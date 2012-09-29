@@ -1,0 +1,44 @@
+// --------------------------------- //
+// Project: PrototypeTest
+// Start: Saturday, May 05, 2012
+// IDE Version: 10.283
+
+
+PROTOTYPE func_proto: a
+
+TYPE Tfoo
+   moo AS func_proto
+ENDTYPE
+
+LOCAL pFoo AS func_proto
+   IF pFoo=FALSE THEN STDOUT "has no pointer\n"
+   pFoo = f1
+   pFoo(1)
+
+   pFoo = f2
+   pFoo(2)
+
+   call(pFoo)
+
+
+   LOCAL tp AS Tfoo
+   tp.moo = f1
+   tp.moo(4)
+
+   ALIAS fkt AS tp.moo
+   fkt(5)
+
+
+
+FUNCTION f1: one
+   STDOUT "f1: "+one+"\n"
+ENDFUNCTION
+
+
+FUNCTION f2: a
+   STDOUT "f2: "+a+"\n"
+ENDFUNCTION
+
+FUNCTION call: foo AS func_proto
+   foo(3)
+ENDFUNCTION

@@ -1,0 +1,984 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Monday, July 18, 2011
+// IDE Version: 9.040
+
+TYPE TCompiler
+	Code$
+	Tokens[] AS Token
+	//currentToken AS Token
+	currentPosi%
+
+	GlobalFuncs AS HashMap //Die Globalen Funktionen, also jene die jederzeit aufgerufen werden können (KEINE Methods)
+	Funcs[] AS IdentifierFunc //Die Funktionen
+	Globals%[] // Alle Globals - zielposition ist das Varisarray
+	Types[] AS IdentifierType //Alle Types
+	Varis[] AS IdentifierVari //Alle Variablen
+	protoCheckers[] AS ProtoChecker //Die Prototype datatype checker
+	DataBlocks[] AS DataBlock //Die Datenblöcke
+
+	MainScope%
+	CurrentScope% = -1
+	ImportantScope% = -1
+	currentFunc% = -1 //Aktuelle Funktion, welche geparst wird.
+	currentForEach$ //Aktuelle ForEach Variable$
+	inLoop% //Befindet sich der compiler gerade in einer Schleife?
+
+	LastMaxTokens%
+	WasError% = FALSE //Gab es einen Fehler?
+	HasGoto% = FALSE //Gibt es im Code GOTO?
+
+	errorState$ = ""
+
+//	Blacklists$[] //was soll nicht eingebunden werden?
+//	BlacklistAll%
+
+	Exports[] AS TExport
+	LastTokenID% = 0
+
+	?IFDEF FOR_IDE
+	GetIdent% = FALSE
+	?ENDIF
+ENDTYPE
+
+GLOBAL LastExprID = 0
+GLOBAL Exprs[] AS Expr
+
+CONSTANT FUNC_IS_FUNC 	= 1
+CONSTANT FUNC_IS_SUB 	= 2
+CONSTANT FUNC_IS_METHOD	= 3
+CONSTANT FUNC_IS_PROTO	= 4
+
+CONSTANT IDENTIFIERFUNC_VERSION = 1000
+TYPE IdentifierFunc
+	OName$ // Der alte Name vor Name mangling
+	Name$
+	Params%[] //Parameter, Varisarray
+	CopyParams%[] //hier sind die Kopien von den parametern (ist um die ref veränderungen nicht nach außen hin weiterzugeben)
+	Statics%[] //Alle statischen Variablen
+
+	datatype AS Datatype
+	Native%
+	Scp% = -1//der Scope (ist eine Expression)
+	ID% //Die Position im FuncArray
+	Typ%//Was ist es? (Siehe FUNC_IS konstanten)
+	Tok% //Der Starttoken
+	PlzCompile% //Es soll bitte kompiliert werden wenn das Hauptfile fertig kompiliert wurde.
+	HasRef% = FALSE //Hat es BYREF Variablen?
+
+	UsedAsPrototype% = FALSE // Wurde die FUnktion als Prototype verwendet? Dazu da: unref() in JS minimieren
+
+	//FUNC_IS_METHOD
+	MyType% = -1//Welchem Type gehört diese Funktion (falls es eine Methode ist)
+	SelfVar% = -1
+	IsAbstract% //Ist die Methode abstrakt?
+
+	//FUNC_IS_FUNC
+	IsCallback% = FALSE //Ist es eine Callbackfunktion?
+
+
+	FUNCTION Save: F%
+		WRITEUWORD F, IDENTIFIERFUNC_VERSION
+
+		WriteString(F, self.OName$)
+		WriteString(F, self.Name$)
+
+		WRITEUWORD F, LEN(self.Params[])
+		FOREACH P IN self.Params[]
+			WRITELONG F, P
+			IF P <> -1 THEN Compiler.Varis[P].Save(F)
+		NEXT
+
+		WRITEUWORD F, LEN(self.CopyParams[])
+		FOREACH P IN self.CopyParams[]
+			WRITELONG F, P
+			IF P <> -1 THEN Compiler.Varis[P].Save(F)
+		NEXT
+
+		WRITEUWORD F, LEN(self.Statics[])
+		FOREACH P IN self.Statics[]
+			WRITELONG F, P
+			IF P <> -1 THEN Compiler.Varis[P].Save(F)
+		NEXT
+
+
+		WRITELONG F, self.Native
+		WRITELONG F, self.Scp
+		WRITELONG F, self.ID
+		WRITELONG F, self.Typ
+		WRITELONG F, self.Tok
+		WRITELONG F, self.PlzCompile
+		WRITELONG F, self.HasRef
+
+		WRITELONG F, self.MyType
+		WRITELONG F, self.SelfVar
+		WRITELONG F, self.IsAbstract
+
+		WRITELONG F, self.IsCallback
+
+
+		//Referenzen abspeichern!
+		IF self.Tok <> -1 THEN Compiler.Tokens[self.Tok].Save(F)
+
+		self.datatype.Save(F)
+
+		IF self.MyType <> -1 THEN Compiler.Types[self.MyType].Save(F)
+
+		IF self.Scp <> -1 THEN Exprs[self.Scp].Save(F)
+
+		WRITEUWORD F, IDENTIFIERFUNC_VERSION
+	ENDFUNCTION
+
+	FUNCTION Load%: F%
+
+	ENDFUNCTION
+ENDTYPE
+
+CONSTANT VARI_IS_LOCAL	= 1
+CONSTANT VARI_IS_GLOBAL	= 2
+CONSTANT VARI_IS_ATTR	= 3
+CONSTANT VARI_IS_STATIC	= 4
+CONSTANT VARI_IS_PARAM	= 5
+CONSTANT VARI_IS_CONST	= 6
+CONSTANT VARI_IS_ALIAS	= 7
+
+CONSTANT IDENTIFIERVARI_VERSION = 2000
+TYPE IdentifierVari
+	Name$
+	datatype AS Datatype
+	Typ%
+	ID%
+	PreDef% = -1 //Der default Wert.
+	ref% = FALSE //Ist es by ref?
+	OwnerVari% = -1 //wenns eine ausweichvariable ist, dann muss die gekennzeichnet werden
+
+	//VARI_IS_STATIC
+	func% // Zu welcher funktion gehört die Variable
+
+	FUNCTION Save: F%
+		WRITEUWORD F, IDENTIFIERVARI_VERSION
+		WriteString(F, self.Name$)
+		self.datatype.Save(F)
+		WRITELONG  F, self.Typ
+		WRITELONG  F, self.ID
+		WRITELONG  F, self.PreDef
+		WRITELONG  F, self.ref
+		WRITELONG  F, self.OwnerVari
+		WRITELONG  F, self.func
+
+		IF self.func THEN Compiler.Funcs[self.func].Save(F)
+		IF self.OwnerVari THEN Compiler.Varis[self.OwnerVari].Save(F)
+		IF self.PreDef = -1 THEN Exprs[self.PreDef].Save(F)
+
+
+		WRITEUWORD F, IDENTIFIERVARI_VERSION
+	ENDFUNCTION
+
+	FUNCTION Load%: F%
+
+	ENDFUNCTION
+ENDTYPE
+
+CONSTANT IDENTIFIERTYPE_VERSION = 3000
+TYPE IdentifierType
+	Name$
+	RealName$
+	Attributes%[]
+	Methods%[] //funcarray in compiler
+	PreSize%[] //die vordefinierte größe
+	ID%
+
+	Extending% = -1 //Extended dieser Type etwas?
+
+	Createable% = TRUE
+
+	IsNative% = FALSE
+
+	FUNCTION Save: F%
+		WRITEUWORD F, IDENTIFIERTYPE_VERSION
+		WriteString(F, self.Name$)
+		WriteString(F, self.RealName$)
+
+
+
+		WRITEUWORD F, self.ID
+		WRITELONG  F, self.Extending
+
+
+		WRITEUWORD F, LEN(self.Attributes[])
+		FOREACH P IN self.Attributes[]
+			WRITELONG F, P
+			IF P <> -1 THEN Compiler.Varis[P].Save(F)
+		NEXT
+
+		WRITEUWORD F, LEN(self.Methods[])
+		FOREACH P IN self.Methods[]
+			WRITELONG F, P
+			IF P <> -1 THEN Compiler.Funcs[P].Save(F)
+		NEXT
+
+		WRITEUWORD F, LEN(self.PreSize[])
+		FOREACH P IN self.PreSize[]
+			WRITELONG F, P
+			IF P <> -1 THEN Exprs[P].Save(F)
+		NEXT
+
+
+		WRITEUWORD F, IDENTIFIERTYPE_VERSION
+	ENDFUNCTION
+
+	FUNCTION Load%: F%
+		LOCAL tmp%
+		READUWORD F, tmp
+		IF tmp <> IDENTIFIERTYPE_VERSION THEN RETURN FALSE
+
+
+
+
+		READUWORD F, tmp
+		IF tmp <> IDENTIFIERTYPE_VERSION THEN RETURN FALSE
+
+		RETURN FALSE
+	ENDFUNCTION
+ENDTYPE
+GLOBAL LastType AS IdentifierType
+
+CONSTANT DATATYPE_VERSION = 4000
+TYPE Datatype
+	Name$
+	IsArray%
+
+	FUNCTION Save: F%
+		WRITEUWORD F, DATATYPE_VERSION
+		WriteString(F, self.Name$)
+		WRITELONG F, self.IsArray
+		WRITEUWORD F, DATATYPE_VERSION
+	ENDFUNCTION
+
+	FUNCTION Load%: F%
+		LOCAL tmp%
+		READUWORD F, tmp
+		IF tmp <> DATATYPE_VERSION THEN RETURN FALSE
+
+		ReadString(F, self.Name$)
+		READLONG F, self.IsArray
+
+		READUWORD F, tmp
+		IF tmp <> DATATYPE_VERSION THEN RETURN FALSE
+		RETURN TRUE
+	ENDFUNCTION
+ENDTYPE
+GLOBAL voidDatatype AS Datatype
+GLOBAL intDatatype AS Datatype
+GLOBAL floatDatatype AS Datatype
+GLOBAL strDatatype AS Datatype
+
+//EIn DATA Block (ist keine Expression, weil nicht notwendig
+TYPE DataBlock
+	Name$
+	Datas%[] //Expressions
+ENDTYPE
+
+//Ist fürs überprüfen der PROTOTYPEs zuständig.
+//kann nicht früher gemacht werden, wegen folgendem:
+//GLOBAL ptr AS funcPtr = Func1 //hier ist noch nicht klar, welche Parameter Func1 hat.
+//FUNCTION Func1: ; ENDFUNCTION
+//PROTOTYPE funcPtr: ; ENDFUNCTION
+TYPE ProtoChecker
+	Tok AS Token
+	fromFunc%; toFunc%
+ENDTYPE
+
+
+CONSTANT TOKEN_VERSION = 5000
+TYPE Token
+	Line%; LineContent$
+	Character%; Path$
+	Text$
+	IsDel% = FALSE //Ist es vom Präprozessor gelöscht?
+	//ID%
+
+	FUNCTION Load%: F%
+		LOCAL tmp%
+		READUWORD F, tmp
+		IF tmp <> TOKEN_VERSION THEN RETURN FALSE
+
+		READLONG F, self.Line
+		READLONG F, self.Character
+		//READLONG F, self.ID
+		ReadString(F, self.LineContent$)
+		ReadString(F, self.Path$)
+		ReadString(F, self.Text$)
+
+		READUWORD F, tmp
+		IF tmp <> TOKEN_VERSION THEN RETURN FALSE
+		RETURN TRUE
+	ENDFUNCTION
+
+	FUNCTION Save: F%
+		WRITEUWORD F, TOKEN_VERSION
+
+		WRITELONG F, self.Line
+		WRITELONG F, self.Character
+		//WRITELONG F, self.ID
+		WriteString(F, self.LineContent$)
+		WriteString(F, self.Path$)
+		WriteString(F, self.Text$)
+
+		WRITEUWORD F, TOKEN_VERSION
+	ENDFUNCTION
+ENDTYPE
+
+TYPE TExport
+	Name$; RealName$
+ENDTYPE
+
+CONSTANT SCOPE_IS_IF	= 1
+CONSTANT SCOPE_IS_FUNC	= 2
+CONSTANT SCOPE_IS_LOOP	= 3
+CONSTANT SCOPE_IS_MAIN	= 4
+CONSTANT SCOPE_IS_TRY	= 5
+CONSTANT SCOPE_IS_SELECT= 6
+
+CONSTANT EXPR_VERSION = 1
+
+
+
+TYPE Expr
+	datatype AS Datatype //Datentyp
+	Typ% //Die Kennzeichnung (siehe EXPR_IS Konstanten)
+	ID% //Die Position im Exprs[] Array
+	tokID% //token
+
+	//operator
+	Left%; Right%
+	Op%
+
+	//Scope
+	Exprs%[]
+	Varis%[]
+	SuperScope% = -1 //Der darüberliegende Scope :OOO
+	ScpTyp% //Siehe SCOPE_IS Konstanten
+	Labels%[] //Die Labels zu denen gesprungen werden kann!
+	Gotos%[] //Die Gotos von denen gesprungen wird!!!111
+
+	//int
+	intval%
+
+	//float
+	floatval
+
+	//string
+	strval$
+
+	//funccall
+	func%
+	Params%[]
+	wasAdded% = FALSE //wurden die default parameter schon hinzugefügt?
+
+	//variable
+	vari%
+
+	//assign
+	//vari%-->siehe variable, Right% --> Siehe Operator
+
+	//dim/redim
+	array%
+	dims%[]
+
+	//array
+	//vari-->siehe variable
+	//dims->siehe dim
+
+	//cast2int/float/string
+	expr% //was soll gecastet werden????
+
+	//access
+	//expr-->siehe cast2
+	nextExpr%
+
+	//return
+	//expr--> siehe cast2
+
+	//Label expression
+	Name$
+
+	//goto
+	//Name$--> siehe Label
+	//Scp--> siehe while
+
+	//if/iif
+	Conditions%[]
+	Scopes%[]
+	elseScope% = -1
+	dummy = -42 //damit man schnell nach dem else scope jumpen kann
+
+	//while
+	//expr siehe cast2
+	Scp%
+	//dummy
+
+	//repeat
+	//expr siehe cast2
+	//scp siehe while
+
+	//for
+	//Scp siehe while
+	varExpr%; toExpr%; stepExpr%; hasTo%
+
+	//foreach
+	// varExpr
+	// Scp
+	inExpr%
+
+	//try
+	//Scp
+	//vari
+	catchScp%
+
+
+	//select --> alle siehe if
+
+	//Restore
+	//name$ --> siehe label
+
+	//read
+	Reads%[]
+
+	//alias
+	//vari
+	//expr
+
+	//inc/dec
+	//expr, vari
+
+	//dimpush
+	//expr, vari
+
+	//len
+	//expr
+	kern% = -1
+
+	//dimdata
+	//array, Exprs[]
+
+	//delete
+	// nichts \o/
+
+	//dimdel
+	//array,
+	position%
+
+	//bounds
+	//array%
+	//position
+
+	//Not
+	//expr
+
+	//addressof
+	//func
+
+	//assert/debug
+	//expr
+
+	//require
+	//siehe Name$ -> Path
+	Content$
+
+
+	//cast2obj
+	//expr
+
+	FUNCTION Load%:
+
+	ENDFUNCTION
+
+	FUNCTION Save: F%
+//		WRITEUWORD F, EXPR_VERSION
+//		self.datatype.Save(F)
+//		WRITELONG  F, self.Typ
+//		WRITELONG  F, self.ID
+//		self.token.Save(F)
+//
+//
+//		WRITELONG F, self.Left
+//		WRITELONG F, self.Right
+//		WRITEWORD F, self.Op
+//
+//		IF self.Left
+//			ALIAS ex AS Exprs[self.Left]
+//			ex.Save(F)
+//		ENDIF
+//		IF self.Right
+//			Exprs[self.Right].Save(F)
+//		ENDIF
+//		WRITEULONG	F, LEN(self.Exprs[])
+//		FOREACH P IN self.Exprs[]
+//			WRITELONG F, P
+//			IF P <> 0 THEN Exprs[P].Save(F)
+//		NEXT
+//
+//		WRITEULONG  F, LEN(self.Varis[])
+//		FOREACH P IN self.Varis[]
+//			WRITEULONG F, P
+//			IF P <> 0 THEN Compiler.Varis[P].Save(F)
+//		NEXT
+//
+//		IF self.SuperScope <> -1 THEN Exprs[self.SuperScope].Save(F)
+//
+//		WRITELONG  F, self.ScpTyp
+//
+//		WRITEULONG F, LEN(self.Labels[])
+//		FOREACH P IN self.Labels[]
+//			WRITEULONG F, P
+//			IF P <> 0 THEN Exprs[P].Save(F)
+//		NEXT
+//
+//		WRITEULONG F, LEN(self.Gotos[])
+//		FOREACH P IN self.Gotos[]
+//			WRITEULONG F, P
+//			IF P <> 0 THEN Exprs[P].Save(F)
+//		NEXT
+
+//
+//		//funccall
+//		func%
+//		Params%[]
+//		wasAdded% = FALSE //wurden die default parameter schon hinzugefügt?
+
+//		WRITELONG F, self.intval
+//		WRITEIEEE F, self.floatval
+//		WriteString(F, self.strval$)
+
+
+		WRITEUWORD F, EXPR_VERSION
+	ENDFUNCTION
+ENDTYPE
+
+
+
+CONSTANT OP_IS_UNAER 	= 1
+CONSTANT OP_IS_BINAER 	= 2
+CONSTANT OP_IS_BOOL 	= 3
+TYPE Operator
+	Name$
+	Sym$
+	Typ%
+	Prio% //je groesser, desto stärker
+	ID%
+ENDTYPE
+GLOBAL Operators[] AS Operator
+//GLOBAL Keywords$[]
+GLOBAL KeywordMap AS HashMap
+GLOBAL Compiler AS TCompiler
+
+
+TYPE TDefine
+	Key$
+	Value$
+ENDTYPE
+GLOBAL Defines[] AS TDefine
+GLOBAL LastDefine AS TDefine
+
+
+PROTOTYPE Lang_Generator$:
+
+TYPE TGenerator
+	Name$
+	genProto AS Lang_Generator$
+ENDTYPE
+
+GLOBAL Generators[] AS TGenerator
+
+
+GLOBAL SettingIn$ = ""
+
+
+FUNCTION LoadFile$: Path$
+	?IFDEF DEBUG
+	STDOUT "Load file: "+Path$+"\n"
+	?ENDIF
+
+	LOCAL Text$
+	LOCAL File% = GENFILE()
+	IF OPENFILE(File,Path$,1)
+		WHILE ENDOFFILE(File)=FALSE
+			LOCAL Line$
+			READLINE File,Line$
+			Text$=Text$+Line$+"\n"
+		WEND
+		CLOSEFILE File
+	ELSE
+		Error("Cannot find file: " + Path$, CODELINE(), CODEFILE$())
+	ENDIF
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION Error: Msg$, Line%,File$
+	LOCAL tok AS Token
+	tok = GetCurrentToken()
+
+	Msg$ = "Error: '"+REPLACE$(Msg$,"\n","NEWLINE")+Compiler.errorState$+"'\n"
+	Msg$ = Msg$ + "in line '" + tok.Line +"' at character '" + tok.Character + "' near '"+REPLACE$(tok.Text$,"\n","NEWLINE")+"'\n"
+	Msg$ = Msg$ + "in file '"+tok.Path$+"'\n"
+	?IFDEF DEBUG
+	LOCAL func$ = "main func"
+	IF Compiler.currentFunc <> -1 THEN func$ = Compiler.Funcs[Compiler.currentFunc].Name$
+	Msg$ = Msg$ + "Debug info: Error appeared in line '"+Line+"' in file '"+File$+"' \n"//while parsing function "+func$+"\n"
+	?ENDIF
+	Msg$ = Msg$ + "\t '"+tok.LineContent$+"'\n"
+	Msg$ = Msg$ + "-----------------------------------\n"
+	Msg$ = "\n-----------------------------------\n" + Msg$;
+	STDERR Msg$
+	Compiler.WasError = TRUE
+	?IFNDEF HTML5
+	KEYWAIT
+	?ELSE
+	END //IN HTML5 aufhören, gibt kein KEYWAIT
+	?ENDIF
+	THROW "syntaxerror '"+Msg$+"'"
+ENDFUNCTION
+
+FUNCTION Warning: Msg$
+	LOCAL tok AS Token
+	tok = GetCurrentToken()
+
+	Msg$ = "Warning: '"+REPLACE$(Msg$,"\n","NEWLINE")+"'\n"
+	Msg$ = Msg$ + "in line '" + tok.Line +"' at character '" + tok.Character+"' near '"+REPLACE$(tok.Text$,"\n","NEWLINE")+"'\n"
+	Msg$ = Msg$ + "in file '"+tok.Path$+"'\n"
+	Msg$ = Msg$ + "\t '"+tok.LineContent$+"'\n"
+	Msg$ = Msg$ + "-----------------------------------\n"
+	Msg$ = "\n-----------------------------------\n" + Msg$;
+	STDOUT Msg$
+ENDFUNCTION
+
+GLOBAL SHLASHF$
+
+
+FUNCTION CreateToken AS Token: Text$, LineContent$, Line%, Character%, Path$
+	IF Text$<>"\n" AND TRIM$(Text$)="" OR Text$="\t" OR Text$ = "\r"
+	ELSE
+		LOCAL ascval% = ASC(Text$)
+		IF (ascval = 8 OR ascval = 12 OR ascval = SHLASHF$)
+			Text$ = "\n"
+		ENDIF
+		?IFDEF DEBUGLEXER
+		STDOUT "Create Token "+REPLACE$(Text$,"\n", "NEWLINE")+" IN line "+Line+" IN Content "+LineContent$+"\n"
+		?ENDIF
+		LOCAL pos = Compiler.LastTokenID
+		Compiler.LastTokenID = Compiler.LastTokenID + 1
+		IF Compiler.LastTokenID >= LEN(Compiler.Tokens[])-10
+			?IFNDEF GLBSCRIPT
+			REDIM Compiler.Tokens[Compiler.LastTokenID + 10000]
+			?ELSE
+			REDIM Compiler.Tokens[Compiler.LastTokenID + 50]
+			?ENDIF
+		ENDIF
+
+		Compiler.Tokens[pos].Line = Line
+		Compiler.Tokens[pos].Character = Character
+		Compiler.Tokens[pos].LineContent$ = LineContent$
+		Compiler.Tokens[pos].Path$ = Path$
+		Compiler.Tokens[pos].Text$ = Text$
+		IF LEFT$(Compiler.Tokens[pos].Text$, 1) = "@" THEN Compiler.Tokens[pos].Text$ = MID$(Compiler.Tokens[pos].Text$, 1)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION GetCurrentToken AS Token:
+	IF Compiler.currentPosi < Compiler.LastTokenID
+		RETURN Compiler.Tokens[Compiler.currentPosi]
+	ELSE
+		LOCAL t AS Token
+		RETURN t
+	ENDIF
+ENDFUNCTION
+
+FUNCTION Start:
+	Compiler.currentPosi = 0
+	GetNext()
+ENDFUNCTION
+
+FUNCTION HasNext%:
+	IF Compiler.currentPosi > Compiler.LastTokenID-2
+		RETURN FALSE
+	ELSE
+		RETURN TRUE
+	ENDIF
+ENDFUNCTION
+FUNCTION GetNext:
+	REPEAT
+		INC Compiler.currentPosi
+		IF Compiler.currentPosi > Compiler.LastTokenID-1
+			Error("Unexpected end of line",CODELINE(), CODEFILE$())
+		ENDIF
+	UNTIL NOT Compiler.Tokens[Compiler.currentPosi].IsDel
+	?IFDEF DEBUG
+	STDOUT "GETNEXT Token: "+REPLACE$(GetCurrent$(),"\n","NEWLINE")+"\n"
+	?ENDIF
+ENDFUNCTION
+FUNCTION Match: Text$, Line, File$
+	IF Compiler.Tokens[Compiler.currentPosi].Text$ <> Text$
+		Error("Unexpected token, expecting: '"+Text$+"'", Line, File$)
+	ENDIF
+	GetNext()
+ENDFUNCTION
+
+FUNCTION EOFParse%:
+	RETURN Compiler.currentPosi < Compiler.LastTokenID-1
+ENDFUNCTION
+
+FUNCTION GetCurrent$:
+	RETURN Compiler.Tokens[Compiler.currentPosi].Text$
+ENDFUNCTION
+
+FUNCTION RemoveCurrent:
+	Compiler.Tokens[Compiler.currentPosi].IsDel = TRUE
+	INC Compiler.currentPosi
+	//DIMDEL Compiler.Tokens[], Compiler.currentPosi
+	//DEC Compiler.LastTokenID
+ENDFUNCTION
+
+FUNCTION MatchAndRemove: Text$, Line, File$
+	IF GetCurrent$() <> Text$
+		Error("Unexpected token, expecting: '"+Text$+"'", Line, File$)
+	ENDIF
+	RemoveCurrent()
+ENDFUNCTION
+
+FUNCTION CreateDatatype AS Datatype: Name$, IsArray% = 0
+	LOCAL datatype AS Datatype
+	datatype.Name$ = Name$
+	datatype.IsArray = IsArray
+	RETURN datatype
+ENDFUNCTION
+
+FUNCTION IsToken%: Text$
+	IF GetCurrent$() = Text$
+		RETURN TRUE
+	ELSE
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+FUNCTION CreateOperator: Name$, Sym$, Prio%, Typ%
+	LOCAL Op AS Operator
+	Op.Name$ = Name$
+	Op.Sym$ = Sym$
+	Op.Prio = Prio
+	Op.Typ = Typ
+	Op.ID = LEN(Operators[])
+	DIMPUSH Operators[], Op
+ENDFUNCTION
+
+FUNCTION WriteString: F%, Text$
+	WRITEULONG F, Text$
+	WRITESTR F, Text$
+ENDFUNCTION
+
+FUNCTION ReadString: F%, BYREF Text$
+	LOCAL l%
+	READULONG F, l
+	READSTR F, Text$, l
+ENDFUNCTION
+
+FUNCTION AddVariable: Vari AS IdentifierVari, Ignore%
+	IF Ignore = FALSE AND IsVarExisting(Vari.Name$) THEN Error("Variable already exists, is a keyword or a type: '"+Vari.Name$+"'", CODELINE(), CODEFILE$())
+	Vari.ID = LEN(Compiler.Varis[])
+
+	DIMPUSH Compiler.Varis[], Vari
+ENDFUNCTION
+
+FUNCTION AddFunction: Func AS IdentifierFunc
+	IF Func.Typ <> FUNC_IS_METHOD AND IsFuncExisting(Func.Name$, Func.IsCallback) THEN Error("Function already exists, is a keyword or a type: '"+Func.Name$+"'", CODELINE(), CODEFILE$())
+
+	Func.ID = LEN(Compiler.Funcs[])
+	DIMPUSH Compiler.Funcs[], Func
+ENDFUNCTION
+
+FUNCTION InitCompiler:
+	REDIM Defines[0]
+	voidDatatype = CreateDatatype("void")
+	intDatatype = CreateDatatype("int")
+	floatDatatype = CreateDatatype("float")
+	strDatatype = CreateDatatype("string")
+
+	SHLASHF$ = CHR$("\f")
+
+	REDIM Operators[0]
+	CreateOperator("add"	,"+"	,4,OP_IS_BINAER)
+	CreateOperator("sub"	,"-"	,4,OP_IS_BINAER)
+	CreateOperator("mul"	,"*"	,5,OP_IS_BINAER)
+	CreateOperator("div"	,"/"	,5,OP_IS_BINAER)
+	CreateOperator("pot"	,"^"	,6,OP_IS_BINAER)
+
+	CreateOperator("equ"	,"="	,3,OP_IS_BOOL)
+	CreateOperator("grt"	,">"	,3,OP_IS_BOOL)
+	CreateOperator("less"	,"<"	,3,OP_IS_BOOL)
+	CreateOperator("lessequ","<="	,3,OP_IS_BOOL)
+	CreateOperator("grtequ"	,">="	,3,OP_IS_BOOL)
+	CreateOperator("unequ"	,"<>"	,3,OP_IS_BOOL)
+
+	CreateOperator("and"	,"AND"	,2,OP_IS_BOOL)
+	CreateOperator("or"		,"OR"	,2,OP_IS_BOOL)
+
+	LOCAL Keywords$[]
+	DIMDATA Keywords$[], "CALLBACK","FUNCTION","ENDFUNCTION","SUB","ENDSUB","GOSUB","IF","ELSE","ELSEIF","THEN","ENDIF","WHILE","WEND","BREAK","CONTINUE","FOR", "FOREACH", "IN", "TO","STEP","NEXT","REPEAT","UNTIL","TYPE","ENDTYPE","RETURN", "NATIVE", "LOCAL", "GLOBAL", "STATIC", "DIM", "REDIM", "INLINE", "ENDINLINE", "PROTOTYPE", "REQUIRE", "BREAK", "CONTINUE", "TRY", "CATCH", "FINALLY", "THROW", "SELECT", "CASE", "DEFAULT", "ENDSELECT", "STARTDATA", "ENDDATA", "DATA", "RESTORE", "READ", "GOTO", "ALIAS", "AS", "CONSTANT", "INC", "DEC", "DIMPUSH", "LEN", "DIMDATA", "DELETE", "DIMDEL", "DEBUG", "ASSERT", "ABSTRACT", "EXPORT"
+	//Nun mache aus den Keywords$[] eine Map
+	KeywordMap.SetSize(LEN(Keywords$[])*8) //richtige größe für eine hashmap
+	FOREACH key$ IN Keywords$[]
+		KeywordMap.Put(key$, TRUE)
+	NEXT
+
+
+	RegisterDefine("GLB_VERSION", VERSION$)
+	RegisterDefine("GLBSCRIPT", TRUE)
+
+
+	//ADDONs
+	RegisterDefine("ADDON_2D", TRUE)
+	RegisterDefine("ADDON_3D", TRUE)
+	RegisterDefine("ADDON_NET", TRUE)
+	RegisterDefine("ADDON_INPUT", TRUE)
+	RegisterDefine("ADDON_CONSOLE", TRUE)
+	RegisterDefine("ADDON_SOUND", TRUE)
+	RegisterDefine("ADDON_NET", TRUE)
+
+	ResetExpressions()
+ENDFUNCTION
+
+
+?IFDEF GLBSCRIPT
+GLOBAL MaxPasses% = 6
+EXPORT MaxPasses
+NATIVE FUNCTION PassSuccessfull:
+?ELSE
+FUNCTION PassSuccessfull:
+ENDFUNCTION
+?ENDIF
+
+FUNCTION Compile$: Text$, Target$
+	LOCAL c AS TCompiler
+	Compiler = c //Neuen Compiler erstellen!
+
+
+	InitCompiler()
+
+	ResetExpressions()
+
+	PushTimer()
+	Text$ = Text$ + "\n"
+	Text$ = Text$ + LoadFile$("Target/Header.gbas")
+	Text$ = Text$ + "\n"
+
+	SetupTarget(Target$)
+
+	PassSuccessfull()
+
+	PopTimer("Header load & setup target!")
+
+	Compiler.Code$ = Text$ + "\n"
+
+	PushTimer()
+	Lexer()
+	PopTimer("Lexer!")
+
+	PassSuccessfull()
+	STDOUT "Lexing successful! \n"
+
+	Compiler.errorState$ = " (precompiler error)"
+	PushTimer()
+	Precompiler()
+	PopTimer("Precompiler")
+
+	PassSuccessfull()
+	STDOUT "Preprocessing successful! \n"
+
+
+	Compiler.LastMaxTokens = Compiler.LastTokenID
+
+	ResetExpressions()
+
+	Compiler.errorState$ = " (analyse error)"
+	PushTimer()
+	Analyser()
+	PopTimer("Analyser")
+
+	PassSuccessfull()
+	IF Compiler.WasError
+		STDOUT "Analysing failed :( \n"
+		RETURN
+	ELSE
+		STDOUT "Analysing successful! \n"
+	ENDIF
+
+	LOCAL tmpPath$ = GETCURRENTDIR$()
+	SETCURRENTDIR(GbapPath$)
+
+	Compiler.errorState$ = " (parse error)"
+	PushTimer()
+	Parser()
+	PopTimer("Parser")
+
+	PassSuccessfull()
+	IF Compiler.WasError
+		STDOUT "Parsing failed :( \n"
+		RETURN
+	ELSE
+		STDOUT "Parsing successful! \n"
+	ENDIF
+	Compiler.errorState$ = " (generate error)"
+
+	SETCURRENTDIR(tmpPath$)
+
+
+	PushTimer()
+	LOCAL Output$ = DoTarget$(Target$)
+	PopTimer("Target stuff")
+
+	PassSuccessfull()
+	IF Compiler.WasError
+		STDOUT "Generating failed :( \n"
+		RETURN
+	ELSE
+		STDOUT "Generating successful to target "+Target$+"! \n"
+	ENDIF
+
+	RETURN Output$
+ENDFUNCTION
+
+FUNCTION ResetExpressions:
+	DIM Exprs[0] //Expressions weg!
+	LastExprID = 0
+	CreateDebugExpression() //zum debuggen \o/
+ENDFUNCTION
+
+
+?IFDEF MEASURETIME
+GLOBAL TimeStack%[]
+?ENDIF
+FUNCTION PushTimer%:
+	?IFDEF MEASURETIME
+	DIMPUSH TimeStack[], GETTIMERALL()
+	?ENDIF
+ENDFUNCTION
+
+FUNCTION PopTimer: Text$
+	?IFDEF MEASURETIME
+	LOCAL n = FORMAT$(6, 16,(GETTIMERALL() - TimeStack[-1])/1000)
+	STDOUT "\t\tTimer: "+Text$+": '"+n+"'\n"
+	DIMDEL TimeStack[], -1
+	?ENDIF
+ENDFUNCTION
+
+
+FUNCTION RegisterDefine: Key$, Value$
+	LOCAL Def AS TDefine
+	Def.Key$ = Key$
+	Def.Value$ = Value$
+	DIMPUSH Defines[], Def
+ENDFUNCTION
+
+
+

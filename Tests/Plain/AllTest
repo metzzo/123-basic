@@ -1,0 +1,237 @@
+?BLACKLIST ALL
+
+LOCAL i, j = 999, k = GetInt()
+
+LET i = 204*(2+2) + i //LET optional
+STDOUT "i: "+i+"\n"
+STDOUT "j: "+j+"\n"
+STDOUT "k: "+k+"\n"
+
+STDOUT (4+4*2) + ": Zahl! \n"
+
+STDOUT "Hallo Welt "+100+"\n"
+LOCAL arr1[10][10] //jahaaa, das kann die GLB Syntax nicht!
+DIM arr1[10]
+REDIM arr1[14] //Redim \o/
+arr1[8] = 99
+STDOUT "Array 1 an der Stelle 8: "+arr1[8]+"\n"
+
+LOCAL arr2[]
+STDOUT "1--- \n"
+arr2 = arr1 //kopieren
+STDOUT "2--- \n"
+arr1[] = arr2[]
+STDOUT "3--- \n"
+
+arr2[] = DIM[10][10] //anstatt DIM arr2[10][10]
+
+LOCAL b AS Buch
+b.AktuelleSeite = 200
+b.GetTitel$()
+b.getBuch()
+STDOUT "buch Seite: "+b.AktuelleSeite+"\n"
+DIM b.Seiten$[100][100]
+
+
+LOCAL r AS Regal
+DIM r.Buecher[100]
+r.Buecher[0] = b.getBuch()
+r.Buecher[0].Titel$ = "Harry Potter"
+STDOUT "Erstes Buch im Regal: "+r.Buecher[0].Titel$+"\n"
+DIM r.Buecher[0].Seiten[100]
+r.Buecher[0].getSeiten()[0].Text$ = "lol"
+r.Buecher[0].getBesteSeite().Text$ = "ICH MAG ZÃœGE"
+getBesteSeite(r.Buecher[0]).Text$ = "ICH NICHT"
+
+FUNCTION getBesteSeite AS Seite: B AS Buch
+	RETURN B.BesteSeite
+ENDFUNCTION
+
+
+TYPE Regal:
+	Buecher[] AS Buch
+ENDTYPE
+
+TYPE Buch:
+	AktuelleSeite = GetInt()
+	Titel$
+	Besitzer$
+	Seiten$[100] //vordefinierte größe \o/
+	Seiten[20] AS Seite
+	BesteSeite AS Seite
+
+	FUNCTION getSeiten[] AS Seite: //Ja das kann der GLB Compiler auch nicht
+		RETURN self.Seiten[]
+	ENDFUNCTION
+
+	FUNCTION GetTitel$: Param = 200, NoParam$ = "lol"
+		DIM self.Seiten$[40]
+		RETURN self.Titel$ + "Param: "+Param + " - " + NoParam$
+	ENDFUNCTION
+
+	FUNCTION getBuch AS Buch:
+		RETURN self
+	ENDFUNCTION
+	FUNCTION getBesteSeite AS Seite:
+		RETURN self.BesteSeite
+	ENDFUNCTION
+ENDTYPE
+
+TYPE Seite:
+	Alter = l
+	Text$
+ENDTYPE
+
+testFunktion$ 10, 20, 30
+testFunktion$ 10, 20
+andereTestFunktion 40
+andereTestFunktion 80
+GOSUB mySub //GOSUB optional
+defaultTest
+
+FUNCTION testFunktion$: param1 = GetInt(), param2 = l, param3 = "lolo"
+	STDOUT "Ich bin in einer Funktion \\o/ "+param1+" "+param2+" "+param3+"\n"
+
+	RETURN "ROFL"
+ENDFUNCTION
+
+FUNCTION defaultTest: param1 = 10, param2 = -1, param3 = 22
+
+ENDFUNCTION
+
+CALLBACK FUNCTION andereTestFunktion: param4
+	STDOUT "Ich bin da, kein Callback\n"
+ENDFUNCTION
+
+FUNCTION andereTestFunktion: param4
+	STDOUT "ICH BIN DA CaLLBACk\n"
+ENDFUNCTION
+
+SUB mySub:
+	STDOUT "I'm in SUB!!! \n"
+	RETURN
+	STDOUT "Ich werde nie angezeigt lol! \n"
+
+	l = 200
+ENDSUB
+
+
+GLOBAL l = GetInt() //RÃ¼ckwÃ¤rtszugriff
+
+FUNCTION GetInt%:
+	STATIC lol = 200
+	lol = lol + 4
+	RETURN 42
+ENDFUNCTION
+
+
+PROTOTYPE funcPtr: a
+
+FUNCTION func1: a
+	STDOUT "Ich bin in 1: "+a+"\n"
+ENDFUNCTION
+FUNCTION func2: a
+	STDOUT "Ich bin in 2: "+a+"\n"
+ENDFUNCTION
+
+LOCAL ptr AS funcPtr = func1
+ptr(42)
+
+TYPE ptrTest
+	ptr AS funcPtr = func2
+ENDTYPE
+
+LOCAL ptrType AS ptrTest
+ptrType.ptr(422)
+prototypeTest(func2)(100) //ja das kann der GLB Compiler nicht!
+
+FUNCTION prototypeTest AS funcPtr: in AS funcPtr
+	in(112)
+	RETURN in
+ENDFUNCTION
+
+IF 1 THEN STDOUT "lol\n"
+
+IF 1 = 1
+	STDOUT "a "+i+"\n"
+ELSEIF 2
+	STDOUT "b\n"
+ELSEIF 3
+	STDOUT "c\n"
+ELSE
+	STDOUT "ELSE\n"
+ENDIF
+
+REM
+WHILE TRUE
+	STDOUT "SHOWSCREEN \n"
+WEND
+
+REPEAT
+	STDOUT "SHOWSCREEN \n"
+	BREAK
+	CONTINUE
+UNTIL FALSE
+ENDREM
+
+FOR abcd = 0 TO 10 STEP 2
+	STDOUT "i step: "+abcd+"\n"
+NEXT
+
+TRY
+	STDOUT "lol\n"
+	THROW "roflmao"
+CATCH Err$
+	STDOUT "Error: "+Err$+"\n"
+FINALLY
+
+SELECT i
+	CASE 2, 3, 4, > 9, <=20
+		STDOUT "DA\n"
+	CASE 2 TO 8
+		STDOUT "NEUN\n"
+	DEFAULT
+		STDOUT "ROFLMAO\n"
+ENDSELECT
+
+RESTORE dataBlock1
+READ i, j, k
+
+STDOUT "i: "+i+" j: "+j+" k: "+k+"\n"
+
+STARTDATA dataBlock1:
+	DATA 1,2,3,4,GetInt(),6,"lol", "roflmao"
+	DATA 2,3,4,5
+ENDDATA
+
+LOCAL refVari = 42
+STDOUT "RefTest: "+byRefTest(refVari)+" ref: "+refVari+"\n"
+
+STDOUT byRefTest(getSeite().Alter) + "\n"
+
+byRefTest(r.Buecher[0].BesteSeite.Alter)
+STDOUT "Alter: "+r.Buecher[0].BesteSeite.Alter+"\n"
+
+FUNCTION getSeite AS Seite: 
+	LOCAL S AS Seite
+	S.Alter = 0
+	STDOUT "I AM CALLEN \n"
+	RETURN S
+ENDFUNCTION
+
+FUNCTION byRefTest: BYREF lol
+	lol = 12233
+	RETURN 200
+ENDFUNCTION
+
+LOCAL s AS Seite = getSeite()
+
+ALIAS alias AS s.Alter
+alias = 100
+STDOUT "Seite ALIAS: "+alias+"\n"
+STDOUT "Seite REAL: "+s.Alter+"\n"
+
+ALIAS ptr2 AS ptr
+ptr2(9999)
+
+

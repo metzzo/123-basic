@@ -1,0 +1,559 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Sunday, July 24, 2011
+// IDE Version: 9.040
+
+CONSTANT EXPR_IS_OPERATOR	= 1
+CONSTANT EXPR_IS_SCOPE		= 2
+CONSTANT EXPR_IS_INT		= 3
+CONSTANT EXPR_IS_FLOAT		= 4
+CONSTANT EXPR_IS_STR		= 5
+CONSTANT EXPR_IS_FUNCCALL	= 6
+CONSTANT EXPR_IS_EMPTY		= 7
+CONSTANT EXPR_IS_DEBUG		= 8
+CONSTANT EXPR_IS_VARI		= 9
+CONSTANT EXPR_IS_ASSIGN		= 10
+CONSTANT EXPR_IS_DIM		= 11
+CONSTANT EXPR_IS_REDIM		= 12
+CONSTANT EXPR_IS_ARRAY		= 13
+CONSTANT EXPR_IS_CAST2INT	= 15
+CONSTANT EXPR_IS_CAST2FLOAT	= 16
+CONSTANT EXPR_IS_CAST2STRING= 17
+CONSTANT EXPR_IS_ACCESS		= 18
+CONSTANT EXPR_IS_RETURN		= 19
+CONSTANT EXPR_IS_GOTO		= 20
+CONSTANT EXPR_IS_LABEL		= 21
+CONSTANT EXPR_IS_FUNCDATA	= 22
+CONSTANT EXPR_IS_PROTOCALL	= 23
+CONSTANT EXPR_IS_IF			= 24
+CONSTANT EXPR_IS_WHILE		= 25
+CONSTANT EXPR_IS_REPEAT		= 26
+CONSTANT EXPR_IS_FOR		= 27
+CONSTANT EXPR_IS_BREAK		= 29
+CONSTANT EXPR_IS_CONTINUE	= 30
+CONSTANT EXPR_IS_TRY		= 31
+CONSTANT EXPR_IS_THROW		= 32
+CONSTANT EXPR_IS_RESTORE	= 33
+CONSTANT EXPR_IS_READ		= 34
+CONSTANT EXPR_IS_DEFVAL		= 35
+CONSTANT EXPR_IS_DIMASEXPR	= 36
+CONSTANT EXPR_IS_ALIAS		= 37
+CONSTANT EXPR_IS_FOREACH	= 38
+CONSTANT EXPR_IS_INC		= 39
+CONSTANT EXPR_IS_DIMPUSH	= 40
+CONSTANT EXPR_IS_LEN		= 41
+CONSTANT EXPR_IS_DIMDATA	= 42
+CONSTANT EXPR_IS_DELETE		= 43
+CONSTANT EXPR_IS_DIMDEL		= 44
+CONSTANT EXPR_IS_BOUND		= 45
+CONSTANT EXPR_IS_NOT		= 46
+CONSTANT EXPR_IS_DUMMY		= 47
+CONSTANT EXPR_IS_ADDRESSOF	= 48
+CONSTANT EXPR_IS_ASSERT		= 49
+CONSTANT EXPR_IS_DEBUGOUTPUT= 50
+CONSTANT EXPR_IS_IIF		= 51
+CONSTANT EXPR_IS_REQUIRE	= 52
+CONSTANT EXPR_IS_SUPER		= 53
+CONSTANT EXPR_IS_CAST2OBJ	= 54
+
+
+//! Eine generische Expression.
+FUNCTION CreateExpression%: Typ%, datatype AS Datatype
+	LOCAL tmpD AS Datatype
+	tmpD = datatype
+	?IFDEF DEBUG
+	STDOUT "Create expression: "+Typ+" datatype: "+datatype.Name$+" is array: "+datatype.IsArray+"\n"
+	?ENDIF
+
+	LOCAL pos = LastExprID
+	LastExprID = LastExprID + 1
+	IF LastExprID >= LEN(Exprs[])-10
+		?IFNDEF GLBSCRIPT
+		REDIM Exprs[LastExprID + 10000] //100
+		?ELSE
+		REDIM Exprs[LastExprID + 50] //100
+		?ENDIF
+	ENDIF
+	Exprs[pos].Typ = Typ
+	LOCAL d AS Datatype
+	//Weird workaround for crash
+	d.Name$ = tmpD.Name$
+	d.IsArray = tmpD.IsArray
+	Exprs[pos].datatype = d
+	Exprs[pos].ID = pos
+	Exprs[pos].tokID = Compiler.currentPosi
+	RETURN pos
+ENDFUNCTION
+
+//! Ein Operator (+,-,*,...)
+FUNCTION CreateOperatorExpression%: Op AS Operator, Left%, Right%
+	LOCAL expr%
+	LOCAL datatype AS Datatype
+	datatype = CastDatatype(Left, Right)
+	//ist es and/or? wenn ja ist der datentyp binär!
+	IF Op.Typ = OP_IS_BOOL
+		//oha
+		datatype = intDatatype
+	ENDIF
+
+	expr = CreateExpression(EXPR_IS_OPERATOR, datatype)
+	Exprs[expr].Left = Left
+	Exprs[expr].Right = Right
+	Exprs[expr].Op = Op.ID
+	//Exprs[expr].gen = GenerateOperatorExpression$
+
+	RETURN expr
+ENDFUNCTION
+
+
+//! Eine Integerkonstante
+FUNCTION CreateIntExpression%: Num%
+	LOCAL expr% = CreateExpression(EXPR_IS_INT, intDatatype)
+	Exprs[expr].intval = Num
+	RETURN expr
+ENDFUNCTION
+
+
+//! Eine Floatkonstante
+FUNCTION CreateFloatExpression%: Num
+	LOCAL expr% = CreateExpression(EXPR_IS_FLOAT, floatDatatype)
+	Exprs[expr].floatval = Num
+	RETURN expr
+ENDFUNCTION
+
+//! Eine Stringkonstante
+FUNCTION CreateStrExpression%: Str$
+	LOCAL expr% = CreateExpression(EXPR_IS_STR, strDatatype)
+	Exprs[expr].strval$ = Str$
+	RETURN expr
+ENDFUNCTION
+
+//! Ein Scope
+FUNCTION CreateScopeExpression%: ScpTyp%
+	LOCAL Scp% = CreateExpression(EXPR_IS_SCOPE, voidDatatype)
+	Exprs[Scp].SuperScope = Compiler.CurrentScope
+	Exprs[Scp].ScpTyp = ScpTyp
+
+	RETURN Scp
+ENDFUNCTION
+
+//! Ein Funktionsaufruf.
+// \param func - Ist die Funktion, welche aufgerufen wird
+// \param Params%[] - Die Parameter expression.
+FUNCTION CreateFuncCallExpression%: func%, Params%[]
+	LOCAL expr% = CreateExpression(EXPR_IS_FUNCCALL, Compiler.Funcs[func].datatype)
+	Exprs[expr].Params[] = Params[]
+	Exprs[expr].func = func
+	RETURN expr
+ENDFUNCTION
+
+//! Eine leere Expression, nützlich wenn eine Expression erwartet wird, aber das bereits vorher verarbeitet wurde
+FUNCTION CreateEmptyExpression%:
+	RETURN CreateExpression(EXPR_IS_EMPTY, voidDatatype)
+ENDFUNCTION
+
+//! Diese Expression ist zum Debuggen gedacht. Wenn auf die zugegriffen wird, gibt es einen Fehler (nützlich für Expr[0] Zugriffe)
+FUNCTION CreateDebugExpression%:
+	RETURN CreateExpression(EXPR_IS_DEBUG, voidDatatype)
+ENDFUNCTION
+
+//! Ein Variabelzugriff
+FUNCTION CreateVariableExpression%: vari%
+	IF Compiler.Varis[vari].Typ = VARI_IS_CONST
+		RETURN Compiler.Varis[vari].PreDef
+	ELSE
+		LOCAL expr% = CreateExpression(EXPR_IS_VARI, Compiler.Varis[vari].datatype)
+		Exprs[expr].vari = vari
+		RETURN expr
+	ENDIF
+ENDFUNCTION
+
+//! Eine Variablenzuweisung
+FUNCTION CreateAssignExpression%: Vari%, Right%
+	LOCAL Expr% = CreateExpression(EXPR_IS_ASSIGN,  voidDatatype)
+	Exprs[Expr].vari = Vari
+	Exprs[Expr].Right = Right
+	RETURN Expr
+ENDFUNCTION
+
+
+//! Array Dimensionieren
+FUNCTION CreateDimExpression%: Array%, Dims%[]
+	LOCAL Expr% = CreateExpression(EXPR_IS_DIM, Exprs[Array].datatype)
+	Exprs[Expr].array = Array
+	Exprs[Expr].dims[] = Dims[]
+
+	RETURN Expr
+ENDFUNCTION
+
+
+
+//! Array Redimensionieren
+FUNCTION CreateReDimExpression%: Array%, Dims%[]
+	LOCAL Expr% = CreateExpression(EXPR_IS_REDIM, Exprs[Array].datatype)
+	Exprs[Expr].array = Array
+	Exprs[Expr].dims[] = Dims[]
+
+	RETURN Expr
+ENDFUNCTION
+
+
+//! Array Zugriff
+FUNCTION CreateArrayExpression%: Array%, Dims%[]
+	LOCAL tmpData AS Datatype
+	tmpData = Exprs[Array].datatype
+	IF Exprs[Array].datatype.IsArray AND Compiler.Varis[GetVariable(Array)].datatype.IsArray AND LEN(Dims[]) THEN tmpData.IsArray = 0
+	LOCAL Expr% = CreateExpression(EXPR_IS_ARRAY, tmpData)
+	Exprs[Expr].array = Array
+	Exprs[Expr].dims = Dims
+	RETURN Expr
+ENDFUNCTION
+
+
+//! In Int casten
+FUNCTION CreateCast2IntExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_CAST2INT, intDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! In Float casten
+FUNCTION CreateCast2FloatExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_CAST2FLOAT, floatDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! In String casten
+FUNCTION CreateCast2StringExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_CAST2STRING, strDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! Erstellt einen Punktoperatorzugriff (falls SuperExpr = -1 ist, gibt es einfach expr% zurück und umgekehrt)
+FUNCTION CreateAccessExpression%: expr%, NextExpr%
+	IF expr = NextExpr AND expr = -1 THEN Error("Internal error (expr and nextexpr = -1)", CODELINE(), CODEFILE$())
+	IF expr = -1
+		RETURN NextExpr
+	ELSEIF NextExpr = -1
+		RETURN expr
+	ELSE
+		LOCAL ONextExpr% = NextExpr
+		IF Exprs[NextExpr].Typ = EXPR_IS_ARRAY THEN NextExpr = Exprs[NextExpr].array
+		IF Exprs[NextExpr].Typ = EXPR_IS_FUNCCALL
+			DIMPUSH Exprs[NextExpr].Params[], expr
+			RETURN ONextExpr
+		ELSE
+			NextExpr = ONextExpr
+			LOCAL Expr% = CreateExpression(EXPR_IS_ACCESS, Exprs[NextExpr].datatype)
+			Exprs[Expr].expr = expr
+			Exprs[Expr].nextExpr = NextExpr
+			RETURN Expr
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+//! Eine Rückgabe
+FUNCTION CreateReturnExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_RETURN, voidDatatype)
+	Exprs[Expr].expr = expr
+
+	RETURN Expr
+ENDFUNCTION
+
+//! Ein Sprungbefehl
+FUNCTION CreateGotoExpression%: Name$
+	LOCAL Expr% = CreateExpression(EXPR_IS_GOTO, voidDatatype)
+	Exprs[Expr].Name$ = Name$
+	Exprs[Expr].Scp = Compiler.CurrentScope
+	RETURN Expr
+ENDFUNCTION
+
+//! Eine Sprungmarke
+FUNCTION CreateLabelExpression%: Name$
+	LOCAL Expr% = CreateExpression(EXPR_IS_LABEL, voidDatatype)
+	Exprs[Expr].Name$ = Name$
+	RETURN Expr
+ENDFUNCTION
+
+//! Ein Functionname als Argument
+FUNCTION CreateFuncDataExpression%: d AS Datatype
+	RETURN CreateExpression(EXPR_IS_FUNCDATA, d)
+ENDFUNCTION
+
+//! Ein PROTOTYP Funktionsaufruf
+FUNCTION CreateProtoCallExpression%: expr%, Params%[]
+	LOCAL Func% = SearchPrototyp(Exprs[expr].datatype.Name$)
+	IF Func = -1 THEN Error("Internal error (could not find prototype: "+Exprs[expr].datatype.Name$+")", CODELINE(), CODEFILE$())
+	LOCAL Expr% = CreateExpression(EXPR_IS_PROTOCALL, Exprs[expr].datatype)
+	Exprs[Expr].expr = expr
+	Exprs[Expr].Params[] = Params[]
+	Exprs[Expr].func = Func //ka ob richtig
+	RETURN Expr
+ENDFUNCTION
+
+//! Eine Fallunterscheidung
+FUNCTION CreateIfExpression%: Conds%[], Scps%[], elseScp%
+	LOCAL Expr% = CreateExpression(EXPR_IS_IF, voidDatatype)
+	Exprs[Expr].Conditions[] = Conds[]
+	Exprs[Expr].Scopes[] = Scps[]
+	Exprs[Expr].elseScope = elseScp
+	Exprs[Expr].dummy = CreateDummyExpression()
+	RETURN Expr
+ENDFUNCTION
+
+//! EinE while Schleife
+FUNCTION CreateWhileExpression%: expr%, Scp%
+	LOCAL Expr% = CreateExpression(EXPR_IS_WHILE, voidDatatype)
+	Exprs[Expr].expr = expr
+	Exprs[Expr].Scp = Scp
+	Exprs[Expr].dummy = CreateDummyExpression()
+	RETURN Expr
+ENDFUNCTION
+
+//! Eine Repeat Schleife
+FUNCTION CreateRepeatExpression%: expr%, Scp%
+	LOCAL Expr% = CreateExpression(EXPR_IS_REPEAT, voidDatatype)
+	Exprs[Expr].expr = expr
+	Exprs[Expr].Scp = Scp
+	Exprs[Expr].dummy = CreateDummyExpression()
+	RETURN Expr
+ENDFUNCTION
+
+//! Eine For schleife
+FUNCTION CreateForExpression%: varExpr%, toExpr%, stepExpr%, hasTo%, Scp%
+	LOCAL Expr% = CreateExpression(EXPR_IS_FOR, voidDatatype)
+	Exprs[Expr].varExpr = varExpr
+	Exprs[Expr].toExpr = toExpr
+	Exprs[Expr].stepExpr = stepExpr
+	Exprs[Expr].Scp = Scp
+	Exprs[Expr].hasTo = hasTo
+	Exprs[Expr].dummy = CreateDummyExpression()
+	RETURN Expr
+ENDFUNCTION
+
+//! Eine ForEach Schleife
+FUNCTION CreateForEachExpression%: varExpr%, inExpr%, Scp%
+	LOCAL Expr% = CreateExpression(EXPR_IS_FOREACH, voidDatatype)
+	Exprs[Expr].varExpr = varExpr
+	Exprs[Expr].inExpr = inExpr
+	Exprs[Expr].Scp = Scp
+	Exprs[Expr].dummy = CreateDummyExpression()
+
+	RETURN Expr
+ENDFUNCTION
+
+//! Ein BREAK
+FUNCTION CreateBreakExpression%:
+	RETURN CreateExpression(EXPR_IS_BREAK, voidDatatype)
+ENDFUNCTION
+
+//! Ein CONTINUE
+FUNCTION CreateContinueExpression%:
+	RETURN CreateExpression(EXPR_IS_CONTINUE, voidDatatype)
+ENDFUNCTION
+
+//! Ein TRY Block
+FUNCTION CreateTryExpression%: tryScp%, ctchScp%, vari%
+	LOCAL Expr% = CreateExpression(EXPR_IS_TRY, voidDatatype)
+	Exprs[Expr].Scp = tryScp
+	Exprs[Expr].catchScp = ctchScp
+	Exprs[Expr].vari = vari
+
+	RETURN Expr
+ENDFUNCTION
+
+//! WIrft eine Exception
+FUNCTION CreateThrowExpression%: value%
+	LOCAL Expr% = CreateExpression(EXPR_IS_THROW, voidDatatype)
+	Exprs[Expr].expr = value
+	RETURN Expr
+ENDFUNCTION
+
+//! RESTORE
+FUNCTION CreateRestoreExpression%: Name$
+	LOCAL Expr% = CreateExpression(EXPR_IS_RESTORE, voidDatatype)
+	Exprs[Expr].Name$ = Name$
+	RETURN Expr
+ENDFUNCTION
+
+//! READ
+FUNCTION CreateReadExpression%: Reads%[]
+	LOCAL Expr% = CreateExpression(EXPR_IS_READ, voidDatatype)
+	Exprs[Expr].Reads[] = Reads[]
+	RETURN Expr
+ENDFUNCTION
+
+//! Default Value
+FUNCTION CreateDefaultValueExpression%: datatype AS Datatype
+	IF datatype.IsArray
+		RETURN CreateExpression(EXPR_IS_DEFVAL, datatype)
+	ELSE
+		SELECT datatype.Name$
+			CASE "int"
+				RETURN CreateIntExpression(0)
+			CASE "float"
+				RETURN CreateFloatExpression(0)
+			CASE "string"
+				RETURN CreateStrExpression("\"\"")
+			CASE "void"
+				RETURN CreateIntExpression(0)
+			DEFAULT
+				RETURN CreateExpression(EXPR_IS_DEFVAL, datatype)
+		ENDSELECT
+	ENDIF
+ENDFUNCTION
+
+//! Ein DIM als Expression LOCAL V[] = DIM[10][10]
+FUNCTION CreateDimAsExprExpression%: datatype AS Datatype, dims%[]
+	LOCAL Expr% = CreateExpression(EXPR_IS_DIMASEXPR, datatype)
+	Exprs[Expr].dims[] = dims[]
+
+	RETURN Expr
+ENDFUNCTION
+
+//! Ein ALIAS (ALIAS foo AS bar)
+FUNCTION CreateAliasExpression%: vari%, expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_ALIAS, voidDatatype)
+	Exprs[Expr].vari = vari
+	Exprs[Expr].expr = expr
+
+	RETURN Expr
+ENDFUNCTION
+
+//! INC/DEC
+FUNCTION CreateIncExpression%: Vari%, AddExpr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_INC, voidDatatype)
+	Exprs[Expr].vari = Vari
+	Exprs[Expr].expr = AddExpr
+	RETURN Expr
+ENDFUNCTION
+
+
+//! DIMPUSH
+FUNCTION CreateDimpushExpression%: vari%, expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_DIMPUSH, voidDatatype)
+	Exprs[Expr].vari = vari
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! LEN
+FUNCTION CreateLenExpression%: expr%, kern% = -1
+	LOCAL Expr% = CreateExpression(EXPR_IS_LEN, intDatatype)
+	Exprs[Expr].expr = expr
+	Exprs[Expr].kern = kern
+	RETURN Expr
+ENDFUNCTION
+
+//! DIMDATA
+FUNCTION CreateDimDataExpression%: array%, exprs%[]
+	LOCAL Expr% = CreateExpression(EXPR_IS_DIMDATA, voidDatatype)
+	Exprs[Expr].array = array
+	Exprs[Expr].Exprs = exprs
+	RETURN Expr
+ENDFUNCTION
+
+//! DELETE
+FUNCTION CreateDeleteExpression%:
+	RETURN CreateExpression(EXPR_IS_DELETE, voidDatatype)
+ENDFUNCTION
+
+//! DIMDEL
+FUNCTION CreateDimDelExpression%: array%, position%
+	LOCAL Expr% = CreateExpression(EXPR_IS_DIMDEL, voidDatatype)
+	Exprs[Expr].array = array
+	Exprs[Expr].position = position
+	RETURN Expr
+ENDFUNCTION
+
+//! BOUNDS
+FUNCTION CreateBoundExpression%: expr%, position%
+	LOCAL Expr% = CreateExpression(EXPR_IS_BOUND, intDatatype)
+	Exprs[Expr].array = expr
+	Exprs[Expr].position = position
+	RETURN Expr
+ENDFUNCTION
+
+//! NOT
+FUNCTION CreateNotExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_NOT, floatDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! Dummy Expression
+FUNCTION CreateDummyExpression%:
+//	LOCAL Expr% = INTEGER(CreateExpression(EXPR_IS_DUMMY, voidDatatype))
+	RETURN 0 //Bei Problemen bei goto mit doppelten cases: wen man hier createexpression schreibt, stürzt es aus unerfindlichen gründen ab...
+ENDFUNCTION
+
+//! ADDRESS OF Expression (für SORTARRAY)
+FUNCTION CreateAddressOfExpression%: func%
+	LOCAL Expr% = CreateExpression(EXPR_IS_ADDRESSOF, intDatatype)
+	Exprs[Expr].func = func
+	RETURN Expr
+ENDFUNCTION
+
+
+//! ASSERT
+FUNCTION CreateAssertExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_ASSERT, voidDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+
+//! DEBUG
+FUNCTION CreateDebugOutputExpression%: expr%
+	LOCAL Expr% = CreateExpression(EXPR_IS_DEBUGOUTPUT, voidDatatype)
+	Exprs[Expr].expr = expr
+	RETURN Expr
+ENDFUNCTION
+
+//! IIF!!!
+FUNCTION CreateIIFExpression%: Cond%, onTrue%, onFalse%
+	LOCAL Expr% = CreateExpression(EXPR_IS_IIF, Exprs[onTrue].datatype)
+	DIMDATA Exprs[Expr].Conditions[], Cond
+	DIMDATA Exprs[Expr].Scopes[], onTrue
+	Exprs[Expr].elseScope = onFalse
+
+	RETURN Expr //thx!
+ENDFUNCTION
+
+FUNCTION CreateRequireExpression: Path$
+	LOCAL Expr% = CreateExpression(EXPR_IS_REQUIRE, voidDatatype)
+	IF REVINSTR(Path$, ".") <> -1
+		//Endung anschauen
+		SELECT MID$(Path$, REVINSTR(Path$, ".")+1)
+			CASE "js"
+			DEFAULT
+				Error("Cannot not REQUIRE non javascript files...", CODELINE(), CODEFILE$())
+		ENDSELECT
+	ENDIF
+	Exprs[Expr].Name$ = Path$
+	Exprs[Expr].Content$ = LoadFile$(Path$)
+
+	RETURN Expr
+ENDFUNCTION
+
+
+FUNCTION CreateSuperExpression%: typ%
+	LOCAL d AS Datatype
+	d.IsArray = FALSE
+	d.Name$ = Compiler.Types[typ].Name$
+	RETURN CreateExpression(EXPR_IS_SUPER, d)
+ENDFUNCTION
+
+
+FUNCTION CreateCast2Obj%: Obj$, expr%
+	LOCAL d AS Datatype
+	d.IsArray = FALSE
+	d.Name$ = Obj$
+	LOCAL Expr% = CreateExpression(EXPR_IS_CAST2OBJ, d)
+	Exprs[Expr].expr = expr
+
+	RETURN Expr
+ENDFUNCTION
+

@@ -1,0 +1,283 @@
+
+Fixed: NOT fixed.
+Fixed: ROTOSPRITE/ROTOANIM/ROTOZOOMSPRITE/ROTOZOOMANIM use correct image handle when rotating
+
+
+0.35
+Fixed: LOCAL E; FOREACH E IN Arr[]; NEXT <- reused variable "E" instead of declaring a new one.
+Fixed: Default seed is not 0, it is the unix timestamp
+Fixed: LOCAL a; ...; LOCAL a <- does not generate buggy JavaScript code
+Improved: Lexer is much faster* (8000 lines in about 8 seconds instead of 16 seconds)
+Improved: Parser parses in less than 1 second
+Improved: Precompiler precompiles in less than 1 second
+Fixed: RND returned sometimes values out of range
+Fixed: GLOBAL foo; FUNCTION Bar: LOCAL foo[]; ENDFUNCTION <- threw syntax error
+Fixed: Compiler shows correct character position in errors
+Improved: Again! The lexer is much optimized and does its really fast! Compiling of the compiler itself takes now around 7 seconds (from 150 seconds to 7 seconds, a huge step forward :D) - GLBScript compiling time is now as fast as GLBasic's
+Improved: Type creating much faster.
+Improved: Function calls much faster (unref() calls are reduced) -> needs some debugging
+Fixed: GOTO works again!!
+Fixed: myArray[0.5] works
+Fixed: ROTOSPRITE / ROTOANIM works as expected - rotates in the middle.
+Fixed: Internal array cloning works again
+Fixed: FOR has variable declaration is correct
+Fixed: LEN with Kerning works (but no "real" kerning is performed...)
+
+
+
+* All measurements are performed on my local test pc: Intel Core i5 Sandy Bridge 2500k with 8GB RAM
+
+0.3
+Improved: Faster compilation: Instead of tokenizer -> preprocessor -> tokenizer -> analyser ->... it's now tokenizer -> preprocessor -> analyser!
+Fixed: Some bugs due to the new preprocessor
+Fixed: Array bug (DIM had wrong behaviour when passed a float)
+Improved: CAST2INT much faster when casting to integers (uses ~~ in JS)
+Fixed: LEN() on uninitialized arrays (LOCAL arr[]; STDOUT LEN(arr[])) failed
+Fixed: TYPE TGameObject; ABSTRACT FUNCTION Test:; ENDTYPE <- Failed (needed second function)
+Fixed: XML parser can handle now tabs!
+Fixed: DOESFILEEXIST / DOESDIREXIST function better
+Improved: code cleanup
+Fixed: ?IF works better (more robust, can handle NOT and much more)
+Improved: Some optimizations compiler side - faster compiling (still too slow...)
+Added: New Targetsystem - 100% extensible with XML files - no platform/target specific stuff is hardcoded.
+Removed: ?BLACKLIST command - now configurable with XML
+Improved: Compile time MUUUUUCH faster - One bootstrap (= compiles its own source code) takes 25s instead of 110s on my pc :) but still: GLBScript is not the fastest compiler...
+Fixed: String prototypes in JavaScript
+Improved: Ressource handling much (is not embedded into the  JavaScript file -> much slimmer!)
+Fixed: Really strange compiler crash (did some weird assignments to get rid of the crashes in "CreateExpression")
+Fixed: DOESDIREXIST/DOESFILEEXIST returned sometimes wrong results
+Added: Little HTTP Server to test your games easily
+Fixed: GLOBAL myGlobal = myConstant; CONSTANT myConstant = 100 <- works now (use constants before they are defined)
+Fixed: GLOBAL myGlobal = MyFunc(); FUNCTION MyFunc: .... <- works again (use of functions in GLOBAL definitions before they are defined)
+Improved: Casting faster
+Added: FOR i = 0 UNTIL 10 <- syntactical sugar for: FOR i = 0 TO 10 - 1, useful for things like: FOR i = 0 UNTIL LEN(MyArray[]) 
+Fixed: Late binding with ABSTRACT methods
+Added: SPRITE2MEM
+Fixed: INC/DEC with floats/strings function now (INC a, 0.5 <- with out cast to integer internally)
+Improved: OOP system cleaned up -> more rubust
+Added: super.MyFunction() in methods.
+Added: MyBaseClass(myDerivedClass) <- Casting!
+Fixed: INTEGER(1)/INTEGER(2) returned in JS 0.5 instead of 0 
+Fixed: If FILESEEK goes beyond the file size it does not throw an error but it sets the position of the file to the last byte!
+Fixed: STARTPOLY without POLYNEWSTRIP and mode = -1 works!
+
+
+0.2
+Fixed: GETFILELIST infinite loop under mysterious circumstances...
+Fixed: INI parser (for the INI... commands) can handle comments properly.
+Fixed: STARTPOLy now with optional parameter and colored polygons (no gradients)
+Fixed: Some array speed improvements
+
+Added: EXPORT now with custom name: EXPORT MyAwesomeFunction, "FunnyName" <- generates function called "FunnyName" in JavaScript
+Added: Case insensitivity (optional)
+Added: Very very very experimental C# target (compiles but does not execute because no library function is ported...) basically it was just a test whether the abstract syntax tree is generic enough...
+Added: POLYVECTOR with image tinting (no gradients possible...)
+
+
+0.15
+Fixed: Negative width/height with STRETCHSPRITE work on Firefox
+Fixed: SYSTEMPOINTER TRUE works
+Fixed: Castings are much faster
+Fixed: Some memory improvement (less micro freezes in Firefox) hard to find these memory "leaks"
+Fixed: WHILE 0.1 WEND <- Was never executed... same with REPEAT - UNTIL
+Fixed: More Unnecessary CAST2FLOATs are removed from the source code => faster execution
+Fixed: Array access in 3 or 4 dimensional array was incorrect
+Fixed: TYPE TFoo; f AS TFoo; ENDTYPE <- throws syntax error, because of a cyclic references!
+
+
+Added: LOADANIM
+Added: DRAWANIM
+Added: STARTPOLY (experimental!)
+Added: ENDPOLY
+Added: POLYVECTOR
+Added: POLYNEWSTRIP
+Added: ZOOMANIM
+Added: ROTOZOOMANIM
+Added: ROTOANIM
+Added: STRETCHANIM
+Added: SETSPRITEANIM
+Added: EXPORT (exporting functions to JavaScript)
+Added: REQUIRE (includes source code)
+
+0.1
+Fixed: FOR had strange behaviour in recursion
+Fixed: "FOR i = 0 TO 0" executes correctly
+Fixed: "4 - 5 + 6" or "TRUE OR FALSE AND FALSE" do not throw a syntax error
+Fixed: i% = 4; STDOUT i% works (the %)
+Fixed: Line numbering is now (almost) correct
+Fixed: (multidimensional) arrays are more robust
+Fixed: Type cloning works with references properly (JavaScript)
+Fixed: floats like ".5" implemented
+Fixed: Some problems with references fixed
+Fixed: Uninitialized arrays have now correct default values
+Fixed: TRY - CATCH works in GOTO scope properly
+Fixed: "GETTIMERALL" returns milliseconds since page loaded instead of unix timestamp
+Fixed: "NOT" returned a boolean instead of an integer
+Fixed: GETFILELIST: uses the filter$ parameter
+Fixed: Hex values fixed
+Fixed: RGB returned incorrect number
+Fixed: Now the compiler seperates the generated html file from the javascript file (one big JavaScript file vs. one small html file). So it's easier to distribute your program.
+Fixed: 2D uses context.save() and context.restore()
+Fixed: Unexpected "gotocounter exception" fixed.
+Fixed: Unnecessary unref(), tryClone() and CAST2INT()/CAST2FLOAT() calls are removed, in the generated JavaScript file. => Execution is faster
+Fixed: Compiler error messages display correct line number, path and character where the error happened
+Fixed: KEY uses GLB Scancodes
+Fixed: REPLACE$ works as expected (uses own implementation instead of the native JavaScript one)
+Fixed: Some safety checks in the file API
+Fixed: Codefolding is supported properly
+Fixed: Array position screwed up in 3 or 4 dimensional arrays...
+Fixed: Wrong dereferencing when calling a NATIVE function
+Fixed: CONSTANT with multiple identifiers (CONSTANT IS_A = 0, IS_B = 1, IS_C = 2)
+Fixed: Width and Height from the .gbap file
+Fixed: Sound in Opera and IE
+Fixed: RGB returned sometimes wrong value
+Fixed: SETTRANSPARENCY: Implementation is a weird hack, please use only if there are no other possibilities
+Fixed: STRETCHSPRITE stretches the sprite properly
+Fixed: Wrong behaviour when performing "IF" with floats
+Fixed: STRETCHSPRITE with width = 0 or height = 0 does not crash Firefox anymore
+Fixed: Implicit defintion of arrays if there is a []
+Fixed: No infinite loop while trying to load a non existing image or sound
+Fixed: Array access optimized.
+Fixed: Preprocessor screwed around with ?ELSE...
+Fixed: \f in strings are not compiled into \n anymore
+Fixed: CAST2INT() cuts decimals correctly
+Fixed: Numbers beginning with 0 does not throw a syntax error anymore (040 for example)
+Fixed: STARTDATA data:\n DATA functCall()\n ENDDATA <- Works now with function calls 
+Fixed: RND should work as expected
+Fixed: CALLBYNAME("10") throws no syntax error when executed...
+Fixed: Touch support for Android
+Fixed: No context menu on right click onto the canvas
+Fixed: Callbacks and function in types are functioning together
+Fixed: MOUSEAXIS with mouse wheel support!
+
+Added: FOREACH with multidimensional arrays
+Added: ?BLACKLIST "file" - For Blacklisting Files/Folders (are not included in the final .html file), "?BLACKLIST ALL" blacklists all files => no file is included!
+Added: "_" symbol for ignoring the newline token
+Added: BOUNDS(array, dimension)
+Added: Fully functional GOTO - still needs some debugging
+Added: "GOTO on demand" overhead reduction: goto overhead (a big switch - case monster) is only inserted when it's really necessary
+Added: "Virtual File System" Engine: Flexible managing of your (persistent and non persistent) data in a nice filesystem like enviroment.
+Added: MIN/MAX
+Added: DEBUG
+Added: ASSERT
+Added: ABS
+Added: SWAP
+Added: SGN
+Added: SIN
+Added: COS
+Added: TAN
+Added: ASIN
+Added: ACOS
+Added: ATAN
+Added: ASL
+Added: ASR
+Added: bOR
+Added: bXOR
+Added: bAND
+Added: bNOT
+Added: FMOD
+Added: LOGN
+Added: POW
+Added: SQR
+Added: STDERR (calls STDOUT with "Error: " prefix)
+Added: CALLBYNAME
+Added: SORTARRAY
+Added: ADDRESSOF
+Added: PLATFORMINFO$
+Added: STDCOLOR*
+Added: END
+Added: GETTIMER
+Added: LIMITFPS
+Added: GETLASTERROR*
+Added: SHELLCMD (executes javascript - eval)
+Added: SLEEP
+Added: SHELLEND (calls SHELLCMD and END)
+Added: LCASE$
+Added: UCASE$
+Added: DECRYPT$/ENCRYPT$: does not use base64
+Added: SETCURRENTDIR
+Added: FILESEEK
+Added: FILEPOSITION
+Added: READSTR
+Added: READBYTE
+Added: READLONG
+Added: READULONG
+Added: READWORD
+Added: READUWORD
+Added: READSHORTIEEE
+Added: READIEEE
+Added: WRITEBYTE
+Added: WRITEUBYTE
+Added: WRITEWORD
+Added: WRITEUWORD
+Added: WRITELONG
+Added: WRITEULONG
+Added: WRITEIEEE
+Added: WRITESHORTIEEE
+Added: KILLFILE
+Added: GETCURRENTDIR$
+Added: DOESFILEEXIST
+Added: DOESDIREXIST
+Added: GETFILESIZE
+Added: COPYFILE
+Added: CREATEDIR
+Added: FILEREQUEST$*
+Added: PUTENV (just a key - value storage)
+Added: GETENV
+Added: FORCEFEEDBACK (basic support, api is not very flexible...)
+Added: SETSHOEBOX*
+Added: GETCOMMANDLINE (returns the url parameter)
+Added: INIOPEN
+Added: INIPUT
+Added: INIGET$
+Added: SPLITSTR
+Added: URLENCODE
+Added: URLDECODE
+Added: NETWEBEND
+Added: PUSHLOOP loop$ (new command: pushes a new Renderloop onto the stack)
+Added: POPLOOP (new command: pops the last renderloop from the stack)
+Added: GETCURRENTLOOP$ (new command: returns the current name of the renderloop)
+Added: RETURNTOLOOP: loop$ (new command: "walks" through the loopstack until it gets to the given loopname)
+Added: ANYKEY: (new command: instead of KEYWAIT, returns true if a key is pressed if not it returns false)
+Added: USEASBMP
+Added: LOADBMP
+Added: Google Closure compatibility (compilation_level = ADVANCED_OPTIMIZATIONS): Now the JavaScript code is perfectly optimized by Google Closure (a wonderful JavaScript Optimizer) It optimizes the file size but the code gets a little slower...
+Added: Useful debug information (if a error occurs) in debugmode: Stacktrace (prints the complete function call history and its parameters) and the current line of execution
+Added: ?OPTIMIZE NONE | SIMPLE | AGGRESSIVE - How much should be optimized? None does nothing, Simple does very little optimzation and aggressive does nearly everything (problem with aggressive is, that it runs sometimes slower than the other techniques)
+Added: Implicit variable declaration (Use variables without their declaration)
+Added: STACKTRACE$ (new command: returns the current stacktrace in debug mode)
+Added: LOADSOUND
+Added: PLAYSOUND
+Added: SOUNDPLAYING
+Added: HUSH
+Added: Automatic audio converting to the common HTML5 audio formats (.mp3 and .ogg) - A very handy feature!
+Added: ALPHAMODE
+Added: SEEDRND
+Added: Improved lexing speed: Uses now Hashmaps (In future I will rewrite the "identifier search engine" to use hashmaps, at the moment the native GLB arrays are used for this...)
+Added: GRABSPRITE
+Added: "Compile to HTML5" macro for GLBasic IDE - compile to HTML5 easily from the IDE.
+Added: GOTO checks are now performed: You are only able to jump to defined labels.
+Added: IIF(condition%, onTrue%, onFalse%)
+Added: GLB_ON_LOADING: As long as GLBScript is loading data, this sub is callen... to check whether a sprite is loaded or not, use GETSPRITESIZE!
+Added: SPRCOLL
+Added: GETMOUSECOUNT (mult touch support, need some bugfixing on Android/iOS...)
+Added: SETACTIVEMOUSE 
+Added: Experimental inheritance feature, FUNCTION in types reprogrammed...
+Added: Experimental ABSTRACT feature
+
+* This function is just a dummy, because it is not possible to implement this feature and/or it's not worth it.
+
+0.01
+Fixed: Repeat - Until now works properly
+Fixed: Reference parameters (BYREF) are more robust (THAT was long bug hunting...)
+Fixed: REDIM/DIMPUSH speed increased
+Fixed: int/float casting handles "1" and "0" correctly
+Fixed: >,<,<=,>=,and,or,=,<> were not converted from boolean to integer
+Fixed: Recursion in combination with FOREACH had really strange behaviour
+Fixed: Negate operator (-) had wrong operator priority
+
+Added: Support for hex values
+Added: GETFILELIST
+Added: REVINSTR
+Added: MOD
+Added: READUBYTE

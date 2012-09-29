@@ -1,0 +1,25 @@
+?IFDEF GLBSCRIPT
+
+?MODULE "GLBScript.2D.Loop"
+
+?DOC PUSHLOOP
+	?PARAM loop$ 
+	?LANG EN
+This command pushes the given SUB loop$ onto the loop stack. The last sub on the stack is callen when a rendering occur.
+The first element on the stack is "GLB_ON_LOOP" (if defined).
+	?LANG DE
+Dieser Befehl gibt die gegebene SUB loop$ auf den Schleifenstapel. Die letzte SUB wird aufgerufen wenn ein Zeichenvorgang durchgeführt wird.
+Das erste Element auf dem Stapel ist "GLB_ON_LOOP" (sofern es definert ist).
+	?SEE POPLOOP, GETCURRENTLOOP$, RETURNTOLOOP
+
+?DOC POPLOOP
+	?LANG EN
+This command pops the last Sub from the loop stack. The previous one is from now used as "render sub".
+If there is no SUB left, GLBScript throws an error.
+	?LANG DE
+Dieser Befehl entfernt die letzte SUB vom Schleifenstapel. Die vorherige SUB wird stattdessen aufgerufen wenn ein Zeichenvorgang durchgeführt wird.
+	?SEE PUSHLOOP, GETCURRENTLOOP$, RETURNTOLOOP
+
+
+
+?ENDIF

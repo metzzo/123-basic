@@ -1,0 +1,374 @@
+// --------------------------------- //
+// Project: Memory
+// Start: Friday, February 18, 2005
+// IDE Version: 2.50218
+
+
+screenx=0; screeny=0; mx=0; my=0; b1=0; b2=0
+	GETSCREENSIZE screenx, screeny
+
+	hardness = 1
+
+	SELECT hardness
+	CASE 1
+	// easy
+		blocksize = INTEGER(screenx / 4)
+	CASE 2
+	// medium
+		blocksize = INTEGER(screenx / 5)
+	CASE 3
+	// hard?
+		blocksize = INTEGER(screenx / 8)
+	ENDSELECT
+
+	device$ = PLATFORMINFO$("")
+	IF device$="WINCE" THEN PocketPC=TRUE
+
+	FOR i=1 TO 4
+		LOADSPRITE "p"+i+".bmp", 49+i
+	NEXT
+	IF TRUE // public domain animals
+		LOADSOUND "sound/parrot.wav", 0, 2
+		LOADSOUND "sound/duck.wav", 1,2
+		LOADSOUND "sound/pig.wav", 2,2
+		LOADSOUND "sound/elephant.wav", 3,2
+		LOADSOUND "sound/dog.wav", 4,2
+		LOADSOUND "sound/lion.wav", 5,2
+		LOADSOUND "sound/horse.wav", 6,2
+		LOADSOUND "sound/monkey.wav", 7,2
+		LOADSOUND "sound/cat.wav", 8,2
+		LOADSOUND "sound/peacock.wav", 9,2
+		LOADSOUND "sound/cow.wav", 10,2
+		LOADSOUND "sound/frog.wav", 11,2
+		LOADSOUND "sound/croc.wav", 12,2
+		LOADSPRITE "Animals.bmp", 14
+	ELSE // the ones I took from a game for my daughter
+		LOADSOUND "sound/pig.wav", 0, 2
+		LOADSOUND "sound/lion.wav", 1,2
+		LOADSOUND "sound/frog.wav", 2,2
+		LOADSOUND "sound/elephant.wav", 3,2
+		LOADSOUND "sound/cow.wav", 4,2
+		LOADSOUND "sound/hippo.wav", 5,2
+		LOADSOUND "sound/zebra.wav", 6,2
+		LOADSOUND "sound/monkey.wav", 7,2
+		LOADSOUND "sound/mouse.wav", 8,2
+		LOADSOUND "sound/beaver.wav", 9,2
+		LOADSOUND "sound/croc.wav", 10,2
+		LOADSOUND "sound/dog.wav", 11,2
+		LOADSOUND "sound/cat.wav", 12,2
+		LOADSPRITE "AnimalsAlida.bmp", 14
+	ENDIF
+	LOADSOUND "sound/select.wav", 20,1
+	LOADSOUND "sound/good.wav", 21,1
+
+
+
+
+	PUSHLOOP "SelNumPlayers"
+
+	// scaling factor for score-bar under each player
+	scorescale = blocksize/INTEGER(screenx*screeny/(blocksize*blocksize))*2
+
+LIMITFPS 30
+
+GLOBAL gridCreate% = FALSE
+
+SUB GLB_ON_LOOP:
+	// shuffle
+	MakeLevel(feld[], INTEGER(screenx/blocksize), INTEGER(screeny/blocksize))
+	save[] = feld[]
+	// SaveLevel(feld[], save[])
+
+DIM Click[2][2] // [id][x,y]
+DIM score[num_players]
+	Click[0][0]=-1; Click[1][0]=-1
+	released=TRUE
+	winner=0
+
+	PUSHLOOP "MainGame"
+ENDSUB
+
+SUB GLB_ON_LOADING:
+	PRINT "Loading...", 10, 10
+	SHOWSCREEN
+ENDSUB
+
+SUB MainGame:
+	IF NOT gridCreate
+		gridCreate = TRUE
+		FOR i=0 TO 13
+			STRETCHSPRITE 14, -i*blocksize, 0, 14*blocksize, blocksize
+			//DRAWSPRITE 14, -i*48, 0
+			GRABSPRITE i,0,0,blocksize, blocksize
+		NEXT
+
+		BLACKSCREEN
+	ELSE
+		IF winner = 0
+			MOUSESTATE mx, my, b1, b2
+
+			ShowLevel(feld[], Click[])
+			ALPHAMODE -.75
+			FOR i=1 TO num_players
+				// Player-icons (active player flashing)
+				IF i<>cur_player+1 OR MOD(GETTIMERALL(), 1000)<500
+					STRETCHSPRITE i+49, blocksize*(i-.25), 3, blocksize*.5, blocksize*.5
+				ENDIF
+				// Score-bar
+
+				DRAWRECT (i-.5)*blocksize-1,blocksize*.5-1, score[i-1]*scorescale+2, 5, RGB(0,0,0)
+				STRETCHSPRITE i+49, (i-.5)*blocksize,blocksize*.5, score[i-1]*scorescale, 3
+			NEXT
+			ALPHAMODE 0
+
+			IF PocketPC=FALSE THEN Pointer(mx, my)
+			SHOWSCREEN
+
+			IF b1 AND released
+				released=FALSE
+				good=0
+				IF turned<2 THEN good = Flip(feld[], mx/blocksize, my/blocksize)
+				IF good OR (good=0 AND turned=2)
+					// turned one or two
+					IF turned<2
+						Click[turned][0] = INTEGER(mx/blocksize)
+						Click[turned][1] = INTEGER(my/blocksize)
+						PLAYSOUND( feld[Click[turned][0]][Click[turned][1]], 0, 1)
+					ENDIF
+					turned=turned+1
+
+					// 2 selected, tapped the screen 3rd time
+					IF turned=3
+						// did pairs match
+						IF feld[Click[0][0]][Click[0][1]]=feld[Click[1][0]][Click[1][1]]
+							PLAYSOUND( 21, 0, 1)
+							feld[Click[0][0]][Click[0][1]]=-1
+							feld[Click[1][0]][Click[1][1]]=-1
+							score[cur_player] = score[cur_player]+1
+							save[] = feld[]
+							winner=WhoIsWinner(feld[], score[])
+						ELSE // no, they didn't
+							PLAYSOUND( 20, 0, 1)
+							cur_player = MOD(cur_player+1, num_players)
+							feld[] = save[]
+						ENDIF
+						turned=0
+						Click[0][0]=-1; Click[0][1]=-1
+						Click[1][0]=-1; Click[1][1]=-1
+					ENDIF
+				ENDIF
+			ENDIF
+			IF b1=FALSE THEN released=TRUE
+		ELSE
+			POPLOOP
+		ENDIF
+	ENDIF
+ENDSUB
+
+
+// ------------------------------------------------------------- //
+// -=#  MAKELEVEL  #=-
+// ------------------------------------------------------------- //
+FUNCTION MakeLevel: feld[], sx, sy
+	// Diese Variablen sind als LOCAL definiert:
+	// sx, sy
+	// Diese Werte werden per Referenz übergeben:
+	// feld[]
+
+LOCAL num, tile, x, y
+	DIM feld[sx][sy]
+	FOR x=0 TO sx-1
+		FOR y=0 TO sy-1
+			feld[x][y]=-1
+		NEXT
+	NEXT
+	x=0; y=0
+	FOR num = 1 TO sx*sy/2
+		FOR tile=0 TO 1
+			WHILE feld[x][y]<>-1
+				x=RND(sx-1)
+				y=RND(sy-1)
+			WEND
+			feld[x][y]=MOD(num, 13)+100
+		NEXT
+	NEXT
+ENDFUNCTION // MAKELEVEL
+
+
+// ------------------------------------------------------------- //
+// -=#  SHOWLEVEL  #=-
+// ------------------------------------------------------------- //
+FUNCTION ShowLevel: feld[], Click[]
+LOCAL x, y, num, c
+	FOR x=0 TO BOUNDS(feld[], 0)-1
+		FOR y=0 TO BOUNDS(feld[], 1)-1
+			num = feld[x][y]
+			IF num>=100 THEN num=13
+			IF num>=0
+				DRAWSPRITE num, x*blocksize, y*blocksize
+				FOR c=0 TO 1 // BOUNDS(click[], 0)-1
+					IF Click[c][0]=x AND Click[c][1]=y
+						ALPHAMODE ABS(SIN(MOD(GETTIMERALL(), 2000.) / 2000. * 360. + c*90.))
+						//DRAWRECT x*blocksize, y*blocksize, blocksize, blocksize, RGB(64,64,128)
+						ALPHAMODE 0
+					ENDIF
+				NEXT
+			ENDIF
+		NEXT
+	NEXT
+ENDFUNCTION // SHOWLEVEL
+
+// ------------------------------------------------------------- //
+// -=#  SELNUMPLAYERS  #=-
+// ------------------------------------------------------------- //
+SUB SelNumPlayers:
+STATIC fx, fy, i, mx, my, b1, b2, blk
+STATIC start
+GLOBAL screenx, screeny
+	MOUSESTATE mx, my, b1, b2
+	IF start
+		i=mx / (blk*1.5)
+		IF i<1 THEN i=1
+		IF i>4 THEN i=4
+		num_players = i
+		POPLOOP
+		RETURN
+	ENDIF
+
+	GETSCREENSIZE screenx, screeny
+	blk=INTEGER(screenx / 8)
+	GETFONTSIZE fx, fy
+	PRINT "Anzahl der Spieler:", 0, (blocksize-fy)/2
+	FOR i=1 TO 4
+		ZOOMSPRITE i+49, i*blk*1.5, blk, blk/blocksize*1.4, blk/blocksize*1.4
+		PRINT i, i*blk*1.5+blk/2-fx/2, blk*2.2
+	NEXT
+
+	IF PocketPC=FALSE
+		Pointer(mx, my)
+	ENDIF
+	SHOWSCREEN
+
+	IF b1
+		PUSHLOOP "MOUSEWAIT"
+		start = TRUE
+	ENDIF
+ENDSUB // SELNUMPLAYERS
+
+SUB MOUSEWAIT:
+	MOUSESTATE mx, my, b1, b2
+	IF NOT b1
+		POPLOOP
+	ENDIF
+ENDSUB
+
+
+
+// ------------------------------------------------------------- //
+// -=#  FLIP  #=-
+// ------------------------------------------------------------- //
+FUNCTION Flip: feld[], x, y
+	// Diese Variablen sind als LOCAL definiert:
+	// x, y
+	// Diese Werte werden per Referenz übergeben:
+	// feld[]
+	IF feld[x][y]>=100
+		feld[x][y]=feld[x][y]-100
+		RETURN 1
+	ENDIF
+RETURN 0
+ENDFUNCTION // FLIP
+
+
+// ------------------------------------------------------------- //
+// -=#  WHOISWINNER  #=-
+// ------------------------------------------------------------- //
+FUNCTION WhoIsWinner: feld[], score[]
+	// Diese Variablen sind als LOCAL definiert:
+	//
+	// Diese Werte werden per Referenz übergeben:
+	// feld[], score[]
+LOCAL x, y, maxscore
+	FOR x=0 TO BOUNDS(feld[], 0)-1
+		FOR y=0 TO BOUNDS(feld[], 1)-1
+			IF feld[x][y]>=100 THEN RETURN 0
+		NEXT
+	NEXT
+
+	maxscore=0; y=0
+	FOR x=0 TO BOUNDS(score[], 0)-1
+		IF score[x]>maxscore
+			maxscore=score[x]
+			y=x+1
+		ENDIF
+	NEXT
+
+	FOR x=1 TO screenx/blocksize STEP (screenx/blocksize-1)/150
+		ROTOZOOMSPRITE y+49, (screenx-blocksize)/2, (screeny-blocksize)/2, x*180, x
+		SHOWSCREEN
+	NEXT
+
+	RETURN y
+ENDFUNCTION // WHOISWINNER
+
+
+// ------------------------------------------------------------- //
+// -=#  POINTER  #=-
+// ------------------------------------------------------------- //
+FUNCTION Pointer: px, py
+	// Diese Variablen sind als LOCAL definiert:
+	// px, py
+
+	DRAWLINE px+1,py+0, px+21, py+20, RGB(255,255,255)
+	DRAWLINE px+0,py+0, px+20, py+20, RGB(255,255,255)
+	DRAWLINE px+0,py+1, px+20, py+21, RGB(255,255,255)
+	FOR i=20 TO 70
+		DRAWLINE px, py, px + COS(i)*16, py+SIN(i)*16, RGB(180,200,255)
+	NEXT
+ENDFUNCTION // POINTER
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

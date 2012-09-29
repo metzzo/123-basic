@@ -1,0 +1,14 @@
+folder:/Media
+static:/Media/bg.png
+static:/Media/map.png
+static:/Media/smalfont.png
+static:/DIR_STRUCTURE
+static:/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+var:compileTime=2012-08-01 20:54:55
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

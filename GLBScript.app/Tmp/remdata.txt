@@ -1,0 +1,7 @@
+Text$ = Text$ + "var viewMode = \""+Mode$+"\";"+NewLine$()
+Text$ = Text$ + "var compileTime = \""+Rot13$(PLATFORMINFO$("TIME"))+"\";"+NewLine$()
+Text$ = Text$ + "var userDefVersion = \""+Rot13$(USRDEF_VERS$)+"\";"+NewLine$()
+Text$ = Text$ + "var hostId = \""+Rot13$(PLATFORMINFO$("HOSTID"))+"\";"+NewLine$()
+Text$ = Text$ + "var uniqueId = new Date().getTime()+\"\"+Math.random()*10000000;"+NewLine$()
+Text$ = Text$ + "var startTime = new Date().getTime();"+NewLine$()
+Text$ = Text$ + "var fileSystem = new VirtualFileSystem(localStorage.getItem(\"filesystem\"));"+NewLine$()

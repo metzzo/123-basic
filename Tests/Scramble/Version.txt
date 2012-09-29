@@ -1,0 +1,5 @@
+Version 1.1
+- Improved Line-Drawing by using capped lines
+  special thx to X-Out for this hint!
+ 
+ 

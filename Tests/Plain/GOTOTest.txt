@@ -1,0 +1,28 @@
+?BLACKLIST ALL
+
+IF TRUE
+	GOTO Label1
+ENDIF
+STDOUT "Ich werde nie angezeigt \o/ \n"
+Label1:
+
+
+LOCAL i
+MainLoop:
+STDOUT "ROFL Ich bin Da: "+i+"\n"
+IF i = 10 THEN GOTO ExitLoop
+i = i + 1
+GOTO MainLoop
+ExitLoop:
+
+STDOUT "EndProgram!\n"
+
+
+FOR x = 0 TO 20
+	FOR y = 0 TO 20
+		STDOUT "x: "+x+" y: "+y+"\n"
+		IF x = 10 AND y = 8 THEN GOTO ExitDoubleLoop
+	NEXT
+NEXT
+ExitDoubleLoop:
+

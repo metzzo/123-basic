@@ -1,0 +1,1205 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Thursday, July 28, 2011
+// IDE Version: 9.033
+
+
+?IFDEF JSCOMPILER
+
+
+GLOBAL OptimizeLevel% = 1 //0 = None, 1 = Simple, 2 = Aggressive
+
+GLOBAL CurrentScope% = -1
+GLOBAL ForEachCounter%
+GLOBAL CurrentFunc% = -1
+GLOBAL LabelDef$
+GLOBAL IsInGoto% = FALSE
+GLOBAL LoopBreakID% = 0
+GLOBAL LoopContinueID% = 0
+GLOBAL LastDummyID%
+GLOBAL StaticText$ = ""
+
+
+
+//! Generiert JavaScript Code
+FUNCTION JS_Generator$:
+	TRY
+		LOCAL InWebWorker% = IsDefine("HTML5_WEBWORKER")
+
+		ManageFuncParamOverlaps()
+
+
+		StaticText$ = ""
+
+		LOCAL Text$ = ""
+
+		IF DEBUGMODE
+			Text$ = Text$ + "var __debugInfo = \"\";"+NewLine$()
+			Text$ = Text$ + "var debugMode = true;"+NewLine$()
+		ELSE
+			Text$ = Text$ + "var debugMode = false;"+NewLine$()
+		ENDIF
+
+		//Dummy ID (für GOTO)
+		LastDummyID = LastExprID + 1337
+
+		Text$ = Text$ + "window['main'] = function()"
+		Text$ = Text$ + JSGenerate$(Exprs[Compiler.MainScope])+NewLine$()
+		IF InWebWorker THEN Text$ = Text$ + "main = window['main'];"+NewLine$()
+
+		LOCAL StaticText$ = "", StaticDefText$ = ""
+		FOREACH Func IN Compiler.Funcs[]
+			IF Func.Native = FALSE AND Func.Scp<>-1
+				//statics definieren
+				IF LEN(Func.Statics[])>0
+					StaticDefText$ = StaticDefText$ + "var "+ JSVariDef$(Func.Statics[], TRUE)+";"+NewLine$()
+					StaticText$ = StaticText$ + JSVariDef$(Func.Statics[])+";"+NewLine$()
+				ENDIF
+				//falls eine Sub und DEBUGMODE = FALSE, erzeuge im window objekt eine referenz darauf, um CALLBYNAME ausführen zu können
+
+				Text$ = Text$ + "window['"+Func.Name$+"'] = function("
+				LOCAL Find = FALSE
+				FOREACH P IN Func.Params[]
+					IF Find THEN Text$ = Text$ + ", "
+					Text$ = Text$ + Compiler.Varis[P].Name$
+
+					Find = TRUE
+				NEXT
+				Text$ = Text$ + ") "
+				Text$ = Text$ + JSGenerate$(Exprs[Func.Scp])+ ";"+NewLine$()
+
+				IF DEBUGMODE = FALSE AND Func.Typ = FUNC_IS_SUB
+					Text$ = Text$ + "window['"+Func.Name$+"'] = "+Func.Name$+";"+NewLine$()
+				ENDIF
+
+				IF InWebWorker THEN Text$ = Text$ + Func.Name$+ " = window['"+Func.Name$+"'];"+NewLine$()
+			ENDIF
+		NEXT
+
+		//Prototype
+		FOREACH Func IN Compiler.Funcs[]
+			IF Func.Typ = FUNC_IS_PROTO
+				IndentUp()
+				Text$ = Text$ + "window['"+Func.OName$+"'] = function() {"+NewLine$()
+				Text$ = Text$ + "return function() { throwError(\"NullPrototypeException\"); };"
+				IndentDown()
+				Text$ = Text$ + NewLine$()+"};"+NewLine$()
+				IF InWebWorker THEN Text$ = Text$ + Func.OName$+ " = window['"+Func.OName$+"'];"+NewLine$()
+			ENDIF
+		NEXT
+
+		//Types
+		FOREACH Typ IN Compiler.Types[]
+			//VTables für die Types erstellen
+			LOCAL typId% = Typ.ID
+			LOCAL map AS HashMap
+			IndentUp()
+			Text$ = Text$ + "var vtbl_"+Typ.Name$ + " = {"+NewLine$()
+			LOCAL First% = FALSE
+			WHILE typId <> -1
+				FOREACH Mth IN Compiler.Types[typId].Methods[]
+					IF NOT map.DoesKeyExist(Compiler.Funcs[Mth].OName$) AND Compiler.Funcs[Mth].Scp <>-1
+						IF First THEN Text$ = Text$ + ", "+NewLine$()
+						//noch nicht definiert
+						Text$ = Text$ + Compiler.Funcs[Mth].OName$+": "+Compiler.Funcs[Mth].Name$
+						map.Put(Compiler.Funcs[Mth].OName$, Mth)
+						First = TRUE
+					ENDIF
+				NEXT
+
+				typId = Compiler.Types[typId].Extending
+			WEND
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "};" + NewLine$()
+
+
+			IF DEBUGMODE = FALSE
+				Text$ = Text$ + "/**"+NewLine$()
+				Text$ = Text$ + "* @constructor"+NewLine$()
+				Text$ = Text$ + "*/"+NewLine$()
+			ENDIF
+			IndentUp()
+			Text$ = Text$ +"window ['"+Typ.Name$+"'] = function() {"+NewLine$()
+			//Text$ = Text$ + "this = new Object();"+NewLine$()
+
+			//defaults setzen
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				Text$ = Text$ +  "this."+variable.Name$
+				Text$ = Text$ + " = "
+				Text$ = Text$ + JSGetDefaultValue$(variable.datatype, variable.ref, FALSE)
+				//IF variable.ref THEN Text$ = Text$ + ")"
+				Text$ = Text$ + ";"+NewLine$()
+			NEXT
+
+			//vtable
+			Text$ = Text$ + "this.vtbl = vtbl_"+Typ.Name$+";"+NewLine$()
+
+			//richtige defaults
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				IF variable.PreDef<>-1
+					Text$ = Text$ +  "this."+variable.Name$
+					Text$ = Text$ + " = "
+					IF variable.ref THEN Text$ = Text$ + "["
+					Text$ = Text$ + JSGenerate$(Exprs[variable.PreDef])
+					IF variable.ref THEN Text$ = Text$ + "]"
+					//IF variable.ref THEN Text$ = Text$ + ")"
+					Text$ = Text$ + ";"+NewLine$()
+				ENDIF
+			NEXT
+
+
+
+			Text$ = Text$ + "return this;"+NewLine$()
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "};" + NewLine$()
+
+			IndentUp()
+			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.clone = function() {"+NewLine$()
+			Text$ = Text$ + "var other = new "+Typ.Name$+"();"+NewLine$()
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				//IF variable.datatype.IsArray=0 AND IsType(variable.Name$) = FALSE AND variable.ref = FALSE
+				//ELSE
+				//	Text$ = Text$ + "other."+variable.Name$ + " = this."+variable.Name$+");"+NewLine$()
+				//ENDIF
+				LOCAL plzclone% = FALSE
+				IF Compiler.Varis[Attr].datatype.IsArray = 0 AND (Compiler.Varis[Attr].datatype.Name$="int" OR Compiler.Varis[Attr].datatype.Name$="float" OR Compiler.Varis[Attr].datatype.Name$="string")
+					plzclone = FALSE
+				ELSE
+					plzclone = TRUE
+				ENDIF
+				//Es sei denn es ist REF
+				IF Compiler.Varis[Attr].ref THEN plzclone = TRUE //Sobald ref
+				Text$ = Text$ + "other."+variable.Name$ + " = "
+
+				IF plzclone THEN Text$ = Text$ + "tryClone("
+				Text$ = Text$ + "this."+variable.Name$
+				IF plzclone THEN Text$ = Text$ + ")"
+
+				Text$ = Text$ + ";"+NewLine$()
+			NEXT
+			//vtable
+			Text$ = Text$ + "other.vtbl = this.vtbl;"+NewLine$()
+
+			//Text$ = Text$ + "other.clone = this.clone;"+NewLine$()
+			IndentDown()
+			Text$ = Text$ + "return other;"+NewLine$()
+			Text$ = Text$ + "};" + NewLine$()
+
+
+			IF InWebWorker THEN Text$ = Text$ + Typ.Name$+ " = window['"+Typ.Name$+"'];"+NewLine$()
+
+			//Methoden prototypes definieren
+			LOCAL typId% = Typ.ID
+			LOCAL map2 AS HashMap
+
+			LOCAL First% = FALSE
+			WHILE typId <> -1
+				FOREACH Mth IN Compiler.Types[typId].Methods[]
+					IF NOT map2.DoesKeyExist(Compiler.Funcs[Mth].OName$) AND Compiler.Funcs[Mth].Scp <>-1
+						IndentUp()
+						Text$ = Text$ + Typ.Name$ + ".prototype."+Compiler.Funcs[Mth].OName$+" = function() {"+NewLine$()+" return "
+						Text$ = Text$ + "this.vtbl."+Compiler.Funcs[Mth].OName$+"("
+
+						FOR i = 0 TO LEN(Compiler.Funcs[Mth].Params[]) - 2 //-2 weil self nicht dazu!
+							Text$ = Text$ + "arguments["+i+"], "
+						NEXT
+
+						Text$ = Text$ + "this"
+						IndentDown()
+						Text$ = Text$ + ");"+NewLine$()+"};"+NewLine$()
+						map2.Put(Compiler.Funcs[Mth].OName$, Mth)
+					ENDIF
+				NEXT
+
+				typId = Compiler.Types[typId].Extending
+			WEND
+		NEXT
+
+		//data block
+		FOREACH block IN Compiler.DataBlocks[]
+			Text$ = Text$ + "var datablock_"+block.Name$+" = [ "
+			LOCAL Done% = FALSE
+			FOREACH d IN block.Datas[]
+				IF Done THEN Text$ = Text$ + ", "
+				Text$ = Text$ + JSGenerate$(Exprs[d])
+				Done = TRUE
+			NEXT
+			Text$ = Text$ + " ];"+NewLine$()
+		NEXT
+
+		IF LEN(Compiler.Globals[])>0
+			//init globals, default
+			Text$ = Text$ + "var "
+			Text$ = Text$ + JSVariDef$(Compiler.Globals[], TRUE)
+			//init statics, default
+			Text$ = Text$ + ";"+NewLine$()
+		ENDIF
+
+		IF TRIM$(StaticText$) <> ""
+			Text$ = Text$ + "// set default statics:"+NewLine$()
+			Text$ = StaticDefText$ + Text$
+			IndentUp()
+			Text$ = Text$ + "window['initStatics'] = function() {"+NewLine$()
+			IndentDown()
+			Text$ = Text$ + StaticText$ + NewLine$()
+			Text$ = Text$ + "}" + NewLine$()
+		ELSE
+			//empty statictext
+			Text$ = Text$ + "window['initStatics'] = function() {}"+NewLine$()
+		ENDIF
+		IF InWebWorker THEN Text$ = Text$ + "initStatics = window['initStatics'];"+NewLine$()
+
+		Text$ = Text$ + "for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();"+NewLine$()
+		?IFDEF FOR_IDE
+		Text$ = Text$ + "delete preInitFuncs;"+NewLine$()
+		?ENDIF
+
+		RETURN Text$
+	CATCH Err$
+	FINALLY
+ENDFUNCTION
+
+
+FUNCTION JSGenerate$: expr AS Expr
+	?IFDEF DEBUG
+	STDOUT "Generating expression: '"+REPLACE$(Compiler.Tokens[expr.tokID].Text$,"\n","")+"' in Line "+Compiler.Tokens[expr.tokID].LineContent$+" type: "+expr.Typ+"\n"
+	?ENDIF
+
+	Compiler.currentPosi = expr.tokID
+	LOCAL Text$ = ""
+	SELECT expr.Typ
+		CASE EXPR_IS_SCOPE
+			LOCAL oScp = CurrentScope
+			LOCAL oFunc = CurrentFunc
+			LOCAL oLabelDef$ = LabelDef$
+			LOCAL oIsInGoto% = IsInGoto
+			LOCAL IsFunc% = FALSE
+			LOCAL mngGoto% = FALSE
+			LOCAL IsStackPusher% = FALSE
+			IF (expr.ScpTyp = SCOPE_IS_FUNC OR expr.ScpTyp = SCOPE_IS_MAIN) THEN IsStackPusher = TRUE
+
+			IF ScopeHasGoto(expr) AND IsStackPusher
+				mngGoto = TRUE
+				IsInGoto = TRUE
+			ENDIF
+
+
+			IF expr.ScpTyp = SCOPE_IS_FUNC// OR expr.ScpTyp = FUNC_IS_METHOD TODO: schauen ob da nicht was anderes hingehört
+				LOCAL i%
+				FOREACH Func IN Compiler.Funcs[]
+					IF Func.Scp = expr.ID
+						CurrentFunc = i
+						IsFunc = TRUE
+						//STDOUT "N: "+Func.Name$+"\n"
+						//KEYWAIT
+						BREAK
+					ENDIF
+					INC i
+				NEXT
+			ENDIF
+			CurrentScope = expr.ID
+
+
+
+
+			IF NOT IsInGoto OR mngGoto
+				IndentUp()
+			ELSE
+				//IndentDown()
+			ENDIF
+			Text$ = Text$ + NewLine$()
+			//Text$ = Text$ + "{"+NewLine$()
+
+			//scope enter
+			IF DEBUGMODE AND IsStackPusher
+				Text$ = Text$ + "stackPush(\""+ScopeName$(expr)+"\", __debugInfo);"+NewLine$()
+				IndentUp()
+				Text$ = Text$ + "try {"+NewLine$()
+			ENDIF
+
+
+			//nun ein kleiner workaround: die parameter durchschauen, sobald einer ein [0] (=ref) hat, und es ungewollt ist, das derefernzieren!
+			//Ist aber nur bei als Prototype verwendete Funktionen notwendig, denn die anderen werden beim Parameteraufruf dereferenziert.
+			IF IsFunc AND Compiler.Funcs[CurrentFunc].UsedAsPrototype%
+				FOREACH P IN Compiler.Funcs[CurrentFunc].Params[]
+					//parameter!
+					IF Compiler.Varis[P].ref = FALSE
+						//KEIN PARAMETER :O
+						Text$ = Text$ + Compiler.Varis[P].Name$ + " = unref("+Compiler.Varis[P].Name$+");"+NewLine$()
+					ELSE
+//						Text$ = Text$ + Compiler.Varis[P].Name$ + " = ref("+Compiler.Varis[P].Name$+");"+NewLine$()
+					ENDIF
+				NEXT
+			ENDIF
+
+
+			LOCAL Def$ = JSVariDef$(expr.Varis[], FALSE, TRUE)
+			IF TRIM$(Def$) <> ""
+				Text$ = Text$ + "var "
+				Text$ = Text$ + Def$
+				Text$ = Text$ + ";"+NewLine$()
+			ENDIF
+
+			IF CurrentFunc <> -1 AND oFunc = -1
+				LOCAL i%
+				FOREACH Param IN Compiler.Funcs[CurrentFunc].Params[]
+					IF Compiler.Varis[Param].OwnerVari <> -1
+						Text$ = Text$ + "var "+ Compiler.Varis[Compiler.Varis[Param].OwnerVari].Name$ + " = ["+Compiler.Varis[Param].Name$+"]; /* NEWCODEHERE */"+NewLine$()
+						INC i
+					ENDIF
+				NEXT
+			ENDIF
+
+
+			IF mngGoto
+				IndentUp()
+				IndentUp()
+				IndentUp() //damit die generates auf der richtigen ebene sind
+			ENDIF
+			LOCAL ERes$[]
+			FOREACH Ex IN expr.Exprs[]
+				LOCAL add$ = JSGenerate$(Exprs[Ex])
+				IF TRIM$(add$)<>""
+					DIMPUSH ERes$[], Ex
+					DIMPUSH ERes$[], add$
+				ENDIF
+			NEXT
+			IF mngGoto
+				IndentDown()
+				IndentDown()
+				IndentDown()
+
+
+				Text$ = Text$ + "var __pc = "
+				IF LEN(ERes$[]) > 0
+					Text$ = Text$ +ERes$[0]
+				ELSE
+					Text$ = Text$ + "0"
+				ENDIF
+				Text$ = Text$ + ";"+NewLine$()
+
+				IndentUp()
+				Text$ = Text$ + "while(__pc >= 0) {"+NewLine$()
+				IndentUp()
+				Text$ = Text$ + "switch(__pc) {"+NewLine$()
+			ENDIF
+
+			LOCAL FirstText$ = ""
+			FOR i = 0 TO LEN(ERes$[])-1 STEP 2
+				LOCAL add$ = ERes$[i+1]
+				LOCAL Ex% = ERes$[i]
+				ALIAS ExEx AS Exprs[Ex]
+				LOCAL HasCase% = FALSE
+				IF (mngGoto OR IsInGoto) AND (i = 0 OR ExEx.Typ = EXPR_IS_GOTO OR ExEx.Typ = EXPR_IS_LABEL OR ExEx.Typ = EXPR_IS_IF OR ExEx.Typ = EXPR_IS_WHILE OR ExEx.Typ = EXPR_IS_FOR OR ExEx.Typ = EXPR_IS_FOREACH OR ExEx.Typ = EXPR_IS_REPEAT OR ExEx.Typ = EXPR_IS_BREAK OR ExEx.Typ = EXPR_IS_CONTINUE OR i = LEN(ERes$[])-1)
+					IndentUp()
+					HasCase = TRUE
+					Text$ = Text$ + "case "+Ex+":"+NewLine$()
+				ENDIF
+				IF DEBUGMODE
+					LOCAL Add$ = "__debugInfo = \""+Compiler.Tokens[Exprs[Ex].tokID].Line+":"+Compiler.Tokens[Exprs[Ex].tokID].Path$+"\";"
+					Text$ = Text$ + Add$ +NewLine$()
+					IF FirstText$ = "" THEN FirstText$ = Add$
+				ENDIF
+
+				Text$ = Text$ + add$
+				Text$ = Text$ + ";"+NewLine$()
+				IF HasCase
+					IndentDown()
+					Text$ = Text$ + NewLine$()
+				ENDIF
+			NEXT
+
+			IF FirstText$ <> ""
+				Text$ = Text$ + FirstText$
+			ENDIF
+
+			IF mngGoto
+				Text$ = Text$ + "__pc = -1; break;"+NewLine$()
+				IndentUp()
+				Text$ = Text$ + "default:"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + "throwError(\"Gotocounter exception pc: \"+__pc);"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "}"
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "}"
+
+
+				Text$ = "var __labels = {"+JSRemoveLast$(LabelDef$,", ")+"};"+NewLine$() + Text$
+				Text$ = NewLine$() + Text$
+			ENDIF
+			IF NOT IsInGoto OR mngGoto THEN Text$ = "{" + Text$ //öffnende klammer rein
+
+			//Scope leave
+			IF DEBUGMODE AND IsStackPusher
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "} catch(ex) {"
+				IndentUp()
+				Text$ = Text$ + NewLine$() + "if (isKnownException(ex)) throw ex;" //Wenn bekannt, weiter schießen
+				Text$ = Text$ + NewLine$() + "alert(formatError(ex));" //unbekannt, also ausgeben
+				Text$ = Text$ + NewLine$() + "END();"
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "} finally {"
+				IndentUp()
+				Text$ = Text$ + NewLine$()+"stackPop();"
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "}" + NewLine$()
+			ENDIF
+
+			IF NOT IsInGoto OR mngGoto
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				Text$ = Text$ + "}"
+			ELSE
+				//IndentUp()
+				Text$ = Text$ + NewLine$()
+			ENDIF
+
+
+			CurrentScope = oScp
+			CurrentFunc = oFunc
+
+			IF mngGoto
+				LabelDef$ = oLabelDef$
+				IsInGoto = oIsInGoto
+			ENDIF
+		CASE EXPR_IS_OPERATOR
+			LOCAL Sym$ = Operators[expr.Op].Sym$
+			LOCAL HasToBeInt = FALSE
+			SELECT Sym$
+				CASE "="
+					Sym$ = "=="
+					HasToBeInt = TRUE
+				CASE "<>"
+					Sym$ = "!="
+					HasToBeInt = TRUE
+				CASE "OR"
+					Sym$ = "||"
+					HasToBeInt = TRUE
+				CASE "AND"
+					Sym$ = "&&"
+					HasToBeInt = TRUE
+				CASE "<"
+					HasToBeInt = TRUE
+				CASE ">"
+					HasToBeInt = TRUE
+				CASE ">="
+					HasToBeInt = TRUE
+				CASE "<="
+					HasToBeInt = TRUE
+				//...
+			ENDSELECT
+			IF HasToBeInt
+				Text$ = Text$ + "(((" + JSGenerate$(Exprs[expr.Left]) + ") " + Sym$ + " (" + JSGenerate$(Exprs[expr.Right]) + ")) ? 1 : 0)"
+			ELSE
+				LOCAL l$ = JSGenerate$(Exprs[expr.Left])
+				IF Sym$ = "-" AND l$ = "0"
+					Text$ = Text$ + "-("+JSGenerate$(Exprs[expr.Right])+")"
+				ELSE
+					Text$ = Text$ + "((" + l$  + ") " + Sym$ + " (" + JSGenerate$(Exprs[expr.Right]) + "))"
+				ENDIF
+			ENDIF
+
+			//Wemm Division und int, dann nach int casten
+			IF Sym$="/" AND Exprs[expr.Left].datatype.Name$ = "int" AND Exprs[expr.Right].datatype.Name$="int"
+				Text$ = "CAST2INT("+Text$+")"
+			ENDIF
+		CASE EXPR_IS_INT
+			Text$ = expr.intval
+		CASE EXPR_IS_FLOAT
+			Text$ = expr.floatval
+		CASE EXPR_IS_STR
+			Text$ = expr.strval$
+		CASE EXPR_IS_FUNCCALL
+			IF Compiler.Funcs[expr.func].Typ = FUNC_IS_METHOD
+				LOCAL P% = expr.Params[-1]
+				ALIAS Ex AS Exprs[P]
+				IF Ex.Typ = EXPR_IS_SUPER
+					//Suche die Funktion
+					IF NOT IsType(Ex.datatype.Name$) THEN Error("Internal error (Unable to find '"+Ex.datatype.Name$+"')", CODELINE(), CODEFILE$())
+
+					LOCAL Found% = FALSE
+					LOCAL typId% = LastType.ID
+					WHILE typId <> -1
+						FOREACH Mth IN Compiler.Types[typId].Methods[]
+							IF Compiler.Funcs[Mth].OName$ = Compiler.Funcs[expr.func].OName$
+								LOCAL Params$ = JSDoParameter$(expr, expr.func, FALSE)
+								IF Params$ <> "" THEN Params$ = Params$ + ", "
+								Text$ = Text$ + Compiler.Funcs[Mth].Name$+"("+Params$+"param4_self)"
+								GOTO Exit
+							ENDIF
+						NEXT
+						typId = Compiler.Types[typId].Extending
+					WEND
+					Exit:
+
+				ELSE
+					Text$ = Text$ + "("+JSGenerate$(Exprs[P])+")."+Compiler.Funcs[expr.func].OName$+JSDoParameter$(expr, expr.func)
+				ENDIF
+
+			ELSE
+				Text$ = Text$ + Compiler.Funcs[expr.func].Name$+JSDoParameter$(expr, expr.func)
+			ENDIF
+		CASE EXPR_IS_PROTOCALL
+			// TODO: Here I need a proper function...
+			Text$ = Text$ + JSGenerate$(Exprs[expr.expr])+JSDoParameter$(expr, -1)
+		CASE EXPR_IS_VARI
+			Text$ = Text$ + Compiler.Varis[expr.vari].Name$
+			IF Compiler.Varis[expr.vari].ref THEN Text$ = Text$ + "[0]"
+		CASE EXPR_IS_ARRAY
+
+			//IF Compiler.Varis[expr.vari].ref THEN Text$ = Text$ + "[0]"
+			Text$ = Text$ +  JSGenerate$(Exprs[expr.array])
+			IF LEN(expr.dims[]) <> 0
+				Text$ = Text$ + ".arrAccess("
+				LOCAL s% = FALSE
+				LOCAL Add$ = ""
+				FOREACH d IN expr.dims[]
+					IF s THEN Text$ = Text$ + ", "
+					Text$ = Text$ + JSGenerate$(Exprs[d])
+
+					s = TRUE
+					LOCAL v% = GetVariable(expr.array, FALSE) //vorher: d
+					//STDOUT "V:::: "+v+" "+d+" "+Exprs[d].Typ+"\n"
+					IF v <> -1 AND Compiler.Varis[v].ref
+						Add$ = "[0]"
+					ENDIF
+				NEXT
+				Text$ = Text$ + ").values[tmpPositionCache]"+Add$
+				//IF Compiler.Varis[expr.vari].ref THEN Text$ = Text$ + "[0]"
+			ENDIF
+		CASE EXPR_IS_ASSIGN
+			Text$ = Text$ + JSGenerate$(Exprs[expr.vari]) +" = "
+			//LOCAL A$ = "tryClone("+JSGenerate$(Exprs[expr.Right])+")"
+			Text$ = Text$ + JSGenerate$(Exprs[expr.Right])
+			IF Exprs[expr.vari].datatype.IsArray OR IsType(Exprs[expr.vari].datatype.Name$)
+				IF Exprs[expr.Right].Typ <> EXPR_IS_DEFVAL AND Exprs[expr.Right].Typ <> EXPR_IS_DIMASEXPR
+					Text$ = Text$ + ".clone(/* In Assign */)"
+				ENDIF
+			ENDIF
+
+			//Text$ = Text$ + A$
+		CASE EXPR_IS_DIM
+			LOCAL v% = GetVariable(expr.array, FALSE)
+			LOCAL hasRef% = FALSE
+			IF v = -1 OR Compiler.Varis[v].ref THEN hasRef = TRUE
+
+			Text$ = Text$ + "DIM("+JSTryUnref$(expr.array)+", ["
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + JSGenerate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "], "+JSGetDefaultValue$(Exprs[expr.array].datatype, hasRef, TRUE)+")"
+
+		CASE EXPR_IS_REDIM
+			LOCAL v% = GetVariable(expr.array, FALSE)
+			LOCAL hasRef% = FALSE
+			IF v = -1 OR Compiler.Varis[v].ref THEN hasRef = TRUE
+
+			Text$ = Text$ + "REDIM("+JSTryUnref$(expr.array)+", ["
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + JSGenerate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "], "+JSGetDefaultValue$(Exprs[expr.array].datatype, hasRef, TRUE)+" )"
+		CASE EXPR_IS_CAST2INT
+			//Ist es wirklich notwendig?
+			LOCAL cast% = TRUE
+			IF Exprs[expr.expr].Typ = EXPR_IS_FLOAT
+				cast = FALSE
+				//ist da drinnen wirklich eine float?
+				LOCAL f$ = Exprs[expr.expr].floatval+""
+				FOR i = 0 TO LEN(f$)-1
+					IF ASC(f$, i) = CHR$(".")
+						//da ist ein . drinnen
+						cast = TRUE
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+			IF cast
+				//Den vorigen Datentyp anschauen
+				SELECT Exprs[expr.expr].datatype.Name$
+					CASE "int"
+						//Nichts
+						Text$ = Text$ +JSGenerate$(Exprs[expr.expr])
+					CASE "float"
+						Text$ = Text$ + "~~("+JSGenerate$(Exprs[expr.expr])+")" //Nach Int
+					CASE "string"
+						Text$ = Text$ + "INT2STR("+JSGenerate$(Exprs[expr.expr])+")"
+					DEFAULT
+						Text$ = Text$ + "CAST2INT(" + JSGenerate$(Exprs[expr.expr])+")"
+				ENDSELECT
+			ELSE
+				Text$ = Text$ + JSGenerate$(Exprs[expr.expr])
+			ENDIF
+		CASE EXPR_IS_CAST2FLOAT
+			//Ist es wirklich notwendig?
+			IF Exprs[expr.expr].Typ = EXPR_IS_INT
+				Text$ = Text$ + JSGenerate$(Exprs[expr.expr])
+			ELSE
+				SELECT Exprs[expr.expr].datatype.Name$
+					CASE "int"
+						//Nichts
+						Text$ = Text$ +JSGenerate$(Exprs[expr.expr])
+					CASE "float"
+						//nichts
+						Text$ = Text$ +JSGenerate$(Exprs[expr.expr])
+					CASE "string"
+						Text$ = Text$ + "FLOAT2STR("+JSGenerate$(Exprs[expr.expr])+")"
+					DEFAULT
+						Text$ = Text$ + "CAST2FLOAT(" + JSGenerate$(Exprs[expr.expr])+")"
+				ENDSELECT
+			ENDIF
+		CASE EXPR_IS_CAST2STRING
+			Text$ = Text$ + "CAST2STRING("+JSGenerate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_ACCESS
+			Text$ = Text$ + JSGenerate$(Exprs[expr.expr]) + "." + JSGenerate$(Exprs[expr.nextExpr])
+		CASE EXPR_IS_RETURN
+			LOCAL F% = FALSE
+			SELECT Exprs[expr.expr].Typ
+				CASE EXPR_IS_INT
+					F = TRUE
+				CASE EXPR_IS_FLOAT
+					F = TRUE
+				CASE EXPR_IS_STR
+					F = TRUE
+			ENDSELECT
+
+			IF F
+				Text$ = Text$ + "return "+JSTryUnref$(expr.expr)
+			ELSE
+				Text$ = Text$ + "return tryClone(" + JSTryUnref$(expr.expr) + ")"
+			ENDIF
+			//IF Exprs[expr.expr].datatype.IsArray OR IsType(Exprs[expr.expr].datatype.Name$)
+			//	IF Exprs[expr.expr].Typ <> EXPR_IS_DEFVAL AND Exprs[expr.expr].Typ <> EXPR_IS_DIMASEXPR
+			//		Text$ = Text$ + ".clone(/* In return */)"
+			//	ENDIF
+			//ENDIF
+		CASE EXPR_IS_FUNCDATA
+			//Bekomme die Funktion
+			LOCAL Name$ = REPLACE$(expr.datatype.Name$, "$", "_Str")
+			LOCAL Found%
+			FOREACH Func IN Compiler.Funcs[]
+				IF Func.OName$ = Name$
+					Text$ = Text$ + Func.Name$ //Um Prototypes mit Strings zu erlauben
+					Found = TRUE
+					BREAK
+				ENDIF
+			NEXT
+			IF NOT Found THEN Text$ = Text$ + Name$
+		CASE EXPR_IS_IF
+			IF IsInGoto
+				LOCAL dummy% = LastDummyID
+				INC LastDummyID
+
+				FOR i = 0 TO LEN(expr.Conditions[]) - 1
+					Text$ = Text$ + "if (!("+ConditionJSGenerate$(Exprs[expr.Conditions[i]])+")) { __pc = "+expr.Conditions[i]+"; break; }"+NewLine$() //wegspringen
+
+
+					Text$ = Text$ + JSGenerate$(Exprs[expr.Scopes[i]])
+					//wenn else vorhanden, dann springe danach hin!
+					IF expr.elseScope <> -1
+						//omg wegspringen!
+						Text$ = Text$ + "__pc = "+dummy+";"+NewLine$()
+						Text$ = Text$ + "break;"+NewLine$()
+					ENDIF
+					IndentDown()
+					Text$ = Text$ + NewLine$()
+					IndentUp()
+					Text$ = Text$ + "case "+expr.Conditions[i]+": //dummy jumper1"+NewLine$() //omg ich "missbrauche" die id der condition als target, falls das ganze übersprungen werden muss
+				NEXT
+
+				IF expr.elseScope <> -1
+					Text$ = Text$ + JSGenerate$(Exprs[expr.elseScope])
+
+					IndentDown()
+					Text$ = Text$ + NewLine$()
+					IndentUp()
+					Text$ = Text$ + "case "+dummy+": //dummy jumper2"+NewLine$() //dummy als target
+				ENDIF
+
+			ELSE //zum glück normal
+				//Versuche nun daraus ein Switch zu machen!
+				LOCAL IsSwitch% = FALSE
+//				LOCAL Conds$[]
+//				LOCAL TryLeft$
+//				FOR i = 0 TO LEN(expr.Conditions[]) - 1
+//					ALIAS Ex AS Exprs[expr.Conditions[i]]
+//					IF Ex.Typ = EXPR_IS_OPERATOR
+//						IF i = 0
+//							TryLeft$ = JSGenerate$(Exprs[Ex.Left])
+//						ELSE
+//							IF TryLeft$ <> ""
+//								IF JSGenerate$(Exprs[Ex.Left])= TryLeft$
+//									TRY
+//										CalculateTree(Exprs[Ex.Right]) //Ist es konstant?
+//										DIMPUSH Conds$[], JSGenerate$(Exprs[Ex.Right])
+//									CATCH Ex$
+//										IsSwitch = FALSE
+//										BREAK
+//									FINALLY
+//								ELSE
+//									IsSwitch = FALSE
+//									BREAK
+//								ENDIF
+//							ELSE
+//								IsSwitch = FALSE
+//								BREAK
+//							ENDIF
+//						ENDIF
+//					ELSE
+//						IsSwitch = FALSE
+//					ENDIF
+//				NEXT
+
+
+
+				IF IsSwitch
+//					IndentUp()
+//					Text$ = Text$ + "switch("+TryLeft$+") {"+NewLine$()
+//					FOR i = 0 TO LEN(expr.Conditions[]) - 1
+//						Text$ = Text$ + "case "+Conds$[i]+":" + JSGenerate$(Exprs[expr.Scopes[i]])
+//					NEXT
+//					IF expr.elseScope <> -1
+//						Text$ = Text$ + " default "+JSGenerate$(Exprs[expr.elseScope])
+//					ENDIF
+//					IndentDown()
+//					Text$ = Text$ + NewLine$()
+//					Text$ = Text$ + "}"
+				ELSE
+					FOR i = 0 TO LEN(expr.Conditions[]) - 1
+						IF i = 0
+							Text$ = Text$ + "if"
+						ELSE
+							Text$ = Text$ + " else if"
+						ENDIF
+						Text$ = Text$ + " (" + ConditionJSGenerate$(Exprs[expr.Conditions[i]]) + ") "
+						Text$ = Text$ + JSGenerate$(Exprs[expr.Scopes[i]])
+					NEXT
+					IF expr.elseScope <> -1
+						Text$ = Text$ + " else "+JSGenerate$(Exprs[expr.elseScope])
+					ENDIF
+				ENDIF
+			ENDIF
+		CASE EXPR_IS_WHILE
+			IF IsInGoto
+				LOCAL TmpBID% = LoopBreakID
+				LOCAL TmpCID% = LoopContinueID
+				LoopBreakID = LastDummyID
+				LoopContinueID = expr.ID
+				INC LastDummyID
+
+				Text$ = Text$ + "if (!("+ConditionJSGenerate$(Exprs[expr.expr])+")) {__pc = "+LoopBreakID+"; break;}"+NewLine$()
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+				Text$ = Text$ + "__pc = "+expr.ID+"; break; //back jump"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+LoopBreakID+":"+NewLine$() //omg ich "missbrauche" die id der condition als target, falls das ganze übersprungen werden muss
+
+				LoopBreakID = TmpBID
+				LoopContinueID = TmpCID
+			ELSE
+				Text$ = Text$ + "while ("+ConditionJSGenerate$(Exprs[expr.expr])+") "
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+			ENDIF
+		CASE EXPR_IS_REPEAT
+			IF IsInGoto
+				LOCAL TmpBID% = LoopBreakID
+				LOCAL TmpCID% = LoopContinueID
+
+				LoopBreakID = LastDummyID
+				LoopContinueID = expr.ID
+				INC LastDummyID
+
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+				Text$ = Text$ + "if ("+ConditionJSGenerate$(Exprs[expr.expr])+") {__pc = "+LoopBreakID+"; break;}"+NewLine$()
+				Text$ = Text$ + "__pc = "+expr.ID+"; break; //back jump"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+LoopBreakID+": //dummy repeat"+NewLine$() //omg ich "missbrauche" die id der condition als target, falls das ganze übersprungen werden muss
+
+				LoopBreakID = TmpBID
+				LoopContinueID = TmpCID
+			ELSE
+				Text$ = Text$ + "do "
+				Text$ = Text$ + ConditionJSGenerate$(Exprs[expr.Scp])
+				Text$ = Text$ + " while (!("+JSGenerate$(Exprs[expr.expr])+"))"
+			ENDIF
+		CASE EXPR_IS_FOR
+			LOCAL CheckComm$
+			IF expr.hasTo
+				CheckComm$ = "toCheck"
+			ELSE
+				CheckComm$ = "untilCheck"
+			ENDIF
+			IF IsInGoto
+				LOCAL TmpBID% = LoopBreakID
+				LOCAL TmpCID% = LoopContinueID
+
+				LoopBreakID = expr.stepExpr
+				LoopContinueID = expr.varExpr
+
+				Text$ = Text$ + JSGenerate$(Exprs[expr.varExpr])+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+expr.varExpr+": //dummy for1"+NewLine$() //omg ich "missbrauche" die id der condition als target, falls das ganze übersprungen werden muss
+
+
+				Text$ = Text$ + "if (!"+CheckComm$+"("+JSGenerate$(Exprs[Exprs[expr.varExpr].vari])+", "+JSGenerate$(Exprs[expr.toExpr])+", "+JSGenerate$(Exprs[expr.stepExpr])+")) {__pc = "+expr.stepExpr+"; break;}"+NewLine$()
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+				Text$ = Text$ + JSGenerate$(Exprs[Exprs[expr.varExpr].vari])+" += "+JSGenerate$(Exprs[expr.stepExpr])+";"+NewLine$()
+				Text$ = Text$ + "__pc = "+expr.varExpr+"; break; //back jump"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+expr.stepExpr+": //dummy for"+NewLine$() //omg ich "missbrauche" die id der condition als target, falls das ganze übersprungen werden muss
+
+				LoopBreakID = TmpBID
+				LoopContinueID = TmpCID
+			ELSE
+				Text$ = Text$ + "for ("+JSGenerate$(Exprs[expr.varExpr])+";"+CheckComm$+"("+JSGenerate$(Exprs[Exprs[expr.varExpr].vari])+", "+JSGenerate$(Exprs[expr.toExpr])+", "+JSGenerate$(Exprs[expr.stepExpr])+");"+JSGenerate$(Exprs[Exprs[expr.varExpr].vari])+" += "+JSGenerate$(Exprs[expr.stepExpr])+") "
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+			ENDIF
+		CASE EXPR_IS_FOREACH
+			ForEachCounter = expr.ID
+			LOCAL c% = ForEachCounter
+			Text$ = Text$ + "var forEachSaver"+c+" = "+JSGenerate$(Exprs[expr.inExpr])+";"+NewLine$()
+			LOCAL varName$ = JSRemoveLast$(JSGenerate$(Exprs[expr.varExpr]))
+			LOCAL StartText$ = "var forEachCounter"+c+" = 0"
+			LOCAL CondText$ = "forEachCounter"+c+" < forEachSaver"+c+".values.length"
+			LOCAL IncText$ = "forEachCounter"+c+"++"
+			LOCAL EachBegin$ = "var " + varName$ + " = forEachSaver"+c+".values[forEachCounter"+c+"];"+NewLine$()
+			LOCAL EachEnd$ = "forEachSaver"+c+".values[forEachCounter"+c+"] = " + varName$ + ";"+NewLine$()
+			IF IsInGoto
+				LOCAL TmpBID% = LoopBreakID
+				LOCAL TmpCID% = LoopContinueID
+
+				LoopBreakID = expr.varExpr
+				LoopContinueID = expr.inExpr
+
+				Text$ = Text$ + StartText$+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+expr.inExpr+": //dummy for1"+NewLine$()
+
+
+				Text$ = Text$ + "if (!("+CondText$+")) {__pc = "+expr.varExpr+"; break;}"+NewLine$()
+				Text$ = Text$ + EachBegin$+NewLine$()
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+				Text$ = Text$ + EachEnd$+NewLine$()
+				Text$ = Text$ + IncText$+NewLine$()
+				Text$ = Text$ + "__pc = "+expr.inExpr+"; break; //back jump"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + NewLine$()
+				IndentUp()
+				Text$ = Text$ + "case "+expr.varExpr+": //dummy for"+NewLine$()
+
+				LoopBreakID = TmpBID
+				LoopContinueID = TmpCID
+			ELSE
+				IndentUp()
+				Text$ = Text$ + "for("+StartText$+" ; "+CondText$+" ; "+IncText$+") {"+NewLine$()
+				Text$ = Text$ + EachBegin$
+				Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])+NewLine$()
+				Text$ = Text$ + EachEnd$
+				IndentDown()
+				Text$ = Text$ + NewLine$() + "}"
+			ENDIF
+		CASE EXPR_IS_CONTINUE
+			IF IsInGoto
+				Text$ = Text$ + "__pc = "+LoopContinueID+"; break"
+			ELSE
+				Text$ = Text$ + "continue"
+			ENDIF
+		CASE EXPR_IS_BREAK
+			IF IsInGoto
+				Text$ = Text$ + "__pc = "+LoopBreakID+"; break"
+			ELSE
+				Text$ = Text$ + "break"
+			ENDIF
+		CASE EXPR_IS_TRY
+			LOCAL oIsInGoto% = IsInGoto
+			IsInGoto = FALSE
+
+			Text$ = Text$ + "try "
+			Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
+			IndentUp()
+			Text$ = Text$ + " catch ("+Compiler.Varis[expr.vari].Name$+") {"+NewLine$()
+			Text$ = Text$ + "if ("+Compiler.Varis[expr.vari].Name$+" instanceof GLBException) "+Compiler.Varis[expr.vari].Name$+" = "+Compiler.Varis[expr.vari].Name$+".getText(); else throwError("+Compiler.Varis[expr.vari].Name$+");"
+			Text$ = Text$ + JSGenerate$(Exprs[expr.catchScp])
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "}"
+
+
+			IsInGoto = oIsInGoto
+		CASE EXPR_IS_THROW
+			Text$ = Text$ + "throw new GLBException("+JSGenerate$(Exprs[expr.expr])+", \""+Compiler.Tokens[expr.tokID].Path$+"\", "+Compiler.Tokens[expr.tokID].Line+")";
+		CASE EXPR_IS_RESTORE
+			Text$ = Text$ + "RESTORE(datablock_"+expr.Name$+")"
+		CASE EXPR_IS_READ
+			LOCAL i = 0
+			FOREACH R IN expr.Reads[]
+				Text$ = Text$ + JSGenerate$(Exprs[R])+" = READ()"
+				IF i < LEN(expr.Reads[])-1 THEN Text$ = Text$ + ";"+NewLine$()
+				INC i
+			NEXT
+		CASE EXPR_IS_DEFVAL
+			Text$ = Text$ + JSGetDefaultValue$(expr.datatype,FALSE,FALSE)
+		CASE EXPR_IS_DIMASEXPR
+			Text$ = Text$ + "DIM(new GLBArray(), ["
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + JSGenerate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "], "+JSGetDefaultValue$(expr.datatype, TRUE, TRUE)+")"
+		CASE EXPR_IS_ALIAS
+			Text$ = Text$ + Compiler.Varis[expr.vari].Name$ + " = "
+			IF Exprs[expr.expr].Typ = EXPR_IS_CAST2OBJ
+				Text$ = Text$ + "castobj("+JSRemoveLast$(JSGenerate$(Exprs[Exprs[expr.expr].expr]))+", "+ChangeTypeName$(Exprs[expr.expr].datatype.Name$)+")"
+			ELSE
+				Text$ = Text$ + JSRemoveLast$(JSGenerate$(Exprs[expr.expr]))
+			ENDIF
+
+			Text$ = Text$ + " /* ALIAS */"
+		CASE EXPR_IS_GOTO
+			Text$ = Text$ + "__pc = __labels[\""+expr.Name$+"\"]; break" //pc an den labelcounter anpassen
+		CASE EXPR_IS_LABEL
+			LabelDef$ = LabelDef$ + "\""+expr.Name$+"\": "+expr.ID+", "
+			//Text$ = Text$ + "LABEL(\""+expr.Name$+"\")"
+			Text$ = Text$ + "//label: "+expr.Name$
+		CASE EXPR_IS_INC
+			Text$ = Text$ + JSGenerate$(Exprs[expr.vari])+"+="+JSGenerate$(Exprs[expr.expr])
+		CASE EXPR_IS_DIMPUSH
+			Text$ = Text$ + "DIMPUSH("+JSGenerate$(Exprs[expr.vari])+", "+ JSRemoveLast$(JSGenerate$(Exprs[expr.expr]))+")" //Nicht sicher über RemoveRef
+		CASE EXPR_IS_LEN
+			IF expr.kern <> -1
+				Text$ = Text$ + "KERNLEN("+JSGenerate$(Exprs[expr.expr])+", "+JSGenerate$(Exprs[expr.kern])+")"
+			ELSE
+				Text$ = Text$ + "("+JSGenerate$(Exprs[expr.expr])+").length"
+			ENDIF
+		CASE EXPR_IS_BOUND
+			Text$ = Text$ + "BOUNDS("+JSGenerate$(Exprs[expr.array])+", "+JSGenerate$(Exprs[expr.position])+")"
+		CASE EXPR_IS_DIMDATA
+			Text$ = Text$ + "DIMDATA("+JSGenerate$(Exprs[expr.array])+", ["
+			LOCAL Find%
+			FOREACH Elem IN expr.Exprs[]
+				IF Find THEN Text$ = Text$ + ", "
+
+				Text$ = Text$ + JSGenerate$(Exprs[Elem])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "])"
+		CASE EXPR_IS_DELETE
+			Text$ = Text$ + "//DELETE!!111"+NewLine$()
+			Text$ = Text$ + "forEachSaver"+ForEachCounter+".values[forEachCounter"+ForEachCounter+"] = " + JSGenerate$(Exprs[Exprs[ForEachCounter].varExpr]) + ";"+NewLine$()
+			Text$ = Text$ + "DIMDEL(forEachSaver"+ForEachCounter+", forEachCounter"+ForEachCounter+");"+NewLine$()
+			Text$ = Text$ + "forEachCounter"+ForEachCounter+"--;"+NewLine$()
+			Text$ = Text$ + "continue"
+		CASE EXPR_IS_DIMDEL
+			Text$ = Text$ + "DIMDEL("+JSGenerate$(Exprs[expr.array])+", "+JSGenerate$(Exprs[expr.position])+")"
+		CASE EXPR_IS_NOT
+			Text$ = Text$ + "(("+JSGenerate$(Exprs[expr.expr])+") ? 0 : 1)"
+		CASE EXPR_IS_ADDRESSOF
+			Text$ = Text$ + Compiler.Funcs[expr.func].Name$
+		CASE EXPR_IS_ASSERT
+			LOCAL Cond$ = JSGenerate$(Exprs[expr.expr])
+			Text$ = Text$ + "if (!("+Cond$+")) throwError(\"AssertException "+REPLACE$(Cond$, "\"","'")+"\")"
+		CASE EXPR_IS_DEBUGOUTPUT
+			Text$ = Text$ + "DEBUG("+JSGenerate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_IIF
+			Text$ = Text$ + "(("+JSGenerate$(Exprs[expr.Conditions[0]])+") ? ("+JSGenerate$(Exprs[expr.Scopes[0]])+") : (" + JSGenerate$(Exprs[expr.elseScope]) + "))"
+		CASE EXPR_IS_REQUIRE
+			Text$ = Text$ + "//REQUIRE: "+expr.Name$+"\n"
+			Text$ = Text$ + expr.Content$+NewLine$()
+			Text$ = Text$ + "//ENDREQUIRE: "+expr.Name$+NewLine$()
+		CASE EXPR_IS_SUPER
+			LOCAL Found% = FALSE
+			LOCAL Scp% = CurrentScope
+			WHILE Scp <> -1 AND (NOT (Exprs[Scp].ScpTyp = SCOPE_IS_FUNC OR Exprs[Scp].ScpTyp = SCOPE_IS_MAIN)) AND NOT Found
+				LOCAL Varis%[]
+				GetVaris(Varis[], Scp)
+				FOREACH V IN Varis[]
+					ALIAS Var AS Compiler.Varis[V]
+					IF Var.Name$ = "param4_self_"+Var.ID //still some dirty shit....
+						Text$ = Text$ + Var.Name$
+						Found = TRUE
+						BREAK
+					ENDIF
+				NEXT
+				Scp = Exprs[Scp].SuperScope
+			WEND
+			IF NOT Found THEN Error("Self not found for super", CODELINE(), CODEFILE$())
+			//Error("Internal error (super is not allowed to compile in JavaScript)", CODELINE(), CODEFILE$())
+		CASE EXPR_IS_CAST2OBJ
+			Text$ = Text$ + "castobj("+JSGenerate$(Exprs[expr.expr])+", "+ChangeTypeName$(expr.datatype.Name$)+")"
+		CASE EXPR_IS_EMPTY
+		CASE EXPR_IS_DEBUG
+			Error("Invalid Expression", CODELINE(), CODEFILE$())
+		DEFAULT
+			Error("Unknown expression type: "+expr.Typ, CODELINE(), CODEFILE$())
+	ENDSELECT
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION JSTryUnref$: E%
+	IF JSDoesUnref(E)
+		RETURN "unref("+JSGenerate$(Exprs[E])+")"
+	ELSE
+		RETURN JSGenerate$(Exprs[E])
+	ENDIF
+ENDFUNCTION
+
+FUNCTION JSDoesUnref%: Expr%
+	LOCAL unref% = TRUE
+	IF NOT Exprs[Expr].datatype.IsArray
+		//Rückgabewert darf auf keinen Fall Array sein!
+
+		SELECT Exprs[Expr].Typ
+			CASE EXPR_IS_INT
+				unref = FALSE
+			CASE EXPR_IS_FLOAT
+				unref = FALSE
+			CASE EXPR_IS_STR
+				unref = FALSE
+			CASE EXPR_IS_CAST2INT
+				unref = JSDoesUnref(Exprs[Expr].expr)
+			CASE EXPR_IS_CAST2FLOAT
+				unref = JSDoesUnref(Exprs[Expr].expr)
+			CASE EXPR_IS_CAST2STRING
+				unref = JSDoesUnref(Exprs[Expr].expr)
+			CASE EXPR_IS_OPERATOR
+				unref = FALSE //not sure about this...
+			CASE EXPR_IS_FUNCCALL
+				unref = FALSE //funccalls sind immer unref't, weil bei jedem Return ein tryClone und unref gemacht wird!
+			CASE EXPR_IS_PROTOCALL
+				unref = FALSE //protocalls auch
+			CASE EXPR_IS_BOUND
+				unref = FALSE
+			CASE EXPR_IS_LEN
+				unref = FALSE
+			DEFAULT
+				LOCAL v% = GetVariable(Expr, FALSE)
+				IF v <> -1
+					//DANGEROUS!!!
+					IF NOT Compiler.Varis[v].ref
+						unref = FALSE
+					ENDIF
+				ENDIF
+		ENDSELECT
+	ENDIF
+	RETURN unref
+ENDFUNCTION
+
+FUNCTION JSDoParameter$: expr AS Expr, func%, DoParam% = TRUE
+	LOCAL Text$
+	IF DoParam THEN Text$= "("
+	LOCAL i = 0
+
+
+	FOREACH param IN expr.Params[]
+		IF func <> -1 AND Compiler.Funcs[func].Typ = FUNC_IS_METHOD AND i = LEN(expr.Params[])-1 THEN BREAK
+		IF i THEN Text$ = Text$ + ", "
+		//schauen ob Nativ
+		//Compiler.Funcs[CurrentFunc].Params[]
+		IF func <> -1 AND NOT Compiler.Funcs[func].UsedAsPrototype% AND Compiler.Varis[Compiler.Funcs[func].Params[i]].ref = FALSE //Compiler.Varis[GetVariable(Compiler.Funcs[func].Params[i], FALSE)].ref = FALSE
+			Text$ = Text$ + JSTryUnref$(param) //"unref("+JSGenerate$(Exprs[param])+")"
+		ELSE
+			Text$ = Text$ + JSRemoveLast$(JSGenerate$(Exprs[param]))
+		ENDIF
+
+		INC i
+	NEXT
+	IF DoParam THEN Text$ = Text$ + ")"
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION JSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE
+	LOCAL Text$ = ""
+	LOCAL Find = FALSE
+	FOREACH Var IN Varis[]
+		IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND (NoStatic = FALSE OR Compiler.Varis[Var].Typ <> VARI_IS_STATIC) AND JSShouldRedeclare(Var)
+			IF Find THEN Text$ = Text$ + ", "
+			Text$ = Text$ + Compiler.Varis[Var].Name$ + " = "
+			IF Compiler.Varis[Var].PreDef <> -1 AND (ForceDefault = FALSE OR Compiler.Varis[Var].Typ = VARI_IS_CONST)
+				Text$ = Text$ + JSGenerate$(Exprs[Compiler.Varis[Var].PreDef])
+			ELSE
+				Text$ = Text$ + JSGetDefaultValue$(Compiler.Varis[Var].datatype,Compiler.Varis[Var].ref,FALSE)
+			ENDIF
+			Find = TRUE
+		ENDIF
+	NEXT
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION ConditionJSGenerate$: expr AS Expr
+	IF expr.Typ = EXPR_IS_CAST2FLOAT
+		RETURN JSGenerate$(Exprs[expr.expr])
+	ELSE
+		RETURN JSGenerate$(expr)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION JSShouldRedeclare%: Var%
+	IF CurrentFunc <> -1 // AND Compiler.Varis[Var].Typ = VARI_IS_LOCAL
+		//schau ma mal
+		FOREACH P IN Compiler.Funcs[CurrentFunc].CopyParams[]
+			IF P = Var
+				//okay es ist ein parameter in der funktion, also nicht lokal definieren!
+				RETURN FALSE
+			ENDIF
+		NEXT
+	ENDIF
+	RETURN TRUE
+ENDFUNCTION
+
+FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
+	LOCAL RetVal$ = ""
+	IF datatype.IsArray AND IgnoreArray = FALSE
+		RetVal$ = "new GLBArray()"
+	ELSE
+		SELECT datatype.Name$
+			CASE "int"
+				RetVal$ = "0"
+			CASE "float"
+				RetVal$ = "0.0"
+			CASE "string"
+				RetVal$ = "\"\""
+			DEFAULT
+				IF IsType(datatype.Name$)
+					RetVal$ = "new "+LastType.Name$+"()"
+				ELSE
+					RetVal$ = REPLACE$(datatype.Name$, "$", "_Str") //um die $ rauszukriegen
+				ENDIF
+		ENDSELECT
+	ENDIF
+	IF Ref THEN RetVal$ = "["+RetVal$+"]"
+	RETURN RetVal$
+ENDFUNCTION
+
+FUNCTION JSRemoveLast$: Text$, L$ = "[0]"
+	IF LEN(Text$) > LEN(L$) AND RIGHT$(Text$,LEN(L$))=L$ THEN Text$ = LEFT$(Text$,LEN(Text$) - LEN(L$))
+	RETURN Text$
+ENDFUNCTION
+
+?ENDIF
+

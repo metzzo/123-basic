@@ -1,0 +1,18 @@
+folder:/Media
+static:/back.bmp
+static:/ball.bmp
+static:/bat.bmp
+static:/DIR_STRUCTURE
+static:/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+static:/Pong.exe
+static:/pong.wav
+static:/pongtune.mp3
+static:/smalfont.bmp
+var:compileTime=2012-06-12 21:49:53
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

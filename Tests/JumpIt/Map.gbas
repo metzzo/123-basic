@@ -1,0 +1,373 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Sunday, September 25, 2011
+// IDE Version: 10.118
+
+CONSTANT Tilesize = 32
+
+//Spielkarte
+
+TYPE TMap
+	IsSnow%
+	Datas%[]
+	Width%; Height%
+	ScrollX; ScrollY
+	Tileset% //die frames gespeichert
+	TilesetPath$
+	SpikePosition; SpikeDir%
+	SpawnX%; SpawnY%
+	NextMap$ = ""
+	LastPickX%; LastPickY%
+	HasFBO%; IsRenderedFBO%; ScreenID%; SprID%
+
+	FUNCTION InitEmpty: Width%, Height%, Tileset$
+		self.IsSnow = FALSE
+		self.Width = Width
+		self.Height = Height
+
+		self.ScrollX = 0
+		self.ScrollY = 0
+
+		DIM Spits[0]
+		DIM Shits[0]
+		DIM Enemys[0]
+		Player.Init(100,100)
+
+		self.Tileset = GENSPRITE()
+		self.TilesetPath$ = Tileset$
+		LOADANIM Tileset$, self.Tileset, 32, 32
+		IF INSTR(Tileset$,"snowtileset") <> -1 THEN self.IsSnow = TRUE
+
+
+
+		DIM self.Datas[self.Width][self.Height]
+
+		self.HasFBO = PLATFORMINFO$("GLEX:glBindFramebufferEXT")
+		IF self.HasFBO
+			self.SprID = GENSPRITE()
+			self.IsRenderedFBO = 0
+			self.ScreenID = 0
+			LOADSPRITE "", self.SprID
+			CREATESCREEN self.ScreenID, self.SprID, self.Width*Tilesize, self.Height*Tilesize
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Save: File$
+		LOCAL Chn% = GENFILE()
+		IF DOESFILEEXIST(File$) THEN KILLFILE File$
+		IF OPENFILE(Chn, File$, 0) = FALSE THEN END
+
+
+		WRITELINE Chn, self.Width
+		WRITELINE Chn, self.Height
+		WRITELINE Chn, self.TilesetPath$
+		WRITELINE Chn, self.NextMap$
+		FOR y = 0 TO self.Height -1
+			LOCAL Line$ = ""
+			FOR x = 0 TO self.Width -1
+				IF x > 0 THEN Line$ = Line$ + ","
+				LOCAL PositionData% = self.Datas[x][y]
+				FOREACH Enem IN Enemys[]
+					IF INTEGER(Enem.X/Tilesize) = x AND INTEGER((Enem.Y + Enem.Height - 1)/Tilesize) = y
+						SELECT Enem.Typ
+							CASE IS_BIRD
+								PositionData = 8
+							CASE IS_PIG
+								PositionData = 6
+							CASE IS_LLAMA
+								PositionData = 9
+							CASE IS_HUMAN
+								PositionData = 7
+						ENDSELECT
+						BREAK
+					ENDIF
+				NEXT
+
+				Line$ = Line$ + PositionData
+			NEXT
+			WRITELINE Chn, Line$
+		NEXT
+
+		CLOSEFILE Chn
+	ENDFUNCTION
+
+	FUNCTION Init: Name$
+		LOCAL Chn% = GENFILE()
+		LOCAL Line$, Tileset$
+
+		IF OPENFILE(Chn, Name$, 1) = FALSE THEN END
+
+		READLINE Chn, Line$
+		self.Width = INTEGER(Line$)
+
+		READLINE Chn, Line$
+		self.Height = INTEGER(Line$)
+
+		READLINE Chn, Line$
+		Tileset$ = Line$
+
+		READLINE Chn, Line$
+		self.NextMap$ = Line$
+
+		self.InitEmpty(self.Width, self.Height, Tileset$)
+
+		LOCAL x%, y%
+		WHILE ENDOFFILE(Chn) = FALSE
+			READLINE Chn, Line$
+			LOCAL Tiles$[]
+
+			SPLITSTR(Line$, Tiles$[], ",")
+
+
+			x = 0
+			FOREACH tile IN Tiles$[]
+				self.Datas[x][y] = Convert(tile)
+				SELECT self.Datas[x][y]
+					CASE 4
+						Player.X = x*Tilesize
+						Player.Y = y*Tilesize
+						self.SpawnX = Player.X
+						self.SpawnY = Player.Y
+						self.Datas[x][y] = 0
+					CASE 6 TO 9
+						LOCAL Typ
+						SELECT self.Datas[x][y]
+							CASE 6
+								Typ = IS_PIG
+							CASE 7
+								Typ = IS_HUMAN
+							CASE 8
+								Typ = IS_BIRD
+							CASE 9
+								Typ = IS_LLAMA
+						ENDSELECT
+						LOCAL Enemy AS TEnemy
+						Enemy.Init(Typ,x*Tilesize, y*Tilesize)
+						self.Datas[x][y] = 0
+				ENDSELECT
+				INC x
+			NEXT
+
+			INC y
+		WEND
+
+		CLOSEFILE Chn
+	ENDFUNCTION
+
+	FUNCTION Update:
+		IF self.SpikeDir
+			DEC self.SpikePosition, 0.5
+			IF self.SpikePosition <= 0
+				self.SpikePosition = 0
+				self.SpikeDir = FALSE
+			ENDIF
+		ELSE
+			INC self.SpikePosition, 0.5
+			IF self.SpikePosition >= Tilesize
+				self.SpikeDir = TRUE
+				self.SpikePosition = Tilesize
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL TmpScrollX, TmpScrollY
+		TmpScrollX = self.ScrollX; TmpScrollY = self.ScrollY
+
+		IF self.IsRenderedFBO = FALSE AND self.HasFBO
+			USESCREEN self.ScreenID
+			DRAWRECT 0,0,self.Width*Tilesize,self.Height*Tilesize,RGB(255,0,128)
+			self.ScrollX = 0
+			self.ScrollY = 0
+		ENDIF
+
+		IF self.HasFBO = FALSE OR self.IsRenderedFBO = FALSE
+			LOCAL width, height
+			GETSCREENSIZE width, height
+			width = INTEGER(width/Tilesize)+1
+			height = INTEGER(height/Tilesize)+1
+			LOCAL sx = -INTEGER(self.ScrollX/Tilesize)-1
+			LOCAL sy = -INTEGER(self.ScrollY/Tilesize)-1
+
+
+			//alles aus die tiles rendern
+			FOR x =sx TO sx + width
+				FOR y = sy TO sy + height
+					IF x >= 0 AND y >= 0 AND x < self.Width AND y < self.Height
+						IF self.Datas[x][y] <> 1 THEN RenderTile(self.Datas[x][y], x, y, FALSE)
+					ENDIF
+				NEXT
+			NEXT
+
+
+			//tiles rendern
+			STARTPOLY self.Tileset, 2
+			FOR x =sx TO sx + width
+				FOR y = sy TO sy + height
+					IF x >= 0 AND y >= 0 AND x < self.Width AND y < self.Height
+						IF self.Datas[x][y] = 1 THEN RenderTile(self.Datas[x][y], x, y, TRUE)
+					ENDIF
+				NEXT
+			NEXT
+			ENDPOLY
+
+		ENDIF
+
+		IF self.IsRenderedFBO = FALSE AND self.HasFBO
+			USESCREEN -1
+			self.IsRenderedFBO = TRUE
+			self.ScrollX = TmpScrollX
+			self.ScrollY = TmpScrollY
+		ENDIF
+		IF self.IsRenderedFBO
+			DRAWSPRITE self.SprID, self.ScrollX, self.ScrollY
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION RenderTile: Tile%, x, y, IsPoly%
+		IF NOT(x>=0 AND y >=0 AND x < Map.Width AND y <Map.Height) THEN RETURN
+
+		SELECT Tile
+			CASE 1
+				LOCAL Tile%
+				IF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = 0 OR IsCollisionTile(self.Datas[x-1][y]))
+					IF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = (self.Width-1) OR IsCollisionTile(self.Datas[x+1][y]))
+						Tile = 1
+					ELSE
+						Tile = 2
+					ENDIF
+				ELSEIF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = (self.Width-1) OR self.Datas[x+1][y] = 0)
+					Tile = 3
+				ELSEIF y = 0 OR IsCollisionTile(self.Datas[x][y-1])
+					Tile = 1
+				ELSE
+					Tile = 0
+				ENDIF
+
+				IF IsPoly = FALSE
+					DRAWANIM self.Tileset, Tile, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+				ELSE
+					POLYVECTOR x*Tilesize + self.ScrollX			, y*Tilesize + self.ScrollY -1				, Tile*Tilesize			, 0 		, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX + Tilesize	, y*Tilesize + self.ScrollY	-1				, (Tile+1)*Tilesize		, 0			, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX			, y*Tilesize + self.ScrollY + Tilesize -1	, Tile*Tilesize			, Tilesize-1, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX + Tilesize , y*Tilesize + self.ScrollY + Tilesize -1	, (Tile+1)*Tilesize		, Tilesize-1, RGB(255,255,255)
+
+					POLYNEWSTRIP
+				ENDIF
+			CASE 2
+				DRAWSPRITE LadderImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 3
+				DRAWSPRITE SpikeImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY + self.SpikePosition
+			CASE 4
+				//DRAWRECT x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY, Tilesize, Tilesize, RGB(0,255,0)
+			CASE 5
+				DRAWSPRITE TrampolineImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY + 16
+			CASE 10
+				DRAWSPRITE DoorImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 11
+				DRAWSPRITE DynamitImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 12
+				DRAWANIM TriggerImage, 0, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY+Tilesize/2
+			CASE 13
+				DRAWANIM TriggerImage, 1, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY+Tilesize/2
+		ENDSELECT
+	ENDFUNCTION
+
+	//Gibt das tile an der gegebenen Stelle zurück
+	FUNCTION PickTile:  X, Y
+		IF X >= 0 AND Y >= 0 AND X < self.Width*Tilesize AND Y < self.Height*Tilesize
+			//yay es ist in der map!
+			X = INTEGER(X/Tilesize)
+			Y = INTEGER(Y/Tilesize)
+			self.LastPickX = X
+			self.LastPickY = Y
+			RETURN self.Datas[X][Y]
+		ELSE
+			RETURN 0
+		ENDIF
+	ENDFUNCTION
+
+	//entfernt das tile an der position
+	FUNCTION RemoveTile: X, Y
+		IF X >= 0 AND Y>=0 AND X<Map.Width AND Y < Map.Height
+			self.Datas[X][Y] = 0
+			self.IsRenderedFBO = FALSE
+		ENDIF
+	ENDFUNCTION
+
+	//Punktskollision
+	FUNCTION CollisionPoint%: X, Y
+		LOCAL TmpY = Y
+		IF X >= 0 AND Y >= 0 AND X < self.Width*Tilesize AND Y < self.Height*Tilesize
+			//yay es ist in der map!
+			X = INTEGER(X/Tilesize)
+			Y = INTEGER(Y/Tilesize)
+
+			IF IsCollisionTile(self.Datas[X][Y]) = FALSE
+				IF self.Datas[X][Y] = 5 OR self.Datas[X][Y] = 12 OR self.Datas[X][Y] = 13
+					//halbteil!
+					IF MOD(TmpY,32) > 16
+						RETURN TRUE
+					ELSE
+						RETURN FALSE
+					ENDIF
+				ENDIF
+				RETURN TRUE
+			ELSE
+				RETURN FALSE
+			ENDIF
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+
+	//Linienkollision
+	FUNCTION RayCollision: X1, Y1, X2, Y2
+		LOCAL Length = SQR(X1*X1 + Y1*Y1 + X2*X2 + Y2*Y2)
+		LOCAL DeltaX = (X1 - X2)/Length
+		LOCAL DeltaY = (Y1 - Y2)/Length
+		FOR i = 0 TO Length
+			IF CollisionPoint(X1 - DeltaX*i, Y1 - DeltaY*i)
+				RETURN TRUE
+			ENDIF
+		NEXT
+		RETURN FALSE
+	ENDFUNCTION
+
+	//Rechteckskollision
+	FUNCTION Collision%: X, Y, Width, Height
+		FOR XX = X TO X + Width STEP 4
+			FOR YY = Y TO Y + Height STEP 4
+				IF CollisionPoint(XX, YY) THEN RETURN TRUE
+			NEXT
+		NEXT
+
+		//eckpunkte!
+		IF CollisionPoint(X,Y) OR CollisionPoint(X + Width, Y) OR CollisionPoint(X, Y + Height) OR CollisionPoint(X + Width, Y + Height)
+			RETURN TRUE
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+ENDTYPE
+
+FUNCTION IsCollisionTile%: Typ%
+	IF Typ = 0 OR Typ = 2 OR Typ = 3 OR Typ = 10
+		RETURN TRUE
+	ELSE
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+FUNCTION Convert%: Text$
+	SELECT Text$
+		CASE "A"
+			RETURN 10
+		CASE "B"
+			RETURN 11
+		CASE "C"
+			RETURN 12
+		DEFAULT
+			RETURN INTEGER(Text$)
+	ENDSELECT
+ENDFUNCTION

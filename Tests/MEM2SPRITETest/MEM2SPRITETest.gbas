@@ -1,0 +1,78 @@
+// A Tree image
+LOCAL image$ = "" _
+      + "....****...." _
+      + "..**++++**.." _
+      + ".*++++++++*." _
+      + "*++++++++++*" _
+      + "*++++++*+++*" _
+      + "*++++++*+++*" _
+      + "*+++++*++++*" _
+      + ".*++*+++++*." _
+      + "..********.." _
+      + "....####...." _
+      + "....####...." _
+      + "...######..." _
+      + ""
+DIM colors$[4]
+   colors$[0] = "."+INTEGER(0x00000000) // transparent
+   colors$[1] = "+"+INTEGER(0xff00ff80) // green
+   colors$[2] = "*"+INTEGER(0xff008000) // dark green
+   colors$[3] = "#"+INTEGER(0xff0080ff) // orange
+MakeImage(0, 12, image$, colors$[])
+
+
+
+LOCAL pixl%[]
+   SPRITE2MEM(pixl%[], 0) // get the sprite
+
+LOCAL w%, h%
+   GETSPRITESIZE 0, w,h
+MEM2SPRITE(pixl[], 1, w,h) // make a copy to see if it worked
+
+DRAWRECT 0,0,1000,1000,RGB(70,90,255)
+SMOOTHSHADING FALSE
+STRETCHSPRITE 0,  32,32,99,99
+STRETCHSPRITE 1, 232,32,99,99
+SHOWSCREEN
+?IFDEF HTML5
+PUSHLOOP "WaitMouse"
+SUB WaitMouse:
+	IF ANYMOUSE() THEN POPLOOP
+ENDSUB
+?ELSE
+MOUSEWAIT
+?ENDIF
+
+// ------------------------------------------------------------- //
+// -=#  MAKEIMAGE  #=-
+// Make a Sprite from a string
+// usage:
+// img$ =  ".+." _
+//       + "+++" _
+//         ".+."
+// dim col$[2];
+//     col$[0]="."++INTEGER(0xAABBGGRR) // alpha, blue, green, red
+//     col$[1]="+"++INTEGER(0xff00ff80)
+// ------------------------------------------------------------- //
+FUNCTION MakeImage: num%, width%, image$, colors$[]
+LOCAL x%, y%, c$, height%, pix%[]
+   height = LEN(image$)/width
+
+   DIM pix%[width*height]
+
+   FOR y = 0 TO height-1
+      FOR x = 0 TO width-1
+         c$ = MID$(image$, x+y*width, 1)
+         FOR i=0 TO BOUNDS(colors$[], 0)-1
+            IF c$ = MID$(colors$[i], 0,1)
+               pix[x + y*width] = MID$(colors$[i], 1, 9)
+               BREAK
+            ENDIF
+         NEXT
+      NEXT
+   NEXT
+
+   // Make Sprite from the image
+   MEM2SPRITE(pix[], num%, width%, height%)
+ENDFUNCTION // MAKEIMAGE
+

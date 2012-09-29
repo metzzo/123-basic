@@ -1,0 +1,47 @@
+// --------------------------------- //
+// Project: qmath - quick math approximations
+// Start: Thursday, March 15, 2007
+// IDE Version: 4.126
+
+
+
+// Qedo http://www.glbasic.com/forum/index.php?topic=6446
+FUNCTION QSIN: x
+	?IFDEF HTML5
+	//does not work well..
+	RETURN SIN(x)
+	?ELSE
+    WHILE x>360.0;  DEC x, 360.0; WEND
+    WHILE x<0;      INC x, 360.0; WEND
+
+    IF x>180.0 THEN x = 180.0-x
+
+	IF x>0
+		x = (0.022221532036391804173392430864397 - 0.00012345295575773224540773572702443 * x) * x
+		x = 0.225*(x*x-x)+x
+	ELSE
+		x = (0.022221532036391804173392430864397 + 0.00012345295575773224540773572702443 * x) * x
+		x = 0.225*(-x*x-x)+x
+	ENDIF
+	RETURN x
+	?ENDIF
+ENDFUNCTION
+
+
+
+FUNCTION QCOS: x
+	?IFDEF HTML5
+	RETURN COS(x)
+	?ELSE
+	RETURN QSIN(x+90)
+	?ENDIF
+ENDFUNCTION
+
+
+FUNCTION QSQR: y
+	RETURN SQR(y)
+ENDFUNCTION
+
+
+
+

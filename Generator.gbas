@@ -1,0 +1,186 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Thursday, July 28, 2011
+// IDE Version: 9.033
+?DEFINE JSCOMPILER
+GLOBAL CurrentScope% = -1
+
+//! Generiert JavaScript Code
+FUNCTION Generator$:
+	TRY
+		LOCAL template$ = LoadFile$("HTMLTEMPLATE.txt")
+		LOCAL Text$
+		Text$ = Text$ + "function main()"
+		Text$ = Text$ + Generate$(Exprs[compiler.MainScope])
+
+		FOREACH Typ IN compiler.Types[]
+			IndentUp()
+			Text$ = Text$ +"function "+Typ.Name$+"() {"+NewLine$()
+			//Text$ = Text$ + "this = new Object();"+NewLine$()
+			IndentUp()
+			Text$ = Text$ + "this.clone = function() {"+NewLine$()
+			Text$ = Text$ + "var other = new Object();"+NewLine$()
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS compiler.Varis[Attr]
+				IF variable.Datatype.IsArray=0 AND IsType(variable.Name$) = FALSE
+					Text$ = Text$ + "other."+REPLACE$(variable.Name$,"$","_Str") + " = this."+REPLACE$(variable.Name$,"$","_Str")+";"+NewLine$()
+				ELSE
+					Text$ = Text$ + "other."+REPLACE$(variable.Name$,"$","_Str") + " = this."+REPLACE$(variable.Name$,"$","_Str")+".clone();"+NewLine$()
+				ENDIF
+			NEXT
+			IndentDown()
+			Text$ = Text$ + "return other;"+NewLine$()
+			Text$ = Text$ + "};" + NewLine$()
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS compiler.Varis[Attr]
+				Text$ = Text$ + "this."+REPLACE$(variable.Name$,"$","_Str") + " = "
+				IF variable.Datatype.IsArray
+					Text$ = Text$ + "new Array()"
+				ELSE
+					SELECT variable.Datatype.Name$
+						CASE "int"
+							Text$ = Text$+ "0"
+						CASE "float"
+							Text$ = Text$+ "0.0"
+						CASE "string"
+							Text$ = Text$+ "\"\""
+						DEFAULT
+							Text$ = Text$+ variable.Datatype.Name$+"()"
+					ENDSELECT
+				ENDIF
+				Text$ = Text$ + ";"+NewLine$()
+			NEXT
+			Text$ = Text$ + "return this;"+NewLine$()
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "};" + NewLine$()
+		NEXT
+
+		RETURN REPLACE$(template$,"$JS_CODE",Text$)
+	CATCH Err$
+	FINALLY
+ENDFUNCTION
+
+//! generiert diee OpCodes aus der gegebenen Expression
+//! Dadurch, dass die Funktion als CALLBACK deklariert wurde, kann sie einfach überladen werden, für andere Zielsprachen.
+//! Es muss lediglich der outputstring angepasst werden.
+FUNCTION Generate$: expr AS Expr
+	?IFDEF DEBUG
+	STDOUT "Generating expression: '"+REPLACE$(expr.token.Text$,"\n","")+"' in Line "+expr.token.LineContent$+" type: "+expr.Typ+"\n"
+	?ENDIF
+
+	compiler.currentToken = expr.token
+	LOCAL Text$ = ""
+	SELECT expr.Typ
+		CASE EXPR_IS_SCOPE
+			LOCAL oScp = CurrentScope
+			CurrentScope = expr.ID
+			IndentUp()
+			Text$ = Text$ + "{"+NewLine$()
+			IF LEN(expr.Varis[])>0
+				Text$ = Text$ + "var "
+				Text$ = Text$ + JSVariDef$(expr.Varis[])
+				Text$ = Text$ + ";"+NewLine$()
+			ENDIF
+
+			FOREACH Ex IN expr.Exprs[]
+				LOCAL add$ = Generate$(Exprs[Ex])
+				Text$ = Text$ + add$
+				IF TRIM$(add$)<>"" THEN Text$ = Text$ + ";"+NewLine$()
+			NEXT
+			IndentDown()
+			Text$ = Text$ + NewLine$()
+			Text$ = Text$ + "};"+NewLine$()
+			CurrentScope = oScp
+		CASE EXPR_IS_OPERATOR
+			Text$ = Text$ + Generate$(Exprs[expr.Left]) + " " + Operators[expr.Op].Sym$ + " " + Generate$(Exprs[expr.Right])
+		CASE EXPR_IS_INT
+			Text$ = expr.intval
+		CASE EXPR_IS_FLOAT
+			Text$ = expr.floatval
+		CASE EXPR_IS_STR
+			Text$ = expr.strval$
+		CASE EXPR_IS_FUNCCALL
+			Text$ = Text$ + expr.func.Name$+"("
+			FOREACH param IN expr.Params[]
+				Text$ = Text$ + Generate$(Exprs[param])
+			NEXT
+			Text$ = Text$ + ")"
+		CASE EXPR_IS_VARI
+			Text$ = Text$ + REPLACE$(compiler.Varis[expr.vari].Name$,"$","_Str")
+		CASE EXPR_IS_ARRAY
+			Text$ = Text$ +  REPLACE$(compiler.Varis[expr.vari].Name$,"$","_Str")
+			FOREACH d IN expr.dims[]
+				Text$ = Text$ + "["+ Generate$(Exprs[d])+"]"
+			NEXT
+		CASE EXPR_IS_ASSIGN
+			Text$ = Text$ + Generate$(Exprs[expr.vari]) +" = "
+			IF compiler.Varis[GetVariable(expr.vari)].Datatype.IsArray
+				Text$ = Text$ + Generate$(Exprs[expr.Right])+".clone()" //TODO: Array kopieren
+			ELSE
+				Text$ = Text$ + Generate$(Exprs[expr.Right])
+			ENDIF
+		CASE EXPR_IS_ARRASSIGN
+			Text$ = Text$ + Generate$(Exprs[expr.vari])
+			Text$ = Text$ +" = "+Generate$(Exprs[expr.Right])
+		CASE EXPR_IS_DIM
+			Text$ = Text$ + "//DIM(...)"
+		CASE EXPR_IS_REDIM
+			Text$ = Text$ + "//REDIM(...)"
+		CASE EXPR_IS_CAST2INT
+			Text$ = Text$ + Generate$(Exprs[expr.expr])
+		CASE EXPR_IS_CAST2FLOAT
+			Text$ = Text$ + Generate$(Exprs[expr.expr])
+		CASE EXPR_IS_CAST2STRING
+			Text$ = Text$ + Generate$(Exprs[expr.expr])
+		CASE EXPR_IS_ACCESS
+			Text$ = Text$ + Generate$(Exprs[expr.expr]) + "." + Generate$(Exprs[expr.nextExpr])
+		CASE EXPR_IS_EMPTY
+		CASE EXPR_IS_DEBUG
+			Error("Invalid Expression")
+		DEFAULT
+			Error("Unknown expression type: "+expr.Typ)
+	ENDSELECT
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION JSVariDef$: Varis%[]
+	LOCAL Text$ = ""
+	LOCAL Find = FALSE
+	FOREACH Var IN Varis[]
+		IF Find THEN Text$ = Text$ + ", "
+		Text$ = Text$ + REPLACE$(compiler.Varis[Var].Name$,"$","_Str")
+		IF compiler.Varis[Var].Datatype.IsArray
+			Text$ = Text$ + " = new Array()"
+		ELSE
+			SELECT compiler.Varis[Var].Datatype.Name$
+				CASE "int"
+					Text$ = Text$ + " = 0"
+				CASE "float"
+					Text$ = Text$ + " = 0.0"
+				CASE "string"
+					Text$ = Text$ + " = \"\""
+				DEFAULT
+					Text$ = Text$ + " = " + compiler.Varis[Var].Datatype.Name$+"()"
+			ENDSELECT
+		ENDIF
+		Find = TRUE
+	NEXT
+
+	RETURN Text$
+ENDFUNCTION
+
+GLOBAL Indent%
+FUNCTION NewLine$:
+	LOCAL Text$ = "\n"
+	FOR i = 1 TO Indent
+		Text$ = Text$ + "   "
+	NEXT
+	RETURN Text$
+ENDFUNCTION
+FUNCTION IndentUp:
+	INC Indent
+ENDFUNCTION
+FUNCTION IndentDown:
+	DEC Indent
+ENDFUNCTION

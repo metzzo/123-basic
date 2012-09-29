@@ -1,0 +1,18 @@
+LOCAL arr[]
+DIM arr[4][12]
+arr[2][2] = 122
+
+STDOUT "lol: "+arr[2][2]+"\n"
+
+LOCAL i = 5
+FOR x = 0 TO BOUNDS(arr[], 0)-1
+	FOR y = 0 TO BOUNDS(arr[], 1)-1
+		arr[x][y] = i
+		INC i
+	NEXT
+NEXT
+arr[0][0] = -100
+
+FOREACH e IN arr[]
+	STDOUT e+"\n"
+NEXT

@@ -1,0 +1,13 @@
+folder:/Media
+static:/Media/smalfont.bmp
+static:/Media/smalfont.png
+static:/ddgui.exe
+static:/DIR_STRUCTURE
+static:/GLBFile.html
+static:/GLBScript.js
+var:compileTime=2012-06-30 19:44:08
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

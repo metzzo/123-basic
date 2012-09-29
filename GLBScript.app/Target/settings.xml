@@ -1,0 +1,59 @@
+<target name="html5" lang="js">
+	<template path="HTMLTEMPLATE" name="GLBFile.html" mode="console 2d 3d" />
+	
+	<lib path="lib.js" mode="console 2d 3d" />
+	<lib path="array.js" mode="console 2d 3d" />
+	<lib path="math.js" mode="console 2d 3d" />
+	<lib path="string.js" mode="console 2d 3d" />
+	<lib path="file.js" mode="console 2d 3d" />
+	<lib path="ini.js" mode="console 2d 3d" />
+	
+	<lib path="2d.js" mode="2d 3d" />
+	<lib path="font.js" mode="2d 3d" />
+	<lib path="sound.js" mode="2d 3d" />
+	<lib path="input.js" mode="2d 3d" />
+	<lib path="sprite.js" mode="2d 3d" />
+	<lib path="collision2d.js" mode="2d 3d" />
+	<lib path="screen.js" mode="2d 3d" />
+	
+	<extension name="exe" action="ignore" />
+	<extension name="png" action="ignore" />
+	<extension name="bmp" action="ignore" />
+	<extension name="tga" action="ignore" />
+	<extension name="jpeg" action="ignore" />
+	<extension name="mid" action="warning" />
+	<extension name="ac3" action="mp3 ogg" />
+	<extension name="wav" action="mp3 ogg" />
+	<extension name="png" action="ignore" />
+	<extension name="mp3" action="ogg" />
+	<extension name="ogg" action="mp3" />
+	<extension name="ddd" action="ignore" />
+	<extension name="ddw" action="ignore" />
+	<extension name="DIR_DATA" action="ignore" />
+	<extension name="GLBSCRIPT_DATA" action="ignore" />
+	
+	<file name="GLBScript.js" action="ignore" />
+	<file name="GLBFile.html" action="ignore" />
+	<file name="GLBScript_opt.js" action="ignore" />
+	<file name="GLBScript_unopt.js" action="ignore" />
+	<file name="GLBScript_beautiful.js" action="ignore" />
+	<file name="DIR_STRUCTURE" action="ignore" />
+	<file name=".svn" action="ignore" />
+	
+	<action type="embeddata" />
+	<action type="appbeforelibs" />
+	<action type="optimize" name="closure" />
+	<action type="save" name="GLBScript.js" />
+	<action type="insertfont" name="smalfont.png" />
+	<action type="run" command="$COMPILERDIRTools/GLBServer/GLBServer.exe '$PROJECTDIRGLBFile.html'" />
+	
+</target>
+
+<target name="xna" lang="cs">
+	<action type="save" name="GLBScript.cs" />
+</target>
+
+
+
+
+

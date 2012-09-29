@@ -1,0 +1,375 @@
+// --------------------------------- //
+// Project: Four In A Row
+// Start: Tuesday, July 06, 2004
+// IDE Version: 1.40525
+
+?OPTIMIZE AGGRESSIVE
+
+MAX_X=12
+MAX_Y=8
+strength=0.7 // 0.0(weak) -> 1.0(uh-oh!)
+
+DIM coins[MAX_X+1][MAX_Y+1]
+DIM winnerpos[4]
+LIMITFPS 30
+
+col=1; scx=0; scy=0; b1=FALSE; b2=FALSE
+
+GETSCREENSIZE scx, scy
+
+CONSTANT STATE_IS_REACT = 1, STATE_IS_INTERACT = 2, STATE_IS_GAME = 3
+
+GLOBAL State = STATE_IS_GAME
+
+SUB GLB_ON_MOUSEWAIT:
+	IF ANYMOUSE()
+		END
+	ELSE
+		HIBERNATE
+	ENDIF
+ENDSUB
+
+SUB GLB_ON_LOOP:
+	SELECT State
+		CASE STATE_IS_REACT
+			DoMove(mx, col)
+			IF CheckWinner(col, winnerpos[])
+				FOR mx=MIN(winnerpos[0], winnerpos[2]) TO MAX(winnerpos[0], winnerpos[2])
+					FOR my=MIN(winnerpos[1], winnerpos[3]) TO MAX(winnerpos[1], winnerpos[3])
+						coins[mx][my]=3
+					NEXT
+				NEXT
+				ShowField(scx, scy)
+				IF col=1
+					MsgBox( "You won?")
+				ELSE
+					MsgBox( "I won!")
+				ENDIF
+				SHOWSCREEN
+				PUSHLOOP "GLB_ON_MOUSEWAIT"
+			ENDIF
+
+			col=OtherColor(col)
+			ShowField(scx, scy)
+			IF col<>1 THEN MsgBox("Thinking...")
+			SHOWSCREEN
+			State = STATE_IS_GAME
+		CASE STATE_IS_INTERACT
+			MOUSESTATE mx, my, b1, b2
+			IF b1 = FALSE AND NOT was
+				ShowField(scx, scy)
+				IF PLATFORMINFO$("")<>"WINCE" THEN PRINT "V", mx-8, my
+				mx = mx/scx*(MAX_X+1)
+				my=my/scy*(MAX_Y+1)
+				PRINT RatePos(mx, my, col), 0, 300
+				SHOWSCREEN
+				HIBERNATE
+			ELSEIF NOT was
+				was = TRUE
+			ELSEIF was
+				SHOWSCREEN
+				IF NOT b1
+					mx = mx/scx*(MAX_X+1)
+					my=my/scy*(MAX_Y+1)
+					was = FALSE
+					State = STATE_IS_REACT
+				ENDIF
+			ENDIF
+
+		CASE STATE_IS_GAME
+			IF col=1
+				State = STATE_IS_INTERACT
+			ELSE
+				mx = GetBest(col, 1)
+				State = STATE_IS_REACT
+			ENDIF
+	ENDSELECT
+ENDSUB
+
+
+FUNCTION ShowField: wx, wy
+LOCAL x, y, col[], dx, dy
+DIM col[4]
+	col[1] = RGB(0x00, 0xff, 0x80)
+	col[2] = RGB(0x80, 0x80, 0xff)
+	col[3] = RGB(0xff, 0xff, 0x40)
+	wx=wx/(MAX_X+1)
+	wy=wy/(MAX_Y+1)
+
+	FOR x=0 TO MAX_X
+	FOR y=0 TO MAX_Y
+		dx = x*wx; dy=y*wy
+		DRAWRECT dx, dy, wx, wy, RGB(255,255,255)
+		DRAWRECT dx+1, dy+1, wx-2, wy-2, col[coins[x][y]]
+	NEXT
+	NEXT
+ENDFUNCTION
+
+
+FUNCTION DoMove: xpos, color
+LOCAL y
+	FOR y=MAX_Y TO 0 STEP -1
+		IF coins[xpos][y]=0
+			coins[xpos][y]=color
+			RETURN y
+		ENDIF
+	NEXT
+RETURN -1
+ENDFUNCTION
+
+FUNCTION UnDoMove: xpos
+LOCAL y
+	FOR y=0 TO MAX_Y
+		IF coins[xpos][y]<>0
+			coins[xpos][y]=0
+			RETURN TRUE
+		ENDIF
+	NEXT
+RETURN FALSE // will never happen...
+ENDFUNCTION
+
+FUNCTION OtherColor: col
+	IF col=1 THEN RETURN 2
+	RETURN 1
+ENDFUNCTION
+
+FUNCTION CanMove:
+LOCAL x
+	FOR x=0 TO MAX_X
+		IF coins[x][1] = 0 THEN RETURN TRUE
+	NEXT
+RETURN FALSE
+ENDFUNCTION
+
+FUNCTION CheckWinner: col, winpos[]
+LOCAL x, y, l
+	FOR x=0 TO MAX_X
+		FOR y=0 TO MAX_Y
+			IF coins[x][y]<>col THEN GOTO skip
+			winpos[0]=x; winpos[1]=y
+			IF x<MAX_X-2 // °°
+				IF	coins[x+1][y]=col AND coins[x+2][y]=col AND _
+											coins[x+3][y]=col
+
+					winpos[2]=x+3; winpos[3]=y
+						RETURN TRUE
+				ENDIF
+				IF y<MAX_Y-2 // °.
+					IF	coins[x+1][y+1]=col AND coins[x+2][y+2]=col AND _
+												coins[x+3][y+3]=col
+						winpos[2]=x+3; winpos[3]=y+3
+						RETURN TRUE
+					ENDIF
+				ENDIF
+			ENDIF
+			IF y<MAX_Y-2 // :
+				IF	coins[x][y+1]=col AND coins[x][y+2]=col AND _
+											coins[x][y+3]=col
+						winpos[2]=x; winpos[3]=y+3
+						RETURN TRUE
+				ENDIF
+				IF x>3 // .°
+					IF	coins[x-1][y+1]=col AND coins[x-2][y+2]=col AND _
+												coins[x-3][y+3]=col
+						winpos[2]=x-3; winpos[3]=y+3
+						RETURN TRUE
+					ENDIF
+				ENDIF
+			ENDIF
+		skip:
+		NEXT
+	NEXT
+	RETURN FALSE
+ENDFUNCTION
+
+
+
+FUNCTION GetAt: x, y
+IF x<0 OR y<0 OR x>MAX_X OR y>MAX_Y THEN RETURN -1
+RETURN coins[x][y]
+ENDFUNCTION
+
+// assumes that x,y already is "color"
+FUNCTION RatePos: x, y, color
+LOCAL c, mode, i, dx, dy, allgood, good, possible
+LOCAL activepos, activeneg
+	FOR mode=0 TO 3 // 0.. 1: 2.° 3°.
+		SELECT mode
+		CASE 0
+			dx=1; dy=0
+		CASE 1
+			dx=0; dy=1
+		CASE 2
+			dx=1; dy=-1
+		CASE 3
+			dx=1; dy=1
+		ENDSELECT
+		possible=1; good=1
+		activepos=TRUE; activeneg=TRUE
+		FOR i=1 TO 3
+			c = GetAt(x + i*dx, y + i*dy)
+			IF activepos
+				IF c = color
+				good=good+1
+					possible=possible+1
+				ELSE
+					IF c=0
+						possible=possible+1
+					ELSE // border or other color
+						activepos=FALSE
+					ENDIF
+				ENDIF
+			ENDIF
+
+			c = GetAt(x - i*dx, y - i*dy)
+			IF activeneg
+				IF c = color
+					good=good+1
+					possible=possible+1
+				ELSE
+					IF c=0
+						possible=possible+1
+					ELSE // border or other color
+						activeneg=FALSE
+					ENDIF
+				ENDIF
+			ENDIF
+		NEXT
+		IF possible<4 THEN good=1
+		IF good>3 THEN RETURN 10000 // Got four
+		allgood=allgood+good
+	NEXT
+	RETURN allgood
+ENDFUNCTION
+
+
+
+FUNCTION RateMove: xpos, color, depth, solution[]
+LOCAL ypos
+	IF depth>2 OR solution[color]>=10000 THEN RETURN
+	ypos = DoMove(xpos, color)
+	IF ypos<0
+		IF CanMove() THEN RETURN
+		RETURN depth
+	ENDIF
+
+	// See value if I move there
+	solution[color] = MAX(solution[color], RatePos(xpos, ypos, color))
+	// See value if I didn't move there
+	solution[color] = MAX(solution[color], RatePos(xpos, ypos, OtherColor(color)))
+	IF solution[color]<10000 THEN _
+		RateMove(GetBest(OtherColor(color), depth+1), OtherColor(color), depth+1, solution[])
+	UnDoMove(xpos)
+ENDFUNCTION
+
+
+
+FUNCTION GetBest: color, depth
+LOCAL bestx, bestrate, ratex, i, x, solution[]
+DIM solution[3]
+
+	bestx=-1; bestrate = 0
+	IF RND(100)>GLOBAL strength *100 THEN RETURN RND(MAX_X)
+	FOR i=0 TO MAX_X
+		solution[color]=0
+		solution[OtherColor(color)]=0
+		x = MOD(INTEGER((1-MOD(i+1,2)*2) * i/2 + MOD(i,2) + (MAX_X+MOD(MAX_X,2))/2), MAX_X+1)
+		IF coins[x][0] = 0
+			RateMove(x, color, depth, solution[])
+			IF solution[color]>=10000 THEN solution[OtherColor(color)] = 1
+			ratex = solution[color] / solution[OtherColor(color)]
+			IF ratex>bestrate
+				bestrate=ratex
+				bestx=x
+			ENDIF
+			// Would the enemy win with that position?
+			RateMove(x, OtherColor(color), depth, solution[])
+			IF (solution[OtherColor(color)]>10000)
+				bestx = x; bestrate = solution[OtherColor(color)]
+			ENDIF
+		ENDIF
+	NEXT
+	IF bestx<0 THEN bestx = RND(MAX_X)
+	RETURN bestx
+ENDFUNCTION
+
+
+// ------------------------------------------------------------- //
+// -=#  MSGBOX  #=-
+// ------------------------------------------------------------- //
+FUNCTION MsgBox: text$
+	// Diese Variablen sind als LOCAL definiert:
+	// text$
+	LOCAL fx, fy, px, py
+	GETFONTSIZE fx, fy
+	px = (GLOBAL scx - fx*LEN(text$))/2
+	py = GLOBAL scy/4
+	fx=LEN(text$)*fx
+	DRAWRECT px-4, py-4, fx+8, fy+8, RGB(255,255,255)
+	DRAWRECT px-1, py-1, fx+2, fy+2, RGB(0,0,0)
+	PRINT text$, px, py
+ENDFUNCTION // MSGBOX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

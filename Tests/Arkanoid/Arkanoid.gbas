@@ -1,0 +1,209 @@
+// Arkanoid Demo
+
+?OPTIMIZE NONE
+
+GLOBAL screenx, screeny, col // avoid warning "variable unassigned"
+
+GETSCREENSIZE screenx, screeny
+
+GLOBAL i, j, xa, ya, mx, my, b1, b2, swapx, swapy
+
+
+LOADSOUND "boing.wav", 0, 4
+LOADSOUND "bwah.wav", 1, 1
+
+DIM	colors[3] // Block colors
+	colors[0]=RGB(127, 25, 255)
+	colors[1]=RGB(50, 255, 50)
+	colors[2]=RGB(255, 255, 255)
+
+// Block playfield
+DIM hit[20][30]
+
+// Balls Positions
+DIM bx[100]
+DIM by[100]
+// Directional speed of balls
+DIM bdirx[100]
+DIM bdiry[100]
+// Bat positions
+DIM batx[4]
+DIM baty[4]
+
+// Setup starting values
+batx[0] = screenx/2
+baty[0] = 400
+
+maxball=0
+maxbat=0
+bx[0]=580; by[0]=350; bdirx[0]= 1.2; bdiry[0]=-1
+bx[1]=160; by[1]=350; bdirx[1]=-1; bdiry[1]= 1.2
+
+// Random level data
+// 32x16 = 20x30 blocks
+FOR x=0 TO 19
+	FOR y=0 TO 9
+		hit[x][y]=RND(2)+1
+	NEXT
+NEXT
+
+
+// ------------------------------------------------------------- //
+// -=#  MAINGAME  #=-
+// ------------------------------------------------------------- //
+SUB GLB_ON_LOOP:
+	MOUSESTATE	mx, my, b1, b2
+	mx = mx*640/screenx
+	IF mx>640 THEN mx=640
+	batx[0]=mx-32
+	dtime = GETTIMER()/8 // For smooth ball movement
+	// Move Balls
+
+	FOR i=0 TO maxball
+		// remember old position
+		swapy=FALSE; swapx=FALSE
+		xa=bx[i]
+		ya=by[i]
+
+		// X-Direction
+		bx[i]=xa+bdirx[i]*dtime
+		IF BallColl(i)
+			bx[i]=xa
+			swapx=TRUE
+		ENDIF
+
+		// Y-Direction
+		by[i]=ya+bdiry[i]*dtime
+		IF BallColl(i)
+			by[i]=ya
+			swapy=TRUE
+		ENDIF
+
+		// Bat Collision
+		FOR j=0 TO maxbat
+			IF BOXCOLL(batx[j], baty[j], 128, 16, xa, ya, 16, 16) AND bdiry[i]>0
+				swapy=TRUE
+				swapx=FALSE
+				bdirx[i] = (xa-batx[j]-24)/50
+				by[i]=ya
+			ENDIF
+		NEXT
+
+		IF swapy THEN bdiry[i]=-bdiry[i]
+		IF swapx THEN bdirx[i]=-bdirx[i]
+
+		IF swapx OR swapy
+			PLAYSOUND (0,0,1)
+		ENDIF
+
+	NEXT
+	GOSUB ShowAll
+	SHOWSCREEN
+ENDSUB // MAINGAME
+
+// ------------------------------------------------------------- //
+// -=#  SHOWALL  #=-
+// ------------------------------------------------------------- //
+SUB ShowAll:
+LOCAL x, y, f
+	f = screenx / 640
+	FOR x=0 TO 19
+		FOR y=0 TO 29
+			IF hit[x][y]>0
+				DRAWRECT (x*32)*f, (y*16)*f, 30*f, 14*f, colors[hit[x][y]-1]
+			ENDIF
+		NEXT
+	NEXT
+
+	FOR x=0 TO maxball
+		DRAWRECT (bx[x])*f, (by[x])*f, 16*f, 16*f, RGB(255, 255, 64)
+	NEXT
+
+	FOR x=0 TO maxbat
+		DRAWRECT (batx[x])*f, (baty[x])*f, 128*f, 16*f, RGB(255, 255, 64)
+	NEXT
+
+ENDSUB // SHOWALL
+
+// ------------------------------------------------------------- //
+// -=#  BALLCOLL  #=-
+// ------------------------------------------------------------- //
+FUNCTION BallColl: num
+	// Diese Variablen sind als LOCAL definiert:
+	// num
+LOCAL docol
+docol=FALSE
+	IF bx[num]<0
+		bx[num]=0
+		docol=TRUE
+	ENDIF
+	IF bx[num]>=624
+		bx[num]=623
+		docol=TRUE
+	ENDIF
+	IF by[num]<0 THEN by[num]=0
+	IF by[num]>=464
+		bdiry[num] = -ABS(bdiry[num])
+		by[num] = 300 // Hit floor
+		PLAYSOUND(1,0,1)
+		RETURN FALSE
+	ENDIF
+
+	h=  TouchBlockAtPixel((bx[num])/32, (by[num])/16)
+	h=h+TouchBlockAtPixel((bx[num]+16)/32, (by[num])/16)
+	h=h+TouchBlockAtPixel((bx[num]+16)/32, (by[num]+16)/16)
+	h=h+TouchBlockAtPixel((bx[num])/32, (by[num]+16)/16)
+	IF h=0 THEN RETURN docol
+
+	// ToDo: some explosions here...
+	RETURN TRUE
+ENDFUNCTION // BALLCOLL
+
+
+// ------------------------------------------------------------- //
+// -=#  TOUCHBLOCKATPIXEL  #=-
+// ------------------------------------------------------------- //
+FUNCTION TouchBlockAtPixel: x, y
+	// Diese Variablen sind als LOCAL definiert:
+	// x, y
+LOCAL	h
+	h=hit[x][y]
+	IF h
+		hit[x][y]=0
+		RETURN TRUE
+	ENDIF
+RETURN FALSE
+ENDFUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

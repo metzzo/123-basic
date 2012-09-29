@@ -1,0 +1,49 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Tuesday, September 27, 2011
+// IDE Version: 10.118
+
+GLOBAL Shits[] AS TShit
+
+TYPE TShit
+	Del%
+	X;Y
+	VY
+	Age%
+	Al
+
+	FUNCTION Render:
+		DRAWSPRITE ShitImage, self.X + Map.ScrollX, self.Y + Map.ScrollY
+	ENDFUNCTION
+
+	FUNCTION Update:
+		IF self.Age > 149
+			self.Del = TRUE
+		ENDIF
+
+		IF self.Y > Map.Height*Tilesize + Tilesize*20 THEN self.Del = TRUE
+
+
+		IF Map.CollisionPoint(self.X+8,self.Y + self.VY + 16)
+			WHILE Map.CollisionPoint(self.X+8,self.Y + 16) = FALSE
+				INC self.Y
+			WEND
+			self.VY = 0
+			INC self.Age
+		ELSE
+			INC self.VY, 1
+		ENDIF
+		self.VY = MIN(self.VY, 8)
+
+
+		INC self.Y, self.VY
+	ENDFUNCTION
+
+	FUNCTION Init: X, Y
+		self.X 	= X
+		self.Y 	= Y
+		self.VY = 1
+
+		DIMPUSH Shits[], self
+	ENDFUNCTION
+ENDTYPE

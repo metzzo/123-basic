@@ -1,0 +1,162 @@
+// --------------------------------- //
+// Project: FileTest
+// Start: Wednesday, May 30, 2012
+// IDE Version: 10.283
+
+STDOUT "Commandline: "+GETCOMMANDLINE$()+"\n"
+
+SETCURRENTDIR("Media")
+
+//Datei lesen
+//IF NOT OPENFILE(0, "abcdef.txt", 1)
+//	STDOUT "ERROR READ!\n"
+//	END
+//ENDIF
+//
+LOCAL l$
+//READLINE 0, l$
+//STDOUT "Line: "+l$+"\n"
+//
+//CLOSEFILE 0
+
+//Datei schreiben
+IF NOT OPENFILE(0,"hallo123.txt", 0)
+	STDOUT "ERROR WRITE!\n"
+	END
+ENDIF
+
+WRITESTR 0, "Hallo Leute!"
+WRITEUBYTE 0, 123
+
+CLOSEFILE 0
+
+OPENFILE(0, "hallo123.txt", 1)
+l$ = ""
+READSTR 0, l$, 4
+STDOUT "BackRead: "+l$+"\n"
+
+CLOSEFILE 0
+
+OPENFILE(0, "greetings.txt", -1)
+WRITESTR 0, "Guten Tag! " //Für jeden Seitenaufruf gibts einmal gutentag!
+CLOSEFILE 0
+
+//Binarytest
+
+KILLFILE "binarytest.txt"
+OPENFILE(0, "binarytest.txt", 0)
+WRITEUBYTE 0, 252
+WRITEBYTE 0, -127
+WRITEWORD 0, -POW(2, 15)+1
+WRITEUWORD 0, POW(2, 16)-3478
+WRITELONG 0, -POW(2,30)
+WRITEULONG 0, POW(2, 32)-1
+WRITEIEEE 0, 42.42
+WRITESHORTIEEE 0, 42.42
+WRITESTR 0, "Hi"
+CLOSEFILE 0
+
+
+OPENFILE(0, "binarytest.txt", 1)
+LOCAL bin%
+READUBYTE 0, bin //kann auch mit unterschiedlichen datentypen klarkommen
+STDOUT "UBYTE: "+bin+"\n"
+READBYTE 0, bin
+STDOUT "BYTE: "+bin+"\n"
+READWORD 0, bin
+STDOUT "Word: "+bin+"\n"
+READUWORD 0, bin
+STDOUT "UWord: "+bin+"\n"
+READLONG 0, bin
+STDOUT "Long: "+bin+"\n"
+READULONG 0, bin
+STDOUT "ULong: "+bin+"\n"
+LOCAL bbin
+READIEEE 0, bbin
+STDOUT "IEEE: "+bbin+"\n"
+READSHORTIEEE 0, bbin
+STDOUT "SHORT IEEE: "+bbin+"\n"
+LOCAL Hi$
+READSTR 0, Hi$, 2
+STDOUT "STR: "+Hi$+"\n"
+
+CLOSEFILE 0
+
+l$ = ""
+OPENFILE(0, "greetings.txt", 0)
+STDOUT "Filesize: "+MyGETFILESIZE(0)+"\n"
+READSTR 0, l$, MyGETFILESIZE(0)
+STDOUT "Begrüßung: "+l$+"\n"
+
+
+
+KILLFILE "test.ini"
+
+INIOPEN "test.ini"
+
+LOCAL color$ = "Colors"
+LOCAL shape$ = "Shapes"
+
+INIPUT color$, "red", 1
+INIPUT color$, "green", 2
+INIPUT shape$, "Circle", 1
+INIPUT shape$, "Poly", "fine"
+
+// schreibt "test.ini" auf die Platte
+INIOPEN ""
+
+// Jetzt die Datei neu einlesen
+INIOPEN "test.ini"
+STDOUT "Red  = " + INIGET$(color$, "rEd")+"\n"
+STDOUT "Poly = " + INIGET$(shape$, "polY")+"\n"
+
+
+STDOUT "nach dem loeschen: "+"\n"
+
+// Color Sektion entfernen
+INIPUT color$, "", ""
+// Poly Schlüssel entfernen
+INIPUT shape$, "pOLy", ""
+
+// nochmals anzeigen
+STDOUT "Red  = " + INIGET$(color$, "Red")+"\n"
+STDOUT "Poly = " + INIGET$(shape$, "PoLy")+"\n"
+
+LOCAL splits$[]
+LOCAL num = SPLITSTR("  Dream.Design - Entertainment", splits$[], ". -")
+STDOUT "count: "+num+"\n"
+FOR i=0 TO num-1
+	STDOUT ">"+splits$[i]+"<\n"
+NEXT
+
+
+LOCAL cur$ = GETCURRENTDIR$()
+LOCAL files$[]
+num = GETFILELIST("*.*", files$[])
+LOCAL num_dir  = INTEGER(num / 0x10000) // Hi-Word
+LOCAL num_file = MOD(num, 0x10000)      // Lo-Word
+STDOUT "CUR: "+cur$+"\n"
+STDOUT "num: " + num + " -> nDir: "+num_dir+" nFile: "+num_file+"\n"
+
+FOR i=0 TO BOUNDS(files$[], 0)-1 // BOUNDS(files$[], 0)-1 = num = num_dir+num_file
+	STDOUT " - "+files$[i]+"\n"
+NEXT
+
+?IFNDEF HTML5
+KEYWAIT
+?ENDIF
+
+//NETWEBEND "http://www.google.com"
+
+FUNCTION MyGETFILESIZE: channel%
+	LOCAL pos% = FILEPOSITION(channel)
+	FILESEEK channel, 0, 0
+	LOCAL Size% = 0
+	WHILE NOT ENDOFFILE(channel)
+		LOCAL tmp%
+		READUBYTE channel, tmp
+		INC Size
+	WEND
+	FILESEEK channel, pos, 0
+	RETURN Size
+ENDFUNCTION

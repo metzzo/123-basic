@@ -1,0 +1,16 @@
+folder:/Media
+static:/Arkanoid.exe
+static:/boing.wav
+static:/bwah.wav
+static:/DIR_STRUCTURE
+static:/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+static:/GLBScript_unopt.js
+static:/smalfont.bmp
+var:compileTime=2012-06-12 21:49:06
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

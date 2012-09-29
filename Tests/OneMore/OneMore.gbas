@@ -1,0 +1,149 @@
+// --------------------------------- //
+// Project: OneMore
+// Start: Tuesday, August 26, 2003
+// Compiler Version: 1.30615
+
+?OPTIMIZE NONE
+
+DIM playfield[10][10]
+GLOBAL mx, my, b1, b2
+level = 0
+
+
+SUB GLB_ON_LOOP:
+	IF IsLevelComplete()
+		GOSUB NewLevel
+		mousefree=FALSE
+	ENDIF
+
+	MOUSESTATE mx, my, b1, b2
+	IF b1
+		IF mousefree THEN Click(mx/32, my/32)
+		mousefree=FALSE
+	ELSE
+		mousefree=TRUE
+	ENDIF
+
+	GOSUB ShowPlayfield
+	PRINT "<=", mx, my-8
+	SHOWSCREEN
+ENDSUB
+
+// ------------------------------------------------------------- //
+// -=#  SHOWPLAYFIELD  #=-
+// ------------------------------------------------------------- //
+SUB ShowPlayfield:
+	LOCAL x, y, color[]
+
+	//               not set             set
+	DIMDATA color[], RGB( 50,  50, 255), RGB( 50, 255,  50)
+
+	DRAWRECT 0,0, 320, 320, RGB(255,255,255)
+	FOR x=0 TO 9
+		FOR y=0 TO 9
+			DRAWRECT x*32+1, y*32+1, 30, 30, color[playfield[x][y]]
+		NEXT
+	NEXT
+	PRINT "Clicks: "+clicks, 360, 120
+	PRINT "Level:  "+level, 360, 160
+ENDSUB // SHOWPLAYFIELD
+
+
+// ------------------------------------------------------------- //
+// -=#  CLICK  #=-
+// ------------------------------------------------------------- //
+FUNCTION Click: x, y
+	// These values are defined LOCAL:
+	// x, y
+	clicks=clicks+1
+	Change(x-1, y)
+	Change(x+1, y)
+	Change(x, y)
+	Change(x, y-1)
+	Change(x, y+1)
+ENDFUNCTION
+
+
+// ------------------------------------------------------------- //
+// -=#  CHANGE  #=-
+// ------------------------------------------------------------- //
+FUNCTION Change: x, y
+	// These values are defined LOCAL:
+	// x, y
+	IF x>=0 AND x<10 AND y>=0 AND y<10
+		set = playfield[x][y]
+
+		IF set = TRUE
+			set=FALSE
+		ELSE
+			set=TRUE
+		ENDIF
+		// or simply:
+		// set = 1-set
+		playfield[x][y]=set
+	ENDIF
+ENDFUNCTION
+
+
+// ------------------------------------------------------------- //
+// -=#  NEWLEVEL  #=-
+// ------------------------------------------------------------- //
+SUB NewLevel:
+	LOCAL x, y, i
+
+	// Clear playfield - just to be sure
+	FOR x=0 TO 9
+		FOR y=0 TO 9
+			playfield[x][y]=FALSE
+		NEXT
+	NEXT
+
+	level=level+1
+
+	// Do random clicks
+	FOR i=0 TO level
+		Click(RND(9), RND(9))
+	NEXT
+	clicks=0
+	GOSUB ShowPlayfield
+	PRINT "Level: "+level + " - get ready", 0, 360
+	SHOWSCREEN
+	PUSHLOOP "MOUSEWAIT_LOOP"
+ENDSUB // NEWLEVEL
+
+SUB MOUSEWAIT_LOOP:
+	IF ANYMOUSE() THEN POPLOOP
+ENDSUB
+
+
+// ------------------------------------------------------------- //
+// -=#  ISLEVELCOMPLETE  #=-
+// ------------------------------------------------------------- //
+FUNCTION IsLevelComplete:
+	LOCAL x, y
+
+	FOR x=0 TO 9
+		FOR y=0 TO 9
+			IF playfield[x][y]=TRUE THEN RETURN FALSE
+		NEXT
+	NEXT
+	RETURN TRUE
+ENDFUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

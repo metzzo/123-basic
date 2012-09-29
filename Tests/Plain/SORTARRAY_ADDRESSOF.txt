@@ -1,0 +1,45 @@
+?BLACKLIST ALL
+
+
+LOCAL arr[]
+STDOUT "Normal Sortierung:\n"
+Fill(arr[])
+SORTARRAY arr[], 0
+FOR i=0 TO LEN(arr[])-1
+	STDOUT "\t"+arr[i]+"\n"
+NEXT
+
+STDOUT "sortieren mit Funktion\n"
+Fill(arr[])
+SORTARRAY arr[], ADDRESSOF(compare)
+FOR i=0 TO LEN(arr[])-1
+	STDOUT "\t"+arr[i]+"\n"
+NEXT
+
+STDOUT "Rückwärts Sortieren\n"
+Fill(arr[])
+SORTARRAY arr[], ADDRESSOF(inverse_compare)
+FOR i=0 TO LEN(arr[])-1
+	STDOUT "\t"+arr[i]+"\n"
+NEXT
+
+FUNCTION Fill: arr[]
+   DIM arr[0]
+   FOR i=0 TO 10
+      DIMPUSH arr[], RND(100)
+   NEXT
+ENDFUNCTION
+
+
+FUNCTION compare: BYREF a, BYREF b
+   IF a<b THEN RETURN -1
+   IF a>b THEN RETURN 1
+   RETURN 0
+ENDFUNCTION
+
+
+FUNCTION inverse_compare: BYREF a, BYREF b
+   IF a<b THEN RETURN 1
+   IF a>b THEN RETURN -1
+   RETURN 0
+ENDFUNCTION

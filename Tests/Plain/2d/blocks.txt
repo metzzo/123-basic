@@ -1,0 +1,389 @@
+// DiNGS Blocks
+
+?BLACKLIST ALL
+
+GLOBAL bTriTris%  =TRUE // Tri-Tris? (or Tet-ris)
+
+//SETCURRENTDIR("Media")
+
+// Feld mit Blockmuster für jeden Stein & Rotation
+// Arrary with blockmask for each stone and rotation
+
+GLOBAL blocks[], hit[], col[], score,  scorelines
+GLOBAL a$ = "", b$ = ""
+GLOBAL stonec, stonex, stoney, stonesx, stonesy, stoner, ReleaseRotate
+GLOBAL NeedLines, Level
+GLOBAL stonet
+
+DIM blocks[7][4][4][4]	// [Type][Rotation, x, y]
+DIM hit[40][30]			// Becherfeld / Mug data
+DIM col[6]				// Farben / Colors
+
+GOSUB InitStones
+GOSUB	NewLevel
+
+SUB GLB_ON_LOOP:
+	GOSUB MoveStone
+	GOSUB ShowAll
+	GOSUB ShowCurrent
+	SHOWSCREEN
+ENDSUB
+
+// ------------------------------------------------------------- //
+// Initialisieren von Steinen, Hintergrund und Farben
+// Initialize Stones, Background and Colors
+// ------------------------------------------------------------- //
+SUB InitStones:
+	LOCAL dot
+
+	IF bTriTris
+		// 3x3 Blocks
+		FOR blk=0 TO 5
+			// Daten der Blöcke / Data of blocks
+			// Zeile/Line     1bcABCab_2bcABCab_3bcABCab_4bcABCabc
+			
+			IF blk=0 THEN a$="   ***    *  *  *    ***    *  *  * " // -
+			IF blk=1 THEN a$="   *  ** ** *      **  *        * **"   // L
+			IF blk=2 THEN a$="*   *   *  * * *  *   *   *  * * *  "// /
+			IF blk=3 THEN a$="**   *     *  * *    *   ** * *  *  " // __-
+			IF blk=4 THEN a$=" ***      *   *  *     *** *  *   * "  // -__
+			IF blk=5 THEN a$="   * * *  * *   *  * * *    *   * * "  // v
+
+			FOR rot=0 TO 3
+				FOR x=0 TO 2; FOR y=0 TO 2
+					dot=FALSE
+					b$ = MID$(a$, x+y*3+rot*9, 1)
+					IF b$="*" THEN dot=TRUE
+					blocks[blk][rot][x][y]=dot
+				NEXT; NEXT
+			NEXT
+		NEXT
+
+
+
+	ELSE // 4 block stones
+		// 3x3 Blocks
+		FOR blk=1 TO 6
+			// Daten der Blöcke / Data of blocks
+			// Zeile/Line     1bcABCab_2bcABCab_3bcABCab_4bcABCabc
+			IF blk=1 THEN a$="** **    ** **    ** **    ** **"   // O
+			IF blk=2 THEN a$="****     **  *  *   ****   *  *  **"// L
+			IF blk=3 THEN a$="***  *    *  * ** *  ***   ** *  *" // J
+			IF blk=4 THEN a$="**  **    * ** *  **  **   * ** *"  // -_  S
+			IF blk=5 THEN a$=" ****    *  **  *  ****    *  **  *"// _-  Z
+			IF blk=6 THEN a$="*** *     * **  *  * ***   *  ** *" // T
+
+			FOR rot=0 TO 3
+				FOR x=0 TO 2; FOR y=0 TO 2
+					dot=FALSE
+					b$ = MID$(a$, x+y*3+rot*9, 1)
+					IF b$="*" THEN dot=TRUE
+					blocks[blk][rot][x][y]=dot
+				NEXT; NEXT
+			NEXT
+		NEXT
+		// Der Lange / The long one  I
+		FOR y=0 TO 3
+			blocks[0][0][y][1]=TRUE
+			blocks[0][1][1][y]=TRUE
+			blocks[0][2][y][1]=TRUE
+			blocks[0][3][1][y]=TRUE
+		NEXT
+
+	ENDIF
+
+
+	// Becher ins Feld übertragen / Setup playfield
+	FOR x=0 TO 39; FOR y=0 TO 29
+		hit[x][y]=99 // Massiv / Solid
+	NEXT; NEXT
+	FOR x=1 TO 11; FOR y=0 TO 28
+		hit[x][y]=0 // Leer / free
+	NEXT; NEXT
+	// Farben / Colors
+	col[0]=RGB(80, 180, 255)
+	col[1]=RGB(255, 255, 80)
+	col[2]=RGB(255, 125, 50)
+	col[3]=RGB(255, 50, 50)
+	col[4]=RGB(50, 255, 50)
+	col[5]=RGB(128, 50, 255)
+
+	// Globale Sachen / Global stuff
+	score=0		// Punkte des Spielers			 / Score of player
+	GOSUB NewStone
+ENDSUB
+
+// ------------------------------------------------------------- //
+// -=# Anzeigen von Hintergrund und Blöcken im Becher #=-
+// -=# Show Background with Blocks in Mug #=-
+// ------------------------------------------------------------- //
+SUB ShowAll:
+	LOCAL c
+	FOR x=0 TO 12; FOR y=29 TO 0 STEP -1
+		c=hit[x][y]
+		IF c>0
+			// Index 99 für massive Wand
+			// Index 99 for solid wall
+			IF c>5 THEN c=0
+			Lego(x*16,y*16,c)
+		ENDIF
+	NEXT; NEXT
+
+	// Hide Part of the image
+	FOR i=0 TO 19
+		IF i<NeedLines THEN DRAWRECT 320,i*24,320,24,col[MOD(Level, 6)]
+	NEXT
+	// Punkteanzeige / Show scores
+	PRINT "$:"+score, 400, 32
+	PRINT "L:"+scorelines, 400, 50
+ENDSUB
+
+// ------------------------------------------------------------- //
+// -=#  Einen Block zeichnen #=-
+// -=#  Draw one block #=-
+// ------------------------------------------------------------- //
+FUNCTION Lego: x,y, c
+	DRAWRECT x+4, y-4, 7, 3,  col[c]
+	DRAWRECT x,   y,   15,15, col[c]
+ENDFUNCTION
+
+// ------------------------------------------------------------- //
+// -=#  Gib dem Spieler einen neuen Stein #=-
+// -=#  Get the player a new stone #=-
+// ------------------------------------------------------------- //
+SUB NewStone:
+	IF bTriTris
+		stonet=RND(5)
+	ELSE
+		stonet=RND(6)
+	ENDIF
+	stonec=RND(4)+1
+	stonex=4
+	stoney=4
+	stonesx=0 // Soft-x
+	stonesy=0 // Soft-y
+	stoner=0
+	ReleaseRotate=TRUE
+ENDSUB // NEWSTONE
+
+// ------------------------------------------------------------- //
+// -=#  Zeigen des aktuellen Steins  #=-
+// -=# Show the current stone #=-
+// ------------------------------------------------------------- //
+SUB ShowCurrent:
+	FOR x=0 TO 3; FOR y=0 TO 3
+		IF blocks[stonet][stoner][x][y]
+			LOCAL bx=(x+stonex)*16
+			LOCAL by=(y+stoney)*16
+			Lego(bx+stonesx, by+stonesy, stonec)
+		ENDIF
+	NEXT; NEXT
+ENDSUB // SHOWCURRENT
+
+// ------------------------------------------------------------- //
+// -=#  Prüfen ob Stein an Pos(x, y) schon besetzt ist  #=-
+// -=#  Check if stone at Pos(x, y) is already occupant #=-
+// ------------------------------------------------------------- //
+FUNCTION CheckPosition: px, py
+	// Diese Variablen sind als LOCAL definiert:
+	// These variables are defined LOCAL:
+	// px, py, isfree
+LOCAL x, y, isfree
+	isfree=TRUE
+	FOR x=0 TO 3; FOR y=0 TO 3
+		IF x+stonex<0 OR y+stoney<0 OR y+stoney>29 OR x+stonex>39 THEN GOTO skip // Out of DIM array
+		IF blocks[stonet][stoner][x][y]
+			IF hit[x+px][y+py]<>0 THEN RETURN FALSE
+		ENDIF
+	skip:
+	NEXT; NEXT
+	RETURN isfree
+ENDFUNCTION // CHECKPOSITION
+
+// ------------------------------------------------------------- //
+// -=#  Mit den Tasten den Stein bewegen  #=-
+// -=#  Move the stone with keyboard keys #=-
+// ------------------------------------------------------------- //
+SUB MoveStone:
+LOCAL dx, dy
+	// Links-Rechts / Left-Right
+	IF stonesx<0 THEN stonesx=stonesx+2
+	IF stonesx>0 THEN stonesx=stonesx-2
+
+	IF stonesx=0
+		dx=0
+		IF KEY(203) THEN dx=-1
+		IF KEY(205) THEN dx=1
+		IF CheckPosition(stonex+dx, stoney)
+			stonex=stonex+dx
+			stonesx=-dx*16
+		ENDIF
+	ENDIF
+
+	// Drehen / Rotate
+	IF KEY(200)
+		IF ReleaseRotate
+			ReleaseRotate=FALSE
+			stoner=MOD(stoner+1, 4) // 0 1 2 3 4->0
+			IF CheckPosition(stonex, stoney)=FALSE
+				stoner=MOD(stoner+3, 4) // (+4-1)->3 0 1 2 3
+			ENDIF
+		ENDIF
+	ELSE
+		ReleaseRotate=TRUE
+	ENDIF
+
+	// Fall
+	IF stonesy<0 THEN stonesy=stonesy+4
+	
+	LOCAL fdelay
+	IF stonesy=0 THEN fdelay=fdelay+1
+	IF KEY(208) AND stonesy=0 THEN fdelay=500 // Schnell ab / fast down
+	IF fdelay>(100-Level*10)
+		fdelay=0
+		IF CheckPosition(stonex, stoney+1)
+			stoney=stoney+1
+			stonesy=-16
+		ELSE
+			GOSUB StickStone
+			GOSUB CheckLines
+		ENDIF
+	ENDIF
+ENDSUB // MOVESTONE
+
+// ------------------------------------------------------------- //
+// -=#  Stein in den Hintergrund kleben  #=-
+// -=#  Stick the stone to the background #=-
+// ------------------------------------------------------------- //
+SUB StickStone:
+LOCAL x, y
+	FOR x=0 TO 3; FOR y=0 TO 3
+		IF x+stonex<0 OR y+stoney<0 OR y+stoney>29 OR x+stonex>39 THEN GOTO skip // Out of DIM array
+		IF blocks[stonet][stoner][x][y]
+			hit[x+stonex][y+stoney]=stonec
+		ENDIF
+	skip:
+	NEXT; NEXT
+	GOSUB NewStone
+ENDSUB // STICKSTONE
+
+// ------------------------------------------------------------- //
+// -=#  Auf ganze Linien prüfen  #=-
+// -=#  Check for full lines #=-
+// ------------------------------------------------------------- //
+SUB CheckLines:
+LOCAL x, y, count, lines
+	FOR y=0 TO 28
+		count=0
+		FOR x=1 TO 11
+			IF hit[x][y]>0 THEN count=count+1
+		NEXT
+		IF count=11
+			RemoveLine(y)
+			lines=lines+1
+		ENDIF
+	NEXT
+	score=score+lines*lines
+	scorelines=scorelines+lines
+	NeedLines=NeedLines-lines
+	IF NeedLines<=0 THEN GOSUB NewLevel
+ENDSUB // CHECKLINES
+
+// ------------------------------------------------------------- //
+// -=#  Entfernen einer Linie  #=-
+// -=#  Remove a certain line #=-
+// ------------------------------------------------------------- //
+FUNCTION RemoveLine: ly
+	// Diese Variablen sind als LOCAL definiert:
+	// These variables are defined LOCAL:
+	// ly
+LOCAL x, y
+	FOR y=ly TO 1 STEP -1
+		FOR x=1 TO 11
+			hit[x][y]=hit[x][y-1]
+		NEXT
+	NEXT
+	FOR x=1 TO 11
+		hit[x][0]=0
+	NEXT
+ENDFUNCTION // REMOVELINE
+
+// ------------------------------------------------------------- //
+// -=#  Ein Level weiter, Becher leeren, Bild laden  #=-
+// -=#  LEvel up, empty mug, load background picture #=-
+// ------------------------------------------------------------- //
+SUB NewLevel:
+
+	Level=Level+1
+
+	// -> Game finished -> Show Credits...
+	// -> Spiel vorbei -> Credits zeigen...
+	IF Level>10 THEN Level=10
+
+	NeedLines=0 // Ganzes Bild zeigen / Show whole image
+	GOSUB ShowAll
+	PRINT "Level: "+Level, 20, 100
+	SHOWSCREEN
+	KEYWAIT
+
+	NeedLines=20
+	// LOADBMP "Back"+Level+".bmp"
+
+	//LOADSPRITE "chicks.png", 100
+	DRAWSPRITE 100,320,0
+
+
+
+	USEASBMP
+
+ENDSUB // NEWLEVEL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

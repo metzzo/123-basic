@@ -1,0 +1,165 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Monday, November 14, 2011
+// IDE Version: 10.159
+
+TYPE xmlAttribute
+	Name$
+	Value$
+ENDTYPE
+
+PROTOTYPE XMLEvent: Name$, Attributes[] AS xmlAttribute
+
+TYPE XML
+	Text$; Event AS XMLEvent; Position%; DontCall% = FALSE
+
+	FUNCTION ReadXML: File$, event AS XMLEvent
+		self.Event = event
+		self.Text$ = LoadFile$(File$)
+		self.Position = 0
+
+		self.SkipWhitespaces()
+		//überspringe <? >
+		IF LEFT$(self.Text$, 2) = "<?"
+			WHILE self.Get$() <> ">"
+				INC self.Position
+			WEND
+			INC self.Position
+		ENDIF
+		self.SkipWhitespaces()
+		TRY
+			ParseNode()
+		CATCH Err$
+			IF Err$ = "EXIT"
+			ELSE
+				STDOUT Err$
+				?IFNDEF HTML5
+				KEYWAIT
+				?ENDIF
+			ENDIF
+		FINALLY
+	ENDFUNCTION
+
+	FUNCTION ParseLayer:
+		self.SkipWhitespaces()
+
+		WHILE self.Get$() = "<"
+			// ist es /?
+			LOCAL HasSlash% = FALSE
+			INC self.Position
+		 	self.SkipWhitespaces()
+		 	IF self.Get$() = "/"
+		 		HasSlash = TRUE
+		 	ENDIF
+		 	WHILE self.Get$() <> "<" //war vorher <
+		 		DEC self.Position
+		 	WEND
+		 	IF HasSlash THEN RETURN 0
+			self.ParseNode()
+		WEND
+		RETURN 1
+	ENDFUNCTION
+
+	FUNCTION ParseNode:
+		IF self.Get$() <> "<" THEN THROW "XML Error - Expecting '<'"
+		INC self.Position
+		self.SkipWhitespaces()
+
+		LOCAL Name$ = ParseIdentifier$()
+		LOCAL Attributes[] AS xmlAttribute
+
+		//Attribute holen
+		IF self.Get$() = " "
+			self.SkipWhitespaces()
+			WHILE self.Get$() <> "/" AND self.Get$() <> ">"
+				self.SkipWhitespaces()
+				LOCAL Att AS xmlAttribute
+
+				Att.Name$ = self.ParseIdentifier$()
+				self.SkipWhitespaces()
+
+				IF self.Get$() <> "=" THEN THROW "XML Error - Expecting '='"
+				INC self.Position
+
+				self.SkipWhitespaces()
+
+				IF self.Get$() <> "\"" THEN THROW "XML Error - Expecting '\"'"
+
+				INC self.Position
+				LOCAL Pos% = self.Position
+				WHILE self.Get$() <> "\""
+					INC self.Position
+				WEND
+				INC self.Position
+				Att.Value$ = MID$(self.Text$, Pos, self.Position - Pos - 1)
+				self.SkipWhitespaces()
+
+				DIMPUSH Attributes[], Att
+			WEND
+		ENDIF
+
+		self.Event(Name$, Attributes[]) //führe event aus
+
+		SELECT self.Get$()
+			CASE ">"
+				INC self.Position
+				self.SkipWhitespaces()
+
+				IF ParseLayer() THEN THROW "XML Error - Unexpected End of File, expecting </"+Name$+">"
+
+
+				self.SkipWhitespaces()
+				IF self.Get$() <> "<" THEN THROW "XML Error - Expecting '<'"
+				INC self.Position
+				self.SkipWhitespaces()
+				IF self.Get$() <> "/" THEN THROW "XML Error - Expecting '/'"
+				INC self.Position
+
+				IF Name$ <> self.ParseIdentifier$() THEN THROW "XML Error - Nodes do not match"
+				IF self.Get$() <> ">" THEN THROW "XML Error Expecting '>'"
+
+				INC self.Position
+				self.SkipWhitespaces()
+			CASE "/"
+				INC self.Position
+				IF self.Get$() <> ">" THEN THROW "XML Error - Expecting '>'"
+				INC self.Position
+				self.SkipWhitespaces()
+			DEFAULT
+				THROW "XML Error"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION ParseIdentifier$:
+		LOCAL Pos% = self.Position
+		WHILE self.Get$() <> " " AND self.Get$() <> "/" AND self.Get$() <> ">" AND self.Get$() <> "="
+			INC self.Position
+		WEND
+		IF self.Position >= LEN(self.Text$) THEN THROW "XML Error"
+		RETURN UCASE$(MID$(self.Text$, Pos, self.Position - Pos))
+	ENDFUNCTION
+
+	FUNCTION Get$:
+		IF self.Position >= LEN(self.Text$)
+			THROW "XML Error - Unexpected End Of File"
+		ELSE
+			//DEBUG MID$(self.Text$, self.Position, 1)
+			RETURN MID$(self.Text$, self.Position, 1)
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION SkipWhitespaces:
+		WHILE self.Position < LEN(self.Text$) AND (self.Get$() = " " OR self.Get$() = "\n" OR self.Get$() = CHR$(13) OR self.Get$() = "\t")
+			INC self.Position
+		WEND
+	ENDFUNCTION
+ENDTYPE
+
+FUNCTION GetAttribute$: Name$, Att[] AS xmlAttribute
+	Name$ = UCASE$(Name$)
+	FOREACH A IN Att[]
+		IF UCASE$(A.Name$) = Name$ THEN RETURN A.Value$
+	NEXT
+	RETURN ""
+ENDFUNCTION
+

@@ -1,0 +1,413 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Sunday, May 27, 2012
+// IDE Version: 10.283
+
+
+
+FUNCTION Analyser:
+
+	Start()
+	//Typenamen suchen (kann Rückgabewert in Funktionen sein)
+	WHILE EOFParse()
+		TRY
+			SELECT GetCurrent$()
+				CASE "TYPE"
+					Match("TYPE", CODELINE(), CODEFILE$())
+					LOCAL typ AS IdentifierType
+					typ.Name$=GetCurrent$()
+					typ.RealName$ = typ.Name$
+					typ.ID = LEN(Compiler.Types[])
+					DIMPUSH Compiler.Types[], typ
+
+					GetNext()
+				CASE "PROTOTYPE"
+					Match("PROTOTYPE", CODELINE(), CODEFILE$())
+					LOCAL func AS IdentifierFunc
+					func.Name$ = GetCurrent$()
+					func.Typ = FUNC_IS_PROTO
+					AddFunction(func)
+
+					GetNext()
+				CASE "CONSTANT"
+					//Globals zwischenspeichern, damit man von CONSTANTs nicht auf funktionen und gloabalen zugreifen kann
+					//Nicht notwendig, weil hier noch keine GLOBAL/FUNCTION analysiert wurden
+//					LOCAL saveGlbVar%[]
+//					LOCAL saveFncVar[] AS IdentifierFunc
+//					saveFncVar[] = Compiler.Funcs[]
+//					saveGlbVar[] = Compiler.Globals[]
+//					DIM Compiler.Globals[0]
+//					DIM Compiler.Funcs[0]
+
+					REPEAT
+						IF IsToken("CONSTANT")
+							Match("CONSTANT", CODELINE(), CODEFILE$())
+						ELSE
+							Match(",", CODELINE(), CODEFILE$())
+						ENDIF
+
+						LOCAL Vari AS IdentifierVari
+						Vari = VariDef()
+						Vari.Typ = VARI_IS_CONST
+						AddVariable(Vari, FALSE)
+						DIMPUSH Compiler.Globals[], LEN(Compiler.Varis[])-1
+					UNTIL IsToken(",") = FALSE
+
+//					Compiler.Funcs[] 	= saveFncVar[]
+//					Compiler.Globals[] 	= saveGlbVar[]
+			ENDSELECT
+			GetNext()
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+
+	LOCAL CurTyp% = -1
+	Start()
+	WHILE EOFParse()
+		//Funktion/sub _namen_ (damit vordefinierte Werte Funktionsaufrufe haben können)
+		TRY
+			LOCAL IsCallback% = FALSE, IsNative% = FALSE, IsAbstract% = FALSE
+			IF IsToken("CALLBACK")
+				Match("CALLBACK", CODELINE(), CODEFILE$())
+				IsCallback = TRUE
+				IF IsToken("FUNCTION") = FALSE THEN Match("FUNCTION", CODELINE(), CODEFILE$())
+			ENDIF
+			IF IsToken("NATIVE")
+				Match("NATIVE", CODELINE(), CODEFILE$())
+				IsNative = TRUE
+				IF IsToken("FUNCTION") = FALSE THEN Match("FUNCTION", CODELINE(), CODEFILE$())
+			ENDIF
+			IF IsToken("ABSTRACT")
+				Match("ABSTRACT", CODELINE(), CODEFILE$())
+				IsAbstract = TRUE
+				IF IsToken("FUNCTION") = FALSE THEN Match("FUNCTION", CODELINE(), CODEFILE$())
+			ENDIF
+
+			SELECT GetCurrent$()
+				CASE "PROTOTYPE"
+					Match("PROTOTYPE", CODELINE(), CODEFILE$())
+					LOCAL var AS IdentifierVari
+					var = VariDef()
+					LOCAL Found% = FALSE
+					FOREACH func IN Compiler.Funcs[]
+						IF func.Name$ = var.Name$
+							func.datatype = var.datatype
+							Found = TRUE
+							BREAK
+						ENDIF
+					NEXT
+					IF Found = FALSE THEN Error("Internal error (prototype not found: "+var.Name$, CODELINE(), CODEFILE$())
+					IF CurTyp<>-1 THEN Error("PROTOTYPE definition not in Type allowed.", CODELINE(), CODEFILE$())
+				CASE "FUNCTION"
+					Match("FUNCTION", CODELINE(), CODEFILE$())
+					LOCAL var AS IdentifierVari
+					var = VariDef()
+
+					LOCAL func AS IdentifierFunc
+					func.Name$ = var.Name$
+					func.datatype = var.datatype
+					func.IsCallback = IsCallback
+					func.IsAbstract = IsAbstract
+
+					IF CurTyp <> -1
+						func.Typ = FUNC_IS_METHOD
+						DIMPUSH Compiler.Types[CurTyp].Methods[], LEN(Compiler.Funcs[])
+						func.MyType = CurTyp
+					ELSE
+						func.Typ = FUNC_IS_FUNC
+					ENDIF
+
+					AddFunction(func)
+
+					IF IsNative = FALSE AND IsAbstract = FALSE THEN SkipTokens("FUNCTION", "ENDFUNCTION", func.Name$)
+				CASE "SUB"
+					Match("SUB", CODELINE(), CODEFILE$())
+					LOCAL func AS IdentifierFunc
+					func.Name$ = GetCurrent$()
+					func.datatype = voidDatatype
+					func.Typ = FUNC_IS_SUB
+					AddFunction(func)
+					SkipTokens("SUB", "ENDSUB", func.Name$)
+				CASE "TYPE"
+					Match("TYPE",CODELINE(), CODEFILE$())
+					IF IsType() = FALSE THEN Error("Internal error (unrecognized type: "+GetCurrent$()+")",CODELINE(),CODEFILE$())
+					CurTyp = LastType.ID
+				CASE "ENDTYPE"
+					CurTyp = -1
+			ENDSELECT
+
+
+			GetNext()
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+
+	IF CurTyp <> -1 THEN Error("Type '"+Compiler.Types[CurTyp].Name$+" not closed with 'ENDTYPE'", CODELINE(), CODEFILE$())
+	CurTyp = -1
+
+	//Nun CALLBACK überschreiben
+	FOREACH F IN Compiler.Funcs[]
+		IF F.IsCallback
+			LOCAL alreadyExist% = FALSE
+			FOREACH F2 IN Compiler.Funcs[]
+				IF F2.Name$ = F.Name$ AND F2.IsCallback = FALSE
+					alreadyExist = TRUE
+					BREAK
+				ENDIF
+			NEXT
+			IF alreadyExist
+				//Damit die IDs nicht nutzlos werden, doch nicht löschen sondern einfach nur umbenennen!
+				F.Name$ = "Overwritten Callback method (screw them!): "+F.Name$
+			ENDIF
+		ENDIF
+	NEXT
+
+	//Nun alle in den GlobalFuncs rein
+	FOREACH F IN Compiler.Funcs[]
+		IF F.Typ <> FUNC_IS_METHOD AND F.Typ <> FUNC_IS_SUB AND NOT F.IsCallback
+			Compiler.GlobalFuncs.Put(F.Name$, F.ID)
+		ENDIF
+	NEXT
+
+	//Nun Func IDs wieder anpassen (OBACHT, alles Expressions die vorher erstellt wurden und funktionen verwenden sind nutzlos, weil ja alle IDs sich geändert haben!!)
+//	LOCAL i = 0
+//	FOREACH F IN Compiler.Funcs[]
+//		F.ID = i
+//		INC i
+//	NEXT
+//	FOREACH E IN Exprs[]
+//		IF E.Typ <> EXPR_IS_DEBUG THEN Warning("Internal warning (Expression created, before allowed)")
+//	NEXT
+
+
+	Start()
+	WHILE EOFParse()
+		//GLObaL suchen, keine Funktionen, weil die können GLOBALs als Parameter haben.
+		TRY
+			SELECT GetCurrent$()
+				CASE "GLOBAL"
+					REPEAT
+						IF IsToken("GLOBAL")
+							Match("GLOBAL", CODELINE(), CODEFILE$())
+						ELSE
+							Match(",", CODELINE(), CODEFILE$())
+						ENDIF
+						LOCAL Vari AS IdentifierVari
+						Vari = VariDef()
+						Vari.Typ = VARI_IS_GLOBAL
+						AddVariable(Vari, TRUE) //OBACHT! Schaltet das doppelte existenzprüfen bei GLOBAL ab (ist vllt eh so in der GLB Syntax?)
+						DIMPUSH Compiler.Globals[], LEN(Compiler.Varis[])-1
+					UNTIL IsToken(",") = FALSE
+			ENDSELECT
+
+			GetNext()
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+
+	//Types parsen
+	Start()
+	WHILE EOFParse()
+		TRY
+			SELECT GetCurrent$()
+				CASE "TYPE"
+					TypeDefi()
+			ENDSELECT
+
+			GetNext()
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+	CurTyp = -1
+
+	//Nun jedem Type die Attribute/Methoden geben, die er von dem Kindtyp bekommt!
+	FOREACH typ IN Compiler.Types[]
+		ExtendType(typ)
+	NEXT
+
+	//Zyklen suchen
+	FOREACH typ IN Compiler.Types[]
+		CheckCyclic(typ.Name$, typ)
+	NEXT
+
+	Start()
+	WHILE EOFParse()
+		//Nun schlussendlich Funktionen/SUBS/PROTOTYPEs suchen
+		TRY
+			LOCAL isNative% = FALSE
+			LOCAL isCallBack% = FALSE
+			SELECT GetCurrent$()
+				CASE "NATIVE"
+					isNative = TRUE
+					GetNext()
+				CASE "CALLBACK"
+					isCallBack = TRUE
+					GetNext()
+				CASE "ABSTRACT"
+					GetNext()
+			ENDSELECT
+
+			SELECT GetCurrent$()
+				CASE "FUNCTION"
+					LOCAL Typ
+					IF CurTyp = -1
+						Typ = FUNC_IS_FUNC
+					ELSE
+						Typ = FUNC_IS_METHOD
+					ENDIF
+					FuncDef(isNative, isCallBack, Typ, CurTyp)
+				CASE "PROTOTYPE"
+					FuncDef(FALSE, FALSE, FUNC_IS_PROTO, -1)
+				CASE "SUB"
+					SubDef()
+				CASE "TYPE"
+					Match("TYPE",CODELINE(), CODEFILE$())
+					IF IsType() = FALSE THEN Error("Internal error (unrecognized type: "+GetCurrent$()+")",CODELINE(),CODEFILE$())
+					CurTyp = LastType.ID
+				CASE "ENDTYPE"
+					CurTyp = -1
+				CASE "STARTDATA"
+					Match("STARTDATA", CODELINE(), CODEFILE$())
+					LOCAL Name$ = GetCurrent$()
+					IF IsValidVarName() = FALSE THEN Error("Invalid DATA name", CODELINE(), CODEFILE$())
+					Match(Name$, CODELINE(), CODEFILE$())
+					Match(":", CODELINE(), CODEFILE$())
+					Match("\n", CODELINE(), CODEFILE$())
+					LOCAL Datas%[]
+					WHILE IsToken("DATA")
+						Match("DATA", CODELINE(), CODEFILE$())
+						LOCAL Done% = FALSE
+						WHILE IsToken("\n") = FALSE
+							IF Done = TRUE THEN Match(",", CODELINE(), CODEFILE$())
+							LOCAL e = Expression()
+							LOCAL tmpData AS Datatype
+							tmpData = Exprs[e].datatype
+							tmpData.IsArray = 0
+							EnsureDatatype(e, tmpData, 0)
+							IF Exprs[e].datatype.Name$ = "int" OR Exprs[e].datatype.Name$="float" OR Exprs[e].datatype.Name$="string"
+							ELSE
+								Error("Must be primitive datatype (int, float or string), got '"+Exprs[e].datatype.Name$+"'", CODELINE(), CODEFILE$())
+							ENDIF
+							DIMPUSH Datas[], e
+							Done = TRUE
+						WEND
+						Match("\n", CODELINE(), CODEFILE$())
+					WEND
+					Match("ENDDATA", CODELINE(), CODEFILE$())
+					LOCAL dataB AS DataBlock
+					dataB.Name$ = Name$
+					dataB.Datas[] = Datas[]
+
+
+					DIMPUSH Compiler.DataBlocks[], dataB
+			ENDSELECT
+
+			GetNext()
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+ENDFUNCTION
+
+//! Schaut ob zyklisches Attribut
+FUNCTION CheckCyclic: Name$, typ AS IdentifierType
+	FOREACH t IN typ.Attributes[]
+		IF Compiler.Varis[t].datatype.Name$ = Name$
+			Error("Cyclic reference '"+Compiler.Varis[t].Name$+"' to type '"+Name$+"'", CODELINE(), CODEFILE$())
+		ELSEIF IsType(Compiler.Varis[t].datatype.Name$)
+			//Schauen ob da was zyklisches ist?
+			CheckCyclic(Name$, LastType)
+		ELSE
+			//Primitiver Datentyp!
+		ENDIF
+	NEXT
+ENDFUNCTION
+
+//! Erweitert einen Type mit der Extendklasse!
+FUNCTION ExtendType%: typ AS IdentifierType
+	IF typ.Extending <> -1
+		ExtendType(Compiler.Types[typ.Extending]) //Vorher aber Kind extenden!
+
+		//nun die Attribute holen!
+		ALIAS ExtTyp AS Compiler.Types[typ.Extending]
+
+		//Methoden einbinden
+//		FOREACH M IN ExtTyp.Methods[]
+//			ALIAS Mth AS Compiler.Funcs[M]
+//			LOCAL Exists% = FALSE
+//
+//			FOREACH M2 IN typ.Methods[]
+//				ALIAS Mth2 AS Compiler.Funcs[M2]
+//				IF Mth.Name$ = Mth2.Name$
+//					Exists = TRUE
+//					BREAK
+//				ENDIF
+//			NEXT
+//
+//			IF NOT Exists
+//				//In den Typ die Methode geben!
+//				IF Mth.IsAbstract
+//					//Nicht überschrieben => Fehler!
+//					Error("Abstract method not overwritten '"+Mth.Name$+"' from '"+ExtTyp.Name$+"' please overwrite!", CODELINE(), CODEFILE$())
+//				ELSE
+//					DIMPUSH typ.Methods[], M
+//				ENDIF
+//			ENDIF
+//		NEXT
+
+		//Schauen ob freie Abstrakte da sind
+		LOCAL tmpTyp% = ExtTyp.ID
+		LOCAL Abstracts%[]
+		WHILE tmpTyp <> -1
+			FOREACH M IN Compiler.Types[tmpTyp].Methods[]
+				IF Compiler.Funcs[M].IsAbstract
+					DIMPUSH Abstracts[], M
+				ENDIF
+			NEXT
+
+			tmpTyp = Compiler.Types[tmpTyp].Extending
+		WEND
+
+
+		FOREACH Ab IN Abstracts[]
+			//Ist das irgendwie überladen?
+			LOCAL Found% = FALSE
+			tmpTyp = ExtTyp.ID
+			WHILE tmpTyp% <> -1
+				FOREACH M IN Compiler.Types[tmpTyp].Methods[]
+					IF Compiler.Funcs[M].Name$ = Compiler.Funcs[Ab].Name$ AND NOT Compiler.Funcs[M].IsAbstract
+						Found = TRUE
+						BREAK
+					ENDIF
+				NEXT
+				IF Found THEN BREAK
+				tmpTyp = Compiler.Types[tmpTyp].Extending
+			WEND
+			IF NOT Found
+				ExtTyp.Createable = FALSE
+				//Error("Unimplemented ABSTRACT function '"+Compiler.Funcs[Ab].Name$+"' of TYPE '"+ExtTyp.Name$+"'", CODELINE(), CODEFILE$())
+			ENDIF
+		NEXT
+
+		//Attribute einbinden
+		FOREACH A IN ExtTyp.Attributes[]
+			ALIAS Att AS Compiler.Varis[A]
+			LOCAL Exists% = FALSE
+			FOREACH A2 IN typ.Attributes[]
+				ALIAS Att2 AS Compiler.Varis[A2]
+				IF Att.Name$ = Att2.Name$
+					Exists = TRUE
+					BREAK
+				ENDIF
+			NEXT
+			IF NOT Exists
+				//In den Typ die Attributes geben!
+				DIMPUSH typ.Attributes[], A
+			ENDIF
+		NEXT
+	ENDIF
+ENDFUNCTION

@@ -1,0 +1,858 @@
+// --------------------------------- //
+// Project:
+// Start: Tuesday, May 16, 2006
+// IDE Version: 3.131
+
+GLOBAL screenx, screeny, gameover, score, gameon, hiscore, scale
+GLOBAL boom[], shot[], rocket[], ufo[], plx, ply, objx[], objy[], objn[]
+GLOBAL scrn, cave[], fuel[], bomb[], tank, colormode, flicker
+LOCAL vel, delta, oldscrn, dtime, newbomb, newshot, reload
+GLOBAL name$
+LOCAL speedlim, mscale, life, i, facspeed
+GETSCREENSIZE screenx, screeny
+hiscore = 10000
+flicker=FALSE
+colormode=TRUE
+
+GLOBAL q_sin[], q_cos[]
+DIM q_sin[360]
+DIM q_cos[360]
+FOR i=0 TO 359
+	q_sin[i] = SIN(i)
+	q_cos[i] = COS(i)
+NEXT
+
+DIM objn[20]
+DIM objx[20][20]
+DIM objy[20][20]
+DIM cave[0][2] // top, bottom
+
+DIM fuel[0][2]   // x,typ(0mystery,1fuel)
+DIM rocket[0][2] // x,y
+DIM bomb[0][3] // x,y,vy
+DIM shot[0][2] // x,y
+DIM boom[0][3] // x,y,scale
+DIM ufo[0][3]   // x_in_level,x,y,type(0ufo,1comet) Get y from ufo_xy function
+
+LOADSPRITE "line.bmp", 0
+
+LOADSOUND "sfx/bomb.wav", 0, 4
+LOADSOUND "sfx/implosion.wav", 1, 4
+LOADSOUND "sfx/shot.wav", 2, 4
+LOADSOUND "sfx/fuel.wav", 3, 2
+LOADSOUND "sfx/hahaha.wav",4,1
+
+// center point = 0.5 / 1.0
+
+// ship: >
+i=0
+objn[i]=7
+objx[i][0] =.2; objy[i][0]=1
+objx[i][1] =.1; objy[i][1]=0.5
+objx[i][2] =.4; objy[i][2]=0.8
+objx[i][3] =1.1;objy[i][3]=1.0
+objx[i][4] =.1; objy[i][4]=1.2
+objx[i][5] =.2; objy[i][5]=1
+objx[i][6] =.5; objy[i][6]=1
+
+// bomb: v
+i=1
+objn[i]=5
+objx[i][0] = .3; objy[i][0]=.3
+objx[i][1] = .5; objy[i][1]=1
+objx[i][2] = .7; objy[i][2]=.3
+objx[i][3] = .5; objy[i][3]=.5
+objx[i][4] = .3; objy[i][4]=.3
+
+
+// ufo: <->
+i=2
+objn[i]=6
+objx[i][0]=.2; objy[i][0]=1.2
+objx[i][1]=0; objy[i][1]=.9
+objx[i][2]=.5; objy[i][2]=.7
+objx[i][3]=1; objy[i][3]=.9
+objx[i][4]=.8; objy[i][4]=1.2
+objx[i][5]=.2; objy[i][5]=1.2
+
+
+// boom: *
+i=3
+objn[i]=6
+objx[i][0] = .3; objy[i][0]=1.5
+objx[i][1] = 0;  objy[i][1]=.5
+objx[i][2] = 1;  objy[i][2]=1.5
+objx[i][3] = -.2;objy[i][3]=1
+objx[i][4] = 1.2;objy[i][4]=.7
+objx[i][5] = .3; objy[i][5]=1.5
+
+// rocket: ^
+i=4
+objn[i]=5
+objx[i][0] = .2; objy[i][0]=1
+objx[i][1] = .5; objy[i][1]=0
+objx[i][2] = .8; objy[i][2]=1
+objx[i][3] = .5; objy[i][3]=.9
+objx[i][4] = .2; objy[i][4]=1
+
+// shot: -
+i=5
+objn[i]=2
+objx[i][0] = 0; objy[i][0]=1
+objx[i][1] = 1; objy[i][1]=1
+
+//        ___
+// score: |X|
+i=6
+objn[i]=6
+objx[i][0] = 0; objy[i][0]=0
+objx[i][1] = 1.0; objy[i][1]=1.0
+objx[i][2] = 1.0; objy[i][2]=0
+objx[i][3] = 0; objy[i][3]=1.0
+objx[i][4] = 0; objy[i][4]=0
+objx[i][5] = 1.0; objy[i][5]=0
+
+//        ^
+//       [ ]
+// fuel: / \.
+i=7
+objn[i]=9
+objx[i][0]=.1; objy[i][0]=1
+objx[i][1]=.3; objy[i][1]=.7
+objx[i][2]=0 ; objy[i][2]=.7
+objx[i][3]=0 ; objy[i][3]=.1
+objx[i][4]=.5; objy[i][4]=.0
+objx[i][5]=1 ; objy[i][5]=.1
+objx[i][6]=1 ; objy[i][6]=.7
+objx[i][7]=.7; objy[i][7]=.7
+objx[i][8]=.9; objy[i][8]=1
+
+
+	LOADBMP "backgnd.bmp"
+	INIOPEN "config.ini"
+	name$ = INIGET$("player1", "name")
+	PRINT "Enter your name:", 100, 120
+	//INPUT name$, 100, 140
+	name$ = "robi"
+restart:
+	LoadLevel()
+	scale = 20; mscale = 30
+
+	WideScroller("readme-REALLY-DO!.txt")
+
+	// Prepare Game
+	// -----------------------------------
+	LoadLevel()
+	tank = 100
+	life = 3
+	scrn=0
+	plx=scrn
+	ply = (cave[0][1]+cave[0][0])/2
+	scale = 20; mscale = 30
+	speedlim = 12
+	gameover = FALSE
+	reload   = FALSE
+	score    = 0
+
+	facspeed = 0.7/8000 // player speed
+
+
+	newshot = GETTIMERALL()
+	newbomb = GETTIMERALL()
+	gameon  = GETTIMERALL()
+
+	// MAINGAME
+	// -----------------------------------
+	WHILE TRUE
+		// game won
+		IF scrn>=1200
+			LoadLevel()
+			scrn=0
+			plx=0
+			ply = cave[0][1]-1
+		ENDIF
+
+		dtime = GETTIMER()*5
+
+		Show(dtime, FALSE)
+
+		IF gameon<=GETTIMERALL()
+			IF (UserInput(4)OR KEY(29)) AND reload=FALSE AND newbomb<GETTIMERALL()
+				newbomb = GETTIMERALL() + 500
+				dropbomb(plx, ply)
+				reload = TRUE
+			ENDIF
+
+			IF UserInput(3) AND newshot<GETTIMERALL()
+				newshot = GETTIMERALL() + 200
+				addshot(plx,ply)
+			ENDIF
+
+			IF UserInput(4) = FALSE THEN reload=FALSE
+
+			// get 220 blocks with 100 tank
+			// scrolling = dtime/4000
+			//
+			tank = tank - dtime/8800
+			oldscrn = scrn
+			scrn=scrn + dtime/2000 // scroll speed
+			IF INTEGER(oldscrn) > INTEGER(scrn) THEN score=score+10
+
+			vel = speedlim * UserInput(0) // [0;1]
+			vel = vel * dtime*facspeed
+			plx = plx+dtime/3000 + vel
+			// no fuel - dive
+			IF tank>0
+				vel = speedlim * UserInput(1) // [0;1]
+				vel = vel * dtime*facspeed
+				ply = ply+vel
+			ELSE
+				ply = ply + dtime*facspeed
+				tank=0
+			ENDIF
+			// zoom
+			mscale = mscale + UserInput(2)*dtime*.05
+			IF mscale < 20 THEN mscale=20
+			IF mscale>70 THEN mscale=70
+			scale = scale + (mscale-scale)*dtime/2000
+
+			// player crashed
+			IF gameover
+				life = life - 1
+				PLAYSOUND( 4,0,1)
+				gameon = GETTIMERALL() + 1500
+				IF life<0
+					GETFONTSIZE plx, ply
+					PRINT "GAME OVER", screenx/2 - plx*4.5,100
+					SHOWSCREEN
+					WHILE UserInput(3) = 0; HIBERNATE; WEND
+					GOTO restart
+				ENDIF
+			ENDIF
+		ELSE
+			delta = (gameon - GETTIMERALL())/1000
+			plx = MAX(1, plx - dtime/1000*delta)
+			scrn= MAX(1, scrn- dtime/1000*delta)
+			ply = bottomat(plx) - MIN(7, (bottomat(plx) - ceilingat(plx)))/2
+			gameover=FALSE
+			tank=100
+		ENDIF
+
+		IF flicker
+			ALPHAMODE -.3
+			y = MOD(GETTIMERALL()/50, 7)*screeny/7
+			DRAWRECT 0, y, screenx, screeny/7, 0
+			ALPHAMODE 0
+		ENDIF
+
+		// score
+		ALPHAMODE .7
+		hiscore = MAX(score, hiscore)
+		PRINT FORMAT$(6, 0, score), screenx/10, screeny/10
+		PRINT FORMAT$(6, 0, hiscore), screenx/2-screenx/10, screeny/10
+		// fuel
+		Line(screenx*.1, screeny*.85, screenx*.8*tank*.01, screeny*.85, RGB(0x00,0xff,0x00))
+		IF colormode THEN Line(screenx*.8*tank*.01, screeny*.85, screenx*.8, screeny*.85, RGB(0xff,0x00,0x00))
+
+		FOR i=1 TO life
+			thing(0, i*32+32, screeny*.15, RGB(0x00, 0x80, 0xff), 16,0)
+		NEXT
+
+		SHOWSCREEN
+	WEND
+
+
+
+FUNCTION UserInput: tp
+LOCAL speedlim, rv
+	speedlim = 12 // max movement of mouse
+	SELECT tp
+		CASE 0; rv = MOUSEAXIS(0)/speedlim + KEY(205)-KEY(203)+GETJOYX(0)
+		CASE 1; rv = MOUSEAXIS(1)/speedlim + KEY(200)-KEY(208)+GETJOYY(0)
+		CASE 2; rv = MOUSEAXIS(2)          + KEY(52)-KEY(51)+GETJOYZ(0)
+		CASE 3; rv = MOUSEAXIS(3) + KEY(42)+GETJOYBUTTON(0,0)
+		CASE 4; rv = MOUSEAXIS(4) + KEY(29)+GETJOYBUTTON(0,1)
+	ENDSELECT
+	IF rv>1  THEN rv=1
+	IF rv<-1 THEN rv=-1
+RETURN rv
+ENDFUNCTION
+
+FUNCTION SINq: a
+	IF a<0 THEN a =180-a
+	RETURN q_sin[MOD(a,360)]
+ENDFUNCTION
+
+FUNCTION COSq: a
+	IF a<0 THEN a=-a
+	RETURN q_cos[MOD(a,360)]
+ENDFUNCTION
+
+
+// -----------------------------------------
+// Show everything and move it all
+// -----------------------------------------
+FUNCTION Show: dtime, isdemo
+LOCAL sc, offx, offy, i, j, col, x, y, phi, sight, bsight
+GLOBAL scale, gameover, scrn
+
+
+	// F key
+	IF KEY(33)
+		WHILE KEY(33); WEND
+		flicker = 1-flicker
+	ENDIF
+	// C key
+	IF KEY(46)
+		WHILE KEY(46); WEND
+		colormode = 1-colormode
+	ENDIF
+
+
+	sc = scale
+	offx = scrn*sc - screenx/2
+	offy = sc-screeny*.5
+	col=RGB(0xff, 0x80, 0x00)
+	sight = INTEGER(30 + scrn)
+	bsight= INTEGER(scrn - 30)
+
+	FOR i=MAX(0, INTEGER(scrn-16)) TO MIN(sight, BOUNDS(cave[],0)-2)
+		Line(i*sc-offx, cave[i][0]*sc-offy, (i+1)*sc-offx, cave[i+1][0]*sc-offy, col)
+		Line(i*sc-offx, cave[i][1]*sc-offy, (i+1)*sc-offx, cave[i+1][1]*sc-offy, col)
+
+		Line(i*sc-offx, cave[i][1]*sc-offy, i*sc-offx, (cave[i][1]+4)*sc-offy, col)
+		y=(cave[i][1] + cave[i+1][1])/2
+		Line((i+.5)*sc-offx, y*sc-offy, (i+.5)*sc-offx, (y+2)*sc-offy, col)
+	NEXT
+
+	// ufos/comets
+	MoveUfos()
+	FOR i=0 TO BOUNDS(ufo[],0)-1
+		x = ufo[i][1]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = ufo[i][2]
+			phi = 0
+			IF ufo[i][3] = 1
+				phi = -GETTIMERALL()*.07
+			ELSE
+				phi = SIN(GETTIMERALL()*20)*15
+			ENDIF
+			thing(2, x*sc-offx, y*sc-offy, col, sc, phi)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+
+
+@fuels:
+	// fuel depots
+	col = RGB(0x80, 0xff, 0x00)
+	FOR i=0 TO BOUNDS(fuel[],0)-1
+		x = fuel[i][0]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = bottomat(x)
+			thing(6+fuel[i][1], x*sc-offx, y*sc-offy, col, sc, 0)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+@rockets:
+	col = RGB(0xff, 0xff, 0x00)
+	FOR i=0 TO BOUNDS(rocket[],0)-1
+		x = rocket[i][0]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = rocket[i][1]
+			IF (x<plx+MOD(x-2,10)/5 OR x-plx<(y-ply)/2 OR y<bottomat(x)-.01)
+				DEC y, dtime/1500
+				IF y<ceilingat(x)
+					rocket[i][0] = 0
+					rocket[i][1] = 10000
+					IF isdemo=FALSE THEN addboom(x,y)
+				ELSE
+					rocket[i][1] = y
+				ENDIF
+			ENDIF
+			thing(4, x*sc-offx, y*sc-offy, col, sc, 0)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+@bombs:
+	// bombs
+	col = RGB(0xf0, 0xf0, 0xf0)
+	FOR i=0 TO BOUNDS(bomb[],0)-1
+		bomb[i][2] = bomb[i][2] + dtime/2500
+		bomb[i][1] = bomb[i][1] + dtime * bomb[i][2]/1200
+		bomb[i][0]  =bomb[i][0] + dtime/1800
+		phi = ATAN(-.5, bomb[i][2])
+		thing(1, bomb[i][0]*sc-offx, bomb[i][1]*sc-offy, col, sc, phi)
+		y = bottomat(bomb[i][0])
+
+		IF impact(bomb[i][0], bomb[i][1]) OR bomb[i][1] > y
+			addboom(bomb[i][0], bomb[i][1])
+			DIMDEL bomb[], i
+		ENDIF
+	NEXT
+@shots:
+	// shots
+	FOR i=0 TO BOUNDS(shot[],0)-1
+		y = shot[i][1]
+		x = shot[i][0]
+		shot[i][0] = x+dtime/500
+		IF impact(x, y) OR x>sight OR y<ceilingat(x) OR y>bottomat(x)
+			IF isdemo=FALSE THEN addboom(x,y)
+			DIMDEL shot[], i
+			DEC i,1
+		ENDIF
+		thing(5, x*sc-offx, y*sc-offy, col, sc, 0)
+	NEXT
+@player:
+	// player
+	col = RGB(0x00, 0x80, 0xff)
+	thing(0, plx*sc-offx, ply*sc-offy, col, sc, 0)
+@booms:
+	// boom
+	FOR i=0 TO BOUNDS(boom[],0)-1
+		boom[i][2] = boom[i][2] + dtime/1000
+		IF boom[i][2]>3
+			DIMDEL boom[], i
+			i=i-1
+		ELSE
+			col = RGB(0xff, 0xff - boom[i][2]/3*255, 0x00)
+			thing(3, boom[i][0]*sc-offx, boom[i][1]*sc-offy, col, sc*boom[i][2], 0.7*GETTIMERALL())
+		ENDIF
+	NEXT
+
+	IF col_wall(plx, ply) THEN gameover=TRUE
+ENDFUNCTION
+
+// does shot impact? Make boom, return true
+FUNCTION impact: shx,shy
+GLOBAL tank
+LOCAL x, y, i
+
+	// ufo
+	FOR i=0 TO BOUNDS(ufo[],0)-1
+		x = ufo[i][1]
+		y = ufo[i][2]
+		IF col_thth(shx, shy, x, y)
+			IF ufo[i][3] = 0
+				INC score, 100
+				DIMDEL ufo[], i
+			ENDIF
+			RETURN TRUE
+		ENDIF
+		IF x>shx THEN BREAK
+	NEXT
+
+	// fuel depots
+	FOR i=0 TO BOUNDS(fuel[],0)-1
+		x = fuel[i][0]
+		IF col_thth(shx, shy, x, bottomat(x))
+			IF fuel[i][1]
+				PLAYSOUND( 3,0,1)
+				tank = MIN(100, tank+10)
+				INC score, 150
+			ELSE
+				INC score, RND(4)*100+100
+			ENDIF
+			DIMDEL fuel[], i
+			RETURN TRUE
+		ENDIF
+		IF x>shx THEN BREAK
+	NEXT
+
+	// rockets
+	FOR i=0 TO BOUNDS(rocket[],0)-1
+		x = rocket[i][0]
+		IF col_thth(shx, shy, x, rocket[i][1])
+			INC score, 50+RND(1)*30
+			DIMDEL rocket[], i
+			RETURN TRUE
+		ENDIF
+		IF x>shx THEN BREAK
+	NEXT
+RETURN FALSE
+ENDFUNCTION
+
+
+// INTERPOL - give value between a and b with factor x
+//            x=0 -> a
+//            x=1 -> b
+FUNCTION Interpol: a, b, x
+	RETURN (b-a)*x+a
+ENDFUNCTION
+
+FUNCTION bottomat: x
+LOCAL i, j
+	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
+	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
+	RETURN Interpol(cave[i][1], cave[j][1], x-i)
+ENDFUNCTION
+
+FUNCTION ceilingat: x
+LOCAL i, j
+	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
+	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
+	RETURN Interpol(cave[i][0], cave[j][0], x-i)
+ENDFUNCTION
+
+FUNCTION thing: id, x, y, col, sc, phi
+LOCAL i, x1,y1,x2,y2, cp, sp
+	sp = SIN(phi)
+	cp = COS(phi)
+	FOR i=0 TO objn[id]-2
+		x1 = (objx[id][i  ]-0.5)*sc
+		y1 = (objy[id][i  ]-1.0)*sc
+		x2 = (objx[id][i+1]-0.5)*sc
+		y2 = (objy[id][i+1]-1.0)*sc
+		Line(	x1*cp-y1*sp + x, x1*sp+y1*cp + y, _
+				x2*cp-y2*sp + x, x2*sp+y2*cp + y, col)
+	NEXT
+ENDFUNCTION
+
+
+// collision of thing/thing
+FUNCTION col_thth: x1,y1, x2,y2
+LOCAL x,y
+	x = x1-x2
+	y = y1-y2
+	x = x*x+y*y // SQR(a)<1 <-> a<1
+	IF x<1 THEN RETURN TRUE
+RETURN FALSE
+ENDFUNCTION
+
+FUNCTION col_wall: x,y
+LOCAL c
+	c = bottomat(x)
+	IF c<y THEN RETURN TRUE
+	c = ceilingat(x)
+	IF c>y THEN RETURN TRUE
+RETURN FALSE
+ENDFUNCTION
+
+FUNCTION addshot: x,y
+LOCAL m
+	PLAYSOUND( 2,0,1)
+	m=BOUNDS(shot[], 0)
+	REDIM shot[m+1][2]
+	shot[m][0]=x
+	shot[m][1]=y
+ENDFUNCTION
+
+FUNCTION dropbomb: x,y
+LOCAL m
+	PLAYSOUND( 0,0,1)
+	m  =BOUNDS(bomb[],0)
+	REDIM bomb[m+1][3]
+	bomb[m][0]=x
+	bomb[m][1]=y
+	bomb[m][2]=0
+ENDFUNCTION
+
+FUNCTION addboom: x,y
+LOCAL m
+	PLAYSOUND( 1,0,1)
+	m  =BOUNDS(boom[],0)
+	REDIM boom[m+1][3]
+	boom[m][0]=x
+	boom[m][1]=y
+	boom[m][2]=0
+ENDFUNCTION
+
+FUNCTION Line: x1, y1, x2, y2, col
+LOCAL c,s,p, w, dx, dy, ddx, ddy, ux, uy, lg
+GLOBAL colormode
+
+	IF colormode=FALSE THEN col=RGB(200,200,150)
+	ALPHAMODE .7
+
+	//line width
+	w = 16
+
+	// direction of line
+	ddx = x2-x1
+	ddy = y2-y1
+	lg = SQR(ddx*ddx+ddy*ddy)
+	IF lg<0.5 THEN RETURN
+
+	// short caps
+	lg=lg*2
+	// dir vector
+	dx=ddx*w/lg
+	dy=ddy*w/lg
+	// up vector
+	ux=dy
+	uy=-dx
+
+	// cap1
+	STARTPOLY 0
+		POLYVECTOR x1+ux-dx, y1+uy-dy,  0.5, 0.5,col
+		POLYVECTOR x1-ux-dx, y1-uy-dy,  0.5,63.5,col
+		POLYVECTOR x1-ux,    y1-uy,    31.5,63.5,col
+		POLYVECTOR x1+ux,    y1+uy,    31.5, 0.5,col
+	ENDPOLY
+
+	// center
+	STARTPOLY 0
+		POLYVECTOR x1+ux, y1+uy, 31.5,  0.5,col
+		POLYVECTOR x1-ux, y1-uy, 31.5, 63.5,col
+		POLYVECTOR x2-ux, y2-uy, 31.5, 63.5,col
+		POLYVECTOR x2+ux, y2+uy, 31.5,  0.5,col
+	ENDPOLY
+
+	// cap2
+	STARTPOLY 0
+		POLYVECTOR x2+ux,    y2+uy,    31.5,  0.5,col
+		POLYVECTOR x2-ux,    y2-uy,    31.5, 63.5,col
+		POLYVECTOR x2-ux+dx, y2-uy+dy, 63.5, 63.5,col
+		POLYVECTOR x2+ux+dx, y2+uy+dy, 63.5,  0.5,col
+	ENDPOLY
+ENDFUNCTION
+
+FUNCTION MoveUfos:
+GLOBAL scrn
+LOCAL i, spd, y1, y2, x
+	spd = 1
+	FOR i=0 TO BOUNDS(ufo[], 0)-1
+		SELECT ufo[i][3]
+		CASE 0 // ufo
+			x = (ufo[i][0]-scrn)*.5+ufo[i][0]
+			ufo[i][1] = x
+			IF x>0
+				y1 = ceilingat(x)+.5
+				y2 = bottomat(x)-.5
+				ufo[i][2] = (1+SINq(x*30))/2 * (y2-y1)*.75 + (y2-y1)*.1 + y1
+			ENDIF
+		CASE 1 // comet
+			ufo[i][1] = (ufo[i][0]-scrn)*2.1 + ufo[i][0]
+		ENDSELECT
+	NEXT
+ENDFUNCTION
+
+FUNCTION LoadLevel:
+LOCAL x, y, i, num, up$, lo$, en$, y,by
+LOCAL nfuel, nrocket, nufo
+LOCAL data1$[], data2$[], data3$[]
+GLOBAL cave[]
+	// line 1+2 = ycoord
+	// line3:
+	// 1=rocket
+	// 2=mystery
+	// 3=fuel
+	// 4=asteroids
+	// 5=ufo
+	DIM cave[6*10*22][2]
+	FOR y=0 TO 10*6
+		GETFILE "level.txt", y*4+1, up$
+		GETFILE "level.txt", y*4+2, lo$
+		GETFILE "level.txt", y*4+3, en$
+		num = SPLITSTR(up$, data1$[], ",")
+		num = SPLITSTR(lo$, data2$[], ",")
+		num = SPLITSTR(en$, data3$[], ",")
+		FOR x=0 TO num-1
+			cave[i][1] = 9 - INTEGER(data2$[x])
+			cave[i][0] = -10 + INTEGER(data1$[x])// +2.5
+			IF cave[i][0] >= cave[i][1]-1 THEN cave[i][0] = cave[i][1]-2
+
+			by = cave[i][1]
+			SELECT INTEGER(data3$[x])
+				CASE 1
+					REDIM rocket[nrocket+1][2]
+					rocket[nrocket][0] = i-.5
+					rocket[nrocket][1] = by
+					INC nrocket,1
+				CASE 2 TO 3
+					REDIM fuel[nfuel+1][2]
+					fuel[nfuel][0] = i-.5
+					fuel[nfuel][1] = INTEGER(data3$[x])-2
+					INC nfuel,1
+				CASE 4
+					REDIM ufo[nufo+1][4]
+					ufo[nufo][0] = i-.5
+					ufo[nufo][2] = cave[i][0] + MOD(nufo*nufo+x,10)*(cave[i][1]-cave[i][0])/10
+					ufo[nufo][3] = 1
+					INC nufo, 1
+				CASE 5
+					REDIM ufo[nufo+1][4]
+					ufo[nufo][0] = i-.5
+					ufo[nufo][2] = by // get's calced automatically
+					ufo[nufo][3] = 0
+					INC nufo, 1
+			ENDSELECT
+			INC i, 1
+		NEXT
+	NEXT
+ENDFUNCTION
+
+
+
+
+// ------------------------------------------------------------- //
+//   --- WIDESCROLLER ---
+// ------------------------------------------------------------- //
+FUNCTION WideScroller: filename$
+GLOBAL score, name$, flicker
+	// Diese Variablen sind als LOCAL definiert:
+	// filename$, void
+	LOCAL text$[], a$, maxline, z, dz, dx, y, fx, fy, hi$[], hi[]
+	DIM text$[1024]
+
+	GETFONTSIZE fx, fy // Neuer, guter Befehl / New and good command (24.10.01)
+
+	fy=fy*1.2 // Platz lassen / Leave space
+	maxline=maxline+2
+	text$[maxline] = "-= HIGHSCORES =-"
+	INC maxline, 1
+	// The firewall might want a mouse pointer
+	SYSTEMPOINTER TRUE
+	ReadHighScores(hi$[], hi[], name$, score)
+	SYSTEMPOINTER FALSE
+
+	FOR i=0 TO BOUNDS(hi[], 0)-1
+		text$[i + maxline] = MID$(hi$[i]+"................", 0, 12) + FORMAT$(6,0,hi[i])
+	NEXT
+	maxline = maxline + BOUNDS(hi[], 0) + 4
+
+
+	FOR i=0 TO 255
+		GETFILE filename$, i, a$
+		IF a$="NO_FILE" THEN RETURN FALSE
+		IF a$="NO_DATA" THEN a$ = ""
+		IF a$="EOF" THEN BREAK
+		text$[maxline]=a$
+		INC maxline, 1
+	NEXT
+
+	WHILE UserInput(3); HIBERNATE; WEND
+
+	LIMITFPS 60
+	WHILE TRUE
+		FOR zt=screeny TO 0-maxline*fy STEP -0.4 // Aufwärts / Move upwards
+			dtime = GETTIMER()*5
+			scrn = scrn + dtime / 5000
+			plx = scrn
+			ply = (bottomat(plx) + ceilingat(plx) )/2
+			SELECT scrn
+				CASE <50; ALPHAMODE scrn/200
+				CASE 500 TO 550; ALPHAMODE (scrn-550)/200
+				DEFAULT; ALPHAMODE .5
+			ENDSELECT
+
+			IF scrn>=600 THEN scrn=0
+			Show(dtime, TRUE)
+
+			ALPHAMODE .5
+			FOR z=0 TO maxline-1
+				dz=z*fy+zt
+				dx=(screenx-LEN(text$[z])*fx)/2
+				IF dz<screeny+fy AND dz>-20
+					a$ = text$[z]
+					IF MID$(a$,0,1)="#"
+						thing(MID$(a$, 1,1), dx, dz+fy, RGB(200,200,150), fy*2, 0)
+						a$ = "  " + MID$(a$, 2, 1000)
+					ENDIF
+					PRINT a$, dx, dz
+				ENDIF
+			NEXT
+			IF UserInput(3) THEN RETURN TRUE
+
+			IF flicker
+				ALPHAMODE -.3
+				y = MOD(GETTIMERALL()/50, 7)*screeny/7
+				DRAWRECT 0, y, screenx, screeny/7, 0
+				ALPHAMODE 0
+			ENDIF
+			SHOWSCREEN
+		NEXT
+	WEND
+
+	LIMITFPS -1
+ENDFUNCTION // WIDESCROLLER
+
+
+FUNCTION ReadHighScores: names$[], scores[], username$, thescore
+LOCAL ct, i, str$, proxy$, port
+
+	str$ = "highscores/listgame.php"
+	str$ = str$ + "?game=scramble"
+	str$ = str$ + "&name="+username$
+	str$ = str$ + "&score="+thescore
+	str$ = str$ + "&secret=3e5b72ec"
+
+	PRINT ".: WebGet scores :.", 0, 0
+	SHOWSCREEN
+
+	INIOPEN "config.ini"
+	proxy$ = INIGET$("server", "proxy")
+	port   = INIGET$("server", "port")
+	KILLFILE "scores.ini"
+	IF port=0 OR proxy$="NO_DATA"
+		NETWEBGET("www.glbasic.com", "/"+str$, 80, "scores.ini")
+	ELSE
+		NETWEBGET(proxy$, "http://www.glbasic.com/" + str$, port, "scores.ini")
+	ENDIF
+
+	INIOPEN "scores.ini"
+	ct = INIGET$("scores", "count")
+	DIM names$[ct]
+	DIM scores[ct]
+
+	FOR i=1 TO ct
+		names$[i-1] = INIGET$("scores", "n"+i)
+		scores[i-1] = INIGET$("scores", "s"+i)
+	NEXT
+ENDFUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?IFDEF HTML5
+
+FUNCTION GETFILE AS void: File$, lin%, BYREF dat$
+	lin = MIN(lin, 255)
+	LOCAL f = GENFILE()
+	IF OPENFILE(f, File$, 1)
+		FOR i = 0 TO lin
+			IF ENDOFFILE(f) THEN BREAK
+			READLINE f, dat$
+		NEXT
+		CLOSEFILE f
+	ELSE
+		dat$ = ""
+	ENDIF
+ENDFUNCTION
+
+
+?ENDIF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

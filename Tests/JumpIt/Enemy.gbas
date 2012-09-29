@@ -1,0 +1,192 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Monday, September 26, 2011
+// IDE Version: 10.118
+
+CONSTANT IS_BIRD 	= 1
+CONSTANT IS_PIG 	= 2
+CONSTANT IS_HUMAN 	= 3
+CONSTANT IS_LLAMA 	= 4
+
+GLOBAL Enemys[] AS TEnemy
+
+
+TYPE TEnemy
+	Typ% //vogel = 1, schwein = 2, mensch = 3 oder Llama = 4
+	X; Y
+	VX; VY
+	Width; Height
+	Anim%
+	Fall%
+	EventCounter%
+
+
+	FUNCTION Update:
+		IF self.Fall
+			self.VY = self.VY +.2
+
+			INC self.Y, self.VY
+		ELSE
+			INC self.Anim
+			SELECT self.Typ
+				CASE IS_BIRD
+					IF (Map.CollisionPoint(self.X + 2 + self.VX, self.Y+self.Height/2) OR Map.CollisionPoint(self.X - 2 + self.VX + self.Width, self.Y+self.Height/2)) OR self.X + self.VX < 0 OR self.X + self.VX > Map.Width*Tilesize
+						self.VX = -self.VX
+					ENDIF
+					INC self.X, self.VX
+					self.VY = QCOS(GETTIMERALL()/10)
+					IF Map.Collision(self.X+4,self.Y + self.VY,self.Width-8,self.Height)
+						self.VY = 0
+					ENDIF
+
+					INC self.EventCounter
+					IF MOD(self.EventCounter, RND(500)) = 5
+						LOCAL S AS TShit
+						S.Init(self.X, self.Y)
+					ENDIF
+
+					INC self.Y, self.VY
+
+					self.Anim = MOD(self.Anim, 15*2)
+				CASE IS_PIG TO IS_LLAMA
+					SELECT self.Typ
+						CASE IS_LLAMA
+							self.Anim = MOD(self.Anim, 15)
+							INC self.EventCounter
+
+							LOCAL Look
+							IF self.VX < 0
+								Look = 0
+							ELSE
+								Look = self.Width/2
+							ENDIF
+
+							IF MOD(self.EventCounter, 55) = 5 AND Map.RayCollision(self.X + Look, self.Y + 4, Player.X, Player.Y) = FALSE
+
+
+								LOCAL S AS TSpit
+								S.Init(self.X+Look, self.Y+4, self.VX*4, self.VY  - RND(2))
+							ENDIF
+						CASE IS_PIG
+							self.Anim = MOD(self.Anim, 10)
+					ENDSELECT
+
+					IF (Map.CollisionPoint(self.X + self.VX, self.Y + self.Height + 1) = FALSE OR Map.CollisionPoint(self.X+self.Width+self.VX, self.Y + self.Height + 1) = FALSE) OR (Map.CollisionPoint(self.X + 2 + self.VX, self.Y+self.Height/2) OR Map.CollisionPoint(self.X - 2 + self.VX + self.Width, self.Y+self.Height/2)) OR self.X + self.VX < 0 OR self.X + self.VX > Map.Width*Tilesize
+						self.VX = -self.VX
+					ENDIF
+					INC self.X, self.VX
+			ENDSELECT
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL Frame% = 0
+
+		SELECT self.Typ
+			CASE IS_BIRD
+				LOCAL Dir%
+				IF self.VX > 0
+					Dir = 1
+				ELSE
+					Dir = 0
+				ENDIF
+				IF self.Anim > 10*2
+					Frame = 2
+				ELSEIF self.Anim > 5*2
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+				TurnImage(BirdImage,Frame, Dir, self.X, self.Y, 6)
+			CASE IS_PIG
+				LOCAL Dir%
+				IF self.VX < 0
+					Dir = 0
+				ELSE
+					Dir = 1
+				ENDIF
+
+				IF self.Anim > 5
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+
+				TurnImage(PigImage, Frame, Dir, self.X, self.Y, 4)
+			CASE IS_HUMAN
+				ROTOSPRITE HumanImage, self.X + Map.ScrollX, self.Y + Map.ScrollY, -MOD(self.X, 360)
+			CASE IS_LLAMA
+				LOCAL Dir%
+				IF self.VX < 0
+					Dir = 1
+				ELSE
+					Dir = 0
+				ENDIF
+
+				IF self.Anim > 10
+					Frame = 2
+				ELSEIF self.Anim > 5
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+
+				TurnImage(LlamaImage, Frame, Dir, self.X, self.Y, 6)
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Init: Typ%, X, Y
+		self.Typ 	= Typ
+		self.X 		= X
+		self.Y 		= Y
+		self.Width 	= Tilesize
+		self.Height = Tilesize
+
+		SELECT self.Typ
+			CASE IS_BIRD
+				self.Height 	= Tilesize/2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+			CASE IS_PIG
+				IF INTEGER(RND(2))
+					self.VX 	= 2
+				ELSE
+					self.VX		= -2
+				ENDIF
+			CASE IS_HUMAN
+				self.Y 			= self.Y - Tilesize
+				self.Height 	= Tilesize*2
+				self.Width 		= Tilesize*2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+			CASE IS_LLAMA
+				self.Y = self.Y - Tilesize
+				self.Height 	= Tilesize*2
+				self.Width 		= Tilesize*2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+		ENDSELECT
+
+		DIMPUSH Enemys[], self
+	ENDFUNCTION
+
+	FUNCTION IsDestroyable:
+		IF self.Typ = IS_HUMAN
+			RETURN FALSE
+		ELSE
+			RETURN TRUE
+		ENDIF
+	ENDFUNCTION
+ENDTYPE

@@ -1,0 +1,207 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Monday, July 18, 2011
+// IDE Version: 9.040
+
+FUNCTION Lexer:
+	REDIM Compiler.Tokens[0]
+	Compiler.LastTokenID = 0
+
+	LOCAL Splitter$[]
+	DIMDATA Splitter$[], " ","\t","\n","-","+","*","/","^",",","=","<",">","|","&","[","]","(",")","!","\"","?",";",".",":", CHR$(8), CHR$(12), "\r", "\f"
+
+	LOCAL SplitterMap AS HashMap
+	SplitterMap.SetSize(LEN(Splitter$[])*8)
+	FOREACH Split$ IN Splitter$[]
+		SplitterMap.Put(Split$, 1)
+	NEXT
+
+	LOCAL LastFound%
+	LOCAL Line%, LineContent$, NewLineContent$, Path$
+	Compiler.Code$ = "\n" + Compiler.Code$
+
+	LOCAL Character%
+	FOR i% = 0 TO LEN(Compiler.Code$) - 1
+		INC Character
+
+		LOCAL DoubleChar$
+		IF i<LEN(Compiler.Code$)-2 THEN DoubleChar$ = MID$(Compiler.Code$,i,2)
+		IF DoubleChar$="//"
+			LOCAL Text$ = MID$(Compiler.Code$,LastFound, i - LastFound)
+			IF TRIM$(Text$) <> ""
+				CreateToken(Text$,LineContent$, Line, Character, Path$)
+			ENDIF
+
+			LOCAL Pos% = i
+			WHILE MID$(Compiler.Code$,i,1)<>"\n" AND MID$(Compiler.Code$,i,1)<>"\f"
+				INC i
+			WEND
+			LOCAL Text$ = MID$(Compiler.Code$, Pos, i - Pos)
+			IF LEN(Text$) > LEN("//$$RESETFILE") AND LEFT$(Text$,LEN("//$$RESETFILE"))="//$$RESETFILE"
+				Text$ = MID$(Text$,LEN("//$$RESETFILE")+1)
+				Path$ = Text$
+				Line = 0
+			ENDIF
+			LastFound = i
+		ENDIF
+		LOCAL curChar$ = MID$(Compiler.Code$,i,1)
+
+		LOCAL TmpLineCont$ = LineContent$
+		IF curChar$ = "\f" THEN curChar$ = "\n"
+		SELECT curChar$
+			CASE "\n"
+				Character = 0
+				INC Line
+				FOR j% = i+1 TO LEN(Compiler.Code$) - 1
+					IF MID$(Compiler.Code$,j,1) = "\n" OR MID$(Compiler.Code$,j,1) = "\f"
+						TmpLineCont$ = TRIM$(MID$(Compiler.Code$,i,j-i))
+						IF RIGHT$(TmpLineCont$, 1) = "\f" THEN TmpLineCont$ = MID$(TmpLineCont$, 0, LEN(TmpLineCont$)-1)+"\n" //\f durch \n ersetzen
+						BREAK
+					ENDIF
+				NEXT
+			CASE "\""
+				LOCAL WasBackSlash% = FALSE, WasWasBack% = FALSE
+				FOR j% = i + 1 TO LEN(Compiler.Code$) - 1
+					IF MID$(Compiler.Code$,j,1) = "\"" AND (WasBackSlash = FALSE OR WasWasBack)
+						i = j
+						BREAK
+					ENDIF
+					WasWasBack = WasBackSlash
+					WasBackSlash = FALSE
+					IF MID$(Compiler.Code$,j,1) = "\\"
+						WasBackSlash = TRUE
+					ENDIF
+				NEXT
+				CONTINUE
+		ENDSELECT
+
+		IF SplitterMap.DoesKeyExist(curChar$)
+			LOCAL Split$ = curChar$
+			LOCAL Text$ = MID$(Compiler.Code$,LastFound, i - LastFound)
+			IF Text$=";" THEN Text$="\n"
+			CreateToken(Text$,LineContent$, Line, Character, Path$)
+
+			Text$ = MID$(Compiler.Code$,i, LEN(Split$))
+			IF Text$=";" THEN Text$="\n"
+			CreateToken(Text$,LineContent$, Line, Character, Path$)
+
+			LastFound = i + LEN(Split$)
+		ENDIF
+
+		LineContent$ = TmpLineCont$
+	NEXT
+	CreateToken("__EOFFILE__","__EOFFILE__",Line,0, Path$)
+	CreateToken("\n","__EOFFILE__",Line,0, Path$)
+
+	//Postprocessing!
+
+	LOCAL WasNL% = FALSE, WasRem% = FALSE, HasDel% = FALSE
+	//FOREACH Token IN Compiler.Tokens[]
+	FOR i = 0 TO Compiler.LastTokenID - 1
+		IF HasDel
+			HasDel = FALSE
+			Compiler.Tokens[i].IsDel = TRUE
+//			DIMDEL Compiler.Tokens[], i
+//			DEC Compiler.LastTokenID
+//			DEC i
+			CONTINUE
+		ENDIF
+		LOCAL Text$ = Compiler.Tokens[i].Text$
+		IF Compiler.Tokens[i].Text$="\n"
+			Text$="NEWLINE"
+			IF WasNL
+				Compiler.Tokens[i].IsDel = TRUE
+//				DIMDEL Compiler.Tokens[], i
+//				DEC Compiler.LastTokenID
+//				DEC i
+				CONTINUE
+			ENDIF
+			WasNL = TRUE
+		ELSE
+			WasNL = FALSE
+		ENDIF
+		IF Compiler.Tokens[i].Text$ = "REM"
+			WasRem = TRUE
+		ENDIF
+		IF WasRem AND Compiler.Tokens[i].Text$ = "ENDREM"
+			WasRem = FALSE
+			HasDel = TRUE
+
+			Compiler.Tokens[i].IsDel = TRUE
+//			DIMDEL Compiler.Tokens[], i
+//			DEC Compiler.LastTokenID
+//			DEC i
+			CONTINUE
+		ENDIF
+		IF WasRem
+			Compiler.Tokens[i].IsDel = TRUE
+//			DIMDEL Compiler.Tokens[], i
+//			DEC Compiler.LastTokenID
+//			DEC i
+			CONTINUE
+		ENDIF
+		IF i < Compiler.LastTokenID -1
+			SELECT Compiler.Tokens[i].Text$
+				CASE "<"
+					IF Compiler.Tokens[i + 1].Text$=">"
+						Compiler.Tokens[i+1].IsDel = TRUE
+						//DIMDEL Compiler.Tokens[], i + 1
+						Compiler.Tokens[i].Text$ = "<>"
+					ENDIF
+					IF Compiler.Tokens[i + 1].Text$="="
+						Compiler.Tokens[i+1].IsDel = TRUE
+						//DIMDEL Compiler.Tokens[], i + 1
+						Compiler.Tokens[i].Text$ = "<="
+					ENDIF
+				CASE ">"
+					IF Compiler.Tokens[i + 1].Text$="="
+						Compiler.Tokens[i+1].IsDel = TRUE
+						//DIMDEL Compiler.Tokens[], i + 1
+						Compiler.Tokens[i].Text$ = ">="
+					ENDIF
+			ENDSELECT
+		ENDIF
+	NEXT
+	LOCAL i = 0
+//	FOR j = 0 TO Compiler.LastTokenID-2
+//		INC i
+//		SELECT Compiler.Tokens[j].Text$
+//			CASE "<"
+//				IF Compiler.Tokens[i].Text$=">"
+//					DIMDEL Compiler.Tokens[], i
+//					Compiler.Tokens[j].Text$ = "<>"
+//				ENDIF
+//				IF Compiler.Tokens[i].Text$="="
+//					DIMDEL Compiler.Tokens[], i
+//					Compiler.Tokens[j].Text$ = "<="
+//				ENDIF
+//			CASE ">"
+//				IF Compiler.Tokens[i].Text$="="
+//					DIMDEL Compiler.Tokens[], i
+//					Compiler.Tokens[j].Text$ = ">="
+//				ENDIF
+//		ENDSELECT
+//	NEXT
+
+	?IFDEF CASEINSENSITIVE
+	//FOREACH Token IN Compiler.Tokens[]
+	FOR i = 0 TO Compiler.LastTokenID - 1
+		ALIAS Token AS Compiler.Tokens[i]
+		IF INSTR(Token.Text$, "\"") = -1//kein string
+			LOCAL lc$ = LCASE$(Token.Text$)
+			IF lc$ = "self" OR lc$ = "void" OR lc$ = "int" OR lc$ = "float" OR lc$ = "bool" OR lc$ = "boolean" OR lc$ = "short" OR lc$ = "long" OR lc$ = "string" OR lc$ = "byte"
+				Token.Text$ = LCASE$(Token.Text$)
+			ELSE
+				Token.Text$ = UCASE$(Token.Text$)
+			ENDIF
+		ENDIF
+	NEXT
+	?ENDIF
+
+
+	?IFDEF DEBUGLEXER
+	STDOUT "--------------------------------------\n"
+	?ENDIF
+ENDFUNCTION
+
+

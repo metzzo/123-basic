@@ -1,0 +1,193 @@
+// -------------------------4-------- //
+// Project: GLBScript
+// Start: Monday, July 18, 2011
+// IDE Version: 9.040
+
+// ?DEFINE DEBUGLEXER
+// ?DEFINE DEBUG
+// ?DEFINE MEASURETIME
+
+
+
+?DEFINE PRE_FOR_IDE
+
+?IF DEFINED(GLBSCRIPT) AND DEFINED(PRE_FOR_IDE)
+?DEFINE FOR_IDE //Kompiliere für die IDE
+?ENDIF
+
+
+CONSTANT VERSION$ 	= "1"
+CONSTANT XMLNAME$ 	= "WIN32"
+
+
+?IFNDEF HTML5
+	//Es ist natives GLBasic oder C#
+	?DEFINE CSCOMPILER
+	?DEFINE JSCOMPILER
+?ELSE
+	?DEFINE JSCOMPILER
+?ENDIF
+
+
+LOCAL G AS TGenerator
+DIM Generators[0]
+
+?IFDEF JSCOMPILER
+G.Name$ = "JS"
+G.genProto = JS_Generator$
+DIMPUSH Generators[], G
+?ENDIF
+
+?IFDEF CSCOMPILER
+G.Name$ = "CS"
+G.genProto = CS_Generator$
+DIMPUSH Generators[], G
+?ENDIF
+
+?IFDEF FOR_IDE
+?DEFINE HTML5_WEBWORKER
+?ENDIF
+
+
+?OPTIMIZE NONE
+
+
+GbapPath$ = "./"
+
+//LoadFile$("file.glbs")
+//ReadGBAP$("../Tests/Blocks/", "Blocks.gbap")
+//ReadGBAP$("../Tests/", "GLBScript.gbap")
+//ReadGBAP$("../Tests/JumpIt/", "JumpIt.gbap")
+//ReadGBAP$("../Tests/Arkanoid/", "Arkanoid.gbap")
+//ReadGBAP$("../Tests/FourInARow/", "FourInARow.gbap")
+//ReadGBAP$("../Tests/Pong/", "Pong.gbap")
+//ReadGBAP$("../Tests/JumpFrog/", "JumpFrog.gbap")
+//ReadGBAP$("../Tests/Memory/", "Memory.gbap")
+
+//LoadFile$("../Tests/Plain/GOTOTest.txt")
+//LoadFile$("../Tests/Plain/AllTest")
+//LoadFile$("../Tests/Plain/BYREF-ALIAS")
+//LoadFile$("../Tests/Plain/array4dtest.glbs")
+//LoadFile$("../Tests/Plain/ColorTest.txt")
+//LoadFile$("../Tests/Plain/FileProgram.txt")
+//LoadFile$("../Tests/Plain/FOREACH_PREPROCESSORTEST.txt")
+//LoadFile$("../Tests/Plain/PLATTFORMINFO_STRINGFUNCTIONS_ASSERT.txt")
+//LoadFile$("../Tests/Plain/ooptest.txt")
+
+
+?IFNDEF HTML5
+
+LOCAL ProjPath$	 = "C:\\Users\\Robert\\Documents\\GLBasic\\GLBScript\\Tests\\BugFight\\" //C:\\Users\\Robert\\Documents\\GLBasic\\GLBScript\\"
+LOCAL ProjName$	 = "BugFight.gbap"//"GLBScript.gbap"
+LOCAL Target$	 = "HTML5"
+LOCAL Input$	 = ""
+
+?IFNDEF GLB_DEBUG
+LOCAL c$ = GETCOMMANDLINE$()
+IF INSTR(c$, "-N") <> -1
+	LOCAL StartPos% = INSTR(c$, "-N")+3
+	LOCAL EndPos% = INSTR(c$, "\"", StartPos)
+	ProjName$ = MID$(c$, StartPos, EndPos - StartPos)
+ELSE
+	ArgumentError("Missing option '-N'")
+ENDIF
+
+IF INSTR(c$, "-P") <> -1
+	LOCAL StartPos% = INSTR(c$, "-P")+3
+	LOCAL EndPos% = INSTR(c$, "\"", StartPos)
+	ProjPath$ = MID$(c$, StartPos, EndPos - StartPos)
+ELSE
+	ArgumentError("Missing option '-P'")
+ENDIF
+
+IF INSTR(c$, "-G") <> -1
+	LOCAL StartPos% = INSTR(c$, "-G")+2
+	LOCAL EndPos% = INSTR(c$, "\"", StartPos)
+	Target$ = MID$(c$, StartPos, EndPos - StartPos)
+ELSE
+	ArgumentError("Missing option -G")
+ENDIF
+?ENDIF
+
+//STDOUT "Path "+ProjPath$+"\n"
+//STDOUT "Name:"+ProjName$+"\n"
+//STDOUT "Target:"+Target$+"\n"
+
+PushTimer()
+Input$ = ReadGBAP$(ProjPath$, ProjName$) //MID$(ProjPath$,0, REVINSTR(ProjPath$, "/")+1), MID$(ProjPath$, REVINSTR(ProjPath$, "/")+1)
+PopTimer("Read GBAP")
+
+?IFDEF DEBUG
+STDOUT "Compile:\n"+Input$+"\n"
+?ENDIF
+
+
+
+InitCompiler()
+
+LOCAL Time% = GETTIMERALL()
+
+LOCAL output$ = Compile$(Input$, Target$)
+
+
+IF output$ = ""
+	STDOUT "\n\nCompiling failed :(\n"
+
+	KEYWAIT
+
+ELSE
+	STDOUT "\n\nFunctions: "+LEN(Compiler.Funcs[])+" Variables: "+LEN(Compiler.Varis[])+" AST Nodes: "+LastExprID+" Types: "+LEN(Compiler.Types[])+"\n"
+	STDOUT "Successful compile! Duration: "+(GETTIMERALL()-Time)/1000+" S, time per token: "+(GETTIMERALL()-Time)/Compiler.LastMaxTokens+"MS, tokens: "+Compiler.LastMaxTokens+" \n"
+
+	?IFNDEF HTML5
+	?IFDEF MEASURETIME
+	KEYWAIT
+	?ENDIF
+	?ENDIF
+ENDIF
+
+
+?ELSE
+
+CONSOLE = FALSE
+
+EXPORT Compile$
+EXPORT InitCompiler
+EXPORT RegisterDefine
+
+?IFDEF FOR_IDE
+EXPORT GetIdentifierByPart$, GetIdentifierByPart
+
+
+FUNCTION GetIdentifierByPart$: Text$
+	LOCAL Result$ = ""
+
+	LOCAL tmpCompiler AS TCompiler
+	tmpCompiler = Compiler
+
+	Compiler.Code$ = Text$+"\n"
+
+	Lexer()
+
+	Analyser()
+
+	Compiler.GetIdent = TRUE
+
+	Parser()
+
+	Compiler = tmpCompiler
+
+	RETURN Result$
+ENDFUNCTION
+?ENDIF
+
+?ENDIF
+
+FUNCTION ArgumentError: Err$
+	STDOUT "Argument error: '"+Err$+"'"
+	?IFNDEF HTML5
+	//KEYWAIT
+	?ENDIF
+	END
+ENDFUNCTION
+

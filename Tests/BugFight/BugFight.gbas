@@ -1,0 +1,233 @@
+// --------------------------------- //
+// Project: BugFight
+// Start: Sunday, May 27, 2012
+// IDE Version: 10.283
+
+?OPTIMIZE NONE
+
+SETTRANSPARENCY 0 // transparent color is black RGB(0,0,0) = 0
+
+SETCURRENTDIR("Media") // go to media files
+
+
+GLOBAL Objects[] AS TGameObject
+TYPE TGameObject
+	PositionX; PositionY
+
+	ABSTRACT FUNCTION Update:
+	ABSTRACT FUNCTION Render:
+
+	FUNCTION Init:
+		DIMPUSH Objects[], self
+	ENDFUNCTION
+
+	FUNCTION SetPosition: X, Y
+		PositionX = X
+		PositionY = Y
+	ENDFUNCTION
+ENDTYPE
+
+TYPE TGameMap EXTENDS TGameObject
+	SprID%
+	ScreenID%
+	ImgData%[]
+	Width; Height
+
+
+	FUNCTION Load: Path$
+		ScreenID% = 0
+		SprID = LoadSpr(Path$)
+		DIM ImgData[0]
+		Init
+	ENDFUNCTION
+
+	FUNCTION Update:
+		IF LEN(ImgData) = 0
+			//Lade die Daten
+			IF NOT SPRITE2MEM(ImgData[], SprID) THEN THROW "Failed to get imagedata"
+			//nun vereinfachen
+			GETSPRITESIZE SprID, Width, Height
+			FOR x = 0 UNTIL Width
+				FOR y = 0 UNTIL Height
+					LOCAL a = bAND(ASR(ImgData[x + y*Width],24), 0xff)
+					IF a > 64
+						//solide
+						ImgData[x + y*Width] = TRUE
+					ELSE
+						ImgData[x + y*Width] = FALSE
+					ENDIF
+				NEXT
+			NEXT
+			
+			LOCAL NewSpr% = GENSPRITE()
+			CREATESCREEN ScreenID, NewSpr, Width, Height
+			USESCREEN ScreenID
+			DRAWSPRITE SprID, 0, 0
+			USESCREEN -1
+			LOADSPRITE SprID, ""
+			SprID = NewSpr
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		DRAWSPRITE SprID, PositionX, PositionY
+	ENDFUNCTION
+
+	FUNCTION CheckCollision%: X%, Y%
+		LOCAL pos% = X + Y*Width
+		IF pos > LEN(ImgData) OR X < 0 OR Y < 0
+			RETURN FALSE
+		ELSE
+			RETURN ImgData[pos]
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION RemoveRect: x%, y%, w%, h%, col% = 0
+		USESCREEN ScreenID
+		//DRAWRECT x,y,w,h,col
+		LOCAL dy, xi
+		w=w/2
+		h=h/2
+		x=x+w
+		FOR dy = -h TO h
+			xi = w/h * SQR(h*h - dy*dy)
+			DRAWRECT x-xi, y+dy+h, xi+xi, 1, col
+			LOCAL yy = y+dy+h
+			FOR xx = x-xi TO x+xi
+				IF xx >= 0 AND yy >= 0 AND xx < Width AND yy < Height
+					ImgData[xx + yy*Width] = col
+				ENDIF
+			NEXT
+		NEXT
+		USESCREEN -1
+	ENDFUNCTION
+ENDTYPE
+
+CONSTANT GRAVITY = .5
+CONSTANT MAXSPEED = 8
+
+TYPE TCollisionable EXTENDS TGameObject
+	VX; VY
+	Width;Height
+
+	FUNCTION Update:
+		super.Update()
+
+		INC VY, GRAVITY
+
+		VX = VX * .8
+		VY = VY * .99
+
+
+
+		LOCAL PosY = PositionY
+		//Schauen ob Kollision
+		INC PositionY, VY
+		IF IsCollision()
+			VY = 0
+			PositionY = PosY
+		ENDIF
+
+
+		LOCAL PosX = PositionX
+		//Schauen ob Kollision
+		INC PositionX, VX
+		IF IsCollision()
+			LOCAL i% = 8
+			LOCAL Found% = FALSE
+			WHILE i > 0 AND IsCollision() AND NOT Found
+				DEC PositionY, 1
+				IF NOT IsCollision() THEN Found = TRUE
+				DEC i, 1
+			WEND
+			IF NOT Found
+				PositionX = PosX
+				PositionY = PosY
+				VX = 0
+			ENDIF
+		ENDIF
+
+	ENDFUNCTION
+
+	FUNCTION IsCollision%:
+		ALIAS map AS TGameMap(Objects[0]) //Das Objekt an der 0. Stelle ist die Map
+		//RETURN map.CheckCollision(PositionX + Width/2, PositionY + Height/2)
+		FOR x = PositionX TO PositionX + Width
+			IF map.CheckCollision(x, PositionY) OR map.CheckCollision(x,PositionY + Height) THEN RETURN TRUE
+		NEXT
+		FOR y = PositionY TO PositionY + Height
+			IF map.CheckCollision(PositionX, y) OR map.CheckCollision(PositionX + Width, y) THEN RETURN TRUE
+		NEXT
+		RETURN FALSE
+	ENDFUNCTION
+ENDTYPE
+
+TYPE TPlayer EXTENDS TCollisionable
+	Width = 8; Height = 16
+	FUNCTION Update:
+		super.Update()
+
+		INC VX, -(KEY(203) - KEY(205))*.75
+
+		INC PositionY, 4
+		IF KEY(57) AND IsCollision()
+			VY = -10
+		ENDIF
+		DEC PositionY, 4
+	ENDFUNCTION
+
+	FUNCTION Render:
+		PRINT "PosX: "+INTEGER(PositionX)+" PosY: "+INTEGER(PositionY), 10, 10, TRUE
+		DRAWRECT PositionX, PositionY, Width, Height, RGB(255, 0, 0)
+	ENDFUNCTION
+ENDTYPE
+
+LOCAL map AS TGameMap
+map.Load "map.png"
+
+LOCAL Player AS TPlayer
+Player.SetPosition 40, 40
+
+Player.Init
+
+GLOBAL Spr% = GENSPRITE()
+LOADSPRITE "bg.png", Spr
+
+SUB GLB_ON_LOOP:
+	LOCAL w%, h%
+	GETSCREENSIZE w, h
+	STRETCHSPRITE Spr, 0, 0, w, h
+	
+	LOCAL x, y, ml, mr
+	MOUSESTATE x,y,ml,mr
+	FOREACH Obj IN Objects
+		Obj.Render
+	NEXT
+	FOREACH Obj IN Objects
+		Obj.Update
+	NEXT
+
+
+	ALIAS map AS TGameMap(Objects[0])
+	IF ml
+		map.RemoveRect(x - 15, y - 15, 30, 30)
+	ENDIF
+	
+	PRINT IIF(map.CheckCollision(x,y), "Coll", "No Coll"), x, y, TRUE
+
+	SHOWSCREEN
+ENDSUB
+
+
+
+
+FUNCTION LoadSpr%: Path$
+	LOCAL id% = GENSPRITE()
+	LOADSPRITE Path$, id
+	RETURN id
+ENDFUNCTION
+
+SUB GLB_ON_LOADING:
+	PRINT "Loading...", 10, 10
+	SHOWSCREEN
+ENDSUB

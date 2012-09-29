@@ -1,0 +1,467 @@
+// --------------------------------- //
+// Project: JumpFrog
+// Start: Tuesday, May 10, 2005
+// IDE Version: 2.50405		PUSHLOOP("GameOn_Loop")
+
+
+
+SETTRANSPARENCY RGB(255, 0, 128)
+
+DIM frog_jump[1]
+DIM frog_x[1] // offset to current platform - if jumping, real position
+DIM frog_y[1] // on what platform
+
+GLOBAL screenx, screeny, waterlevel
+GLOBAL dtime, gameone
+LOCAL  starttime, i
+
+
+VIEW_3D		 = FALSE // 3D instead of 2D (PPC vs PC)
+
+GETSCREENSIZE screenx, screeny
+MAX_PLATFORM = 50
+
+// Make that to have the 2D Version of the game
+// on PocketPC/GP2X
+IF PLATFORMINFO$("") = "WINCE" THEN VIEW_3D = FALSE
+IF PLATFORMINFO$("") = "GP2X"  THEN VIEW_3D = FALSE
+IF PLATFORMINFO$("") = "HTML5" THEN VIEW_3D = FALSE
+
+IF VIEW_3D
+	JUMP_HEIGHT = .99
+	TUBE_WIDTH = 6
+	X_LOADOBJ "frog1.ddd", 0;    LOADSPRITE "frog1.bmp", 0
+	X_LOADOBJ "platform.ddd", 1; LOADSPRITE "wall.bmp", 1; LOADSPRITE "wall2.bmp", 11
+	X_LOADOBJ "wall.ddd", 2//;     LOADSPRITE "wall.bmp", 2
+	X_LOADOBJ "water.ddd", 3;    LOADSPRITE "water.bmp", 3
+ELSE
+	JUMP_HEIGHT = screeny/8.0
+	LOADSPRITE "frogsmal.bmp", 0
+	LOADSPRITE "platsmal.bmp", 1; LOADSPRITE "platsmal2.bmp", 11
+	LOADSPRITE "water.bmp",    3
+ENDIF
+
+LOADSOUND "frog.wav", 0, 1
+
+DIM gqSin[360]
+
+FOR i=0 TO 359; gqSin[i] = SIN(i); NEXT
+
+?IFNDEF HTML5
+
+
+GLOBAL FuncStack$[]
+DIMPUSH FuncStack$[], "GLB_ON_LOOP"
+WHILE TRUE
+	CALLBYNAME(FuncStack$[-1])
+WEND
+
+FUNCTION PUSHLOOP: Func$
+	DIMPUSH FuncStack$[], Func$
+ENDFUNCTION
+
+FUNCTION POPLOOP:
+	DIMDEL FuncStack$[], -1
+ENDFUNCTION
+
+FUNCTION GETCURRENTLOOP$:
+	RETURN FuncStack$[-1]
+ENDFUNCTION
+
+FUNCTION RETURNTOLOOP: Loop$
+	WHILE FuncStack$[-1] <> Loop$
+		POPLOOP
+	WEND
+ENDFUNCTION
+?ENDIF
+
+SUB GLB_ON_LOOP:
+	frog_jump[0] = 0
+	frog_x[0] = 0
+	frog_y[0] = 0
+	waterlevel = MAX_PLATFORM
+
+	PUSHLOOP "TitleScreen"
+ENDSUB
+
+
+// ------------------------------------------------------------- //
+// -=#  The Time  #=-
+// ------------------------------------------------------------- //
+FUNCTION GetTime:
+	RETURN GETTIMERALL()*3.0
+ENDFUNCTION
+
+// ------------------------------------------------------------- //
+// -=#  Button pressed?  #=-
+// ------------------------------------------------------------- //
+FUNCTION Button:
+	RETURN MOUSEAXIS(3) OR KEY(28)
+ENDFUNCTION
+// ------------------------------------------------------------- //
+// -=#  SHOWALL  #=-
+// ------------------------------------------------------------- //
+FUNCTION ShowAll: dtime
+LOCAL i, pos[], fx, nicecam
+LOCAL wx,wy,wz, spr
+	DIM pos[5]
+	GetPlatformPos(frog_y[0], dtime, pos[])
+
+	scale = 0.9 // dynamic camera speed
+	IF VIEW_3D
+		nicecam = -pos[1]+2*JUMP_HEIGHT
+		yoffset = yoffset*scale + (1-scale)*nicecam
+		X_MAKE3D 1,100,35
+		X_CAMERA 0,yoffset+3,10,  0,yoffset,0
+		X_CULLMODE 0
+		X_SPOT_LT -2, RGB(255,255,255), 0, yoffset,1, 0,0,-1,90
+	ELSE
+		nicecam = -pos[1]*JUMP_HEIGHT + screeny*2/3
+		yoffset = INTEGER(yoffset*scale + (1-scale)*nicecam)
+	ENDIF
+
+	// FROGGERS
+	FOR i=0 TO BOUNDS(frog_x[], 0)-1
+		GetPlatformPos(frog_y[i], dtime, pos[])
+		IF frog_jump[i]
+			fx = frog_x[0]
+		ELSE
+			fx = pos[0] + frog_x[0]
+		ENDIF
+
+		IF frog_jump[i] >= 0
+			dy = frog_jump[i]
+		ELSE
+			dy = SIN(90*frog_jump[i])
+		ENDIF
+		IF VIEW_3D
+			X_SETTEXTURE 0, -1
+			X_MOVEMENT fx*TUBE_WIDTH-TUBE_WIDTH/2, -(pos[1]+dy)*JUMP_HEIGHT+1.5*.25, 0
+			X_SCALING  .25,.25,.25
+			SELECT frog_jump[i]
+			CASE <0 // jumping
+				X_DRAWANIM 0,0,6,-frog_jump[i], TRUE
+			CASE 0 // waiting
+				X_DRAWOBJ 0,0
+			CASE >0 // falling
+				X_DRAWANIM 0,5,6,frog_jump[i], TRUE
+			ENDSELECT
+		ELSE
+			DRAWSPRITE 0, INTEGER(fx*screenx-16), INTEGER((pos[1]+dy)*JUMP_HEIGHT+yoffset-32)
+		ENDIF
+	NEXT
+
+	// PLATFORMS
+	FOR i = 0 TO MAX_PLATFORM
+		GetPlatformPos(i, dtime, pos[])
+		IF pos[4]=FALSE // not hidden
+			ALPHAMODE pos[3]
+			spr = 1
+			IF pos[3] THEN spr=11
+			IF VIEW_3D
+				X_SETTEXTURE spr, -1
+				X_MOVEMENT pos[0]*TUBE_WIDTH-TUBE_WIDTH/2, -pos[1]*JUMP_HEIGHT, 0
+
+				X_SCALING  pos[2]*TUBE_WIDTH, 1, 1.5
+				X_DRAWOBJ 1,0
+				ALPHAMODE 0
+				// bkg walls
+				IF MOD(i,7)=0
+					X_SETTEXTURE 1, -1
+					X_MOVEMENT 0,i*JUMP_HEIGHT,0
+					X_SCALING 1,1,1
+					X_DRAWOBJ 2,0
+				ENDIF
+				X_PRINT INTEGER(MAX_PLATFORM-i), -TUBE_WIDTH/3, -pos[1]*JUMP_HEIGHT, 0, 0
+			ELSE
+				width = pos[2]*screenx/2
+	//			DRAWRECT	pos[0]*screenx-width, pos[1]*JUMP_HEIGHT+yoffset, _
+	//						width*2, JUMP_HEIGHT*.2, _
+	//						RGB(0,255,0)
+				STRETCHSPRITE spr, _
+						pos[0]*screenx-width, pos[1]*JUMP_HEIGHT+yoffset, _
+						 width*2, JUMP_HEIGHT*.2
+				PRINT INTEGER(MAX_PLATFORM-i+1), 0, pos[1]*JUMP_HEIGHT+yoffset
+			ENDIF
+		ENDIF // hidden
+	NEXT
+
+	// WATER
+	ALPHAMODE -.7
+	IF VIEW_3D
+		X_SETTEXTURE 3, -1
+		X_SCALING  5*TUBE_WIDTH, TUBE_WIDTH, 2
+		X_MOVEMENT 0, waterlevel*JUMP_HEIGHT, TUBE_WIDTH/4
+		X_DRAWOBJ 3, 0
+//		X_WORLD2SCREEN 0,waterlevel*JUMP_HEIGHT,0, wx,wy,wz
+	ELSE
+		wy = yoffset - waterlevel*JUMP_HEIGHT
+		STRETCHSPRITE 3, 0, wy, screenx, screeny-wy
+		// DRAWRECT 0, wy, screenx-1, screeny-wy, RGB(0,0,128)
+	ENDIF
+
+	X_MAKE2D
+	ALPHAMODE 0
+
+	IF bestlevel<frog_y[0] THEN bestlevel = frog_y[0]
+	PRINT "Position: " + frog_y[0] + " Best: " + bestlevel, 0, 0
+
+GETFONTSIZE wx, wy
+	PRINT "GLBasic.com", GLOBAL screenx-11*wx, GLOBAL screeny-wy
+
+RETURN
+	dtime=GETTIMERALL()
+	IF dtime>lasttime+1000
+		fps = numframes/(dtime-lasttime)*1000
+		lasttime=dtime
+		numframes=0
+	ENDIF
+	numframes=numframes+1
+	PRINT "FPS:" +FORMAT$(0, 1, fps), 20, 25 // + dtime, 0,0
+ENDFUNCTION // SHOWALL
+
+
+// ------------------------------------------------------------- //
+// -=#  HANDLEFROG  #=-
+// ------------------------------------------------------------- //
+FUNCTION HandleFrog: num, dtime
+	// Diese Variablen sind als LOCAL definiert:
+	// num, dtime
+LOCAL pos[]
+	DIM pos[5]
+	SELECT frog_jump[num]
+	CASE <0 // jumping
+		frog_jump[num] = frog_jump[num] - GETTIMER()/500
+		SetOnPlatform(num, dtime)
+	CASE >0 // falling
+		frog_jump[num] = frog_jump[num] + GETTIMER()/700
+		SetOnPlatform(num, dtime)
+	CASE 0 // standing
+		GetPlatformPos(frog_y[num], dtime, pos[])
+		IF pos[4] // toggling platform - is gone!
+			FallFrog(num, dtime)
+		ENDIF
+	ENDSELECT
+
+	IF frog_y[num]+.5 < waterlevel
+		POPLOOP //Sich selber weg
+		PUSHLOOP "GameOver"
+	ENDIF
+
+ENDFUNCTION // HANDLEFROG
+
+// ------------------------------------------------------------- //
+// -=#  JUMPFROG  #=-
+// Make frog jumping
+// ------------------------------------------------------------- //
+FUNCTION JumpFrog: num, dtime
+LOCAL pos[]
+	DIM pos[5]
+	IF frog_jump[num] <> 0 THEN RETURN
+	GetPlatformPos(frog_y[num], dtime, pos[])
+	frog_jump[num] = -0.01
+	frog_x[num] = pos[0] + frog_x[num]
+	PLAYSOUND( 0, (2*frog_x[num])-1, 1)
+ENDFUNCTION
+
+// ------------------------------------------------------------- //
+// -=#  FALLFROG  #=-
+// Make frog falling
+// ------------------------------------------------------------- //
+FUNCTION FallFrog: num, dtime
+LOCAL pos[]
+	DIM pos[5]
+	IF frog_jump[num] <> 0 THEN RETURN
+	GetPlatformPos(frog_y[num], dtime, pos[])
+	frog_jump[num] = 0.01
+	frog_x[num] = pos[0] + frog_x[num]
+ENDFUNCTION
+
+// ------------------------------------------------------------- //
+// -=#  SETONPLATFORM  #=-
+// Try to attach a frog to the next closest platform
+// ------------------------------------------------------------- //
+FUNCTION SetOnPlatform: num, dtime
+LOCAL frogx
+LOCAL pos[]
+	DIM pos[5]
+	IF ABS(frog_jump[num])>1
+		IF frog_jump[num] > 1 THEN frog_y[num]=frog_y[num]-1
+		IF frog_jump[num] <-1 THEN frog_y[num]=frog_y[num]+1
+		frog_jump[num] = 0
+		// check if you're on a platform now
+		GetPlatformPos(frog_y[num], dtime, pos[])
+		frogx = frog_x[num]
+		frog_x[num] = frog_x[num]-pos[0]
+		IF pos[4] OR (ABS(pos[0] - frogx) > pos[2]/2)
+			FallFrog(num, dtime)
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+
+// ------------------------------------------------------------- //
+// A RND that always returns the _same_ value
+// ------------------------------------------------------------- //
+FUNCTION PseudoRand: num
+LOCAL ps_rnd, i
+	ps_rnd = INTEGER(SQR(1247+num*num) )
+	FOR i=0 TO MOD(num, 7)
+		// ps_rnd = qCOS(360*(ps_rnd+i))+qSIN(ps_rnd*i)*i
+		SELECT MOD(i, 4)
+			CASE 0; ps_rnd=ps_rnd+1027*i
+			CASE 1; ps_rnd=ps_rnd*21+MOD(i, ps_rnd)
+			CASE 2; ps_rnd=ps_rnd*i+13
+			CASE 3; ps_rnd=MOD(ps_rnd, i)
+		ENDSELECT
+	NEXT
+	RETURN ABS(INTEGER(ps_rnd+2))
+ENDFUNCTION
+
+// ------------------------------------------------------------- //
+// -=#  GetPlatformPos  #=-
+// pos[0] = x [0; 1] or -1000 if invisible
+// pos[1] = y [0; n] 1 unit = 1 storey heigth
+// pos[2] = width [0; 1]
+// pos[3] = alphamode (for vanishing blocks)
+// pos[4] = is hidden?
+// ------------------------------------------------------------- //
+FUNCTION GetPlatformPos: num, dtime, pos[]
+	// Diese Variablen sind als LOCAL definiert:
+	// num, dtime
+LOCAL x
+	IF BOUNDS(pos[], 0) < 5 THEN DIM pos[5]
+
+	dtime = dtime * (20+num/MAX_PLATFORM)/200
+	pos[2] = 0.15 + (MAX_PLATFORM-num)/MAX_PLATFORM*0.30
+	pos[3] = 0
+	pos[4] = FALSE
+
+	SELECT MOD(PseudoRand(num),6) // MOD(num-1, 4)
+		CASE 0 // linear motion
+			x = MOD(dtime*(num+10)/MAX_PLATFORM, 2000)/2
+			IF x>500
+				x = (1000-x)/500
+			ELSE
+				x = x/500
+			ENDIF
+		CASE 1 // disapear in the center
+			x = MOD(dtime*num/MAX_PLATFORM, 1000)
+			IF x>700
+				pos[4]=TRUE
+			ENDIF
+			SELECT x
+			CASE <100
+				pos[3] = -x/100 - 0.01
+			CASE >600
+				pos[3] = -(700-x)/100 - 0.01
+			DEFAULT
+				pos[3]=-.95
+			ENDSELECT
+				x = 0.5
+		CASE 2 // sin
+			x = (1+qSIN(dtime*num/MAX_PLATFORM*.5))/2
+		CASE 3 // whacky
+			x = (1+qSIN(dtime*num/MAX_PLATFORM*.3))/2 * (1+qSIN(dtime*0.1))/2
+		CASE 4 // sin + hide
+			x = MOD(dtime*num/MAX_PLATFORM, 2000)/2
+			IF x>700
+				pos[4] = TRUE
+			ENDIF
+			SELECT x
+			CASE <100
+				pos[3] = -x/100 + 0.01
+			CASE >600
+				pos[3] = -(700-x)/100 + 0.01
+			DEFAULT
+				pos[3]=-.95
+			ENDSELECT
+			x = (1+SIN(0.5 * dtime*num/MAX_PLATFORM))/2
+		CASE >4
+			x=.5
+			pos[2]=.1
+	ENDSELECT
+
+	pos[0] = (1-pos[2]) * x + pos[2]/2
+	pos[1] = -num //*JUMP_HEIGHT
+	IF num = 0; pos[2]=1; pos[0]=0.5; pos[3]=0; pos[4]=FALSE; ENDIF
+ENDFUNCTION // GETPLATFROMPOS
+
+FUNCTION qSIN: a
+	WHILE a<0; a=a+360; WEND
+	RETURN gqSin[MOD(a,360)]
+ENDFUNCTION
+
+FUNCTION qCOS: a
+	a=a+90
+	WHILE a<0; a=a+360; WEND
+	RETURN gqSin[MOD(a,360)]
+ENDFUNCTION
+
+
+// ------------------------------------------------------------- //
+//      GAME OVER
+// ------------------------------------------------------------- //
+SUB GameOver:
+LOCAL fx, fy
+	GETFONTSIZE fx, fy
+
+	IF Button()=FALSE
+		ShowAll(GetTime())
+		X_MAKE2D
+		ALPHAMODE -.5
+		STRETCHSPRITE 3, 0,0, screenx,screeny
+		ALPHAMODE 0
+		PRINT "Blub!", (screenx-5*fx)/2, screeny/2
+		SHOWSCREEN
+	ELSE
+		gameon=FALSE
+		POPLOOP
+	ENDIF
+ENDSUB
+
+
+
+// ------------------------------------------------------------- //
+//      TITLE SCREEN
+// ------------------------------------------------------------- //
+SUB TitleScreen:
+LOCAL fx, fy
+	GETFONTSIZE fx, fy
+
+	IF Button()<>FALSE
+		gameon = TRUE
+		starttime = GETTIMERALL()
+
+		POPLOOP //sich selber weg
+		PUSHLOOP "GameOn_Loop"
+	ELSE
+		ShowAll(GetTime())
+		X_MAKE2D
+		ALPHAMODE -.5
+		STRETCHSPRITE 3, 0,0, screenx,screeny
+		ALPHAMODE 0
+		PRINT "JumpFrog!", (screenx-9*fx)/2, screeny/2
+		SHOWSCREEN
+	ENDIF
+ENDSUB
+
+SUB GameOn_Loop:
+	IF NOT gameon
+		POPLOOP
+	ELSE
+		dtime = GetTime()
+		waterlevel=(GETTIMERALL()-starttime)/12000 - 1
+		IF Button() AND frog_jump[0] = 0 THEN JumpFrog(0, dtime)
+		HandleFrog(0, dtime)
+
+		ShowAll(dtime)
+		SHOWSCREEN
+	ENDIF
+ENDSUB
+
+
+
+
+
+

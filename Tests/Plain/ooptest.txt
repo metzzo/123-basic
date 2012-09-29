@@ -1,0 +1,40 @@
+?BLACKLIST ALL
+
+TYPE GameObject
+	X;Y
+	
+	ABSTRACT FUNCTION Update:
+	ABSTRACT FUNCTION Render:
+	
+	FUNCTION Test123:
+		STDOUT "Test123!"
+	ENDFUNCTION
+	
+	FUNCTION ToString$:
+		RETURN "GameObject!"
+	ENDFUNCTION
+	
+	FUNCTION New:
+		STDOUT "GameObject create!"
+	ENDFUNCTION
+ENDTYPE
+
+TYPE Player EXTENDS GameObject
+	FUNCTION ToString$:
+		RETURN "Player"
+	ENDFUNCTION
+	
+	FUNCTION Update:
+		
+	ENDFUNCTION
+	
+	FUNCTION Render:
+		
+	ENDFUNCTION
+ENDTYPE
+
+
+
+LOCAL P AS Player
+LOCAL Obj AS TObject = P
+STDOUT Obj.ToString$()

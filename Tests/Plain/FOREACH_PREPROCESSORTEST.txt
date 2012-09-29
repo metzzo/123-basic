@@ -1,0 +1,28 @@
+?BLACKLIST ALL
+
+GLOBAL Players$[]
+
+DIM Players$[2]
+Players$[0] = "Player1"
+Players$[1] = "Player2"
+FOREACH P$ IN Players$
+	STDOUT "Hallo: "+P$
+NEXT
+
+STDOUT 100*9-8*(4-10/2)
+
+?IF GLB_VERSION > 0
+	STDOUT "Oha nice GLB version!"
+?ENDIF
+
+?IF 100*5 > 10 AND 4-9 = -5
+	STDOUT "nice expression dude"
+?ENDIF
+
+?IFNDEF HTML5
+//Compatibility!
+GOSUB GLB_ON_INIT
+WHILE TRUE
+	GOSUB GLB_ON_LOOP
+WEND
+?ENDIF

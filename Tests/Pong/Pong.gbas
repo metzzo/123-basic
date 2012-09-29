@@ -1,0 +1,147 @@
+// Pong
+
+GOSUB Init
+
+SUB GLB_ON_LOOP:
+	GOSUB MoveAll
+	GOSUB ShowAll
+ENDSUB
+
+
+
+// ------------------------------------------------------------- //
+// -=#  INIT  #=-
+// ------------------------------------------------------------- //
+SUB Init:
+	SETTRANSPARENCY RGB(255, 0, 128)
+	
+	GOSUB ResetBall
+
+	// Reset Bats
+	DIMDATA bat_y[], 240, 240
+	DIMDATA bat_x[],  16, 600
+	DIM score[2]
+
+	LOADBMP    "back.bmp"
+	LOADSPRITE "ball.bmp" ,0
+	LOADSPRITE "bat.bmp", 1
+
+	LOADSOUND "pong.wav", 0, 1
+	PLAYMUSIC "pongtune.mp3", TRUE
+ENDSUB // INIT
+
+
+
+// ------------------------------------------------------------- //
+// -=#  MOVEALL  #=-
+// ------------------------------------------------------------- //
+SUB MoveAll:
+
+// Paddles
+	FOR num=0 TO 1
+		IF KEY(30) THEN bat_y[0]=bat_y[0]-2
+		IF KEY(44) THEN bat_y[0]=bat_y[0]+2
+
+		IF KEY(200) THEN bat_y[1]=bat_y[1]-2
+		IF KEY(208) THEN bat_y[1]=bat_y[1]+2
+
+		IF bat_y[num]<0   THEN bat_y[num]=0
+		IF bat_y[num]>416 THEN bat_y[num]=416
+	NEXT
+
+// Ball
+	ball_x=ball_x+ball_sx
+	ball_y=ball_y+ball_sy
+
+	// Ball Unten am Rand / Ball at lower border
+	IF ball_y>464
+		ball_y=464
+		ball_sy=-ball_sy
+	ENDIF
+
+	// Ball oben am Rand / Ball at upper border
+	IF ball_y<0
+		ball_y=0
+		ball_sy=-ball_sy
+	ENDIF
+
+	// Ball Linker Rand / Ball at left border
+	IF ball_x<0
+		score[1]=score[1]+1
+		GOSUB ResetBall
+	ENDIF
+
+	// Ball rechter Rand / Ball at right border
+	IF ball_x>624
+		score[0]=score[0]+1
+		GOSUB ResetBall
+	ENDIF
+
+// Pong
+	FOR num=0 TO 1
+		IF BOXCOLL(bat_x[num], bat_y[num], 16, 64,   ball_x, ball_y, 16, 16)
+			PLAYSOUND( 0, 0, 1)
+			// Ball wieder zurücksetzten vor den Schläger / Reset Ball in front of bat
+			ball_x=ball_x-ball_sx
+			ball_sx= - ball_sx
+
+			IF ball_sx<0
+				ball_sx=ball_sx-.1
+				ball_sy=ball_sy*1.1
+			ELSE
+				ball_sx=ball_sx+.1
+				ball_sy=ball_sy*1.1
+			ENDIF
+		ENDIF
+	NEXT
+
+ENDSUB // MOVEALL
+
+// ------------------------------------------------------------- //
+// -=#  SHOWALL  #=-
+// ------------------------------------------------------------- //
+SUB ShowAll:
+
+	FOR num=0 TO 1
+		ALPHAMODE -.5
+		DRAWSPRITE 1, bat_x[num]+10, bat_y[num]+20
+		ALPHAMODE 0
+		DRAWSPRITE 1, bat_x[num], bat_y[num]
+		PRINT score[num], num*320 + 32, 16
+	NEXT
+	ALPHAMODE -.5
+	DRAWSPRITE 0, INTEGER(ball_x+10), INTEGER(ball_y+20)
+	ALPHAMODE 0
+	DRAWSPRITE 0, INTEGER(ball_x), INTEGER(ball_y)
+	SHOWSCREEN
+ENDSUB // SHOWALL
+
+// ------------------------------------------------------------- //
+// -=#  RESETBALL  #=-
+// ------------------------------------------------------------- //
+SUB ResetBall:
+	ball_x=320
+	ball_y=240
+
+	IF ball_sx<0
+		ball_sx=1
+	ELSE
+		ball_sx=-1
+	ENDIF
+
+	ball_sy=1
+
+ENDSUB // RESETBALL
+
+
+
+
+
+
+
+
+
+
+
+
+

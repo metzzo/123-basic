@@ -1,0 +1,70 @@
+GLBScript 0.1 - Prealpha
+
+Hey!
+
+I proudly present the first alpha of the new GLBasic to HTML5 compiler, GLBScript! The compiler is fully self hosting
+and works awesome. The compiler produces high quality JavaScript code which runs amazingly fast! Surprisingly
+the JavaScript compiler runs even faster than the native GLBasic compiler, isn't that great?
+
+Further I want to say, that EVERY GLBasic syntax element is now fully working. PROTOTYPEs, "FUNCTION in TYPEs", 
+CALLBACK or even GOTO is doing its job wonderfull! And there I come to the next great improvement I made:
+
+GOTO!
+
+Yep! I've managed to get this beast working in JavaScript and it's quite stable. To get this monster working
+in JavaScript I had to reimplement all flow control structures (IF, WHILE, FOR, FOREACH, REPEAT, ...) in a
+more machine code like structure. Of course as soon as you use a single GOTO in a scope the whole scope gets
+transformed into this, but I think that's quite reasonable.
+
+Filesystem!
+
+The next monster I had to kill was the low level filesystem API of GLBasic. The main problem is, in HTML5
+there is no filesystem alike API available (except for Google Chrome, but this was no choice, because I want
+GLBScript running in every browser!). There is only a Key - Value storage available in every browser. So I
+had to implement a beast I call "Virtual File System". It basically wraps the whole Filesystem into an abstract
+representation in JavaScript. When a file gets saved, I simply serialize this into a string and voilá we have
+persistent file storage across every browser. Even old browsers with no "Localstorage API" this works fine (just
+with less available memory), because as a second choice it uses cookies to save the data. Quite flexible i think!
+
+So all Filesystem functions are available (WRITE... READ... INI... and many more)
+
+I've also ported ALL String and Math functions to JavaScript. And of course a lot of minor problems were fixed (see changelog).
+I also spent some time on improving the 2D Engine of GLBScript. It is fully capable of converting the "Blocks" Sample to HTML5 
+with no changes in the source code (except the GLB_ON_LOOP modification)
+
+
+Self hosting!
+
+As already mentioned, the compiler is fully self hosting. That means it is capable of compiling itself and produce executable 
+JavaScript.
+So what's the goal of this?
+ - It's a good self test whether the compiler compiles accurate code. Compiling a compiler is not a trivial task.
+ - EVAL() would be a possible function, and maybe I will include it.
+ - Online development enviroment is possible. Developing your GLBasic Apps on the web.
+
+ One thing I want to mention is, that suprisingly the JavaScript compiler compiles _faster_ than the native one. I have no idea why,
+ but I am quite happy about this.
+
+
+Improved Debugging!
+
+If an error occurs you see the current line of execution, a detailed stacktrace and of course the error message. The whole API does a lot more
+saftey checks. You are able to get the current stacktrace in GLBasic with the new command "STACKTRACE$".
+
+Google Closure is also used. In Release mode Closure optimizes and minimizes the output code and in Debugmode it cleans the code. Google Closure is 
+a really nice tool!
+
+
+[changelog here]
+
+Download!
+Here you can download the current GLBScript compiler, simply drag your .gbas file or your .gbap project onto the exe file.
+
+
+Future goals!
+
+ - Optimise compiler speed (At the moment the compiler is really slow...)
+ - Get ddgui running on the web (improve 2D engine)
+ - Fix all TODOs in code
+ - Compile every 2D game and execute it properly (after the GLB_ON_LOOP change)
+ - Get 3D commands working and implement a WebGL driver

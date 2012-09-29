@@ -1,0 +1,645 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Thursday, July 28, 2011
+// IDE Version: 9.033
+
+?IFDEF CSCOMPILER
+
+
+//! Generiert JavaScript Code
+FUNCTION CS_Generator$:
+	TRY
+		//nun jeder Variable ihre eigene ID geben (damit keine Kollision!)
+		FOREACH V IN Compiler.Varis[]
+			V.Name$ = V.Name$+"_"+V.ID
+		NEXT
+
+		ManageFuncParamOverlaps()
+
+
+		ForEachCounter = 0
+		LOCAL Text$
+
+		IndentUp()
+		Text$ = Text$ + "namespace GLB {"+NewLine$()
+
+
+		//Prototype
+		FOREACH Func IN Compiler.Funcs[]
+			IF Func.Typ = FUNC_IS_PROTO
+				IndentUp()
+				Text$ = Text$ + "public delegate "+CSGenerateDatatype$(Func.datatype)+" "+Func.OName$+"("
+				LOCAL f% = FALSE
+				FOREACH P IN Func.Params[]
+					IF f THEN Text$ = Text$ + ", "
+					IF Compiler.Varis[P].ref THEN Text$ = Text$ + ", "
+					Text$ = Text$ + CSGenerateDatatype$(Compiler.Varis[P].datatype)+" "+Compiler.Varis[P].Name$
+					f = TRUE
+				NEXT
+				Text$ = Text$ + ");"+NewLine$()
+			ENDIF
+		NEXT
+
+		IndentUp()
+		Text$ = Text$ + "class GLBApp {"+NewLine$()
+		IF DEBUGMODE
+			Text$ = Text$ + "public static string __debugInfo = \"\";"+NewLine$()
+			Text$ = Text$ + "public static bool debugMode = true;"+NewLine$()
+		ELSE
+			Text$ = Text$ + "public static bool debugMode = false;"+NewLine$()
+		ENDIF
+
+		IF LEN(Compiler.Globals[])>0
+			?IFDEF DEBUG
+			Text$ = Text$ + "//init globals, default value!! "+NewLine$()
+			?ENDIF
+			Text$ = Text$ + CSVariDef$(Compiler.Globals[], TRUE, FALSE, TRUE)
+		ENDIF
+
+		Text$ = Text$ + "public static void Main(string[] args)"
+		Text$ = Text$ + CS_Generate$(Exprs[Compiler.MainScope])+NewLine$()
+
+		LOCAL StaticText$ = ""
+		FOREACH Func IN Compiler.Funcs[]
+			IF Func.Native = FALSE AND Func.Scp<>-1
+				//statics definieren
+				IF LEN(Func.Statics[])>0 THEN StaticText$ = StaticText$ + CSVariDef$(Func.Statics[])
+
+				Text$ = Text$ + "public static "+CSGenerateDatatype$(Func.datatype)+" "+Func.Name$+"("
+				LOCAL Find = FALSE
+				FOREACH P IN Func.Params[]
+					IF Find THEN Text$ = Text$ + ", "
+					IF Compiler.Varis[P].ref THEN Text$ = Text$ + "ref "
+					Text$ = Text$ + CSGenerateDatatype$(Compiler.Varis[P].datatype) + " " + Compiler.Varis[P].Name$
+
+					Find = TRUE
+				NEXT
+				Text$ = Text$ + ") "
+				Text$ = Text$ + CS_Generate$(Exprs[Func.Scp])+ NewLine$()
+
+			ENDIF
+		NEXT
+
+
+		//Types
+		FOREACH Typ IN Compiler.Types[]
+			IndentUp()
+			Text$ = Text$ +"public class "+Typ.Name$+" {"+NewLine$()
+			//defaults setzen
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				Text$ = Text$ +  "public "+CSGenerateDatatype$(variable.datatype)+" "+variable.Name$
+				Text$ = Text$ + " = "
+				Text$ = Text$ + CSGetDefaultValue$(variable.datatype, FALSE)
+				Text$ = Text$ + ";"+NewLine$()
+			NEXT
+
+			//richtige defaults
+			IndentUp()
+			Text$ = Text$ + "public " + Typ.Name$ + "() {"+NewLine$()
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				IF variable.PreDef<>-1
+					Text$ = Text$ +  "this."+variable.Name$ + " = " +CS_Generate$(Exprs[variable.PreDef])+";"+NewLine$()
+				ENDIF
+			NEXT
+			IndentDown()
+			Text$ = Text$ +NewLine$() + "}"+NewLine$()
+
+			//copy!
+			IndentUp()
+			Text$ = Text$ + "public "+Typ.Name$+" Copy() {"+NewLine$()
+			Text$ = Text$ + Typ.Name$ + " other = new "+Typ.Name$+"();"+NewLine$()
+			FOREACH Attr IN Typ.Attributes[]
+				ALIAS variable AS Compiler.Varis[Attr]
+				Text$ = Text$ +  "other."+variable.Name$ + " = this." +variable.Name$+".Copy();"+NewLine$()
+			NEXT
+			IndentDown()
+			Text$ = Text$ + "return other;"+NewLine$()
+			Text$ = Text$ + "}"
+
+			//Methods reinhauen!
+			FOREACH Mth IN Typ.Methods[]
+				ALIAS AlMth AS Compiler.Funcs[Mth]
+				Text$ = Text$ + "public "+CSGenerateDatatype$(AlMth.datatype)+" " + AlMth.OName$+"("
+				LOCAL Params$ = ""
+				LOCAL i% = 0
+				FOR i = 0 TO LEN(Compiler.Funcs[Mth].Params[])-2 //-2 weil kein self und so
+					IF i > 0 THEN Text$ = Text$ + ", "
+
+					IF Compiler.Varis[AlMth.Params[i]].ref THEN Text$ = Text$ + "ref "
+
+					Text$ = Text$ + CSGenerateDatatype$(Compiler.Varis[AlMth.Params[i]].datatype)+" arg"+i
+
+					Params$ = Params$ + "arg"+i+", "
+				NEXT
+
+				Text$ = Text$ + ") { return "+Compiler.Funcs[Mth].Name$+"(" + Params$ + "selfVar); }"+NewLine$()
+			NEXT
+
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "};" + NewLine$()
+		NEXT
+
+
+		//data block
+		FOREACH block IN Compiler.DataBlocks[]
+			Text$ = Text$ + "public static Object[] datablock_"+block.Name$+" = [ "
+			LOCAL Done% = FALSE
+			FOREACH d IN block.Datas[]
+				IF Done THEN Text$ = Text$ + ", "
+				Text$ = Text$ + CS_Generate$(Exprs[d])
+				Done = TRUE
+			NEXT
+			Text$ = Text$ + " ];"+NewLine$()
+		NEXT
+
+		IF TRIM$(StaticText$) <> ""
+			Text$ = Text$ + "// set default statics:"+NewLine$()
+			Text$ = Text$ + StaticText$
+		ENDIF
+
+		IndentDown()
+		Text$ = Text$ + NewLine$() + "}" + NewLine$()
+		IndentDown()
+		Text$ = Text$ + "}"+NewLine$()
+
+
+//		IF OPENFILE(0, "GLBScript_CS.cs", 0)
+//			WRITESTR 0, Text$
+//			CLOSEFILE 0
+//		ELSE
+//			Error("Cannot save output C# file", CODELINE(), CODEFILE$())
+//		ENDIF
+
+		RETURN Text$
+	CATCH Err$
+	FINALLY
+ENDFUNCTION
+
+
+FUNCTION CS_Generate$: expr AS Expr
+	?IFDEF DEBUG
+	STDOUT "Generating expression: '"+REPLACE$(Compiler.Tokens[expr.tokID].Text$,"\n","")+"' in Line "+Compiler.Tokens[expr.tokID].LineContent$+" type: "+expr.Typ+"\n"
+	?ENDIF
+
+	Compiler.currentPosi = expr.tokID
+	LOCAL Text$ = ""
+	SELECT expr.Typ
+		CASE EXPR_IS_SCOPE
+			LOCAL oScp = CurrentScope
+			LOCAL oFunc = CurrentFunc
+			LOCAL IsFunc% = FALSE
+
+
+
+			IF expr.ScpTyp = SCOPE_IS_FUNC// OR expr.ScpTyp = FUNC_IS_METHOD TODO: schauen ob da nicht was anderes hingehört
+				LOCAL i%
+				FOREACH Func IN Compiler.Funcs[]
+					IF Func.Scp = expr.ID
+						CurrentFunc = i
+						IsFunc = TRUE
+						BREAK
+					ENDIF
+					INC i
+				NEXT
+			ENDIF
+			CurrentScope = expr.ID
+
+			IndentUp()
+			Text$ = Text$ + "{"
+
+			Text$ = Text$ + NewLine$()
+
+
+			LOCAL Def$ = CSVariDef$(expr.Varis[], FALSE, TRUE)
+			IF TRIM$(Def$) <> ""
+				Text$ = Text$ + Def$
+			ENDIF
+
+			IF CurrentFunc <> -1 AND oFunc = -1
+				//IN JS muss man hier unterscheiden, in C# nicht => Namen gleichsetzen
+				FOREACH Param IN Compiler.Funcs[CurrentFunc].Params[]
+					IF Compiler.Varis[Param].OwnerVari <> -1
+						Compiler.Varis[Compiler.Varis[Param].OwnerVari].Name$ = Compiler.Varis[Param].Name$
+					ENDIF
+				NEXT
+			ENDIF
+
+
+			LOCAL ERes$[]
+			FOREACH Ex IN expr.Exprs[]
+				LOCAL add$ = CS_Generate$(Exprs[Ex])
+				IF TRIM$(add$)<>""
+					DIMPUSH ERes$[], Ex
+					DIMPUSH ERes$[], add$
+				ENDIF
+			NEXT
+
+
+			LOCAL FirstText$ = ""
+			FOR i = 0 TO LEN(ERes$[])-1 STEP 2
+				LOCAL add$ = ERes$[i+1]
+				LOCAL Ex% = ERes$[i]
+				ALIAS ExEx AS Exprs[Ex]
+
+				IF DEBUGMODE
+					LOCAL Add$ = "__debugInfo = \""+Compiler.Tokens[Exprs[Ex].tokID].Line+":"+Compiler.Tokens[Exprs[Ex].tokID].Path$+"\";"
+					Text$ = Text$ + Add$ +NewLine$()
+					IF FirstText$ = "" THEN FirstText$ = Add$
+				ENDIF
+
+				Text$ = Text$ + add$
+				Text$ = Text$ + ";"+NewLine$()
+			NEXT
+
+			IF FirstText$ <> ""
+				Text$ = Text$ + FirstText$
+			ENDIF
+
+			IndentDown()
+			Text$ = Text$ + NewLine$()
+			Text$ = Text$ + "}"
+			Text$ = Text$ + NewLine$()
+
+			CurrentScope = oScp
+			CurrentFunc = oFunc
+		CASE EXPR_IS_OPERATOR
+			LOCAL Sym$ = Operators[expr.Op].Sym$
+			LOCAL HasToBeInt = FALSE, IsRealBool% = FALSE
+			SELECT Sym$
+				CASE "="
+					Sym$ = "=="
+					HasToBeInt = TRUE
+				CASE "<>"
+					Sym$ = "!="
+					HasToBeInt = TRUE
+				CASE "OR"
+					Sym$ = "||"
+					HasToBeInt = TRUE
+					IsRealBool = TRUE
+				CASE "AND"
+					Sym$ = "&&"
+					HasToBeInt = TRUE
+					IsRealBool = TRUE
+				CASE "<"
+					HasToBeInt = TRUE
+				CASE ">"
+					HasToBeInt = TRUE
+				CASE ">="
+					HasToBeInt = TRUE
+				CASE "<="
+					HasToBeInt = TRUE
+				//...
+			ENDSELECT
+			IF HasToBeInt
+				IF IsRealBool
+					IF Exprs[expr.Left].datatype.Name$ = "string"
+						Text$ = Text$ + "(((GLBNative.CastToInt(" + CS_Generate$(Exprs[expr.Left]) + ") != 0)" + Sym$ + " (GLBNative.CastToint(" + CS_Generate$(Exprs[expr.Right]) + ") != 0)) ? 1 : 0)"
+					ELSE
+						Text$ = Text$ + "((((" + CS_Generate$(Exprs[expr.Left]) + ") != 0)" + Sym$ + " ((" + CS_Generate$(Exprs[expr.Right]) + ") != 0)) ? 1 : 0)"
+					ENDIF
+				ELSE
+					Text$ = Text$ + "(((" + CS_Generate$(Exprs[expr.Left]) + ")" + Sym$ + " (" + CS_Generate$(Exprs[expr.Right]) + ")) ? 1 : 0)"
+				ENDIF
+			ELSE
+				LOCAL l$ = CS_Generate$(Exprs[expr.Left])
+				IF Sym$ = "-" AND l$ = "0"
+					Text$ = Text$ + "-("+CS_Generate$(Exprs[expr.Right])+")"
+				ELSE
+					Text$ = Text$ + "((" + l$  + ") " + Sym$ + " (" + CS_Generate$(Exprs[expr.Right]) + "))"
+				ENDIF
+			ENDIF
+		CASE EXPR_IS_INT
+			Text$ = expr.intval
+		CASE EXPR_IS_FLOAT
+			Text$ = expr.floatval
+		CASE EXPR_IS_STR
+			LOCAL str$ = expr.strval$
+			//Nun die unbekannten \ masken!
+//			LOCAL p = INSTR(str$, "\\")
+//			WHILE p <> -1
+//				INC p
+//				LOCAL t$ = CHR$(ASC(str$, p))
+//				IF t$ = "n" OR t$ = "t" OR t$ = "f" OR t$ = "\\"
+//					//lass es drinnen
+//				ELSE
+//					//Escape
+//					LOCAL l$ = LEFT$(str$, p)
+//					LOCAL r$ = MID$(str$,p)
+//					str$ = l$ + "\"" + r$
+//				ENDIF
+//
+//
+//				p = INSTR(str$, "\\", p)
+//			WEND
+
+			Text$ = str$
+		CASE EXPR_IS_FUNCCALL
+			IF Compiler.Funcs[expr.func].Typ = FUNC_IS_METHOD
+				LOCAL P% = expr.Params[-1]
+				Text$ = Text$ + "("+CS_Generate$(Exprs[P])+")."+Compiler.Funcs[expr.func].OName$+CSDoParameter$(expr, expr.func)
+			ELSE
+				//Ist es eine Native funktion, wenn ja => Native. anhängen
+				IF Compiler.Funcs[expr.func].Native
+					Text$ = Text$ + "GLBNative."
+				ENDIF
+				Text$ = Text$ + Compiler.Funcs[expr.func].Name$+CSDoParameter$(expr, expr.func)
+			ENDIF
+		CASE EXPR_IS_PROTOCALL
+			Text$ = Text$ + CS_Generate$(Exprs[expr.expr])+CSDoParameter$(expr)
+		CASE EXPR_IS_VARI
+			Text$ = Text$ + Compiler.Varis[expr.vari].Name$
+		CASE EXPR_IS_ARRAY
+			Text$ = Text$ +  CS_Generate$(Exprs[expr.array])
+			IF LEN(expr.dims[]) <> 0
+				Text$ = Text$ + "[GLBNative.CastToInt("
+				LOCAL Found% = FALSE
+				FOREACH d IN expr.dims[]
+					IF Found THEN Text$ = Text$ + ", "
+
+					Text$ = Text$ +  CS_Generate$(Exprs[d])
+
+					Found = TRUE
+				NEXT
+				Text$ = Text$ +")]"
+			ENDIF
+		CASE EXPR_IS_ASSIGN
+			Text$ = Text$ + CS_Generate$(Exprs[expr.vari]) + " = " + CS_Generate$(Exprs[expr.Right])
+			IF Exprs[expr.vari].datatype.IsArray OR IsType(Exprs[expr.vari].datatype.Name$)
+				IF Exprs[expr.Right].Typ <> EXPR_IS_DEFVAL AND Exprs[expr.Right].Typ <> EXPR_IS_DIMASEXPR
+					Text$ = Text$ + ".Copy()"
+				ENDIF
+			ENDIF
+		CASE EXPR_IS_DIM
+			LOCAL v% = GetVariable(expr.array, FALSE)
+
+			Text$ = Text$ + CS_Generate$(Exprs[expr.array])+".dim(new int[] {"
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + CS_Generate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "})"
+
+		CASE EXPR_IS_REDIM
+			LOCAL v% = GetVariable(expr.array, FALSE)
+
+			Text$ = Text$ + CS_Generate$(Exprs[expr.array])+".redim( new int[] {"
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + CS_Generate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "})"
+		CASE EXPR_IS_CAST2INT
+			Text$ = Text$ + "GLBNative.CastToInt(" + CS_Generate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_CAST2FLOAT
+			Text$ = Text$ + "GLBNative.CastToFloat("+CS_Generate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_CAST2STRING
+			Text$ = Text$ + "(\"\"+("+CS_Generate$(Exprs[expr.expr])+"))"
+		CASE EXPR_IS_ACCESS
+			Text$ = Text$ + CS_Generate$(Exprs[expr.expr]) + "." + CS_Generate$(Exprs[expr.nextExpr])
+		CASE EXPR_IS_RETURN
+			Text$ = Text$ + "return "+CS_Generate$(Exprs[expr.expr])+".Copy()"
+		CASE EXPR_IS_FUNCDATA
+			Text$ = Text$ + expr.datatype.Name$
+		CASE EXPR_IS_IF
+			FOR i = 0 TO LEN(expr.Conditions[]) - 1
+				IF i = 0
+					Text$ = Text$ + "if"
+				ELSE
+					Text$ = Text$ + " else if"
+				ENDIF
+				Text$ = Text$ + " ((" + CSCondition_Generate$(Exprs[expr.Conditions[i]]) + ") != 0) "
+				Text$ = Text$ + CS_Generate$(Exprs[expr.Scopes[i]])
+			NEXT
+			IF expr.elseScope <> -1
+				Text$ = Text$ + " else "+CS_Generate$(Exprs[expr.elseScope])
+			ENDIF
+		CASE EXPR_IS_WHILE
+			Text$ = Text$ + "while (("+CSCondition_Generate$(Exprs[expr.expr])+") != 0) "
+			Text$ = Text$ + CS_Generate$(Exprs[expr.Scp])
+		CASE EXPR_IS_REPEAT
+			Text$ = Text$ + "do "
+			Text$ = Text$ + CSCondition_Generate$(Exprs[expr.Scp])
+			Text$ = Text$ + " while (("+CS_Generate$(Exprs[expr.expr])+") != 0)"
+		CASE EXPR_IS_FOR
+			LOCAL CheckComm$
+			IF expr.hasTo
+				CheckComm$ = "toCheck"
+			ELSE
+				CheckComm$ = "untilCheck"
+			ENDIF
+			Text$ = Text$ + "for ("+CS_Generate$(Exprs[expr.varExpr])+";GLBNative."+CheckComm$+"("+CS_Generate$(Exprs[Exprs[expr.varExpr].vari])+", "+CS_Generate$(Exprs[expr.toExpr])+", "+CS_Generate$(Exprs[expr.stepExpr])+");"+CS_Generate$(Exprs[Exprs[expr.varExpr].vari])+" += "+CS_Generate$(Exprs[expr.stepExpr])+") "
+			Text$ = Text$ + CS_Generate$(Exprs[expr.Scp])
+		CASE EXPR_IS_FOREACH
+			ForEachCounter = expr.ID
+			LOCAL c% = ForEachCounter
+			Text$ = Text$ + CSGenerateDatatype$(Exprs[expr.inExpr].datatype)+ " forEachSaver"+c+" = "+CS_Generate$(Exprs[expr.inExpr])+";"+NewLine$()
+			LOCAL varName$ = CS_Generate$(Exprs[expr.varExpr])
+			LOCAL StartText$ = "int forEachCounter"+c+" = 0"
+			LOCAL CondText$ = "forEachCounter"+c+" < forEachSaver"+c+".Length"
+			LOCAL IncText$ = "forEachCounter"+c+"++"
+			LOCAL EachBegin$ = CSGenerateDatatype$(Exprs[expr.varExpr].datatype)+ " " + varName$ + " = forEachSaver"+c+"[forEachCounter"+c+"];"+NewLine$()
+			LOCAL EachEnd$ = "forEachSaver"+c+"[forEachCounter"+c+"] = " + varName$ + ";"+NewLine$()
+			IndentUp()
+			Text$ = Text$ + "for("+StartText$+" ; "+CondText$+" ; "+IncText$+") {"+NewLine$()
+			Text$ = Text$ + EachBegin$
+			Text$ = Text$ + CS_Generate$(Exprs[expr.Scp])+NewLine$()
+			Text$ = Text$ + EachEnd$
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "}"
+		CASE EXPR_IS_CONTINUE
+			Text$ = Text$ + "continue"
+		CASE EXPR_IS_BREAK
+			Text$ = Text$ + "break"
+		CASE EXPR_IS_TRY
+			IsInGoto = FALSE
+
+			Text$ = Text$ + "try "
+			Text$ = Text$ + CS_Generate$(Exprs[expr.Scp])
+			IndentUp()
+			Text$ = Text$ + " catch (GLBException glbEx) {"+NewLine$()
+			Text$ = Text$ + Compiler.Varis[expr.vari].Name$+" = glbEx.toString();"+NewLine$()
+			Text$ = Text$ + CS_Generate$(Exprs[expr.catchScp])
+			IndentDown()
+			Text$ = Text$ + NewLine$() + "}"
+		CASE EXPR_IS_THROW
+			Text$ = Text$ + "throw new GLBException(" + CS_Generate$(Exprs[expr.expr])+ ")"
+		CASE EXPR_IS_RESTORE
+			Text$ = Text$ + "RESTORE(datablock_"+expr.Name$+")"
+		CASE EXPR_IS_READ
+			LOCAL i = 0
+			FOREACH R IN expr.Reads[]
+				Text$ = Text$ + CS_Generate$(Exprs[R])+" = READ()"
+				IF i < LEN(expr.Reads[])-1 THEN Text$ = Text$ + ";"+NewLine$()
+				INC i
+			NEXT
+		CASE EXPR_IS_DEFVAL
+			Text$ = Text$ + CSGetDefaultValue$(expr.datatype, FALSE)
+		CASE EXPR_IS_DIMASEXPR
+			Text$ = Text$ + "DIM(new GLBArray<"+CSGenerateDatatype$(expr.datatype)+">(), ["
+			LOCAL Find% = FALSE
+			FOREACH D IN expr.dims[]
+				IF Find = TRUE THEN Text$ = Text$ + ", "
+				Text$ = Text$ + CS_Generate$(Exprs[D])
+
+				Find = TRUE
+			NEXT
+			Text$ = Text$ + "], "+CSGetDefaultValue$(expr.datatype, TRUE)+")"
+		CASE EXPR_IS_ALIAS
+			Text$ = Text$ + Compiler.Varis[expr.vari].Name$ + " = " + CS_Generate$(Exprs[expr.expr])
+		CASE EXPR_IS_GOTO
+			Text$ = Text$ + "goto "+expr.Name$
+		CASE EXPR_IS_LABEL
+			Text$ = Text$ + expr.Name$+":"
+		CASE EXPR_IS_INC
+			Text$ = Text$ + CS_Generate$(Exprs[expr.vari])+"+="+CS_Generate$(Exprs[expr.expr])
+		CASE EXPR_IS_DIMPUSH
+			Text$ = Text$ + CS_Generate$(Exprs[expr.vari])+".dimpush("+ CS_Generate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_LEN
+			Text$ = Text$ + "("+CS_Generate$(Exprs[expr.expr])+").Length"
+		CASE EXPR_IS_BOUND
+			Text$ = Text$ + "("+CS_Generate$(Exprs[expr.array])+").bounds("+CS_Generate$(Exprs[expr.position])+")"
+		CASE EXPR_IS_DIMDATA
+			IF LEN(expr.Exprs[]) > 0
+				Text$ = Text$ + ""+CS_Generate$(Exprs[expr.array])+".dimdata(new "+CSGenerateDatatype$(Exprs[expr.Exprs[0]].datatype)+"[] {"
+				LOCAL Find%
+				FOREACH Elem IN expr.Exprs[]
+					IF Find THEN Text$ = Text$ + ", "
+
+					Text$ = Text$ + CS_Generate$(Exprs[Elem])
+
+					Find = TRUE
+				NEXT
+				Text$ = Text$ + "})"
+			ENDIF
+		CASE EXPR_IS_DELETE
+			Text$ = Text$ + "//DELETE!!111"+NewLine$()
+			Text$ = Text$ + "forEachSaver"+ForEachCounter+"[forEachCounter"+ForEachCounter+"] = " + CS_Generate$(Exprs[Exprs[ForEachCounter].varExpr]) + ";"+NewLine$()
+			Text$ = Text$ + "forEachSaver"+ForEachCounter+".dimdel(forEachCounter"+ForEachCounter+");"+NewLine$()
+			Text$ = Text$ + "forEachCounter"+ForEachCounter+"--;"+NewLine$()
+			Text$ = Text$ + "continue"
+		CASE EXPR_IS_DIMDEL
+			Text$ = Text$ + CS_Generate$(Exprs[expr.array])+".dimdel("+CS_Generate$(Exprs[expr.position])+")"
+		CASE EXPR_IS_NOT
+			Text$ = Text$ + "(("+CS_Generate$(Exprs[expr.expr])+") ? 0 : 1)"
+		CASE EXPR_IS_ADDRESSOF
+			Text$ = Text$ + Compiler.Funcs[expr.func].Name$
+		CASE EXPR_IS_ASSERT
+			LOCAL Cond$ = CS_Generate$(Exprs[expr.expr])
+			Text$ = Text$ + "if (!("+Cond$+")) throw new GLBAssertException("+Cond$+")"
+		CASE EXPR_IS_DEBUGOUTPUT
+			Text$ = Text$ + "DEBUG("+CS_Generate$(Exprs[expr.expr])+")"
+		CASE EXPR_IS_IIF
+			Text$ = Text$ + "(("+CS_Generate$(Exprs[expr.Conditions[0]])+") ? ("+CS_Generate$(Exprs[expr.Scopes[0]])+") : (" + CS_Generate$(Exprs[expr.elseScope]) + "))"
+		CASE EXPR_IS_REQUIRE
+			Text$ = Text$ + "//REQUIRE: "+expr.Name$+"\n"
+			Text$ = Text$ + expr.Content$+NewLine$()
+			Text$ = Text$ + "//ENDREQUIRE: "+expr.Name$+NewLine$()
+		CASE EXPR_IS_EMPTY
+		CASE EXPR_IS_DEBUG
+			Error("Invalid Expression", CODELINE(), CODEFILE$())
+		DEFAULT
+			Error("Unknown expression type: "+expr.Typ, CODELINE(), CODEFILE$())
+	ENDSELECT
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION CSDoParameter$: expr AS Expr, func% = -1
+	LOCAL Text$ = "("
+	LOCAL i = 0
+
+
+	FOREACH param IN expr.Params[]
+		IF func <> -1 AND Compiler.Funcs[func].Typ = FUNC_IS_METHOD AND i = LEN(expr.Params[])-1 THEN BREAK
+		IF i THEN Text$ = Text$ + ", "
+		IF func <> -1 AND Compiler.Varis[Compiler.Funcs[func].Params[i]].ref
+			Text$ = Text$ + "ref " //Ref rein!
+		ENDIF
+
+		Text$ = Text$ +CS_Generate$(Exprs[param])
+
+		INC i
+	NEXT
+	Text$ = Text$ + ")"
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION CSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE, CreateStatic% = FALSE
+	LOCAL Text$ = ""
+	LOCAL Find = FALSE
+	FOREACH Var IN Varis[]
+		IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND (NoStatic = FALSE OR Compiler.Varis[Var].Typ <> VARI_IS_STATIC) AND CSShouldRedeclare(Var)
+			IF CreateStatic THEN Text$ = Text$ + "public static "
+			Text$ = Text$ + CSGenerateDatatype$(Compiler.Varis[Var].datatype) + " "
+			Text$ = Text$ + Compiler.Varis[Var].Name$ + " = "
+			IF Compiler.Varis[Var].PreDef <> -1 AND (ForceDefault = FALSE OR Compiler.Varis[Var].Typ = VARI_IS_CONST)
+				Text$ = Text$ + CS_Generate$(Exprs[Compiler.Varis[Var].PreDef])
+			ELSE
+				Text$ = Text$ + CSGetDefaultValue$(Compiler.Varis[Var].datatype, FALSE)
+			ENDIF
+			Text$ = Text$ + ";" + NewLine$()
+		ENDIF
+	NEXT
+
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION CSCondition_Generate$: expr AS Expr
+	IF expr.Typ = EXPR_IS_CAST2FLOAT
+		RETURN CS_Generate$(Exprs[expr.expr])
+	ELSE
+		RETURN CS_Generate$(expr)
+	ENDIF
+ENDFUNCTION
+
+
+FUNCTION CSGetDefaultValue$: datatype AS Datatype, IgnoreArray%
+	LOCAL RetVal$ = ""
+	IF datatype.IsArray AND IgnoreArray = FALSE
+		RetVal$ = "new GLBArray<"+ChangeTypeName$(datatype.Name$)+">()"
+	ELSE
+		SELECT datatype.Name$
+			CASE "int"
+				RetVal$ = "0"
+			CASE "float"
+				RetVal$ = "0.0f"
+			CASE "string"
+				RetVal$ = "\"\""
+			DEFAULT
+				IF IsType(datatype.Name$)
+					RetVal$ = "new "+LastType.Name$+"()"
+				ELSE
+					RetVal$ = ChangeTypeName$(datatype.Name$)
+				ENDIF
+		ENDSELECT
+	ENDIF
+	RETURN RetVal$
+ENDFUNCTION
+
+FUNCTION CSGenerateDatatype$: datatyp AS Datatype
+	IF datatyp.IsArray
+		RETURN "GLBArray<"+ChangeTypeName$(datatyp.Name$)+">"
+	ELSE
+		RETURN ChangeTypeName$(datatyp.Name$)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION CSShouldRedeclare%: Var%
+	IF CurrentFunc <> -1 // AND Compiler.Varis[Var].Typ = VARI_IS_LOCAL
+		FOREACH P IN Compiler.Funcs[CurrentFunc].CopyParams[]
+			IF P = Var
+				RETURN FALSE
+			ENDIF
+		NEXT
+	ENDIF
+	RETURN TRUE
+ENDFUNCTION
+?ENDIF

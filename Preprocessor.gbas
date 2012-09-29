@@ -1,0 +1,244 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Monday, November 14, 2011
+// IDE Version: 10.159
+
+FUNCTION Precompiler:
+	Start()
+	TRY
+		WHILE EOFParse()
+			PreCommand(FALSE)
+		WEND
+	CATCH Err$
+	FINALLY
+ENDFUNCTION
+FUNCTION PreCommand%: IgnoreAll%
+	IF IsToken("?")
+		MatchAndRemove("?", CODELINE(), CODEFILE$())
+		LOCAL Cur$ = GetCurrent$()
+		RemoveCurrent()
+		SELECT Cur$
+			CASE "DEFINE"
+				LOCAL Def AS TDefine
+				Def.Key$ = GetCurrent$()
+				RemoveCurrent()
+				IF IsToken("\n") = FALSE
+					Def.Value$ = GetCurrent$()
+					RemoveCurrent()
+				ELSE
+					Def.Value$ = TRUE
+				ENDIF
+				IF NOT IgnoreAll THEN DIMPUSH Defines[], Def
+			CASE "UNDEF"
+				IF NOT IgnoreAll
+					FOREACH Def IN Defines[]
+						IF IsToken(Def.Key$) THEN DELETE Def
+					NEXT
+				ENDIF
+				RemoveCurrent()
+			CASE "IFDEF"
+				IF NOT IgnoreAll
+					LOCAL doIt% = FALSE
+					FOREACH Def IN Defines[]
+						IF IsToken(Def.Key$)
+							doIt = TRUE
+							BREAK
+						ENDIF
+					NEXT
+					RemoveCurrent()
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+					PreIf(doIt)
+				ELSE
+					RemoveCurrent()
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+					PreIf(2)
+				ENDIF
+			CASE "IFNDEF"
+				IF NOT IgnoreAll
+					LOCAL doIt% = TRUE
+					FOREACH Def IN Defines[]
+						IF IsToken(Def.Key$)
+							doIt = FALSE
+							BREAK
+						ENDIF
+					NEXT
+					RemoveCurrent()
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+
+					PreIf(doIt)
+				ELSE
+					RemoveCurrent()
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+					PreIf(2)
+				ENDIF
+			CASE "IF"
+				IF NOT IgnoreAll
+					//ein term -.-, muss nun geparst werden
+					LOCAL Result% = FALSE
+					LOCAL Pos = Compiler.currentPosi
+					TRY
+						Result = CalculateTree(Exprs[Expression()])
+					CATCH Error$
+						Error("Unable to evaluate IF (syntax error?) '"+Error$+"'", CODELINE(), CODEFILE$())
+					FINALLY
+					Compiler.currentPosi = Pos - 1
+					GetNext()
+
+					WHILE NOT IsToken("\n")
+						RemoveCurrent()
+					WEND
+
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+
+
+					IF Result = TRUE
+						PreIf(TRUE)
+					ELSE
+						PreIf(FALSE)
+					ENDIF
+				ELSE
+					WHILE NOT IsToken("\n")
+						RemoveCurrent()
+					WEND
+					MatchAndRemove("\n", CODELINE(), CODEFILE$())
+
+					PreIf(2)
+				ENDIF
+			CASE "WARNING"
+				IF NOT IgnoreAll THEN Warning(GetCurrent$())
+				RemoveCurrent()
+			CASE "ERROR"
+				IF NOT IgnoreAll THEN Error(GetCurrent$(), CODELINE(), CODEFILE$())
+				RemoveCurrent()
+			CASE "ELSE"
+				RETURN 1
+			CASE "ENDIF"
+				RETURN 2
+//			CASE "BLACKLIST"
+//				IF NOT IgnoreAll
+//					IF IsToken("ALL")
+//						Compiler.BlacklistAll = TRUE
+//					ELSE
+//						LOCAL File$ = REPLACE$(GetCurrent$(), "\"","")
+//						DIMPUSH Compiler.Blacklists$[], File$
+//					ENDIF
+//				ENDIF
+//				RemoveCurrent()
+			CASE "OPTIMIZE"
+				IF NOT IgnoreAll
+					SELECT GetCurrent$()
+						CASE "SIMPLE"
+							OptimizeLevel = 1
+						CASE "AGGRESSIVE"
+							OptimizeLevel = 2
+						CASE "NONE"
+							OptimizeLevel = 0
+						DEFAULT
+							Error("Unknown optimization level", CODELINE(), CODEFILE$())
+					ENDSELECT
+				ENDIF
+				RemoveCurrent()
+			CASE "GRAPHICS"
+				IF NOT IgnoreAll THEN CONSOLE = FALSE
+
+			DEFAULT
+				Error("Expecting preprocessor command got '"+Cur$+"'", CODELINE(), CODEFILE$())
+		ENDSELECT
+
+		MatchAndRemove("\n", CODELINE(), CODEFILE$())
+	ELSE
+		LOCAL Is$ = GetCurrent$()
+		IF Is$ = "_"
+			RemoveCurrent()
+			MatchAndRemove("\n", CODELINE(), CODEFILE$())
+		ELSE
+			IF IgnoreAll
+				RemoveCurrent()
+			ELSE
+				GetNext()
+			ENDIF
+		ENDIF
+	ENDIF
+
+	RETURN 0
+ENDFUNCTION
+
+FUNCTION PreIf: doIt%
+	LOCAL Text$
+	IF doIt = 0
+		IF PreSkip(TRUE) = 1
+			MatchAndRemove("\n", CODELINE(), CODEFILE$())
+		 	//ELSE
+		 	IF PreSkip(FALSE) = 1 THEN Error("Expecting '?ENDIF'", CODELINE(), CODEFILE$())
+		ENDIF
+	ELSEIF doIt = 1
+		IF PreSkip(FALSE) = 1
+			IF PreSkip(TRUE) = 1 THEN Error("Expectiong '?ENDIF'", CODELINE(), CODEFILE$())
+		ENDIF
+	ELSEIF doIt = 2
+		//Alles überspringen
+		IF PreSkip(TRUE) = 1
+			IF PreSkip(TRUE) = 1 THEN Error("Expecting '?ENDIF'", CODELINE(), CODEFILE$())
+		ENDIF
+	ELSE
+		Error("Internal error (unknown preif)", CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+FUNCTION PreSkip: RemoveAll%
+	WHILE EOFParse()
+		LOCAL E% = PreCommand(RemoveAll%)
+		IF  E > 0
+			RETURN E
+		ENDIF
+	WEND
+	Error("Unexpected End Of File (maybe missing ?ENDIF)", CODELINE(), CODEFILE$())
+ENDFUNCTION
+
+FUNCTION CalculateTree: expr AS Expr
+	SELECT expr.Typ
+		CASE EXPR_IS_INT
+			RETURN expr.intval
+		CASE EXPR_IS_FLOAT
+			RETURN expr.floatval
+		CASE EXPR_IS_NOT
+			RETURN NOT CalculateTree(Exprs[expr.expr])
+		CASE EXPR_IS_CAST2INT
+			RETURN INTEGER(CalculateTree(Exprs[expr.expr]))
+		CASE EXPR_IS_CAST2FLOAT
+			RETURN CalculateTree(Exprs[expr.expr])
+		CASE EXPR_IS_OPERATOR
+			LOCAL Left = CalculateTree(Exprs[expr.Left])
+			LOCAL Right = CalculateTree(Exprs[expr.Right])
+			SELECT Operators[expr.Op].Sym$
+				CASE "+"
+					RETURN Left + Right
+				CASE "-"
+					RETURN Left - Right
+				CASE "*"
+					RETURN Left * Right
+				CASE "/"
+					RETURN Left / Right
+				CASE "^"
+					RETURN POW(Left, Right)
+				CASE "="
+					RETURN Left = Right
+				CASE ">"
+					RETURN Left > Right
+				CASE "<"
+					RETURN Left < Right
+				CASE "<="
+					RETURN Left <= Right
+				CASE ">="
+					RETURN Left >= Right
+				CASE "AND"
+					RETURN Left AND Right
+				CASE "OR"
+					RETURN Left OR Right
+				DEFAULT
+					Error("Internal error (unimplemented operator!)", CODELINE(), CODEFILE$())
+			ENDSELECT
+		DEFAULT
+			THROW "Unable to resolve '"+expr.Typ+"'"
+	ENDSELECT
+ENDFUNCTION

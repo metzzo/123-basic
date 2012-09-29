@@ -1,0 +1,49 @@
+//Simple ALIAS Variable test
+?BLACKLIST ALL
+
+LOCAL i = 100
+ALIAS j AS i
+j = 200
+STDOUT "i = "+i+"\n"
+
+
+//Array test
+LOCAL array[10][10]
+array[GetInteger()][GetInteger()] = 200
+ALIAS v AS array[GetInteger()][GetInteger()]
+v = 300
+STDOUT "array[GetInteger()][GetInteger()] = " + array[GetInteger()][GetInteger()] + "\n"
+
+//damit keine ungewollten seiteneffekte entstehen, muss ich überüprüfen wie oft GetInteger() aufgerufen wird
+FUNCTION GetInteger%:
+	STATIC Callen
+	Callen = Callen + 1
+	STDOUT "Call 'GetInteger', "+Callen+" time(s) \n"
+	RETURN 5
+ENDFUNCTION
+
+//Type ALIAS
+TYPE Test
+	X
+ENDTYPE
+GLOBAL Tests[10] AS Test
+Tests[GetInteger()].X = 100
+ALIAS typTest AS Tests[GetInteger()]
+typTest.X = 200
+STDOUT "Tests[GetInteger()].X = " + Tests[GetInteger()].X+"\n"
+
+//Array Alias
+LOCAL arr[10]
+ALIAS arr2 AS arr
+arr2[GetInteger()] = 400
+STDOUT "arr[GetInteger()] = "+arr[GetInteger()]+"\n"
+
+
+//simple BYREF test
+FUNCTION Foo: BYREF a
+	a = 200
+ENDFUNCTION
+i = 100
+Foo i
+STDOUT "i = "+i+"\n"
+

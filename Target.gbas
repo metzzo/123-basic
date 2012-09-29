@@ -1,0 +1,470 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Tuesday, May 22, 2012
+// IDE Version: 10.283
+
+TYPE TTemplate
+	Path$; Mode$
+	Name$
+ENDTYPE
+GLOBAL Templates[] AS TTemplate
+
+TYPE TLibrary
+	Path$; Mode$
+ENDTYPE
+GLOBAL Libraries[] AS TLibrary
+
+TYPE TBlackList
+	Typ%
+	Name$; Action$
+ENDTYPE
+GLOBAL Blacklists[] AS TBlackList
+CONSTANT BL_EXT 	= 1
+CONSTANT BL_FILE 	= 2
+TYPE TAction
+	Name$
+	Att[] AS xmlAttribute
+ENDTYPE
+GLOBAL Actions[] AS TAction
+
+GLOBAL Mode$
+GLOBAL Target$ = "", SettingIn$ = ""
+GLOBAL Templates[] AS TTemplate
+GLOBAL Lang$ = ""
+GLOBAL DirectoryStructure$
+
+
+FUNCTION DoTarget$: Name$
+	Compiler.errorState$ = " (target '"+Name$+"' error)"
+	Target$ = Name$
+	SettingIn$ =""
+
+	REDIM Templates[0]
+	REDIM Libraries[0]
+	REDIM Blacklists[0]
+	REDIM Actions[0]
+
+	?IFNDEF FOR_IDE
+	LOCAL x AS XML
+	LOCAL proto AS XMLEvent
+	proto = LoadSettings
+
+	x.ReadXML("Target/settings.xml", proto)
+
+	LOCAL Template$ = ""
+	LOCAL TemplateName$ = ""
+	//Nun ein Template nehmen welches dem aktuellen modus entspricht
+	FOREACH T IN Templates[]
+		IF INSTR(LCASE$(T.Mode$), LCASE$(Mode$)) <> -1
+			Template$ = LoadFile$("Target/"+Target$+"/"+T.Path$)
+			TemplateName$ = T.Name$
+			BREAK
+		ENDIF
+	NEXT
+	IF Template$ = "" AND LEN(Templates[]) > 0 THEN Error("Could not find template for '"+Mode$+"'", CODELINE(), CODEFILE$())
+	//Die Variablen ersetzen
+	Template$ = REPLACE$(REPLACE$(Template$, "$GFX_HEIGHT", GFX_HEIGHT), "$GFX_WIDTH", GFX_WIDTH)
+	?ENDIF
+
+	//Nun für die gegebene Sprache den Generator holen
+	LOCAL Output$ = ""
+	FOREACH G IN Generators[]
+		IF UCASE$(G.Name$) = UCASE$(Lang$)
+			Compiler.errorState$ = " (generate error)"
+			Output$ = G.genProto()
+			Compiler.errorState$ = " (target '"+Name$+"' error)"
+			BREAK
+		ENDIF
+	NEXT
+	IF Output$ = "" THEN Error("Empty output!", CODELINE(), CODEFILE$())
+
+	?IFNDEF FOR_IDE
+	//hole die Libraries
+	LOCAL LibText$ = ""
+	FOREACH L IN Libraries[]
+		LOCAL Path$ = "Libs/"+LCASE$(Target$)+"/"+L.Path$
+		LOCAL Path2$ = "Libs/"+LCASE$(Lang$)+"/"+L.Path$
+		LOCAL Text$ = ""
+		IF DOESFILEEXIST(Path$)
+			Text$ = LoadFile$(Path$)
+		ELSEIF DOESFILEEXIST(Path2$)
+			Text$ = LoadFile$(Path2$)
+		ELSE
+			Error("Library '"+L.Path$+"' does not exist", CODELINE(), CODEFILE$())
+		ENDIF
+		LibText$ = LibText$ + Text$
+	NEXT
+
+	?IFDEF PRE_FOR_IDE
+	IF Target$ = "HTML5"
+		//Speichere den Header
+		WriteFile("Tmp/Header.js", LibText$)
+	ENDIF
+	?ENDIF
+
+	FOREACH Ac IN Actions[]
+		SELECT TRIM$(LCASE$(Ac.Name$))
+			CASE "save"
+				LOCAL dir$ = GETCURRENTDIR$()
+				LOCAL projDir$
+				SETCURRENTDIR(GbapPath$)
+				IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
+					SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
+				ENDIF
+				projDir$ = GETCURRENTDIR$()
+
+				//do all the action!
+
+				IF Template$ <> "" THEN WriteFile(TemplateName$, Template$)
+				WriteFile(GetAttribute$("name", Ac.Att[]), Output$)
+
+				SETCURRENTDIR(dir$)
+			CASE "embeddata"
+				LOCAL dir$ = GETCURRENTDIR$()
+				LOCAL projDir$
+				SETCURRENTDIR(GbapPath$)
+				IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
+					SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
+				ENDIF
+				//Media falls da
+				//IF DOESDIREXIST("Media") THEN SETCURRENTDIR("Media")
+				projDir$ = GETCURRENTDIR$()
+				DirectoryStructure$ = ""
+				PushTimer()
+				DoEmbed("")
+				PopTimer("Embedding took:")
+
+				DirectoryStructure$ = DirectoryStructure$ + "var:compileTime="+PLATFORMINFO$("TIME")+"\n"
+				DirectoryStructure$ = DirectoryStructure$ + "var:userDefVersion="+USRDEF_VERS$+"\n"
+				DirectoryStructure$ = DirectoryStructure$ + "var:hostId="+PLATFORMINFO$("HOSTID")+"\n"
+				DirectoryStructure$ = DirectoryStructure$ + "var:viewMode="+Mode$+"\n"
+				IF INSTR(Mode$, "2d") <> -1
+					DirectoryStructure$ = DirectoryStructure$ + "var:GFX_WIDTH="+GFX_WIDTH+"\n"
+					DirectoryStructure$ = DirectoryStructure$ + "var:GFX_HEIGHT="+GFX_HEIGHT+"\n"
+				ENDIF
+				SETCURRENTDIR(projDir$)
+
+				IF DirectoryStructure$ <> "" THEN WriteFile("DIR_STRUCTURE", DirectoryStructure$)
+				SETCURRENTDIR(dir$)
+			CASE "appendlibs"
+				Output$ = Output$ + LibText$
+				LibText$ = ""
+			CASE "appbeforelibs"
+				Output$ = LibText$ + Output$
+				LibText$ = ""
+			CASE "optimize"
+				PushTimer()
+				SELECT LCASE$(GetAttribute$("name", Ac.Att[]))
+					CASE "closure"
+						Output$ = ClosureOptimize$(Output$)
+					DEFAULT
+						Error("Unknown optimizer you stupid!", CODELINE(), CODEFILE$())
+				ENDSELECT
+				PopTimer("Optimizer:")
+			CASE "insertfont"
+				InsertFont(GetAttribute$("name", Ac.Att[]))
+			CASE "run"
+				//command holen
+				?IFNDEF GLBSCRIPT
+				LOCAL Run$ = GetAttribute$("command", Ac.Att[])
+
+				LOCAL dir$ = GETCURRENTDIR$()
+				LOCAL projDir$
+				SETCURRENTDIR(GbapPath$)
+				IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
+					SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
+				ENDIF
+				projDir$ = GETCURRENTDIR$()
+				SETCURRENTDIR(dir$)
+
+				Run$ = REPLACE$(Run$, "$COMPILERDIR", dir$)
+				Run$ = REPLACE$(Run$, "$PROJECTDIR", projDir$)
+				Run$ = REPLACE$(Run$, "'", "\"")
+
+				STDOUT "RUN '"+Run$+"'\n"
+
+				LOCAL a#
+				IF NOT SHELLCMD(Run$, TRUE, TRUE, a)
+					Error("Command '"+Run$+"' failed...", CODELINE(), CODEFILE$())
+				ENDIF
+				?ENDIF
+			DEFAULT
+				Error("Unknown action '"+Ac.Name$+"'", CODELINE(), CODEFILE$())
+		ENDSELECT
+	NEXT
+	?ENDIF
+
+	RETURN Output$
+ENDFUNCTION
+
+FUNCTION SetupTarget: Name$
+	SettingIn$ = ""
+	Target$ = Name$
+
+	//MODE setzen
+	IF CONSOLE
+		Mode$ = "console"
+	ELSE
+		Mode$ = "2d"
+	ENDIF
+	//Funktionen laden
+
+	?IFNDEF FOR_IDE
+	LOCAL x AS XML
+	LOCAL proto AS XMLEvent
+	proto = SetupTarget_Proto
+	x.ReadXML("Target/settings.xml", proto)
+	IF SettingIn$ = "" THEN Error("Unknown target '"+Name$+"'", CODELINE(), CODEFILE$())
+	?ELSE
+	Target$ = "HTML5"
+	Lang$ = "js"
+	RegisterDefine(UCASE$(Target$), "1")
+	RegisterDefine("JS", "1")
+	?ENDIF
+
+ENDFUNCTION
+
+FUNCTION SetupTarget_Proto: Name$, Atts[] AS xmlAttribute
+	SELECT UCASE$(Name$)
+		CASE "TARGET"
+			IF UCASE$(GetAttribute$("name", Atts[])) = UCASE$(Target$)
+				SettingIn$ = GetAttribute$("name", Atts[])
+				Lang$ = GetAttribute$("lang", Atts[])
+				RegisterDefine(UCASE$(Target$), "1")
+				RegisterDefine(UCASE$(GetAttribute$("lang", Atts[])), "1")
+				THROW "EXIT"
+			ENDIF
+	ENDSELECT
+ENDFUNCTION
+
+FUNCTION LoadSettings: Name$, Atts[] AS xmlAttribute
+	SELECT UCASE$(Name$)
+		CASE "TARGET"
+			SettingIn$ = GetAttribute$("name", Atts[])
+			IF UCASE$(SettingIn$) = UCASE$(Target$)
+				Lang$ = GetAttribute$("lang", Atts[])
+			ENDIF
+	ENDSELECT
+
+
+	IF UCASE$(SettingIn$) = UCASE$(Target$)
+		SELECT UCASE$(Name$)
+			CASE "TEMPLATE"
+				LOCAL Template AS TTemplate
+				Template.Path$ = GetAttribute$("path", Atts[])
+				Template.Mode$ = GetAttribute$("mode", Atts[])
+				Template.Name$ = GetAttribute$("name", Atts[])
+				DIMPUSH Templates[], Template
+			CASE "LIB"
+				LOCAL Lib AS TLibrary
+				Lib.Path$ = GetAttribute$("path", Atts[])
+				Lib.Mode$ = GetAttribute$("mode", Atts[])
+				DIMPUSH Libraries[], Lib
+			CASE "EXTENSION"
+				LOCAL BL AS TBlackList
+				BL.Typ = BL_EXT
+				BL.Name$ = GetAttribute$("name", Atts[])
+				BL.Action$ = LCASE$(GetAttribute$("action", Atts[]))
+				DIMPUSH Blacklists[], BL
+			CASE "FILE"
+				LOCAL BL AS TBlackList
+				BL.Typ = BL_FILE
+				BL.Name$ = GetAttribute$("name", Atts[])
+				BL.Action$ = LCASE$(GetAttribute$("action", Atts[]))
+				DIMPUSH Blacklists[], BL
+			CASE "ACTION"
+				LOCAL Ac AS TAction
+				Ac.Name$ = GetAttribute$("type", Atts[])
+				Ac.Att[] = Atts[]
+				DIMPUSH Actions[], Ac
+		ENDSELECT
+	ENDIF
+ENDFUNCTION
+
+
+FUNCTION ClosureOptimize$: Text$
+	LOCAL rev
+	KILLFILE "Tmp/optimized.js"
+
+	IF NOT DEBUGMODE AND OptimizeLevel > 0
+		//optimieren, falls in Release
+		STDOUT "Optimize code\n"
+
+
+		?IFNDEF HTML5
+			//hier die .jar ausführen
+			LOCAL Advance$ = "--compilation_level WHITESPACE_ONLY"
+			IF OptimizeLevel = 1
+				Advance$ = "--compilation_level SIMPLE_OPTIMIZATIONS"
+			ELSEIF OptimizeLevel = 2
+				Advance$ = "--compilation_level ADVANCED_OPTIMIZATIONS"
+			ENDIF
+
+			WriteFile("Tmp/closure.js", Text$)
+
+			IF NOT SHELLCMD("java -jar Tools/Closure/compiler.jar "+Advance$+" --js Tmp/closure.js --js_output_file Tmp/optimized.js --jscomp_off uselessCode --charset iso-8859", TRUE, TRUE, rev)
+				Error("Could not optimize your damn code... try it again.", CODELINE(), CODEFILE$())
+			ENDIF
+		?ELSE
+			//hier den webservice aufrufen
+			//TODO!
+		?ENDIF
+	ELSE
+		STDOUT "Make the code handsome\n"
+		?IFNDEF HTML5
+			WriteFile("Tmp/closure.js", Text$)
+
+			//Closure zum verschönern verwenden
+			IF NOT SHELLCMD("java -jar Tools/Closure/compiler.jar --compilation_level WHITESPACE_ONLY --js Tmp/closure.js --js_output_file Tmp/optimized.js --jscomp_off uselessCode --formatting PRETTY_PRINT --charset iso-8859", TRUE, TRUE, rev)
+				Error("Could not optimize your damn code... try it again.", CODELINE(), CODEFILE$())
+			ENDIF
+		?ELSE
+			//webservice TODO
+		?ENDIF
+	ENDIF
+
+	IF DOESFILEEXIST("Tmp/optimized.js")
+		RETURN LoadFile$("Tmp/optimized.js")
+	ELSE
+		RETURN Text$
+	ENDIF
+ENDFUNCTION
+
+
+FUNCTION DoEmbed: Path$
+	LOCAL files$[]
+	LOCAL num% = GETFILELIST("*.*", files$[])
+
+	//Ist das aktuelle target exklusive?
+	FOR i = 0 TO LEN(files$[])-1
+		LOCAL File$ = files$[i]
+		IF LCASE$(File$) = LCASE$(Target$)+".xcl" THEN RETURN
+	NEXT
+
+	IF Path$ <> "" THEN DirectoryStructure$ = DirectoryStructure$ + "folder:"+ Path$+"\n"
+
+	//scheint nicht so zu sein
+	FOR i = 0 TO LEN(files$[])-1
+		LOCAL File$ = files$[i]
+		STDOUT "File: "+File$+"\n"
+		LOCAL postfix$ =""
+		IF INSTR(File$, ".") <> -1 THEN postfix$ = MID$(File$, REVINSTR(File$,".")+1)
+
+		IF MID$(File$,0,1) <> "." AND (LEN(File$) < 2 OR  MID$(File$,0,2) <> "..") AND MID$(File$, 0, LEN(".convertedsounds_")) <> ".convertedsounds_"
+			LOCAL Found% = FALSE
+			FOREACH B IN Blacklists[]
+				LOCAL Action% = FALSE
+				SELECT B.Typ
+					CASE BL_EXT
+						IF LCASE$(TRIM$(postfix$)) = LCASE$(TRIM$(B.Name$))
+							Action = TRUE
+						ENDIF
+					CASE BL_FILE
+						IF INSTR(LCASE$(TRIM$(File$)), LCASE$(TRIM$(B.Name$))) <> -1
+							//Trifft zu
+							Action = TRUE
+						ENDIF
+				ENDSELECT
+				IF Action
+					Found = TRUE
+
+					IF NOT INSTR(B.Action$, "ignore") <> -1
+						//Mach was
+						IF (INSTR(B.Action$, "mp3") <> -1 OR INSTR(B.Action$, "ogg") <> -1) AND NOT DOESDIREXIST(".html5_convertedsounds_"+File$)
+							//wird aufjedenfall konvertiert
+							CREATEDIR(".html5_convertedsounds_"+File$)
+							IF INSTR(B.Action$, "mp3") <> -1 THEN ConvertSound(File$, "mp3")
+							IF INSTR(B.Action$, "ogg") <> -1 THEN ConvertSound(File$, "ogg")
+							COPYFILE File$, ".html5_convertedsounds_"+File$+"/sound."+postfix$
+						ENDIF
+					ENDIF
+					BREAK
+				ENDIF
+			NEXT
+			IF NOT Found
+				//folder?
+				IF DOESDIREXIST(File$)
+					?IFDEF DEBUG
+					STDOUT "Embed Dir: "+File$+"\n"
+					?ENDIF
+
+					SETCURRENTDIR(File$)
+					DoEmbed(Path$+"/"+File$)
+					SETCURRENTDIR("..")
+				ELSE
+					?IFDEF DEBUG
+					STDOUT "Embed File: "+File$+"\n"
+					?ENDIF
+
+					DirectoryStructure$ = DirectoryStructure$ + "editable:"+ Path$ + "/"+File$+"\n"
+
+					LOCAL Text$ = ""
+					LOCAL f% = GENFILE()
+					OPENFILE(f, File$,1)
+
+					LOCAL found% = FALSE
+					WHILE ENDOFFILE(f) = FALSE
+						IF found THEN Text$ = Text$ + ","
+						LOCAL b%
+						READUBYTE f, b
+						Text$ = Text$ + b
+						found = TRUE
+					WEND
+					CLOSEFILE f
+
+					WriteFile(File$+".GLBSCRIPT_DATA", Text$)
+				ENDIF
+			ELSE
+				DirectoryStructure$ = DirectoryStructure$ + "static:"+ Path$ + "/"+File$+"\n"
+			ENDIF
+		ENDIF
+	NEXT
+ENDFUNCTION
+
+
+FUNCTION ConvertSound: File$, Form$
+	LOCAL r
+	STDOUT "Convert sound: "+File$+" to format: "+Form$+"\n"
+	LOCAL Command$
+	SELECT Form$
+		CASE "ogg"
+			 Command$ = "Tools/SOX/sox.exe"
+		CASE "mp3"
+			 Command$ = "Tools/Lame/LAME.exe"
+	ENDSELECT
+
+	IF NOT SHELLCMD(Command$+" "+GETCURRENTDIR$()+File$+" "+GETCURRENTDIR$()+".html5_convertedsounds_"+File$+"/sound."+Form$, TRUE, TRUE, r)
+		Error("Cannot convert sound file: "+File$+" to "+Form$, CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+
+FUNCTION InsertFont: Name$
+	LOCAL dir$ = GETCURRENTDIR$()
+	SETCURRENTDIR(GbapPath$)
+	IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
+		SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
+	ENDIF
+	//Media falls da
+	IF DOESDIREXIST("Media") THEN SETCURRENTDIR("Media")
+	//Schauen ob smalfont.png existiert
+	IF NOT DOESFILEEXIST(Name$)
+		COPYFILE dir$+"/Target/"+Name$, Name$
+	ENDIF
+
+
+	SETCURRENTDIR(dir$)
+ENDFUNCTION
+
+
+FUNCTION WriteFile: File$, Text$
+	?IFNDEF HTML5 //In HTML5 ist das Speichern zu "kostbar"
+	IF DOESFILEEXIST(File$) THEN KILLFILE File$
+	LOCAL Chn% = GENFILE()
+	IF NOT OPENFILE(Chn, File$, FALSE) THEN Error("Cannot write file '"+File$+"'", CODELINE(), CODEFILE$())
+	WRITESTR Chn, Text$
+	CLOSEFILE Chn
+	?ENDIF
+ENDFUNCTION
+
+

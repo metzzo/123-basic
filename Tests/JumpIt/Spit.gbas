@@ -1,0 +1,51 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Tuesday, September 27, 2011
+// IDE Version: 10.118
+GLOBAL Spits[] AS TSpit
+
+TYPE TSpit
+	X;Y
+	VX;VY
+	Age%; Al
+	Del%
+
+
+	FUNCTION Update:
+		self.VX = self.VX * .99
+		INC self.VY, .1
+		INC self.Age
+
+		IF self.Age > 149
+			self.Del = TRUE
+		ENDIF
+
+
+		LOCAL OldX, OldY
+		OldX = self.X; OldY = self.Y
+
+		INC self.X, self.VX
+		IF Map.Collision(self.X, self.Y, 8,8)
+			self.VX =  -self.VX
+			self.X = OldX
+		ENDIF
+		INC self.Y, self.VY
+		IF Map.Collision(self.X, self.Y, 8,8)
+			self.VY =  -self.VY
+			self.Y = OldY
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		DRAWSPRITE SpitImage, self.X+Map.ScrollX, self.Y+Map.ScrollY
+	ENDFUNCTION
+
+	FUNCTION Init: X, Y, DirX, DirY
+		self.X 	= X
+		self.Y	= Y
+		self.VX = DirX
+		self.VY = DirY
+
+		DIMPUSH Spits[], self
+	ENDFUNCTION
+ENDTYPE

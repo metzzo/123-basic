@@ -1,0 +1,22 @@
+?BLACKLIST ALL
+
+ASSERT 1+1+1+1+1+1+1+1
+
+STDOUT "Time: "+PLATFORMINFO$("TIME")+"\n"
+STDOUT "HOSTID: "+PLATFORMINFO$("HOSTID")+"\n"
+STDOUT "LOCALE: "+PLATFORMINFO$("LOCALE")+"\n"
+STDOUT "Battery: "+PLATFORMINFO$("BATTERY")+"\n"
+
+
+STDOUT "FORMAT: '"+FORMAT$(4,4,42.42)+"'\n"
+STDOUT "FORMAT: '"+FORMAT$(1,1,42.42)+"'\n"
+
+STDOUT "lower: "+LCASE$("HALLO")+" upper: "+UCASE$("hallo")+"\n"
+
+LOCAL hex$ = ENCRYPT$("secr1t", "honey@moon.com")
+LOCAL txt$ = DECRYPT$("secr1t", hex$)
+
+STDOUT "HEX:"+hex$+":\n"
+STDOUT "TXT:"+txt$+":\n"
+
+

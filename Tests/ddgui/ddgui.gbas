@@ -1,0 +1,4124 @@
+// --------------------------------- //
+// Project: ddgui
+// Start: Sunday, May 06, 2012
+// IDE Version: 10.283
+
+?OPTIMIZE NONE
+
+// --------------------------------- //
+// Project: DDgui
+// Start: Friday, August 12, 2005
+// IDE Version: 2.50808
+
+gDDguiMinControlDimension% = 32
+DDGUI_AUTO_INPUT_DLG = TRUE
+
+GOSUB GLB_ON_INIT
+
+
+
+GLOBAL delta
+GLOBAL nt%, old%, fps%, flips%
+
+?IFDEF HTML5
+SUB GLB_ON_LOOP:
+?ELSE
+WHILE TRUE
+?ENDIF
+	LOCAL now%
+
+	old=GETTIMERALL()
+	DDgui_show(FALSE) // show the dialog + handle widgets
+
+//	IF DDgui_get("bt_complex", "CLICKED") THEN DoComplex()
+//
+//	// Did you change the color or the count list?
+//	IF DDgui_get("ls_test", "CLICKED") OR DDgui_get("ra_test", "CLICKED")
+//		// Get the text at selected position
+//		LOCAL num$, col$, text$
+//		num$ = DDgui_getitemtext$("ls_test", DDgui_get("ls_test", "SELECT"))
+//		col$ = DDgui_getitemtext$("ra_test", DDgui_get("ra_test", "SELECT"))
+//		text$ = num$ + " " + col$ + " frog(s)"
+//		// replace the text
+//		DDgui_set("tx_test", "TEXT", text$)
+//	ENDIF
+
+
+
+	now = GETTIMERALL()
+	INC delta, now-old
+	INC flips
+	IF flips > 300
+		nt = 1000
+		fps = delta
+		delta=0
+		flips=0
+	ENDIF
+	PRINT "fps:" +INTEGER(fps), 0,0
+
+
+	SHOWSCREEN
+//	HIBERNATE // idle until mousemove/keypress
+?IFDEF HTML5
+ENDSUB
+?ELSE
+WEND
+?ENDIF
+
+SUB GLB_ON_INIT:
+	//DDgui_UpdateFont(FALSE) // use font kerning
+
+	// Very easy dialog demo:
+	DDgui_pushdialog(0,0,300,300)
+
+
+	DDgui_set("", "MOVEABLE", TRUE) // can move the dialog at top bar
+
+	DDgui_widget("", "Static Text", 0,0)                  // static text
+	DDgui_spacer(10000,20)                                // spacer
+//
+//	// at this position we're entering a TAB widget
+//	// although the "child" widgets do not exist, yet
+//	// this is perfectly OK!
+//
+//	DDgui_tab("tab1",	"Lig_sts,ls_test,ra_test|"+ _
+//						"Buttons,fr_buttons|" + _
+//						"Texts,st_text,tx_test"	)
+//
+//	// now the items for the tab
+//	// watch out: the spacers get drawn even if the
+//	// widgets are not! Make the spacers vertical size = 0!
+//	DDgui_combo("ls_test", "one|two|three", 0, 0)          // list box
+//	DDgui_spacer(10000,0)                                 // spacer
+//	DDgui_radio("ra_test", "red|green|blue", 0)           // radio buttons
+//	DDgui_slider("sl_test", 0.5, 0,0)					  // slider
+//	DDgui_spacer(10000,0)                                 // spacer
+//
+//	DDgui_framestart("fr_buttons")
+//		DDgui_button("bt_complex", "complex dialog", 0,0)     // button
+//		DDgui_button("bt_col", "SPR_C"+RGB(255,0,255), 0,0)   // color-button
+//		DDgui_button("bt_disable", "readonly", 0,0)   // color-button
+//		DDgui_set("bt_disable", "READONLY", TRUE)
+//
+//		// make color button "readonly" -> click does not allow to change the color
+//		// DDgui_set("bt_col", "READONLY", TRUE)
+//	DDgui_frameend()
+//
+//	DDgui_widget("st_text", "Write text here:", 0,0)      // static text
+//	DDgui_spacer(10000,0)                                 // spacer
+//	DDgui_text("tx_test", "Some text\nnext line", 150,75) // text box
+//	DDgui_spacer(10000,20)                                // spacer
+//	DDgui_singletext("tx_sin", "SingleText",150) // single line text
+//	DDgui_numbertext("tx_num", "123.1233", 150) // number only
+
+ENDSUB
+
+
+// A much more complex dialog with interactivity
+FUNCTION DoComplex:
+LOCAL tb_id$[], tb_spr[]
+
+// Make a new dialog
+DDgui_pushdialog(30,10,240,430)
+	DDgui_set("", "MOVEABLE", TRUE) // can move the dialog at top bar
+	DDgui_set("", "SCALEABLE", TRUE) // can scale the dialog at right bottom
+	DDgui_set("", "TEXT", "Complex Test") // moveable has a caption text
+
+
+// a toolbar - the most complicated
+	// load sprites
+	LOADSPRITE "test.bmp", 1
+	LOADSPRITE "append.bmp", 2
+	LOADSPRITE "insert.bmp", 3
+
+	// dim ids and sprite numbers
+	// assign each toolbar button's value
+	DIMDATA tb_id$[], "bt_test", "bt_append", "bt_insert"
+	DIMDATA tb_spr[], 1,2,3
+
+	// push it on the GUI-stack
+	DDgui_toolbar(tb_id$[], tb_spr[])
+
+	DDgui_combo("cb_images", "SPR_B1|SPR_B2|SPR_B3|SPR_B1|SPR_B2|SPR_B3|SPR_B1|SPR_B2|SPR_B3", 100, 24)
+
+FOR i% = 0 TO 11
+	DEBUG "["+i+"] >"+DDgui_getitemtext$("cb_images", i)+"<\n"
+NEXT
+
+
+	// Some text
+	DDgui_widget("", "This is a static text.\nYou can use it for lengthy help texts!", 200, 0)
+		// Fuel
+		DDgui_checkbox("cb_autopilot", "Autopilot", 0, 0)
+		DDgui_checkbox("cb_nitroboost", "Nitro Booster", 0, 0)
+		DDgui_spacer(10000,0)
+		DDgui_radio("ls_fuel", "full|half|empty", 0)
+		DDgui_spacer(10000,0)
+
+	DDgui_widget("", "Select a fruit, then delete it", 200, 0)
+		DDgui_spacer(10000,0)
+		DDgui_list("ls_fruit", "apple|cherry|banana|peach|pear|strawberry|pineapple|watermelon|raspberry", 0, 0)
+		DDgui_button("bt_del",    "Delete", 0,0)
+		DDgui_set("bt_del", "TIPTEXT", "click here\nto delete")
+	DDgui_widget("", "Type some text here", 200, 0)
+		DDgui_spacer(10000,0)
+		DDgui_text("tx_demo", "Select and type some text here.\nThis is very funny and you will soon like it a lot", 200,50)
+
+	// a sprite-button
+	LOADSPRITE "joypad.bmp", 13
+	DDgui_button("bt_run", "SPR_B 13")
+
+	// Select a filename
+	DDgui_file("file1", "smalfont.bmp", "*.bmp")
+	DDgui_spacer(10000,20)
+	DDgui_button("bt_ok", "OK")
+
+	WHILE TRUE
+		DDgui_show(FALSE) // show the dialog + handle widgets
+
+		IF DDgui_get("bt_ok", "CLICKED") THEN BREAK // close dialog
+
+		// Make a messagebox
+		IF DDgui_get("bt_test", "CLICKED")
+			IF DDgui_msg("You clicked a button! Wow, that worked!\n\nDo you want to quit now?", TRUE)
+				END
+			ENDIF
+		ENDIF
+
+		// insert text to a radio group
+		IF DDgui_get("bt_append", "CLICKED") THEN DDgui_insertitem("ls_fuel", "void", -1)
+		IF DDgui_get("bt_insert", "CLICKED") THEN DDgui_insertitem("ls_fuel", "third", 1)
+
+		IF DDgui_get("bt_run", "CLICKED") THEN DDgui_set("tx_demo", "TEXT", "Loading\nReady\nRun")
+
+		// delete the selected item from the list
+		IF DDgui_get("bt_del", "CLICKED")
+			// is the selection valid?
+			LOCAL index%
+			index = DDgui_get("ls_fruit", "SELECT")
+			IF index>=0 AND index<=DDgui_get("ls_fruit", "COUNT")
+				// delete the selected item
+				DDgui_deleteitem("ls_fruit", index)
+			ELSE
+				// inform about a wrong selection
+				DDgui_msg("Nothing was selected to delete!", FALSE)
+			ENDIF
+		ENDIF
+		// show current screen
+		SHOWSCREEN
+		// let the CPU breathe until you move the mouse
+		HIBERNATE
+	WEND
+
+	// clean up this dialog and activate the one below
+	DDgui_popdialog()
+ENDFUNCTION
+
+
+
+
+// Globals you can use to tweak the DDgui experience:
+GLOBAL gDDguiCaretColour% = 0x000000
+GLOBAL gDDguiMinControlDimension% // min size of button etc.
+GLOBAL gDDguiScrollbarWidth% // width of a scrollbar - might want wider for touchscreens
+
+
+// a prototype for a user callback of DDgui 4 user widgets
+PROTOTYPE DDgui_userfunction: id$, verb$, BYREF info$
+
+
+TYPE DDGUI_ENTRY
+	key$
+	val$
+ENDTYPE
+
+TYPE DDGUI_WDG
+// public:
+	// all widgets
+	wid$
+	wtype$
+	wtext$
+
+	wxpos% // readonly, topleft x pos in screen coords
+	wypos% // readonly, topleft y pos in screen coords
+	wwidth%  // bounding width in pixels
+	wheight% // bounding height in pixels
+	whover%  // mouse hovers over this widget (change colour)
+	whide%=0 // hidden (and not handled)
+	wfilter$ // filter string for file widget.
+	tiptext$ // tooltip text
+
+	// button, slider, checkbox, radio, file, list, text, tab
+	wclicked% // was clicked within last ddgui_show
+
+	// checkbox, list, tab, radio
+	wselect%  // index of selected item (-1 none)
+
+	// list, radio
+	wcount%   // number of items
+
+	// text
+	wreadonly%
+	wselstart%
+	wselend%
+
+	// slider
+	wminval=0
+	wmaxval=1.0
+	wstep  =0.01
+
+// protected:
+	wscroll%    // scroll position [0; wscrollmax]
+	wscrollmax% // scroll limit. 0=no scrollbar
+	wcaretx% // Caret position in pixels
+	wcarety% //                in pixels
+	wframe%=0  // frame index (0=dialog's main frame)
+	walign%=-1 // -1=left, 0=center, 1=right
+
+	wuserfoo AS DDgui_userfunction
+
+ENDTYPE
+
+TYPE DDGUI_ORDER
+	id$       // widget id
+	index%    // index in widgets list
+ENDTYPE
+
+TYPE DDGUI_AUTO
+	idfrom$; idto$; objfrom$; objto$
+ENDTYPE
+
+TYPE DDGUI_DLG
+// public: (with DDgui_get/set)
+	focus$ // focus widget id$
+	moveable%
+	moving%
+	scaleable%
+	scaleing%
+	col_bright%
+	col_norm%
+	col_hover_bright%
+	col_hover_norm%
+	dlg_inkey$
+	xpos%; ypos%
+
+	rectx%; recty%; rectw%; recth% // bounding rect for dialog. Set on each show
+
+
+// protected: (not in DDgui_get/set)
+	realheight%;
+	kick_intern_dlg% // want a colour picker dlg? 1=color, 2=osd keyboard,
+	kick_intern_id$  // id for kicking
+
+	main AS DDGUI_WDG // dialog "widget" - used for scrollbar, only
+
+	autos[] AS DDGUI_AUTO
+	widgets[] AS DDGUI_WDG
+	draworder[] AS DDGUI_ORDER // indices for drawing order
+
+//	pairs[] AS DDGUI_ENTRY
+	// some globals that speed drawing up
+ENDTYPE
+
+// for internal use, only - quicker drawing
+
+GLOBAL ddgui_stack[] AS DDGUI_DLG // dialog stack for dawing background stuff
+// GLOBAL ddgui_vals    AS DDGUI_DLG // current values
+
+TYPE DDGUI_FONT
+	left%[]  // left side of first pixel per char
+	width%[] // width of that char (with 1 pixel space already)
+	bHasKerning%=TRUE
+ENDTYPE
+GLOBAL ddgui_font_kerning AS DDGUI_FONT
+
+GLOBAL DDGUI_AUTO_INPUT_DLG // auto-open DDgui_input, when you click a text?
+GLOBAL DDGUI_IN_INPUT_DLG // for text to know, that clicking again should not pop up
+
+
+// ------------------------------------------ //
+// Pass value from one widget to another
+// ------------------------------------------ //
+FUNCTION DDgui_automate: idfrom$, whatfrom$, idto$, whatto$
+LOCAL autom AS DDGUI_AUTO
+	autom.idfrom$=idfrom$
+	autom.idto$=idto$
+	autom.objfrom$=whatfrom$
+	autom.objto$=whatto$
+	DIMPUSH ddgui_stack[-1].autos[], autom
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Get index in ddgui_vals$[] for given string
+//! New sorting algorithm for much faster access
+// ------------------------------------------ //
+FUNCTION DDgui_index%: ddgui_vals AS DDGUI_DLG, BYREF name$, create%
+LOCAL up%, dn%, mid%
+	up=0; dn=LEN(ddgui_vals.widgets[])-1
+	WHILE up < dn
+		mid = (up+dn) / 2
+		IF ddgui_vals.widgets[mid].wid$ > name$
+			dn=MAX(mid-1, up)
+		ELSE
+			IF ddgui_vals.widgets[mid].wid$ < name$
+				up=MIN(dn, mid+1)
+			ELSE
+				RETURN mid // not bigger, not smaller, guess what!?
+			ENDIF
+		ENDIF
+	WEND
+
+	IF LEN(ddgui_vals.widgets[]) AND ddgui_vals.widgets[up].wid$ = name$ THEN RETURN up
+
+
+	// not found. But must be at [up].
+	IF create%
+		dn = LEN(ddgui_vals.widgets[]) // one below last
+		REDIM ddgui_vals.widgets[dn+1]
+		FOR mid = dn TO up+1 STEP -1
+			ddgui_vals.widgets[mid] = ddgui_vals.widgets[mid-1]
+		NEXT
+		IF dn>0 AND ddgui_vals.widgets[up].wid$ < name$ THEN up=up+1
+		LOCAL widg AS DDGUI_WDG
+		widg.wid$ = name$
+		ddgui_vals.widgets[up] = widg // copy a fresh on there, clear old junk
+
+		// also make a new drawing order entry!!
+		LOCAL order AS DDGUI_ORDER
+		order.id$ = name$
+		DIMPUSH ddgui_vals.draworder[], order
+
+		// Internally fixed the drawing oder, when pushing new
+		// widgets to the quick-dictionary array.
+		FOREACH od IN ddgui_vals.draworder[]
+			od.index = DDgui_index(ddgui_vals, od.id$, FALSE)
+		NEXT
+
+		RETURN up
+	ENDIF
+RETURN -1
+ENDFUNCTION
+
+
+
+
+
+// Internally get a value by a string from a widget
+FUNCTION DDgui_get_intern$: wdg AS DDGUI_WDG, BYREF name$
+	SELECT name$
+		CASE "CLICKED";   RETURN wdg.wclicked%
+		CASE "TEXT";      RETURN wdg.wtext$
+		CASE "WIDTH";     RETURN wdg.wwidth%
+		CASE "HEIGHT";    RETURN wdg.wheight%
+		CASE "SELECT";    RETURN wdg.wselect%
+		CASE "COUNT";     RETURN wdg.wcount%
+		CASE "HOVER";     RETURN wdg.whover%
+		CASE "READONLY";  RETURN wdg.wreadonly%
+		CASE "SELSTART";  RETURN wdg.wselstart%
+		CASE "SELEND";    RETURN wdg.wselend%
+		CASE "HIDE";      RETURN wdg.whide%
+		CASE "TYPE";      RETURN wdg.wtype$
+		CASE "FILTER";    RETURN wdg.wfilter$
+		CASE "TIPTEXT";   RETURN wdg.tiptext$
+		CASE "MINVAL";    RETURN wdg.wminval
+		CASE "MAXVAL";    RETURN wdg.wmaxval
+		CASE "STEP";      RETURN wdg.wstep
+		CASE "SCROLL";    RETURN wdg.wscroll
+		CASE "ALIGN";     RETURN wdg.walign%
+		CASE "XPOS";      RETURN wdg.wxpos%
+		CASE "YPOS";      RETURN wdg.wypos%
+		DEFAULT
+			DEBUG "DDgui_get_intern$: Widget property "+name$+" is unknown\n"
+	ENDSELECT
+ENDFUNCTION
+
+
+// Internally get a value by a string
+FUNCTION DDgui_get$: id$, name$
+	IF LEN(ddgui_stack[])=0
+		DEBUG "DDgui_get$: No active dialog!\n"
+		RETURN ""
+	ENDIF
+	IF LEN(id$)=0
+		SELECT name$
+			CASE "FOCUS";            RETURN ddgui_stack[-1].focus$
+			CASE "INKEY";            RETURN ddgui_stack[-1].dlg_inkey$
+			CASE "TEXT";             RETURN ddgui_stack[-1].main.wtext$
+			CASE "COL_BRIGHT";       RETURN ddgui_stack[-1].col_bright%
+			CASE "COL_NORM";         RETURN ddgui_stack[-1].col_norm%
+			CASE "COL_HOVER_BRIGHT"; RETURN ddgui_stack[-1].col_hover_bright%
+			CASE "COL_HOVER_NORM";   RETURN ddgui_stack[-1].col_hover_norm%
+			CASE "XPOS";             RETURN ddgui_stack[-1].xpos%
+			CASE "YPOS";             RETURN ddgui_stack[-1].ypos%
+			CASE "WIDTH";            RETURN ddgui_stack[-1].main.wwidth%
+			CASE "HEIGHT";           RETURN ddgui_stack[-1].main.wheight%
+			CASE "MOVEABLE";         RETURN ddgui_stack[-1].moveable%
+			CASE "SCALEABLE";        RETURN ddgui_stack[-1].scaleable%
+			CASE "MOVING";           RETURN ddgui_stack[-1].moving%
+			CASE "SCALEING";         RETURN ddgui_stack[-1].scaleing%
+		ENDSELECT
+	ELSE
+		LOCAL iw% = DDgui_index(ddgui_stack[-1], id$, FALSE)
+		IF iw>=0 THEN RETURN DDgui_get_intern$(ddgui_stack[-1].widgets[iw], name$)
+		DEBUG "DDgui_get$: Widget not found "+id$+"\n"
+	ENDIF
+	RETURN ""
+ENDFUNCTION
+
+// Internally get a value by a string
+FUNCTION DDgui_get: id$, name$
+	IF LEN(ddgui_stack[])=0
+		DEBUG "DDgui_get: No active dialog!\n"
+		RETURN 0
+	ENDIF
+	IF LEN(id$)=0
+		RETURN DDgui_get$(id$, name$)
+	ELSE
+		LOCAL iw% = DDgui_index(ddgui_stack[-1], id$, FALSE)
+		IF iw>=0
+			// the most important ones as a quick shortcut to avoid string conversion
+			ALIAS wdg AS ddgui_stack[-1].widgets[iw]
+			SELECT name$
+				CASE "CLICKED";   RETURN wdg.wclicked%
+				CASE "SELECT";    RETURN wdg.wselect%
+				CASE "COUNT";     RETURN wdg.wcount%
+				CASE "SELSTART";  RETURN wdg.wselstart%
+				CASE "SELEND";    RETURN wdg.wselend%
+			ENDSELECT
+			// slow but compatible for the other properties
+			RETURN DDgui_get_intern$(wdg, name$)
+		ENDIF
+		DEBUG "DDgui_get: Widget not found "+id$+"\n"
+	ENDIF
+ENDFUNCTION
+
+FUNCTION DDgui_set: id$, name$, val$
+	IF LEN(id$)=0
+		SELECT name$
+			CASE "FOCUS";            ddgui_stack[-1].focus$=val$
+			CASE "INKEY";            ddgui_stack[-1].dlg_inkey$=val$
+			CASE "COL_BRIGHT";       ddgui_stack[-1].col_bright%=val$
+			CASE "COL_NORM";         ddgui_stack[-1].col_norm%=val$
+			CASE "COL_HOVER_BRIGHT"; ddgui_stack[-1].col_hover_bright%=val$
+			CASE "COL_HOVER_NORM";   ddgui_stack[-1].col_hover_norm%=val$
+			CASE "TEXT";             ddgui_stack[-1].main.wtext$=val$
+			CASE "XPOS";             ddgui_stack[-1].xpos%=val$
+			CASE "YPOS";             ddgui_stack[-1].ypos%=val$
+			CASE "WIDTH";            ddgui_stack[-1].main.wwidth%=val$
+			CASE "HEIGHT";           ddgui_stack[-1].main.wheight%=val$
+			CASE "MOVEABLE";         ddgui_stack[-1].moveable%=val$
+			CASE "SCALEABLE";        ddgui_stack[-1].scaleable%=val$
+			DEFAULT
+				DEBUG "DDgui_set dialog (\"\") property: "+name$+" is unknown\n"
+		ENDSELECT
+	ELSE
+		LOCAL iw = DDgui_index(ddgui_stack[-1], id$, TRUE)
+
+		ALIAS wdg AS ddgui_stack[-1].widgets[iw]
+
+		SELECT name$
+			CASE "TEXT";      wdg.wtext$ = val$
+			CASE "CLICKED";   wdg.wclicked% = val$
+			CASE "WIDTH";     wdg.wwidth% = val$
+			CASE "HEIGHT";    wdg.wheight% = val$
+			CASE "SELECT";    wdg.wselect% = val$
+			CASE "COUNT";     wdg.wcount% = val$
+			CASE "HOVER";     wdg.whover% = val$
+			CASE "READONLY";  wdg.wreadonly% = val$
+			CASE "SELSTART";  wdg.wselstart% = val$
+			CASE "SELEND";    wdg.wselend% = val$
+			CASE "HIDE";      wdg.whide% = val$
+			CASE "TYPE";      wdg.wtype$ = val$
+			CASE "FILTER";    wdg.wfilter$ = val$
+			CASE "TIPTEXT";   wdg.tiptext$ = val$
+			CASE "MINVAL";    wdg.wminval = val$
+			CASE "MAXVAL";    wdg.wmaxval = val$
+			CASE "STEP";      wdg.wstep   = val$
+			CASE "SCROLL";    wdg.wscroll = val$
+			CASE "ALIGN";     wdg.walign% = val$
+			DEFAULT
+				DEBUG "DDgui_set: Widget property "+name$+" is unknown\n"
+		ENDSELECT
+	ENDIF
+
+ENDFUNCTION
+
+
+
+// ------------------------------------------ //
+//! Initialize font (with kerning)
+// ------------------------------------------ //
+FUNCTION DDgui_UpdateFont: bWantKerning%, iPixelsSpaceBetweenLettersIfKerning%=2
+
+	ddgui_font_kerning.bHasKerning% = bWantKerning%
+
+RETURN
+
+
+// ancient code ...
+LOCAL fx%, fy%
+
+	IF LEN(ddgui_font_kerning.left%[])<256
+		DIM ddgui_font_kerning.left%[256]
+		DIM ddgui_font_kerning.width%[256]
+	ENDIF
+
+	GETFONTSIZE fx%, fy%
+	IF bWantKerning
+
+		LOCAL spr_bar%, spr_char%
+
+		// create vertival bar image
+		LOCAL pix%[]
+		DIM pix%[fy]
+		FOREACH p% IN pix%[]; p = 0xffffffff; NEXT
+		spr_bar=GENSPRITE()
+		MEM2SPRITE(pix%[], spr_bar, 1, fy)
+		spr_char=GENSPRITE()
+
+		ddgui_font_kerning.bHasKerning%=TRUE
+		FOR i% = 0 TO 255
+			DRAWRECT 0,0,fx+2, fy+2, RGB(255,0,128)
+			PRINT CHR$(i%), 1,1
+			GRABSPRITE spr_char%, 1,1, fx,fy
+
+			ddgui_font_kerning.width[i%] = fx%
+			FOR x%=0 TO fx-1
+				IF SPRCOLL(spr_bar,x,0, spr_char%,0,0)
+					ddgui_font_kerning.left[i%] = x
+					BREAK
+				ENDIF
+			NEXT
+			FOR x%=fx-1 TO 0 STEP -1
+				IF SPRCOLL(spr_bar,x,0, spr_char%,0,0)
+					ddgui_font_kerning.width[i%] = x - ddgui_font_kerning.left[i%] + iPixelsSpaceBetweenLettersIfKerning%
+					BREAK
+				ENDIF
+			NEXT
+
+			// totally empty chars
+			IF ddgui_font_kerning.width%[i%]<=1
+				ddgui_font_kerning.width%[i%] = (fx%*10)/100+iPixelsSpaceBetweenLettersIfKerning%
+				ddgui_font_kerning.left%[i%]  = 0
+			ENDIF
+		NEXT
+		GRABSPRITE spr_bar , 0,0,0,0
+		GRABSPRITE spr_char, 0,0,0,0
+
+		// fix space character
+		ddgui_font_kerning.width%[ASC(" ")] = ddgui_font_kerning.width%[ASC("n")]
+		ddgui_font_kerning.left[ASC(" ")] = 0
+	ELSE
+		ddgui_font_kerning.bHasKerning%=FALSE
+		FOREACH sp% IN ddgui_font_kerning.left%[]
+			sp% = 0
+		NEXT
+		FOREACH sp% IN ddgui_font_kerning.width%[]
+			sp% = fx%
+		NEXT
+	ENDIF
+ENDFUNCTION
+
+// ------------------------------------------ //
+// Print, using Kerning - if wanted
+// ------------------------------------------ //
+@FUNCTION DDGui_PrintIntern%: BYREF t$, x%, y%, bBold%=FALSE
+	IF bBold%
+		ALPHAMODE -.5
+		DDGui_PrintIntern(t$, x+1, y, FALSE)
+		ALPHAMODE 0
+	ENDIF
+
+
+	PRINT t$, x,y, ddgui_font_kerning.bHasKerning%
+	RETURN
+
+// old code
+	IF ddgui_font_kerning.bHasKerning%
+		LOCAL fx%, lt%, c$, kern%
+		LOCAL ac%
+		lt% = LEN(t$)-1
+		FOR c% = 0 TO lt%
+			c$ = MID$(t$,c,1)
+			ac = ASC(c$)
+			kern% = ddgui_font_kerning.left%[ac]
+			PRINT c$, x-kern, y
+			INC x, ddgui_font_kerning.width%[ac]
+		NEXT
+	ELSE
+		PRINT t$, x,y
+	ENDIF
+ENDFUNCTION
+
+// ------------------------------------------ //
+// Return the width of that text in pixels
+// even for kerned fonts
+// -> center button text
+// -> get width of tab stripes
+// ------------------------------------------ //
+@FUNCTION DDGui_TextWidthIntern%: BYREF t$
+
+	RETURN LEN(t$, ddgui_font_kerning.bHasKerning%)
+
+// old code
+	IF ddgui_font_kerning.bHasKerning%
+		LOCAL fx%, lt%, c$, x%, ac%
+		lt% = LEN(t$)-1
+		FOR c% = 0 TO lt%
+			ac% = ASC(MID$(t$,c,1))
+			INC x, ddgui_font_kerning.width%[ac]
+		NEXT
+		RETURN x
+	ELSE
+		LOCAL fx%, fy%
+		GETFONTSIZE fx%, fy%
+		RETURN LEN(t$) * fx
+	ENDIF
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! clear all widgets, but keep color and size
+// ------------------------------------------ //
+FUNCTION DDgui_init:
+	IF LEN(ddgui_stack[])=0 THEN DIM ddgui_stack[1]
+
+	IF ddgui_stack[-1].col_norm=0 AND ddgui_stack[-1].col_bright=0
+		ddgui_stack[-1].col_norm   = RGB(0xc0, 0xc0, 0xc0)
+		ddgui_stack[-1].col_bright = RGB(0xff, 0xff, 0xff)
+		ddgui_stack[-1].col_hover_norm=RGB(0x40, 0x90, 0xff)
+		ddgui_stack[-1].col_hover_bright=RGB(0xa0, 0xf0, 0xff)
+	ENDIF
+	DIM ddgui_stack[-1].widgets[0]
+	DIM ddgui_stack[-1].draworder[0]
+	DIM ddgui_stack[-1].autos[0]
+
+
+//	DDGUI_AUTO_INPUT_DLG = FALSE
+	IF PLATFORMINFO$("") = "WINCE"  OR PLATFORMINFO$("") = "GP2X" OR PLATFORMINFO$("") = "ANDROID"  _
+	OR PLATFORMINFO$("") = "IPHONE" OR PLATFORMINFO$("") = "PANDORA" OR PLATFORMINFO$("")="WEBOS" OR PLATFORMINFO$("")="PALM_PIXI"
+		DDGUI_AUTO_INPUT_DLG = TRUE
+		IF gDDguiScrollbarWidth% = 0 THEN gDDguiScrollbarWidth% = 30
+	ENDIF
+	IF gDDguiScrollbarWidth% = 0 THEN gDDguiScrollbarWidth% = 20
+
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Get index in ddgui_vals$[] for given string
+//! New sorting algorithm for much faster access
+// ------------------------------------------ //
+//FUNCTION DDgui_index: BYREF name$, create
+//LOCAL up%, dn%, mid%
+//	up=0; dn=LEN(ddgui_vals.pairs[])-1
+//	WHILE up < dn
+//		mid = INTEGER( (up+dn) / 2)
+//		IF ddgui_vals.pairs[mid].key$ > name$
+//			dn=MAX(mid-1, up)
+//		ELSE
+//			IF ddgui_vals.pairs[mid].key$ < name$
+//				up=MIN(dn, mid+1)
+//			ELSE
+//				RETURN mid // not bigger, not smaller, guess what!?
+//			ENDIF
+//		ENDIF
+//	WEND
+//	IF LEN(ddgui_vals.pairs[]) AND ddgui_vals.pairs[up].key$ = name$ THEN RETURN up
+//	IF create
+//		dn = LEN(ddgui_vals.pairs[])
+//		REDIM ddgui_vals.pairs[dn+1]
+//		FOR mid = dn TO up+1 STEP -1
+//			ddgui_vals.pairs[mid] = ddgui_vals.pairs[mid-1]
+//		NEXT
+//		IF dn>0 AND ddgui_vals.pairs[up].key$ < name$ THEN up=up+1
+//		ddgui_vals.pairs[up].key$ = name$
+//		RETURN up
+//	ENDIF
+//RETURN -1
+//ENDFUNCTION
+//
+//
+//FUNCTION DDgui_get$: name$
+//LOCAL i%
+//	i = DDgui_index(name$, FALSE)
+//	IF i>=0 THEN RETURN ddgui_vals.pairs[i].val$
+//RETURN ""
+//ENDFUNCTION
+//
+//FUNCTION DDgui_get: name$
+//	RETURN DDgui_get$(name$)
+//ENDFUNCTION
+//
+//FUNCTION DDgui_set: name$, val$
+//LOCAL i%
+//	IF LEN(val$)=0
+//		i = DDgui_index(name$, FALSE)
+//		IF i>=0 THEN DIMDEL ddgui_vals.pairs[], i
+//	ELSE
+//		i = DDgui_index(name$, TRUE)
+//		ddgui_vals.pairs[i].val$ = val$
+//	ENDIF
+//ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Bring a new dialog in front of the current one
+// ------------------------------------------ //
+FUNCTION DDgui_pushdialog: x%, y%, width%, height%, center_to_screen% = FALSE
+LOCAL sx%, sy%
+LOCAL dlg AS DDGUI_DLG
+
+
+	IF gDDguiMinControlDimension%<=0
+		gDDguiMinControlDimension%=16
+
+		?IF DEFINED(IPHONE) OR DEFINED(ANDROID) OR DEFINED(WEBOS) OR DEFINED(PALMPIXI)
+			gDDguiMinControlDimension%=32
+		?ENDIF
+
+		?IF DEFINED(IPHONE)
+			LOCAL scx%, scy%
+			GETSCREENSIZE scx, scy
+			IF (scx=640 AND scy=960) OR (scx=960 AND scx=640) // retina, ouch!
+				gDDguiMinControlDimension%=48
+			ENDIF
+		?ENDIF
+	ENDIF
+
+	DIMPUSH ddgui_stack[], dlg
+
+	GETSCREENSIZE sx, sy
+//	IF LEN(ddgui_stack[])=0 THEN DIM ddgui_stack[1]
+//	IF LEN(ddgui_stack[-1].widgets[]) THEN DIMPUSH ddgui_stack[], ddgui_stack[-1]
+
+	DDgui_init()
+	ddgui_stack[-1].xpos = MIN(x, sx-1)
+	ddgui_stack[-1].ypos = MIN(y, sy-1)
+	ddgui_stack[-1].main.wwidth= MIN(width, sx-x)
+	ddgui_stack[-1].main.wheight=MIN(height, sy-y)
+
+	// Keep the colurs from the [0] dialog - in case someone has set them
+	ddgui_stack[-1].col_norm   = ddgui_stack[0].col_norm
+	ddgui_stack[-1].col_bright = ddgui_stack[0].col_bright
+	ddgui_stack[-1].col_hover_norm=ddgui_stack[0].col_hover_norm
+	ddgui_stack[-1].col_hover_bright=ddgui_stack[0].col_hover_bright
+
+
+	IF center_to_screen% THEN DDgui_CenterDialog()
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! quit current dialog, activate the one below this
+// ------------------------------------------ //
+FUNCTION DDgui_popdialog:
+	IF LEN(ddgui_stack[])>0
+		LOCAL n% = LEN(ddgui_stack[])-1
+
+		// alert all user widgets of descruction
+		LOCAL dummy$
+		FOREACH wdg IN ddgui_stack[n].widgets[]
+			IF wdg.wuserfoo THEN DDgui_signal(wdg.wid$, "DESTROY", dummy$)
+		NEXT
+
+		DIMDEL ddgui_stack[], n
+//	ELSE
+//		DIM ddgui_stack[1]
+//		DDgui_init()
+	ENDIF
+
+	IF LEN(ddgui_stack[]) THEN DDgui_resizedialog(0,0,0,0) // handle msg once -> set size for lists...
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! show the dialogs (all) and handle the current one
+// ------------------------------------------ //
+FUNCTION DDgui_show: only_show_current%
+	IF LEN(ddgui_stack[])=0
+		DEBUG "DDshow: No active dialog!\n"
+		RETURN 0
+	ENDIF
+
+	IF only_show_current=FALSE
+		LOCAL i%
+		FOR i% = 0 TO LEN(ddgui_stack[])-2 // don't draw the current one twice!
+			ALIAS dlg AS ddgui_stack[i]
+			DDgui_show_intern(dlg, FALSE)
+		NEXT
+	ENDIF
+	DDgui_show_intern(ddgui_stack[-1], TRUE)
+
+	FOREACH autom IN ddgui_stack[-1].autos[]
+		DDgui_set(autom.idto$, autom.objto$, DDgui_get$(autom.idfrom$, autom.objfrom$))
+	NEXT
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Check for box collision with the current dialog (to avoid drawing when you're on dialog?)
+// ------------------------------------------ //
+FUNCTION DDgui_BoxColl%: x%, y%, w%=1, h%=1
+	IF LEN(ddgui_stack[])= 0 THEN RETURN FALSE
+	ALIAS dlg AS ddgui_stack[-1]
+	RETURN BOXCOLL(dlg.rectx%, dlg.recty%, dlg.rectw%, dlg.recth%, x%,y%,w%,h%)
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! show the dialogs
+// ------------------------------------------ //
+@FUNCTION DDgui_show_intern: ddgui_vals AS DDGUI_DLG, is_current%
+LOCAL x%,y%,width%, height%, c1%, c2%
+LOCAL i%, id$, dy_line%, xpos%, ypos%
+LOCAL ytop%, yclip% // ytop = top of dialog, virtual area, yclip=top of visible area
+LOCAL mx%, my%, b1%, b2%, realb1%, realb2%
+LOCAL tx%, ty%
+LOCAL spacing%, movable%
+LOCAL col%
+	spacing = 2
+	MOUSESTATE mx, my, realb1, realb2
+	GETFONTSIZE tx, ty
+STATIC mouse_down%, movemousex%, movemousey%
+STATIC ToolTipDelay%, ToolTipMx%, ToolTipMy%
+
+LOCAL caption_height% = MAX(ty, gDDguiMinControlDimension%)
+
+	IF ABS(mx-ToolTipMx)>4 OR ABS(my-ToolTipMy)>4
+		ToolTipDelay% = GETTIMERALL()
+		ToolTipMx% = mx
+		ToolTipMy% = my
+	ENDIF
+
+	IF is_current
+		b1=0
+		// mouse down
+		IF realb1 AND mouse_down%=0
+			b1=-1
+			mouse_down%=1
+			movemousex=mx
+			movemousey=my
+		ENDIF
+		// mouse up
+		IF realb1 = FALSE AND mouse_down%>0
+			b1=1
+			mouse_down%=0
+			?IF DEFINED(IPHONE) OR DEFINED(WEBOS) OR DEFINED(WINCE) OR DEFINED(PANDORA) OR DEFINED(PALMPIXI)
+				SETMOUSE 0,0
+				movemousex=0
+				movemousey=0
+			?ENDIF
+		ENDIF
+
+		// Pen up -> move mouse away from widgets
+		?IF DEFINED(IPHONE) OR DEFINED(WEBOS) OR DEFINED(WINCE) OR DEFINED(PANDORA) OR DEFINED(PALMPIXI)
+		IF b1=0 AND realb1=0
+			mx=-1; my=-1
+		ENDIF
+		?ENDIF
+	ENDIF
+
+	// Now show it
+	VIEWPORT 0,0,0,0
+	c1=ddgui_vals.col_bright
+	c2=ddgui_vals.col_norm
+	x = ddgui_vals.xpos%
+	y = ddgui_vals.ypos%
+	width = ddgui_vals.main.wwidth%
+	height= ddgui_vals.main.wheight%
+
+	// MOVE dialog
+	IF is_current
+		// handle move-bar
+		IF ddgui_vals.moveable%
+			IF realb1
+				i=BOXCOLL(x,y,width,caption_height%, mx,my,1,1)
+				IF (i OR ddgui_vals.moving%) AND LEN(ddgui_vals.focus$)=0
+					ddgui_vals.moving%=TRUE
+					x = MAX(0, x + mx - movemousex%)
+					y = MAX(0, y + my - movemousey%)
+					ddgui_vals.xpos = x
+					ddgui_vals.ypos = y
+				ELSEIF i
+					ddgui_vals.focus$=""
+				ENDIF
+			ELSE
+				ddgui_vals.moving%=FALSE
+			ENDIF
+		ENDIF
+	ENDIF
+
+	// caption bar
+	IF ddgui_vals.moveable% OR LEN(ddgui_vals.main.wtext$)
+		movable=TRUE
+		y=y+caption_height%+4
+
+		// DRAWRECT x,y-ty-4,   width, ty+4,    c1
+		// DRAWRECT x+2,y-2-ty,  width-4, ty-1, c2
+		DDgui_backgnd(c1, c2, x+1, y-caption_height%-3,   width-2, caption_height%+4);
+		DDGui_PrintIntern(ddgui_vals.main.wtext$, x+3, y-caption_height%-2, TRUE)
+		DDgui_backrect(x,y-caption_height%-4,width, height+caption_height%+4, c2)
+
+		ddgui_vals.rectx% = x
+		ddgui_vals.recty% = y-caption_height%-4
+		ddgui_vals.rectw% = width
+		ddgui_vals.recth% = height+caption_height%+4
+	ELSE // no caption bar
+		DDgui_backrect(x,y,width, height, c2)
+		ddgui_vals.rectx% = x
+		ddgui_vals.recty% = y
+		ddgui_vals.rectw% = width
+		ddgui_vals.recth% = height
+	ENDIF
+
+	// Dialog backgrnd (client area)
+	//	DDgui_backgnd(c1, c2, x,y,width, height)
+	DDgui_backgnd(c1, c1, x+1,y+1,width-2, height-2)
+
+	// top position of client area (screen position)
+	ytop=y
+	yclip=ytop
+
+
+	LOCAL sizer_size% = MAX(tx*2, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+	IF is_current
+		// handle sizer
+		IF ddgui_vals.scaleable% OR ddgui_vals.scaleing%
+			IF realb1
+				i=BOXCOLL(x+width-sizer_size%-4,y+height-sizer_size%-4,sizer_size%+4,sizer_size%+4, mx,my,1,1)
+				IF i OR ddgui_vals.scaleing%
+					ddgui_vals.scaleing%=TRUE
+					width  = MAX(0, width  + mx - movemousex%)
+					height = MAX(0, height + my - movemousey%)
+					ddgui_vals.main.wwidth=width
+					ddgui_vals.main.wheight=height
+				ENDIF
+			ELSE
+				ddgui_vals.scaleing%=FALSE
+			ENDIF
+		ENDIF
+	ENDIF
+	// draw sizer + movebar
+	IF ddgui_vals.scaleable% OR ddgui_vals.scaleing%
+		col=BOXCOLL(x+width-sizer_size%-4,y+height-sizer_size%-4,sizer_size%+4,sizer_size%+4, mx,my,1,1)
+		IF col THEN c2 = ddgui_vals.col_hover_norm
+		i=y+height-sizer_size%-3
+		DRAWRECT x+width-sizer_size%/3-5, i, sizer_size%/3, 2, c2
+		INC i,sizer_size%/3
+		DRAWRECT x+width-2*sizer_size%/3-5, i, 2*sizer_size%/3, 2, c2
+		INC i,sizer_size%/3
+		DRAWRECT x+width-sizer_size%-5, i, sizer_size%, 2, c2
+		IF col THEN c2 = ddgui_vals.col_norm
+	ENDIF
+
+	// for move/scale of dialog
+	IF is_current
+		movemousex% = mx
+		movemousey% = my
+	ENDIF
+	INC x, 3
+	INC y, 3
+	INC ytop, 3
+	INC yclip, 3
+	DEC width, 6
+	DEC height, 6
+	ypos = y
+	xpos = x
+
+	// now do a scrollbar (if needed)
+	IF is_current
+		ddgui_vals.main.wscrollmax% = MAX(0, ddgui_vals.realheight% - height% - 12)
+
+		IF ddgui_vals.main.wscrollmax% THEN INC ddgui_vals.main.wscrollmax%, 24 // more space for better scrolling
+
+		LOCAL hgrp% // height of sizing gripper
+		IF ddgui_vals.scaleable%
+			hgrp% = MAX(32, sizer_size%)
+		ENDIF
+
+
+		IF is_current AND DDgui_handlescrollbar(ddgui_vals, ddgui_vals.main, mx-x+10, my-y, b1, b2, height-hgrp%)
+			VIEWPORT x,y,width,height
+			DDgui_drawscrollbar(ddgui_vals, ddgui_vals.main, width, height-hgrp%, height, 0)
+			VIEWPORT 0,0,0,0
+
+			DEC width, sizer_size%  // SCROLLBAR_SIZE - visible widget space left of scrollbar
+			i = ddgui_vals.main.wscroll%
+			ypos = ypos - i
+			ytop = ytop - i
+		ENDIF
+	ENDIF
+
+	dy_line=0
+
+	IF LEN(ddgui_vals.draworder[]) <> LEN(ddgui_vals.widgets[])
+		DEBUG "Draw order is messed up "+LEN(ddgui_vals.draworder[])+"/"+LEN(ddgui_vals.widgets[])+"\n"
+	ENDIF
+
+	LOCAL show_tips%
+	IF GETTIMERALL() - ToolTipDelay% > 500 THEN show_tips%=TRUE
+
+	//INC height%, ypos% // clipping bottom position, global
+	LOCAL xclip% = xpos% + width%
+	LOCAL ybclip% = yclip% + height%
+
+	FOR od%=0 TO LEN(ddgui_vals.draworder[])-1
+		DDgui_draw_widget_intern(ddgui_vals, od%, xpos%, ypos%, dy_line%, width%, is_current%, spacing%, xclip%, yclip%, ybclip%, mx, my, b1, b2, x%, y%, show_tips%)
+	NEXT // widget
+	VIEWPORT 0,0,0,0
+
+	// shade out non-current dialogs
+	IF is_current=FALSE
+		ALPHAMODE -.5
+		x = ddgui_vals.xpos%
+		y = ddgui_vals.ypos%
+		width = ddgui_vals.main.wwidth%
+		height= ddgui_vals.main.wheight%
+		IF movable THEN INC height, caption_height%+4
+		DRAWRECT x,y,width, height, RGB(0,0,0)
+		ALPHAMODE 0
+	ENDIF
+	SYSTEMPOINTER TRUE
+
+	// set the real height of that dialog
+	height = ypos+spacing+dy_line-ytop
+	IF is_current THEN ddgui_vals.realheight% = height
+	LOCAL retval% = MAX(height, ddgui_vals.main.wheight% )
+
+
+	// Might want to call an internal dialog from a button?
+	x = ddgui_vals.kick_intern_dlg%
+	ddgui_vals.kick_intern_dlg%=0
+	LOCAL KickId$ = ddgui_vals.kick_intern_id$
+
+	SELECT x
+		CASE 1 // color dialog
+			LOCAL col%
+			// watch it!! ddgui_vals is broken after anything that calls ddgui_show!
+			col% = DDgui_ColorDlg(MID$(DDgui_get$(KickId$, "TEXT"), 5,64))
+			DDgui_set(KickId$, "TEXT", "SPR_C"+col%)
+			DDgui_set(KickId$, "CLICKED", TRUE)
+		CASE 2 // osd keyboard
+			LOCAL bSingleText% = FALSE
+			LOCAL bIsNumber% = FALSE
+			IF DDgui_get$(KickId$, "TYPE") = "SINGLETEXT" THEN bSingleText% = TRUE
+			IF DDgui_get$(KickId$, "TYPE") = "NUMBERTEXT"
+				bSingleText% = TRUE
+				bIsNumber%   = TRUE
+			ENDIF
+			LOCAL text$ = DDgui_input$(DDgui_get$(KickId$, "TEXT"), FALSE, FALSE, bSingleText%, bIsNumber%)
+			DDgui_set(KickId$, "TEXT", text$)
+		CASE 3 // combo box
+			LOCAL scx%, scy%
+			GETSCREENSIZE scx, scy
+			LOCAL isel%
+			isel% = DDgui_button_list_picker(MIN(scy-16, DDgui_get(KickId$, "XPOS")), DDgui_get(KickId$, "YPOS"),DDgui_get(KickId$, "WIDTH"), MAX(16, scy - DDgui_get(KickId$, "YPOS")), DDgui_get$(KickId$, "TEXT"), DDgui_get(KickId$, "SELECT") )
+			IF isel>=0
+				DDgui_set(KickId$, "SELECT", isel%)
+				DDgui_set(KickId$, "CLICKED", TRUE)
+			ENDIF
+		CASE 4 // File Dialog
+			LOCAL ret$ = DDgui_FileDialog$(TRUE,"*.*")
+			DDgui_set(KickId$, "TEXT", ret$)
+	ENDSELECT
+	// FROM NOW ON - DON'T USE ddgui_vals ANYMORE!! I MEAN IT!
+
+
+
+RETURN retval // minimum required height of this dialog
+ENDFUNCTION
+
+
+// -----------------------------------------------
+// Draw a widget
+// return TRUE: ok, widget drawn
+//        FALSE: a frame ends
+// xpos%      - x position of left widget corner, global
+// ypos%      - y position of widget's local 0 coord, global coords
+// dy_line%   - height of the line this widget is in
+// width%     - useable width of dialog or frame before wrapping a new line
+// is_current - see if dialog is active
+// spacing    - pixels between widgets
+// xclip%     - rightmost pixel to clip (global coords)
+// yclip%     - topmost pixel visible on dialog (global coords)
+// ybclip%    - bottom pixel to clip (global coords)
+// mx,my,b1,b2- mouse state
+// x,y        - top left corner of dialog client area (or frame area), global coords
+// show_tips  - enable tooltips for this widget?
+// -----------------------------------------------
+@FUNCTION DDgui_draw_widget_intern%: ddgui_vals AS DDGUI_DLG, BYREF order_index%, BYREF xpos%, BYREF ypos%, BYREF dy_line%, width%, is_current%, spacing%, xclip%, yclip%, ybclip%, mx%, my%, b1%, b2%, x%, y%, show_tips%
+LOCAL vpx%, vpy%, dx%, dy%
+STATIC lines$[]
+LOCAL vptop%, ytop%
+	ALIAS wdg AS ddgui_vals.widgets[ddgui_vals.draworder[order_index%].index%]
+
+	// ignore hidden ones
+	IF wdg.whide% THEN RETURN TRUE
+
+	dx = wdg.wwidth%
+	dy = wdg.wheight%
+
+	// need a new line due to wide widget?
+	IF xpos + dx > width+x
+		xpos = x
+		ypos = ypos + dy_line + spacing
+		dy_line = dy
+
+		IF dx>=width% AND wdg.wtype$="SPACER" THEN RETURN TRUE // spacer -> don't ruin frames
+	ENDIF
+
+	// is aligned to center
+	IF wdg.walign% =0 AND dx<width AND width<10000
+		// free space = x+width-xpos-dx
+		xpos = xpos + (width+x-xpos-dx)/2
+	ENDIF
+	// right alignment
+	IF wdg.walign%>0 AND dx<width AND width<10000
+		xpos = x+width-dx
+	ENDIF
+
+__DrawFrames__:
+	IF wdg.wtype$="FRAME"
+		LOCAL border% = 0
+		IF dx=10000 THEN border=1 // ugly ugly fix for non caption frames with width=0 and center align
+		LOCAL dy_line_frame%=0
+		LOCAL xstart% = xpos%
+		LOCAL ystart% = ypos%
+
+		IF LEN(wdg.wtext$)
+			border% = 4
+			LOCAL fx%, fy%
+			GETFONTSIZE fx%, fy%
+
+			// clip frame to dialog
+			// Viewport for this widget
+			vpx=wdg.wwidth%; vpy=wdg.wheight%
+			vptop% = ypos
+
+			ytop% = 0
+			IF ypos% < yclip%
+				ytop% = ypos% - yclip%
+				DEC vptop%, ytop%
+				INC vpy, ytop%
+			ENDIF
+			IF vpx + xpos > xclip%  THEN vpx = xclip% -xpos
+			IF vpy + vptop > ybclip% THEN vpy = ybclip%-vptop
+
+			// draw it if visible
+			IF vpx>0 AND vpy>0
+				VIEWPORT xpos, vptop%, vpx, vpy
+				// draw frame
+				ALPHAMODE -.5
+				DDgui_backrect(1, ytop%+fy%/2+1, wdg.wwidth%-2, wdg.wheight%-fy%/2-2, ddgui_vals.col_norm%)
+				ALPHAMODE 0
+				DDgui_backrect(0, ytop%+fy%/2, wdg.wwidth%, wdg.wheight%-fy%/2, ddgui_vals.col_norm%)
+				DRAWRECT border, ytop%, border%*4 + DDGui_TextWidthIntern(wdg.wtext$), fy, ddgui_vals.col_bright%
+				DDGui_PrintIntern(wdg.wtext$, border%*2, ytop%)
+			ENDIF
+			// adjust content size
+			INC ypos%, fy%+border%
+			INC xpos%, border%
+			INC ypos%, border%
+			INC xstart%, border%
+		//	INC ystart%, border%
+		ENDIF
+
+		// draw all sub childs
+		LOCAL iord%
+		LOCAL fr_width% = 0
+
+		// get widht for sub items. If that's undefined, tell the childs so
+
+		LOCAL wwidth% = wdg.wwidth%
+		IF wwidth% < 10000 THEN DEC wwidth%, 2*border%
+		FOR iord% = order_index%+1 TO LEN(ddgui_vals.draworder[])-1
+			LOCAL simplewdg%
+			LOCAL icur% = iord% // remember this one, might change for nested frames
+
+			simplewdg% = DDgui_draw_widget_intern(ddgui_vals, iord%, xpos%, ypos%, dy_line_frame%, _
+												wwidth%, is_current%, spacing%, _
+												xclip%, yclip%, ybclip%, _
+												mx%, my%, b1%, b2%, xstart%, ystart%, show_tips%)
+			// xpos is where that widget was drawn.
+			// frame width can be max of: xpos - x_start_of_frame
+			fr_width% = MAX(fr_width%, xpos% - xstart%)
+			IF simplewdg%=FALSE
+				order_index% = iord%
+				BREAK
+			ENDIF
+		NEXT
+		// no width, yet -> set to what your content has
+		IF wdg.wwidth%=10000 // _AUTO_FRAME_WIDTH_
+			wdg.wwidth%=fr_width% + 2*border%
+			dx = wdg.wwidth%
+		ENDIF
+
+		wdg.wheight% = ypos% - ystart% + dy_line_frame% + border%*2
+		xpos% = xstart%
+		ypos% = ystart%
+//		RETURN TRUE
+	ELSEIF wdg.wtype$="UNFRAME"
+		RETURN FALSE
+	ENDIF
+
+	// handle it
+	IF is_current THEN DDgui_handlewidget(ddgui_vals, wdg, mx-xpos, my-ypos, b1, b2)
+
+	// Viewport for this widget
+	vpx=dx; vpy=dy
+	vptop% = ypos
+	ytop% = 0
+	IF ypos% < yclip%
+		ytop% = ypos% - yclip%
+		DEC vptop%, ytop%
+		INC vpy, ytop%
+	ENDIF
+	IF vpx + xpos > xclip%   THEN vpx = xclip%   -xpos
+	IF vpy + vptop > ybclip% THEN vpy = ybclip%-vptop
+
+	// drawing position (read only) as global coords
+	wdg.wxpos% = xpos
+	wdg.wypos% = vptop
+
+	// draw it if visible
+	IF vpx>0 AND vpy>0 // AND ypos+vpy>=y AND ypos+vpy>=yclip
+		VIEWPORT xpos, vptop%, vpx, vpy
+		DDgui_drawwidget(ddgui_vals, wdg, ytop%)
+	ENDIF
+
+	// Tooltip text
+	IF show_tips% AND wdg.whover% AND LEN(wdg.tiptext$)
+		LOCAL boxx, boxy
+		LOCAL frame% = 1 // frame pixels
+		VIEWPORT 0,0,0,0
+		GETFONTSIZE boxx, boxy
+		LOCAL truew%
+
+		LOCAL is_multiline%
+		is_multiline% = INSTR(wdg.tiptext$, "\n")
+		IF is_multiline%<>-1
+			SPLITSTR(wdg.tiptext$, lines$[], "\n")
+			boxy = boxy * LEN(lines$[])
+			// find maximum line width
+			truew = 0
+			FOREACH l$ IN lines$[]
+				truew = MAX(truew, DDGui_TextWidthIntern(l$))
+			NEXT
+			boxx=truew
+		ELSE
+			truew% =DDGui_TextWidthIntern(wdg.tiptext$)
+			boxx = MAX(vpx, truew)
+			DIM lines$[1]
+			lines$[0] = wdg.tiptext$
+		ENDIF
+
+		LOCAL x%, y%
+		x = MAX(0, xpos+(vpx-boxx)/2 -frame)
+		y = MAX(0, ypos - boxy       -frame*2)
+
+		DEC y, gDDguiMinControlDimension
+		IF y<0 THEN y=0
+
+		ALPHAMODE -.8
+		DRAWRECT x, y, boxx+frame*2, boxy+frame*2, ddgui_vals.col_hover_bright
+		ALPHAMODE 0
+		DDgui_backrect(x,y,boxx+frame*2,boxy+frame*2,ddgui_vals.col_norm)
+		// draw text
+		INC x, frame
+		INC y, frame
+		IF LEN(lines$[])
+			LOCAL w%, h%
+			GETFONTSIZE w, h
+			FOREACH l$ IN lines$[]
+				DDGui_PrintIntern(l$, x + (boxx-DDGui_TextWidthIntern(l$))/2, y)
+				INC y, h
+			NEXT
+		ELSE
+			DDGui_PrintIntern(wdg.tiptext$, x + (boxx-truew)/2, y)
+		ENDIF
+	ENDIF
+
+	xpos = xpos + vpx + spacing
+	IF dy_line<dy THEN dy_line=dy
+
+	RETURN TRUE
+ENDFUNCTION
+
+
+
+// ------------------------------------------ //
+//! Resize and mode a dialog
+// ------------------------------------------ //
+FUNCTION DDgui_resizedialog%: x%,y%,width%=0,height%=0
+LOCAL i%, id$
+LOCAL scx%, scy%
+	GETSCREENSIZE scx%, scy%
+	IF width>0 AND height>0
+		DDgui_set("", "XPOS", x)
+		DDgui_set("", "YPOS", y)
+		IF width>0  THEN DDgui_set("", "WIDTH", MIN(scx, width))
+		IF height>0 THEN DDgui_set("", "HEIGHT", MIN(scy, height))
+	ENDIF
+	// Handle each widget - so they get things ordered
+	FOREACH wdg IN ddgui_stack[-1].widgets[]
+		DDgui_handlewidget(ddgui_stack[-1], wdg, -1, -1, 0, 0)
+	NEXT
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Show or hide a widget
+// ------------------------------------------ //
+FUNCTION DDgui_hide%: id$, bHide%=TRUE
+	DDgui_set(id$, "HIDE", bHide)
+
+	// if a frame, hide all childs, too
+	IF DDgui_get$(id$, "TYPE") = "FRAME"
+		LOCAL od%, inframe%
+		FOR od%=0 TO LEN(ddgui_stack[-1].draworder[])-1
+			IF inframe=0 AND ddgui_stack[-1].draworder[od%].id$ = id$ THEN INC inframe, 1
+			IF inframe
+				ALIAS wdg AS ddgui_stack[-1].widgets[ddgui_stack[-1].draworder[od%].index%]
+				IF wdg.wtype$="UNFRAME"
+					DEC inframe
+					IF inframe<2 THEN BREAK
+				ENDIF
+				IF wdg.wtype$="FRAME" THEN INC inframe
+				wdg.whide% = bHide%
+				IF bHide THEN wdg.wclicked%=0 // can't click that - would lock "clicked" state
+			ENDIF
+		NEXT // widget
+	ENDIF
+ENDFUNCTION
+
+
+
+SUB __DDgui_Callbacks__:
+ENDSUB
+
+// ------------------------------------------ //
+// !Overwrite for drawing user defined widgets
+// ytop% - top pixel, relative to viewport
+// ------------------------------------------ //
+CALLBACK FUNCTION DDgui_draw_user%: BYREF id$, width%, height%, ytop%
+	DDgui_backgnd(RGB(0,0,0), RGB(255,255,255), 0,0,width, height)
+	PRINT "user: id="+id$, 0,0
+ENDFUNCTION
+
+// ------------------------------------------ //
+// !Overwrite for handling user defined widgets
+// ------------------------------------------ //
+CALLBACK FUNCTION DDgui_handle_user%: BYREF id$, mx%, my%, b1%, b2%
+	VIEWPORT 0,0,0,0
+	DRAWRECT 0,0,1024,1024,RGB(255,128,64)
+	PRINT "Must overwrite: ddgui_handle_user", 0,0
+	PRINT "for item: "+id$, 0, 20
+	PRINT "type="+DDgui_get$(id$, "TYPE"), 0, 40
+	SHOWSCREEN
+	//MOUSEWAIT
+	//END
+ENDFUNCTION
+
+
+//! Draw a 1 pixel rectangle usually around
+//! text or list controls
+CALLBACK FUNCTION DDgui_backrect%: x%,y%,dx%,dy%, col%
+?IFDEF WIN32
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF LINUX
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF MACOSX
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF IPHONE
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF PANDORA
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF WEBOS
+  ?DEFINE DDGUI_OGL
+?ENDIF
+?IFDEF PALMPIXI
+  ?DEFINE DDGUI_OGL
+?ENDIF
+
+
+?IFDEF DDGUI_OGL
+	DEC dx, 1; DEC dy, 1
+	DRAWLINE x+1,y+dy,x+dx-1,y+dy,col
+	DRAWLINE x+dx,y+1,x+dx,y+dy-1,col
+	DRAWLINE x+1,y,  x+dx-1, y,col
+	DRAWLINE x,y+1,  x,y+dy-1,col
+?ELSE
+	DRAWRECT x+1,y,dx-2,1,col
+	DRAWRECT x,y+1,1,dy-2,col
+	DRAWRECT x+dx-1,y+1,1,dy-2,col
+	DRAWRECT x+1,y+dy-1,dx-2,1,col
+?ENDIF
+ENDFUNCTION
+
+// ------------------------------------------ //
+//! Draw 3D background
+//! override this function for your own
+//! graphics style
+//! Colors are:
+//!			col_bright				 - bright color
+//!			col_norm				 - normal color
+//!			col_hover_bright		 - bright color when under mouse
+//!			col_hover_norm			 - normal color when under mouse
+// \param col1 - a bright color
+// \param col2 - the normal color, see
+// \param x    - start x value
+// \param y    - start y value
+// \param dx   - width
+// \param dy   - height
+// ------------------------------------------ //
+CALLBACK FUNCTION DDgui_backgnd%: col1%, col2%, x%, y%, dx%, dy%
+STATIC QuickGL%=-1
+	IF QuickGL = -1
+		IF INTEGER(PLATFORMINFO$("GLEXT:glDrawRangeElements")) <> 0
+			QuickGL=TRUE
+		ELSE
+			QuickGL=FALSE
+			?IF DEFINED(WEBOS) OR DEFINED(PALMPIXI)
+				QuickGL=TRUE
+			?ENDIF
+		ENDIF
+	ENDIF
+
+	// really too slow on iPhone. A true shame :(
+	IF col1=col2
+		DRAWRECT x,y,dx,dy,col1
+		RETURN
+	ENDIF
+
+	IF QuickGL
+		LOCAL hpos = 0.35
+		STARTPOLY -1, 2
+		IF dx >= dy*.65
+			POLYVECTOR x+dx,y,      0,0, col1
+			POLYVECTOR x,   y,      0,0, col1
+			POLYVECTOR x+dx,y+dy*hpos, 0,0, col2
+			POLYVECTOR x,   y+dy*hpos, 0,0, col2
+			POLYVECTOR x+dx,y+dy,   0,0, col2
+			POLYVECTOR x,   y+dy,   0,0, col2
+		ELSE
+			POLYVECTOR x,     y,    0,0, col1
+			POLYVECTOR x,     y+dy, 0,0, col1
+			POLYVECTOR x+dx*hpos,y,    0,0, col2
+			POLYVECTOR x+dx*hpos,y+dy, 0,0, col2
+			POLYVECTOR x+dx,  y,    0,0, col2
+			POLYVECTOR x+dx,  y+dy, 0,0, col1
+		ENDIF
+		ENDPOLY
+	ELSE
+		LOCAL hpos = 0.35
+		IF dx>=dy*.65
+			DRAWRECT x,y,dx, dy*hpos, col1
+			DRAWRECT x,y+dy*hpos,dx, dy*(1.0-hpos)+.99, col2
+		ELSE
+			DRAWRECT x,y,dx*hpos, dy, col1
+			DRAWRECT x+dx*hpos,y,dx*(1.0-hpos)+.99, dy, col2
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+
+SUB __DDgui_Widgets___:
+ENDSUB
+
+// ------------------------------------------ //
+//! widget c'tor - can be used as a static text widget
+// ------------------------------------------ //
+FUNCTION DDgui_widget%: id$, caption$, width%=0, height%=0
+LOCAL count%
+LOCAL fx%, fy%
+LOCAL wdg AS DDGUI_WDG
+
+	count = 1 + LEN(ddgui_stack[-1].widgets[])
+	IF id$="" THEN id$="iwdg%"+count
+
+	GETFONTSIZE fx, fy
+	IF width <=gDDguiMinControlDimension% THEN width  = MAX(gDDguiMinControlDimension%, MAX(width, DDGui_TextWidthIntern(caption$) + fx))
+	IF height<=gDDguiMinControlDimension% THEN height = MAX(gDDguiMinControlDimension%, MAX(height, fy+6))
+
+	LOCAL i% = DDgui_index(ddgui_stack[-1], id$, TRUE)
+	ddgui_stack[-1].widgets[i].wid$ = id$
+	ddgui_stack[-1].widgets[i].wwidth=width
+	ddgui_stack[-1].widgets[i].wheight=height
+	ddgui_stack[-1].widgets[i].wtype$ = "WIDGET"
+	ddgui_stack[-1].widgets[i].wtext$=caption$
+ENDFUNCTION
+
+
+
+FUNCTION DDgui_user%: id$, user_type$, fkt_ptr AS DDgui_userfunction, width%, height%
+	DDgui_widget(id$, "", width%, height%)
+	DDgui_set(id$, "TYPE", user_type$)
+
+	ddgui_stack[-1].widgets[-1].wuserfoo = fkt_ptr
+
+	LOCAL dummy$
+	IF fkt_ptr THEN DDgui_signal(id$, "INIT", dummy$)
+ENDFUNCTION
+
+
+// signal a user function
+FUNCTION DDgui_signal%: id$, verb$, BYREF info$
+	LOCAL id% = DDgui_index(ddgui_stack[-1], id$, FALSE)
+	IF id<0 THEN RETURN FALSE
+	ALIAS foo AS ddgui_stack[-1].widgets[id].wuserfoo
+	IF foo
+		foo(id$, verb$, info$)
+	ENDIF
+ENDFUNCTION
+
+
+
+
+
+// Make a user defined widget
+// \sa DDgui_handle_user, DDgui_draw_user
+FUNCTION DDgui_userdefined: id$, user_type$, width%, height%
+	DDgui_widget(id$, "", width%, height%)
+	DDgui_set(id$, "TYPE", user_type$)
+ENDFUNCTION
+
+// ------------------------------------------ //
+//! Draw a widget (any one)
+// ------------------------------------------ //
+@FUNCTION DDgui_drawwidget%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+
+	STATIC dummy$
+
+	SELECT wdg.wtype$
+		CASE "FRAME"
+		CASE "UNFRAME"
+		CASE "SPACER"
+			// DRAWRECT 0, ytop%,MAX(1,wdg.wwidth%+1), MAX(1,wdg.wheight%+1), RGB(255,0,0)
+		CASE "WIDGET"
+			ALPHAMODE -.7
+			LOCAL w%, h%
+			GETFONTSIZE w%, h%
+
+			// singleline -> vcenter
+			IF INSTR(wdg.wtext$, "\n")<0
+				h = DDgui_boxprint(ddgui_vals, wdg, 0, ytop% + (wdg.wheight-h%)/2, wdg.wwidth, TRUE, FALSE)
+			ELSE
+				h = DDgui_boxprint(ddgui_vals, wdg, 0, ytop%, wdg.wwidth, TRUE, FALSE)
+			ENDIF
+			wdg.wheight = MAX(gDDguiMinControlDimension%, h) // set height after each draw
+			ALPHAMODE 0
+		CASE "BUTTON"
+			DDgui_drawbutton(ddgui_vals, wdg, ytop%)
+		CASE "SLIDER"
+			DDgui_drawslider(ddgui_vals, wdg, ytop%)
+		CASE "RADIO"
+			DDgui_drawradio(ddgui_vals, wdg, ytop%)
+		CASE "CHECKBOX"
+			DDgui_drawcheckbox(ddgui_vals, wdg, ytop%)
+		CASE "TAB"
+			DDgui_drawtab(ddgui_vals, wdg, ytop%)
+		CASE "COMBO"
+			DDgui_drawcombo(ddgui_vals, wdg, ytop%)
+		CASE "LIST"
+			DDgui_drawlist(ddgui_vals, wdg, ytop%)
+		CASE "SINGLETEXT"
+			DDgui_drawtext(ddgui_vals, wdg, ytop%, TRUE)
+		CASE "NUMBERTEXT"
+			DDgui_drawtext(ddgui_vals, wdg, ytop%, TRUE)
+		CASE "TEXT"
+			DDgui_drawtext(ddgui_vals, wdg, ytop%, FALSE)
+		CASE "FILE"
+			DDgui_drawfile(ddgui_vals, wdg, ytop%)
+		DEFAULT
+			IF wdg.wuserfoo
+				wdg.wuserfoo(wdg.wid$, "DRAW", dummy$)
+			ELSE
+				DDgui_draw_user(wdg.wid$, wdg.wwidth%, wdg.wheight%, ytop%)
+			ENDIF
+	ENDSELECT
+ENDFUNCTION
+
+// ------------------------------------------ //
+//! Interact with a widget
+//! \param mx% - mouse x position, relative to widget
+//! \param my% - mouse y position, relative to widget
+//! \param b1% - left mouse button. -1=down; 1=up; 0=pressed or released
+// ------------------------------------------ //
+@FUNCTION DDgui_handlewidget%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+
+	STATIC dummy$
+
+	// Does the mouse cover the widget?
+	IF mx>=0 AND my>=0 AND mx<wdg.wwidth AND my<wdg.wheight
+		wdg.whover%=TRUE
+	ELSE
+		b1=0; b2=0 // it's not for you!
+		wdg.whover%=FALSE
+	ENDIF
+
+	SELECT wdg.wtype$
+		CASE "SPACER"  // no actions
+		CASE "FRAME"   // no actions
+		CASE "UNFRAME" // no actions
+
+		CASE "WIDGET"
+			IF b1 <> 1 THEN b1 = 0
+			wdg.wclicked = b1
+		CASE "BUTTON"
+			DDgui_handlebutton(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "SLIDER"
+
+			DDgui_handleslider(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "RADIO"
+			DDgui_handleradio(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "CHECKBOX"
+			DDgui_handlecheckbox(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "FILE"
+			DDgui_handlefile(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "LIST"
+			DDgui_handlelist(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "TAB"
+			DDgui_handletab(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "COMBO"
+			DDgui_handlecombo(ddgui_vals, wdg, mx, my, b1, b2)
+		CASE "SINGLETEXT"
+			ddgui_handletext(ddgui_vals, wdg, mx, my, b1, b2, TRUE, FALSE)
+		CASE "NUMBERTEXT"
+			ddgui_handletext(ddgui_vals, wdg, mx, my, b1, b2, TRUE, TRUE)
+		CASE "TEXT"
+			ddgui_handletext(ddgui_vals, wdg, mx, my, b1, b2, FALSE, FALSE)
+
+		DEFAULT
+			IF wdg.wuserfoo
+				dummy$=""
+
+				IF b1 <> 1 THEN b1 = 0
+				wdg.wclicked = b1
+
+				IF wdg.wclicked
+					dummy$ = FORMAT$(4,0,mx)+","+FORMAT$(4,0,my)+","+FORMAT$(2,0,b1)
+					wdg.wuserfoo(wdg.wid$, "CLICKED", dummy$)
+				ENDIF
+			ELSE
+				DDgui_handle_user(wdg.wid$, mx, my, b1, b2)
+			ENDIF
+	ENDSELECT
+ENDFUNCTION
+
+
+
+// ------------------------------------------ //
+//! Print text, wrap if too wide
+//! if !do_draw it won't paint
+//! if find_pos, then it will return the char index
+//!    if you click on the point x,y
+// \return height of block
+// ------------------------------------------ //
+@FUNCTION DDgui_boxprint%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, x%, y%, wx%, do_draw%, find_pos%
+	LOCAL str$, tx%, ty% // Width of one character
+	LOCAL cx%, cy%, s$, c$, cpos%, spos%, slen%
+	LOCAL caretpos%
+	LOCAL has_caret%
+	LOCAL xseek%, yseek%
+	LOCAL selcol% = ddgui_stack[-1].col_hover_norm
+
+	GETFONTSIZE tx, ty
+
+	IF find_pos THEN do_draw=FALSE
+
+	str$=wdg.wtext$
+	IF find_pos
+		xseek=x
+		yseek=y
+		x=0;  y=0
+	ELSE
+		LOCAL strleng% = LEN(str$)
+		IF wdg.wselend>strleng THEN wdg.wselend=strleng
+		IF wdg.wselstart>strleng THEN wdg.wselstart=strleng
+		caretpos = wdg.wselend
+		// don't swap - can't select backwards, otherwise!
+//		IF wdg.wselstart>wdg.wselend
+//			cpos = wdg.wselstart
+//			wdg.wselstart=wdg.wselend
+//			wdg.wselend=cpos
+//			cpos=0
+//		ENDIF
+		IF ddgui_vals.focus$ = wdg.wid$
+			has_caret=TRUE
+		ELSE
+			has_caret=FALSE
+			wdg.wselstart=-1
+			wdg.wselend=-1
+		ENDIF
+	ENDIF
+
+	cx=x; cy=y
+	str$=str$+" "
+	slen = LEN(str$)
+	WHILE cpos < slen
+		c$=MID$(str$, cpos, 1)
+
+		tx = LEN(c$, ddgui_font_kerning.bHasKerning%) // .width[ASC(c$)]
+
+		// find_pos
+		IF find_pos AND cy>=yseek-ty AND (cx>=(xseek-tx*1.5) OR c$="\n") THEN RETURN cpos
+
+		// do_draw
+		IF do_draw
+			// selection
+			IF wdg.wselstart<>wdg.wselend AND (cpos>=wdg.wselstart AND cpos<wdg.wselend) OR (cpos<wdg.wselstart AND cpos>=wdg.wselend)
+				// ALPHAMODE -.3
+				DRAWRECT cx, cy, tx, ty, selcol
+				// ALPHAMODE 0
+			ENDIF
+			//  - ddgui_font_kerning.left[ASC(c$)]
+			IF c$<>"\n" THEN PRINT c$, cx, cy, ddgui_font_kerning.bHasKerning%
+		ENDIF
+		// caret
+		IF has_caret AND cpos = caretpos
+			IF do_draw
+				LOCAL blink% = MOD(GETTIMERALL(), 1024) > 512
+				IF blink THEN ALPHAMODE -.5
+				DRAWRECT cx-1, cy, 2, ty, gDDguiCaretColour%
+				IF blink THEN ALPHAMODE 0
+				wdg.wcaretx= INTEGER(cx+tx/2)-x
+				wdg.wcarety= INTEGER(cy+ty/2)-y
+			ENDIF
+		ENDIF
+
+		// manual linefeed
+		IF c$="\n"; cx=x; INC cy, ty;   INC cpos, 1; CONTINUE; ENDIF
+
+		cx=cx+tx
+		cpos=cpos+1
+
+		// See if the comming word is too large for this line
+		// #NEED - must be faster, silly old code
+		IF c$=" " OR c$="\t"
+			LOCAL next_w_len% = 0
+			LOCAL code%
+			LOCAL co$
+			FOR spos = cpos TO slen-1
+				co$ = MID$(str$, spos, 1)
+				code% = ASC(co$)
+				IF code=ASC(" ") OR code=ASC("\t")
+					IF cx+next_w_len%-x > wx
+						cx=x; cy=cy+ty
+					ENDIF
+					BREAK
+				ENDIF
+				INC next_w_len%, LEN(co$, ddgui_font_kerning.bHasKerning%) // ddgui_font_kerning.width[code%]
+			NEXT
+		ENDIF
+	WEND
+	IF find_pos THEN RETURN slen
+	RETURN cy+ty - y
+ENDFUNCTION // BOXPRINT
+
+
+// ------------------------------------------ //
+//! over-draw the scrollbar of a widget (if it has one)
+//! VIEWPORT of the widget
+//! width/height of complete widget -> scrollbar will
+//! attach to right border itself!
+//! page_height is the height of the visible "scroll size"->used for gripper size
+// ------------------------------------------ //
+@FUNCTION DDgui_drawscrollbar%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, width%, height%, page_height%, ytop%
+LOCAL c1%, c2%, c1b%, c2b%, tx%, ty%, x%
+LOCAL up%, down%, pos%, smax%, hsb%
+
+	GETFONTSIZE tx%, ty%
+	tx = MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+
+	x = width%-tx-1
+
+	smax= wdg.wscrollmax%
+	IF smax% <= 0 THEN RETURN
+
+	IF ddgui_vals.focus$ = "SB"+wdg.wid$
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+	c1b=ddgui_vals.col_bright
+	c2b=ddgui_vals.col_norm
+
+	pos = wdg.wscroll%
+	IF pos < 0 THEN pos = 0
+	IF pos > smax THEN pos=smax
+	up = pos>0
+	down = pos<smax+1
+
+	// scrollbar backgorund
+	DRAWRECT x,ytop%, tx, height%, c1
+	DDgui_backrect(x, ytop%, tx, height, c2)
+
+	// cheat by removing upper and lower pixel
+	INC ytop%, 1
+	DEC height%, 2
+	INC x, 1
+	DEC tx, 2
+
+	hsb% = MAX(2, (height*128) /  (((smax+page_height%-1)*128) / page_height%) ) // height of gripper
+	IF hsb% > height%-20 THEN hsb = height% - 20
+
+	pos% = MAX(0, pos * (height - hsb) / smax ) // top position of gripper
+
+	INC x, 3
+	DEC tx, 6
+
+	// gripper
+	DDgui_backgnd(c1b, c2b, x, ytop%+pos, tx, hsb)
+	DDgui_backrect(x-1, ytop%+pos%-1, tx+2, hsb+2, c2)
+
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Handle scrollbar for any widget that has a scrollbar
+//! returns 0 - noBar, 1 - VBAR
+//! mx,my are relative to the widget.
+//! The spin buttons are max(fontx, fonty) in square
+//! height is the height of the scrollbar (y=0 for top point)
+// ------------------------------------------ //
+@FUNCTION DDgui_handlescrollbar%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%, height%
+LOCAL tx%, ty%, x%
+LOCAL smax%, hsb%, pos%
+LOCAL hasfocus%, width%
+
+	GETFONTSIZE tx%, ty%
+	tx = MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+
+	width% = wdg.wwidth%
+	x = width - tx
+
+	smax= wdg.wscrollmax%
+	IF smax <= 0
+		wdg.wscrollmax%=0
+		wdg.wscroll=0
+		RETURN 0
+	ENDIF
+
+
+	IF wdg.wscroll%>smax
+		pos = smax
+		wdg.wscroll% = wdg.wscrollmax%
+	ENDIF
+
+LOCAL rmx%, rmy%, rb1%, rb2%
+	MOUSESTATE rmx%, rmy%, rb1%, rb2%
+
+	IF ddgui_vals.focus$ = "SB"+wdg.wid$ THEN hasfocus = TRUE
+	// mouse clicked in gripper area
+	IF (rb1 AND BOXCOLL(x, 0, tx, height%, mx%, my%, 1,1)) OR hasfocus
+		hasfocus=TRUE
+		ddgui_vals.focus$ = "SB"+wdg.wid$
+
+		hsb = MAX(2, height*1024/smax/1024) // height of gripper
+		LOCAL div%
+		div% = height-hsb
+		IF div%>0
+			wdg.wscroll = MAX(0, MIN(wdg.wscrollmax%, my*wdg.wscrollmax%*1024 / div% /1024 ))
+		ELSE
+			wdg.wscroll% = 0
+		ENDIF
+	ENDIF
+
+	IF hasfocus AND rb1=FALSE THEN ddgui_vals.focus$ = ""
+
+	RETURN 1
+ENDFUNCTION
+
+
+
+//! ------------------------------------------ //
+//! Spacer. Width of 10000 make new line
+//! ------------------------------------------ //
+FUNCTION DDgui_spacer: width%=10000, height%=0
+LOCAL id$
+	id$ = "ID_SPACER_"+LEN(ddgui_stack[-1].widgets[])
+	DDgui_widget(id$, "", width, height) // adds COUNT
+	// overwrite min sizes
+	DDgui_set(id$, "WIDTH", width)
+	DDgui_set(id$, "HEIGHT", height)
+
+//	IF height=0 THEN DDgui_set(id$, "HEIGHT", height) // That's OK for a spacer
+	DDgui_set(id$, "TYPE", "SPACER")
+ENDFUNCTION
+
+
+//! ------------------------------------------ //
+//! Button
+//! ------------------------------------------ //
+FUNCTION DDgui_button: id$, caption$, width%=0, height%=0
+LOCAL sx%, sy%
+	DDgui_widget(id$, caption$, width, height)
+	IF width=0 OR height=0
+		IF INSTR(caption$,"SPR_B",0)=0 // MID$(caption$, 0,5) = "SPR_B"
+			GETSPRITESIZE INTEGER(MID$(caption$, 5,LEN(caption$) ) ), sx, sy
+			IF width=0 THEN DDgui_set(id$,"WIDTH", sx+4)
+			IF height=0 THEN DDgui_set(id$,"HEIGHT", sy+4)
+			GOTO skip
+		ENDIF
+		IF INSTR(caption$,"SPR_C",0)=0 // MID$(caption$,0,5) = "SPR_C"
+			IF width=0 THEN DDgui_set(id$,"WIDTH", 32)
+			IF height=0 THEN DDgui_set(id$,"HEIGHT",  32)
+		ELSE
+			GETFONTSIZE sx, sy
+			IF height=0 THEN DDgui_set(id$,"HEIGHT", MAX(gDDguiMinControlDimension%, sy+4))
+		ENDIF
+	ENDIF
+@skip:
+	DDgui_set(id$, "TYPE", "BUTTON")
+ENDFUNCTION
+
+
+@FUNCTION DDgui_drawbutton: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL c1%, c2%, hover%
+
+	ALPHAMODE 0
+	hover = wdg.whover%
+//	IF wdg.wselect% THEN hover=1-hover
+	IF hover>0 AND wdg.wreadonly=FALSE
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+	DDgui_backgnd(c1, c2, 1,ytop%+1, wdg.wwidth-2, wdg.wheight-2)
+
+	LOCAL x% = 1, y%=ytop%+1, w% = wdg.wwidth%-2, h%= wdg.wheight%-2
+
+	// small border for "selected" image or colour buttons
+	IF wdg.wselect%
+		INC x
+		INC y
+		DEC w,2
+		DEC h,2
+	ENDIF
+
+	IF INSTR(wdg.wtext$,"SPR_B",0)=0 // MID$(caption$, 0,5) = "SPR_B"
+		// draw image blured only if hovering
+		IF wdg.wreadonly
+			ALPHAMODE -0.8
+		ELSE
+			IF hover=0
+				ALPHAMODE -1.0
+			ELSE
+				ALPHAMODE -0.8
+			ENDIF
+		ENDIF
+
+		c1 = INTEGER(MID$(wdg.wtext$, 5,LEN(wdg.wtext$) ) )
+		DDgui_fit_sprite_in_box(c1, x+1, y+1, w-2, h-2)
+
+	ELSEIF INSTR(wdg.wtext$,"SPR_C",0)=0
+		// draw image blured only if hovering
+		IF hover=0
+			ALPHAMODE -1.0
+		ELSE
+			ALPHAMODE -0.8
+		ENDIF
+		c1 = INTEGER(MID$(wdg.wtext$, 5,LEN(wdg.wtext$) ) )
+		DRAWRECT x,y,w,h, c1
+	ELSE
+		// center text
+		IF wdg.wreadonly
+			ALPHAMODE -0.5
+		ELSE
+			ALPHAMODE 0
+		ENDIF
+		LOCAL fx%, fy%
+		GETFONTSIZE fx%, fy%
+		DDGui_PrintIntern(wdg.wtext$, (wdg.wwidth% - DDGui_TextWidthIntern(wdg.wtext$))/2, ytop%+(wdg.wheight%-fy%)/2)
+	ENDIF
+	ALPHAMODE 0
+
+	IF wdg.wselect
+		DDgui_backrect( 0,ytop%, wdg.wwidth,wdg.wheight, ddgui_vals.col_hover_norm)
+	ELSE
+		DDgui_backrect( 0,ytop%, wdg.wwidth,wdg.wheight, c2)
+	ENDIF
+ENDFUNCTION
+
+@FUNCTION DDgui_handlebutton: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	IF wdg.wreadonly AND INSTR(wdg.wtext$,"SPR_C",0)<>0 THEN RETURN
+	IF b1 <> 1 THEN b1 = 0
+	wdg.wclicked = b1
+	IF b1 AND INSTR(wdg.wtext$,"SPR_C",0)=0 AND wdg.wreadonly=FALSE
+		ddgui_vals.kick_intern_dlg% = 1
+		ddgui_vals.kick_intern_id$  = wdg.wid$
+	ENDIF
+ENDFUNCTION
+
+//! ------------------------------------------ //
+//! Slider (Range is 0 - 1)
+//! ------------------------------------------ //
+
+FUNCTION DDgui_slider: id$, value, width%=100, height%=16
+	IF width=0 THEN width=100
+	IF height=0 THEN height=16
+	DDgui_widget(id$, 0, width, height)
+	DDgui_set(id$, "TYPE", "SLIDER")
+	DDgui_set(id$, "TEXT", value )
+ENDFUNCTION
+
+@FUNCTION DDgui_drawslider%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL c1%, c2%, x, w%, h%
+LOCAL t$
+	w=wdg.wwidth
+	h=wdg.wheight
+	IF wdg.whover>0
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+
+	// slider center line
+	DRAWRECT 0,ytop%+h/2, w, 3, c2
+
+	x = wdg.wtext$
+
+	DEC x, wdg.wminval
+	x = x / (wdg.wmaxval - wdg.wminval)
+
+	x = (w-12)*x + 6
+	c1=ddgui_vals.col_hover_bright
+	c2=ddgui_vals.col_hover_norm
+
+	h = MIN(h-2, 24)
+	LOCAL sltop% = ytop%+(wdg.wheight-h)/2 + 1
+	STARTPOLY -1,0
+		POLYVECTOR x,   sltop%      , 0,0,c1
+
+		POLYVECTOR x-5, sltop%+2,     0,0,c2
+		POLYVECTOR x-5, sltop%+h-2,   0,0,c2
+		POLYVECTOR x  , sltop%+h,     0,0,c1
+
+
+		POLYVECTOR x+5, sltop%+h-2,   0,0,c2
+		POLYVECTOR x+5, sltop%+2,     0,0,c2
+	ENDPOLY
+
+	// frame
+	IF wdg.whover = 0 THEN c2=ddgui_vals.col_norm
+	DDgui_backrect( 0,ytop%, wdg.wwidth,wdg.wheight, c2)
+ENDFUNCTION
+
+@FUNCTION DDgui_handleslider%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	IF wdg.wreadonly THEN RETURN
+
+	IF b1 = -1
+		IF (mx>=0 AND my>=0 AND mx<=wdg.wwidth% AND my<=wdg.wheight%)
+			ddgui_vals.focus$ = wdg.wid$
+		ENDIF
+	ENDIF
+
+	wdg.wclicked = FALSE
+
+	IF ddgui_vals.focus$ = wdg.wid$
+		IF MOUSEAXIS(3) // Lclick - set position
+			LOCAL old$ = wdg.wtext$
+			// 0..1
+			LOCAL pos = MIN(1.0, MAX(0.0, (mx-5.0)/(wdg.wwidth%-9.0) ))
+			// bring in range
+			pos = wdg.wminval + pos * (wdg.wmaxval-wdg.wminval)
+			// round
+			IF wdg.wstep>0
+				LOCAL iSteps% = pos / wdg.wstep + 0.4
+				pos = wdg.wstep * iSteps
+				wdg.wtext$ = pos
+			ELSE
+				wdg.wtext$ = FORMAT$(0,2,pos)
+			ENDIF
+
+			IF old$ <> wdg.wtext$ THEN wdg.wclicked% = TRUE
+		ELSE // just released
+			ddgui_vals.focus$ = ""
+		ENDIF
+	ENDIF
+
+ENDFUNCTION
+
+
+
+//! ------------------------------------------ //
+//! Toolbar (macro)
+//! ------------------------------------------ //
+
+FUNCTION DDgui_toolbar: id_buttons$[], id_sprites[]
+LOCAL i%, mx%, sx%, sy%, szx%, szy%
+	mx = MIN(BOUNDS(id_buttons$[], 0), BOUNDS(id_sprites[], 0))
+	FOR i=0 TO mx-1
+		GETSPRITESIZE id_sprites[i], szx, szy
+		sx=MAX(sx, szx)
+		sy=MAX(sy, szy)
+	NEXT
+	FOR i=0 TO mx-1
+		DDgui_button(id_buttons$[i], "SPR_B"+id_sprites[i], sx, sy)
+	NEXT
+	DDgui_spacer(10000,0)
+ENDFUNCTION
+
+
+//! ------------------------------------------ //
+//! Checkbox
+//! ------------------------------------------ //
+
+FUNCTION DDgui_checkbox: id$, caption$, width%=0, height%=0
+LOCAL tx%, ty%
+	GETFONTSIZE tx,ty
+	IF width=0 THEN width = MAX(gDDguiMinControlDimension%, DDGui_TextWidthIntern(caption$) + 2*tx)
+	DDgui_widget(id$, caption$, width, height)
+	DDgui_set(id$, "TYPE", "CHECKBOX")
+ENDFUNCTION
+
+
+@FUNCTION DDgui_drawcheckbox%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL c1%, c2%, hover%, check%, r%, tx%, ty%, txt$
+
+	txt$= wdg.wtext$
+	GETFONTSIZE tx,ty
+
+	IF wdg.wselect% THEN check=TRUE
+	IF wdg.whover% AND wdg.wreadonly=FALSE THEN hover=TRUE
+	IF hover// OR check
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+		IF hover=0
+			r = c1
+			c1=c2
+			c2=r
+		ENDIF
+		DDgui_backrect(1,ytop%+1, wdg.wwidth-1, ty-1, c1)
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+	DDGui_PrintIntern(txt$, tx*1.7+1, ytop%+1, check)
+
+	IF check
+		c1 = ddgui_vals.col_hover_bright; c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1 = ddgui_vals.col_bright; c2=ddgui_vals.col_norm
+	ENDIF
+	DDgui_backgnd(c1, c2, 3, ytop%+3, ty-4, ty-4)
+	DDgui_backrect(2,ytop%+2,ty-2,ty-2, c2)
+ENDFUNCTION
+
+@FUNCTION DDgui_handlecheckbox%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	IF wdg.wreadonly THEN RETURN
+	wdg.wclicked = FALSE
+	IF b1=1
+		wdg.wselect = 1-wdg.wselect
+		wdg.wclicked = TRUE
+	ENDIF
+ENDFUNCTION
+
+
+//! ------------------------------------------ //
+//! RadioGroup
+//! ------------------------------------------ //
+
+FUNCTION DDgui_radio: id$, texts$, width%=0
+LOCAL tx%, ty%, num%, i%
+STATIC opt$[]
+	GETFONTSIZE tx, ty
+	num = SPLITSTR(texts$, opt$[], "|")
+	IF num=0 THEN DDgui_set(id$, "SELECT", -1)
+	IF width=0
+		FOR i=0 TO num-1
+			ty = LEN(opt$[i])
+			IF ty>width THEN width=ty
+		NEXT
+		width = (width+2)*tx
+	ENDIF
+	DDgui_widget(id$, texts$, width, 0)
+	DDgui_set(id$, "TYPE", "RADIO")
+
+//	DDgui_handleradio(ddgui_stack[-1].widgets[LEN(ddgui_vals.widgets[])-1], -10,-10,0,0)
+ENDFUNCTION
+
+@FUNCTION DDgui_drawradio%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL i%, tx%, ty%, h%
+LOCAL hover%, check%, bright%, dark%, bright_h%, dark_h%
+
+// STATIC opt$[]
+
+	bright = ddgui_vals.col_bright
+	dark   = ddgui_vals.col_norm
+	bright_h = ddgui_vals.col_hover_bright
+	dark_h   = ddgui_vals.col_hover_norm
+
+	// draw each one
+	GETFONTSIZE tx, ty
+
+	tx=MAX(12,tx)
+	ty=MAX(12,ty)
+
+	// num = SPLITSTR(wdg.wtext$, opt$[], "|")
+	LOCAL num% = wdg.wcount%
+	h = MAX(ty, gDDguiMinControlDimension%)
+
+	INC ytop, (h-ty)/2
+
+//	DDgui_backgnd(bright, dark, 3,ytop%+2, ty-6, ty-6 + num*h)
+//	DDgui_backrect(             2,ytop%+1, ty-4, num*h-4 - (h-ty), dark)
+//	DDgui_backrect(             ty/2-1,ytop%+1, 3, num*h-4 - (h-ty), dark)
+	DRAWRECT ty/2-1,ytop%+1, 3, num*h-4 - (h-ty), dark
+
+	LOCAL opt$
+	FOR i%=0 TO 9999
+		wdg.wcount% = i% // update count on drawing
+		opt$ = DDgui_intern_list_item_text$(wdg.wtext$, i%)
+		IF LEN(opt$) = 0 THEN BREAK
+
+		LOCAL yitem% = ytop% + i%*h%
+		hover=FALSE
+		check = FALSE
+		IF wdg.wselect% = i THEN check=TRUE
+		IF wdg.whover% = i AND wdg.wreadonly=FALSE THEN hover=TRUE
+		IF check
+		// check box
+			DDgui_backgnd(bright_h, dark_h, 3,yitem%+2, ty-6, ty-6)
+			DDgui_backrect(             2,yitem%+1, ty-4, ty-4, dark_h)
+		ENDIF
+		IF hover// OR check
+			IF hover
+				DDgui_backrect(0,yitem% - (h-ty)/2, wdg.wwidth-1, h-1, bright_h)
+			ENDIF
+		ENDIF
+		// text
+		DDGui_PrintIntern(opt$, tx*1.7, yitem%, check)
+	NEXT
+
+
+	// DDgui_backrect(0,0,wdg.wwidth, wdg.wheight, dark)
+ENDFUNCTION
+
+@FUNCTION DDgui_handleradio%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	IF wdg.wreadonly THEN RETURN
+
+LOCAL tx%,ty%, h%, hover%, oldsel%
+LOCAL num%
+STATIC txt$[]
+	// recalc height + set
+	GETFONTSIZE tx%, ty%
+	num = SPLITSTR(wdg.wtext$, txt$[], "|")
+	h = MAX(ty%, gDDguiMinControlDimension%)
+	wdg.wheight = h% * num%
+	wdg.wclicked = FALSE
+
+	wdg.whover=-1
+	IF my>0 AND my<=wdg.wheight% AND mx>0 AND mx<wdg.wwidth%
+		my = INTEGER(my/h)
+		IF b1=1
+			oldsel = wdg.wselect%
+			IF my<>oldsel
+				my=MIN(my, num-1)
+				wdg.wselect = my
+				wdg.wclicked=TRUE
+			ENDIF
+		ENDIF
+		wdg.whover = my
+	ENDIF
+ENDFUNCTION
+
+//! ------------------------------------------ //
+//! File
+//! ------------------------------------------ //
+FUNCTION DDgui_file: id$, caption$, filter$, width%=0, height%=0
+LOCAL tx%, ty%, opt$[]
+	GETFONTSIZE tx, ty
+	IF width=0 THEN width = 12*tx
+	DDgui_widget(id$, caption$, width, height)
+	DDgui_set(id$, "TYPE", "FILE")
+	ddgui_stack[-1].widgets[LEN(ddgui_stack[-1].widgets[])-1].wfilter$ = filter$
+ENDFUNCTION
+
+
+@FUNCTION DDgui_drawfile%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL c1%, c2%
+LOCAL tx%, ty%, txt$, dheight%
+	GETFONTSIZE tx, ty
+	IF wdg.whover%>0 AND wdg.wreadonly=FALSE
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+	DDgui_backgnd(c1, c2, 0,ytop%, wdg.wwidth, wdg.wheight)
+
+	// draw disk-symbol
+	dheight%=ty*1.2
+
+	// file symbol
+	DRAWRECT 1,ytop%+1, dheight%, dheight%, RGB(0x47, 0x6b, 0xfe)
+	DRAWRECT 1+dheight*.2,ytop%+1, dheight*.8-2, dheight*.6-1, 0xffffff
+	DRAWRECT 1+dheight*.2,ytop%+1+ dheight*.7, dheight*.8-2, dheight*.30+1, RGB(0xcc, 0xcc, 0xcc)
+
+	txt$ = wdg.wtext$
+	ty = 0
+	// find file-name in real time!?
+	// might be a stupid idea
+	FOR tx = LEN(txt$)-1 TO 0 STEP -1
+		IF MID$(txt$, tx, 1) = "/"; ty=tx+1; BREAK; ENDIF
+	NEXT
+	txt$ = MID$(txt$, ty, LEN(txt$))
+
+	DDGui_PrintIntern(txt$, dheight + 3, ytop%+3)
+
+	// frame
+	DDgui_backrect( 0,ytop%, wdg.wwidth, wdg.wheight, c2)
+ENDFUNCTION
+
+@FUNCTION DDgui_handlefile%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	IF wdg.wreadonly THEN RETURN
+
+LOCAL a$
+	IF LEN(wdg.wfilter$)=0 THEN wdg.wfilter$="*.*"
+	DDgui_set(wdg.wid$, "CLICKED", FALSE)
+	IF b1=1
+		IF wdg.wreadonly% THEN RETURN
+
+		ddgui_vals.kick_intern_dlg% = 4
+		ddgui_vals.kick_intern_id$  = wdg.wid$
+
+//		a$=DDgui_FileDialog$(TRUE,wdg.wfilter$) //: bOpen%, filterstr$="*.*"
+//		//DEBUG "Result : "+a$+"\n"
+//
+//		//a$ = FILEREQUEST$(TRUE, wdg.wfilter$)
+//		//IF a$ = "NO_FILE" THEN a$=""
+//		wdg.wtext$ = a$
+//		wdg.wclicked=TRUE
+	ENDIF
+ENDFUNCTION
+
+
+
+// Draw a sprite to fit a box. Keep proportions
+@FUNCTION DDgui_fit_sprite_in_box%: id%, x%, y%, w%, h%
+	IF w<1 OR h<1 THEN RETURN
+
+	LOCAL spx%, spy%
+	GETSPRITESIZE id%, spx%, spy%
+	IF spx=0 OR spy=0 THEN RETURN
+
+	IF spx<=w AND spy<=h
+		DRAWSPRITE id%, x + (w-spx)/2, y + (h-spy)/2
+	ELSE
+		LOCAL facx = w; facx = facx / spx
+		LOCAL facy = h; facy = facy / spy
+		LOCAL dw, dh
+		IF facx<facy
+			dw = spx*facx
+			dh = spy*facx
+		ELSE
+			dw = spx*facy
+			dh = spy*facy
+		ENDIF
+		STRETCHSPRITE id%, x + (w-dw)/2, y + (h-dh)/2, dw, dh
+	ENDIF
+ENDFUNCTION
+
+
+FUNCTION DDgui_combo: id$, texts$, width%=0, height%=0
+LOCAL tx%, ty%
+	GETFONTSIZE tx, ty
+	IF height%=0 THEN height%=ty
+	DDgui_list(id$, texts$, width%, height%)
+	DDgui_set(id$, "TYPE", "COMBO")
+ENDFUNCTION
+
+
+
+@FUNCTION DDgui_drawcombo%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+// STATIC opt$[]
+LOCAL fx%, fy%
+LOCAL c1%, c2%, hover%
+	GETFONTSIZE fx%, fy%
+
+	// draw each one
+	// SPLITSTR(wdg.wtext$, opt$[], "|")
+
+	hover = wdg.whover%
+
+	IF hover>0 AND wdg.wreadonly=FALSE
+		c1=ddgui_vals.col_hover_bright
+		c2=ddgui_vals.col_hover_norm
+	ELSE
+		c1=ddgui_vals.col_bright
+		c2=ddgui_vals.col_norm
+	ENDIF
+	DDgui_backgnd(c1, c2, 1,ytop%+1, wdg.wwidth-2, wdg.wheight-2)
+	DDgui_backgnd(ddgui_vals.col_hover_bright, ddgui_vals.col_hover_norm, wdg.wwidth-fx*2,ytop%+1, fx*2, wdg.wheight-2)
+
+	STARTPOLY -1, 0
+		POLYVECTOR wdg.wwidth-fx*1.7, ytop+wdg.wheight*0.2, 0,0,c1
+		POLYVECTOR wdg.wwidth-fx*1.0, ytop+wdg.wheight*0.8, 0,0,c1
+		POLYVECTOR wdg.wwidth-fx*0.3, ytop+wdg.wheight*0.2, 0,0,c1
+	ENDPOLY
+
+	LOCAL x% = 1, y%=ytop%+1, w% = wdg.wwidth%-2-2*fx, h%= wdg.wheight%-2
+
+	// small border for "selected" image or colour buttons
+	IF wdg.wselect%
+		INC x
+		INC y
+		DEC w,2
+		DEC h,2
+	ENDIF
+
+	IF wdg.wselect>=0 //  AND wdg.wselect<LEN(opt$[])
+		LOCAL a$ = DDgui_intern_list_item_text$(wdg.wtext$, wdg.wselect%)
+		// ALIAS a$ AS opt$[wdg.wselect%]
+		IF INSTR(a$,"SPR_B",0)=0
+			// draw image blured only if hovering
+			IF hover=0
+				ALPHAMODE -1.0
+			ELSE
+				ALPHAMODE -0.8
+			ENDIF
+			c1 = INTEGER(MID$(a$, 5 ) )
+			DDgui_fit_sprite_in_box(c1, x+1, y+1, w-2, h-2)
+		ELSEIF INSTR(a$,"SPR_C",0)=0
+			// draw image blured only if hovering
+			IF hover=0
+				ALPHAMODE -1.0
+			ELSE
+				ALPHAMODE -0.8
+			ENDIF
+			c1 = INTEGER(MID$(a$, 5 ) )
+			DRAWRECT x,y,w,h, c1
+		ELSE // center text
+			IF hover=0 THEN ALPHAMODE -0.8
+			DDGui_PrintIntern(a$, (w% - DDGui_TextWidthIntern(a$))/2, ytop%+(wdg.wheight%-fy%)/2)
+		ENDIF
+	ENDIF
+
+
+	ALPHAMODE 0
+
+	DDgui_backrect( 0,ytop%, wdg.wwidth,wdg.wheight, c2)
+ENDFUNCTION
+
+
+@FUNCTION DDgui_handlecombo%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+	wdg.wclicked% = FALSE
+	IF b1=1
+		ddgui_vals.kick_intern_dlg% = 3
+		ddgui_vals.kick_intern_id$  = wdg.wid$
+	ENDIF
+ENDFUNCTION
+
+
+// that's the combo-box when it's clicked
+@FUNCTION DDgui_button_list_picker%: x%, y%, w%, h%, texts$, cursel%
+
+LOCAL tx%, ty%
+GETFONTSIZE tx, ty
+	tx = MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+	ty = MAX(ty, gDDguiMinControlDimension%)
+
+LOCAL numitems%
+LOCAL vals$[]
+	SPLITSTR(texts$, vals$[], "|")
+	numitems% = LEN(vals$[])
+	IF numitems% = 0 THEN RETURN -1
+
+LOCAL screenx%, screeny%
+	GETSCREENSIZE screenx%, screeny%
+	IF h > ty*numitems%+8 THEN h=ty*numitems%+8
+	IF y+h >= screeny% THEN h = screeny - y-1 // limit to bottom of screen
+
+	DDgui_pushdialog(x-1,y-1,w+2,h+2)
+
+	DDgui_list("lst", texts$, w-4, h)
+	DDgui_set("lst", "SELECT", cursel%)
+	DDgui_set("lst", "SCROLL", cursel%)
+
+	LOCAL mx%, my%, b1%, b2%, down%, px%, py%
+	WHILE TRUE
+		DDgui_show(FALSE)
+		MOUSESTATE mx%, my%, b1%, b2%
+		IF b1
+			down=TRUE
+			px=mx; py=my // iPhone moves finger off when not touching
+		ENDIF
+		IF b1=FALSE AND down
+			IF BOXCOLL(DDgui_get("", "XPOS"), DDgui_get("", "YPOS"), DDgui_get("", "WIDTH"), DDgui_get("", "HEIGHT"), px, py, 1, 1)=0
+				DDgui_popdialog()
+				RETURN -1
+			ENDIF
+		ENDIF
+		IF DDgui_get("lst", "CLICKED")
+			LOCAL isel% = DDgui_get("lst", "SELECT")
+			DDgui_popdialog()
+			RETURN isel%
+		ENDIF
+
+		SHOWSCREEN
+	WEND
+ENDFUNCTION
+
+
+
+
+//! ------------------------------------------ //
+//! List
+//! ------------------------------------------ //
+FUNCTION DDgui_list: id$, texts$, width%=0, height%=0
+LOCAL tx%, ty%, num%, i%
+STATIC opt$[]
+	GETFONTSIZE tx, ty
+	ty=MAX(ty, gDDguiMinControlDimension)
+
+	num = SPLITSTR(texts$, opt$[], "|")
+	IF num=0 THEN DDgui_set(id$, "SELECT", -1)
+	IF height=0
+		height = 4*ty+4
+	ELSE // Make full rows -> otherwise text might look dull on last item (VIEWPORT problem?)
+		height = height-MOD(height, ty) + 4
+	ENDIF
+	IF width=0
+		FOR i=0 TO num-1
+			ty = LEN(opt$[i])
+			IF ty>width THEN width=ty
+		NEXT
+		width = (width+3)*tx
+	ENDIF
+	DDgui_widget(id$, texts$, width, height)
+	DDgui_set(id$, "TYPE", "LIST")
+	DDgui_set(id$, "COUNT", num)
+	ddgui_stack[-1].widgets[-1].wscrollmax = num
+ENDFUNCTION
+
+@FUNCTION DDgui_drawlist%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL c1%, c2%, txt$, i%, num%, tx%, ty%, r%
+LOCAL hover%, check%, offset%
+STATIC opt$[]
+
+	// draw each one
+	GETFONTSIZE tx, ty
+	ty=MAX(ty, gDDguiMinControlDimension)
+	num = SPLITSTR(wdg.wtext$, opt$[], "|")
+	wdg.wcount = num
+
+	LOCAL twidth%=wdg.wwidth-8
+	IF wdg.wscrollmax% THEN DEC twidth, MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+
+
+	// get + limit SCROLL value
+	offset = wdg.wscroll
+
+	FOR i=offset TO num-1
+		hover=FALSE
+		check = FALSE
+		IF wdg.wselect% = i THEN check=TRUE
+		IF wdg.whover% = i AND wdg.wreadonly=FALSE THEN hover=TRUE
+		IF hover OR check
+			c1=ddgui_vals.col_hover_bright
+			c2=ddgui_vals.col_hover_norm
+			IF hover=0
+				r = c1
+				c1=c2
+				c2=r
+			ENDIF
+			IF check
+				DDgui_backgnd(c1, c2, 0,ytop%+(i-offset)*ty, wdg.wwidth-1, ty-1)
+			ELSEIF hover
+				DDgui_backrect(1,ytop%+(i-offset)*ty, wdg.wwidth-2, ty-1, c1)
+			ENDIF
+		ELSE
+			c1=ddgui_vals.col_bright
+			c2=ddgui_vals.col_norm
+		ENDIF
+
+		IF INSTR(opt$[i], "SPR_B", 0)=0
+			c1 = INTEGER(MID$(opt$[i], 5 ) )
+			DDgui_fit_sprite_in_box(c1, 5, ytop%+(i-offset)*ty+1, twidth%-2, ty-2)
+		ELSE
+			DDGui_PrintIntern(opt$[i], 4, ytop%+(i-offset)*ty, check)
+		ENDIF
+	NEXT
+
+	c1 = ddgui_vals.col_norm
+	DDgui_backrect(0,ytop%,wdg.wwidth, wdg.wheight,c1)
+
+	// Now draw a scrollbar for that thingy
+	DDgui_drawscrollbar(ddgui_vals, wdg, wdg.wwidth, wdg.wheight, wdg.wheight%/ty, ytop%)
+ENDFUNCTION
+
+
+@FUNCTION DDgui_handlelist%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+LOCAL tx%,ty%, hover%, width%, height%, sb%
+LOCAL offset%, oldsel%, num%
+
+	GETFONTSIZE tx, ty
+	ty=MAX(ty, gDDguiMinControlDimension)
+	width = wdg.wwidth%
+	height= wdg.wheight%
+
+	// adjust scrollsize if required
+	num = wdg.wcount%
+	wdg.wscrollmax = num-INTEGER(height/ty)
+
+	sb=DDgui_handlescrollbar(ddgui_vals, wdg, mx, my, b1, b2,height)
+	offset = wdg.wscroll%
+
+	IF wdg.wreadonly THEN RETURN
+
+	wdg.wclicked=FALSE
+	// hovering
+	wdg.whover=-1
+	IF my>0 AND my<=height AND mx>0 AND mx<width-sb*(tx*1.5)
+		my = INTEGER(my/ty) + offset
+		// Clicked -> Set idSELECT to the selected index
+		// and trigger a CLICKED message
+		IF b1=1
+			// oldsel = wdg.wselect%
+			// IF oldsel<>my
+				IF my>= wdg.wcount% THEN my=-1
+				wdg.wselect=my
+				wdg.wclicked=TRUE
+			// ENDIF
+		ENDIF
+		wdg.whover=my
+	ENDIF
+ENDFUNCTION
+
+
+//! ------------------------------------------ //
+//! Text
+//! ------------------------------------------ //
+
+FUNCTION DDgui_text: id$, text$, width%=0, height%=0
+	DDgui_widget(id$, text$, width, height)
+	DDgui_set(id$, "TYPE", "TEXT")
+ENDFUNCTION
+
+FUNCTION DDgui_singletext: id$, text$, width%=0
+	DDgui_widget(id$, text$, width, 0)
+	DDgui_set(id$, "TYPE", "SINGLETEXT")
+ENDFUNCTION
+
+FUNCTION DDgui_numbertext: id$, text$, width%=0
+	DDgui_widget(id$, text$, width, 0)
+	DDgui_set(id$, "TYPE", "NUMBERTEXT")
+ENDFUNCTION
+
+
+
+@FUNCTION DDgui_drawtext%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%, bSingleText%
+LOCAL tx%, ty%, c1%, c2%, twidth%
+	GETFONTSIZE tx, ty
+	c1 = ddgui_vals.col_bright
+	c2 = ddgui_vals.col_norm
+
+	twidth=wdg.wwidth-tx
+	IF wdg.wscrollmax% THEN twidth=twidth-MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+
+	IF wdg.wreadonly%
+		DDgui_backgnd(c2, c2,1,ytop%+1, wdg.wwidth-2, wdg.wheight-2)
+	ENDIF
+
+	IF bSingleText%
+		DDgui_boxprint(ddgui_vals, wdg,tx/2,ytop% + (wdg.wheight-ty)/2, twidth, TRUE, FALSE)
+	ELSE
+		DDgui_boxprint(ddgui_vals, wdg,tx/2,ytop%-wdg.wscroll%*ty, twidth, TRUE, FALSE)
+	ENDIF
+	DDgui_drawscrollbar(ddgui_vals, wdg, wdg.wwidth, wdg.wheight, wdg.wheight%/ty, ytop%)
+	DDgui_backrect( 0,ytop%, wdg.wwidth,wdg.wheight, c2)
+ENDFUNCTION
+
+@FUNCTION ddgui_handletext%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%, bSingleText%, bIsNumber%
+LOCAL height%, width%, tx%, ty%, text$, txheight%, txwidth%
+LOCAL has_focus%, a$, l$, r$, sb%
+LOCAL selstart%, selend%, del%, backsp%, xkey%, ykey%, tab%, lastkey%, shift%
+LOCAL offset%, keycopy%, keypaste%, readonly%
+STATIC st_lasttime%, st_lastkey%
+
+	readonly% = wdg.wreadonly%
+
+
+	GETFONTSIZE tx, ty
+	text$ = wdg.wtext$
+	width = wdg.wwidth%
+	offset = wdg.wscroll% * ty
+	txwidth=width-tx
+
+	// Ignore vertical position of mouse for single texts
+	IF bSingleText%
+		IF my>0 AND my<height THEN my%=1
+	ENDIF
+
+	IF wdg.wscrollmax% THEN txwidth=txwidth-MAX(tx, gDDguiScrollbarWidth%) // SCROLLBAR_SIZE
+	height = wdg.wheight%
+	txheight=DDgui_boxprint(ddgui_vals, wdg, 0,0,txwidth,FALSE,FALSE)
+
+	// Setup scrollbar
+	wdg.wscrollmax = MAX(0, (txheight-height) / ty)
+	IF wdg.wscrollmax THEN INC wdg.wscrollmax
+	sb=DDgui_handlescrollbar(ddgui_vals, wdg, mx, my, b1, b2,height)
+
+	// did I get the focus?
+	IF mx>=0 AND mx<width-sb*(tx*1.5) AND my>=0 AND my<height
+
+		IF b1=1 AND ddgui_vals.focus$ <> wdg.wid$
+			DDgui_setfocus(wdg.wid$)
+
+			// for POCKETPC and GP2X -> edit with DDGui_input$
+			IF b1=1 AND readonly%=FALSE AND DDGUI_IN_INPUT_DLG=FALSE AND DDGUI_AUTO_INPUT_DLG
+				ddgui_vals.kick_intern_dlg% = 2
+				ddgui_vals.kick_intern_id$  = wdg.wid$
+				DDgui_setfocus("") // no focus for autoinput dialogs
+			ENDIF
+		ELSE
+			IF b1=0 AND MOUSEAXIS(3) THEN b1=1
+			IF b1<>0 THEN tx = DDgui_boxprint(ddgui_vals, wdg, mx,my+offset,txwidth, FALSE, TRUE)
+			IF b1=-1 // lbutton down
+				wdg.wselstart = tx
+				b1 = 1
+			ENDIF
+			// on mousemove
+			IF b1=1 THEN wdg.wselend = tx
+
+		ENDIF
+
+
+	ENDIF
+	IF ddgui_vals.focus$ = wdg.wid$ THEN has_focus=TRUE
+
+	// keyboard input
+	IF has_focus
+		lastkey = st_lasttime%
+		IF GETTIMERALL()-lastkey > 150
+			lastkey=0
+		ELSE
+			lastkey = st_lastkey
+		ENDIF
+
+		a$ = ddgui_vals.dlg_inkey$
+		IF LEN(a$)
+			lastkey=0
+			ddgui_vals.dlg_inkey$=""
+			DEBUG "ddgui_inpkey: "+a$+"\n"
+		ELSE
+			a$ = INKEY$()
+			IF LEN(a$) THEN DEBUG "INKEY: "+a$+"\n"
+		ENDIF
+
+		IF a$="\t" THEN a$="" // tab handled with KEY()
+
+		IF a$="\b"
+			a$="" // handle backspace separately
+			backsp = TRUE
+		ENDIF
+
+		IF lastkey=0 OR KEY(lastkey)=FALSE
+			lastkey=0
+			ykey = KEY(208) - KEY(200)
+			xkey = KEY(205) - KEY(203)
+			del  = KEY(211)
+			tab  = KEY(15)
+			backsp = backsp OR KEY(14)
+			shift = KEY(42) OR KEY(54)
+			keycopy = KEY(29) AND KEY(46)
+			keypaste= KEY(29) AND KEY(47)
+
+			IF ykey>0   THEN lastkey=208
+			IF ykey<0   THEN lastkey=200
+			IF xkey<0   THEN lastkey=203
+			IF xkey>0   THEN lastkey=205
+			IF del      THEN lastkey=211
+			IF tab      ;    lastkey=15; a$=" "; ENDIF
+			IF backsp   THEN lastkey=14
+			IF keycopy  THEN lastkey=29
+			IF keypaste THEN lastkey=29
+
+			IF KEY(199)
+				lastkey=199
+				wdg.wcaretx = 0 // home
+				IF NOT bSingleText%
+					INC wdg.wcarety, ty
+					ykey=-1
+				ENDIF
+			ENDIF
+			IF KEY(207)
+				lastkey=207
+				wdg.wcaretx=wdg.wwidth // end
+				IF NOT bSingleText%
+					INC wdg.wcarety, ty
+					ykey=-1
+				ENDIF
+			ENDIF
+
+			st_lastkey=lastkey
+			st_lasttime = GETTIMERALL()
+		ENDIF
+
+
+		// readonly? Disable everything that modifies the text
+		IF readonly%=TRUE
+			a$=""
+			del=FALSE
+			tab=FALSE
+			backsp=FALSE
+			keypaste=FALSE
+		ENDIF
+
+		IF bSingleText%
+			ykey=FALSE // no vertical movement
+			IF a$="\n" THEN a$=""
+			IF a$="\r" THEN a$=""
+			IF tab
+				IF shift
+					DDgui_advancefocus(-1)
+				ELSE
+					DDgui_advancefocus(1)
+				ENDIF
+				RETURN
+			ENDIF
+		ENDIF
+
+		IF bIsNumber%
+			IF (a$>="0" AND a$<="9") OR a$="." OR a$="e" OR a$="-"
+				// ok
+			ELSE
+				a$ = ""
+			ENDIF
+		ENDIF
+
+		IF a$<>"" OR del OR backsp OR xkey OR ykey
+			selstart=wdg.wselstart
+			selend  =wdg.wselend
+
+			IF shift AND (xkey OR ykey) // Select with shift+keys
+				INC selend, xkey
+				// caret up/dn
+				IF ykey
+					selend = DDgui_boxprint(ddgui_vals, wdg, wdg.wcaretx, wdg.wcarety + ykey*ty, txwidth, FALSE, TRUE)
+				ENDIF
+
+				IF selend<0 THEN selend=0
+				IF selend>LEN(text$) THEN selend=LEN(text$)
+				// DDgui_set(id$, "SELSTART", selstart)
+				wdg.wselend = selend
+			ELSE
+				// remove selection
+				IF selstart <>selend AND (del OR backsp OR a$<>"")
+					IF selstart>selend
+						tx=selstart
+						selstart=selend
+						selend=tx
+					ENDIF
+					l$ = MID$(text$, 0, selstart)
+					r$ = MID$(text$, selend)
+					text$=l$+r$
+					// this only deletes selection, not more
+					IF del THEN del=FALSE
+					IF backsp THEN backsp=FALSE
+				ENDIF
+
+				// split text in left and right of caret
+				l$ = MID$(text$, 0, selstart)
+				r$ = MID$(text$, selstart)
+
+				// caret left/right
+				INC selstart, xkey
+				// caret up/dn
+				IF ykey
+					selstart = DDgui_boxprint(ddgui_vals, wdg, wdg.wcaretx, wdg.wcarety + ykey*ty, txwidth, FALSE, TRUE)
+				ENDIF
+
+				// delete
+				IF del THEN r$ = MID$(r$, 1)
+
+				// backspace
+				IF backsp
+					l$ = LEFT$(l$, LEN(l$)-1)
+					DEC selstart, 1
+				ENDIF
+				// any char
+				IF a$<>""
+					l$ = l$ + a$
+					INC selstart, 1
+				ENDIF
+				text$ = l$+r$
+
+				IF selstart<0 THEN selstart=0
+				IF selstart>LEN(text$) THEN selstart=LEN(text$)
+				wdg.wselstart = selstart
+				wdg.wselend = selstart // clear selection
+				wdg.wtext$ = text$
+			ENDIF // not shift AND xkey
+
+			// make the caret in visible area
+			IF wdg.wcarety+ty > wdg.wscroll*ty+wdg.wheight AND wdg.wscroll < wdg.wscrollmax THEN INC wdg.wscroll
+			IF wdg.wcarety-ty < wdg.wscroll*ty AND wdg.wscroll>0 THEN DEC wdg.wscroll
+
+		ENDIF // any key
+	ENDIF // focus
+ENDFUNCTION
+
+
+
+//! ---------------------------------------
+//! a TAB widget
+//! ---------------------------------------
+FUNCTION DDgui_tab: id$, captions$, height%=0
+LOCAL num% //, num2%, i%, chars%
+LOCAL fx%, fy%
+	GETFONTSIZE fx, fy
+
+//  STATIC str2$[], str$[]
+//	num = SPLITSTR(captions$, str$[], "|")
+//	FOR i=0 TO num-1
+//		num2 = SPLITSTR(str$[i], str2$[], ",")
+//		IF num2 THEN INC chars, LEN(str2$[0])+1
+//	NEXT
+
+	IF height% = 0 THEN height% = fy+7
+
+	DDgui_widget(id$, captions$, 10000, height%)
+
+	DDgui_set(id$,  "TYPE", "TAB")
+	ddgui_stack[.1].widgets[-1].wselect% = -1 // select at first draw!
+//	DDgui_spacer(10000,0)
+ENDFUNCTION
+
+@FUNCTION DDgui_drawtab%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, ytop%
+LOCAL num%, num2%, i%, isel%
+LOCAL c1%, c2%, c1b%, c2b%
+LOCAL fx%, fy%, x%, twidth%
+LOCAL selx%, selw% // selected tab -> draw rect later, it overlaps the others
+STATIC str$[], str2$[]
+	GETFONTSIZE fx, fy
+
+	c1=ddgui_vals.col_bright
+	c2=ddgui_vals.col_norm
+	c1b=ddgui_vals.col_hover_bright
+	c2b=ddgui_vals.col_hover_norm
+//	DRAWRECT 0,0,wdg.wwidth, wdg.wheight-1, c1
+	DDgui_backgnd(c1, c1, 0,ytop%,wdg.wwidth, wdg.wheight-1)
+
+	isel = wdg.wselect%
+
+	LOCAL y_text% = ytop% + wdg.wheight%-2-fy%
+
+	x = 2
+	num = SPLITSTR(wdg.wtext$, str$[], "|")
+	FOR i=0 TO num-1
+		num2 = SPLITSTR(str$[i], str2$[], ",")
+		twidth=MAX(gDDguiMinControlDimension%, DDGui_TextWidthIntern(str2$[0])+fx)
+		IF i=isel
+			DDgui_backgnd(c1b, c2b, x, ytop%+1, twidth, wdg.wheight)
+			selx = x-1
+			selw = twidth+2
+		ELSE
+			DDgui_backgnd(c1, c2, x+1, ytop%+4, twidth-1, wdg.wheight-4)
+			DDgui_backrect(x,ytop%+3,twidth+1, wdg.wheight-2, c2)
+		ENDIF
+		DDGui_PrintIntern(str2$[0], x+INTEGER(fx/2), y_text%, i=isel)
+		INC x, twidth
+	NEXT
+
+
+	// selected tab
+	IF selx>0 THEN DDgui_backrect(selx,ytop%+1,selw, wdg.wheight, c2b)
+
+	// bottom line
+	DRAWRECT 0,wdg.wheight-1, wdg.wwidth-1, 1, c2
+ENDFUNCTION
+
+@FUNCTION DDgui_handletab%: ddgui_vals AS DDGUI_DLG, wdg AS DDGUI_WDG, mx%, my%, b1%, b2%
+LOCAL width%, num%, num2%, i%
+LOCAL fx%, fy%, x%, oldsel%
+STATIC str$[], str2$[]
+	GETFONTSIZE fx, fy
+	wdg.wclicked = FALSE
+
+	fy = wdg.wheight%
+
+LOCAL must_update% = FALSE
+	IF wdg.wselect% = -1 OR (b1=1 AND my>0 AND mx>0 AND my<=fy AND mx<wdg.wwidth%) THEN must_update=TRUE
+
+	IF wdg.wselect% = -1 THEN DDgui_selecttab(wdg.wid$, 0);
+
+	IF must_update%
+		oldsel = wdg.wselect%
+		num = SPLITSTR(wdg.wtext$, str$[], "|")
+
+		FOR i=0 TO num-1
+			num2 = SPLITSTR(str$[i], str2$[], ",")
+			width=MAX(gDDguiMinControlDimension%, DDGui_TextWidthIntern(str2$[0])+fx)
+
+			IF BOXCOLL(mx,my,1,1, x,1,width,fy)
+				IF i <> oldsel
+					wdg.wselect = i
+					wdg.wclicked = TRUE
+					DDgui_selecttab(wdg.wid$, i)
+				ENDIF
+				BREAK
+			ENDIF
+			INC x, width
+		NEXT
+	ENDIF
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! Start a frame element. All new widgets will be placed
+//! within this frame, until you call DDgui_frameend()
+//! If you add no caption, the frame is invisible.
+//! Otherwise it's a nice frame, which takes some additional
+//! space.
+// ------------------------------------------ //
+FUNCTION DDgui_framestart: id$="", caption$="", width%=0
+LOCAL count%
+	IF LEN(id$)=0
+		count = 1 + LEN(ddgui_stack[-1].widgets[])
+		id$ = "frm"+count
+	ENDIF
+	DDgui_widget(id$, caption$, width%, 100)
+	DDgui_set(id$, "TYPE", "FRAME")
+	IF width%=0 THEN DDgui_set(id$, "WIDTH", 10000) // calculate at first draw event _AUTO_FRAME_WIDTH_
+ENDFUNCTION
+
+
+// ------------------------------------------ //
+//! ends putting elements in a frame. From now on
+//! elements will be placed next to the current frame, again.
+// ------------------------------------------ //
+FUNCTION DDgui_frameend:
+LOCAL count%, id$
+	count = 1 + LEN(ddgui_stack[-1].widgets[])
+	id$ = "frm"+count
+	DDgui_widget(id$, "", 1,1)
+	DDgui_set(id$, "TYPE", "UNFRAME")
+	DDgui_set(id$, "WIDTH", 0)
+	DDgui_set(id$, "HEIGHT", 0)
+ENDFUNCTION
+
+
+SUB __DDgui_Helpers___:
+ENDSUB
+
+
+//! #### HELPER FUNCTIONS #####
+
+
+// ---------------------------------------
+//! Advance the focus of text elements
+//! \param iDirection : -1 backwards, 1=forward
+// ---------------------------------------
+FUNCTION DDgui_advancefocus%: iDirection%=1
+	LOCAL focus$ = DDgui_get$("", "FOCUS")
+	LOCAL ifocus% = -1
+
+	LOCAL iFirst%  = -1
+	LOCAL iBefore% = -1
+	LOCAL iAfter%  = -1
+	LOCAL iLast%   = -1
+	FOR i% = 0 TO LEN(ddgui_stack[-1].widgets[])-1
+		ALIAS wdg AS ddgui_stack[-1].widgets[i]
+		IF wdg.wid$ = focus$
+			IF ifocus=-1
+				ifocus = i
+			ENDIF
+		ENDIF
+
+		// new optional widgets for tab
+		IF wdg.wtype$ = "TEXT" OR wdg.wtype$="SINGLETEXT" OR wdg.wtype$="NUMBERTEXT"
+			IF iFirst = -1 THEN iFirst = i
+			IF ifocus = -1 THEN iBefore = i// nothing, yet
+			IF ifocus>=0 AND iAfter=-1 AND ifocus <> i THEN iAfter=i // no after, yet
+			iLast = i
+		ENDIF
+	NEXT
+
+	IF iDirection<0 // find previous
+		IF iBefore>=0 THEN ifocus = iBefore
+		IF iBefore<0 AND iLast>=0 THEN ifocus=iLast
+	ELSE // find next
+		IF iAfter>=0 THEN ifocus=iAfter
+		IF iAfter<0 AND iFirst>=0 THEN ifocus=iFirst
+	ENDIF
+
+	IF ifocus >=0 AND ifocus <LEN(ddgui_stack[-1].widgets[])
+		focus$ = ddgui_stack[-1].widgets[ifocus].wid$
+		DDgui_setfocus(focus$)
+	ENDIF
+ENDFUNCTION
+
+// ---------------------------------------
+//! Sets the focus to a widget, might select the text and such
+// ---------------------------------------
+FUNCTION DDgui_setfocus%: id$
+	DDgui_set("", "FOCUS", id$)
+	SELECT DDgui_get$(id$, "TYPE")
+		CASE "TEXT"
+			DDgui_set(id$, "SELSTART", 0)
+			DDgui_set(id$, "SELEND", 0)
+		CASE "SINGLETEXT"
+			DDgui_set(id$, "SELSTART", 0)
+			DDgui_set(id$, "SELEND", LEN(DDgui_get$(id$, "TEXT") ) )
+		CASE "NUMBERTEXT"
+			DDgui_set(id$, "SELSTART", 0)
+			DDgui_set(id$, "SELEND", LEN(DDgui_get$(id$, "TEXT") ) )
+	ENDSELECT
+
+ENDFUNCTION
+
+
+// ---------------------------------------
+//! performs the hide/unhide for the selected tab
+// ---------------------------------------
+FUNCTION DDgui_selecttab%: id$, isel%
+LOCAL num%, num2%, i%, j%
+STATIC str$[], str2$[]
+
+	LOCAL oldselect% = DDgui_get(id$, "SELECT")
+
+	DDgui_set(id$, "SELECT", isel)
+	num = SPLITSTR(DDgui_get$(id$, "TEXT"), str$[], "|")
+	// first hide all, then show the active ones
+	FOR iHide%=0 TO 1
+		FOR i=0 TO num-1
+			num2 = SPLITSTR(str$[i], str2$[], ",")
+
+			FOR j=1 TO num2-1
+
+				// this will crash badly, otherwise.
+				// It will try to create the widget and destroy the pointer from
+				// the draw_internal array!!
+				IF oldselect% = -1 AND DDgui_index(ddgui_stack[-1], str2$[j], FALSE)<0
+					DEBUG "Invalid widget in Tab: "+str2$[j]+" - could crash!\n"
+					CONTINUE
+				ENDIF
+
+				IF i=isel AND iHide=1
+					DDgui_hide(str2$[j], FALSE)
+				ELSEIF iHide=0
+					DDgui_hide(str2$[j], TRUE)
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+ENDFUNCTION
+
+
+
+//! ---------------------------------------
+//! msg - a message box
+//! ---------------------------------------
+FUNCTION DDgui_msg%: text$, yes_no%, caption$="Information"
+LOCAL scx%, scy%, width%
+	GETSCREENSIZE scx, scy
+	width = MAX(scx/3, 220)
+
+	DDgui_pushdialog(0, 0, width, width, TRUE)
+	DDgui_set("", "MOVEABLE", TRUE)
+	DDgui_set("", "TEXT", caption$)
+
+	DDgui_widget("tx_text", text$, width-16,0)
+	DDgui_spacer(10000,5)
+
+
+LOCAL yes$, no$
+	yes$="Yes"
+	no$="No"
+	IF PLATFORMINFO$("LOCALE")="de"
+		yes$="Ja"; no$="Nein";
+	ELSEIF PLATFORMINFO$("LOCALE")="es"
+		yes$="Si"; no$="No";
+	ELSEIF PLATFORMINFO$("LOCALE")="it"
+		yes$="Si"; no$="No";
+	ELSEIF PLATFORMINFO$("LOCALE")="fr"
+		yes$="Qui"; no$="No";
+	ENDIF
+
+	DDgui_framestart("fr_buttons", "", 130)
+	DDgui_button("bt_yes", yes$, 64,32)
+	DDgui_button("bt_no",  no$,  64,32)
+	DDgui_frameend()
+	DDgui_set("tx_text", "ALIGN", 0)
+	IF yes_no=FALSE
+		DDgui_hide("bt_no")
+		DDgui_set("bt_yes", "TEXT", "OK")
+		DDgui_set("bt_yes", "ALIGN", 0)
+	ENDIF
+	DDgui_set("fr_buttons", "ALIGN", 0)
+
+	DDgui_resizedialog(0,0,0,0) // let everything arrange
+
+	// Now find the height of the dialog
+	DDgui_show(TRUE)
+	DDgui_show(TRUE)
+	LOCAL height% = DDgui_get("bt_yes", "YPOS")-DDgui_get("", "YPOS") + 32
+	IF height% < width THEN DDgui_set("", "HEIGHT", height%)
+	DDgui_CenterDialog()
+
+
+
+	WHILE TRUE
+		DDgui_show(FALSE)
+		SHOWSCREEN
+		IF DDgui_get("bt_yes", "CLICKED")
+			DDgui_popdialog()
+			RETURN 1
+		ENDIF
+		IF DDgui_get("bt_no", "CLICKED")
+			DDgui_popdialog()
+			RETURN 0
+		ENDIF
+	WEND
+ENDFUNCTION
+
+
+// ---------------------------------------
+//! get the text for a list separated by "|"
+//! very fast - no splitstr involved
+// ---------------------------------------
+FUNCTION DDgui_intern_list_item_text$: BYREF txt$, index%
+	IF index%<0 THEN RETURN ""
+
+	LOCAL start% = -1
+	WHILE index% > 0
+		start = INSTR(txt$, "|", start+1)
+		IF start < 0 THEN RETURN ""
+		DEC index%
+	WEND
+	LOCAL fine% = INSTR(txt$, "|", start+1) // <0 no matter for mid$
+	IF fine%>0 THEN fine% = fine-start-1
+	RETURN MID$(txt$, start+1,fine%)
+ENDFUNCTION
+
+
+// ---------------------------------------
+//! get the text for a list item index
+//! very fast - no splitstr involved
+// ---------------------------------------
+FUNCTION DDgui_getitemtext$: id$, index%
+
+
+	IF LEN(ddgui_stack[])=0
+		DEBUG "DDgui_get: No active dialog!\n"
+		RETURN ""
+	ENDIF
+
+	LOCAL iw% = DDgui_index(ddgui_stack[-1], id$, FALSE)
+	IF iw>=0
+		// the most important ones as a quick shortcut to avoid string conversion
+		ALIAS wdg AS ddgui_stack[-1].widgets[iw]
+		ALIAS txt$ AS wdg.wtext$
+		RETURN DDgui_intern_list_item_text$(txt$, index%)
+	ENDIF
+	DEBUG "DDgui_get: Widget not found "+id$+"\n"
+ENDFUNCTION
+
+// ---------------------------------------
+//! insert an item into a list box
+// ---------------------------------------
+FUNCTION DDgui_insertitem%: id$, text$, before_index%
+LOCAL i%, tx$, num%
+STATIC tk$[]
+	IF text$="" THEN text$="<null>"
+	tx$ = DDgui_get$(id$, "TEXT")
+	IF LEN(tx$)
+		num = SPLITSTR(tx$, tk$[], "|")
+		REDIM tk$[num+1]
+	ELSE
+		DIM tk$[1]
+	ENDIF
+
+	IF before_index>=num THEN before_index = -1
+	IF before_index<0
+		tk$[num] = text$
+	ELSE
+		FOR i=num-1 TO before_index STEP -1
+			tk$[i+1]=tk$[i]
+		NEXT
+		tk$[before_index] = text$
+	ENDIF
+	text$ = ""
+	FOR i=0 TO num
+		text$=text$+tk$[i]
+		IF i<num THEN text$=text$+"|"
+	NEXT
+	DDgui_set(id$, "TEXT", text$)
+	DDgui_set(id$, "COUNT", num+1)
+
+	// adjust the selection
+	IF before_index>=0
+		i = DDgui_get(id$, "SELECT")
+		IF i>=before_index THEN DDgui_set(id$, "SELECT", i+1)
+	ENDIF
+	DDgui_resizedialog(0,0,0,0) // update some sizes
+ENDFUNCTION
+
+// ---------------------------------------
+//! remove an item from a list box
+// ---------------------------------------
+FUNCTION DDgui_deleteitem%: id$, index%
+LOCAL i%, tx$, num%
+STATIC tk$[]
+
+	tx$ = DDgui_get$(id$, "TEXT")
+	num = SPLITSTR(tx$, tk$[], "|")
+
+	IF index<0 // delete all
+		num=0
+	ELSE
+		FOR i=index TO num-2
+			tk$[i]=tk$[i+1]
+		NEXT
+		num=num-1
+	ENDIF
+
+	tx$ = ""
+	FOR i=0 TO num-1
+		tx$=tx$+tk$[i]
+		IF i<num-1 THEN tx$=tx$+"|"
+	NEXT
+	DDgui_set(id$, "TEXT", tx$)
+	DDgui_set(id$, "COUNT", num)
+
+	// adjust the selection
+	IF index>=0
+		i = DDgui_get(id$, "SELECT")
+		IF i>=index THEN DDgui_set(id$, "SELECT", i-1)
+	ELSE
+		DDgui_set(id$, "SELECT", -1)
+	ENDIF
+	DDgui_resizedialog(0,0,0,0) // update some sizes
+ENDFUNCTION
+
+
+
+
+//! ---------------------------------------
+//! An Onscreen Keyboard for PocketPC/GP2X
+//! automatically kicked, when you tip on a
+//! non-READONLY text box.
+//! You can force/disable this behaviour by manually changing
+//! the variable: DDGUI_AUTO_INPUT_DLG=TRUE/FALSE
+//! ---------------------------------------
+FUNCTION DDgui_input$: text$, bSpecialChars%=TRUE, bFullscreen=FALSE, bSingleLine%=FALSE, bIsNumber% = FALSE
+LOCAL fx%, fy%, size%, iTabSel%, text_old$
+LOCAL ssel%, esel%
+LOCAL widg$[]
+
+	text_old$ = text$ // for cancel
+
+LOCAL scx%, scy%
+	GETSCREENSIZE scx%, scy%
+	GETFONTSIZE fx%, fy%
+
+LOCAL storeoldsize% = gDDguiMinControlDimension%
+	gDDguiMinControlDimension%=16
+
+	size = MIN(400, MIN(scx, scy))
+
+	IF bFullscreen
+		DDgui_pushdialog( 0,0, scx, scy, TRUE)
+		size% = 20 // size to fit a 240x320 device
+		IF scx > 240 THEN size% = 28 // fit at least 320x320 - that's a fine size
+		IF scx > 320 THEN size% = 36 // fit at least 480x480 - that's a fine size
+	ELSE
+		DDgui_pushdialog( (scx - size)/2, (scy-size)/2 ,size, size)
+		scy=size
+		scx=size
+		size% = 20 // size to fit a 240x320 device
+		IF scx > 240 THEN size% = 28 // fit at least 320x320 - that's a fine size
+		IF scx > 320 THEN size% = 36 // fit at least 480x480 - that's a fine size
+	ENDIF
+
+
+	DDGUI_IN_INPUT_DLG=TRUE
+
+	DDgui_set("tx_text", "TEXT", text$)
+	DDgui_set("tab", "SELECT", 2)
+	IF bIsNumber% THEN DDgui_set("tab", "SELECT", 0)
+
+	IF bSingleLine OR (INSTR(text$, "\n")<0 AND LEN(text$)<40) // single line -> select all
+		DDgui_set("tx_text", "SELSTART", 0)
+		DDgui_set("tx_text", "SELEND", LEN(text$))
+	ENDIF
+
+
+@refresh:
+	text$ = DDgui_get$("tx_text", "TEXT")
+	ssel% = DDgui_get("tx_text", "SELSTART")
+	esel% = DDgui_get("tx_text", "SELEND")
+	iTabSel% = DDgui_get("tab", "SELECT")
+
+	DDgui_init() // clear all items
+	LOCAL texth% = scy - 6*(size+2) - 32
+	IF bSingleLine%
+		texth% = 0
+		IF bIsNumber%
+			DDgui_numbertext("tx_text", text$, scx-MAX(32, fx%))
+		ELSE
+			DDgui_singletext("tx_text", text$, scx-MAX(32, fx%))
+		ENDIF
+	ELSE
+		DDgui_text("tx_text", text$, scx-MAX(32, fx%), texth%)
+	ENDIF
+
+	DDgui_set("tx_text", "ALIGN", 0)
+	DDgui_spacer(10000,2)
+
+
+	DDgui_set("tab", "SELECT", iTabSel%)
+	DDgui_set("tx_text", "SELSTART", ssel%)
+	DDgui_set("tx_text", "SELEND", esel%)
+
+	IF bIsNumber%
+		DDgui_tab("tab", "123", size%) // silly?
+	ELSE
+		IF bSpecialChars%
+			DDgui_tab("tab", "123|ABC|abc|ÄÖÜ", size%)
+		ELSE
+			DDgui_tab("tab", "123|ABC|abc", size%)
+		ENDIF
+	ENDIF
+
+
+	DDgui_framestart("fr_keypad")
+	IF bIsNumber%
+			DDgui_button("b7", "7",size%, size%)
+			DDgui_button("b8", "8",size%, size%)
+			DDgui_button("b9", "9",size%, size%)
+			DDgui_button("b-", "-",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b4", "4",size%, size%)
+			DDgui_button("b5", "5",size%, size%)
+			DDgui_button("b6", "6",size%, size%)
+			DDgui_button("be", "e",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b1", "1",size%, size%)
+			DDgui_button("b2", "2",size%, size%)
+			DDgui_button("b3", "3",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b0", "0",size%*2+2, size%)
+			DDgui_button("b.", ".",size%, size%)
+			DDgui_button("b\b", "<-",size%*2+2, size%)
+	ELSE
+		SELECT iTabSel%
+		CASE 0 // 123
+			DDgui_button("b@", "@",size%, size%)
+			DDgui_button("b#", "#",size%, size%)
+			DDgui_button("b[", "[",size%, size%)
+			DDgui_button("b]", "]",size%, size%)
+			DDgui_button("b~", "~",size%, size%)
+			DDgui_button("b7", "7",size%, size%)
+			DDgui_button("b8", "8",size%, size%)
+			DDgui_button("b9", "9",size%, size%)
+			DDgui_button("b/", "/",size%, size%)
+			DDgui_button("b*", "*",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b?", "?",size%, size%)
+			DDgui_button("b!", "!",size%, size%)
+			DDgui_button("b{", "{",size%, size%)
+			DDgui_button("b}", "}",size%, size%)
+			DDgui_button("b=", "=",size%, size%)
+			DDgui_button("b4", "4",size%, size%)
+			DDgui_button("b5", "5",size%, size%)
+			DDgui_button("b6", "6",size%, size%)
+			DDgui_button("b-", "-",size%, size%)
+			DDgui_button("b+", "+",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b:", ":",size%, size%)
+			DDgui_button("b;", ";",size%, size%)
+			DDgui_button("b(", "(",size%, size%)
+			DDgui_button("b)", ")",size%, size%)
+			DDgui_button("b0", "0",size%, size%)
+			DDgui_button("b1", "1",size%, size%)
+			DDgui_button("b2", "2",size%, size%)
+			DDgui_button("b3", "3",size%, size%)
+			DDgui_button("b\b", "<-",size%*2+2, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b,", ",",size%, size%)
+			DDgui_button("b.", ".",size%, size%)
+			DDgui_button("b<", "<",size%, size%)
+			DDgui_button("b>", ">",size%, size%)
+			DDgui_button("b'", "'",size%, size%)
+			DDgui_button("b\"","\"",size%, size%)
+			DDgui_button("b ", "",size%*2+2, size%)
+			DDgui_button("b\n", CHR$(0xb6),size%*2+2, size%)
+		CASE 1 // ABC
+			DDgui_button("bQ", "Q",size%, size%)
+			DDgui_button("bW", "W",size%, size%)
+			DDgui_button("bE", "E",size%, size%)
+			DDgui_button("bR", "R",size%, size%)
+			DDgui_button("bT", "T",size%, size%)
+			DDgui_button("bY", "Y",size%, size%)
+			DDgui_button("bU", "U",size%, size%)
+			DDgui_button("bI", "I",size%, size%)
+			DDgui_button("bO", "O",size%, size%)
+			DDgui_button("bP", "P",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("bA", "A",size%, size%)
+			DDgui_button("bS", "S",size%, size%)
+			DDgui_button("bD", "D",size%, size%)
+			DDgui_button("bF", "F",size%, size%)
+			DDgui_button("bG", "G",size%, size%)
+			DDgui_button("bH", "H",size%, size%)
+			DDgui_button("bJ", "J",size%, size%)
+			DDgui_button("bK", "K",size%, size%)
+			DDgui_button("bL", "L",size%, size%)
+			DDgui_button("b,", ",",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("bShift", "^",size%, size%)
+			DDgui_button("bZ", "Z",size%, size%)
+			DDgui_button("bX", "X",size%, size%)
+			DDgui_button("bC", "C",size%, size%)
+			DDgui_button("bV", "V",size%, size%)
+			DDgui_button("bB", "B",size%, size%)
+			DDgui_button("bN", "N",size%, size%)
+			DDgui_button("bM", "M",size%, size%)
+			DDgui_button("b\b", "<-",size%*2+2, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b,", ",",size%, size%)
+			DDgui_button("b.", ".",size%, size%)
+			DDgui_button("b ", "",size%*6+10, size%)
+			DDgui_button("b\n", CHR$(0xb6),size%*2+2, size%)
+		CASE 2 // abc
+			DDgui_button("bq", "q",size%, size%)
+			DDgui_button("bw", "w",size%, size%)
+			DDgui_button("be", "e",size%, size%)
+			DDgui_button("br", "r",size%, size%)
+			DDgui_button("bt", "t",size%, size%)
+			DDgui_button("by", "y",size%, size%)
+			DDgui_button("bu", "u",size%, size%)
+			DDgui_button("bi", "i",size%, size%)
+			DDgui_button("bo", "o",size%, size%)
+			DDgui_button("bp", "p",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("ba", "a",size%, size%)
+			DDgui_button("bs", "s",size%, size%)
+			DDgui_button("bd", "d",size%, size%)
+			DDgui_button("bf", "f",size%, size%)
+			DDgui_button("bg", "g",size%, size%)
+			DDgui_button("bh", "h",size%, size%)
+			DDgui_button("bj", "j",size%, size%)
+			DDgui_button("bk", "k",size%, size%)
+			DDgui_button("bl", "l",size%, size%)
+			DDgui_button("b,", ",",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("bShift", "^",size%, size%)
+			DDgui_button("bz", "z",size%, size%)
+			DDgui_button("bx", "x",size%, size%)
+			DDgui_button("bc", "c",size%, size%)
+			DDgui_button("bv", "v",size%, size%)
+			DDgui_button("bb", "b",size%, size%)
+			DDgui_button("bn", "n",size%, size%)
+			DDgui_button("bm", "m",size%, size%)
+			DDgui_button("b\b", "<-",size%*2+2, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b,", ",",size%, size%)
+			DDgui_button("b.", ".",size%, size%)
+			DDgui_button("b ", "",size%*6+10, size%)
+			DDgui_button("b\n", CHR$(0xb6),size%*2+2, size%)
+		CASE 3 // ÄÖÜ
+			DDgui_button("bá", "á",size%, size%)
+			DDgui_button("bé", "é",size%, size%)
+			DDgui_button("bí", "í",size%, size%)
+			DDgui_button("bó", "ó",size%, size%)
+			DDgui_button("bú", "ú",size%, size%)
+			DDgui_button("bÁ", "Á",size%, size%)
+			DDgui_button("bÉ", "É",size%, size%)
+			DDgui_button("bÍ", "Í",size%, size%)
+			DDgui_button("bÓ", "Ó",size%, size%)
+			DDgui_button("bÚ", "Ú",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("bà", "à",size%, size%)
+			DDgui_button("bè", "è",size%, size%)
+			DDgui_button("bì", "ì",size%, size%)
+			DDgui_button("bò", "ò",size%, size%)
+			DDgui_button("bù", "ù",size%, size%)
+			DDgui_button("b2", "À",size%, size%)
+			DDgui_button("b3", "È",size%, size%)
+			DDgui_button("b2", "Ì",size%, size%)
+			DDgui_button("b2", "Ò",size%, size%)
+			DDgui_button("b3", "Ù",size%, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("bä", "ä",size%, size%)
+			DDgui_button("bö", "ö",size%, size%)
+			DDgui_button("bü", "ü",size%, size%)
+			DDgui_button("bÄ", "Ä",size%, size%)
+			DDgui_button("bÖ", "Ö",size%, size%)
+			DDgui_button("bÜ", "Ü",size%, size%)
+			DDgui_button("bß","ß",size%, size%)
+			DDgui_button("bß","ß",size%, size%)
+			DDgui_button("b\b", "<-",size%*2+2, size%)
+			DDgui_spacer(10000,0)
+			DDgui_button("b´","´" ,size%, size%)
+			DDgui_button("b`", "`",size%, size%)
+			DDgui_button("b° ","°",size%, size%)
+			DDgui_button("b ", "" ,size%*5+8, size%)
+			DDgui_button("b\n", CHR$(0xb6),size%*2+2, size%); DDgui_set("b\n", "TEXT", "Enter")
+		ENDSELECT
+	ENDIF
+
+
+	DDgui_frameend()
+	DDgui_set("fr_keypad", "ALIGN", 0)
+
+LOCAL cancel$="Cancel"
+	IF PLATFORMINFO$("LOCALE")="de" THEN cancel$="Abbrechen"
+
+	DDgui_spacer(10000,0)
+	DDgui_framestart("fr_okpad")
+		DDgui_button("btOK", "OK", 0, size%)
+		DDgui_spacer(16,1)
+		DDgui_button("btCancel", cancel$,0, size%)
+	DDgui_frameend()
+	DDgui_set("fr_okpad", "ALIGN", 0)
+
+LOCAL chr%
+
+	// make a table of visible key, asking 255 keys is slow for PocketPC
+	DIM widg$[0]
+	FOREACH w IN ddgui_stack[LEN(ddgui_stack[])-1].widgets[]
+		IF LEN(w.wid$)=2 AND MID$(w.wid$, 0,1)="b"
+			DIMPUSH widg$[], w.wid$
+			w.tiptext$ = w.wtext$
+		ENDIF
+	NEXT
+
+	DDgui_set("", "FOCUS", "tx_text")
+	DDgui_show(TRUE) // flicker fixer
+
+	WHILE TRUE
+		LOCAL tab_change% = DDgui_get("tab", "CLICKED") // handle INKEY message, probably
+		DDgui_set("", "FOCUS", "tx_text")
+		DDgui_show(TRUE)
+
+		IF tab_change THEN GOTO refresh
+
+		FOREACH w$ IN widg$[]
+			IF DDgui_get(w$, "CLICKED")
+				DDgui_set("", "INKEY", MID$(w$,1,1) )
+				IF DDgui_get("tab", "SELECT") = 1 // capitals -> make small
+					DDgui_set("tab", "SELECT", 2)
+					DDgui_set("tab", "CLICKED", TRUE)
+				ENDIF
+				BREAK
+			ENDIF
+		NEXT
+
+		IF NOT bIsNumber% AND DDgui_get("bShift", "CLICKED")
+			LOCAL isel% = DDgui_get("tab", "SELECT")
+			IF isel<3 AND isel>0
+				isel = isel-1
+				isel = 1-isel
+				isel = 1+isel
+				DDgui_set("tab", "SELECT", isel)
+				DDgui_set("tab", "CLICKED", TRUE)
+			ENDIF
+		ENDIF
+
+		IF DDgui_get("btOK", "CLICKED")
+			text$ = DDgui_get$("tx_text", "TEXT")
+			BREAK
+		ENDIF
+		IF DDgui_get("btCancel", "CLICKED")
+			text$ = text_old$
+			BREAK
+		ENDIF
+
+		SHOWSCREEN
+	WEND
+
+	DDgui_popdialog()
+
+	DDGUI_IN_INPUT_DLG=FALSE
+
+
+	gDDguiMinControlDimension% = storeoldsize%
+
+	RETURN text$
+ENDFUNCTION
+
+
+
+//! Opens a file request dialog for a DDgui program.
+//! \param bOpen - Open (TRUE) or Save (FALSE) a file
+//! \param filterstr$ - file filter to display. When writing (bOpen=FALSE), the extension will be appended.
+//! \returns either the filename or an empty string in case of abort or error.
+FUNCTION DDgui_FileDialog$: bOpen%, filterstr$="*.*", initialise%=FALSE
+LOCAL startdir$ = GETCURRENTDIR$()
+LOCAL cdir$ = startdir$
+LOCAL bread$[]
+LOCAL pre$
+LOCAL files$[]
+LOCAL num_file%, num_dir%
+LOCAL outfile$
+
+LOCAL bBreadcrumbs% = FALSE
+LOCAL scx%, scy%
+	GETSCREENSIZE scx%, scy%
+	// FILEREQUEST$
+
+	scx=MIN(480, scx)
+	scy=MIN(480, scy)
+
+	IF scx>400 AND scy>400
+		bBreadcrumbs% = TRUE
+	ENDIF
+	DDgui_pushdialog(0,0,scx,scy, TRUE)
+
+refresh_fd:
+	DDgui_init()
+	DDgui_set("", "MOVEABLE", TRUE)
+	DDgui_set("", "SCALEABLE", FALSE)
+LOCAL caption$ = "Pick a file:"
+	IF PLATFORMINFO$("LOCALE")="de" THEN caption$="Datei auswählen:"
+	DDgui_set("", "TEXT", caption$)
+	cdir$ = GETCURRENTDIR$()
+
+	IF initialise%=TRUE THEN DDgui_init()
+
+	// split current dir for breadcrumbs
+	IF MID$(cdir$,1,1)=":"
+		// c:/mnt
+		pre$=MID$(cdir$, 0,2)
+		cdir$=MID$(cdir$,2)
+	ELSEIF  MID$(cdir$,1,1)="/" OR MID$(cdir$,0,1)="~"
+		// //pc-fg/ds
+		// ~/downloads
+		pre$=MID$(cdir$,0,1)
+		cdir$=MID$(cdir$,1)
+	ELSE
+		// /mnt/sd
+		pre$=""
+		cdir$=MID$(cdir$,1)
+	ENDIF
+	SPLITSTR(cdir$, bread$[], "/")
+
+IF bBreadcrumbs% // no breadcrumbs -> too big IMO
+	FOR i%=0 TO LEN(bread$[])-1
+		DDgui_button("bt_br"+i%, bread$[i],0,0)
+	NEXT
+	DDgui_spacer(1000,4)
+ENDIF
+
+	num_file% = GETFILELIST(filterstr$, files$[])
+	num_dir%  = INTEGER(num_file% / 0x10000) // Hi-Word
+	num_file% = MOD(num_file%, 0x10000)      // Lo-Word
+
+	LOCAL tmp$
+	FOR i%=0 TO num_dir%-1
+		IF files$[i] = "."
+			DIMDEL files$[], i
+			DEC num_dir%, 1
+			DEC i,1
+			CONTINUE
+		ENDIF
+		IF LEN(tmp$)
+			INC tmp$, "|"
+		ENDIF
+		INC tmp$, files$[i%]
+	NEXT
+
+	DDgui_combo("ls_dir", tmp$, scx-20)
+	DDgui_set("ls_dir", "SELECT", -1)
+	DDgui_spacer(1000,4)
+
+	tmp$=""
+	FOR i%=0 TO num_file%-1
+		IF i>0 THEN INC tmp$, "|"
+		INC tmp$, files$[i% + num_dir%]
+	NEXT
+	DDgui_list("ls_file", tmp$, scx-20,scy - 120 - bBreadcrumbs% * 64)
+	DDgui_set("ls_file", "SELECT", -1)
+	DDgui_spacer(1000,4)
+	DDgui_singletext("tx_file", "", scx-20)
+	DDgui_spacer(1000,4)
+
+	DDgui_button("bt_ok", "OK", 0,0); DDgui_button("bt_cancel", "Cancel",0,0)
+
+	LOCAL ok% = FALSE
+	WHILE TRUE
+		DDgui_show(FALSE)
+
+		IF bBreadcrumbs% // no breadcrumbs -> too big IMO
+			FOR i%=0 TO LEN(bread$[])-1
+				IF DDgui_get("bt_br"+i%, "CLICKED")
+					cdir$= pre$
+					FOR j% = 0 TO i
+						INC cdir$, "/"
+						INC cdir$, bread$[j]
+					NEXT
+
+					IF MID$(cdir$, LEN(cdir$)-1,1)=":" THEN INC cdir$, "/"
+					SETCURRENTDIR(cdir$)
+					GOTO refresh_fd
+
+				ENDIF
+			NEXT
+		ENDIF
+
+		IF DDgui_get("ls_dir", "CLICKED")
+			LOCAL sel% = DDgui_get("ls_dir", "SELECT")
+			cdir$= pre$
+			FOR i% = 0 TO LEN(bread$[])-2
+				INC cdir$, "/"
+				INC cdir$, bread$[i]
+			NEXT
+			IF files$[sel%] <> ".."
+				IF LEN(bread$[]) THEN INC cdir$, "/"+bread$[-1]
+				DEBUG "sel: " + sel% + " = " + DDgui_getitemtext$("ls_dir", sel%) + "\n"
+				INC cdir$, "/"+DDgui_getitemtext$("ls_dir", sel%)
+			ENDIF
+
+			IF MID$(cdir$, LEN(cdir$)-1,1)=":" THEN INC cdir$, "/"
+			SETCURRENTDIR(cdir$)
+			GOTO refresh_fd
+		ENDIF
+
+		IF DDgui_get("ls_file", "CLICKED")
+			DDgui_set("tx_file", "TEXT", DDgui_getitemtext$("ls_file", DDgui_get("ls_file", "SELECT")))
+		ENDIF
+
+
+
+		IF DDgui_get("bt_ok", "CLICKED")
+			outfile$=DDgui_get$("tx_file", "TEXT")
+			IF LEN(outfile$)
+
+				cdir$ = GETCURRENTDIR$()
+				IF MID$(cdir$, LEN(cdir$)-1, 1)="/"
+					outfile$ = cdir$ + outfile$
+				ELSE
+					outfile$ = cdir$ +"/"+ outfile$
+				ENDIF
+
+				IF bOpen%
+					IF DOESFILEEXIST(outfile$) THEN ok=TRUE
+				ELSE
+					// append extension
+					LOCAL ext$
+					ext$ = MID$(filterstr$, INSTR(filterstr$, ".")+1)
+					LOCAL cext$ = MID$(outfile$, LEN(outfile$)-LEN(ext$), LEN(ext$))
+					IF ext$<>"*" AND LCASE$(cext$) <> LCASE$(ext$)
+						INC outfile$, "."+ext$
+					ENDIF
+
+					IF DOESFILEEXIST(outfile$)
+						ok=TRUE
+					ELSE
+						IF OPENFILE(1, outfile$, FALSE)
+							CLOSEFILE 1
+							ok=TRUE
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+
+			BREAK
+		ENDIF
+
+		IF DDgui_get("bt_cancel", "CLICKED")
+			BREAK
+		ENDIF
+
+		SHOWSCREEN
+	WEND
+
+	DDgui_popdialog()
+
+	SETCURRENTDIR(startdir$)
+	IF ok THEN RETURN outfile$
+
+	RETURN ""
+ENDFUNCTION
+
+
+//! Display a wait animation. Call it with TRUE to show the wait cursor.
+//! the current back buffer is grabbed as a background.
+//! call it with FALSE at the end to clear up memory.
+//! use the iSpriteId as the backgound. If you specify -1 here
+//! DDgui will use GENSPRITE() for that
+FUNCTION DDgui_WaitCursor%:  bWait%, iSpriteId% = -1
+STATIC isprite% = -1
+STATIC nexttime=0
+	IF bWait
+		LOCAL time = GETTIMERALL()
+		IF nexttime < time
+			nexttime = time + 16.7
+			LOCAL scx%, scy%
+			GETSCREENSIZE scx, scy
+			IF isprite%<0
+				IF iSpriteId%<0
+					iSpriteId% = GENSPRITE()
+				ENDIF
+				isprite% = iSpriteId%
+				GRABSPRITE isprite%, 0,0,scx,scy
+			ENDIF
+
+			DRAWSPRITE isprite%, 0,0
+			ALPHAMODE -.5
+			DRAWRECT 0,0,scx, scy, RGB(0,0,0)
+			ALPHAMODE 0
+
+			time = time * 0.10
+			scx = scx/2
+			scy = scy/2
+			FOR i = 0 TO 4
+				LOCAL x = scx + (i-2)*24
+				LOCAL col%
+				col% = 225 * ABS(SIN( i/5 * 90 + time)) + 30
+				col = RGB(col,col,col)
+				DRAWRECT x-8, scy-16, 16, 32, col%
+			NEXT
+			SHOWSCREEN
+		ENDIF
+	ELSE
+		nexttime = 0
+		IF isprite% >=0
+			GRABSPRITE isprite%, 0,0,0,0
+			isprite%=-1
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+
+//! ---------------------------------------
+//! colordlg - a color picker dialog
+//! returns the color
+//! ---------------------------------------
+FUNCTION DDgui_ColorDlg%: color%
+LOCAL screenx%, screeny%, tx%,ty%
+LOCAL x%,y%,w%
+LOCAL r,g,b,h
+LOCAL oldcolor%
+	oldcolor = color
+
+	r = bAND(color, 0x0000ff)/255.0
+	g = bAND(color, 0x00ff00)/65280.0
+	b = bAND(color, 0xff0000)/16711680.0
+	h = 0.5
+
+	GETFONTSIZE tx,ty
+	GETSCREENSIZE screenx, screeny
+
+	DDgui_pushdialog(0,0,240,240)
+	DDgui_set("", "MOVEABLE", TRUE)
+	DDgui_set("", "TEXT", "Color Picker")
+	DDgui_framestart()
+			DDgui_widget("", "R", 0,0)
+			DDgui_slider("sl_R", r, 0,0)
+			DDgui_numbertext("tx_R", INTEGER(r*255.01), tx*3)
+			DDgui_set("tx_R", "READONLY", TRUE)
+			DDgui_set("tx_R", "STEP", 16)
+		DDgui_spacer()
+			DDgui_widget("", "G", 0,0)
+			DDgui_slider("sl_G", g,0,0)
+			DDgui_numbertext("tx_G", INTEGER(g*255.01), tx*3)
+			DDgui_set("tx_G", "READONLY", TRUE)
+			DDgui_set("tx_G", "STEP", 16)
+		DDgui_spacer()
+			DDgui_widget("", "B", 0,0)
+			DDgui_slider("sl_B", b,0,0)
+			DDgui_numbertext("tx_B", INTEGER(b*255.01), tx*3)
+			DDgui_set("tx_B", "READONLY", TRUE)
+			DDgui_set("tx_B", "STEP", 16)
+		DDgui_spacer()
+			DDgui_widget("", "H", 0,0)
+			DDgui_slider("sl_H", h,0,0)
+			DDgui_numbertext("tx_H", INTEGER(h*100.0001), tx*3)
+			DDgui_set("tx_H", "READONLY", TRUE)
+			DDgui_set("tx_H", "STEP", 6.25)
+	DDgui_frameend()
+
+	DDgui_button("bt_col", "SPR_C"+color, 32,128)
+	DDgui_set("bt_col", "WIDTH", 32)
+	DDgui_set("bt_col", "READONLY", TRUE)
+
+	DDgui_spacer()
+
+	DDgui_framestart("fr_center")
+		DDgui_button("bt_ok", "OK", 64, 32)
+		DDgui_button("bt_cancel", "Cancel", 128, 32)
+	DDgui_frameend()
+	DDgui_set("fr_center", "ALIGN", 0)
+
+	WHILE TRUE
+		DDgui_show(FALSE)
+		IF DDgui_get("sl_R", "CLICKED") OR DDgui_get("sl_G", "CLICKED") OR DDgui_get("sl_B", "CLICKED") OR DDgui_get("sl_H", "CLICKED")
+			r = DDgui_get("sl_R", "TEXT")
+			g = DDgui_get("sl_G", "TEXT")
+			b = DDgui_get("sl_B", "TEXT")
+			h = 2*DDgui_get("sl_H", "TEXT")
+
+			IF h<=1
+				r=h*r
+				g=h*g
+				b=h*b
+			ELSE
+				h=h-1
+				r=MIN(1.0, MAX(0.0, h*(1-r)+r))
+				g=MIN(1.0, MAX(0.0, h*(1-g)+g))
+				b=MIN(1.0, MAX(0.0, h*(1-b)+b))
+			ENDIF
+			color = RGB(r*255, g*255, b*255)
+			DDgui_set("tx_R", "TEXT", INTEGER(r*255.01))
+			DDgui_set("tx_G", "TEXT", INTEGER(g*255.01))
+			DDgui_set("tx_B", "TEXT", INTEGER(b*255.01))
+			DDgui_set("tx_H", "TEXT", INTEGER(h*100.0001))
+			DDgui_set("bt_col", "TEXT", "SPR_C"+color)
+		ENDIF
+
+		x = ddgui_stack[-1].xpos%+tx*2
+		y = ddgui_stack[-1].ypos%+ty*2
+		w = 128
+		h = 48
+		// color area
+//		DRAWRECT x,y,w,h,color
+//		DDgui_backrect( x,y, w,h, RGB(0,0,0))
+
+		SHOWSCREEN
+
+		IF DDgui_get("bt_ok", "CLICKED") THEN BREAK
+		IF DDgui_get("bt_cancel", "CLICKED")
+			color=oldcolor
+			BREAK
+		ENDIF
+
+		HIBERNATE
+	WEND
+
+	DDgui_popdialog()
+	RETURN color
+ENDFUNCTION
+
+FUNCTION DDgui_CenterDialog%:
+LOCAL scx%, scy%
+	GETSCREENSIZE scx%, scy%
+	LOCAL w%, h%
+	w% = DDgui_get("", "WIDTH")
+	h% = DDgui_get("", "HEIGHT")
+	DDgui_set("", "XPOS", (scx-w)/2)
+	DDgui_set("", "YPOS", (scy-h)/2)
+ENDFUNCTION
+
+
+
+
+

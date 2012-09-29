@@ -1,0 +1,20 @@
+folder:/Media
+editable:/Media/binarytest.txt
+static:/Media/binarytest.txt.GLBSCRIPT_DATA
+editable:/Media/greetings.txt
+static:/Media/greetings.txt.GLBSCRIPT_DATA
+editable:/Media/hallo123.txt
+static:/Media/hallo123.txt.GLBSCRIPT_DATA
+editable:/Media/test.ini
+static:/Media/test.ini.GLBSCRIPT_DATA
+static:/DIR_STRUCTURE
+static:/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/FileTest.exe
+static:/GLBFile.html
+static:/GLBScript.js
+editable:/test.ini
+static:/test.ini.GLBSCRIPT_DATA
+var:compileTime=2012-06-12 21:44:51
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=console

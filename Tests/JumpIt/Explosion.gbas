@@ -1,0 +1,40 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Saturday, October 01, 2011
+// IDE Version: 10.118
+
+
+GLOBAL Explosions[] AS TExplosion
+
+TYPE TExplosion
+	X;Y
+	Anim%
+	Del%
+
+	FUNCTION Update:
+		INC self.Anim
+		IF self.Anim> 20 THEN self.Del = TRUE
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL Frame%
+		IF self.Anim>15
+			Frame = 3
+		ELSEIF self.Anim>10
+			Frame = 2
+		ELSEIF self.Anim>5
+			Frame = 1
+		ELSE
+			Frame = 0
+		ENDIF
+
+		DRAWANIM ExplosionImage, Frame, self.X + Map.ScrollX, self.Y + Map.ScrollY
+	ENDFUNCTION
+
+	FUNCTION Init: X, Y
+		self.X = X
+		self.Y = Y
+
+		DIMPUSH Explosions[], self
+	ENDFUNCTION
+ENDTYPE

@@ -1,0 +1,81 @@
+// --------------------------------- //
+// Project: KeydefMenu
+// Start: Monday, January 22, 2007
+// IDE Version: 4.063
+
+
+// Include both files: Menu.gbas
+//                     keydef.gbas
+// From Samples/Common folder
+
+
+// A type holding the user defined keys
+// Ein Type, das die benutzerdefinierten Tasten hält
+TYPE CONTROL
+	lft$
+	rght$
+	up$
+	down$
+	button$
+ENDTYPE
+
+// Remember keys
+// Tasten merken
+GLOBAL g_ctrl[] AS CONTROL
+DIM g_ctrl[4]
+
+
+// Load Menu+keys / Menü+Tasten laden
+MenuInit("keys.ini")
+
+WHILE TRUE
+	item = MenuShow()
+	IF item THEN BREAK
+	SHOWSCREEN
+WEND
+
+
+IF item = -1 THEN END // exit
+
+// ------ THE GAME ----------
+
+
+DIM pos[4][2] // ship positions / Schiff-positionen
+
+// load keys fomr ini
+// Tasten von ini laden
+
+INIOPEN "keys.ini"
+FOR i=0 TO 3
+	g_ctrl[i].up$     = INIGET$("keyconfig"+(i+1), "1value")
+	g_ctrl[i].down$   = INIGET$("keyconfig"+(i+1), "2value")
+	g_ctrl[i].lft$    = INIGET$("keyconfig"+(i+1), "3value")
+	g_ctrl[i].rght$   = INIGET$("keyconfig"+(i+1), "4value")
+	g_ctrl[i].button$ = INIGET$("keyconfig"+(i+1), "5value")
+
+	pos[i][0] = 100
+	pos[i][1] = 20 + i*20
+NEXT
+
+
+
+
+WHILE TRUE
+
+	PRINT "Music: " + INIGET$("options", "2value"), 0, 0
+	PRINT "volume:" + INIGET$("options", "3value"), 0, 20
+
+	FOR i=0 TO 3
+		INC pos[i][0], keydef_key(g_ctrl[i].rght$) - keydef_key(g_ctrl[i].lft$)
+		INC pos[i][1], keydef_key(g_ctrl[i].down$) - keydef_key(g_ctrl[i].up$)
+
+		PRINT "Player " + i, pos[i][0], pos[i][1]
+	NEXT
+
+	SHOWSCREEN
+WEND
+
+
+
+
+

@@ -1,0 +1,24 @@
+?BLACKLIST ALL
+
+LOCAL arr[]
+DIM arr[3][6][2][3]
+arr[2][2][1][2] = 122
+
+STDOUT "lol: "+arr[2][2][1][2]+"\n"
+
+LOCAL i = 5
+FOR x = 0 TO BOUNDS(arr[], 0)-1
+	FOR y = 0 TO BOUNDS(arr[], 1)-1
+		FOR z = 0 TO BOUNDS(arr[], 2)-1
+			FOR zz = 0 TO BOUNDS(arr[], 3)-1
+				arr[x][y][z][zz] = i
+				INC i
+			NEXT
+		NEXT
+	NEXT
+NEXT
+arr[0][0][0][0] = -100
+
+FOREACH e IN arr[]
+	STDOUT e+"\n"
+NEXT

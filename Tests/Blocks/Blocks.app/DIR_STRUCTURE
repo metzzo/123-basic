@@ -1,0 +1,15 @@
+folder:/Media
+static:/Media/chicks.png
+static:/Media/smalfont.bmp
+static:/Blocks.exe
+static:/DIR_STRUCTURE
+static:/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+static:/GLBScript_unopt.js
+var:compileTime=2012-06-12 21:47:08
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

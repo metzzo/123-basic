@@ -1,0 +1,2778 @@
+// --------------------------------- //
+// Project: GLBasicScript
+// Start: Monday, July 18, 2011
+// IDE Version: 9.040
+
+//! Eine Variablendefinition (Ohne LOCAL/GLOBAL/...)
+FUNCTION VariDef AS IdentifierVari: NoDefault% = FALSE
+	LOCAL Name$ = GetCurrent$()
+	IsValidVarName()
+	Match(Name$, CODELINE(), CODEFILE$())
+	LOCAL datatype$ = "float"
+	LOCAL IsArray% = FALSE
+	LOCAL RightTok$ = RIGHT$(Name$,1)
+	LOCAL LeftTok$ = LEFT$(Name$,LEN(Name$)-1)
+	LOCAL DefVal% = -1
+	LOCAL dims%[]
+
+	SELECT RightTok$
+		CASE "%"
+			datatype$="int"
+			Name$ = LeftTok$
+		CASE "#"
+			datatype$="float"
+			Name$ = LeftTok$
+		CASE "$"
+			datatype$="string"
+			//Hier nicht LeftTok$, weil GLBasic Syntax das verlangt
+	ENDSELECT
+
+
+	IF IsToken("[")
+		Match("[", CODELINE(), CODEFILE$())
+		IF IsToken("]")
+			Match("]", CODELINE(), CODEFILE$())
+		ELSE
+			LOCAL E% = EnsureDatatype(Expression(), intDatatype, CODELINE())
+			Match("]", CODELINE(), CODEFILE$())
+			DIMPUSH dims[], E
+			WHILE IsToken("[")
+				Match("[", CODELINE(), CODEFILE$())
+				E = EnsureDatatype(Expression(), intDatatype, CODELINE())
+				DIMPUSH dims[], E
+				Match("]", CODELINE(), CODEFILE$())
+			WEND
+		ENDIF
+		IsArray = TRUE
+	ENDIF
+
+	IF IsToken("AS")
+		IF datatype$ = "float"
+			Match("AS", CODELINE(), CODEFILE$())
+			IF IsToken("int") OR IsToken("short") OR IsToken("byte") OR IsToken("bool") OR IsToken("boolean") OR IsToken("long") OR IsToken("single")
+				datatype$="int"
+			ELSEIF IsToken("float") OR IsToken("double")
+				datatype$="float"
+			ELSEIF IsToken("void")
+				datatype$="void"
+			ELSEIF IsToken("string")
+				datatype$="string"
+			ELSE
+				IsValidDatatype()
+				datatype$=GetCurrent$()
+			ENDIF
+			GetNext()
+		ELSE
+			Error("Unexpected AS", CODELINE(), CODEFILE$())
+		ENDIF
+	ENDIF
+
+	LOCAL vari AS IdentifierVari
+	vari.Name$ = Name$
+	vari.datatype.Name$ = datatype$
+	vari.datatype.IsArray = IsArray
+
+	IF LEN(dims[]) > 0
+		DefVal = CreateDimAsExprExpression(vari.datatype, dims[])
+	ENDIF
+
+	IF IsToken("=") AND NOT NoDefault
+		Match("=", CODELINE(), CODEFILE$())
+		DefVal = EnsureDatatype(Expression(), vari.datatype, CODELINE())
+	ENDIF
+
+	vari.PreDef = DefVal
+	RETURN vari
+ENDFUNCTION
+
+//! Eine Funktiondefinition
+FUNCTION FuncDef: Native%, IsCallBack%, Typ%, CurTyp%
+	IF Typ = FUNC_IS_PROTO
+		Match("PROTOTYPE", CODELINE(), CODEFILE$())
+	ELSE
+		Match("FUNCTION", CODELINE(), CODEFILE$())
+	ENDIF
+	LOCAL Name$ = GetCurrent$()
+	FOREACH func IN Compiler.Funcs[]
+		IF (IsToken(AddDataChars$(func.Name$, func)) OR IsToken(func.Name$)) AND func.IsCallback = IsCallBack AND func.Typ = Typ AND func.MyType = CurTyp
+			LOCAL tmpVari AS IdentifierVari
+			tmpVari = VariDef()
+			//weil ich faul bin und der parser das nicht so ganz unterstützt... also die arrays als rückgabewert
+			//IF tmpVari.datatype.IsArray THEN Error("Functions cannot return an array.",CODELINE(),CODEFILE$())
+
+
+			Match(":", CODELINE(), CODEFILE$())
+			LOCAL MustDefVal% = FALSE
+			WHILE IsToken("\n") = FALSE
+				LOCAL ref% = FALSE
+				IF IsToken("BYREF")
+					//Warning("Experimental feature 'BYREF'")
+					ref = TRUE
+					Match("BYREF", CODELINE(), CODEFILE$())
+					func.HasRef = TRUE
+				ENDIF
+				LOCAL vari AS IdentifierVari
+				vari = VariDef()
+				IF MustDefVal
+					IF vari.PreDef = -1 THEN Error("Parameter '"+vari.Name$+"' has to have default value.",CODELINE(), CODEFILE$())
+				ELSE
+					IF vari.PreDef <> -1 THEN MustDefVal = TRUE
+				ENDIF
+				vari.Typ = VARI_IS_PARAM
+				vari.ref = ref
+				vari.ID = LEN(Compiler.Varis[])
+				DIMPUSH Compiler.Varis[], vari
+				DIMPUSH func.Params[], LEN(Compiler.Varis[])-1
+				IF IsToken("\n") = FALSE THEN Match(",", CODELINE(), CODEFILE$())
+			WEND
+			?IFDEF DEBUG
+			STDOUT "Define Function: "+func.Name$+"\n"
+			STDOUT "\tDatatype: "+func.datatype.Name$+" "+func.datatype.IsArray+"\n"
+			LOCAL i% = 0
+			FOREACH P IN func.Params[]
+				STDOUT "\tParameter "+i+": "+Compiler.Varis[P].Name$+" Datatype: "+Compiler.Varis[P].datatype.Name$+" "+Compiler.Varis[P].datatype.IsArray+" ID: "+Compiler.Varis[P].ID+" ref: "+Compiler.Varis[P].ref+"\n"
+				INC i
+			NEXT
+			?ENDIF
+			//IF Typ = FUNC_IS_FUNC
+			Compiler.GlobalFuncs.Put(func.Name$, func.ID)
+			//ENDIF
+			IF Typ <> FUNC_IS_PROTO
+				IF Native = FALSE AND func.IsAbstract = FALSE
+					func.Native = FALSE
+					Match("\n", CODELINE(), CODEFILE$())
+					func.Tok = Compiler.currentPosi
+					SkipTokens("FUNCTION", "ENDFUNCTION", func.Name$)
+				ELSE
+					IF NOT func.IsAbstract
+						func.Native = TRUE
+					ENDIF
+				ENDIF
+			ENDIF
+			RETURN
+		ENDIF
+	NEXT
+	IF IsCallBack //Wenn es eine Callbackfunktion ist, kann es sein, dass die bereits weg ist
+		SkipTokens("FUNCTION", "ENDFUNCTION", Name$)
+	ELSE
+		Error("Internal error (func definition for unknown type: "+Name$+")", CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+//! Eine Sub Definition
+FUNCTION SubDef:
+	Match("SUB", CODELINE(), CODEFILE$())
+	FOREACH func IN Compiler.Funcs[]
+		IF IsToken(func.Name$)
+			func.Name$ = GetCurrent$()
+			func.datatype = voidDatatype
+			func.Typ = FUNC_IS_SUB
+
+			Compiler.GlobalFuncs.Put(func.Name$, func.ID)
+
+			Match(func.Name$, CODELINE(), CODEFILE$())
+			Match(":", CODELINE(), CODEFILE$())
+			Match("\n", CODELINE(), CODEFILE$())
+			func.Tok = Compiler.currentPosi
+			SkipTokens("SUB", "ENDSUB", func.Name$)
+			RETURN
+		ENDIF
+	NEXT
+	Error("Internal error (sub definition for unknown type)", CODELINE(), CODEFILE$())
+ENDFUNCTION
+
+//! Eine Typdefinition
+FUNCTION TypeDefi:
+	Match("TYPE", CODELINE(), CODEFILE$())
+	FOREACH typ IN Compiler.Types[]
+		IF IsToken(typ.Name$)
+			typ.Name$ = GetCurrent$()
+			Match(typ.Name$, CODELINE(), CODEFILE$())
+
+			LOCAL ExtName$
+			IF IsToken("EXTENDS")
+				//Erweitert eine Klasse!
+				Match("EXTENDS", CODELINE(), CODEFILE$())
+				ExtName$ = GetCurrent$()
+				GetNext()
+			ELSEIF typ.Name$ <> "TObject"
+				ExtName$ = "TObject"
+			ENDIF
+			IF ExtName$ <>""
+				IF ExtName$ = typ.Name$ THEN Error("Type cannot extend itself!", CODELINE(), CODEFILE$())
+				FOREACH T IN Compiler.Types[]
+					IF T.Name$ = ExtName$
+						typ.Extending = T.ID //Extende!
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+
+			IF IsToken(":") THEN Match(":", CODELINE(), CODEFILE$())
+			Match("\n", CODELINE(), CODEFILE$())
+			FOREACH M1 IN typ.Methods[]
+				FOREACH M2 IN typ.Methods[]
+					IF M1 <> M2 AND Compiler.Funcs[M2].Name$ = Compiler.Funcs[M1].Name$ THEN Error("Method '"+Compiler.Funcs[M1].Name$+"' already exists", CODELINE(), CODEFILE$())
+				NEXT
+			NEXT
+			WHILE IsToken("ENDTYPE") = FALSE
+				LOCAL IsAbstract% = FALSE
+				IF IsToken("ABSTRACT")
+					Match("ABSTRACT", CODELINE(), CODEFILE$())
+					IsAbstract = TRUE
+				ENDIF
+
+				IF IsToken("FUNCTION")
+					IF IsAbstract
+						SkipTokens("FUNCTION", "\n", "ABSTRACT FUNCTION")
+					ELSE
+						SkipTokens("FUNCTION", "ENDFUNCTION", "FUNCTION IN TYPE")
+					ENDIF
+				ELSE
+					LOCAL Vari AS IdentifierVari
+					Vari = VariDef()
+					//FOREACH Attr IN typ.Attributes[]
+					//	IF Compiler.Funcs[Attr].Name$ = Vari.Name$ THEN Error("Attribute '"+Vari.Name$+"' already exists", CODELINE(), CODEFILE$()) //fehler bei GLBS kompilieren
+					//NEXT
+					//FOREACH Meth IN typ.Methods[]
+					//	IF Compiler.Funcs[Meth].Name$ = Vari.Name$ THEN Error("Attribute '"+Vari.Name$+"' already exists, as method.", CODELINE(), CODEFILE$())
+					//NEXT
+					Vari.Typ = VARI_IS_ATTR
+					AddVariable(Vari, TRUE)
+					DIMPUSH typ.Attributes[], LEN(Compiler.Varis[])-1
+
+				ENDIF
+
+
+				IF IsToken("ENDTYPE") = FALSE
+					Match("\n", CODELINE(), CODEFILE$())
+				ENDIF
+			WEND
+			Match("ENDTYPE", CODELINE(), CODEFILE$())
+			RETURN
+		ENDIF
+	NEXT
+	Error("Internal error (type definition for unknown type)", CODELINE(), CODEFILE$())
+ENDFUNCTION
+
+//! Kompiliert eine Funktion
+FUNCTION CompileFunc%: func AS IdentifierFunc
+	IF func.Scp = -1 AND func.Native = FALSE AND func.PlzCompile = TRUE
+		IF func.IsAbstract
+		//	Error("Internal error (try to compile ABSTRACT method...)", CODELINE(), CODEFILE$())
+		ENDIF
+		LOCAL TmpScp = Compiler.CurrentScope
+		Compiler.CurrentScope = Compiler.MainScope
+		LOCAL Tok% = Compiler.currentPosi
+		LOCAL Curfunc = Compiler.currentFunc
+		Compiler.currentFunc = func.ID
+		Compiler.currentPosi = func.Tok - 1
+		IF func.Tok = 0 AND NOT func.IsAbstract THEN Error("Internal error (function has no start token)", CODELINE(), CODEFILE$())
+
+		IF func.Typ = FUNC_IS_METHOD
+			//self einfügen
+			LOCAL Vari AS IdentifierVari
+			Vari.Name$ = "self"
+			Vari.datatype.Name$ = Compiler.Types[func.MyType].Name$
+			Vari.datatype.IsArray = 0
+			Vari.Typ = VARI_IS_PARAM
+
+			AddVariable(Vari, TRUE)
+			DIMPUSH func.Params[], Vari.ID
+			func.SelfVar = Vari.ID
+		ENDIF
+
+		?IFDEF DEBUG
+		STDOUT "Compiling function '"+func.Name$+" typ: "+func.Typ+"'\n"
+		FOREACH P IN func.Params[]
+			STDOUT "\tFunction has parameter: "+Compiler.Varis[P].Name$+" typ: "+Compiler.Varis[P].datatype.Name$+"\n"
+		NEXT
+		?ENDIF
+		GetNext()
+		LOCAL Scp%
+		TRY
+			IF NOT func.IsAbstract //Nur wenn nicht abstrakt kompilieren
+				IF func.Typ = FUNC_IS_SUB
+					Scp = Scope("ENDSUB", func.ID)
+				ELSE
+					Scp = Scope("ENDFUNCTION", func.ID)
+					LOCAL e% = CreateReturnExpression(CreateDefaultValueExpression(func.datatype))
+					DIMPUSH Exprs[Scp].Exprs[], e
+				ENDIF
+			ELSE
+				Scp = CreateScopeExpression(SCOPE_IS_FUNC)
+				DIMPUSH Exprs[Scp].Exprs[], CreateEmptyExpression()
+			ENDIF
+		CATCH Err$
+			Scp = CreateEmptyExpression()
+		FINALLY
+		?IFDEF DEBUG
+		STDOUT "Done compiling function '"+func.Name$+"'\n"
+		?ENDIF
+
+		func.Scp = Scp
+
+		Compiler.currentPosi = Tok - 1
+		GetNext()
+		Compiler.currentFunc = Curfunc
+		Compiler.CurrentScope = TmpScp
+		RETURN TRUE
+	ELSE
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+//! Ein Matheterm
+FUNCTION Expression%: Prio% = 0
+	IF Prio < 15
+		LOCAL Left% = Expression(Prio + 1), Right% = -1
+
+		LOCAL Found% = FALSE
+		REPEAT
+			Found = FALSE
+			FOREACH Op IN Operators[]
+				WHILE Op.Prio = Prio AND IsToken(Op.Sym$)
+					Match(Op.Sym$, CODELINE(), CODEFILE$())
+					Right = Expression(Prio + 1)
+					Left = CreateOperatorExpression(Op, Left, Right)
+					TRY
+						LOCAL Result = CalculateTree(Exprs[Left])
+						IF INTEGER(Result) = Result //integer \o/
+							Left = CreateIntExpression(Result)
+						ELSE
+							Right = CreateFloatExpression(Result)
+						ENDIF
+					CATCH Error$
+						//no static Expression :/
+					FINALLY
+					Found = TRUE
+					BREAK
+				WEND
+			NEXT
+		UNTIL Found = FALSE
+
+		RETURN Left
+	ELSE
+		RETURN Factor()
+	ENDIF
+ENDFUNCTION
+
+//! Entscheidet welcher Datentyp das ist und castet.
+FUNCTION CastDatatype AS Datatype: BYREF RetData1%, BYREF RetData2%
+	LOCAL Data1% = RetData1
+	LOCAL Data2% = RetData2
+
+	IF Exprs[Data1].datatype.IsArray = Exprs[Data2].datatype.IsArray
+		IF Exprs[Data1].datatype.Name$ = Exprs[Data2].datatype.Name$
+			RetData1 = Data1
+			RetData2 = Data2
+			RETURN Exprs[RetData1].datatype
+		ELSE
+			IF Exprs[Data1].datatype.Name$="string" //wenn data1 string, dann muss data2 auch in einen string umgewandelt werden
+				RetData2 = CreateCast2StringExpression(Data2)
+			ELSEIF Exprs[Data2].datatype.Name$="string"
+				RetData1 = CreateCast2StringExpression(Data1)
+			ELSEIF Exprs[Data1].datatype.Name$="float"
+				RetData2 = CreateCast2FloatExpression(Data2)
+			ELSEIF Exprs[Data2].datatype.Name$="float"
+				RetData1 = CreateCast2FloatExpression(Data1)
+			ELSE
+				Error("Cannot cast '"+Exprs[Data1].datatype.Name$+BuildArrBrackets$(Exprs[Data1].datatype.IsArray)+"' to '"+Exprs[Data2].datatype.Name$+BuildArrBrackets$(Exprs[Data2].datatype.IsArray)+"'", CODELINE(), CODEFILE$())
+			ENDIF
+
+			RETURN Exprs[RetData1].datatype
+		ENDIF
+	ELSE
+		Error("Dimensions are different: "+Exprs[Data1].datatype.Name$+BuildArrBrackets$(Exprs[Data1].datatype.IsArray)+", "+Exprs[Data2].datatype.Name$+BuildArrBrackets$(Exprs[Data2].datatype.IsArray), CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+//! Versichert, dass die gegebene Expression den Datentyp hat, falls nötig/möglich wird auch gecastet
+// \param Data - Die Expression welche überprüft werden soll
+// \param NeedData - Der Datentyp den die Expression enthalten soll
+// \return Die neue Expression, falls notwendig ist zu casten, ansonsten die gleiche
+FUNCTION EnsureDatatype%: Expr%, NeedData AS Datatype, Line%, Strict% = FALSE
+	//If true, then BYREF parameters are strongly typed (need to get the right datatype) If there are any problems, uncomment the following line
+	Strict = FALSE
+
+
+	IF NeedData.Name$ = "" THEN Error("Internal error (datatype is empty)", CODELINE(), CODEFILE$())
+	LOCAL myData AS Datatype
+	myData = Exprs[Expr].datatype
+	IF myData.Name$ = NeedData.Name$ AND myData.IsArray = NeedData.IsArray
+		RETURN Expr
+	ELSE
+		IF Strict = FALSE
+			IF myData.IsArray = NeedData.IsArray
+				IF myData.Name$="int" OR myData.Name$="float" OR myData.Name$="string"
+					IF NeedData.Name$="int" OR NeedData.Name$="float" OR NeedData.Name$="string"
+						SELECT NeedData.Name$
+							CASE "int"
+								RETURN CreateCast2IntExpression(Expr)
+							CASE "float"
+								RETURN CreateCast2FloatExpression(Expr)
+							CASE "string"
+								RETURN CreateCast2StringExpression(Expr)
+						ENDSELECT
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+
+		//Schauen ob Prototype?
+		LOCAL func1% = SearchPrototyp(myData.Name$), func2% = SearchPrototyp(NeedData.Name$)
+		IF func1 <> -1
+			IF func2 <> -1
+				IF myData.IsArray OR NeedData.IsArray THEN Error("PROTOTYPE cannot be an array.", CODELINE(), CODEFILE$())
+
+				LOCAL checker AS ProtoChecker
+				checker.fromFunc 	= Compiler.Funcs[func1].ID
+				checker.toFunc 		= Compiler.Funcs[func2].ID
+				checker.Tok 		= GetCurrentToken()
+				DIMPUSH Compiler.protoCheckers[], checker
+
+				RETURN Expr
+			ELSE
+				//wird ein int/float/string erwartet?
+				IF (NeedData.Name$="int" OR NeedData.Name$="float" OR NeedData.Name$="string") AND NeedData.IsArray = FALSE
+					SELECT NeedData.Name$
+						CASE "int"
+							RETURN CreateCast2IntExpression(Expr)
+						CASE "float"
+							RETURN CreateCast2FloatExpression(Expr)
+						CASE "string"
+							RETURN CreateCast2StringExpression(Expr)
+					ENDSELECT
+				ENDIF
+			ENDIF
+		ENDIF
+		//Schauen ob beides Types?
+		IF IsType(myData.Name$) AND IsType(NeedData.Name$)
+			//TODO: EVTL checken ob wirklich castbar ist?
+			RETURN Expr
+		ENDIF
+
+		LOCAL add$ = ""
+		IF Strict
+			add$ = " , and maybe can't cast, because it is BYREF (screw you BYREF >:O)!!"
+		ENDIF
+		Error("Cannot cast datatypes. Needs '"+NeedData.Name$+BuildArrBrackets$(NeedData.IsArray)+"', got '"+myData.Name$+BuildArrBrackets$(myData.IsArray)+"'"+add$, Line, CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+@FUNCTION BuildArrBrackets$: IsArray%
+	IF IsArray
+		RETURN "[]"
+	ELSE
+		RETURN ""
+	ENDIF
+ENDFUNCTION
+
+
+//! Converts Hex to Dec (got from the forum, thanks MrTAToad)
+FUNCTION Hex2Dec%: hex$
+	LOCAL i%
+	LOCAL j%
+	LOCAL loop%
+
+	i%=0
+	j%=0
+	FOR loop%=0 TO LEN(hex$)-1
+		 i%=ASC(MID$(hex$,loop%,1))-48
+		 IF 9<i%
+		 	DEC i%,7
+		 ENDIF
+
+		 j%=j%*16
+		 j%=bOR(j%,bAND(i,15))
+	NEXT
+
+	RETURN j
+ENDFUNCTION
+
+//! Ein endgültiger Literal
+FUNCTION Factor%:
+	IF IsToken("(")
+		Match("(", CODELINE(), CODEFILE$())
+		LOCAL Expr% = Expression()
+		Match(")", CODELINE(), CODEFILE$())
+		RETURN Expr
+	ELSEIF IsIdentifier(TRUE)
+		RETURN Identifier(FALSE)
+	ELSEIF IsString()
+		LOCAL Str$ = GetCurrent$()
+		IF INSTR(Str$, "\n") <> -1
+			//eine newline im string => unerlaubt!
+			Error("Expecting '\"'", CODELINE(), CODEFILE$())
+		ENDIF
+		GetNext()
+		RETURN CreateStrExpression(Str$)
+	ELSEIF MID$(GetCurrent$(),0,2 ) = "0x"
+		LOCAL hex$ = MID$(GetCurrent$(), 2)
+		GetNext()
+		RETURN CreateIntExpression(Hex2Dec(hex$))//INTEGER(hex$))
+	ELSEIF IsNumber() OR IsToken(".")
+		LOCAL Num%
+		LOCAL hasToHaveNum% = FALSE
+		IF IsToken(".")
+			Num = 0
+			hasToHaveNum = TRUE
+		ELSE
+			Num% = GetCurrent$()
+			GetNext()
+		ENDIF
+
+		IF IsToken(".")
+			Match(".", CODELINE(), CODEFILE$())
+			LOCAL Num2% = GetCurrent$()
+			LOCAL pos% = Compiler.currentPosi
+
+			IF IsNumber()
+				GetNext()
+			//ELSE
+			//	Error("Expecting number!", CODELINE(), CODEFILE$())
+			ENDIF
+			LOCAL FNum = (Num+"."+Num2)+0
+
+			RETURN CreateFloatExpression(FNum)
+		ELSE
+			IF hasToHaveNum THEN Error("Expecting number!", CODELINE(), CODEFILE$())
+			RETURN CreateIntExpression(Num)
+		ENDIF
+	ELSEIF IsToken("-")
+		Match("-", CODELINE(), CODEFILE$())
+		LOCAL Expr% = Factor()
+		ALIAS Op AS Operators[SearchOperator("sub")]
+		LOCAL tmpData AS Datatype
+		tmpData = Exprs[Expr].datatype
+		tmpData.IsArray = 0
+
+		Expr = EnsureDatatype(Expr, tmpData, CODELINE())
+		IF Exprs[Expr].datatype.Name$ = "float"
+			Expr = CreateOperatorExpression(Op,CreateFloatExpression(0), EnsureDatatype(Expr, floatDatatype, CODELINE()))
+		ELSEIF Exprs[Expr].datatype.Name$ = "int" OR Exprs[Expr].datatype.Name$ = "string"
+			Expr = CreateOperatorExpression(Op,CreateIntExpression(0), EnsureDatatype(Expr, intDatatype, CODELINE()))
+		ELSE
+			Error("Unexpected datatype, expecting 'float/int' got '"+Exprs[Expr].datatype.Name$+"'", CODELINE(), CODEFILE$())
+		ENDIF
+		RETURN Expr
+	ELSEIF IsToken("TRUE")
+		Match("TRUE", CODELINE(), CODEFILE$())
+		RETURN CreateIntExpression(1)
+	ELSEIF IsToken("FALSE")
+		Match("FALSE", CODELINE(), CODEFILE$())
+		RETURN CreateFloatExpression(0)
+	ELSEIF IsToken("CODELINE")
+		Match("CODELINE", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		Match(")", CODELINE(), CODEFILE$())
+		RETURN CreateIntExpression(Compiler.Tokens[Compiler.currentPosi].Line)
+	ELSEIF IsToken("CODEFILE$")
+		Match("CODEFILE$", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		Match(")", CODELINE(), CODEFILE$())
+		RETURN CreateStrExpression("\""+MID$(Compiler.Tokens[Compiler.currentPosi].Path$,1)+"\"")
+	ELSEIF IsToken("LEN")
+		Match("LEN", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		//OHA LEN!!!
+		LOCAL Expr% = Expression()
+		LOCAL Kerning% = FALSE
+		IF IsToken(",")
+			Match(",", CODELINE(), CODEFILE$())
+			Kerning% = EnsureDatatype(Expression(),  intDatatype, CODELINE())
+			Match(")", CODELINE(), CODEFILE$())
+
+			//String
+			Expr = EnsureDatatype(Expr, strDatatype, CODELINE())
+
+			RETURN CreateLenExpression(Expr, Kerning)
+		ELSE
+			Match(")", CODELINE(), CODEFILE$())
+
+			IF Exprs[Expr].datatype.IsArray = 0
+				IF (Exprs[Expr].datatype.Name$ = "int" OR Exprs[Expr].datatype.Name$ = "float" OR Exprs[Expr].datatype.Name$="string")
+					Expr = EnsureDatatype(Expr, strDatatype, CODELINE())
+
+					RETURN CreateLenExpression(Expr)
+				ELSE
+					Error("Cannot get the length of Type '"+Exprs[Expr].datatype.Name$+"'", CODELINE(), CODEFILE$())
+				ENDIF
+			ELSE
+				RETURN CreateBoundExpression(Expr, CreateIntExpression(0))
+			ENDIF
+		ENDIF
+	ELSEIF IsToken("BOUNDS")
+		Match("BOUNDS", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		LOCAL Expr% = Expression()
+		Match(",", CODELINE(), CODEFILE$())
+		IF Exprs[Expr].datatype.IsArray = 0 THEN Error("BOUNDS needs array!", CODELINE(), CODEFILE$())
+		LOCAL Dimension% = EnsureDatatype(Expression(), intDatatype, CODELINE())
+		Match(")", CODELINE(), CODEFILE$())
+
+		RETURN CreateBoundExpression(Expr, Dimension)
+	ELSEIF IsToken("ADDRESSOF")
+		Match("ADDRESSOF", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		LOCAL Name$ = GetCurrent$()
+		LOCAL MyFunc% = -1
+		FOREACH Func IN Compiler.Funcs[]
+			IF (Func.Typ = FUNC_IS_FUNC OR Func.Typ = FUNC_IS_SUB) AND Func.Name$ = Name$
+				MyFunc = Func.ID
+				BREAK
+			ENDIF
+		NEXT
+		IF MyFunc = -1 THEN Error("Function '"+Name$+"' is unknown!", CODELINE(), CODEFILE$())
+		Compiler.Funcs[MyFunc].PlzCompile = TRUE
+		GetNext()
+		Match(")", CODELINE(), CODEFILE$())
+
+		RETURN CreateAddressOfExpression(MyFunc)
+	ELSEIF IsToken("NOT")
+		Match("NOT", CODELINE(), CODEFILE$())
+		RETURN CreateNotExpression(EnsureDatatype(Factor(), floatDatatype, CODELINE())) // not not Expression() => Factor
+	ELSEIF IsToken("DIM") OR IsToken("DIM%") OR IsToken("DIM$") OR IsToken("DIM#")
+		STATIC DIMASEXPRErr%
+		IF NOT DIMASEXPRErr
+			DIMASEXPRErr = TRUE
+			Warning("Experimental feature 'DIMASEXPR'")
+		ENDIF
+		LOCAL datatype AS Datatype
+		datatype.IsArray = TRUE
+		datatype.Name$ = "float"
+		IF IsToken("DIM%") THEN datatype.Name$ = "int"
+		IF IsToken("DIM$") THEN datatype.Name$ = "string"
+		IF IsToken("DIM#") THEN datatype.Name$ = "float"
+		GetNext()
+
+		LOCAL dims%[]
+		REPEAT
+			Match("[", CODELINE(), CODEFILE$())
+			LOCAL E% = EnsureDatatype(Expression(), intDatatype, CODELINE())
+			Match("]", CODELINE(), CODEFILE$())
+			DIMPUSH dims[], E
+		UNTIL IsToken("[") = FALSE
+
+		IF IsToken("AS")
+			IF datatype.Name$ = "float"
+				Match("AS", CODELINE(), CODEFILE$())
+				IsValidDatatype()
+				datatype.Name$ = GetCurrent$()
+			ELSE
+				Error("Unexpected AS", CODELINE(), CODEFILE$())
+			ENDIF
+		ENDIF
+
+		RETURN CreateDimAsExprExpression(datatype, dims[])
+	ELSEIF IsToken("DEFINED")
+		Match("DEFINED", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		LOCAL Find% = FALSE
+		FOREACH Def IN Defines[]
+			IF IsToken(Def.Key$) AND INTEGER(Def.Value$)<>0
+				Find = TRUE
+				BREAK
+			ENDIF
+		NEXT
+		GetNext()
+		Match(")", CODELINE(), CODEFILE$())
+
+		RETURN CreateIntExpression(Find)
+	ELSEIF IsToken("IIF")
+		Match("IIF", CODELINE(), CODEFILE$())
+		Match("(", CODELINE(), CODEFILE$())
+		LOCAL Cond%, onTrue%, onFalse%
+		Cond = EnsureDatatype(Expression(), floatDatatype, CODELINE())
+		Match(",", CODELINE(), CODEFILE$())
+		onTrue = Expression()
+		Match(",", CODELINE(), CODEFILE$())
+		onFalse = Expression()
+		Match(")", CODELINE(), CODEFILE$())
+
+		IF Exprs[onTrue].datatype.Name$ <> Exprs[onFalse].datatype.Name$ OR Exprs[onTrue].datatype.IsArray <> Exprs[onFalse].datatype.IsArray
+			Error("IIF parameters do not match!", CODELINE(), CODEFILE$())
+		ENDIF
+
+		RETURN CreateIIFExpression(Cond, onTrue, onFalse)
+	ELSEIF IsDefine()
+		GetNext()
+		IF INTEGER(LastDefine.Value$) = LastDefine.Value$
+			RETURN CreateIntExpression(LastDefine.Value$)
+		ELSEIF MID$(LastDefine.Value$,0,1)="\"" AND MID$(LastDefine.Value$,LEN(LastDefine.Value$)-1,1)="\""
+			RETURN CreateStrExpression(LastDefine.Value$)
+		ELSE
+			RETURN CreateFloatExpression(LastDefine.Value$)
+		ENDIF
+	ELSE
+		//Implicit erstellen
+		IF NOT STRICT
+			ImplicitDefine()
+			RETURN Identifier(FALSE)
+		ELSE
+			//um weitere fehler darüber zu vermeiden erstelle nun eine variable davon
+			ImplicitDefine()
+
+			LOCAL vars$ = ""
+			LOCAL Varis%[]
+			GetVaris(Varis[])
+			FOREACH Vari IN Varis[]
+				vars$ = vars$ + Compiler.Varis[Vari].Name$+", "
+			NEXT
+			Error("Unknown variable/function: "+GetCurrent$()+" possible variables: '"+vars$+"'", CODELINE(), CODEFILE$())
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+//! Versucht einen konsistenten Zustand nach einem Fehler wiederherzustellen
+FUNCTION FixError:
+	GetNext()
+
+	//Wieder konsistenten Zustand herstellen
+	IF NOT IsToken("\n") //sofern kein \n
+		WHILE IsKeyword()=FALSE AND IsToken("\n")=FALSE
+			GetNext()
+		WEND
+	ENDIF
+ENDFUNCTION
+
+//! Parst
+FUNCTION Parser:
+	TRY
+		Start()
+//		PushTimer()
+		Scope("__EOFFILE__")
+//		PopTimer("Initial parsing")
+
+		//alle subs markieren, weil die automatisch kompiliert werden
+		FOREACH func IN Compiler.Funcs[]
+			IF func.Typ = FUNC_IS_SUB OR func.Typ = FUNC_IS_METHOD //Dirty mirty: sollten nicht alle methoden automatisch kompiliert werden...
+				func.PlzCompile = TRUE
+			ENDIF
+		NEXT
+
+
+		//Alle Funktionen kompilieren, welche kompiliert werden müssen
+		WHILE TRUE
+
+			//Alle benutzten Methoden müssen kompiliert werden
+//			FOR i = 0 TO LastExprID-1 //Kein foreach weil Exprs[] verändert wird => stürzt ab
+//				IF Exprs[i].Typ = EXPR_IS_FUNCCALL OR Exprs[i].Typ = EXPR_IS_PROTOCALL
+//					//Falls Methode => Alle Methoden mit selben Namen auch Usen!
+//					IF Exprs[i].Typ = EXPR_IS_FUNCCALL AND Compiler.Funcs[Exprs[i].func].Typ = FUNC_IS_METHOD
+//						FOREACH F IN Compiler.Funcs[]
+//							IF F.Typ = FUNC_IS_METHOD AND F.Name$ = Compiler.Funcs[Exprs[i].func].Name$ AND F.ID <> Exprs[i].func
+//								IF NOT F.IsAbstract THEN F.PlzCompile = TRUE
+//								IF NOT Compiler.Funcs[Exprs[i].func].IsAbstract THEN Compiler.Funcs[Exprs[i].func].PlzCompile = TRUE
+//							ENDIF
+//						NEXT
+//					ENDIF
+//				ENDIF
+//			NEXT
+
+			LOCAL Found% = FALSE
+			FOREACH func IN Compiler.Funcs[]
+				IF func.PlzCompile AND func.Scp = -1 //Bitte kompilieren und es dard noch keinen Scope haben!
+					//PushTimer()
+					IF CompileFunc(func) THEN Found = TRUE
+					//PopTimer("Compile: "+func.Name$)
+				ENDIF
+			NEXT
+			IF Found = FALSE THEN BREAK
+		WEND
+
+//		PushTimer()
+		?IFDEF DEBUG
+		STDOUT "Add all default parameters to function calls"
+		?ENDIF
+		//nun die defaultwerte in functioncalls einbinden
+		//FOREACH Expr IN Exprs[]
+		FOR i = 0 TO LastExprID - 1
+			ALIAS Expr AS Exprs[i]
+			IF Expr.Typ = EXPR_IS_FUNCCALL OR Expr.Typ = EXPR_IS_PROTOCALL
+				IF LEN(Expr.Params[]) < LEN(Compiler.Funcs[Expr.func].Params[]) AND Expr.wasAdded = FALSE
+					Expr.wasAdded = TRUE
+					LOCAL Meth% = 0
+					LOCAL TmpSave%
+					IF Compiler.Funcs[Expr.func].Typ = FUNC_IS_METHOD //self wegnehmen
+						IF LEN(Expr.Params[]) = 0 THEN Error("Internal error (method '"+Compiler.Funcs[Expr.func].Name$+"' didn't get self parameter)", CODELINE(), CODEFILE$())
+						Meth = TRUE
+						TmpSave = Expr.Params[-1]
+						DIMDEL Expr.Params[], -1
+					ENDIF
+					FOR i = LEN(Expr.Params[]) TO LEN(Compiler.Funcs[Expr.func].Params[])-1-Meth
+						IF Compiler.Varis[Compiler.Funcs[Expr.func].Params[i]].PreDef <> -1
+							DIMPUSH Expr.Params[],  Compiler.Varis[Compiler.Funcs[Expr.func].Params[i]].PreDef
+						ENDIF
+					NEXT
+					IF Meth //self wieder anfügen
+						DIMPUSH Expr.Params[], TmpSave
+					ENDIF
+				ENDIF
+			ENDIF
+		NEXT
+//		PopTimer("Default parameters")
+
+		CheckPrototypes()
+
+//		PushTimer()
+		?IFDEF DEBUG
+		STDOUT "Check parameters \n"
+		?ENDIF
+		//Nun alle functioncalls auf Korrektheit prüfen (richtige datentypen)
+		FOR i = 0 TO LastExprID-1 //Kein foreach weil Exprs[] verändert wird => stürzt ab
+			IF Exprs[i].Typ = EXPR_IS_FUNCCALL OR Exprs[i].Typ = EXPR_IS_PROTOCALL
+				//Falls Methode => Alle Methoden mit selben Namen auch Usen!
+
+				?IFDEF DEBUG
+				STDOUT "Check function call to "+Compiler.Funcs[Exprs[i].func].Name$+"\n"
+				?ENDIF
+
+				LOCAL Meth% = FALSE
+				IF Compiler.Funcs[Exprs[i].func].Typ = FUNC_IS_METHOD THEN Meth = TRUE
+
+				Compiler.currentPosi = Exprs[i].tokID
+
+				IF LEN(Exprs[i].Params[]) = LEN(Compiler.Funcs[Exprs[i].func].Params[])
+					LOCAL j = 0
+					LOCAL NewParams%[]
+					FOREACH P IN Exprs[i].Params[]
+						LOCAL S% = FALSE
+						IF Compiler.Varis[Compiler.Funcs[Exprs[i].func].Params[j]].ref
+							Compiler.Varis[GetVariable(P)].ref = TRUE
+							S = TRUE
+						ENDIF
+						LOCAL Tmp%
+						IF NOT S
+							Tmp =  EnsureDatatype(P, Compiler.Varis[Compiler.Funcs[Exprs[i].func].Params[j]].datatype, CODELINE(), S)
+						ELSE
+							Tmp =  P //TODO Type checking?
+						ENDIF
+						DIMPUSH NewParams[], Tmp%
+						INC j
+					NEXT
+					Exprs[i].Params[] = NewParams[]
+				ELSE
+					LOCAL miss$ = "", datas$
+					IF LEN(Exprs[i].Params[]) < LEN(Compiler.Funcs[Exprs[i].func].Params[])
+						FOR j = LEN(Exprs[i].Params[]) TO LEN(Compiler.Funcs[Exprs[i].func].Params[])-1-Meth
+							miss$ = miss$ + Compiler.Varis[Compiler.Funcs[Exprs[i].func].Params[j]].Name$+", "
+						NEXT
+					ELSEIF LEN(Exprs[i].Params[]) > LEN(Compiler.Funcs[Exprs[i].func].Params[])
+						FOR j = LEN(Compiler.Funcs[Exprs[i].func].Params[]) TO LEN(Exprs[i].Params[])-Meth-1
+							IF Exprs[i].Params[j] < LEN(Compiler.Varis[])
+								datas$ = datas$ + Compiler.Varis[Exprs[i].Params[j]].datatype.Name$+", "
+							ENDIF
+						NEXT
+					ENDIF
+					Compiler.currentPosi = Exprs[i].tokID
+					IF LEN(Exprs[i].Params[]) > LEN(Compiler.Funcs[Exprs[i].func].Params[])
+						Error("Too many parameters, function '"+Compiler.Funcs[Exprs[i].func].Name$+"' has: '"+(LEN(Compiler.Funcs[Exprs[i].func].Params[])-Meth)+"' got '"+LEN(Exprs[i].Params[])+"' datatypes '"+datas$+"'", CODELINE(), CODEFILE$())
+					ELSEIF LEN(Exprs[i].Params[]) < LEN(Compiler.Funcs[Exprs[i].func].Params[])
+						Error("Too less parameters, function '"+Compiler.Funcs[Exprs[i].func].Name$+"' has: '"+(LEN(Compiler.Funcs[Exprs[i].func].Params[])-Meth)+"' got '"+LEN(Exprs[i].Params[])+"' missing '"+miss$+"'", CODELINE(), CODEFILE$())
+					ELSE
+						Error("Internal error (wtf? call: "+LEN(Exprs[i].Params[])+", "+LEN(Compiler.Funcs[Exprs[i].func].Params[])+")",CODELINE(), CODEFILE$())
+					ENDIF
+				ENDIF
+			ENDIF
+		NEXT
+//		PopTimer("Function parameters check")
+
+		CheckPrototypes()
+
+//		PushTimer()
+		?IFDEF DEBUG
+		STDOUT "Check Ref Parameters \n"
+		?ENDIF
+		//falls im nachhinein sich ein checkparam geändert hat, muss sich das natürlich auch auf die nachfolgenden auswirken
+		LOCAL found% = TRUE
+		WHILE found
+			found = FALSE
+
+			//FOREACH E IN Exprs[]
+			FOR i = 0 TO LastExprID - 1
+				ALIAS E AS Exprs[i]
+				LOCAL set% = FALSE
+				LOCAL Vari%, var%
+				//gib die ref weiter, falls vorhanden
+				SELECT E.Typ
+					CASE EXPR_IS_DIMPUSH
+						Vari = E.vari
+						var = GetVariable(E.expr, FALSE)
+						set = TRUE
+					CASE EXPR_IS_FOREACH
+						Vari = E.inExpr
+						var = GetVariable(E.varExpr, FALSE)
+						set = TRUE
+					CASE EXPR_IS_FUNCCALL
+						//omg funccall :/
+
+				ENDSELECT
+
+				IF set AND var >= 0
+					//oha hat eine variable!
+					LOCAL v% = GetVariable(Vari)
+					IF Compiler.Varis[var].ref <> Compiler.Varis[v].ref THEN found = TRUE
+					?IFDEF DEBUG
+					STDOUT "Ref param: "+Compiler.Varis[var].ref+" gets "+Compiler.Varis[v].ref+" v1: "+var+"v2: "+v+" in line: "+Compiler.Tokens[E.tokID].Line+"\n"
+					?ENDIF
+					Compiler.Varis[var].ref = Compiler.Varis[v].ref
+				ENDIF
+			NEXT
+		WEND
+//		PopTimer("Ref parameter Check")
+
+		?IFDEF DEBUG
+		STDOUT "Check GOTOs \n"
+		?ENDIF
+
+//		PushTimer()
+		FOR i = 0 TO LastExprID - 1
+			ALIAS Expr AS Exprs[i]
+			SELECT Expr.Typ
+				CASE EXPR_IS_SCOPE
+					//schauen ob IS_FUNC oder IS_MAIN
+					IF (Expr.ScpTyp = SCOPE_IS_FUNC OR Expr.ScpTyp = SCOPE_IS_MAIN) AND LEN(Expr.Gotos[])
+						//alle gotos durchschaun, und schaun ob LABEL definiert alda
+						IF NOT ScopeHasGoto(Expr) THEN Error("Internal Error (There is a goto, but I can't find it)", CODELINE(), CODEFILE$())
+						FOREACH G IN Expr.Gotos[]
+							LOCAL Found% = FALSE
+							FOREACH L IN Expr.Labels[]
+								IF Exprs[L].Name$ = Exprs[G].Name$
+									Found = TRUE
+									BREAK
+								ENDIF
+							NEXT
+							IF NOT Found
+								Compiler.currentPosi = Exprs[G].tokID
+								Error("Label '"+Exprs[G].Name$+"' does not exist, please use an existing label badass!", CODELINE(), CODEFILE$())
+
+							ENDIF
+						NEXT
+					ENDIF
+			ENDSELECT
+		NEXT
+
+//		PopTimer("GOTO check")
+
+//		PushTimer()
+		//typenamemangling
+		FOREACH Typ IN Compiler.Types[]
+			Typ.Name$ = ChangeTypeName$(Typ.Name$)
+		NEXT
+
+
+		//Methodennamemangling und functionnamemangling (damit sie nicht in konflikt mit regulären methoden kommen)
+		FOREACH Func IN Compiler.Funcs[]
+			ChangeFuncName(Func)
+		NEXT
+
+
+		//variablenamemangling
+		FOREACH Vari IN Compiler.Varis[]
+			ChangeVarName(Vari)
+		NEXT
+
+		//nun jeder lokalem/alias Variable ihre eigene ID geben (damit keine Kollision!)
+
+		FOREACH V IN Compiler.Varis[]
+			IF V.Typ = VARI_IS_LOCAL OR V.Typ = VARI_IS_ALIAS
+				V.Name$ = V.Name$+"_"+V.ID
+			ENDIF
+		NEXT
+
+		//Nun die PROTOTYP Datentypen der Exprs anpassen
+		FOR i = 0 TO LastExprID - 1
+			ALIAS E AS Exprs[i]
+			IF E.datatype.Name$ = "void" OR E.datatype.Name$ = "int" OR E.datatype.Name$ = "float" OR E.datatype.Name$="string"
+			ELSE
+				IF IsType(E.datatype.Name$) = FALSE
+					//Es ist ein Prototyp!!
+					FOREACH F IN Compiler.Funcs[]
+						IF E.datatype.Name$ = F.OName$
+							E.datatype.Name$ = F.Name$
+						ENDIF
+					NEXT
+				ENDIF
+			ENDIF
+		NEXT
+
+		ManageFuncParamOverlaps()
+
+//		PopTimer("Copy params & name mangling")
+	CATCH Err$
+	FINALLY
+ENDFUNCTION
+
+//! CHeckt alle Prototypes auf Fehler
+FUNCTION CheckPrototypes:
+//	PushTimer()
+	IF LEN(Compiler.protoCheckers[]) >0
+		?IFDEF DEBUG
+		STDOUT "Check prototypes \n"
+		?ENDIF
+		//TODO: Schauen ob das nicht noch Parameter checking gehört
+		FOREACH checker IN Compiler.protoCheckers[]
+			ALIAS func1 AS Compiler.Funcs[checker.fromFunc]
+			ALIAS func2 AS Compiler.Funcs[checker.toFunc]
+			LOCAL valid% = FALSE
+			IF func1.datatype.Name$ = func2.datatype.Name$ AND func1.datatype.IsArray = func2.datatype.IsArray
+				IF LEN(func1.Params[]) = LEN(func2.Params[])
+					valid = TRUE
+					FOR i = 0 TO LEN(func1.Params[]) - 1
+						ALIAS p1 AS Compiler.Varis[func1.Params[i]]
+						ALIAS p2 AS Compiler.Varis[func2.Params[i]]
+						IF p1.datatype.Name$ <> p2.datatype.Name$ OR p1.datatype.IsArray <> p2.datatype.IsArray THEN valid = FALSE
+					NEXT
+				ENDIF
+			ENDIF
+			IF valid = FALSE
+				//Compiler.currentPosi = checker.Tok.ID
+				Error("Cannot cast prototype '"+BuildPrototyp$(checker.fromFunc)+"' to '"+BuildPrototyp$(checker.toFunc)+"'", CODELINE(), CODEFILE$())
+			ENDIF
+		NEXT
+		REDIM Compiler.protoCheckers[0]
+	ENDIF
+//	PopTimer("Check prototypes")
+ENDFUNCTION
+
+//! Parst einen Scope (MainScope, Funktionscope, ...)
+FUNCTION Scope%: CloseStr$, func% = -1
+	LOCAL ScpTyp% = 0
+	LOCAL Important% = FALSE //Ist es ein "GOTO Scope"? => Wichtig?
+	SELECT CloseStr$
+		CASE "ENDIF"
+			ScpTyp = SCOPE_IS_IF
+		CASE "ENDSELECT"
+			ScpTyp = SCOPE_IS_SELECT
+		CASE "WEND"
+			ScpTyp = SCOPE_IS_LOOP
+		CASE "UNTIL"
+			ScpTyp = SCOPE_IS_LOOP
+		CASE "NEXT"
+			ScpTyp = SCOPE_IS_LOOP
+		CASE "ENDFUNCTION"
+			ScpTyp = SCOPE_IS_FUNC
+			Important = TRUE
+		CASE "ENDSUB"
+			ScpTyp = SCOPE_IS_FUNC
+			Important = TRUE
+		CASE "CATCH"
+			ScpTyp = SCOPE_IS_TRY
+		CASE "FINALLY"
+			ScpTyp = SCOPE_IS_TRY
+		CASE "__EOFFILE__"
+			ScpTyp = SCOPE_IS_MAIN
+			Important% = TRUE
+		DEFAULT
+			Error("Internal error (unknown scope type)", CODELINE(), CODEFILE$())
+	ENDSELECT
+
+	LOCAL befLoop% = Compiler.inLoop
+	IF ScpTyp = SCOPE_IS_LOOP THEN Compiler.inLoop = TRUE
+
+	LOCAL TmpScope = Compiler.CurrentScope, TmpImportant% = Compiler.ImportantScope
+	Compiler.CurrentScope =  CreateScopeExpression(ScpTyp)
+	IF CloseStr$ = "__EOFFILE__"
+		Compiler.MainScope = Compiler.CurrentScope
+	ENDIF
+
+	IF Important
+		Compiler.ImportantScope = Compiler.CurrentScope
+	ENDIF
+
+	IF ScpTyp = SCOPE_IS_FUNC AND func <> -1
+		FOREACH param IN Compiler.Funcs[func].Params[]
+			LOCAL vari AS IdentifierVari
+			vari = Compiler.Varis[param]
+			vari.Typ = VARI_IS_LOCAL
+			AddVariable(vari, TRUE)
+			DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+			DIMPUSH Compiler.Funcs[func].CopyParams[], LEN(Compiler.Varis[]) - 1
+		NEXT
+	ENDIF
+	LOCAL OneLine% = FALSE
+	IF IsToken("THEN")
+		OneLine = TRUE
+		Match("THEN", CODELINE(), CODEFILE$())
+	ENDIF
+	LOCAL OCloseStr$ = CloseStr$
+	WHILE IsToken(IsClosing$(CloseStr$, ScpTyp)) = FALSE
+		IF EOFParse() = FALSE THEN Error("Missing closing: "+CloseStr$, CODELINE(), CODEFILE$())
+		TRY
+			?IFDEF DEBUG
+			STDOUT "parsing line: "+Compiler.Tokens[Compiler.currentPosi].LineContent$+" in line "+Compiler.Tokens[Compiler.currentPosi].Line+"\n"
+			?ENDIF
+			LOCAL Expr% = -1
+			IF IsToken("LET")
+				Match("LET", CODELINE(), CODEFILE$())
+				IF IsIdentifier() = FALSE
+					Error("Expecting identifier after LET.", CODELINE(), CODEFILE$())
+				ENDIF
+			ENDIF
+			IF IsToken("GOSUB")
+				Match("GOSUB", CODELINE(), CODEFILE$())
+				IF IsFuncExisting(GetCurrent$()) = FALSE
+					Error("Expecting sub after GOSUB.", CODELINE(), CODEFILE$())
+				ENDIF
+			ENDIF
+
+			IF IsKeyword()
+				Expr = Keyword()
+			ELSEIF IsIdentifier(TRUE)
+				Expr = Identifier(TRUE)
+			ELSEIF IsToken("super")
+				//super!!
+				Expr = Identifier(TRUE)
+			ELSE
+				LOCAL pos% = Compiler.currentPosi
+				LOCAL Name$ = REPLACE$(GetCurrent$(),"@", "")
+				GetNext()
+				IF IsToken(":")
+					Match(":", CODELINE(), CODEFILE$())
+					LOCAL Expr% = CreateLabelExpression(Name$)
+					LOCAL Scp% = Compiler.CurrentScope
+					REPEAT
+						FOREACH lbl IN Exprs[Scp].Labels[]
+							IF Exprs[lbl].Name$ = Name$
+								ResetError("Duplicate label identifier '"+Name$+"'", pos)
+							ENDIF
+						NEXT
+						Scp = Exprs[Scp].SuperScope
+					UNTIL Scp = -1 OR Exprs[Scp].ScpTyp = SCOPE_IS_FUNC
+
+					DIMPUSH Exprs[Compiler.ImportantScope].Labels[], Expr
+				ELSE
+					IF IsToken("[")
+						Match("[", CODELINE(), CODEFILE$())
+						Match("]", CODELINE(), CODEFILE$())
+					ENDIF
+					IF IsToken("=") AND NOT STRICT
+						//zurückspringen
+						Compiler.currentPosi = pos - 1
+						GetNext()
+
+						//definiere die global (nur wenn in Assignment)
+						ImplicitDefine()
+						IF IsIdentifier()
+							Expr = Identifier(TRUE)
+						ELSE
+							Error("Internal error (implicit not created)", CODELINE(), CODEFILE$())
+						ENDIF
+					ELSE
+						ResetError("Invalid command (unknown function, variable or keyword).", pos)
+					ENDIF
+				ENDIF
+			ENDIF
+			IF Expr <> -1
+				DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], Expr
+			ENDIF
+
+			IF OneLine THEN BREAK
+			REPEAT
+				Match("\n", CODELINE(), CODEFILE$())
+			UNTIL IsToken("\n")	= FALSE
+
+		CATCH Err$
+			FixError()
+		FINALLY
+	WEND
+
+	IF OneLine = FALSE AND CloseStr$ = OCloseStr$ THEN Match(CloseStr$, CODELINE(), CODEFILE$()) //AND CloseStr$ <> "ELSE" AND CloseStr$ <> "ELSEIF" AND CloseStr$ <> "CASE" AND CloseStr$<>"DEFAULT"
+	LOCAL MyScope% = Compiler.CurrentScope
+	Compiler.CurrentScope = TmpScope
+	Compiler.inLoop = befLoop
+
+	IF Important
+		Compiler.ImportantScope = TmpImportant
+	ENDIF
+
+	RETURN MyScope
+ENDFUNCTION
+
+FUNCTION ResetError: err$, pos%
+	LOCAL tmp = Compiler.currentPosi
+
+	Compiler.currentPosi = pos
+	TRY
+		Error(err$, CODELINE(), CODEFILE$())
+	CATCH Ex$
+		Compiler.currentPosi = tmp
+		THROW Ex$
+	FINALLY
+ENDFUNCTION
+
+FUNCTION IsClosing$: BYREF CloseStr$, ScpTyp%
+	SELECT ScpTyp
+		CASE SCOPE_IS_IF
+			//hier schon bei ELSE/ELSEIF beenden
+			IF IsToken("ELSE") THEN CloseStr$ = "ELSE"
+			IF IsToken("ELSEIF") THEN CloseStr$ = "ELSEIF"
+		CASE SCOPE_IS_SELECT
+			//hier schon bei CASE/DEFAULT beenden
+			IF IsToken("CASE") THEN CloseStr$ = "CASE"
+			IF IsToken("DEFAULT") THEN CloseStr$ = "DEFAULT"
+	ENDSELECT
+	RETURN CloseStr$
+ENDFUNCTION
+
+//! Parst einen Variablenzugriff oder Funktionsaufruf
+FUNCTION Identifier%: IsCommand%
+	LOCAL PreferVar% = 0 //-1 GLOBAL, 1 LOCAL
+	IF IsToken("LOCAL") AND IsCommand = FALSE THEN PreferVar = 1
+	IF IsToken("GLOBAL") AND IsCommand = FALSE THEN PreferVar = -1
+
+
+	IF PreferVar <> 0 THEN GetNext()
+
+	LOCAL Expr% = -1
+	LOCAL IsAcc% = FALSE
+	IF IsToken("super")
+		Match("super", CODELINE(), CODEFILE$())
+		IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1
+			LOCAL typ% = Compiler.Funcs[Compiler.currentFunc].MyType;
+			IF Compiler.Types[typ].Extending <> -1
+				Expr = CreateSuperExpression(Compiler.Types[typ].Extending)
+				Match(".", CODELINE(), CODEFILE$())
+				IsAcc = TRUE
+			ELSE
+				Error("There is no super class/type", CODELINE(), CODEFILE$())
+			ENDIF
+		ELSE
+			Error("Super has to be in method", CODELINE(), CODEFILE$())
+		ENDIF
+	ENDIF
+	IF IsType() AND NOT IsIdentifier(FALSE)
+		//CARSTEN
+		LOCAL posi = Compiler.currentPosi
+		LOCAL typ$ = GetCurrent$()
+		GetNext()
+		IF IsToken("(")
+			Match("(", CODELINE(), CODEFILE$())
+			LOCAL Expr% = Expression()
+			Match(")", CODELINE(), CODEFILE$())
+			IF IsType(Exprs[Expr].datatype.Name$) AND Exprs[Expr].datatype.IsArray = 0
+				Expr = CreateCast2Obj(typ$, Expr)
+				IF IsToken(".")
+					Match(".", CODELINE(), CODEFILE$())
+					IsAcc = TRUE
+				ELSE
+					RETURN Expr
+				ENDIF
+			ELSE
+				Error("Cannot cast non TYPE or array", CODELINE(), CODEFILE$())
+			ENDIF
+		ELSE
+			//Ist doch kein Carst!
+			Compiler.currentPosi = posi
+		ENDIF
+	ENDIF
+
+	REPEAT
+		LOCAL Name$ = CleanVariable$(GetCurrent$())
+		GetNext()
+		//nun % und # skippen
+		IF IsToken("%") OR IsToken("%")
+			GetNext() //skipp yeah
+		ENDIF
+
+		LOCAL SuperExpr% = Expr
+
+		//schauen ob variable?
+		LOCAL Varis%[]
+		IF Expr = -1
+			GetVaris(Varis[], -1, PreferVar)
+			PreferVar = 0
+		ELSE
+			//IF Exprs[Expr].datatype.IsArray THEN Error("Cannot access to array.", CODELINE(), CODEFILE$())
+			IF IsType(Exprs[Expr].datatype.Name$) = FALSE THEN Error("Expecting type, got primitive datatype '"+Exprs[Expr].datatype.Name$+"'", CODELINE(), CODEFILE$())
+			Varis[] = LastType.Attributes[]
+		ENDIF
+
+		LOCAL Found% = FALSE
+
+		FOREACH Vari IN Varis[]
+			IF Name$ = Compiler.Varis[Vari].Name$
+				IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1 AND Expr = -1
+					//sieht gut aus!
+					ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
+					FOREACH A IN Typ.Attributes[]
+						IF Vari = A
+							//yep es ist ein impliztes self
+							SuperExpr = CreateVariableExpression(Compiler.Funcs[Compiler.currentFunc].SelfVar)
+							BREAK
+						ENDIF
+					NEXT
+				ENDIF
+				Expr = CreateVariableExpression(Vari)
+				Found = TRUE
+				BREAK
+			ENDIF
+		NEXT
+		WHILE IsToken("(") AND Found //Wenn ein "(" und eine variable gefunden wurde, dann ist es bereits ein funktionsaufruf => PROTOTYPE!
+			LOCAL func% = SearchPrototyp(Exprs[Expr].datatype.Name$)
+			IF func <> -1
+				LOCAL Params%[]
+				ParseFuncCall(Compiler.Funcs[func].datatype, Params[], IsCommand)
+
+				Expr = CreateProtoCallExpression(Expr, Params[])
+			ENDIF
+		WEND
+		IF Found = FALSE
+			IF Expr <> -1
+				IsType(Exprs[Expr].datatype.Name$)
+				IF Exprs[Expr].datatype.IsArray THEN Error("Cannot access to array.", CODELINE(), CODEFILE$())
+				//funcs[] = LastType.Methods[]
+				LOCAL typId% = LastType.ID
+				WHILE typId <> -1
+					FOREACH M IN Compiler.Types[typId].Methods[]
+						IF Compiler.Funcs[M].Name$ = Name$
+							//Compiler.Funcs[M].PlzCompile = TRUE
+							IF NOT Found
+								LOCAL a% = ParseIdentifierFunc(Expr, SuperExpr, IsCommand, Name$,  M)
+								IF a <> -1 THEN RETURN a
+							ENDIF
+							Found = TRUE
+						ENDIF
+					NEXT
+
+					typId = Compiler.Types[typId].Extending
+				WEND
+			ELSE
+				LOCAL Val%
+				IF Compiler.GlobalFuncs.GetValue(Name$, Val)
+					//Es ist eine GlobalFunction!
+					LOCAL a% = ParseIdentifierFunc(Expr, SuperExpr, IsCommand, Name$,  Val)
+					IF a <> -1 THEN RETURN a
+					Found = TRUE
+				ELSEIF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1
+					//sieht gut aus!
+					ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
+					LOCAL typId% = Typ.ID
+					WHILE typId <> -1
+						FOREACH M IN Compiler.Types[typId].Methods[]
+							IF Compiler.Funcs[M].Name$ = Name$
+								IF NOT Found
+									LOCAL a% = ParseIdentifierFunc(Expr, SuperExpr, IsCommand, Name$,  M)
+									IF a <> -1 THEN RETURN a
+								ENDIF
+								//Compiler.Funcs[M].PlzCompile = TRUE
+								Found = TRUE
+							ENDIF
+						NEXT
+
+						typId = Compiler.Types[typId].Extending
+					WEND
+				ENDIF
+			ENDIF
+
+			WHILE IsToken("(") AND Found //Wenn ein "(" und eine variable gefunden wurde, dann ist es bereits ein funktionsaufruf!
+				LOCAL func% = SearchPrototyp(Exprs[Expr].datatype.Name$)
+				IF func <> -1
+					LOCAL Params%[]
+					ParseFuncCall(Compiler.Funcs[func].datatype, Params[], IsCommand)
+
+					Expr = CreateProtoCallExpression(Expr, Params[])
+				ENDIF
+			WEND
+
+			IF Found = FALSE
+				IF Expr <> -1
+					LOCAL Atts$ = ""
+					FOREACH Vari IN Varis[]
+						IF Name$ = Compiler.Varis[Vari].Name$
+							Atts$ = Atts$ + Compiler.Varis[Vari].Name$+", "
+						ENDIF
+					NEXT
+					IsType(Exprs[Expr].datatype.Name$)
+					Error("Cannot find attribute '"+Name$+"' in type '"+LastType.Name$+"' possible attributes '"+Atts$+"'", CODELINE(), CODEFILE$())
+				ELSE
+					Error("Internal error "+Name$+" (expected identifier).", CODELINE(), CODEFILE$())
+				ENDIF
+			ENDIF
+		ENDIF
+
+		//array zugriff
+		IF IsToken("[")
+			LOCAL Dims%[]
+			IF Exprs[Expr].datatype.IsArray = FALSE
+				Error("Array access, but this identifier is no array", CODELINE(), CODEFILE$())
+			ENDIF
+			WHILE IsToken("[")
+				Match("[", CODELINE(), CODEFILE$())
+				IF IsToken("]")
+					Match("]", CODELINE(), CODEFILE$())
+					BREAK
+				ENDIF
+				LOCAL dimExpr% = EnsureDatatype(Expression(), intDatatype, CODELINE())
+				Match("]", CODELINE(), CODEFILE$())
+				DIMPUSH Dims[], dimExpr
+			WEND
+
+			Expr = CreateArrayExpression(Expr, Dims[])
+		ENDIF
+
+		Expr = CreateAccessExpression(SuperExpr, Expr)
+
+
+		IF IsToken(".")
+			Match(".", CODELINE(), CODEFILE$())
+			IsAcc = TRUE
+		ELSE
+			IsAcc = FALSE
+		ENDIF
+	UNTIL IsAcc = FALSE
+
+	//assignment
+	IF IsToken("=") AND Expr <> -1 AND IsCommand
+		IF Compiler.Varis[GetVariable(Expr)].Typ = VARI_IS_CONST THEN Error("Assignment invalid, because of CONSTANT variable.", CODELINE(), CODEFILE$())
+
+		IF Exprs[GetRightExpr(Expr)].Typ = EXPR_IS_FUNCCALL OR Exprs[GetRightExpr(Expr)].Typ = EXPR_IS_PROTOCALL THEN Error("Cannot assign to function call.", CODELINE(), CODEFILE$())
+		Match("=", CODELINE(), CODEFILE$())
+		IF IsCommand = FALSE THEN Error("Assignment is a statement.", CODELINE(), CODEFILE$())
+
+		LOCAL tmpData AS Datatype //kA wieso das so sein muss, aber sonst kommt eine EXCEPTION ACCESS VIOLATION
+		tmpData = Exprs[Expr].datatype
+		RETURN CreateAssignExpression(Expr , EnsureDatatype(Expression(), tmpData, CODELINE()))
+	ENDIF
+
+	IF Expr <> -1
+		RETURN Expr
+	ELSE
+		Error("Internal error (Expecting identifier)",CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+FUNCTION ParseIdentifierFunc%: BYREF Expr%, BYREF SuperExpr%, IsCommand%, Name$, func%
+	//IF Compiler.Funcs[func].Typ = FUNC_IS_SUB THEN Error("Cannot call SUB by hand, use GOSUB instead...", CODELINE(), CODEFILE$())
+	IF func = -1 THEN Error("Internal Error (func is -1, ParseIdentifierFunc", CODELINE(), CODEFILE$())
+
+
+	IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1 AND Expr = -1
+
+		//sieht gut aus!
+		LOCAL typ% = Compiler.Funcs[Compiler.currentFunc].MyType
+		WHILE typ <> -1
+			IF Compiler.Funcs[func].MyType = typ AND Compiler.Funcs[func].MyType <> -1
+				//yep es ist ein impliztes self
+				SuperExpr = CreateVariableExpression(Compiler.Funcs[Compiler.currentFunc].SelfVar)
+
+				BREAK
+			ENDIF
+
+			typ = Compiler.Types[typ].Extending
+		WEND
+	ENDIF
+
+	Compiler.Funcs[func].PlzCompile = TRUE //Es soll bitte kompiliert werden, wenn alles fertig ist
+
+	IF IsToken("(") = FALSE AND IsCommand = FALSE
+		//Es ist eine Funktion als Parameter
+		LOCAL datatype AS Datatype
+		datatype.Name$ = Name$
+		datatype.IsArray = 0
+
+		//Setze die Funktion noch für UsedAsPrototype%
+		Compiler.Funcs[func].UsedAsPrototype% = TRUE
+
+		RETURN CreateFuncDataExpression(datatype)
+	ELSE
+		LOCAL Params%[]
+		ParseFuncCall(Compiler.Funcs[func].datatype, Params[], IsCommand)
+
+		Expr = CreateFuncCallExpression(Compiler.Funcs[func].ID, Params[])
+	ENDIF
+	RETURN -1
+ENDFUNCTION
+
+FUNCTION ParseFuncCall: datatype AS Datatype, Params%[], IsCommand%
+	LOCAL OpBracket% = IsToken("(")
+	IF datatype.Name$ = "void"
+		IF NOT IsCommand
+			Error("Void function has to be a command!", CODELINE(), CODEFILE$())
+		ENDIF
+		OpBracket = FALSE
+		//Kann ich nicht aktivieren, denn dann würden dinge wie DRAWRECT (1)*2, 120 ... nicht gehen :(
+		//OpBracket = IsToken("(")
+		//IF IsToken("(") THEN Match("(", CODELINE(), CODEFILE$())
+	ELSE
+		IF OpBracket THEN Match("(", CODELINE(), CODEFILE$())
+		//OpBracket = TRUE
+		//Match("(", CODELINE(), CODEFILE$())
+	ENDIF
+
+
+	LOCAL Find = FALSE
+	WHILE IsToken("\n") = FALSE AND IsToken(")") = FALSE
+		IF Find THEN Match(",", CODELINE(), CODEFILE$())
+		DIMPUSH Params[], Expression()
+		Find = TRUE
+	WEND
+
+	LOCAL CloseBracket% = IsToken(")")
+	IF CloseBracket THEN Match(")", CODELINE(), CODEFILE$())
+
+	IF CloseBracket <> OpBracket
+		Error("Brackets are not closed.", CODELINE(), CODEFILE$())
+	ENDIF
+ENDFUNCTION
+
+
+//! Parst die Keywords
+FUNCTION Keyword%:
+	SELECT TRUE
+		CASE IsToken("CALLBACK")
+			Match("CALLBACK", CODELINE(), CODEFILE$())
+			Keyword()
+		CASE IsToken("NATIVE")
+			Match("NATIVE", CODELINE(), CODEFILE$())
+			SkipTokens("NATIVE","\n", "")
+		CASE IsToken("ABSTRACT")
+			Match("ABSTRACT", CODELINE(), CODEFILE$())
+			SkipTokens("ABSTRACT","\n", "")
+		CASE IsToken("FUNCTION")
+			SkipTokens("FUNCTION","ENDFUNCTION", "")
+		CASE IsToken("SUB")
+			SkipTokens("SUB", "ENDSUB" ,"")
+		CASE IsToken("TYPE")
+			SkipTokens("TYPE","ENDTYPE", "")
+		CASE IsToken("PROTOTYPE")
+			SkipTokens("PROTOTYPE","\n", "")
+		CASE IsToken("CONSTANT")
+			SkipTokens("CONSTANT", "\n", "")
+		CASE IsToken("GLOBAL")
+			REPEAT
+				IF IsToken("GLOBAL")
+					Match("GLOBAL", CODELINE(), CODEFILE$())
+				ELSE
+					Match(",", CODELINE(), CODEFILE$())
+				ENDIF
+				LOCAL tmpVari AS IdentifierVari
+				tmpVari = VariDef()
+				FOREACH V IN Compiler.Globals[]
+					ALIAS Vari AS Compiler.Varis[V]
+					IF Vari.Name$ = tmpVari.Name$ AND Vari.PreDef <> -1
+						IF Compiler.CurrentScope = -1 THEN Error("Internal error (GLOBAL in -1 scope)", CODELINE(), CODEFILE$())
+						LOCAL tmpExpr% = CreateAssignExpression(CreateVariableExpression(Vari.ID) , Vari.PreDef)
+						DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], tmpExpr
+						Vari.PreDef = -1
+					ENDIF
+				NEXT
+			UNTIL IsToken(",") = FALSE
+		CASE IsToken("LOCAL")
+			REPEAT
+				IF IsToken("LOCAL")
+					Match("LOCAL", CODELINE(), CODEFILE$())
+				ELSE
+					Match(",", CODELINE(), CODEFILE$())
+				ENDIF
+
+				//Needs some debugging: TODO
+				LOCAL DontCreate% = FALSE
+				IF IsVarExisting(CleanVariable$(GetCurrent$()))
+					DontCreate = TRUE
+					//Schauen ob LOCAL, denn nur dann funktioniert das
+					LOCAL Varis%[]
+					GetVaris(Varis[])
+					FOREACH V IN Varis[]
+						IF Compiler.Varis[V].Name$ = CleanVariable$(GetCurrent$())
+							IF Compiler.Varis[V].Typ = VARI_IS_GLOBAL
+								DontCreate = FALSE
+								BREAK
+							ENDIF
+						ENDIF
+					NEXT
+					IF DontCreate
+						Warning("Variable '"+GetCurrent$()+"' already exists...")
+						LOCAL Expr% = Identifier(TRUE)
+						DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], Expr%
+					ENDIF
+				ENDIF
+
+				IF NOT DontCreate
+					LOCAL Vari AS IdentifierVari
+					Vari = VariDef()
+					Vari.Typ = VARI_IS_LOCAL
+
+					LOCAL PDef% = -1
+					IF Vari.PreDef <> -1
+						PDef = Vari.PreDef
+						Vari.PreDef = -1
+					ENDIF
+					AddVariable(Vari, TRUE)
+					DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+
+					IF PDef <> -1
+						IF Compiler.CurrentScope = -1 THEN Error("Internal error (LOCAL in -1 scope)", CODELINE(), CODEFILE$())
+						LOCAL tmpExpr% = CreateAssignExpression(CreateVariableExpression(LEN(Compiler.Varis[])-1) , PDef)
+						DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], tmpExpr
+					ENDIF
+				ENDIF
+
+			UNTIL IsToken(",") = FALSE
+		CASE IsToken("ALIAS")
+			//Warning("Experimental feature 'ALIAS'")
+			REPEAT
+				IF IsToken("ALIAS")
+					Match("ALIAS", CODELINE(), CODEFILE$())
+				ELSE
+					Match(",", CODELINE(), CODEFILE$())
+				ENDIF
+				IsValidVarName()
+				LOCAL Vari AS IdentifierVari
+				Vari.Name$ = GetCurrent$()
+				Vari.Typ = VARI_IS_ALIAS
+				Vari.ref = TRUE
+
+				Match(Vari.Name$, CODELINE(), CODEFILE$())
+				Match("AS", CODELINE(), CODEFILE$())
+
+				LOCAL PDef% = Identifier(FALSE)
+				Compiler.Varis[GetVariable(PDef)].ref = TRUE
+				Vari.datatype = Exprs[PDef].datatype
+
+
+				AddVariable(Vari, TRUE)
+				DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+
+
+				LOCAL tmpExpr% = CreateAliasExpression(LEN(Compiler.Varis[])-1 , PDef)
+				IF IsToken(",")
+					DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], tmpExpr
+				ELSE
+					RETURN tmpExpr
+				ENDIF
+			UNTIL IsToken(",") = FALSE
+		CASE IsToken("STATIC")
+			IF Compiler.currentFunc = -1 THEN Error("Static has to be in a FUNCTION", CODELINE(), CODEFILE$())
+
+			REPEAT
+				IF IsToken("STATIC")
+					Match("STATIC", CODELINE(), CODEFILE$())
+				ELSE
+					Match(",", CODELINE(), CODEFILE$())
+				ENDIF
+				LOCAL Vari AS IdentifierVari
+				Vari = VariDef()
+				Vari.Typ = VARI_IS_STATIC
+				Vari.func = Compiler.currentFunc
+				AddVariable(Vari, TRUE)
+				DIMPUSH Compiler.Funcs[Compiler.currentFunc].Statics[], LEN(Compiler.Varis[])-1
+				DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+
+			UNTIL IsToken(",") = FALSE
+		CASE IsToken("DIMPUSH")
+			Match("DIMPUSH", CODELINE(), CODEFILE$())
+			LOCAL Vari% = Identifier(FALSE)
+			IF Exprs[Vari].datatype.IsArray = 0 THEN Error("DIMPUSH needs array", CODELINE(), CODEFILE$())
+			Match(",", CODELINE(), CODEFILE$())
+			LOCAL datatype AS Datatype
+			datatype = Exprs[Vari].datatype
+			datatype.IsArray = 0
+
+			LOCAL Expr% = EnsureDatatype( Expression(), datatype, CODELINE())
+
+//			LOCAL var% = GetVariable(Expr, FALSE)
+//			IF var <> -1
+//				//oha hat eine variable!
+//				LOCAL v% = GetVariable(Vari)
+//				Compiler.Varis[var].ref = Compiler.Varis[v].ref
+//			ENDIF
+
+			RETURN CreateDimpushExpression(Vari, Expr)
+		CASE IsToken("DIM")
+			Match("DIM", CODELINE(), CODEFILE$())
+			LOCAL Arr% = ImplicitDefine()
+			IF Arr <> -1
+				Compiler.Varis[Arr].datatype.IsArray = TRUE
+			ENDIF
+
+			IF IsIdentifier()
+				LOCAL expr% = Identifier(FALSE)
+				LOCAL LExpr% = GetRightExpr(expr)
+				IF Compiler.Varis[GetVariable(expr)].datatype.IsArray = FALSE THEN Error("Array expected.", CODELINE(), CODEFILE$())
+				LOCAL Dims%[]
+				SELECT Exprs[LExpr].Typ
+					CASE EXPR_IS_ARRAY
+						Dims[] = Exprs[LExpr].dims[]
+						DIM Exprs[LExpr].dims[0]
+					DEFAULT
+						Error("Internal error (array not parsed)", CODELINE(), CODEFILE$())
+				ENDSELECT
+
+				RETURN CreateDimExpression(expr, Dims[])
+			ELSE
+				Error("DIM needs identifier", CODELINE(), CODEFILE$())
+			ENDIF
+		CASE IsToken("REDIM")
+			Match("REDIM", CODELINE(), CODEFILE$())
+			LOCAL Arr% = ImplicitDefine()
+			IF Arr <> -1
+				Compiler.Varis[Arr].datatype.IsArray = TRUE
+			ENDIF
+			IF IsIdentifier()
+				LOCAL expr% = Identifier(FALSE)
+				LOCAL LExpr% = GetRightExpr(expr)
+				IF Compiler.Varis[GetVariable(expr)].datatype.IsArray = FALSE THEN Error("Array expected.", CODELINE(), CODEFILE$())
+				LOCAL Dims%[]
+				SELECT Exprs[LExpr].Typ
+					CASE EXPR_IS_ARRAY
+						Dims[] = Exprs[LExpr].dims[]
+						DIM Exprs[LExpr].dims[0]
+					DEFAULT
+						Error("Internal error (array not parsed)", CODELINE(), CODEFILE$())
+				ENDSELECT
+				RETURN CreateReDimExpression(expr, Dims[])
+			ELSE
+				Error("REDIM needs identifier", CODELINE(), CODEFILE$())
+			ENDIF
+		CASE IsToken("DIMDATA")
+			Match("DIMDATA", CODELINE(), CODEFILE$())
+
+			LOCAL Array% = ImplicitDefine()
+			IF Array <> -1
+				Compiler.Varis[Array].datatype.IsArray = TRUE
+				Array = Identifier(FALSE)
+			ELSE
+				Array% = Expression()
+			ENDIF
+
+			IF Exprs[Array].datatype.IsArray = 0 THEN Error("DIMDATA needs array, stupid...", CODELINE(), CODEFILE$())
+			LOCAL Ex%[]
+			WHILE IsToken("\n") = FALSE
+				Match(",", CODELINE(), CODEFILE$())
+				IF LEN(Ex[]) = 0
+					DIMPUSH Ex[], Expression()
+				ELSE
+					LOCAL datatyp AS Datatype
+					datatyp = Exprs[Ex[0]].datatype
+					LOCAL E% = EnsureDatatype(Expression(), datatyp, CODELINE())
+					DIMPUSH Ex[], E
+				ENDIF
+			WEND
+
+			RETURN CreateDimDataExpression(Array, Ex[])
+		CASE IsToken("DELETE")
+			Match("DELETE", CODELINE(), CODEFILE$())
+			LOCAL VarName$ = GetCurrent$()
+			IF VarName$ <> Compiler.currentForEach$ AND VarName$ <> "\n" THEN Error("DELETE, invalid name '"+VarName$+"' expecting '"+Compiler.currentForEach$ + "'", CODELINE(), CODEFILE$())
+			IF IsToken("\n") = FALSE THEN GetNext()
+			RETURN CreateDeleteExpression()
+		CASE IsToken("DIMDEL")
+			Match("DIMDEL", CODELINE(), CODEFILE$())
+			LOCAL Array% = Identifier(FALSE)
+			Match(",", CODELINE(), CODEFILE$())
+			RETURN CreateDimDelExpression(Array, EnsureDatatype(Expression(), intDatatype, CODELINE()))
+		CASE IsToken("RETURN")
+			IF Compiler.currentFunc <> -1
+				Match("RETURN", CODELINE(), CODEFILE$())
+				LOCAL Expr%
+				LOCAL datatype AS Datatype
+				datatype = Compiler.Funcs[Compiler.currentFunc].datatype
+				IF IsToken("\n") //void
+					Expr = CreateDefaultValueExpression(datatype)
+				ELSEIF Compiler.Funcs[Compiler.currentFunc].Typ = FUNC_IS_SUB
+					Error("Sub cannot return a value",CODELINE(), CODEFILE$())
+				ELSE
+					Expr = EnsureDatatype(Expression(), datatype, CODELINE())
+				ENDIF
+				RETURN CreateReturnExpression(Expr)
+			ELSE
+				Error("RETURN have to be in a function or sub.", CODELINE(), CODEFILE$())
+			ENDIF
+		CASE IsToken("INLINE")
+			Error("INLINE/ENDINLINE not supported", CODELINE(), CODEFILE$())
+		CASE IsToken("REQUIRE")
+			Match("REQUIRE", CODELINE(), CODEFILE$())
+			LOCAL Name$ = REPLACE$(GetCurrent$(), "\"", "")
+			GetNext()
+			RETURN CreateRequireExpression(Name$)
+		CASE IsToken("EXPORT")
+			Match("EXPORT", CODELINE(), CODEFILE$())
+			LOCAL Exp AS TExport
+			Exp.Name$ = REPLACE$(GetCurrent$(), "\"", "")
+			LOCAL Found% = FALSE
+			FOREACH F IN Compiler.Funcs[]
+				IF F.Typ = FUNC_IS_FUNC AND Exp.Name$ = F.Name$
+					//gefunden!
+					F.PlzCompile = TRUE
+					Found = TRUE
+					BREAK
+				ENDIF
+			NEXT
+
+			IF NOT Found
+				//Schauen ob GLOBAL
+				FOREACH V IN Compiler.Globals[]
+					IF Compiler.Varis[V].Typ = VARI_IS_GLOBAL AND Compiler.Varis[V].Name$ = Exp.Name$
+						Found = TRUE
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+
+			IF NOT Found THEN Error("Cannot export undefined function/global '"+Exp.Name$+"'", CODELINE(), CODEFILE$())
+			Exp.Name$ = REPLACE$(Exp.Name$,"$", "_Str")
+			GetNext()
+			IF IsToken(",")
+				Match(",", CODELINE(), CODEFILE$())
+				Exp.RealName$ = REPLACE$(GetCurrent$(), "\"", "")
+				GetNext()
+			ENDIF
+
+			DIMPUSH Compiler.Exports[], Exp
+			RETURN CreateEmptyExpression()
+		CASE IsToken("IF")
+			LOCAL Cnds%[], Scps%[], elseScp%
+			Match("IF", CODELINE(), CODEFILE$())
+
+			DIMPUSH Cnds[], EnsureDatatype(Expression(), floatDatatype, CODELINE())
+			IF IsToken("THEN") = FALSE
+				Match("\n", CODELINE(), CODEFILE$())
+			ENDIF
+
+			DIMPUSH Scps[], Scope("ENDIF")
+
+
+			WHILE IsToken("ELSEIF")
+				Match("ELSEIF", CODELINE(), CODEFILE$())
+				DIMPUSH Cnds[], EnsureDatatype(Expression(), floatDatatype, CODELINE())
+				Match("\n", CODELINE(), CODEFILE$())
+				DIMPUSH Scps[], Scope("ENDIF")
+			WEND
+			IF IsToken("ELSE")
+				Match("ELSE", CODELINE(), CODEFILE$())
+				Match("\n", CODELINE(), CODEFILE$())
+				elseScp = Scope("ENDIF")
+			ELSE
+				elseScp = -1
+			ENDIF
+
+			RETURN CreateIfExpression(Cnds[], Scps[], elseScp)
+		CASE IsToken("WHILE")
+			Match("WHILE", CODELINE(), CODEFILE$())
+			LOCAL Expr% = EnsureDatatype(Expression(), floatDatatype, CODELINE())
+			Match("\n", CODELINE(), CODEFILE$())
+			LOCAL Scp% = Scope("WEND")
+			RETURN CreateWhileExpression(Expr, Scp)
+		CASE IsToken("REPEAT")
+			Match("REPEAT", CODELINE(), CODEFILE$())
+			Match("\n", CODELINE(), CODEFILE$())
+			LOCAL Scp% = Scope("UNTIL")
+			LOCAL Expr% = EnsureDatatype(Expression(), floatDatatype, CODELINE())
+			RETURN CreateRepeatExpression(Expr, Scp)
+		CASE IsToken("FOR")
+			LOCAL TmpScope = Compiler.CurrentScope
+			Compiler.CurrentScope =  CreateScopeExpression(SCOPE_IS_LOOP)
+			LOCAL Expr% = -1
+			TRY
+				Match("FOR", CODELINE(), CODEFILE$())
+
+
+				LOCAL IsImplicit% = -1
+				LOCAL varExpr%
+				IF IsIdentifier()
+					// Die Variable existiert bereits
+					varExpr = Identifier(TRUE)
+				ELSE
+					IsImplicit = TRUE
+					// Neue Variable erstellen!!
+					LOCAL Vari AS IdentifierVari
+					Vari = VariDef()
+					Vari.Typ = VARI_IS_LOCAL
+
+					LOCAL PDef% = -1
+					IF Vari.PreDef <> -1
+						PDef = Vari.PreDef
+						Vari.PreDef = -1
+					ENDIF
+					AddVariable(Vari, TRUE)
+					IsImplicit = LEN(Compiler.Varis[])-1
+
+					//Da ist irgendwas falsch
+					DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1 //vorher: TmpScope.. ka ob richtig
+
+					IF PDef <> -1
+						varExpr = CreateAssignExpression(CreateVariableExpression(LEN(Compiler.Varis[])-1) , PDef)
+					ENDIF
+				ENDIF
+				IF Exprs[varExpr].Typ <> EXPR_IS_ASSIGN THEN Error("FOR, variable needs assignment.", CODELINE(), CODEFILE$())
+				LOCAL Var = GetVariable(Exprs[varExpr].vari)
+				LOCAL hasTo%
+				IF IsToken("TO")
+					hasTo% = TRUE
+					Match("TO", CODELINE(), CODEFILE$())
+				ELSEIF IsToken("UNTIL")
+					hasTo = FALSE
+					Match("UNTIL", CODELINE(), CODEFILE$())
+				ELSE
+					Error("FOR needs TO or UNTIL!", CODELINE(), CODEFILE$())
+				ENDIF
+				LOCAL toExpr% = EnsureDatatype(Expression(), Compiler.Varis[Var].datatype, CODELINE())
+				LOCAL stepExpr% = EnsureDatatype(CreateIntExpression(1), Compiler.Varis[Var].datatype, CODELINE())
+				IF IsToken("STEP")
+					Match("STEP", CODELINE(), CODEFILE$())
+					stepExpr = EnsureDatatype(Expression(), Compiler.Varis[Var].datatype, CODELINE())
+				ENDIF
+				Match("\n",CODELINE(), CODEFILE$())
+
+
+				Expr = CreateForExpression(varExpr, toExpr, stepExpr, hasTo, Scope("NEXT"))
+
+				DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], Expr
+			CATCH Error$
+				FixError()
+			FINALLY
+			LOCAL OScope% = Compiler.CurrentScope
+			Compiler.CurrentScope = TmpScope
+			RETURN OScope
+		CASE IsToken("FOREACH")
+			LOCAL TmpScope = Compiler.CurrentScope
+			LOCAL TmpForEach$ = Compiler.currentForEach$
+			Compiler.CurrentScope =  CreateScopeExpression(SCOPE_IS_LOOP)
+			LOCAL Expr% = -1
+			TRY
+				Match("FOREACH", CODELINE(), CODEFILE$())
+				LOCAL varExpr%
+
+				//FOREACH verwendet die nicht neu
+				//IF IsIdentifier()
+					// Die Variable existiert bereits
+				//	varExpr = Identifier(TRUE)
+				//ELSE
+				// Neue Variable erstellen!!
+				LOCAL Vari AS IdentifierVari
+				Vari = VariDef()
+				Vari.Typ = VARI_IS_LOCAL
+
+
+				IF Vari.PreDef <> -1
+					Error("No default value, in FOREACH", CODELINE(), CODEFILE$())
+				ENDIF
+				AddVariable(Vari, TRUE)
+				DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+				varExpr = CreateVariableExpression(LEN(Compiler.Varis[])-1)
+				//ENDIF
+				Compiler.currentForEach$ = Compiler.Varis[GetVariable(varExpr)].Name$
+				Match("IN", CODELINE(), CODEFILE$())
+				LOCAL InExpr% = Identifier(FALSE)
+
+				IF Exprs[InExpr].datatype.IsArray = 0 THEN Error("Expecting Array", CODELINE(), CODEFILE$())
+
+				Exprs[varExpr].datatype = Exprs[InExpr].datatype
+				Exprs[varExpr].datatype.IsArray = 0
+
+				LOCAL var% = GetVariable(varExpr)
+				Compiler.Varis[var].datatype = Exprs[InExpr].datatype
+				Compiler.Varis[var].datatype.IsArray = 0
+				Compiler.Varis[var].ref = Compiler.Varis[GetVariable(InExpr)].ref
+
+				Match("\n", CODELINE(), CODEFILE$())
+				Expr = CreateForEachExpression(varExpr, InExpr, Scope("NEXT"))
+			CATCH Error$
+				FixError()
+			FINALLY
+			Compiler.CurrentScope = TmpScope
+			Compiler.currentForEach$ = TmpForEach$
+			RETURN Expr
+		CASE IsToken("BREAK")
+			Match("BREAK", CODELINE(), CODEFILE$())
+			IF Compiler.inLoop = FALSE THEN Error("BREAK not inside loop", CODELINE(), CODEFILE$())
+			RETURN CreateBreakExpression()
+		CASE IsToken("CONTINUE")
+			Match("CONTINUE", CODELINE(), CODEFILE$())
+			IF Compiler.inLoop = FALSE THEN Error("CONTINUE not inside loop", CODELINE(), CODEFILE$())
+			RETURN CreateContinueExpression()
+		CASE IsToken("TRY")
+			Match("TRY", CODELINE(), CODEFILE$())
+			Match("\n", CODELINE(), CODEFILE$())
+			LOCAL tryScp% = Scope("CATCH")
+			LOCAL Vari AS IdentifierVari
+			Vari = VariDef()
+			IF Vari.datatype.Name$ <> "string"  THEN Error("Catch variable must be string", CODELINE(), CODEFILE$())
+			IF Vari.datatype.IsArray			THEN Error("Catch variable must be non array", CODELINE(), CODEFILE$())
+			LOCAL id = LEN(Compiler.Varis[])
+			AddVariable(Vari, FALSE)
+			LOCAL myScope% = -1
+
+			LOCAL TmpScope = Compiler.CurrentScope
+			Compiler.CurrentScope =  CreateScopeExpression(SCOPE_IS_IF)
+			TRY
+				DIMPUSH Exprs[Compiler.CurrentScope].Varis[], id
+
+				Match("\n", CODELINE(), CODEFILE$())
+				LOCAL ctchScp% = Scope("FINALLY")
+
+				LOCAL e% = CreateTryExpression(tryScp, ctchScp, id)
+				DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], e
+
+				myScope = Compiler.CurrentScope
+			CATCH Error$
+				FixError()
+			FINALLY
+			Compiler.CurrentScope = TmpScope
+
+			RETURN myScope
+		CASE IsToken("THROW")
+			Match("THROW", CODELINE(), CODEFILE$())
+			RETURN CreateThrowExpression(EnsureDatatype(Expression(), strDatatype, CODELINE()))
+		CASE IsToken("SELECT")
+			STATIC SelectHelper
+			INC SelectHelper
+			LOCAL Vari AS IdentifierVari
+			Vari.Name$ = "__SelectHelper"+SelectHelper+"_"
+			Vari.Typ = VARI_IS_LOCAL
+
+
+			Match("SELECT", CODELINE(), CODEFILE$())
+
+			LOCAL Cond1% = Expression()
+			LOCAL datatype AS Datatype
+			datatype = Exprs[Cond1].datatype
+			Vari.datatype = datatype
+
+			LOCAL Conds%[]
+			LOCAL Scps%[]
+			LOCAL elseScp% = -1
+
+
+			//Neuen Scope eröffnen, in diesen kommt der SelectHelper
+			AddVariable(Vari, FALSE)
+			LOCAL TmpScope = Compiler.CurrentScope
+			Compiler.CurrentScope =  CreateScopeExpression(SCOPE_IS_IF)
+
+
+			DIMPUSH Exprs[Compiler.CurrentScope].Varis[], LEN(Compiler.Varis[])-1
+			LOCAL VariExpr% = CreateVariableExpression(LEN(Compiler.Varis[])-1)
+			LOCAL e% = CreateAssignExpression(VariExpr, Cond1)
+			DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], e
+			Cond1 = VariExpr
+
+			Match("\n", CODELINE(), CODEFILE$())
+			WHILE IsToken("CASE")
+				Match("CASE", CODELINE(), CODEFILE$())
+				LOCAL Cond2% = -1
+				REPEAT
+					IF IsToken(",") THEN Match(",", CODELINE(), CODEFILE$())
+
+					LOCAL Op = SearchOperator("=")
+					IF IsOperator()
+						Op = SearchOperator(GetCurrent$())
+						GetNext()
+					ENDIF
+
+					LOCAL Expr1% = -1, Expr2% = -1
+					LOCAL tmpCond%
+					Expr1 = EnsureDatatype(Expression(), datatype, CODELINE())
+					IF IsToken("TO")
+						Match("TO", CODELINE(), CODEFILE$())
+						Expr2 = EnsureDatatype(Expression(), datatype, CODELINE())
+
+						Expr1 = CreateOperatorExpression(Operators[SearchOperator(">=")], Cond1, Expr1)
+						Expr2 = CreateOperatorExpression(Operators[SearchOperator("<=")], Cond1, Expr2)
+
+						tmpCond = CreateOperatorExpression(Operators[SearchOperator("AND")], Expr1, Expr2)
+					ELSE
+						tmpCond = CreateOperatorExpression(Operators[Op],Cond1, Expr1)
+					ENDIF
+					IF Cond2 = -1
+						Cond2 = tmpCond
+					ELSE
+						Cond2 = CreateOperatorExpression(Operators[SearchOperator("OR")], Cond2, tmpCond)
+					ENDIF
+				UNTIL IsToken(",") = FALSE
+
+				Match("\n", CODELINE(), CODEFILE$())
+				DIMPUSH Conds[], Cond2
+				DIMPUSH Scps[], Scope("ENDSELECT")
+			WEND
+			IF IsToken("DEFAULT")
+				Match("DEFAULT", CODELINE(), CODEFILE$())
+				Match("\n", CODELINE(), CODEFILE$())
+				elseScp = Scope("ENDSELECT")
+			ENDIF
+			IF elseScp = -1 AND LEN(Conds[]) = 0
+				Match("ENDSELECT", CODELINE(), CODEFILE$())
+			ENDIF
+
+			e = CreateIfExpression(Conds[], Scps[], elseScp)
+			DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], e
+			LOCAL myScope% = Compiler.CurrentScope
+			Compiler.CurrentScope = TmpScope
+			RETURN myScope
+		CASE IsToken("STARTDATA")
+			Match("STARTDATA", CODELINE(), CODEFILE$())
+			SkipTokens("STARTDATA", "ENDDATA", GetCurrent$())
+		CASE IsToken("RESTORE")
+			Match("RESTORE", CODELINE(), CODEFILE$())
+			LOCAL Name$ = GetCurrent$()
+			Match(Name$, CODELINE(), CODEFILE$())
+			FOREACH block IN Compiler.DataBlocks[]
+				IF block.Name$ = Name$
+					RETURN CreateRestoreExpression(Name$)
+				ENDIF
+			NEXT
+			Error("RESTORE label '"+Name$+"' unknown.", CODELINE(), CODEFILE$())
+		CASE IsToken("READ")
+			Match("READ", CODELINE(), CODEFILE$())
+			LOCAL Reads%[]
+			REPEAT
+				IF IsToken(",") THEN Match(",", CODELINE(), CODEFILE$())
+				LOCAL e% = Identifier(FALSE)
+				DIMPUSH Reads[], e
+			UNTIL IsToken(",") = FALSE
+
+			RETURN CreateReadExpression(Reads[])
+		CASE IsToken("GOTO")
+			STATIC GOTOErr%
+			Match("GOTO", CODELINE(), CODEFILE$())
+			LOCAL Name$ = GetCurrent$()
+			GetNext()
+			Compiler.HasGoto = TRUE
+			IF NOT GOTOErr
+				GOTOErr = TRUE
+				Warning("GOTO may cause problems!")
+			ENDIF
+			//Error("GOTO unsupported!", CODELINE(), CODEFILE$())
+			LOCAL Expr% = CreateGotoExpression(Name$)
+
+			LOCAL Scp% = Compiler.ImportantScope
+			IF Scp = -1
+				Error("Internal error (GOTO Scp is -1", CODELINE(), CODEFILE$())
+			ENDIF
+
+			DIMPUSH Exprs[Scp].Gotos[], Expr
+			RETURN Expr
+		CASE IsToken("INC")
+			Match("INC", CODELINE(), CODEFILE$())
+			LOCAL Vari% = Identifier(FALSE)
+			IF Exprs[Vari].datatype.IsArray THEN Error("Cannot increment array...", CODELINE(), CODEFILE$())
+			LOCAL AddExpr%
+			SELECT Exprs[Vari].datatype.Name$
+				CASE "int"
+					IF IsToken(",")
+						Match(",", CODELINE(), CODEFILE$())
+						AddExpr = EnsureDatatype(Expression(), intDatatype, CODELINE())
+					ELSE
+						AddExpr = CreateIntExpression(1)
+					ENDIF
+				CASE "float"
+					IF IsToken(",")
+						Match(",", CODELINE(), CODEFILE$())
+						AddExpr = EnsureDatatype(Expression(), floatDatatype, CODELINE())
+					ELSE
+						AddExpr = CreateFloatExpression(1)
+					ENDIF
+				CASE "string"
+					IF IsToken(",")
+						Match(",", CODELINE(), CODEFILE$())
+						AddExpr = EnsureDatatype(Expression(), strDatatype, CODELINE())
+					ELSE
+						AddExpr = CreateStrExpression(" ")
+					ENDIF
+				DEFAULT
+					Error("Cannot increment type or prototype", CODELINE(), CODEFILE$())
+			ENDSELECT
+			RETURN CreateIncExpression(Vari, AddExpr)
+		CASE IsToken("DEC")
+			Match("DEC", CODELINE(), CODEFILE$())
+			LOCAL Vari% = Identifier(FALSE)
+			LOCAL AddExpr%
+			IF Exprs[Vari].datatype.IsArray THEN Error("Cannot decrement array...", CODELINE(), CODEFILE$())
+			SELECT Exprs[Vari].datatype.Name$
+				CASE "int"
+					IF IsToken(",")
+						Match(",", CODELINE(), CODEFILE$())
+						ALIAS Op AS Operators[SearchOperator("sub")]
+						AddExpr = CreateOperatorExpression(Op, CreateIntExpression(0), EnsureDatatype(Expression(), intDatatype, CODELINE()))
+					ELSE
+						AddExpr = CreateIntExpression(-1)
+					ENDIF
+				CASE "float"
+					IF IsToken(",")
+						Match(",", CODELINE(), CODEFILE$())
+						ALIAS Op AS Operators[SearchOperator("sub")]
+						AddExpr = CreateOperatorExpression(Op, CreateFloatExpression(0), EnsureDatatype(Expression(), floatDatatype, CODELINE()))
+					ELSE
+						AddExpr = CreateFloatExpression(-1)
+					ENDIF
+				CASE "string"
+					Error("Cannot decrement string...", CODELINE(), CODEFILE$())
+				DEFAULT
+					Error("Cannot decrement type or prototype", CODELINE(), CODEFILE$())
+			ENDSELECT
+			RETURN CreateIncExpression(Vari, AddExpr)
+		CASE IsToken("ASSERT")
+			Match("ASSERT", CODELINE(), CODEFILE$())
+			LOCAL Expr% = EnsureDatatype(Expression(), intDatatype, CODELINE())
+
+			IF DEBUGMODE
+				RETURN CreateAssertExpression(Expr)
+			ENDIF
+		CASE IsToken("DEBUG")
+			Match("DEBUG", CODELINE(), CODEFILE$())
+			LOCAL Expr% = EnsureDatatype(Expression(), strDatatype, CODELINE())
+
+			IF DEBUGMODE
+				RETURN CreateDebugOutputExpression(Expr)
+			ENDIF
+		DEFAULT
+			Error("Unexpected keyword", CODELINE(), CODEFILE$())
+	ENDSELECT
+	RETURN CreateEmptyExpression()
+ENDFUNCTION
+
+//! Falls es das aktuelle Identifier nicht gibt und STRICT = FALSE, dann erstelle diese variable implicit als GLOBAL
+FUNCTION ImplicitDefine%:
+	IF STRICT = FALSE
+		//könnte implicit erstellen
+		IF NOT IsIdentifier()
+			LOCAL pos% = Compiler.currentPosi
+			//und ist noch nicht definiert
+			//=> Definiere
+			LOCAL Vari AS IdentifierVari
+			Vari = VariDef(TRUE) //Darf den Defaultvalue dings nicht annehmen
+			Vari.Typ = VARI_IS_GLOBAL
+			AddVariable(Vari, FALSE)
+			DIMPUSH Compiler.Globals[], LEN(Compiler.Varis[])-1
+			Warning("Implicit variable declaration '"+Vari.Name$+"'")
+
+			//Wieder zurück position
+			Compiler.currentPosi = pos-1
+			GetNext()
+
+
+			RETURN LEN(Compiler.Varis[])-1
+		ENDIF
+	ENDIF
+	RETURN -1
+ENDFUNCTION
+
+//! Ist es ein Schlüsselwort?
+FUNCTION IsKeyword%:
+	RETURN KeywordMap.DoesKeyExist(GetCurrent$())
+ENDFUNCTION
+
+//! Ist es ein Identifier (Variable/Funktion/...)
+FUNCTION IsIdentifier%: CheckType% = FALSE
+	IF IsToken("GLOBAL") OR IsToken("LOCAL") THEN RETURN TRUE //LOCAL/GLOBAL
+
+	IF IsType() AND CheckType
+		LOCAL pos% = Compiler.currentPosi
+		GetNext()
+		LOCAL ret%
+		IF IsToken("(")
+			ret = TRUE
+		ELSE
+			ret = FALSE
+		ENDIF
+		Compiler.currentPosi = pos
+	ENDIF
+
+	LOCAL Current$ = GetCurrent$()
+
+//	FOREACH func IN Compiler.Funcs[]
+//		IF IsToken(func.Name$) AND func.Typ <> FUNC_IS_METHOD //FUNC_IS_SUB richtig?
+//			RETURN TRUE
+//		ENDIF
+//	NEXT
+	LOCAL dummy%
+	IF Compiler.GlobalFuncs.GetValue(Current$, dummy) THEN RETURN TRUE
+
+	LOCAL Varis%[]
+	GetVaris(Varis[])
+	FOR i = LEN(Varis[])-1 TO 0 STEP -1
+		IF CleanVariable$(Current$) = Compiler.Varis[Varis[i]].Name$
+			RETURN TRUE
+		ENDIF
+	NEXT
+
+	IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1
+		//sieht gut aus!
+		ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
+		LOCAL myTyp% = Typ.ID
+		WHILE myTyp <> -1
+			FOREACH M IN Compiler.Types[myTyp].Methods[]
+				IF IsToken(Compiler.Funcs[M].Name$)
+					RETURN TRUE
+				ENDIF
+			NEXT
+
+			myTyp = Compiler.Types[myTyp].Extending
+		WEND
+		FOREACH A IN Typ.Attributes[]
+			IF IsToken(Compiler.Varis[A].Name$)
+				RETURN TRUE
+			ENDIF
+		NEXT
+	ENDIF
+
+	RETURN FALSE
+ENDFUNCTION
+
+//! Ist es eine Zahl?
+FUNCTION IsNumber%:
+	FOR i = 0 TO LEN(GetCurrent$())-1
+		IF ASC(GetCurrent$(), i) < 48 OR ASC(GetCurrent$(), i) > 57
+			RETURN FALSE
+		ENDIF
+	NEXT
+	RETURN TRUE
+ENDFUNCTION
+
+//! Ist es eine Zeichenkette?
+FUNCTION IsString%:
+	IF MID$(GetCurrent$(),0,1)="\"" AND MID$(GetCurrent$(),LEN(GetCurrent$())-1,1)="\""
+		RETURN TRUE
+	ELSE
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+//! Ist der gegebene String ein Type?
+FUNCTION IsType%: Str$ = ""
+	IF Str$ = "" THEN Str$ = GetCurrent$()
+	FOREACH typ IN Compiler.Types[]
+		IF typ.RealName$ = Str$
+			LastType = typ
+			RETURN TRUE
+		ENDIF
+	NEXT
+	RETURN FALSE
+ENDFUNCTION
+
+//! Schauen ob Variable existier
+FUNCTION IsVarExisting%: Var$
+	LOCAL Vars%[]
+	GetVaris(Vars[])
+	FOR i = LEN(Vars[])-1 TO 0 STEP -1
+		IF Compiler.Varis[Vars[i]].Name$ = Var$ THEN RETURN TRUE
+	NEXT
+
+	//FOREACH T IN Compiler.Types[]
+	//	IF T.Name$ = Var$ THEN RETURN TRUE
+	//NEXT
+
+	RETURN KeywordMap.DoesKeyExist%(Var$)
+ENDFUNCTION
+
+//! Schauen ob valider Variablenname
+FUNCTION IsValidVarName%:
+	IF IsKeyword() THEN Error("Invalid identifier name: '"	+ GetCurrent$() + "' is already a keyword"	,CODELINE(), CODEFILE$() )
+	//IF IsType() THEN Error("Invalid identifier name: '"		+ GetCurrent$() + "' is already a typename"	,CODELINE(), CODEFILE$() )
+	IF IsNumber() THEN Error("Invalid Identifier name: '"	+ GetCurrent$() + "' is a number"			,CODELINE(), CODEFILE$() )
+	IF IsString() THEN Error("Invalid identifier name: '"	+ GetCurrent$() + "' is a string"			,CODELINE(), CODEFILE$() )
+	IF IsOperator() THEN Error("Invalid identifier name: '"	+ GetCurrent$() + "' is an operator"		,CODELINE(), CODEFILE$() )
+
+	RETURN TRUE
+ENDFUNCTION
+
+//! Schauen ob Funktion existiert
+FUNCTION IsFuncExisting%: func$, IsCallback% = FALSE
+	FOREACH T IN Compiler.Types[]
+		IF T.Name$ = func$ THEN RETURN TRUE
+	NEXT
+
+	IF KeywordMap.DoesKeyExist(func$) THEN RETURN TRUE
+
+	FOREACH F IN Compiler.Funcs[]
+		IF func$ = F.Name$ AND (F.Typ = FUNC_IS_SUB OR F.Typ = FUNC_IS_FUNC) AND F.IsCallback = IsCallback THEN RETURN TRUE
+	NEXT
+
+	RETURN FALSE
+ENDFUNCTION
+
+//! Schauen ob es ein Operator ist
+FUNCTION IsOperator%:
+	FOREACH Op IN Operators[]
+		IF IsToken(Op.Sym$) THEN RETURN TRUE
+	NEXT
+	RETURN FALSE
+ENDFUNCTION
+
+//! Ist es ein valider Datentyp?
+FUNCTION IsValidDatatype%:
+	//Schauen ob Typ
+	IF IsType() THEN RETURN TRUE
+
+	//schauen ob Prototyp
+	FOREACH func IN Compiler.Funcs[]
+		IF func.Typ = FUNC_IS_PROTO AND IsToken(func.Name$)
+			RETURN TRUE
+		ENDIF
+	NEXT
+	//STDOUT "-----"
+	FOREACH typ IN Compiler.Types[]
+		STDOUT typ.RealName$+"\n"
+	NEXT
+	Error("Unknown datatype: "+GetCurrent$(), CODELINE(), CODEFILE$())
+ENDFUNCTION
+
+
+//! Ist es ein mit DEFINE definierter Wert?
+FUNCTION IsDefine%: Def$ = ""
+	IF Def$ ="" THEN Def$ = GetCurrent$()
+	FOREACH Def IN Defines[]
+		IF Def.Key$ = Def$
+			LastDefine = Def
+			RETURN TRUE
+		ENDIF
+	NEXT
+	RETURN FALSE
+ENDFUNCTION
+
+//! Gibt alle Variablen zurück, welche aktuell verfügbar sind.
+FUNCTION GetVaris: Varis%[], Scp = -1, PreferVar% = 0
+	IF Scp = -1 THEN Scp = Compiler.CurrentScope
+
+	IF PreferVar = -1 AND LEN(Varis[]) = 0
+		//globals reinhaun
+		FOREACH Vari IN Compiler.Globals[]
+			DIMPUSH Varis[], Vari
+		NEXT
+	ENDIF
+
+	IF Scp <> -1
+		FOREACH Vari IN Exprs[Scp].Varis[]
+			DIMPUSH Varis[], Vari
+		NEXT
+
+		IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1
+			ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
+			FOREACH A IN Typ.Attributes[]
+				DIMPUSH Varis[], A
+			NEXT
+		ENDIF
+	ENDIF
+
+	IF Exprs[Scp].SuperScope <> -1 AND Exprs[Scp].ScpTyp <> SCOPE_IS_FUNC// Damit man aus Funktionen nicht auf die Lokalen Zugreifen kann
+		GetVaris(Varis[], Exprs[Scp].SuperScope)
+	ELSEIF PreferVar >= 0
+		//globals reinhaun
+		FOREACH Vari IN Compiler.Globals[]
+			DIMPUSH Varis[], Vari
+		NEXT
+	ENDIF
+ENDFUNCTION
+
+//! Gibt die Variable der Expression zurück, sofern diese eine enthält ansonsten gibt es eine Fehlermeldung
+FUNCTION GetVariable%: expr%, err% = TRUE
+	//STDOUT "getvari: "+expr+" "
+	//STDOUT Exprs[expr].Typ
+	//STDOUT "\n"
+	LOCAL hasErr% = FALSE
+ 	SELECT Exprs[expr].Typ
+		CASE EXPR_IS_VARI
+			RETURN Exprs[expr].vari
+		CASE EXPR_IS_ARRAY
+			RETURN GetVariable(Exprs[expr].array, err)
+		CASE EXPR_IS_ACCESS
+			RETURN GetVariable(Exprs[expr].nextExpr, err)
+		CASE EXPR_IS_CAST2OBJ //not sure about this...
+			RETURN GetVariable(Exprs[expr].expr, err)
+		CASE EXPR_IS_FUNCCALL
+			IF Exprs[expr].func <> -1
+				ALIAS func AS Compiler.Funcs[Exprs[expr].func]
+				//schauen ob methode
+				IF func.Typ = FUNC_IS_METHOD
+					RETURN -1
+				ELSE
+					hasErr = TRUE
+				ENDIF
+			ELSE
+				hasErr = TRUE
+			ENDIF
+		DEFAULT
+			hasErr = TRUE
+	ENDSELECT
+	IF hasErr AND err
+		LOCAL add$ = ""
+		?IFDEF DEBUG
+			add$ = " -> debug info: appeared at Expression '"+Exprs[expr].Typ+"'"
+		?ENDIF
+		Error("Variable expected."+add$, CODELINE(), CODEFILE$())
+	ELSE
+		RETURN -1
+	ENDIF
+ENDFUNCTION
+
+//! Gibt die rechte Expression zurück (von access)
+FUNCTION GetRightExpr%: expr%
+	SELECT Exprs[expr].Typ
+		CASE EXPR_IS_ACCESS
+			RETURN GetRightExpr(Exprs[expr].nextExpr)
+		DEFAULT
+			RETURN expr
+	ENDSELECT
+ENDFUNCTION
+
+//! Entfernt die Datatype characters (%, #)
+FUNCTION AddDataChars$: Text$, func AS IdentifierFunc
+	IF func.datatype.Name$ = "int" THEN RETURN Text$ + "%"
+	IF func.datatype.Name$ = "float" THEN RETURN Text$ + "#"
+	RETURN Text$
+ENDFUNCTION
+
+//! Überspringt alle Tokens, bis es zum gegebenen Token kommt
+FUNCTION SkipTokens: Open$, Close$, Name$
+	LOCAL startpos% = Compiler.currentPosi
+	WHILE IsToken(Close$) = FALSE AND HasNext()
+		IF HasNext()
+			GetNext()
+		ENDIF
+	WEND
+
+	IF HasNext() = FALSE
+		LOCAL tmpPos = Compiler.currentPosi
+		Compiler.currentPosi = startpos
+		TRY
+			Error(Open$+" "+Name$+" needs '"+Close$+"', unexpected end of file.", CODELINE(), CODEFILE$())
+		CATCH ex$
+			Compiler.currentPosi = tmpPos
+			THROW ex$
+		FINALLY
+	ENDIF
+	IF Close$ <> "\n" THEN Match(Close$, CODELINE(), CODEFILE$())
+ENDFUNCTION
+
+//! Generiert den Prototypen der gegebenen Funktion
+FUNCTION BuildPrototyp$: F%
+	ALIAS Func AS Compiler.Funcs[F]
+	LOCAL Text$ = "RETURN TYPE: "+Func.datatype.Name$+BuildArrBrackets$(Func.datatype.IsArray  )+" PARAMETER:"
+	LOCAL Found% = FALSE
+	FOREACH P IN Func.Params[]
+		ALIAS Param AS Compiler.Varis[P]
+		IF Found THEN Text$ = Text$ + ", "
+		Text$ = Text$ + Param.datatype.Name$+BuildArrBrackets$(Param.datatype.IsArray)
+		Found = TRUE
+	NEXT
+
+	RETURN Text$
+ENDFUNCTION
+
+//! Sucht einen PROTOTYP
+FUNCTION SearchPrototyp%: Name$
+//	FOREACH Func IN Compiler.Funcs[]
+//		IF Func.Name$ = Name$ AND Func.Typ <> FUNC_IS_SUB THEN RETURN Func.ID
+//	NEXT
+	LOCAL Ret%
+	IF Compiler.GlobalFuncs.GetValue(Name$, Ret)
+		IF Compiler.Funcs[Ret].Typ = FUNC_IS_SUB
+			RETURN -1
+		ELSE
+			RETURN Ret
+		ENDIF
+	ELSE
+		//Schauen ob Prototyp
+		RETURN -1
+	ENDIF
+ENDFUNCTION
+
+//! Sucht einen Operator
+FUNCTION SearchOperator%: Name$
+	FOREACH Op IN Operators[]
+		IF Op.Sym$ = Name$ OR Op.Name$=Name$ THEN RETURN Op.ID
+	NEXT
+	RETURN -1
+ENDFUNCTION
+
+//! Löscht die #/% am ende eines tokens
+FUNCTION CleanVariable$: Var$
+	LOCAL Postfix$ = RIGHT$(Var$, 1)
+	IF Postfix$ = "%" OR Postfix$="#"
+		RETURN LEFT$(Var$,LEN(Var$)-1)
+	ELSE
+		RETURN Var$
+	ENDIF
+ENDFUNCTION
+
+FUNCTION ScopeHasGoto%: scp AS Expr
+	IF scp.Typ <> EXPR_IS_SCOPE THEN Error("Internal error (Cant look for Scope)", CODELINE(), CODEFILE$())
+	FOREACH E IN scp.Exprs[]
+		ALIAS SubE AS Exprs[E]
+		SELECT SubE.Typ
+			CASE EXPR_IS_IF
+				FOREACH E IN SubE.Scopes[]
+					IF ScopeHasGoto(Exprs[E]) THEN RETURN TRUE
+				NEXT
+				IF SubE.elseScope <> -1
+					IF ScopeHasGoto(Exprs[SubE.elseScope]) THEN RETURN TRUE
+				ENDIF
+			CASE EXPR_IS_WHILE
+				IF ScopeHasGoto(Exprs[SubE.Scp]) THEN RETURN TRUE
+			CASE EXPR_IS_REPEAT
+				IF ScopeHasGoto(Exprs[SubE.Scp]) THEN RETURN TRUE
+			CASE EXPR_IS_FOR
+				IF ScopeHasGoto(Exprs[SubE.Scp]) THEN RETURN TRUE
+			CASE EXPR_IS_FOREACH
+				IF ScopeHasGoto(Exprs[SubE.Scp]) THEN RETURN TRUE
+			CASE EXPR_IS_TRY
+				IF ScopeHasGoto(Exprs[SubE.Scp]) THEN RETURN TRUE
+				IF ScopeHasGoto(Exprs[SubE.catchScp]) THEN RETURN TRUE
+			CASE EXPR_IS_GOTO
+				RETURN TRUE
+			CASE EXPR_IS_SCOPE
+				IF ScopeHasGoto(SubE) THEN RETURN TRUE
+			DEFAULT
+//				IF LEN(SubE.Exprs[]) > 0
+//					Error("Internal error (non scope contains expressions '"+SubE.Typ+"'...)", CODELINE(), CODEFILE$())
+//				ENDIF
+		ENDSELECT
+	NEXT
+	RETURN FALSE
+ENDFUNCTION
+
+
+FUNCTION ScopeName$: expr AS Expr
+	SELECT expr.ScpTyp
+		CASE SCOPE_IS_IF
+			RETURN "if"
+		CASE SCOPE_IS_LOOP
+			RETURN "loop"
+		CASE SCOPE_IS_TRY
+			RETURN "try"
+		CASE SCOPE_IS_MAIN
+			RETURN "main"
+		CASE SCOPE_IS_FUNC
+			SELECT Compiler.Funcs[CurrentFunc].Typ
+				CASE FUNC_IS_SUB
+					RETURN "sub: "+Compiler.Funcs[CurrentFunc].OName$
+				CASE FUNC_IS_METHOD
+					RETURN "method: "+Compiler.Funcs[CurrentFunc].OName$
+				CASE FUNC_IS_FUNC
+					RETURN "function: "+Compiler.Funcs[CurrentFunc].OName$//+" parameters: \"+dumpArray(arguments?arguments:[])+\""
+				CASE FUNC_IS_PROTO
+					RETURN "prototype: "+Compiler.Funcs[CurrentFunc].OName$
+			ENDSELECT
+		CASE SCOPE_IS_SELECT
+			RETURN "select"
+		DEFAULT
+			Error("Internal error (unknown scope type)", CODELINE(), CODEFILE$())
+	ENDSELECT
+ENDFUNCTION
+
+
+FUNCTION ChangeVarName:  Vari AS IdentifierVari
+	//Und nun in jedem Identifier die $ durch _Str ersetzen
+	Vari.Name$ = TRIM$(REPLACE$(Vari.Name$,"$","_Str"))
+
+	SELECT Vari.Typ
+		CASE VARI_IS_LOCAL
+			Vari.Name$ = "local"	+LEN(Vari.Name$)+"_"+Vari.Name$
+		CASE VARI_IS_GLOBAL
+			LOCAL Found% = FALSE
+			FOREACH Exp IN Compiler.Exports[]
+				IF Exp.Name$ = Vari.Name$
+					Found = TRUE
+					IF Vari.ref
+						Error("Cannot export '"+Vari.Name$+"' because it is a reference (dont use in connection with BYREF and ALIAS!)", CODELINE(), CODEFILE$())
+					ENDIF
+					IF Exp.RealName$ <> ""
+						Vari.Name$ = Exp.RealName$
+					ENDIF
+					RETURN
+				ENDIF
+			NEXT
+			Vari.Name$ = "global"	+LEN(Vari.Name$)+"_"+Vari.Name$
+		CASE VARI_IS_ATTR
+			Vari.Name$ = "attr"		+LEN(Vari.Name$)+"_"+Vari.Name$
+		CASE VARI_IS_STATIC
+			Vari.Name$ = "static"	+LEN(Vari.Name$)+"_"+Compiler.Funcs[Vari.func].OName$+"_"+Vari.Name$
+		CASE VARI_IS_PARAM
+			Vari.Name$ = "param"	+LEN(Vari.Name$)+"_"+Vari.Name$
+		CASE VARI_IS_CONST
+			Vari.Name$ = "const"	+LEN(Vari.Name$)+"_"+Vari.Name$
+		CASE VARI_IS_ALIAS
+			Vari.Name$ = "alias"	+LEN(Vari.Name$)+"_"+Vari.Name$
+	ENDSELECT
+	IF Vari.ref THEN Vari.Name$ = Vari.Name$ + "_ref"
+
+	//Nun den DIMASEXPRs die notwendige Variable ID geben
+	IF Vari.PreDef <> -1
+		IF Exprs[Vari.PreDef].Typ = EXPR_IS_DIMASEXPR
+			Exprs[Vari.PreDef].vari = Vari.ID
+		ENDIF
+	ENDIF
+ENDFUNCTION
+
+FUNCTION ChangeFuncName: Func AS IdentifierFunc
+	Func.Name$ = TRIM$(REPLACE$(Func.Name$,"$","_Str"))
+
+	Func.OName$ = Func.Name$
+	SELECT Func.Typ
+		CASE FUNC_IS_METHOD
+			Func.Name$ = "method"+LEN(Compiler.Types[Func.MyType].Name$)+"_"+Compiler.Types[Func.MyType].Name$ + "_"+LEN(Func.Name$)+"_"+Func.Name$
+		CASE FUNC_IS_FUNC
+			IF Func.Native = FALSE
+				LOCAL Found% = FALSE
+				FOREACH Exp IN Compiler.Exports[]
+					IF Exp.Name$ = Func.Name$
+						Found = TRUE
+						IF Exp.RealName$ <> ""
+							Func.Name$ = Exp.RealName$
+						ENDIF
+						BREAK
+					ENDIF
+				NEXT
+				IF NOT Found THEN Func.Name$ = "func"+LEN(Func.Name$)+"_"+Func.Name$
+			ENDIF
+		CASE FUNC_IS_SUB
+			//nichts tun!
+	ENDSELECT
+ENDFUNCTION
+
+FUNCTION ChangeTypeName$: Name$
+	IF Name$ = "string" OR Name$ = "void" OR Name$ = "float" OR Name$ = "double" OR Name$ = "int" OR Name$ = "short" OR Name$ = "byte" OR Name$ = "bool" OR Name$ = "boolean" OR Name$ = "long" OR Name$ = "single"
+		RETURN Name$
+	ELSE
+		RETURN "type"+LEN(Name$)+"_"+Name$
+	ENDIF
+ENDFUNCTION
+
+
+GLOBAL Indent%
+FUNCTION NewLine$:
+	LOCAL Text$ = "\n"
+	FOR i = 1 TO Indent
+		Text$ = Text$ + "\t"
+	NEXT
+	RETURN Text$
+ENDFUNCTION
+FUNCTION IndentUp:
+	INC Indent
+ENDFUNCTION
+FUNCTION IndentDown:
+	DEC Indent
+ENDFUNCTION
+
+
+FUNCTION ManageFuncParamOverlaps%:
+	//am ende noch die ganzen CopyParams neu setzen
+	FOREACH Func IN Compiler.Funcs[]
+		IF Func.Native = FALSE AND Func.Scp<>-1 AND Func.IsAbstract = FALSE
+			//schauen ob sich die refs der parameter unterscheiden, falls nein kann der name angeglichen werden, falls ja
+			LOCAL i% = 0
+			//params ... der neue
+			//Copyparams ... der alte
+			FOREACH P IN Func.Params[]
+				IF Compiler.Varis[P].ref <> Compiler.Varis[Func.CopyParams[i]].ref
+					//fu sie sind verschieden, das bedeutet es ist sowas wie:
+					//FUNCTION A:abc
+					//	MOUSESTATE A //A wird zur Reference, aber der parameter darf es nicht sein...
+					//ENDFUNCTION
+					//nun muss das irgendwie ganz crazy gelöst werden
+					//diese variable bekommt als zusatzinfo, dass sie rückgesetzt werden soll.
+					Compiler.Varis[P].OwnerVari = Func.CopyParams[i]
+					//STDOUT "NewParam: "+Compiler.Varis[P].ref+" OldParam: "+Compiler.Varis[Func.CopyParams[i]].ref+"\n"
+					//KEYWAIT
+				ELSE
+					//okay hier ist es gleich also muss nicht weiter beachtet werden => kann gleichgesetzt werden (allerdings wird nur der name gleich gesetzt, die variable an sich verändert sich nicht)
+					//da muss man aufpassen!
+					Compiler.Varis[Func.CopyParams[i]].Name$ = Compiler.Varis[P].Name$
+				ENDIF
+
+				INC i
+			NEXT
+		ENDIF
+	NEXT
+ENDFUNCTION

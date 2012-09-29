@@ -1,0 +1,977 @@
+//$$RESETFILE.\Elefantastic.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+SETCURRENTDIR("Media") // go to media files
+SYSTEMPOINTER TRUE
+
+CONSTANT MAIN_GAME = 0
+
+GLOBAL SolidTile% = LoadSpr("solidtile")
+GLOBAL BGSpr% = LoadSpr("bg")
+GLOBAL DestrTile% = LoadAni("destrtile", 32, 32)
+GLOBAL PlanetSpr% = LoadSpr("planet1")
+GLOBAL LineImg% = LoadSpr("line")
+
+
+GLOBAL GameState% = MAIN_GAME
+
+GLOBAL mx, my, ml, mr
+GLOBAL MouseSpeed AS TVec
+
+GLOBAL ScreenWidth%, ScreenHeight%
+GLOBAL FirstStart% = TRUE
+GETSCREENSIZE ScreenWidth, ScreenHeight
+
+
+GLOBAL Gravity AS TVec
+Gravity = CreateVec(0, .75)
+
+
+?IFNDEF HTML5
+WHILE TRUE
+	GOSUB GLB_ON_LOOP
+WEND
+?ENDIF
+SUB GLB_ON_LOOP:
+	ALPHAMODE -1
+	LOCAL ox = mx, oy = my
+	MOUSESTATE mx, my, ml, mr
+	MouseSpeed.X = mx - ox
+	MouseSpeed.Y = my - oy
+
+	STRETCHSPRITE BGSpr, 0, 0, ScreenWidth, ScreenHeight
+
+	IF FirstStart
+		SELECT GameState
+			CASE MAIN_GAME
+				GOSUB InitMainGame
+			DEFAULT
+				DEBUG "Unknown Gamestate "+GameState+"\n"
+		ENDSELECT
+		FirstStart = FALSE
+	ELSE
+		SELECT GameState
+			CASE MAIN_GAME
+				GOSUB UpdateMainGame
+				GOSUB RenderMainGame
+			DEFAULT
+				DEBUG "Unknown Gamestate "+GameState+"\n"
+		ENDSELECT
+	ENDIF
+
+	SHOWSCREEN
+ENDSUB
+
+SUB GLB_ON_LOADING:
+	PRINT "Game is loading...", 10, 10
+	SHOWSCREEN
+ENDSUB
+
+
+//$$RESETFILE.\CollisionObject.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+CONSTANT OBJECT_IS_LINE = 1
+CONSTANT OBJECT_IS_ROUNDLINE = 2
+CONSTANT OBJECT_IS_AIRSTREAM = 3
+CONSTANT OBJECT_IS_CHAINSAW = 4
+CONSTANT OBJECT_IS_BLACKHOLE = 5
+
+CONSTANT LINE_INFO_ENDPOSVEC = 0
+CONSTANT LINE_INFO_VISIBLE = 0
+
+TYPE TCollisionObject
+	Typ%
+	PosVec AS TVec
+	NormalVec AS TVec
+	DirVec AS TVec
+	CollisionRect AS TRect
+	Thickness% = 1
+
+	Info[]
+	InfoVec[] AS TVec
+
+	FUNCTION Update:
+		SELECT self.Typ
+			CASE OBJECT_IS_LINE
+
+			CASE OBJECT_IS_ROUNDLINE
+
+			CASE OBJECT_IS_AIRSTREAM
+
+			CASE OBJECT_IS_CHAINSAW
+
+			CASE OBJECT_IS_BLACKHOLE
+
+			DEFAULT
+				DEBUG "Unknown Collision Object "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Render:
+		//self.CollisionRect.Draw()
+		SELECT self.Typ
+			CASE OBJECT_IS_LINE
+				IF self.Info[LINE_INFO_VISIBLE]
+					STARTPOLY LineImg,2
+					LOCAL a = self.DirVec.Angle()+90
+					LOCAL s = SIN(a), c = COS(a)
+					LOCAL col = 0
+					POLYVECTOR self.PosVec.X+c*self.Thickness, self.PosVec.Y+s*self.Thickness,0,0,col
+					POLYVECTOR self.PosVec.X-c*self.Thickness, self.PosVec.Y-s*self.Thickness,1,0,col
+					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X+c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y+s*self.Thickness,1,0,col
+					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X-c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y-s*self.Thickness,1,1,col
+					ENDPOLY
+				ENDIF
+				//DRAWLINE self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, self.InfoVec[LINE_INFO_ENDPOSVEC].X + CurrentMap.Scroll.X, self.InfoVec[LINE_INFO_ENDPOSVEC].Y + CurrentMap.Scroll.Y, RGB(255,0,0)
+			CASE OBJECT_IS_ROUNDLINE
+
+			CASE OBJECT_IS_AIRSTREAM
+
+			CASE OBJECT_IS_CHAINSAW
+
+			CASE OBJECT_IS_BLACKHOLE
+
+			DEFAULT
+				DEBUG "Unknown Collision Object "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION DoCollision: Obj AS TFallingObject, Pen, V AS TVec
+		SELECT self.Typ
+			CASE OBJECT_IS_LINE
+				LOCAL T AS TVec
+				T = self.NormalVec
+				T.MulVec(Pen)
+				Obj.PosVec.AddVec(T)
+				T = V
+				T.Normalize()
+				LOCAL S AS TVec
+				S = V
+				S.NormalVec()
+				Obj.SpeedVec.Bounce(S, T)
+			CASE OBJECT_IS_ROUNDLINE
+
+			CASE OBJECT_IS_AIRSTREAM
+
+			CASE OBJECT_IS_CHAINSAW
+
+			CASE OBJECT_IS_BLACKHOLE
+
+			DEFAULT
+				DEBUG "Unknown Collision Object "+self.Typ+"\n"
+		ENDSELECT
+
+	ENDFUNCTION
+
+	FUNCTION GetPen: Obj AS TFallingObject, BYREF Pen, V AS TVec
+		FindIntersection(Obj, V)
+
+		Pen = (Obj.Radius + self.Thickness) - V.Length()
+	ENDFUNCTION
+
+	FUNCTION FindIntersection: Obj AS TFallingObject, ResVec AS TVec
+		LOCAL V3 AS TVec
+		V3 = Obj.PosVec
+		V3.SubVec(self.PosVec)
+
+		LOCAL NormalizedMyVec AS TVec
+		NormalizedMyVec = self.DirVec
+		NormalizedMyVec.Normalize()
+
+		IF V3.DotProd(NormalizedMyVec) < 0
+			ResVec.SetVec(V3)
+		ELSE
+			LOCAL MyPos AS TVec
+			MyPos = self.PosVec
+			MyPos.AddVec(self.DirVec)
+
+			LOCAL V4 AS TVec
+			V4 = Obj.PosVec
+			V4.SubVec(MyPos)
+
+			IF V4.DotProd(NormalizedMyVec) >  0
+				ResVec.SetVec(V4)
+			ELSE
+				V3.Project(self.NormalVec)
+				ResVec.SetVec(V3)
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+
+
+	FUNCTION CreateLine: StartVec AS TVec, EndVec AS TVec, Visible% = FALSE
+		self.Typ = OBJECT_IS_LINE
+		self.PosVec = StartVec
+		DIM self.InfoVec[1]
+		self.InfoVec[LINE_INFO_ENDPOSVEC] = EndVec
+		DIM self.Info[1]
+		self.Info[LINE_INFO_VISIBLE] = Visible
+
+		self.UpdateVectors()
+		DIMPUSH CollisionObjects[], self
+	ENDFUNCTION
+
+	FUNCTION UpdateVectors:
+		SELECT self.Typ
+			CASE OBJECT_IS_LINE
+				self.DirVec.SetVec(self.InfoVec[LINE_INFO_ENDPOSVEC])
+				self.DirVec.SubVec(self.PosVec)
+
+
+				self.CollisionRect.SetPos(self.PosVec)
+				LOCAL P AS TVec
+				P = self.InfoVec[LINE_INFO_ENDPOSVEC]
+				P.SubVec(self.PosVec)
+				self.CollisionRect.SetSize(P.X, P.Y)
+			CASE OBJECT_IS_ROUNDLINE
+
+			CASE OBJECT_IS_AIRSTREAM
+
+			CASE OBJECT_IS_CHAINSAW
+
+			CASE OBJECT_IS_BLACKHOLE
+
+			DEFAULT
+				DEBUG "Unknown Collision Object "+self.Typ+"\n"
+		ENDSELECT
+
+		self.NormalVec = self.DirVec
+		self.NormalVec.NormalVec()
+		self.NormalVec.Normalize()
+
+	ENDFUNCTION
+ENDTYPE
+
+//$$RESETFILE.\FallingObject.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+CONSTANT FALLING_IS_PLANET% = 1
+
+CONSTANT INFO_PLANET_ROTATION% = 0
+CONSTANT INFO_PLANET_ZOOM% = 1
+
+TYPE TFallingObject
+	Typ%
+
+	PosVec AS TVec
+	SpeedVec AS TVec
+	MassVec AS TVec
+	CollisionRect AS TRect
+
+	Radius%; RealRadius%
+	Info[]
+
+	FUNCTION Update:
+		self.SpeedVec.AddVec(self.MassVec)
+		IF self.SpeedVec.Length() > 12
+		//	self.SpeedVec.Normalize()
+		//	self.SpeedVec.MulVec(12)
+		ENDIF
+		//self.PosVec.AddVec(self.SpeedVec)
+
+		CONSTANT STEPSIZE = 3.0
+		LOCAL SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
+		LOCAL SubSpeed AS TVec
+		SubSpeed = self.SpeedVec
+		SubSpeed.DivVec(SubT)
+
+		FOR i = 1 TO SubT
+			self.PosVec.AddVec(SubSpeed)
+			self.CollisionRect.SetXY(self.PosVec.X - self.Radius*2, self.PosVec.Y - self.Radius*2)
+
+			LOCAL Pen = -1, V AS TVec, Obj% = -1
+			FOR j = 0 TO LEN(CollisionObjects[])-1
+				ALIAS O AS CollisionObjects[j]
+				LOCAL TmpPen, TmpV AS TVec
+				IF self.CollisionRect.Collision(O.CollisionRect)
+					O.GetPen(self, TmpPen, TmpV)
+					// DEBUG TmpPen+"\n"
+					IF TmpPen >= Pen AND TmpPen >= 0
+						Pen = TmpPen
+						V = TmpV
+						Obj = j
+					ENDIF
+				ENDIF
+			NEXT
+
+			IF Pen >= 0 AND Obj <> -1
+				// DEBUG "lol "+V.X+" "+V.Y+"\n"
+				CollisionObjects[Obj].DoCollision(self, INTEGER(Pen-1), V)
+				SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
+				SubSpeed = self.SpeedVec
+				SubSpeed.DivVec(SubT)
+				i = 1
+			ENDIF
+		NEXT
+
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				INC self.Info[INFO_PLANET_ROTATION], self.SpeedVec.Length()
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+
+		IF self.PosVec.Y > (CurrentMap.Height+32)*TILESIZE
+			RETURN TRUE
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		//self.CollisionRect.Draw()
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				LOCAL z = self.Info[INFO_PLANET_ZOOM]
+				//DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
+				LOCAL a = self.Radius * (z*4) + self.RealRadius*z
+				ROTOZOOMSPRITE PlanetSpr, self.PosVec.X + CurrentMap.Scroll.X-a, self.PosVec.Y + CurrentMap.Scroll.Y-a, self.Info[INFO_PLANET_ROTATION], z
+
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Create: Typ%, Radius, X, Y
+		self.Typ = Typ
+		self.PosVec.SetXY(X, Y)
+		self.Radius = Radius
+		self.MassVec = Gravity
+		self.MassVec.MulVec(Radius/50)
+
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				DIM self.Info[2]
+				LOCAL sx%, sy%
+				GETSPRITESIZE PlanetSpr, sx%, sy%
+				LOCAL m = MAX(sx, sy)
+				self.RealRadius = m/2
+				self.Info[INFO_PLANET_ZOOM] = Radius / m * 2
+
+				LOCAL z = self.Info[INFO_PLANET_ZOOM]
+				LOCAL tmp AS TVec
+				tmp.SetXY(Radius*z*2,  Radius*z*2)
+				self.PosVec.SubVec(tmp)
+
+				self.CollisionRect.SetSize(Radius*4, Radius*4)
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+
+		DIMPUSH FallingObjects[], self
+	ENDFUNCTION
+ENDTYPE
+
+
+
+//$$RESETFILE.\MainGame.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+GLOBAL CurrentMap AS TGameMap
+
+GLOBAL FallingObjects[] AS TFallingObject
+GLOBAL CollisionObjects[] AS TCollisionObject
+
+GLOBAL CreateObjDelay%, MaxObj%, LastCreateObj%
+GLOBAL SpawnPos AS TVec
+GLOBAL TargetPos AS TVec
+
+CONSTANT TOOL_IS_LINE = 1
+
+GLOBAL SelectedTool% = TOOL_IS_LINE
+GLOBAL Line_Picked%, Line_PickedPos AS TVec
+
+SUB UpdateMainGame:
+	IF GETTIMERALL() - LastCreateObj >= CreateObjDelay OR LastCreateObj = 0
+		IF LEN(FallingObjects[]) <= MaxObj
+			LOCAL FO AS TFallingObject
+			FO.Create(FALLING_IS_PLANET, 12, SpawnPos.X, SpawnPos.Y)
+			LastCreateObj = GETTIMERALL()
+		ENDIF
+	ENDIF
+
+	IF NOT IsFixTool()
+		IF ml
+			CurrentMap.Scroll.AddVec(MouseSpeed)
+			CurrentMap.ScrollSpeed = MouseSpeed
+		ELSE
+			CurrentMap.ScrollSpeed.MulVec(.9)
+			CurrentMap.Scroll.AddVec(CurrentMap.ScrollSpeed)
+		ENDIF
+	ENDIF
+
+	SELECT SelectedTool
+		CASE TOOL_IS_LINE
+			IF ml AND NOT Line_Picked
+				Line_Picked = TRUE
+				Line_PickedPos = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
+			ELSEIF Line_Picked AND NOT ml
+				Line_Picked = FALSE
+				//SelectedTool = 0
+
+				LOCAL l AS TCollisionObject
+				LOCAL b AS TVec
+				b = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
+				l.CreateLine(Line_PickedPos, b, TRUE)
+			ENDIF
+	ENDSELECT
+
+
+	CurrentMap.Update()
+
+	FOREACH Obj IN FallingObjects[]
+		IF Obj.Update() THEN DELETE Obj
+	NEXT
+
+	FOREACH Obj IN CollisionObjects[]
+		IF Obj.Update() THEN DELETE Obj
+	NEXT
+
+ENDSUB
+
+SUB RenderMainGame:
+	FOREACH Obj IN FallingObjects[]
+		Obj.Render()
+	NEXT
+
+	CurrentMap.Render()
+
+	FOREACH Obj IN CollisionObjects[]
+		Obj.Render()
+	NEXT
+
+	SELECT SelectedTool
+		CASE TOOL_IS_LINE
+			IF Line_Picked
+				DRAWLINE Line_PickedPos.X - CurrentMap.Scroll.X, Line_PickedPos.Y - CurrentMap.Scroll.Y, mx, my, RGB(255,0,0)
+			ENDIF
+	ENDSELECT
+ENDSUB
+
+SUB InitMainGame:
+	CurrentMap.Create("map0")
+	
+ENDSUB
+
+FUNCTION IsFixTool%:
+	IF SelectedTool <> TOOL_IS_LINE
+		RETURN FALSE
+	ELSE
+		RETURN TRUE
+	ENDIF
+ENDFUNCTION
+
+
+
+//$$RESETFILE.\Map.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+CONSTANT TILESIZE% = 32
+
+TYPE TGameMap
+	Tiles[] AS TTile
+	Width%; Height%
+	Scroll AS TVec
+	ScrollSpeed AS TVec
+
+	FUNCTION Update:
+		IF self.Scroll.X > ScreenWidth/4
+			self.Scroll.X = ScreenWidth/4
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.X <  -(self.Width*TILESIZE - ScreenWidth/4*3)
+			self.Scroll.X = -(self.Width*TILESIZE - ScreenWidth/4*3)
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.Y > ScreenHeight/4
+			self.Scroll.Y = ScreenHeight/4
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.Y <  -(self.Height*TILESIZE - ScreenHeight/4*3)
+			self.Scroll.Y = -(self.Height*TILESIZE - ScreenHeight/4*3)
+			self.ScrollSpeed.Reverse()
+		ENDIF
+
+
+		FOR x = 0 TO self.Width - 1
+			FOR y = 0 TO self.Height - 1
+				ALIAS T AS self.Tiles[x][y]
+				T.Update()
+			NEXT
+		NEXT
+	ENDFUNCTION
+
+	FUNCTION Render:
+		FOR x = 0 TO self.Width - 1
+			FOR y = 0 TO self.Height - 1
+				ALIAS T AS self.Tiles[x][y]
+				T.Render()
+			NEXT
+		NEXT
+	ENDFUNCTION
+
+
+	FUNCTION Create: File$
+		LOCAL file% = GENFILE()
+		IF NOT OPENFILE(file, "map/"+File$+".map", TRUE) THEN DEBUG "Map loading failed\n"
+		LOCAL r%
+		READUBYTE file, r
+		IF r <> 42
+			DEBUG "Unsupported file format"
+			RETURN
+		ENDIF
+
+		READLONG file, self.Width
+		READLONG file, self.Height
+		DEBUG "Map size: "+self.Width+", "+self.Height+"\n"
+
+		LOCAL Foo% = 42
+		READLONG file, Foo // Elephant lifes
+		READLONG file, CreateObjDelay% // Elephant delay
+		READLONG file, MaxObj% // Max Elephants
+		READLONG file, Foo // Max Anti Materie
+		READLONG file, Foo // Max Matter
+
+		IF MaxObj = -1
+			MaxObj = 25
+		ENDIF
+
+		DIM self.Tiles[self.Width][self.Height]
+
+
+
+		LOCAL myr%
+		READUBYTE file, myr
+		WHILE myr <> 42
+			FOR x% = 0 TO self.Width - 1
+				FOR y = 0 TO self.Height - 1
+					SELECT myr
+						CASE 0
+							READUBYTE file, r
+							LOCAL Typ% = 0
+							IF r
+								LOCAL l%, data$
+								READLONG file, l
+								READSTR file, data$, l
+								Typ = data$
+							ENDIF
+
+							ALIAS T AS self.Tiles[x][y]
+							T.Create(Typ, x, y)
+						CASE 1
+							READUBYTE file, r
+							IF r
+								LOCAL l%, data$
+								READLONG file, l
+								DEBUG "l: "+l+"\n"
+								READSTR file, data$, l
+								LOCAL Params$[]
+								IF SPLITSTR(data$, Params$[], "\n")
+									SELECT Params$[0]
+										CASE "mirror"
+
+										CASE "roundmirror"
+
+										CASE "blackhole"
+
+										CASE "airstream"
+
+										DEFAULT
+											DEBUG "Unknown Parameter "+Params$[0]+" "+data$+"\n"
+									ENDSELECT
+								ENDIF
+							ENDIF
+					ENDSELECT
+				NEXT
+			NEXT
+			READUBYTE file, myr
+		WEND
+
+		?IFDEF GLB_DEBUG
+		// map
+		FOR y = 0 TO self.Height - 1
+			FOR x = 0 TO self.Width - 1
+				ALIAS t AS self.Tiles[x][y]
+				DEBUG t.Typ+ ", "
+			NEXT
+			DEBUG "\n"
+		NEXT
+		?ENDIF
+
+		// create collision lines
+		FOR x% = 0 TO self.Width - 1
+			FOR y% = 0 TO self.Height - 1
+				ALIAS t AS self.Tiles[x][y]
+				IF t.IsSolid()
+					LOCAL dirl%, dirr%, dirt%, dirb%
+					self.Empty(x, y, dirl, dirr, dirt, dirb)
+
+
+					LOCAL l AS TCollisionObject
+					LOCAL a AS TVec, b AS TVec
+
+
+					IF dirt
+						a = CreateVec(x*TILESIZE,y*TILESIZE)
+						b = CreateVec((x+1)*TILESIZE,y*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirr
+						a = CreateVec((x+1)*TILESIZE,y*TILESIZE)
+						b = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirb
+						a = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
+						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirl
+						a = CreateVec(x*TILESIZE,y*TILESIZE)
+						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+				ENDIF
+			NEXT
+		NEXT
+
+		CLOSEFILE file
+	ENDFUNCTION
+
+	FUNCTION Empty: x%, y%, BYREF l%, BYREF r%, BYREF t%, BYREF b%
+		IF y = 0
+			t = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x][y-1]
+			IF t1.IsSolid()
+				t = FALSE
+			ELSE
+				t = TRUE
+			ENDIF
+		ENDIF
+
+		IF x = self.Width - 1
+			r = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x+1][y]
+			IF t1.IsSolid()
+				r = FALSE
+			ELSE
+				r = TRUE
+			ENDIF
+		ENDIF
+
+		IF y = self.Height - 1
+			b = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x][y+1]
+			IF t1.IsSolid()
+				b = FALSE
+			ELSE
+				b = TRUE
+			ENDIF
+		ENDIF
+
+		IF x = 0
+			l = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x-1][y]
+			IF t1.IsSolid()
+				l = FALSE
+			ELSE
+				l = TRUE
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+ENDTYPE
+
+
+
+CONSTANT TILE_IS_EMPTY%  = 0
+CONSTANT TILE_IS_SPAWN%	 = 1
+CONSTANT TILE_IS_SOLID%  = 2
+CONSTANT TILE_IS_TARGET% = 3
+CONSTANT TILE_IS_DESTR%  = 4
+CONSTANT TILE_IS_KILLER  = 5
+
+CONSTANT INFO_DESTR_STATE = 0
+
+TYPE TTile
+	Typ%
+	X%; Y%
+	PosVec AS TVec
+	Info[]
+	RelatedLines%[]
+
+	FUNCTION Update:
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+
+			CASE TILE_IS_SOLID
+				DRAWSPRITE SolidTile, self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
+			CASE TILE_IS_TARGET
+
+			CASE TILE_IS_DESTR
+				//DRAWRECT self.PosVec.X, self.PosVec.Y, 32, 32, RGB(255,0,0)
+				DRAWANIM DestrTile, self.Info[INFO_DESTR_STATE], self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Render:
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+				DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
+			CASE TILE_IS_SOLID
+
+			CASE TILE_IS_TARGET
+
+			CASE TILE_IS_DESTR
+
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Create: Typ%, X%, Y%
+		self.Typ = Typ
+		self.X = X
+		self.Y = Y
+
+		self.PosVec.SetXY(X*TILESIZE, Y*TILESIZE)
+
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+				SpawnPos = self.PosVec
+			CASE TILE_IS_SOLID
+
+			CASE TILE_IS_TARGET
+				TargetPos = self.PosVec
+			CASE TILE_IS_DESTR
+				DIM self.Info[1]
+				self.Info[INFO_DESTR_STATE] = 0
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION IsSolid%:
+		SELECT self.Typ
+			CASE TILE_IS_SOLID
+				RETURN TRUE
+			CASE TILE_IS_DESTR
+				RETURN TRUE
+			CASE TILE_IS_KILLER
+				RETURN TRUE
+		ENDSELECT
+		RETURN FALSE
+	ENDFUNCTION
+ENDTYPE
+
+
+//$$RESETFILE.\Rect.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Tuesday, August 07, 2012
+// IDE Version: 10.283
+
+
+TYPE TRect
+	StartVec AS TVec
+	Width; Height
+
+	FUNCTION SetPos: V AS TVec
+		self.StartVec.SetVec(V)
+	ENDFUNCTION
+
+	FUNCTION SetXY: X, Y
+		self.StartVec.SetXY(X, Y)
+	ENDFUNCTION
+
+	FUNCTION SetSize: W, H
+		self.Width = W
+		self.Height = H
+	ENDFUNCTION
+
+	FUNCTION Collision: R AS TRect
+		RETURN BOXCOLL(R.StartVec.X, R.StartVec.Y, R.Width, R.Height, self.StartVec.X, self.StartVec.Y, self.Width, self.Height)
+	ENDFUNCTION
+
+	FUNCTION Draw:
+		DRAWRECT self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.Width, self.Height, RGB(0,0,255)
+		DRAWLINE self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.StartVec.X+self.Width + CurrentMap.Scroll.X, self.StartVec.Y+self.Height + CurrentMap.Scroll.Y, RGB(255,0,0)
+	ENDFUNCTION
+ENDTYPE
+
+
+//$$RESETFILE.\Util.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+FUNCTION LoadSpr%: Path$
+	LOCAL ID% = GENSPRITE()
+	LOADSPRITE "gfx/"+Path$+".png", ID
+	RETURN ID
+ENDFUNCTION
+
+FUNCTION LoadAni%: Path$, w%, h%
+	LOCAL ID% = GENSPRITE()
+	LOADANIM "gfx/"+Path$+".png", ID, w, h
+	RETURN ID
+ENDFUNCTION
+
+
+//$$RESETFILE.\Vec.gbas
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+TYPE TVec
+	X; Y
+	vlen
+
+	FUNCTION MulVec: Val
+		self.X = self.X * Val
+		self.Y = self.Y * Val
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION DivVec: Val
+		self.X = self.X / Val
+		self.Y = self.Y / Val
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION AddVec: V AS TVec
+		INC self.X, V.X
+		INC self.Y, V.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SubVec: V AS TVec
+		DEC self.X, V.X
+		DEC self.Y, V.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SetXY: X, Y
+		self.X = X
+		self.Y = Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SetVec: V AS TVec
+		self.X = V.X
+		self.Y = V.Y
+		self.vlen = V.vlen
+	ENDFUNCTION
+
+	FUNCTION Reverse:
+		self.MulVec(-1)
+	ENDFUNCTION
+
+	FUNCTION Length:
+		IF self.vlen = -1
+			self.vlen = SQR(self.X*self.X + self.Y*self.Y)
+		ENDIF
+		RETURN self.vlen
+	ENDFUNCTION
+
+	FUNCTION Normalize:
+		IF self.vlen = -1
+			self.Length()
+		ENDIF
+		IF self.vlen > 0
+			self.X = self.X / self.vlen
+			self.Y = self.Y / self.vlen
+			self.vlen = 1
+		ELSE
+			self.X = 0
+			self.Y = 0
+			self.vlen = 0
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION NormalVec:
+		LOCAL tmp = self.Y
+		self.Y = self.X
+		self.X = -tmp
+	ENDFUNCTION
+
+	FUNCTION Bounce: NormalizedVec AS TVec, NormVec AS TVec
+		LOCAL Proj1 AS TVec, Proj2 AS TVec
+		Proj1 = self
+		Proj2 = self
+		Proj1.Project(NormalizedVec)
+		Proj2.Project(NormVec)
+		LOCAL tmp AS TVec
+		tmp = NormVec
+		tmp.MulVec(Proj2.Length())
+
+		self.X = Proj1.X + tmp.X
+		self.Y = Proj1.Y + tmp.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION Project: V AS TVec
+		LOCAL T AS TVec
+		T = V
+		T.Normalize()
+		T.MulVec(self.DotProd(T))
+		self.X = T.X
+		self.Y = T.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION DotProd: V AS TVec
+		RETURN self.X*V.X + self.Y*V.Y
+	ENDFUNCTION
+	
+	FUNCTION Angle:
+		RETURN ATAN(self.Y, self.X)
+	ENDFUNCTION
+ENDTYPE
+
+FUNCTION CreateVec AS TVec: X, Y
+	LOCAL V AS TVec
+	V.SetXY(X, Y)
+	RETURN V
+ENDFUNCTION
+

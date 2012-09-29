@@ -1,0 +1,237 @@
+// --------------------------------- //
+// Project: JumpIt
+// Start: Sunday, September 25, 2011
+// IDE Version: 10.118
+
+// Spieler
+TYPE TPlayer
+	X; Y
+	VX; VY
+	Width%; Height%
+	Anim%
+	// ...
+
+	FUNCTION Init: X, Y, Width% = 16, Height% = 32
+		self.X 		= X
+		self.Y 		= Y
+		self.VX 	= 0
+		self.VY 	= 0
+
+		self.Width 	= Width
+		self.Height = Height
+	ENDFUNCTION
+
+	FUNCTION Update:
+		LOCAL ScrWidth, ScrHeight
+		GETSCREENSIZE ScrWidth, ScrHeight
+
+		//schwerkraft
+		INC self.VY, .5
+
+		//bewegung
+		IF KEY(203) OR UpdateGameButton(42,ScrHeight - 42) THEN DEC self.VX, 1//links
+		IF KEY(205) OR UpdateGameButton(ScrWidth - 42,ScrHeight - 42) THEN INC self.VX, 1 //rechts
+		IF KEY(57) OR (UpdateGameButton(42, ScrHeight - 125) OR UpdateGameButton(ScrWidth - 42, ScrHeight - 125))
+			IF Map.PickTile(self.X+self.Width/2, self.Y) = 2 //leiter
+				self.VY = 0
+				DEC self.Y, 4
+
+				WHILE Map.PickTile(self.X+self.Width/2, self.Y) <> 2
+					INC self.Y, 1
+				WEND
+
+			ELSEIF (Map.CollisionPoint(self.X + 1, self.Y + self.Height + 1) OR Map.CollisionPoint(self.X + self.Width - 1, self.Y + self.Height + 1)) //springen
+				self.VY = -8
+			ENDIF
+		ENDIF
+
+		//nächste map laden?
+		IF Map.PickTile(self.X+self.Width/2, self.Y+self.Height/2) = 10
+			//yay nächste map!111
+			IF Map.NextMap$ = ""
+				END //TODO
+			ELSE
+				Map.Init(Map.NextMap$)
+				THROW "Exit"
+			ENDIF
+		ENDIF
+
+		//trägheit
+		self.VX = self.VX * (.77+Map.IsSnow*.1)
+
+		//grenze
+		IF self.VY > Tilesize-1 THEN self.VY = Tilesize-1
+		IF self.VY < -Tilesize-1 THEN self.VY = -Tilesize-1
+
+
+		LOCAL OldX, OldY
+		OldX = self.X
+		OldY = self.Y
+
+		//bewege und kollision
+		INC self.X, self.VX
+		IF Map.Collision(self.X+1, self.Y+1, self.Width-2, self.Height-2)
+			self.X = OldX
+		ENDIF
+
+		INC self.Y, self.VY
+		IF Map.Collision(self.X+1, self.Y+1, self.Width-2, self.Height-2)
+			self.Y = OldY
+			self.VY = 0
+		ENDIF
+
+		//animation
+		IF ABS(self.VX)>.1
+			INC self.Anim, 1
+			self.Anim = MOD(self.Anim, 15)
+		ELSE
+			self.Anim = 13
+		ENDIF
+
+		//spikes
+		IF Map.PickTile(self.X+4, self.Y - Map.SpikePosition  + Tilesize  - 1) = 3 OR Map.PickTile(self.X + self.Width-4, self.Y - Map.SpikePosition + Tilesize - 1) = 3
+			self.Reset()
+		ENDIF
+
+		//trampolin
+		IF Map.PickTile(self.X+2, self.Y + self.Height + self.VY - 16) = 5 OR Map.PickTile(self.X + self.Width-4, self.Y + self.Height + self.VY - 16) = 5 AND ABS(self.VY)>.25
+			self.VY = -self.VY*1.1
+		ENDIF
+
+		//schalter
+		IF Map.PickTile(self.X, self.Y + self.Height + self.VY - 16) = 12 OR Map.PickTile(self.X + self.Width-4, self.Y + self.Height + self.VY - 16) = 12
+			//yay es ist in der map!
+			Map.Datas[Map.LastPickX][Map.LastPickY] = 13
+			Map.IsRenderedFBO = FALSE
+
+			//suche das nächste dynamit
+			LOCAL LastPosX, LastPosY, Dist = -1
+			FOR x = 0 TO Map.Width - 1
+				FOR y = 0 TO Map.Height - 1
+					IF Map.Datas[x][y] = 11
+						LOCAL TmpDist = SQR((x-Map.LastPickX)*(x-Map.LastPickX) + (y-Map.LastPickY)*(y-Map.LastPickY))
+						IF Dist = -1 OR TmpDist < Dist
+							Dist = TmpDist
+							LastPosX = x
+							LastPosY = y
+						ENDIF
+					ENDIF
+				NEXT
+			NEXT
+
+			IF Dist <> -1
+				//druckwelle
+				LOCAL X1, Y1, X2,Y2
+				//DEBUG LastPosX+" "+LastPosY+"\n"
+				Y1 = LastPosY*Tilesize + 16; Y1 = self.Y + self.Height/2
+				X1 = LastPosX*Tilesize + 16; X2 = self.X + self.Width/2
+				LOCAL Angle = -MOD(ATAN((Y1 - Y2), (X1 - X2)) + 180, 360)
+				LOCAL Dist = SQR((X1 - X2)*(X1 - X2) + (Y1 - Y2)*(Y1 - Y2))
+				//DEBUG Dist
+				IF Dist < 512
+					LOCAL Strength = 256/(Dist+1)*16
+					INC self.VX, QCOS(Angle)*Strength
+					INC self.VY, QSIN(Angle)*Strength
+				ENDIF
+
+				//explosion und so
+				FOR X = -1 TO 1
+					FOR Y = -1 TO 1
+						Map.RemoveTile(LastPosX+X, LastPosY+Y)
+						FOR XX = -0.5 TO 0.5 STEP 0.5
+							FOR YY = -0.5 TO 0.5 STEP 0.5
+								IF (INTEGER(RND(2))>1)
+									LOCAL Exp AS TExplosion
+									Exp.Init((LastPosX+X+XX)*Tilesize, (LastPosY+Y+YY)*Tilesize)
+								ENDIF
+							NEXT
+						NEXT
+					NEXT
+				NEXT
+
+				//gegner aua machen
+				FOREACH Enemy IN Enemys[]
+					IF SQR((Enemy.X - LastPosX*Tilesize)*(Enemy.X - LastPosX*Tilesize) + (Enemy.Y - LastPosY*Tilesize)) < Tilesize
+						Enemy.Fall = TRUE
+					ENDIF
+				NEXT
+			ENDIF
+		ENDIF
+
+
+		//gegner kollision
+		FOREACH Enemy IN Enemys[]
+			IF Enemy.Fall = FALSE
+				IF BOXCOLL(self.X+2,self.Y+2,self.Width-4,self.Height+4,Enemy.X+4,Enemy.Y-8,Enemy.Width-8,16) AND Enemy.IsDestroyable() AND self.VY<>0
+					Enemy.Fall = TRUE
+				ELSEIF BOXCOLL(self.X+2,self.Y+2,self.Width-4,self.Height-4,Enemy.X+2,Enemy.Y+2,Enemy.Width-4,Enemy.Height-4)
+					self.Reset()
+					BREAK
+				ENDIF
+			ENDIF
+		NEXT
+
+		//exkrementkollision
+		FOREACH S IN Shits[]
+			IF BOXCOLL(self.X, self.Y, self.Width, self.Height, S.X, S.Y, 16, 16) AND S.VY <> 0
+				self.Reset()
+				DELETE S
+			ENDIF
+		NEXT
+
+		//spuckkollision
+		FOREACH S IN Spits[]
+			IF BOXCOLL(self.X, self.Y, self.Width, self.Height, S.X, S.Y, 8, 8) AND S.VY <> 0
+				self.Reset()
+				DELETE S
+			ENDIF
+		NEXT
+
+
+		//ist der spieler unter die Map gefallen?
+		IF (self.Y - self.Height*2) > Map.Height*Tilesize
+			self.Reset()
+		ENDIF
+
+		//scrolling
+		Map.ScrollX = -self.X + ScrWidth/2 + self.Width/2
+		Map.ScrollY = -self.Y + ScrHeight/2 + self.Height/2
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL CurAnim%
+		IF self.Anim > 10
+			CurAnim = 0
+		ELSEIF self.Anim > 5
+			CurAnim = 1
+		ELSE
+			CurAnim = 2
+		ENDIF
+		LOCAL Dir%
+
+		IF self.VX < 0
+			Dir = 1
+		ELSE
+			Dir = 0
+		ENDIF
+
+
+		TurnImage(PlayerImage, CurAnim, Dir, self.X + 1, self.Y, 6)
+	ENDFUNCTION
+
+	FUNCTION Reset:
+		self.X = Map.SpawnX
+		self.Y = Map.SpawnY
+		self.VX = 0
+		self.VY = 0
+	ENDFUNCTION
+ENDTYPE
+
+
+FUNCTION TurnImage: Img%, Frame%, Dir%,X,Y, MaxFrame%
+	IF Dir
+		Frame = (MaxFrame - 1) - Frame
+	ENDIF
+
+	DRAWANIM Img,Frame, X + Map.ScrollX, Y + Map.ScrollY
+ENDFUNCTION

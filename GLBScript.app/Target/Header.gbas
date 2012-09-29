@@ -1,0 +1,886 @@
+?IF DEFINED(GLBSCRIPT) AND NOT DEFINED(GLB_HEADER)
+	?DEFINE GLB_HEADER
+	TYPE TObject
+		FUNCTION ToString$:
+			RETURN "Object"
+		ENDFUNCTION
+		FUNCTION Equals%: Obj AS TObject
+			IF Obj = self
+				RETURN TRUE
+			ELSE
+				RETURN FALSE
+			ENDIF
+		ENDFUNCTION
+		FUNCTION ToHashCode%:
+			RETURN 0
+		ENDFUNCTION
+	ENDTYPE
+
+	?IFDEF ADDON_2D
+		NATIVE FUNCTION PUSHLOOP AS void: loop$
+		NATIVE FUNCTION POPLOOP AS void:
+		NATIVE FUNCTION GETCURRENTLOOP$:
+		NATIVE FUNCTION RETURNTOLOOP: loop$
+
+		NATIVE FUNCTION GETTIMER:
+		NATIVE FUNCTION LOADSPRITE AS void: Path$, num%
+		NATIVE FUNCTION MEM2SPRITE%: pixARGB%[], num%, width%, height%
+		NATIVE FUNCTION SPRITE2MEM%: pixels%[], num%
+		NATIVE FUNCTION LOADANIM AS void: Path$, num%, width%, height%
+		NATIVE FUNCTION CREATESCREEN AS void: screenid%, spriteid%, width%, height%
+		NATIVE FUNCTION GRABSPRITE AS void: num%, x, y, width%, height%
+		NATIVE FUNCTION LOADBMP AS void: bmp$
+		NATIVE FUNCTION SAVEBMP AS void: bmp$
+		NATIVE FUNCTION SAVESPRITE AS void: file$, num%
+		NATIVE FUNCTION USEASBMP AS void:
+		NATIVE FUNCTION LOADSPRITEMEM%: file$, BYREF width, BYREF height, pixRGBA%[]
+
+		NATIVE FUNCTION SETSCREEN AS void: width%, height%, fullscreen%
+		NATIVE FUNCTION USESCREEN AS void: id%
+		NATIVE FUNCTION DRAWSPRITE AS void: num%, x, y
+		NATIVE FUNCTION ROTOSPRITE AS void: num%, x, y, phi
+		NATIVE FUNCTION ZOOMSPRITE AS void: num%, x, y, sx, sy
+		NATIVE FUNCTION STRETCHSPRITE AS void: num%, x, y, width, height
+		NATIVE FUNCTION ROTOZOOMSPRITE AS void: num%, x, y, phi, scale
+
+		NATIVE FUNCTION DRAWANIM AS void: num%, anim%, x, y
+		NATIVE FUNCTION ROTOANIM AS void: num%, anim%, x, y, phi
+		NATIVE FUNCTION ZOOMANIM AS void: num%, anim%, x, y, sx, sy
+		NATIVE FUNCTION STRETCHANIM AS void: num%, anim%, x, y, width, height
+		NATIVE FUNCTION ROTOZOOMANIM AS void: num%, anim%, x, y, phi, scale
+		NATIVE FUNCTION SETSPRITEANIM AS void: id%, width%, height%
+
+		NATIVE FUNCTION DRAWRECT AS void: x, y, w, h, col%
+		NATIVE FUNCTION DRAWLINE AS void: x1, y1, x2, y2, col%
+		NATIVE FUNCTION SETPIXEL: x, y, col
+
+		NATIVE FUNCTION RGB%: r%, g%, b%
+		NATIVE FUNCTION SHOWSCREEN AS void:
+		NATIVE FUNCTION CLEARSCREEN AS void: col%
+		NATIVE FUNCTION BLACKSCREEN AS void:
+		NATIVE FUNCTION BLENDSCREEN AS void: bmp$, duration%
+
+		NATIVE FUNCTION GETSCREENSIZE AS void: BYREF width, BYREF height
+		NATIVE FUNCTION GETDESKTOPSIZE AS void: BYREF width, BYREF height
+		NATIVE FUNCTION GETSPRITESIZE AS void: Img, BYREF width, BYREF height
+		NATIVE FUNCTION GETPIXEL%: x, y
+
+		NATIVE FUNCTION PRINT AS void: Text$, x, y, Kerning% = FALSE
+		NATIVE FUNCTION LOADFONT AS void: file$, num%
+		NATIVE FUNCTION SETFONT AS void: num%
+		NATIVE FUNCTION GETFONTSIZE AS void: BYREF width, BYREF height
+
+		NATIVE FUNCTION SETTRANSPARENCY: col#
+		NATIVE FUNCTION SPRCOLL%: id1%, x1, y1, id2%, x2, y2
+		NATIVE FUNCTION ANIMCOLL%: ani1%, id1%, x1%, y1%, ani2%, id2%, x2%, y2%
+		NATIVE FUNCTION VIEWPORT AS void: x, y, width, height
+		NATIVE FUNCTION ALPHAMODE AS void: alpha
+		NATIVE FUNCTION ALPHATESTING AS void: grnth
+
+		NATIVE FUNCTION ALLOWESCAPE: allow%
+		NATIVE FUNCTION AUTOPAUSE: mode%
+
+		NATIVE FUNCTION STARTPOLY AS void: num%, mode% = 0
+		NATIVE FUNCTION POLYVECTOR AS void: x, y, texx = 0, texy = 0, col = RGB(255,255,255)
+		NATIVE FUNCTION POLYNEWSTRIP AS void:
+		NATIVE FUNCTION ENDPOLY AS void:
+
+		NATIVE FUNCTION ISFULLSCREEN%:
+		NATIVE FUNCTION SMOOTHSHADING AS void: smooth%
+		NATIVE FUNCTION GETVIEWPORT: BYREF x%, BYREF y%, BYREF width%, BYREF height%
+
+		NATIVE FUNCTION SETORIENTATION AS void: mode%
+		NATIVE FUNCTION GETORIENTATION%:
+	?ENDIF
+
+	?IFDEF ADDON_INPUT
+		NATIVE FUNCTION SYSTEMPOINTER AS void: show%
+		NATIVE FUNCTION MOUSESTATE AS void: BYREF x, BYREF y, BYREF mr, BYREF ml
+		NATIVE FUNCTION KEY%: KEY%
+		NATIVE FUNCTION HIBERNATE AS void:
+		NATIVE FUNCTION MOUSEAXIS: ax%
+		NATIVE FUNCTION INKEY$:
+		?IFNDEF HTML5
+		NATIVE FUNCTION MOUSEWAIT AS void:
+		NATIVE FUNCTION INPUT AS void: BYREF wert$, x, y, kerning% = FALSE
+		?ENDIF
+		NATIVE FUNCTION GETMOUSECOUNT%:
+		NATIVE FUNCTION SETACTIVEMOUSE AS void: num%
+		NATIVE FUNCTION SETMOUSE AS void: x, y
+
+		NATIVE FUNCTION JOYSTATE AS void: BYREF jx, BYREF jy, BYREF ja, BYREF jb
+		NATIVE FUNCTION GETNUMJOYSTICKS%:
+		NATIVE FUNCTION GETJOYNAME$: n%
+		NATIVE FUNCTION GETJOYX: n%
+		NATIVE FUNCTION GETJOYY: n%
+		NATIVE FUNCTION GETJOYZ: n%
+		NATIVE FUNCTION GETJOYRX: n%
+		NATIVE FUNCTION GETJOYRY: n%
+		NATIVE FUNCTION GETJOYRZ: n%
+		NATIVE FUNCTION GETJOYBUTTON: n%, m%
+		NATIVE FUNCTION GETDIGIX: n%
+		NATIVE FUNCTION GETDIGIY: n%
+
+		NATIVE FUNCTION FORCEFEEDBACK AS void: joy, duraation, x, y
+
+		NATIVE FUNCTION ANYKEY%:
+		NATIVE FUNCTION ANYMOUSE%:
+	?ENDIF
+
+	?IFDEF ADDON_CONSOLE
+		NATIVE FUNCTION SEEDRND: seed%
+		NATIVE FUNCTION RND: val
+
+		NATIVE FUNCTION STDOUT AS void: output$
+		NATIVE FUNCTION STDCOLOR AS void: forefround%, background%
+		NATIVE FUNCTION STDERR AS void: err$
+		NATIVE FUNCTION STDIN$:
+
+		?IFNDEF HTML5
+		NATIVE FUNCTION KEYWAIT AS void:
+		?ENDIF
+
+		NATIVE FUNCTION END AS void:
+		NATIVE FUNCTION PLATFORMINFO$: info$
+		NATIVE FUNCTION GETTIMERALL%:
+		NATIVE FUNCTION LIMITFPS AS void: fps%
+
+		NATIVE FUNCTION GETLASTERROR$:
+		NATIVE FUNCTION SHELLCMD: cmd$, wait, show, BYREF rv
+		NATIVE FUNCTION SHELLEND AS void: cmd$
+		NATIVE FUNCTION CALLBYNAME%: name$
+		NATIVE FUNCTION SLEEP AS void: ms%
+
+		NATIVE FUNCTION BOXCOLL%: x1%, y1%, w1%, h1%, x2%, y2%, w2%, h2%
+		NATIVE FUNCTION FINDPATH%: map[], result[], heu, startx#, starty#, endx#, endy#
+		NATIVE FUNCTION SWAP AS void: BYREF a, BYREF b
+		NATIVE FUNCTION SORTARRAY: array[], cmp% = 0
+		NATIVE FUNCTION INTEGER%: num
+		NATIVE FUNCTION POW: value, p
+		NATIVE FUNCTION SQR: a
+		NATIVE FUNCTION MOD%: value%, m%
+		NATIVE FUNCTION FMOD: value, m
+		NATIVE FUNCTION MIN%: a, b
+		NATIVE FUNCTION MAX%: a, b
+		NATIVE FUNCTION ABS: num
+		NATIVE FUNCTION SGN%: a
+		NATIVE FUNCTION LOGN: a
+
+		NATIVE FUNCTION bAND%: a%, b%
+		NATIVE FUNCTION bOR%: a%, b%
+		NATIVE FUNCTION bXOR%: a%, b%
+		NATIVE FUNCTION bNOT%: a%
+
+		NATIVE FUNCTION SIN: a
+		NATIVE FUNCTION COS: a
+		NATIVE FUNCTION TAN: a
+		NATIVE FUNCTION ASIN: a
+		NATIVE FUNCTION ACOS: a
+		NATIVE FUNCTION ATAN: a, b
+
+		NATIVE FUNCTION ASL%: num%, shift%
+		NATIVE FUNCTION ASR%: num%, shift%
+
+		NATIVE FUNCTION ASC%: Text$, Index% = 0
+		NATIVE FUNCTION CHR$: Ascii%
+		NATIVE FUNCTION FORMAT$: numLetter%, numKomma%, Number
+		NATIVE FUNCTION INSTR%: Text$, Search$, Start% = 0
+		NATIVE FUNCTION LCASE$: Text$
+		NATIVE FUNCTION UCASE$: Text$
+		NATIVE FUNCTION MID$: Source$, Start%, Length% = -1
+		NATIVE FUNCTION REPLACE$: Text$, Search$, REPLACE$
+		NATIVE FUNCTION SPLITSTR%: Text$, Array$[], Split$, DropEmpty% = TRUE
+		NATIVE FUNCTION DECRYPT$: Code$, Text$
+		NATIVE FUNCTION ENCRYPT$: Code$, Text$
+		NATIVE FUNCTION LEFT$: Text$, Count%
+		NATIVE FUNCTION RIGHT$: Text$, Count%
+		NATIVE FUNCTION LTRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+		NATIVE FUNCTION RTRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+		NATIVE FUNCTION TRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+		NATIVE FUNCTION URLENCODE$: Text$
+		NATIVE FUNCTION URLDECODE$: Text$
+		NATIVE FUNCTION REVINSTR%: Text$, Search$, Start% = -1
+
+		NATIVE FUNCTION OPENFILE%: channel%, File$, mode%
+		NATIVE FUNCTION ENDOFFILE%: channel%
+		NATIVE FUNCTION FILEPOSITION%: channel%
+		NATIVE FUNCTION FILESEEK AS void: channel%, bytes%, dir%
+		NATIVE FUNCTION CLOSEFILE AS void: channel%
+
+
+		NATIVE FUNCTION WRITELINE AS void: channel%, line$
+		NATIVE FUNCTION WRITESTR AS void: channel%, str$
+		NATIVE FUNCTION WRITEBYTE AS void: channel%, val%
+		NATIVE FUNCTION WRITEWORD AS void: channel%, val%
+		NATIVE FUNCTION WRITELONG AS void: channel%, val%
+		NATIVE FUNCTION WRITEUBYTE AS void: channel%, val%
+		NATIVE FUNCTION WRITEUWORD AS void: channel%, val%
+		NATIVE FUNCTION WRITEULONG AS void: channel%, val%
+		NATIVE FUNCTION WRITEIEEE AS void: channel%, val
+		NATIVE FUNCTION WRITESHORTIEEE AS void: channel%, val
+
+
+		NATIVE FUNCTION READUBYTE AS void: channel%, BYREF val%
+		NATIVE FUNCTION READBYTE AS void: channel%, BYREF val%
+		NATIVE FUNCTION READWORD AS void: channel%, BYREF val%
+		NATIVE FUNCTION READUWORD AS void: channel%, BYREF val%
+		NATIVE FUNCTION READLONG AS void: channel%, BYREF val%
+		NATIVE FUNCTION READULONG AS void: channel%, BYREF val%
+		NATIVE FUNCTION READIEEE AS void: channel%, BYREF val
+		NATIVE FUNCTION READSHORTIEEE AS void: channel%, BYREF val
+		NATIVE FUNCTION READSTR AS void: channel%, BYREF val$, count%
+		NATIVE FUNCTION READLINE AS void: channel%, BYREF line$
+
+
+		NATIVE FUNCTION SETCURRENTDIR%: Path$
+		NATIVE FUNCTION GETCURRENTDIR$:
+		NATIVE FUNCTION DOESFILEEXIST%: file$
+		NATIVE FUNCTION DOESDIREXIST%: file$
+		NATIVE FUNCTION GETFILELIST: find$, files$[]
+		NATIVE FUNCTION GETFILESIZE%: file$
+		NATIVE FUNCTION FILEREQUEST$: open, filter$
+
+		NATIVE FUNCTION COPYFILE AS void: source$, dest$
+		NATIVE FUNCTION CREATEDIR%: dir$
+
+		NATIVE FUNCTION INIOPEN AS void: file$
+		NATIVE FUNCTION INIPUT AS void: cat$, key$, value$
+		NATIVE FUNCTION INIGET$: cat$, key$, defval$ = "NO_DATA"
+
+		NATIVE FUNCTION KILLFILE AS void: file$
+
+		NATIVE FUNCTION PUTENV AS void: name$, value$
+		NATIVE FUNCTION GETENV$: name$
+
+		NATIVE FUNCTION GENFILE%:
+		NATIVE FUNCTION GENSPRITE%:
+		NATIVE FUNCTION GENFONT%:
+		NATIVE FUNCTION GENSOUND%:
+		//NATIVE FUNCTION GENX_OBJ%:
+
+		NATIVE FUNCTION GETCOMMANDLINE$:
+		NATIVE FUNCTION SETSHOEBOX AS void: data$, media$
+
+		NATIVE FUNCTION STACKTRACE$:
+	?ENDIF
+
+	?IFDEF ADDON_SOUND
+		NATIVE FUNCTION LOADSOUND AS void: file$, num%, buffer%
+		NATIVE FUNCTION HUSH AS void:
+		NATIVE FUNCTION ISMUSICPLAYING%:
+		NATIVE FUNCTION LOOPMOVIE AS void: file$
+		NATIVE FUNCTION MUSICVOLUME AS void: vol
+		NATIVE FUNCTION PLAYMOVIE AS void: file$
+		NATIVE FUNCTION PLAYMUSIC AS void: file$, loop%
+		NATIVE FUNCTION STOPMUSIC AS void:
+		NATIVE FUNCTION PAUSEMUSIC AS void: pause%
+		NATIVE FUNCTION STOPSOUND AS void: channel%
+		NATIVE FUNCTION PLAYSOUND%: num%, pan, volume
+		NATIVE FUNCTION SOUNDPLAYING%: channel%
+	?ENDIF
+
+	?IFDEF ADDON_NET
+		NATIVE FUNCTION NETHOSTGAME: port%
+		NATIVE FUNCTION NETJOINGAME: server$, port%
+		NATIVE FUNCTION NETSHUTDOWN AS void:
+		NATIVE FUNCTION NETISACTIVE%:
+		NATIVE FUNCTION NETCREATEPLAYER%: name$
+		NATIVE FUNCTION NETNUMPLAYERS%:
+		NATIVE FUNCTION NETQUITPLAYER%:
+		NATIVE FUNCTION NETGETPLAYERID%: index%
+		NATIVE FUNCTION NETGETIP$:
+		NATIVE FUNCTION NETALLOWJOINING AS void: ok%
+		NATIVE FUNCTION NETDESTROYPLAYER AS void: id%
+		NATIVE FUNCTION NETSENDMSG%: from%, to%, text$
+		NATIVE FUNCTION NETGETMSG$: id%
+		NATIVE FUNCTION NETGETSENDER%:
+		NATIVE FUNCTION NETGETLASTERROR$:
+
+		NATIVE FUNCTION NETWEBEND AS void: url$
+		NATIVE FUNCTION NETWEBGET$: server$, path$, port%, max_length%, timeout%
+		NATIVE FUNCTION NETWEBGET: server$, path$, port%, local$, timeout%=5000
+
+		NATIVE FUNCTION SOCK_INIT%:
+		NATIVE FUNCTION SOCK_SHUTDOWN AS void:
+		NATIVE FUNCTION SOCK_RECV%: sock%, BYREF msg$, l%
+		NATIVE FUNCTION SOCK_GETIP%: server$
+		NATIVE FUNCTION SOCK_CLOSE%: sock%
+
+		NATIVE FUNCTION SOCK_TCPLISTEN%: port%
+		NATIVE FUNCTION SOCK_TCPCONNECT%: server$, port%
+		NATIVE FUNCTION SOCK_TCPACCEPT%: listen%, BYREF ip%
+		NATIVE FUNCTION SOCK_TCPSEND%: dest%, msg$
+		NATIVE FUNCTION SOCK_UDPOPEN%: port%
+		NATIVE FUNCTION SOCK_UDPSEND%: sockudp%, msg$, destip%, destport%
+	?ENDIF
+
+	?IFDEF ADDON_3D
+		?IFDEF HTML5
+			?DEFINE OGLES2
+		?ELSE
+			?IFDEF XNA
+				?DEFINE XNA
+			?ELSE
+				?ERROR "Unimplemented 3D for Target"
+			?ENDIF
+		?ENDIF
+
+		GLOBAL Objs3D[] AS TObj3D
+
+		TYPE TObj3D
+//			ID%
+//			IsDel% = FALSE
+//
+//			//Buffer
+//			VertexBuffer AS DataBuffer
+//			IndexBuffer AS DataBuffer
+//			TextureBuffer AS DataBuffer
+//			ColorBuffer AS DataBuffer
+//
+//			FUNCTION Create%: ID%
+//				self.ID = ID
+//				self.IsDel = FALSE
+//
+//				IF ID >= LEN(Objs3D[])
+//					REDIM Objs3D[ID + 64]
+//				ENDIF
+//
+//				Objs3D[ID] = self
+//			ENDFUNCTION
+//
+//			FUNCTION Destroy%:
+//				VertexBuffer.Clear
+//				IndexBuffer.Clear
+//				TextureBuffer.Clear
+//				ColorBuffer.Clear
+//
+//				self.IsDel = TRUE
+//			ENDFUNCTION
+		ENDTYPE
+
+
+		//ENGINE
+		NATIVE FUNCTION LOADBUMPTEXTURE AS void: file$, num%
+		NATIVE FUNCTION X_AMBIENT_LT AS void: num%, col%
+		NATIVE FUNCTION X_AUTONORMALS AS void: mode%
+		NATIVE FUNCTION X_CAMERA AS void: x, y, z, px, py, pz
+		NATIVE FUNCTION X_CAMERAUP AS void: x, y, z
+		NATIVE FUNCTION X_CLEAR_Z AS void:
+		NATIVE FUNCTION X_COLLISION%: num%, frame%, radius, x, y, z
+		NATIVE FUNCTION X_COLLISIONAABB%: num%, frame%, x, y, z, width, height, depth
+		NATIVE FUNCTION X_COLLISIONRAY%: num%, frame%, x, y, z, dirx, diry, dirz
+		NATIVE FUNCTION X_COLLISIONSPHEREBOX%: x, y, z, radius, width, height, depth
+		NATIVE FUNCTION X_CULLMODE AS void: mode%
+		NATIVE FUNCTION X_DOT AS void: x, y, z, size, col%
+		NATIVE FUNCTION X_DRAWANIM AS void: num%, startFrame%, endFrame%, interpol, wholeAnim%
+		NATIVE FUNCTION X_DRAWAXES AS void: x, y, z
+		NATIVE FUNCTION X_DRAWOBJ AS void: num%, state%
+		NATIVE FUNCTION X_ENABLE_Z AS void: mode%
+		NATIVE FUNCTION X_FOG AS void: col%, mode%, par1, par2
+		NATIVE FUNCTION X_GETCAMERAMATRIX AS void: matrix[]
+		NATIVE FUNCTION X_GETCOLLISIONFACE%:
+		NATIVE FUNCTION X_GETFACE AS void: obj%, frame%, index%, poly[]
+		NATIVE FUNCTION X_GETMATRIX AS void: matrix[]
+		NATIVE FUNCTION X_LINE AS void: x1, y1, z1, x2, y2, z2, width, col%
+		NATIVE FUNCTION X_LOADOBJ AS void: file$, num%
+		NATIVE FUNCTION X_LOADSHADER%: id%, vertex$, fragment$
+		NATIVE FUNCTION X_MAKE2D AS void:
+		NATIVE FUNCTION X_MAKE3D AS void: znah, zfern, fov = 45
+		NATIVE FUNCTION X_MIPMAPPING AS void: status%
+		NATIVE FUNCTION X_MOVEMENT AS void: x, y, z
+		NATIVE FUNCTION X_MULTMATRIX AS void: matrix[]
+		NATIVE FUNCTION X_NUMFACES%: obj%
+		NATIVE FUNCTION X_OBJSTART AS void: num%
+		NATIVE FUNCTION X_OBJADDVERTEX AS void: x, y, z, tx, ty, col%
+		NATIVE FUNCTION X_OBJNEWGROUP AS void:
+		NATIVE FUNCTION X_OBJEND:
+		NATIVE FUNCTION X_OBJSETFRAME AS void: num%
+		NATIVE FUNCTION X_POPMATRIX AS void:
+		NATIVE FUNCTION X_PRINT AS void: text$, x, y, z, scaling
+		NATIVE FUNCTION X_PUSHMATRIX AS void:
+		NATIVE FUNCTION X_PUTSHADER AS void: name$, value
+		NATIVE FUNCTION X_ROTATION AS void: angle, x, y, z
+		NATIVE FUNCTION X_SAVEOBJ AS void: file$, num%
+		NATIVE FUNCTION X_SCALEMODEL AS void: num%, sx, sy, sz
+		NATIVE FUNCTION X_SCALING AS void: x, y, z
+		NATIVE FUNCTION X_SCREEN2WORLD AS void: sx, sy, sz, wx, wy, wz
+		NATIVE FUNCTION X_SETCELSHADES AS void: shadow[]
+		NATIVE FUNCTION X_SETSHADER AS void: id%
+		NATIVE FUNCTION X_SETTEXTURE AS void: num1%, num2%
+		NATIVE FUNCTION X_SETTEXTUREOFFSET AS void: offx, offy
+		NATIVE FUNCTION X_SPHEREMAPPING AS void: mode%
+		NATIVE FUNCTION X_SPOT_LT AS void: num%, col%, x, y, z, dirx, diry, dirz, cutoff
+		NATIVE FUNCTION X_SPRITE AS void: num%, x, y, z, scaling
+		NATIVE FUNCTION X_WORLD2SCREEN AS void: x, y, z, sx, sy, sz
+
+		?IFDEF OGLES2
+			//WebGL Constants & Functions
+			TYPE DataBuffer
+			ENDTYPE
+
+
+//			NATIVE TYPE DataBuffer
+//				NATIVE FUNCTION GetLength%:
+//
+//			ENDTYPE
+
+//			NATIVE FUNCTION CreateBuffer AS DataBuffer: Size%
+//			NATIVE FUNCTION CreateIntBuffer AS DataBuffer: Size%
+//			NATIVE FUNCTION CreateFloatBuffer AS DataBuffer: Size%
+
+
+			CONSTANT GL_DEPTH_BUFFER_BIT               =0x00000100
+			CONSTANT GL_STENCIL_BUFFER_BIT             =0x00000400
+			CONSTANT GL_COLOR_BUFFER_BIT               =0x00004000
+			CONSTANT GL_FALSE                          =0
+			CONSTANT GL_TRUE                           =1
+			CONSTANT GL_POINTS                         =0x0000
+			CONSTANT GL_LINES                          =0x0001
+			CONSTANT GL_LINE_LOOP                      =0x0002
+			CONSTANT GL_LINE_STRIP                     =0x0003
+			CONSTANT GL_TRIANGLES                      =0x0004
+			CONSTANT GL_TRIANGLE_STRIP                 =0x0005
+			CONSTANT GL_TRIANGLE_FAN                   =0x0006
+			CONSTANT GL_ZERO                           =0
+			CONSTANT GL_ONE                            =1
+			CONSTANT GL_SRC_COLOR                      =0x0300
+			CONSTANT GL_ONE_MINUS_SRC_COLOR            =0x0301
+			CONSTANT GL_SRC_ALPHA                      =0x0302
+			CONSTANT GL_ONE_MINUS_SRC_ALPHA            =0x0303
+			CONSTANT GL_DST_ALPHA                      =0x0304
+			CONSTANT GL_ONE_MINUS_DST_ALPHA            =0x0305
+			CONSTANT GL_DST_COLOR                      =0x0306
+			CONSTANT GL_ONE_MINUS_DST_COLOR            =0x0307
+			CONSTANT GL_SRC_ALPHA_SATURATE             =0x0308
+			CONSTANT GL_FUNC_ADD                       =0x8006
+			CONSTANT GL_BLEND_EQUATION                 =0x8009
+			CONSTANT GL_BLEND_EQUATION_RGB             =0x8009
+			CONSTANT GL_BLEND_EQUATION_ALPHA           =0x883D
+			CONSTANT GL_FUNC_SUBTRACT                  =0x800A
+			CONSTANT GL_FUNC_REVERSE_SUBTRACT          =0x800B
+			CONSTANT GL_BLEND_DST_RGB                  =0x80C8
+			CONSTANT GL_BLEND_SRC_RGB                  =0x80C9
+			CONSTANT GL_BLEND_DST_ALPHA                =0x80CA
+			CONSTANT GL_BLEND_SRC_ALPHA                =0x80CB
+			CONSTANT GL_CONSTANT_COLOR                 =0x8001
+			CONSTANT GL_ONE_MINUS_CONSTANT_COLOR       =0x8002
+			CONSTANT GL_CONSTANT_ALPHA                 =0x8003
+			CONSTANT GL_ONE_MINUS_CONSTANT_ALPHA       =0x8004
+			CONSTANT GL_BLEND_COLOR                    =0x8005
+			CONSTANT GL_ARRAY_BUFFER                   =0x8892
+			CONSTANT GL_ELEMENT_ARRAY_BUFFER           =0x8893
+			CONSTANT GL_ARRAY_BUFFER_BINDING           =0x8894
+			CONSTANT GL_ELEMENT_ARRAY_BUFFER_BINDING   =0x8895
+			CONSTANT GL_STREAM_DRAW                    =0x88E0
+			CONSTANT GL_STATIC_DRAW                    =0x88E4
+			CONSTANT GL_DYNAMIC_DRAW                   =0x88E8
+			CONSTANT GL_BUFFER_SIZE                    =0x8764
+			CONSTANT GL_BUFFER_USAGE                   =0x8765
+			CONSTANT GL_CURRENT_VERTEX_ATTRIB          =0x8626
+			CONSTANT GL_FRONT                          =0x0404
+			CONSTANT GL_BACK                           =0x0405
+			CONSTANT GL_FRONT_AND_BACK                 =0x0408
+			CONSTANT GL_TEXTURE_2D                     =0x0DE1
+			CONSTANT GL_CULL_FACE                      =0x0B44
+			CONSTANT GL_BLEND                          =0x0BE2
+			CONSTANT GL_DITHER                         =0x0BD0
+			CONSTANT GL_STENCIL_TEST                   =0x0B90
+			CONSTANT GL_DEPTH_TEST                     =0x0B71
+			CONSTANT GL_SCISSOR_TEST                   =0x0C11
+			CONSTANT GL_POLYGON_OFFSET_FILL            =0x8037
+			CONSTANT GL_SAMPLE_ALPHA_TO_COVERAGE       =0x809E
+			CONSTANT GL_SAMPLE_COVERAGE                =0x80A0
+			CONSTANT GL_NO_ERROR                       =0
+			CONSTANT GL_INVALID_ENUM                   =0x0500
+			CONSTANT GL_INVALID_VALUE                  =0x0501
+			CONSTANT GL_INVALID_OPERATION              =0x0502
+			CONSTANT GL_OUT_OF_MEMORY                  =0x0505
+			CONSTANT GL_CW                             =0x0900
+			CONSTANT GL_CCW                            =0x0901
+			CONSTANT GL_LINE_WIDTH                     =0x0B21
+			CONSTANT GL_ALIASED_POINT_SIZE_RANGE       =0x846D
+			CONSTANT GL_ALIASED_LINE_WIDTH_RANGE       =0x846E
+			CONSTANT GL_CULL_FACE_MODE                 =0x0B45
+			CONSTANT GL_FRONT_FACE                     =0x0B46
+			CONSTANT GL_DEPTH_RANGE                    =0x0B70
+			CONSTANT GL_DEPTH_WRITEMASK                =0x0B72
+			CONSTANT GL_DEPTH_CLEAR_VALUE              =0x0B73
+			CONSTANT GL_DEPTH_FUNC                     =0x0B74
+			CONSTANT GL_STENCIL_CLEAR_VALUE            =0x0B91
+			CONSTANT GL_STENCIL_FUNC                   =0x0B92
+			CONSTANT GL_STENCIL_FAIL                   =0x0B94
+			CONSTANT GL_STENCIL_PASS_DEPTH_FAIL        =0x0B95
+			CONSTANT GL_STENCIL_PASS_DEPTH_PASS        =0x0B96
+			CONSTANT GL_STENCIL_REF                    =0x0B97
+			CONSTANT GL_STENCIL_VALUE_MASK             =0x0B93
+			CONSTANT GL_STENCIL_WRITEMASK              =0x0B98
+			CONSTANT GL_STENCIL_BACK_FUNC              =0x8800
+			CONSTANT GL_STENCIL_BACK_FAIL              =0x8801
+			CONSTANT GL_STENCIL_BACK_PASS_DEPTH_FAIL   =0x8802
+			CONSTANT GL_STENCIL_BACK_PASS_DEPTH_PASS   =0x8803
+			CONSTANT GL_STENCIL_BACK_REF               =0x8CA3
+			CONSTANT GL_STENCIL_BACK_VALUE_MASK        =0x8CA4
+			CONSTANT GL_STENCIL_BACK_WRITEMASK         =0x8CA5
+			CONSTANT GL_VIEWPORT                       =0x0BA2
+			CONSTANT GL_SCISSOR_BOX                    =0x0C10
+			CONSTANT GL_COLOR_CLEAR_VALUE              =0x0C22
+			CONSTANT GL_COLOR_WRITEMASK                =0x0C23
+			CONSTANT GL_UNPACK_ALIGNMENT               =0x0CF5
+			CONSTANT GL_PACK_ALIGNMENT                 =0x0D05
+			CONSTANT GL_MAX_TEXTURE_SIZE               =0x0D33
+			CONSTANT GL_MAX_VIEWPORT_DIMS              =0x0D3A
+			CONSTANT GL_SUBPIXEL_BITS                  =0x0D50
+			CONSTANT GL_RED_BITS                       =0x0D52
+			CONSTANT GL_GREEN_BITS                     =0x0D53
+			CONSTANT GL_BLUE_BITS                      =0x0D54
+			CONSTANT GL_ALPHA_BITS                     =0x0D55
+			CONSTANT GL_DEPTH_BITS                     =0x0D56
+			CONSTANT GL_STENCIL_BITS                   =0x0D57
+			CONSTANT GL_POLYGON_OFFSET_UNITS           =0x2A00
+			CONSTANT GL_POLYGON_OFFSET_FACTOR          =0x8038
+			CONSTANT GL_TEXTURE_BINDING_2D             =0x8069
+			CONSTANT GL_SAMPLE_BUFFERS                 =0x80A8
+			CONSTANT GL_SAMPLES                        =0x80A9
+			CONSTANT GL_SAMPLE_COVERAGE_VALUE          =0x80AA
+			CONSTANT GL_SAMPLE_COVERAGE_INVERT         =0x80AB
+			CONSTANT GL_NUM_COMPRESSED_TEXTURE_FORMATS =0x86A2
+			CONSTANT GL_COMPRESSED_TEXTURE_FORMATS     =0x86A3
+			CONSTANT GL_DONT_CARE                      =0x1100
+			CONSTANT GL_FASTEST                        =0x1101
+			CONSTANT GL_NICEST                         =0x1102
+			CONSTANT GL_GENERATE_MIPMAP_HINT            =0x8192
+			CONSTANT GL_BYTE                           =0x1400
+			CONSTANT GL_UNSIGNED_BYTE                  =0x1401
+			CONSTANT GL_SHORT                          =0x1402
+			CONSTANT GL_UNSIGNED_SHORT                 =0x1403
+			CONSTANT GL_INT                            =0x1404
+			CONSTANT GL_UNSIGNED_INT                   =0x1405
+			CONSTANT GL_FLOAT                          =0x1406
+			CONSTANT GL_FIXED                          =0x140C
+			CONSTANT GL_DEPTH_COMPONENT                =0x1902
+			CONSTANT GL_ALPHA                          =0x1906
+			CONSTANT GL_RGB                            =0x1907
+			CONSTANT GL_RGBA                           =0x1908
+			CONSTANT GL_LUMINANCE                      =0x1909
+			CONSTANT GL_LUMINANCE_ALPHA                =0x190A
+			CONSTANT GL_UNSIGNED_SHORT_4_4_4_4         =0x8033
+			CONSTANT GL_UNSIGNED_SHORT_5_5_5_1         =0x8034
+			CONSTANT GL_UNSIGNED_SHORT_5_6_5           =0x8363
+			CONSTANT GL_FRAGMENT_SHADER                  =0x8B30
+			CONSTANT GL_VERTEX_SHADER                    =0x8B31
+			CONSTANT GL_MAX_VERTEX_ATTRIBS               =0x8869
+			CONSTANT GL_MAX_VERTEX_UNIFORM_VECTORS       =0x8DFB
+			CONSTANT GL_MAX_VARYING_VECTORS              =0x8DFC
+			CONSTANT GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS =0x8B4D
+			CONSTANT GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS   =0x8B4C
+			CONSTANT GL_MAX_TEXTURE_IMAGE_UNITS          =0x8872
+			CONSTANT GL_MAX_FRAGMENT_UNIFORM_VECTORS     =0x8DFD
+			CONSTANT GL_SHADER_TYPE                      =0x8B4F
+			CONSTANT GL_DELETE_STATUS                    =0x8B80
+			CONSTANT GL_LINK_STATUS                      =0x8B82
+			CONSTANT GL_VALIDATE_STATUS                  =0x8B83
+			CONSTANT GL_ATTACHED_SHADERS                 =0x8B85
+			CONSTANT GL_ACTIVE_UNIFORMS                  =0x8B86
+			CONSTANT GL_ACTIVE_UNIFORM_MAX_LENGTH        =0x8B87
+			CONSTANT GL_ACTIVE_ATTRIBUTES                =0x8B89
+			CONSTANT GL_ACTIVE_ATTRIBUTE_MAX_LENGTH      =0x8B8A
+			CONSTANT GL_SHADING_LANGUAGE_VERSION         =0x8B8C
+			CONSTANT GL_CURRENT_PROGRAM                  =0x8B8D
+			CONSTANT GL_NEVER                          =0x0200
+			CONSTANT GL_LESS                           =0x0201
+			CONSTANT GL_EQUAL                          =0x0202
+			CONSTANT GL_LEQUAL                         =0x0203
+			CONSTANT GL_GREATER                        =0x0204
+			CONSTANT GL_NOTEQUAL                       =0x0205
+			CONSTANT GL_GEQUAL                         =0x0206
+			CONSTANT GL_ALWAYS                         =0x0207
+			CONSTANT GL_KEEP                           =0x1E00
+			CONSTANT GL_REPLACE                        =0x1E01
+			CONSTANT GL_INCR                           =0x1E02
+			CONSTANT GL_DECR                           =0x1E03
+			CONSTANT GL_INVERT                         =0x150A
+			CONSTANT GL_INCR_WRAP                      =0x8507
+			CONSTANT GL_DECR_WRAP                      =0x8508
+			CONSTANT GL_VENDOR                         =0x1F00
+			CONSTANT GL_RENDERER                       =0x1F01
+			CONSTANT GL_VERSION                        =0x1F02
+			CONSTANT GL_EXTENSIONS                     =0x1F03
+			CONSTANT GL_NEAREST                        =0x2600
+			CONSTANT GL_LINEAR                         =0x2601
+			CONSTANT GL_NEAREST_MIPMAP_NEAREST         =0x2700
+			CONSTANT GL_LINEAR_MIPMAP_NEAREST          =0x2701
+			CONSTANT GL_NEAREST_MIPMAP_LINEAR          =0x2702
+			CONSTANT GL_LINEAR_MIPMAP_LINEAR           =0x2703
+			CONSTANT GL_TEXTURE_MAG_FILTER             =0x2800
+			CONSTANT GL_TEXTURE_MIN_FILTER             =0x2801
+			CONSTANT GL_TEXTURE_WRAP_S                 =0x2802
+			CONSTANT GL_TEXTURE_WRAP_T                 =0x2803
+			CONSTANT GL_TEXTURE                        =0x1702
+			CONSTANT GL_TEXTURE_CUBE_MAP               =0x8513
+			CONSTANT GL_TEXTURE_BINDING_CUBE_MAP       =0x8514
+			CONSTANT GL_TEXTURE_CUBE_MAP_POSITIVE_X    =0x8515
+			CONSTANT GL_TEXTURE_CUBE_MAP_NEGATIVE_X    =0x8516
+			CONSTANT GL_TEXTURE_CUBE_MAP_POSITIVE_Y    =0x8517
+			CONSTANT GL_TEXTURE_CUBE_MAP_NEGATIVE_Y    =0x8518
+			CONSTANT GL_TEXTURE_CUBE_MAP_POSITIVE_Z    =0x8519
+			CONSTANT GL_TEXTURE_CUBE_MAP_NEGATIVE_Z    =0x851A
+			CONSTANT GL_MAX_CUBE_MAP_TEXTURE_SIZE      =0x851C
+			CONSTANT GL_TEXTURE0                       =0x84C0
+			CONSTANT GL_TEXTURE1                       =0x84C1
+			CONSTANT GL_TEXTURE2                       =0x84C2
+			CONSTANT GL_TEXTURE3                       =0x84C3
+			CONSTANT GL_TEXTURE4                       =0x84C4
+			CONSTANT GL_TEXTURE5                       =0x84C5
+			CONSTANT GL_TEXTURE6                       =0x84C6
+			CONSTANT GL_TEXTURE7                       =0x84C7
+			CONSTANT GL_TEXTURE8                       =0x84C8
+			CONSTANT GL_TEXTURE9                       =0x84C9
+			CONSTANT GL_TEXTURE10                      =0x84CA
+			CONSTANT GL_TEXTURE11                      =0x84CB
+			CONSTANT GL_TEXTURE12                      =0x84CC
+			CONSTANT GL_TEXTURE13                      =0x84CD
+			CONSTANT GL_TEXTURE14                      =0x84CE
+			CONSTANT GL_TEXTURE15                      =0x84CF
+			CONSTANT GL_TEXTURE16                      =0x84D0
+			CONSTANT GL_TEXTURE17                      =0x84D1
+			CONSTANT GL_TEXTURE18                      =0x84D2
+			CONSTANT GL_TEXTURE19                      =0x84D3
+			CONSTANT GL_TEXTURE20                      =0x84D4
+			CONSTANT GL_TEXTURE21                      =0x84D5
+			CONSTANT GL_TEXTURE22                      =0x84D6
+			CONSTANT GL_TEXTURE23                      =0x84D7
+			CONSTANT GL_TEXTURE24                      =0x84D8
+			CONSTANT GL_TEXTURE25                      =0x84D9
+			CONSTANT GL_TEXTURE26                      =0x84DA
+			CONSTANT GL_TEXTURE27                      =0x84DB
+			CONSTANT GL_TEXTURE28                      =0x84DC
+			CONSTANT GL_TEXTURE29                      =0x84DD
+			CONSTANT GL_TEXTURE30                      =0x84DE
+			CONSTANT GL_TEXTURE31                      =0x84DF
+			CONSTANT GL_ACTIVE_TEXTURE                 =0x84E0
+			CONSTANT GL_REPEAT                         =0x2901
+			CONSTANT GL_CLAMP_TO_EDGE                  =0x812F
+			CONSTANT GL_MIRRORED_REPEAT                =0x8370
+			CONSTANT GL_FLOAT_VEC2                     =0x8B50
+			CONSTANT GL_FLOAT_VEC3                     =0x8B51
+			CONSTANT GL_FLOAT_VEC4                     =0x8B52
+			CONSTANT GL_INT_VEC2                       =0x8B53
+			CONSTANT GL_INT_VEC3                       =0x8B54
+			CONSTANT GL_INT_VEC4                       =0x8B55
+			CONSTANT GL_BOOL                           =0x8B56
+			CONSTANT GL_BOOL_VEC2                      =0x8B57
+			CONSTANT GL_BOOL_VEC3                      =0x8B58
+			CONSTANT GL_BOOL_VEC4                      =0x8B59
+			CONSTANT GL_FLOAT_MAT2                     =0x8B5A
+			CONSTANT GL_FLOAT_MAT3                     =0x8B5B
+			CONSTANT GL_FLOAT_MAT4                     =0x8B5C
+			CONSTANT GL_SAMPLER_2D                     =0x8B5E
+			CONSTANT GL_SAMPLER_CUBE                   =0x8B60
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_ENABLED        =0x8622
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_SIZE           =0x8623
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_STRIDE         =0x8624
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_TYPE           =0x8625
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_NORMALIZED     =0x886A
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_POINTER        =0x8645
+			CONSTANT GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING =0x889F
+			CONSTANT GL_IMPLEMENTATION_COLOR_READ_TYPE   =0x8B9A
+			CONSTANT GL_IMPLEMENTATION_COLOR_READ_FORMAT =0x8B9B
+			CONSTANT GL_COMPILE_STATUS                 =0x8B81
+			CONSTANT GL_INFO_LOG_LENGTH                =0x8B84
+			CONSTANT GL_SHADER_SOURCE_LENGTH           =0x8B88
+			CONSTANT GL_SHADER_COMPILER                =0x8DFA
+			CONSTANT GL_SHADER_BINARY_FORMATS          =0x8DF8
+			CONSTANT GL_NUM_SHADER_BINARY_FORMATS      =0x8DF9
+			CONSTANT GL_LOW_FLOAT                      =0x8DF0
+			CONSTANT GL_MEDIUM_FLOAT                   =0x8DF1
+			CONSTANT GL_HIGH_FLOAT                     =0x8DF2
+			CONSTANT GL_LOW_INT                        =0x8DF3
+			CONSTANT GL_MEDIUM_INT                     =0x8DF4
+			CONSTANT GL_HIGH_INT                       =0x8DF5
+			CONSTANT GL_FRAMEBUFFER                    =0x8D40
+			CONSTANT GL_RENDERBUFFER                   =0x8D41
+			CONSTANT GL_RGBA4                          =0x8056
+			CONSTANT GL_RGB5_A1                        =0x8057
+			CONSTANT GL_RGB565                         =0x8D62
+			CONSTANT GL_DEPTH_COMPONENT16              =0x81A5
+			CONSTANT GL_STENCIL_INDEX                  =0x1901
+			CONSTANT GL_STENCIL_INDEX8                 =0x8D48
+			CONSTANT GL_RENDERBUFFER_WIDTH             =0x8D42
+			CONSTANT GL_RENDERBUFFER_HEIGHT            =0x8D43
+			CONSTANT GL_RENDERBUFFER_INTERNAL_FORMAT   =0x8D44
+			CONSTANT GL_RENDERBUFFER_RED_SIZE          =0x8D50
+			CONSTANT GL_RENDERBUFFER_GREEN_SIZE        =0x8D51
+			CONSTANT GL_RENDERBUFFER_BLUE_SIZE         =0x8D52
+			CONSTANT GL_RENDERBUFFER_ALPHA_SIZE        =0x8D53
+			CONSTANT GL_RENDERBUFFER_DEPTH_SIZE        =0x8D54
+			CONSTANT GL_RENDERBUFFER_STENCIL_SIZE      =0x8D55
+			CONSTANT GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE           =0x8CD0
+			CONSTANT GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME           =0x8CD1
+			CONSTANT GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL         =0x8CD2
+			CONSTANT GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE =0x8CD3
+			CONSTANT GL_COLOR_ATTACHMENT0              =0x8CE0
+			CONSTANT GL_DEPTH_ATTACHMENT               =0x8D00
+			CONSTANT GL_STENCIL_ATTACHMENT             =0x8D20
+			CONSTANT GL_NONE                           =0
+			CONSTANT GL_FRAMEBUFFER_COMPLETE                      =0x8CD5
+			CONSTANT GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT         =0x8CD6
+			CONSTANT GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT =0x8CD7
+			CONSTANT GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS         =0x8CD9
+			CONSTANT GL_FRAMEBUFFER_UNSUPPORTED                   =0x8CDD
+			CONSTANT GL_FRAMEBUFFER_BINDING            =0x8CA6
+			CONSTANT GL_RENDERBUFFER_BINDING           =0x8CA7
+			CONSTANT GL_MAX_RENDERBUFFER_SIZE          =0x84E8
+			CONSTANT GL_INVALID_FRAMEBUFFER_OPERATION  =0x0506
+
+			//InitOpenGLES2() //Initialisiere!
+
+			NATIVE FUNCTION InitOpenGLES2:
+
+			NATIVE FUNCTION glActiveTexture AS void: texture
+			NATIVE FUNCTION glAttachShader AS void: program, shader
+			NATIVE FUNCTION glBindAttribLocation AS void: program, index, name$
+			NATIVE FUNCTION glBindBuffer AS void: target, buffer
+			NATIVE FUNCTION glBindFramebuffer AS void: target, framebuffer
+			NATIVE FUNCTION glBindRenderbuffer AS void: target, renderbuffer
+			NATIVE FUNCTION glBindTexture AS void: target, texture
+			NATIVE FUNCTION glBlendColor AS void: red#, green#, blue#, alpha#
+			NATIVE FUNCTION glBlendEquation AS void:  mode
+			NATIVE FUNCTION glBlendEquationSeparate AS void: modeRGB, modeAlpha
+			NATIVE FUNCTION glBlendFunc AS void: sfactor, dfactor
+			NATIVE FUNCTION glBlendFuncSeparate AS void: srcRGB, dstRGB, srcAlpha, dstAlpha
+			NATIVE FUNCTION glBufferData AS void: target, size, dat AS DataBuffer, usage
+			NATIVE FUNCTION glBufferSubData AS void: target, offset, size, dat AS DataBuffer
+			NATIVE FUNCTION glCheckFramebufferStatus%: target
+			NATIVE FUNCTION glClear AS void: mask
+			NATIVE FUNCTION glClearColor AS void: red#, green#, blue#, alpha#
+			NATIVE FUNCTION glClearDepthf AS void: depth#
+			NATIVE FUNCTION glClearStencil AS void: s
+			NATIVE FUNCTION glColorMask AS void: red%, green%, blue%, alpha%
+			NATIVE FUNCTION glCompileShader AS void: shader
+			NATIVE FUNCTION glCopyTexImage2D AS void: target, level, internalformat, x, y, width, height, border
+			NATIVE FUNCTION glCopyTexSubImage2D AS void: target, level, xoffset, yoffset, x, y, width, height
+			NATIVE FUNCTION glCreateBuffer%:
+			NATIVE FUNCTION glCreateFrameBuffer%:
+			NATIVE FUNCTION glCreateRenderBuffer%:
+			NATIVE FUNCTION glCreateTexture%:
+			NATIVE FUNCTION glCreateProgram%:
+			NATIVE FUNCTION glCreateShader%: typ
+			NATIVE FUNCTION glDeleteBuffer AS void: buffer
+			NATIVE FUNCTION glDeleteFramebuffer AS void: framebuffer
+			NATIVE FUNCTION glDeleteRenderbuffer AS void: renderBuffer
+			NATIVE FUNCTION glDeleteTexture AS void: texture
+			NATIVE FUNCTION glDeleteProgram AS void: program
+			NATIVE FUNCTION glDeleteShader AS void: shader
+			NATIVE FUNCTION glCullFace AS void: mode
+			NATIVE FUNCTION glDepthFunc AS void: func
+			NATIVE FUNCTION glDepthMask AS void: flag%
+			NATIVE FUNCTION glDepthRangef AS void: zNear#, zFar#
+			NATIVE FUNCTION glDetachShader AS void: program, shader
+			NATIVE FUNCTION glDisable AS void: cap
+			NATIVE FUNCTION glDisableVertexAttribArray AS void: index
+			NATIVE FUNCTION glDrawArrays AS void: mode, first, count
+			NATIVE FUNCTION glDrawElements AS void: mode, count, typ, ptr AS DataBuffer
+			NATIVE FUNCTION glDrawElements2 AS void: mode, count, typ, offset
+			NATIVE FUNCTION glEnable AS void: cap
+			NATIVE FUNCTION glEnableVertexAttribArray AS void: index
+			NATIVE FUNCTION glFinish AS void:
+			NATIVE FUNCTION glFlush AS void:
+			NATIVE FUNCTION glFramebufferRenderbuffer AS void: target, attachment, renderbuffertarget, renderbuffer
+			NATIVE FUNCTION glFramebufferTexture2D AS void: target, attachment, textarget, texture, level
+			NATIVE FUNCTION glFrontFace AS void: mode
+			NATIVE FUNCTION glGenerateMipmap AS void: target
+			NATIVE FUNCTION glGetActiveAttrib AS void: program, index, size[], typ[], name$[]
+			NATIVE FUNCTION glGetActiveUniform AS void: program, index, size[], typ[], name$[]
+			NATIVE FUNCTION glGetAttachedShaders AS void: program, maxcount, count[], shaders[]
+			NATIVE FUNCTION glGetAttribLocation%: program, name$
+			NATIVE FUNCTION glGetBooleanv AS void: pname, params%[]
+			NATIVE FUNCTION glGetBufferParameteriv AS void: target, pname, params[]
+			NATIVE FUNCTION glGetError%:
+			NATIVE FUNCTION glGetFloatv AS void: pname, params#[]
+			NATIVE FUNCTION glGetFramebufferAttachmentParameteriv AS void: target, attachment, pname, params[]
+			NATIVE FUNCTION glGetIntegerv AS void: pname, params[]
+			NATIVE FUNCTION glGetProgramiv AS void: program, pname, params[]
+			NATIVE FUNCTION glGetProgramInfoLog$: program
+			NATIVE FUNCTION glGetRenderbufferParameteriv AS void: target, pname, params[]
+			NATIVE FUNCTION glGetShaderiv AS void: shader, pname, params[]
+			NATIVE FUNCTION glGetShaderInfoLog$: shader
+			NATIVE FUNCTION glGetShaderSource$: shader
+			NATIVE FUNCTION glGetString$: name
+			NATIVE FUNCTION glGetTexParameterfv AS void: target, pname, params#[]
+			NATIVE FUNCTION glGetTexParameteriv AS void: target, pname, params[]
+			NATIVE FUNCTION glGetUniformfv AS void: program, location, params#[]
+			NATIVE FUNCTION glGetUniformiv AS void: program, location, params[]
+			NATIVE FUNCTION glGetUniformLocation%: program, name$
+			NATIVE FUNCTION glGetVertexAttribfv AS void: index, pname, params#[]
+			NATIVE FUNCTION glGetVertexAttribiv AS void: index, pname, params[]
+			NATIVE FUNCTION glHint AS void: target, mode
+
+			//BOOL
+			NATIVE FUNCTION glIsBuffer%: buffer
+			NATIVE FUNCTION glIsEnabled%: cap
+			NATIVE FUNCTION glIsFramebuffer%: framebuffer
+			NATIVE FUNCTION glIsProgram%: program
+			NATIVE FUNCTION glIsRenderbuffer%: renderbuffer
+			NATIVE FUNCTION glIsShader%: shader
+			NATIVE FUNCTION glIsTexture%: texture
+			NATIVE FUNCTION glLineWidth%: width#
+
+			//NoBool
+			NATIVE FUNCTION glLinkProgram AS void: program
+			NATIVE FUNCTION glPixelStorei AS void: pname, param
+			NATIVE FUNCTION glPolygonOffset AS void: factor#, units#
+			NATIVE FUNCTION glReadPixels AS void: x, y, width, height, format, typ, pixels AS DataBuffer
+			NATIVE FUNCTION glReleaseShaderCompiler AS void:
+			NATIVE FUNCTION glRenderbufferStorage AS void: target, internalformat, width, height
+			NATIVE FUNCTION glSampleCoverage AS void: value#, invert%
+			NATIVE FUNCTION glScissor AS void: x, y, width, height
+			NATIVE FUNCTION glShaderSource AS void: shader, source$
+			NATIVE FUNCTION glStencilFunc AS void: func, ref, mask
+			NATIVE FUNCTION glStencilFuncSeparate AS void: face, func, ref, mask
+			NATIVE FUNCTION glStencilMask AS void: mask
+			NATIVE FUNCTION glStencilMaskSeparate AS void: face, mask
+			NATIVE FUNCTION glStencilOp AS void: fail, zfail, zpass
+			NATIVE FUNCTION glStencilOpSeparate AS void: face, fail, zfail, zpass
+			NATIVE FUNCTION glTexImage2D AS void: target, level, internalformat, format, typ, path$
+			NATIVE FUNCTION glTexImage2D2 AS void: target, level, internalformat, width, height, border, format, typ, pixels AS DataBuffer
+			NATIVE FUNCTION glTexSubImage2D AS void: target, level, xoffset, yoffset, format, typ, path$
+			NATIVE FUNCTION glTexSubImage2D2 AS void: target, level, xoffset, yoffset, width, height, format, typ, pixels AS DataBuffer
+			NATIVE FUNCTION glTexParameterf AS void: target, pname, param#
+			NATIVE FUNCTION glTexParameteri AS void: target, pname, param
+			NATIVE FUNCTION glUniform1f AS void: location, x#
+			NATIVE FUNCTION glUniform1i AS void: location, x
+			NATIVE FUNCTION glUniform2f AS void: location, x#, y#
+			NATIVE FUNCTION glUniform2i AS void: location, x, y
+			NATIVE FUNCTION glUniform3f AS void: location, x#, y#, z#
+			NATIVE FUNCTION glUniform3i AS void: location, x, y, z
+			NATIVE FUNCTION glUniform4f AS void: location, x#, y#, z#, w#
+			NATIVE FUNCTION glUniform4i AS void: location, x, y, z, w
+			NATIVE FUNCTION glUniform1fv AS void: location, count, v#[]
+			NATIVE FUNCTION glUniform1iv AS void: location, count, v[]
+			NATIVE FUNCTION glUniform2fv AS void: location, count, v#[]
+			NATIVE FUNCTION glUniform2iv AS void: location, count, v[]
+			NATIVE FUNCTION glUniform3fv AS void: location, count, v#[]
+			NATIVE FUNCTION glUniform3iv AS void: location, count, v[]
+			NATIVE FUNCTION glUniform4fv AS void: location, count, v#[]
+			NATIVE FUNCTION glUniform4iv AS void: location, count, v[]
+			NATIVE FUNCTION glUniformMatrix2fv AS void: location, count, transpose%, value#[]
+			NATIVE FUNCTION glUniformMatrix3fv AS void: location, count, transpose%, value#[]
+			NATIVE FUNCTION glUniformMatrix4fv AS void: location, count, transpose%, value#[]
+			NATIVE FUNCTION glUseProgram AS void: program
+			NATIVE FUNCTION glValidateProgram AS void: program
+			NATIVE FUNCTION glVertexAttrib1f AS void: indx, x#
+			NATIVE FUNCTION glVertexAttrib2f AS void: indx, x#, y#
+			NATIVE FUNCTION glVertexAttrib3f AS void: indx, x#, y#, z#
+			NATIVE FUNCTION glVertexAttrib4f AS void: indx, x#, y#, z#, w#
+			NATIVE FUNCTION glVertexAttrib1fv AS void: indx, values#[]
+			NATIVE FUNCTION glVertexAttrib2fv AS void: indx, values#[]
+			NATIVE FUNCTION glVertexAttrib3fv AS void: indx, values#[]
+			NATIVE FUNCTION glVertexAttrib4fv AS void: indx, values#[]
+			NATIVE FUNCTION glVertexAttribPointer AS void: indx, size, typ, normalized%, stride, dat AS DataBuffer
+			NATIVE FUNCTION glVertexAttribPointer2 AS void: indx, size, typ, normalized%, stride, offset
+			NATIVE FUNCTION glViewport AS void: x, y, width, height
+		?ENDIF
+	?ENDIF
+?ENDIF
+
+?ENDIF

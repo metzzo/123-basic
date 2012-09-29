@@ -1,0 +1,71 @@
+// --------------------------------- //
+// Project: SprColTest
+// Start: Thursday, May 03, 2012
+// IDE Version: 10.283
+
+SETCURRENTDIR("Media")
+
+//
+//LOADSPRITE "col1.png", 0
+//LOADSPRITE "col2.png", 1
+//
+//?IFNDEF HTML5
+//WHILE TRUE
+//GOSUB GLB_ON_LOOP
+//WEND
+//?ENDIF
+//
+//SUB GLB_ON_LOOP:
+//	LOCAL x,y,b1, b2
+//	MOUSESTATE x,y,b1,b2
+//
+//	IF SPRCOLL(0, 20, 20, 1, x, y)
+//		CLEARSCREEN RGB(0,255,0)
+//	ELSE
+//		CLEARSCREEN RGB(255,0,0)
+//	ENDIF
+//
+//
+//	DRAWSPRITE 0, 20, 20
+//	DRAWSPRITE 1, x, y
+//
+//
+//	STARTPOLY 0, 2
+//	POLYVECTOR 0, 0, 0, 0, RGB(0,0,255)
+//	POLYVECTOR 100, 0, 200, 0, RGB(0,0,255)
+//	POLYVECTOR 100, 100, 200, 150, RGB(0,0,255)
+//	POLYVECTOR 0, 100, 0, 150, RGB(0,0,255)
+//	POLYNEWSTRIP
+//	ENDPOLY
+//
+//	SHOWSCREEN
+//ENDSUB
+//
+//SUB GLB_ON_LOADING:
+//	PRINT "Loading!", 10, 10
+//
+//	SHOWSCREEN
+//ENDSUB
+
+
+
+//Write your own game with GLBScript
+
+GLOBAL x = 40
+
+TYPE TPlayer
+	FUNCTION Update:
+		DRAWRECT 100,100,100,100,RGB(255,0,0)
+	ENDFUNCTION
+ENDTYPE
+GLOBAL P AS TPlayer
+SUB GLB_ON_LOOP:
+	INC x, 2
+    STDOUT x
+    IF x > 640 THEN x = -80
+	PRINT "Hello World "+GETTIMERALL()+": "+x, x, 10
+	P.Update()
+    SHOWSCREEN
+ENDSUB
+
+
