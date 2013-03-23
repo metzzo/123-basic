@@ -186,7 +186,7 @@ ENDFUNCTION
 FUNCTION ArgumentError: Err$
 	STDOUT "Argument error: '"+Err$+"'"
 	?IFNDEF HTML5
-	//KEYWAIT
+	KEYWAIT
 	?ENDIF
 	END
 ENDFUNCTION

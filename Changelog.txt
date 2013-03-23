@@ -1,6 +1,7 @@
 
 Fixed: NOT fixed.
 Fixed: ROTOSPRITE/ROTOANIM/ROTOZOOMSPRITE/ROTOZOOMANIM use correct image handle when rotating
+Changed: New file structure of project
 
 
 0.35
