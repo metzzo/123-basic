@@ -32,6 +32,7 @@ GLOBAL Target$ = "", SettingIn$ = ""
 GLOBAL Templates[] AS TTemplate
 GLOBAL Lang$ = ""
 GLOBAL DirectoryStructure$
+GLOBAL NoRun% = FALSE
 
 
 FUNCTION DoTarget$: Name$
@@ -103,6 +104,7 @@ FUNCTION DoTarget$: Name$
 	?ENDIF
 
 	FOREACH Ac IN Actions[]
+		STDOUT "Action "+Ac.Name$+"\n"
 		SELECT TRIM$(LCASE$(Ac.Name$))
 			CASE "save"
 				LOCAL dir$ = GETCURRENTDIR$()
@@ -166,27 +168,29 @@ FUNCTION DoTarget$: Name$
 			CASE "run"
 				//command holen
 				?IFNDEF GLBSCRIPT
-				LOCAL Run$ = GetAttribute$("command", Ac.Att[])
-
-				LOCAL dir$ = GETCURRENTDIR$()
-				LOCAL projDir$
-				SETCURRENTDIR(GbapPath$)
-				IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
-					SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
-				ENDIF
-				projDir$ = GETCURRENTDIR$()
-				SETCURRENTDIR(dir$)
-
-				Run$ = REPLACE$(Run$, "$COMPILERDIR", dir$)
-				Run$ = REPLACE$(Run$, "$PROJECTDIR", projDir$)
-				Run$ = REPLACE$(Run$, "'", "\"")
-
-				STDOUT "RUN '"+Run$+"'\n"
-
-				LOCAL a#
-				IF NOT SHELLCMD(Run$, TRUE, TRUE, a)
-					Error("Command '"+Run$+"' failed...", CODELINE(), CODEFILE$())
-				ENDIF
+					IF NOT NoRun
+						LOCAL Run$ = GetAttribute$("command", Ac.Att[])
+		
+						LOCAL dir$ = GETCURRENTDIR$()
+						LOCAL projDir$
+						SETCURRENTDIR(GbapPath$)
+						IF DOESDIREXIST(REPLACE$(GbapName$, ".gbap", ".app"))
+							SETCURRENTDIR(REPLACE$(GbapName$, ".gbap", ".app"))
+						ENDIF
+						projDir$ = GETCURRENTDIR$()
+						SETCURRENTDIR(dir$)
+		
+						Run$ = REPLACE$(Run$, "$COMPILERDIR", dir$)
+						Run$ = REPLACE$(Run$, "$PROJECTDIR", projDir$)
+						Run$ = REPLACE$(Run$, "'", "\"")
+		
+						STDOUT "RUN '"+Run$+"'\n"
+		
+						LOCAL a#
+						IF NOT SHELLCMD(Run$, TRUE, TRUE, a)
+							Error("Command '"+Run$+"' failed...", CODELINE(), CODEFILE$())
+						ENDIF
+					ENDIF
 				?ENDIF
 			DEFAULT
 				Error("Unknown action '"+Ac.Name$+"'", CODELINE(), CODEFILE$())
@@ -346,7 +350,7 @@ FUNCTION DoEmbed: Path$
 	//scheint nicht so zu sein
 	FOR i = 0 TO LEN(files$[])-1
 		LOCAL File$ = files$[i]
-		STDOUT "File: "+File$+"\n"
+		STDOUT "Embedding File (this might take some time): "+File$+"\n"
 		LOCAL postfix$ =""
 		IF INSTR(File$, ".") <> -1 THEN postfix$ = MID$(File$, REVINSTR(File$,".")+1)
 

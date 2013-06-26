@@ -1,0 +1,24 @@
+folder:/FontTest.app
+folder:/FontTest.app/Media
+static:/FontTest.app/Media/testfont.png
+static:/FontTest.app/DIR_STRUCTURE
+static:/FontTest.app/FontTest.exe
+static:/FontTest.app/GLBFile.html
+static:/FontTest.app/GLBScript.js
+static:/DIR_STRUCTURE
+editable:/FontTest.gbap
+static:/FontTest.gbap.GLBSCRIPT_DATA
+editable:/FontTest.gbas
+static:/FontTest.gbas.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+editable:/icon.ico
+static:/icon.ico.GLBSCRIPT_DATA
+static:/icon.png
+static:/smalfont.png
+var:compileTime=2013-06-26 12:46:04
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

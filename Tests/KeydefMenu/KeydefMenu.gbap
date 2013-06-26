@@ -11,7 +11,7 @@
    </EDITFILES>
    <SRCFILES >
       <FILE PATH=".\KeydefMenu.gbas" />
-      <FILE PATH="..\..\Common\keydef.gbas" />
-      <FILE PATH="..\..\Common\Menu.gbas" />
+      <FILE PATH=".\keydef.gbas" />
+      <FILE PATH=".\Menu.gbas" />
    </SRCFILES>
 </GLBASIC>

@@ -1,0 +1,198 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Wednesday, April 11, 2012
+// IDE Version: 10.283
+
+
+//HAshmaptest
+
+//LOCAL Map AS HashMap
+//FOR i = 0 TO 10000
+//	Map.Put("Key"+i, i)
+//NEXT
+//
+//FOR i = 0 TO 10000
+//	LOCAL Value%
+//	Map.GetValue("Key"+i, Value)
+//	STDOUT "Key"+i+": "+Value+"\n"
+//	IF Value <> i THEN END
+//NEXT
+//FOR i = 0 TO 10000
+//	Map.Remove("Key"+i)
+//NEXT
+//FOR i = 0 TO 10000
+//	LOCAL Value%
+//	IF Map.GetValue("Key"+i, Value)
+//		STDOUT "wtf\n"
+//		KEYWAIT
+//		END
+//	ELSE
+//		STDOUT "okay\n"
+//	ENDIF
+//NEXT
+//KEYWAIT
+
+
+//! Ein Behälter für Elemente
+TYPE Bucket
+	Set% = FALSE
+	Elements[] AS KeyValue //Das Bucket, wenn mehrere Elemente reinkommen (Kollisionen)
+	Element AS KeyValue //Wenns nur ein Element gibt
+ENDTYPE
+
+//! Ein Schlüssel - Wert Paar
+TYPE KeyValue
+	Key$; Value%
+ENDTYPE
+
+
+TYPE HashMap
+	Buckets[] AS Bucket
+	Elements%
+
+
+	//! Fügt einen Key$ mit der Value% in die HashMap
+	FUNCTION Put: Key$, Value%
+		IF Key$ = "" THEN Error("Cannot insert empty key you son of a bitch.", 19, "Hashmap.gbas")
+		IF LEN(self.Buckets[]) = 0
+			self.SetSize(4096)
+		ENDIF
+		IF NOT self.DoesKeyExist(Key$)
+			INC self.Elements
+		ENDIF
+		IF self.Elements > (LEN(self.Buckets[])/3*2) //mehr als 2 drittel voll
+			self.SetSize(LEN(self.Buckets[])*4) //verdoppeln
+		ENDIF
+
+		LOCAL KV AS KeyValue
+		KV.Key$ = Key$
+		KV.Value = Value
+
+		LOCAL hash% = HashStr(Key$, LEN(self.Buckets)-1)
+		ALIAS Bucket AS self.Buckets[hash]
+		IF Bucket.Set
+			//Schauen obs das 1. Element ist?
+			IF LEN(Bucket.Elements[]) = 0
+				DIMPUSH Bucket.Elements[], Bucket.Element
+			ENDIF
+
+			DIMPUSH Bucket.Elements%[], KV
+		ELSE
+			Bucket.Set = TRUE
+			Bucket.Element = KV
+		ENDIF
+	ENDFUNCTION
+
+	//! Gibt es den Key$?
+	FUNCTION DoesKeyExist%: Key$
+		LOCAL Value%
+		RETURN GetValue(Key$, Value)
+	ENDFUNCTION
+
+	//! Gibt den Wert des Keys zurück
+	FUNCTION GetValue%: Key$, BYREF Value%
+		LOCAL hash% = HashStr(Key$, LEN(self.Buckets)-1)
+		IF hash >= LEN(self.Buckets[]) THEN RETURN FALSE
+		ALIAS Bucket AS self.Buckets[hash]
+		IF Bucket.Set
+			IF LEN(Bucket.Elements) = 0
+				IF Bucket.Element.Key$ <> Key$
+					Value = 0
+					RETURN FALSE
+				ELSE
+					Value = Bucket.Element.Value
+					RETURN TRUE
+				ENDIF
+			ELSE
+				FOR i = 0 TO LEN(Bucket.Elements[])-1
+					IF Bucket.Elements[i].Key$ = Key$
+						//Oha!
+						Value = Bucket.Elements[i].Value
+						RETURN TRUE
+					ENDIF
+				NEXT
+				RETURN FALSE
+			ENDIF
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+
+	//! Löscht einen Key und retuniert TRUE wenn erfolgreich
+	FUNCTION Remove%: Key$
+		LOCAL hash%= HashStr(Key$, LEN(self.Buckets)-1)
+		ALIAS Bucket AS self.Buckets[hash]
+
+		IF Bucket.Set
+			IF Bucket.Element.Key$ = Key$
+				DEC self.Elements
+				LOCAL e AS KeyValue
+				Bucket.Element = e
+				Bucket.Set = FALSE
+			ELSE
+				LOCAL Find% = FALSE
+				FOR i = 0 TO LEN(Bucket.Elements[])-1
+					IF Bucket.Elements[i].Key$ = Key$
+						Find = TRUE
+						DIMDEL Bucket.Elements[], i
+						BREAK
+					ENDIF
+				NEXT
+				IF LEN(Bucket.Elements[]) = 1 //wenns nur mehr einen gibt => vom array ins element!
+					Bucket.Element = Bucket.Elements[0]
+					DIMDEL Bucket.Elements[], 0
+				ENDIF
+
+				IF Find THEN DEC self.Elements
+
+				RETURN Find
+			ENDIF
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+
+
+	//! In ein verdammtes Array mit der Hashmap
+	FUNCTION ToArray: Array[] AS KeyValue
+		DIM Array[0]
+		FOR i = 0 TO LEN(self.Buckets[])-1
+			ALIAS B AS self.Buckets[i]
+			IF B.Set
+				IF LEN(B.Elements[])
+					FOR j = 0 TO LEN(B.Elements[])-1
+						DIMPUSH Array[], B.Elements[j]
+					NEXT
+				ELSE
+					DIMPUSH Array[], B.Element
+				ENDIF
+			ENDIF
+		NEXT
+	ENDFUNCTION
+
+	//! Setze die Größe des Hashmap Arrays
+	FUNCTION SetSize: Size%
+		LOCAL Arr[] AS KeyValue
+		self.ToArray(Arr[])
+		self.Elements = 0
+		REDIM self.Buckets[Size]
+		FOREACH E IN Arr[]
+			self.Put(E.Key$, E.Value)
+		NEXT
+	ENDFUNCTION
+ENDTYPE
+
+
+
+//! Hash des gegebenen Strings
+FUNCTION HashStr%: Str$, MaxLen%
+	LOCAL Hash%
+	FOR i = 0 TO LEN(Str$) - 1
+		INC Hash, ASC(Str$, i) + i*26
+	NEXT
+	Hash = MOD(Hash, MaxLen)
+	RETURN Hash%
+ENDFUNCTION
+
+
+

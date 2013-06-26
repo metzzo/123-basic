@@ -1,0 +1,24 @@
+folder:/Arkanoid.app
+static:/Arkanoid.app/Arkanoid.exe
+static:/Arkanoid.app/boing.wav
+static:/Arkanoid.app/bwah.wav
+static:/Arkanoid.app/DIR_STRUCTURE
+static:/Arkanoid.app/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/Arkanoid.app/GLBFile.html
+static:/Arkanoid.app/GLBScript.js
+static:/Arkanoid.app/GLBScript_unopt.js
+static:/Arkanoid.app/smalfont.bmp
+editable:/Arkanoid.gbap
+static:/Arkanoid.gbap.GLBSCRIPT_DATA
+editable:/Arkanoid.gbas
+static:/Arkanoid.gbas.GLBSCRIPT_DATA
+static:/DIR_STRUCTURE
+static:/GLBFile.html
+static:/GLBScript.js
+static:/smalfont.png
+var:compileTime=2013-06-26 12:54:12
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

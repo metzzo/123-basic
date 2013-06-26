@@ -1,0 +1,342 @@
+// --------------------------------- //
+// Project: Keydef - define keyboard/joystick input
+// Start: Thursday, December 14, 2006
+// IDE Version: 4.036
+
+//! This file is to help you make user defined
+//! controls. See the file "menu.gbas" for
+//! the real power of this thingy.
+
+// --------------------------------------- //
+//! Internal structure
+// --------------------------------------- //
+TYPE KEYDEF_STATE
+	keys[256]
+	joys[4][48] // 6+6+4+32
+ENDTYPE
+
+
+// --------------------------------------- //
+//! Get state of input devices
+//! do this once for a "null" (empty) state
+//! and then do it on every update
+//! to see what has changed
+// --------------------------------------- //
+FUNCTION keydef_getstate: st AS KEYDEF_STATE
+LOCAL i, j, nj
+	FOR i=1 TO 0xff; st.keys[i] = KEY(i); NEXT
+	nj = GETNUMJOYSTICKS()
+	DIM st.joys[nj][48]
+	FOR i=0 TO nj-1
+		FOR j=0 TO 47
+			st.joys[i][j] = keydef_joystate(i, j, 0.4)
+		NEXT
+	NEXT
+ENDFUNCTION
+
+
+// --------------------------------------- //
+//! Get Joy value for key (internal use)
+// --------------------------------------- //
+FUNCTION keydef_joystate: njoy, nax, deadzone
+LOCAL ax
+	SELECT nax
+	CASE 0x00; ax=GETJOYX (njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x01; ax=GETJOYX (njoy); IF ax> deadzone THEN RETURN     ax
+	CASE 0x02; ax=GETJOYY (njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x03; ax=GETJOYY (njoy); IF ax> deadzone THEN RETURN     ax
+	CASE 0x04; ax=GETJOYZ (njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x05; ax=GETJOYZ (njoy); IF ax> deadzone THEN RETURN     ax
+	CASE 0x06; ax=GETJOYRX(njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x07; ax=GETJOYRX(njoy); IF ax> deadzone THEN RETURN     ax
+	CASE 0x08; ax=GETJOYRY(njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x09; ax=GETJOYRY(njoy); IF ax> deadzone THEN RETURN     ax
+	CASE 0x0a; ax=GETJOYRZ(njoy); IF ax<-deadzone THEN RETURN ABS(ax)
+	CASE 0x0b; ax=GETJOYRZ(njoy); IF ax> deadzone THEN RETURN     ax
+
+	CASE 0x0c; ax=GETDIGIX(njoy); IF ax>0 THEN RETURN ABS(ax)
+	CASE 0x0d; ax=GETDIGIX(njoy); IF ax>0 THEN RETURN     ax
+	CASE 0x0e; ax=GETDIGIY(njoy); IF ax>0 THEN RETURN ABS(ax)
+	CASE 0x0f; ax=GETDIGIY(njoy); IF ax>0 THEN RETURN     ax
+	DEFAULT
+		ax = GETJOYBUTTON(njoy, nax-0x10)
+		IF ax THEN RETURN 1
+	ENDSELECT
+RETURN 0
+ENDFUNCTION
+
+// --------------------------------------- //
+//! Get Key value for key ( * USE THIS * )
+// --------------------------------------- //
+FUNCTION keydef_key: keyname$
+LOCAL names$[], t$, i, njoy, pos
+	// K202
+	t$ = MID$(keyname$, 0,1) // type ("K" or "J")
+	IF t$="K"
+		keyname$=MID$(keyname$, 1, 256)
+		RETURN KEY(keyname$)
+	ENDIF
+
+	// J0-
+	IF t$="J"
+		njoy = MID$(keyname$, 1,1)
+		// IF SPLITSTR(keyname$, names$[], "-")<>2 THEN RETURN 0
+		pos = INSTR(keyname$, "-")
+		IF pos>=0
+			RETURN keydef_joystate(njoy, MID$(keyname$, pos+1,128), 0)
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDFUNCTION
+
+
+// --------------------------------------- //
+//! Get a nice name for any input
+//! Only for visual output in menu or something
+//! \sa keydef_get_name$
+// --------------------------------------- //
+FUNCTION keydef_get_nice_name$: shortname$
+LOCAL none$
+LOCAL names$[], t$, i, njoy
+	none$="*NONE*"
+
+	// K202
+	t$ = MID$(shortname$, 0,1) // type ("K" or "J")
+	IF t$="K"
+		shortname$=MID$(shortname$, 1, 256)
+		IF LEN(shortname$)=0 THEN RETURN none$
+		keydef_keynames(names$[])
+		RETURN names$[shortname$]
+	ENDIF
+
+	// J0-
+	IF t$="J"
+		IF SPLITSTR(shortname$, names$[], "-")<>2 THEN RETURN 0
+		RETURN "J"+INTEGER(MID$(names$[0],1,16)+1) + "," + keydef_joyname$(names$[1])
+	ENDIF
+
+RETURN none$
+ENDFUNCTION
+
+// --------------------------------------- //
+//! Get internal name for input
+//! (store that in ini file as well!)
+// --------------------------------------- //
+FUNCTION keydef_get_name$: state AS KEYDEF_STATE, nullstate AS KEYDEF_STATE
+LOCAL i, j
+LOCAL names$[]
+	FOR i=0 TO 255
+		IF state.keys[i] AND nullstate.keys[i]=0
+			RETURN "K"+i
+		ENDIF
+	NEXT
+
+	FOR i=0 TO MIN(BOUNDS(state.joys[],0), BOUNDS(nullstate.joys[],0) )-1
+		FOR j=0 TO 47
+			IF state.joys[i][j] AND nullstate.joys[i][j]=0
+				RETURN "J"+ i +"-"+j
+			ENDIF
+		NEXT
+	NEXT
+	RETURN ""
+ENDFUNCTION
+
+
+
+// --------------------------------------- //
+//! a readable name for the joystick axis
+// --------------------------------------- //
+FUNCTION keydef_joyname$: i
+	SELECT i
+	CASE 0x00; RETURN "NEG_X"
+	CASE 0x01; RETURN "POS_X"
+	CASE 0x02; RETURN "NEG_Y"
+	CASE 0x03; RETURN "POS_Y"
+	CASE 0x04; RETURN "NEG_Z"
+	CASE 0x05; RETURN "POS_Z"
+	CASE 0x06; RETURN "NEG_RX"
+	CASE 0x07; RETURN "POS_RX"
+	CASE 0x08; RETURN "NEG_RY"
+	CASE 0x09; RETURN "POS_RY"
+	CASE 0x0a; RETURN "NEG_RZ"
+	CASE 0x0b; RETURN "POS_RZ"
+	CASE 0x0c; RETURN "NEG_POVX"
+	CASE 0x0d; RETURN "POS_POVX"
+	CASE 0x0e; RETURN "NEG_POVY"
+	CASE 0x0f; RETURN "POS_POVY"
+	DEFAULT
+		RETURN "BUT_"+(i-0x0f)
+	ENDSELECT
+ENDFUNCTION
+
+// --------------------------------------- //
+//! A readable name for the key
+// --------------------------------------- //
+FUNCTION keydef_keyname$: i
+LOCAL names$[]
+	keydef_keynames(names$[])
+	RETURN names$[i]
+ENDFUNCTION
+
+
+// --------------------------------------- //
+// Fill array with nice names for keys
+// --------------------------------------- //
+@FUNCTION keydef_keynames: names$[]
+	DIM names$[256]
+	names$[ 0x01] = "ESC"
+	names$[ 0x02] = "1"
+	names$[ 0x03] = "2"
+	names$[ 0x04] = "3"
+	names$[ 0x05] = "4"
+	names$[ 0x06] = "5"
+	names$[ 0x07] = "6"
+	names$[ 0x08] = "7"
+	names$[ 0x09] = "8"
+	names$[ 0x0A] = "9"
+	names$[ 0x0B] = "0"
+	names$[ 0x0C] = "MINUS"
+	names$[ 0x0D] = "EQUALS"
+	names$[ 0x0E] = "BACK"
+	names$[ 0x0F] = "TAB"
+	names$[ 0x10] = "Q"
+	names$[ 0x11] = "W"
+	names$[ 0x12] = "E"
+	names$[ 0x13] = "R"
+	names$[ 0x14] = "T"
+	names$[ 0x15] = "Y"
+	names$[ 0x16] = "U"
+	names$[ 0x17] = "I"
+	names$[ 0x18] = "O"
+	names$[ 0x19] = "P"
+	names$[ 0x1A] = "LBRACKET"
+	names$[ 0x1B] = "RBRACKET"
+	names$[ 0x1C] = "RETURN"
+	names$[ 0x1D] = "LCONTROL"
+	names$[ 0x1E] = "A"
+	names$[ 0x1F] = "S"
+	names$[ 0x20] = "D"
+	names$[ 0x21] = "F"
+	names$[ 0x22] = "G"
+	names$[ 0x23] = "H"
+	names$[ 0x24] = "J"
+	names$[ 0x25] = "K"
+	names$[ 0x26] = "L"
+	names$[ 0x27] = "SEMICOLON"
+	names$[ 0x28] = "APOSTROPHE"
+	names$[ 0x29] = "GRAVE"
+	names$[ 0x2A] = "LSHIFT"
+	names$[ 0x2B] = "BACKSLASH"
+	names$[ 0x2C] = "Z"
+	names$[ 0x2D] = "X"
+	names$[ 0x2E] = "C"
+	names$[ 0x2F] = "V"
+	names$[ 0x30] = "B"
+	names$[ 0x31] = "N"
+	names$[ 0x32] = "M"
+	names$[ 0x33] = "COMMA"
+	names$[ 0x34] = "PERIOD"
+	names$[ 0x35] = "SLASH"
+	names$[ 0x36] = "RSHIFT"
+	names$[ 0x37] = "MULTIPLY"
+	names$[ 0x38] = "LMENU"
+	names$[ 0x39] = "SPACE"
+	names$[ 0x3A] = "CAPITAL"
+	names$[ 0x3B] = "F1"
+	names$[ 0x3C] = "F2"
+	names$[ 0x3D] = "F3"
+	names$[ 0x3E] = "F4"
+	names$[ 0x3F] = "F5"
+	names$[ 0x40] = "F6"
+	names$[ 0x41] = "F7"
+	names$[ 0x42] = "F8"
+	names$[ 0x43] = "F9"
+	names$[ 0x44] = "F10"
+	names$[ 0x45] = "NUMLOCK"
+	names$[ 0x46] = "SCROLL"
+	names$[ 0x47] = "NUMPAD7"
+	names$[ 0x48] = "NUMPAD8"
+	names$[ 0x49] = "NUMPAD9"
+	names$[ 0x4A] = "SUBTRACT"
+	names$[ 0x4B] = "NUMPAD4"
+	names$[ 0x4C] = "NUMPAD5"
+	names$[ 0x4D] = "NUMPAD6"
+	names$[ 0x4E] = "ADD"
+	names$[ 0x4F] = "NUMPAD1"
+	names$[ 0x50] = "NUMPAD2"
+	names$[ 0x51] = "NUMPAD3"
+	names$[ 0x52] = "NUMPAD0"
+	names$[ 0x53] = "DECIMAL"
+	names$[ 0x56] = "OEM_102"
+	names$[ 0x57] = "F11"
+	names$[ 0x58] = "F12"
+	names$[ 0x64] = "F13"
+	names$[ 0x65] = "F14"
+	names$[ 0x66] = "F15"
+	names$[ 0x70] = "KANA"
+	names$[ 0x73] = "ABNT_C1"
+	names$[ 0x79] = "CONVERT"
+	names$[ 0x7B] = "NOCONVERT"
+	names$[ 0x7D] = "YEN"
+	names$[ 0x7E] = "ABNT_C2"
+	names$[ 0x8D] = "NUMPADEQUALS"
+	names$[ 0x90] = "PREVTRACK"
+	names$[ 0x91] = "AT"
+	names$[ 0x92] = "COLON"
+	names$[ 0x93] = "UNDERLINE"
+	names$[ 0x94] = "KANJI"
+	names$[ 0x95] = "STOP"
+	names$[ 0x96] = "AX"
+	names$[ 0x97] = "UNLABELED"
+	names$[ 0x99] = "NEXTTRACK"
+	names$[ 0x9C] = "NUMPADENTER"
+	names$[ 0x9D] = "RCONTROL"
+	names$[ 0xA0] = "MUTE"
+	names$[ 0xA1] = "CALCULATOR"
+	names$[ 0xA2] = "PLAYPAUSE"
+	names$[ 0xA4] = "MEDIASTOP"
+	names$[ 0xAE] = "VOLUMEDOWN"
+	names$[ 0xB0] = "VOLUMEUP"
+	names$[ 0xB2] = "WEBHOME"
+	names$[ 0xB3] = "NUMPADCOMMA"
+	names$[ 0xB5] = "DIVIDE"
+	names$[ 0xB7] = "SYSRQ"
+	names$[ 0xB8] = "RMENU"
+	names$[ 0xC5] = "PAUSE"
+	names$[ 0xC7] = "HOME"
+	names$[ 0xC8] = "UP"
+	names$[ 0xC9] = "PRIOR"
+	names$[ 0xCB] = "LEFT"
+	names$[ 0xCD] = "RIGHT"
+	names$[ 0xCF] = "END"
+	names$[ 0xD0] = "DOWN"
+	names$[ 0xD1] = "NEXT"
+	names$[ 0xD2] = "INSERT"
+	names$[ 0xD3] = "DELETE"
+	names$[ 0xDB] = "LWIN"
+	names$[ 0xDC] = "RWIN"
+	names$[ 0xDD] = "APPS"
+	names$[ 0xDE] = "POWER"
+	names$[ 0xDF] = "SLEEP"
+	names$[ 0xE3] = "WAKE"
+	names$[ 0xE5] = "WEBSEARCH"
+	names$[ 0xE6] = "WEBFAVORITES"
+	names$[ 0xE7] = "WEBREFRESH"
+	names$[ 0xE8] = "WEBSTOP"
+	names$[ 0xE9] = "WEBFORWARD"
+	names$[ 0xEA] = "WEBBACK"
+	names$[ 0xEB] = "MYCOMPUTER"
+	names$[ 0xEC] = "MAIL"
+	names$[ 0xED] = "MEDIASELECT"
+ENDFUNCTION
+
+
+
+
+
+
+
+
+
+
+

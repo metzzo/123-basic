@@ -1,0 +1,25 @@
+folder:/ddgui.app
+folder:/ddgui.app/Media
+static:/ddgui.app/Media/smalfont.bmp
+static:/ddgui.app/Media/smalfont.png
+static:/ddgui.app/ddgui.exe
+static:/ddgui.app/DIR_STRUCTURE
+static:/ddgui.app/GLBFile.html
+static:/ddgui.app/GLBScript.js
+editable:/ddgui.gbap
+static:/ddgui.gbap.GLBSCRIPT_DATA
+editable:/ddgui.gbas
+static:/ddgui.gbas.GLBSCRIPT_DATA
+static:/DIR_STRUCTURE
+static:/GLBFile.html
+static:/GLBScript.js
+editable:/icon.ico
+static:/icon.ico.GLBSCRIPT_DATA
+static:/icon.png
+static:/smalfont.png
+var:compileTime=2013-06-26 12:41:17
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

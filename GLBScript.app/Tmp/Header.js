@@ -2596,8 +2596,17 @@ function init2D(canvasName) {
 	
 	SYSTEMPOINTER(0);
 	
-	if (DOESFILEEXIST("Media/smalfont.png")) {
-		LOADFONT("Media/smalfont.png", 0);
+	var possibleDirs = ["Media/smalfont.png", "smalfont.png", "smallfont.png", "Media/smallfont.png", "Media/smalfont.bmp", "smalfont.bmp", "smallfont.bmp", "Media/smallfont.bmp"];
+	var f = null;
+	for (var i = 0; i < possibleDirs.length; i++) {
+		if (DOESFILEEXIST(possibleDirs[i])) {
+			f = possibleDirs[i];
+			break;
+		}
+	}
+	
+	if (f != null) {
+		LOADFONT(f, 0);
 		SETFONT(0);
 		waitForFont = true;
 	}

@@ -1,0 +1,12 @@
+static:/GLBFile.html
+static:/GLBScript.js
+static:/GLBScript_unopt.js
+static:/KeydefMenu.exe
+editable:/keys.ini
+static:/smalfont.bmp
+var:compileTime=2013-06-26 13:09:41
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=640
+var:GFX_HEIGHT=480

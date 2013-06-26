@@ -2596,8 +2596,17 @@ function init2D(canvasName) {
 	
 	SYSTEMPOINTER(0);
 	
-	if (DOESFILEEXIST("Media/smalfont.png")) {
-		LOADFONT("Media/smalfont.png", 0);
+	var possibleDirs = ["Media/smalfont.png", "smalfont.png", "smallfont.png", "Media/smallfont.png", "Media/smalfont.bmp", "smalfont.bmp", "smallfont.bmp", "Media/smallfont.bmp"];
+	var f = null;
+	for (var i = 0; i < possibleDirs.length; i++) {
+		if (DOESFILEEXIST(possibleDirs[i])) {
+			f = possibleDirs[i];
+			break;
+		}
+	}
+	
+	if (f != null) {
+		LOADFONT(f, 0);
 		SETFONT(0);
 		waitForFont = true;
 	}
@@ -4505,33 +4514,669 @@ function LOADBMP(path) {
 var __debugInfo = "";
 var debugMode = true;
 window['main'] = function(){
+		var __labels = {"restart": 1541};
+		
 	stackPush("main", __debugInfo);
 	try {
-		__debugInfo = "8:\Elefantastic.gbas";
-		SETCURRENTDIR("Media");
-		__debugInfo = "9:\Elefantastic.gbas";
-		SYSTEMPOINTER(1);
-		__debugInfo = "13:\Elefantastic.gbas";
-		global9_SolidTile = func7_LoadSpr("solidtile");
-		__debugInfo = "14:\Elefantastic.gbas";
-		global5_BGSpr = func7_LoadSpr("bg");
-		__debugInfo = "15:\Elefantastic.gbas";
-		global9_DestrTile = func7_LoadAni("destrtile", 32, 32);
-		__debugInfo = "16:\Elefantastic.gbas";
-		global9_PlanetSpr = func7_LoadSpr("planet1");
-		__debugInfo = "17:\Elefantastic.gbas";
-		global7_LineImg = func7_LoadSpr("line");
-		__debugInfo = "20:\Elefantastic.gbas";
-		global9_GameState = ~~(0);
-		__debugInfo = "26:\Elefantastic.gbas";
-		global10_FirstStart = 1;
-		__debugInfo = "27:\Elefantastic.gbas";
-		GETSCREENSIZE(global11_ScreenWidth_ref, global12_ScreenHeight_ref);
-		__debugInfo = "31:\Elefantastic.gbas";
-		global7_Gravity = func9_CreateVec(0, 0.75).clone(/* In Assign */);
-		__debugInfo = "18:\MainGame.gbas";
-		global12_SelectedTool = ~~(1);
-		__debugInfo = "8:\Elefantastic.gbas";
+		var local3_vel_1317 = 0.0, local5_delta_1318 = 0.0, local7_oldscrn_1319 = 0.0, local5_dtime_1320 = 0.0, local7_newbomb_1321 = 0.0, local7_newshot_1322 = 0.0, local6_reload_1323 = 0.0, local8_speedlim_1324 = 0.0, local6_mscale_1325 = 0.0, local4_life_1326 = 0.0, local1_i_1327 = 0.0, local8_facspeed_1328 = 0.0;
+		var __pc = 643;
+		while(__pc >= 0) {
+			switch(__pc) {
+				case 643:
+					__debugInfo = "13:\Scramble.gbas";
+					GETSCREENSIZE(global7_screenx_ref, global7_screeny_ref);
+					
+				__debugInfo = "14:\Scramble.gbas";
+				global7_hiscore = 10000;
+				__debugInfo = "15:\Scramble.gbas";
+				global7_flicker = 0;
+				__debugInfo = "16:\Scramble.gbas";
+				global9_colormode = 1;
+				__debugInfo = "19:\Scramble.gbas";
+				DIM(global5_q_sin, [360], 0.0);
+				__debugInfo = "20:\Scramble.gbas";
+				DIM(global5_q_cos, [360], 0.0);
+				__debugInfo = "20:\Scramble.gbas";
+				
+					case 688:
+						__debugInfo = "24:\Scramble.gbas";
+						local1_i_1327 = 0
+					
+				case 668: //dummy for1
+					if (!toCheck(local1_i_1327, 359, 1)) {__pc = 672; break;}
+					
+					case 680:
+						__debugInfo = "22:\Scramble.gbas";
+						global5_q_sin.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = SIN(local1_i_1327);
+						
+					__debugInfo = "23:\Scramble.gbas";
+					global5_q_cos.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = COS(local1_i_1327);
+					__debugInfo = "22:\Scramble.gbas";
+					local1_i_1327 += 1;
+					__pc = 668; break; //back jump
+					
+				case 672: //dummy for
+					;
+						
+					__debugInfo = "24:\Scramble.gbas";
+					;
+				__debugInfo = "26:\Scramble.gbas";
+				DIM(global4_objn, [20], 0.0);
+				__debugInfo = "27:\Scramble.gbas";
+				DIM(global4_objx, [20, 20], 0.0);
+				__debugInfo = "28:\Scramble.gbas";
+				DIM(global4_objy, [20, 20], 0.0);
+				__debugInfo = "29:\Scramble.gbas";
+				DIM(global4_cave, [0, 2], 0.0);
+				__debugInfo = "31:\Scramble.gbas";
+				DIM(global4_fuel, [0, 2], 0.0);
+				__debugInfo = "32:\Scramble.gbas";
+				DIM(global6_rocket, [0, 2], 0.0);
+				__debugInfo = "33:\Scramble.gbas";
+				DIM(global4_bomb, [0, 3], 0.0);
+				__debugInfo = "34:\Scramble.gbas";
+				DIM(global4_shot, [0, 2], 0.0);
+				__debugInfo = "35:\Scramble.gbas";
+				DIM(global4_boom, [0, 3], 0.0);
+				__debugInfo = "36:\Scramble.gbas";
+				DIM(global3_ufo, [0, 3], 0.0);
+				__debugInfo = "38:\Scramble.gbas";
+				LOADSPRITE("line.bmp", 0);
+				__debugInfo = "40:\Scramble.gbas";
+				LOADSOUND("sfx/bomb.wav", 0, 4);
+				__debugInfo = "41:\Scramble.gbas";
+				LOADSOUND("sfx/implosion.wav", 1, 4);
+				__debugInfo = "42:\Scramble.gbas";
+				LOADSOUND("sfx/shot.wav", 2, 4);
+				__debugInfo = "43:\Scramble.gbas";
+				LOADSOUND("sfx/fuel.wav", 3, 2);
+				__debugInfo = "44:\Scramble.gbas";
+				LOADSOUND("sfx/hahaha.wav", 4, 1);
+				__debugInfo = "49:\Scramble.gbas";
+				local1_i_1327 = 0;
+				__debugInfo = "50:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 7;
+				__debugInfo = "50:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
+				__debugInfo = "51:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
+				__debugInfo = "51:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.1;
+				__debugInfo = "52:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
+				__debugInfo = "52:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.4;
+				__debugInfo = "53:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.8;
+				__debugInfo = "53:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1.1;
+				__debugInfo = "54:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
+				__debugInfo = "54:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.1;
+				__debugInfo = "55:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
+				__debugInfo = "55:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.2;
+				__debugInfo = "56:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
+				__debugInfo = "56:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 0.5;
+				__debugInfo = "57:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 1;
+				__debugInfo = "60:\Scramble.gbas";
+				local1_i_1327 = 1;
+				__debugInfo = "61:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 5;
+				__debugInfo = "61:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
+				__debugInfo = "62:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
+				__debugInfo = "62:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
+				__debugInfo = "63:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
+				__debugInfo = "63:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
+				__debugInfo = "64:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.3;
+				__debugInfo = "64:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
+				__debugInfo = "65:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
+				__debugInfo = "65:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.3;
+				__debugInfo = "66:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.3;
+				__debugInfo = "70:\Scramble.gbas";
+				local1_i_1327 = 2;
+				__debugInfo = "71:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
+				__debugInfo = "71:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
+				__debugInfo = "72:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1.2;
+				__debugInfo = "72:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
+				__debugInfo = "73:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.9;
+				__debugInfo = "73:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.5;
+				__debugInfo = "74:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
+				__debugInfo = "74:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
+				__debugInfo = "75:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.9;
+				__debugInfo = "75:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.8;
+				__debugInfo = "76:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
+				__debugInfo = "76:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.2;
+				__debugInfo = "77:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1.2;
+				__debugInfo = "81:\Scramble.gbas";
+				local1_i_1327 = 3;
+				__debugInfo = "82:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
+				__debugInfo = "82:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
+				__debugInfo = "83:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1.5;
+				__debugInfo = "83:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
+				__debugInfo = "84:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
+				__debugInfo = "84:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
+				__debugInfo = "85:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1.5;
+				__debugInfo = "85:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = -(0.2);
+				__debugInfo = "86:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
+				__debugInfo = "86:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
+				__debugInfo = "87:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.7;
+				__debugInfo = "87:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.3;
+				__debugInfo = "88:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1.5;
+				__debugInfo = "91:\Scramble.gbas";
+				local1_i_1327 = 4;
+				__debugInfo = "92:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 5;
+				__debugInfo = "92:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
+				__debugInfo = "93:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
+				__debugInfo = "93:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
+				__debugInfo = "94:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
+				__debugInfo = "94:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.8;
+				__debugInfo = "95:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
+				__debugInfo = "95:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
+				__debugInfo = "96:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.9;
+				__debugInfo = "96:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.2;
+				__debugInfo = "97:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1;
+				__debugInfo = "100:\Scramble.gbas";
+				local1_i_1327 = 5;
+				__debugInfo = "101:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 2;
+				__debugInfo = "101:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
+				__debugInfo = "102:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
+				__debugInfo = "102:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
+				__debugInfo = "103:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
+				__debugInfo = "107:\Scramble.gbas";
+				local1_i_1327 = 6;
+				__debugInfo = "108:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
+				__debugInfo = "108:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
+				__debugInfo = "109:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
+				__debugInfo = "109:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
+				__debugInfo = "110:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
+				__debugInfo = "110:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
+				__debugInfo = "111:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0;
+				__debugInfo = "111:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0;
+				__debugInfo = "112:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
+				__debugInfo = "112:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
+				__debugInfo = "113:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
+				__debugInfo = "113:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
+				__debugInfo = "114:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0;
+				__debugInfo = "119:\Scramble.gbas";
+				local1_i_1327 = 7;
+				__debugInfo = "120:\Scramble.gbas";
+				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 9;
+				__debugInfo = "120:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.1;
+				__debugInfo = "121:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
+				__debugInfo = "121:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.3;
+				__debugInfo = "122:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.7;
+				__debugInfo = "122:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0;
+				__debugInfo = "123:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
+				__debugInfo = "123:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0;
+				__debugInfo = "124:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.1;
+				__debugInfo = "124:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.5;
+				__debugInfo = "125:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
+				__debugInfo = "125:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
+				__debugInfo = "126:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.1;
+				__debugInfo = "126:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 1;
+				__debugInfo = "127:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 0.7;
+				__debugInfo = "127:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 7).values[tmpPositionCache] = 0.7;
+				__debugInfo = "128:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 7).values[tmpPositionCache] = 0.7;
+				__debugInfo = "128:\Scramble.gbas";
+				global4_objx.arrAccess(~~(local1_i_1327), 8).values[tmpPositionCache] = 0.9;
+				__debugInfo = "129:\Scramble.gbas";
+				global4_objy.arrAccess(~~(local1_i_1327), 8).values[tmpPositionCache] = 1;
+				__debugInfo = "132:\Scramble.gbas";
+				LOADBMP("backgnd.bmp");
+				__debugInfo = "133:\Scramble.gbas";
+				INIOPEN("config.ini");
+				__debugInfo = "134:\Scramble.gbas";
+				global8_name_Str = INIGET_Str("player1", "name", "NO_DATA");
+				__debugInfo = "135:\Scramble.gbas";
+				PRINT("Enter your name:", 100, 120, 0);
+				__debugInfo = "137:\Scramble.gbas";
+				global8_name_Str = "robi";
+				case 1541:
+					__debugInfo = "138:\Scramble.gbas";
+					//label: restart;
+					
+				__debugInfo = "139:\Scramble.gbas";
+				func9_LoadLevel();
+				__debugInfo = "139:\Scramble.gbas";
+				global5_scale = 20;
+				__debugInfo = "140:\Scramble.gbas";
+				local6_mscale_1325 = 30;
+				__debugInfo = "142:\Scramble.gbas";
+				func12_WideScroller("readme-REALLY-DO!.txt");
+				__debugInfo = "146:\Scramble.gbas";
+				func9_LoadLevel();
+				__debugInfo = "147:\Scramble.gbas";
+				global4_tank = 100;
+				__debugInfo = "148:\Scramble.gbas";
+				local4_life_1326 = 3;
+				__debugInfo = "149:\Scramble.gbas";
+				global4_scrn = 0;
+				__debugInfo = "150:\Scramble.gbas";
+				global3_plx_ref[0] = global4_scrn;
+				__debugInfo = "151:\Scramble.gbas";
+				global3_ply_ref[0] = ((((global4_cave.arrAccess(0, 1).values[tmpPositionCache]) + (global4_cave.arrAccess(0, 0).values[tmpPositionCache]))) / (2));
+				__debugInfo = "151:\Scramble.gbas";
+				global5_scale = 20;
+				__debugInfo = "152:\Scramble.gbas";
+				local6_mscale_1325 = 30;
+				__debugInfo = "153:\Scramble.gbas";
+				local8_speedlim_1324 = 12;
+				__debugInfo = "154:\Scramble.gbas";
+				global8_gameover = 0;
+				__debugInfo = "155:\Scramble.gbas";
+				local6_reload_1323 = 0;
+				__debugInfo = "156:\Scramble.gbas";
+				global5_score = 0;
+				__debugInfo = "158:\Scramble.gbas";
+				local8_facspeed_1328 = ((0.7) / (8000));
+				__debugInfo = "161:\Scramble.gbas";
+				local7_newshot_1322 = GETTIMERALL();
+				__debugInfo = "162:\Scramble.gbas";
+				local7_newbomb_1321 = GETTIMERALL();
+				__debugInfo = "163:\Scramble.gbas";
+				global6_gameon = GETTIMERALL();
+				case 2119:
+					__debugInfo = "263:\Scramble.gbas";
+					if (!(1)) {__pc = 7386; break;}
+					
+					case 1651:
+						__debugInfo = "174:\Scramble.gbas";
+						if (!((((global4_scrn) >= (1200)) ? 1 : 0))) { __pc = 1631; break; }
+					
+					case 1633:
+						__debugInfo = "170:\Scramble.gbas";
+						func9_LoadLevel();
+						
+					__debugInfo = "171:\Scramble.gbas";
+					global4_scrn = 0;
+					__debugInfo = "172:\Scramble.gbas";
+					global3_plx_ref[0] = 0;
+					__debugInfo = "173:\Scramble.gbas";
+					global3_ply_ref[0] = ((global4_cave.arrAccess(0, 1).values[tmpPositionCache]) - (1));
+					__debugInfo = "170:\Scramble.gbas";
+					
+				case 1631: //dummy jumper1
+					;
+						
+					__debugInfo = "176:\Scramble.gbas";
+					local5_dtime_1320 = ((GETTIMER()) * (5));
+					__debugInfo = "178:\Scramble.gbas";
+					func4_Show(local5_dtime_1320, 0);
+					case 1974:
+						__debugInfo = "240:\Scramble.gbas";
+						if (!((((global6_gameon) <= (GETTIMERALL())) ? 1 : 0))) { __pc = 1665; break; }
+					
+					case 1697:
+						__debugInfo = "185:\Scramble.gbas";
+						if (!((((((((((func9_UserInput(4)) || (KEY(29))) ? 1 : 0)) && ((((local6_reload_1323) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((local7_newbomb_1321) < (GETTIMERALL())) ? 1 : 0))) ? 1 : 0))) { __pc = 1682; break; }
+					
+					case 1689:
+						__debugInfo = "182:\Scramble.gbas";
+						local7_newbomb_1321 = ((GETTIMERALL()) + (500));
+						
+					__debugInfo = "183:\Scramble.gbas";
+					func8_dropbomb(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]));
+					__debugInfo = "184:\Scramble.gbas";
+					local6_reload_1323 = 1;
+					__debugInfo = "182:\Scramble.gbas";
+					
+				case 1682: //dummy jumper1
+					;
+						
+					case 1717:
+						__debugInfo = "190:\Scramble.gbas";
+						if (!((((func9_UserInput(3)) && ((((local7_newshot_1322) < (GETTIMERALL())) ? 1 : 0))) ? 1 : 0))) { __pc = 1706; break; }
+					
+					case 1713:
+						__debugInfo = "188:\Scramble.gbas";
+						local7_newshot_1322 = ((GETTIMERALL()) + (200));
+						
+					__debugInfo = "189:\Scramble.gbas";
+					func7_addshot(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]));
+					__debugInfo = "188:\Scramble.gbas";
+					
+				case 1706: //dummy jumper1
+					;
+						
+					case 1727:
+						__debugInfo = "192:\Scramble.gbas";
+						if (!((((func9_UserInput(4)) == (0)) ? 1 : 0))) { __pc = 1722; break; }
+					
+					case 1726:
+						__debugInfo = "192:\Scramble.gbas";
+						local6_reload_1323 = 0;
+						
+					__debugInfo = "192:\Scramble.gbas";
+					
+				case 1722: //dummy jumper1
+					;
+						
+					__debugInfo = "197:\Scramble.gbas";
+					global4_tank = ((global4_tank) - (((local5_dtime_1320) / (8800))));
+					__debugInfo = "198:\Scramble.gbas";
+					local7_oldscrn_1319 = global4_scrn;
+					__debugInfo = "199:\Scramble.gbas";
+					global4_scrn = ((global4_scrn) + (((local5_dtime_1320) / (2000))));
+					case 1760:
+						__debugInfo = "200:\Scramble.gbas";
+						if (!((((INTEGER(local7_oldscrn_1319)) > (INTEGER(global4_scrn))) ? 1 : 0))) { __pc = 1752; break; }
+					
+					case 1759:
+						__debugInfo = "200:\Scramble.gbas";
+						global5_score = ((global5_score) + (10));
+						
+					__debugInfo = "200:\Scramble.gbas";
+					
+				case 1752: //dummy jumper1
+					;
+						
+					__debugInfo = "202:\Scramble.gbas";
+					local3_vel_1317 = ((local8_speedlim_1324) * (func9_UserInput(0)));
+					__debugInfo = "203:\Scramble.gbas";
+					local3_vel_1317 = ((((local3_vel_1317) * (local5_dtime_1320))) * (local8_facspeed_1328));
+					__debugInfo = "204:\Scramble.gbas";
+					global3_plx_ref[0] = ((((global3_plx_ref[0]) + (((local5_dtime_1320) / (3000))))) + (local3_vel_1317));
+					case 1820:
+						__debugInfo = "213:\Scramble.gbas";
+						if (!((((global4_tank) > (0)) ? 1 : 0))) { __pc = 1788; break; }
+					
+					case 1795:
+						__debugInfo = "207:\Scramble.gbas";
+						local3_vel_1317 = ((local8_speedlim_1324) * (func9_UserInput(1)));
+						
+					__debugInfo = "208:\Scramble.gbas";
+					local3_vel_1317 = ((((local3_vel_1317) * (local5_dtime_1320))) * (local8_facspeed_1328));
+					__debugInfo = "209:\Scramble.gbas";
+					global3_ply_ref[0] = ((global3_ply_ref[0]) + (local3_vel_1317));
+					__debugInfo = "207:\Scramble.gbas";
+					__pc = 7393;
+					break;
+					
+				case 1788: //dummy jumper1
+					
+					case 1815:
+						__debugInfo = "211:\Scramble.gbas";
+						global3_ply_ref[0] = ((global3_ply_ref[0]) + (((local5_dtime_1320) * (local8_facspeed_1328))));
+						
+					__debugInfo = "212:\Scramble.gbas";
+					global4_tank = 0;
+					__debugInfo = "211:\Scramble.gbas";
+					
+				case 7393: //dummy jumper2
+					;
+						
+					__debugInfo = "215:\Scramble.gbas";
+					local6_mscale_1325 = ((local6_mscale_1325) + (((((func9_UserInput(2)) * (local5_dtime_1320))) * (0.5))));
+					case 1841:
+						__debugInfo = "216:\Scramble.gbas";
+						if (!((((local6_mscale_1325) < (20)) ? 1 : 0))) { __pc = 1835; break; }
+					
+					case 1840:
+						__debugInfo = "216:\Scramble.gbas";
+						local6_mscale_1325 = 20;
+						
+					__debugInfo = "216:\Scramble.gbas";
+					
+				case 1835: //dummy jumper1
+					;
+						
+					case 1852:
+						__debugInfo = "217:\Scramble.gbas";
+						if (!((((local6_mscale_1325) > (70)) ? 1 : 0))) { __pc = 1846; break; }
+					
+					case 1851:
+						__debugInfo = "217:\Scramble.gbas";
+						local6_mscale_1325 = 70;
+						
+					__debugInfo = "217:\Scramble.gbas";
+					
+				case 1846: //dummy jumper1
+					;
+						
+					__debugInfo = "218:\Scramble.gbas";
+					global5_scale = ((global5_scale) + (((((((local6_mscale_1325) - (global5_scale))) * (local5_dtime_1320))) / (2000))));
+					case 1915:
+						__debugInfo = "232:\Scramble.gbas";
+						if (!(global8_gameover)) { __pc = 1865; break; }
+					
+					case 1872:
+						__debugInfo = "222:\Scramble.gbas";
+						local4_life_1326 = ((local4_life_1326) - (1));
+						
+					__debugInfo = "223:\Scramble.gbas";
+					PLAYSOUND(4, 0, 1);
+					__debugInfo = "224:\Scramble.gbas";
+					global6_gameon = ((GETTIMERALL()) + (1500));
+					case 1914:
+						__debugInfo = "231:\Scramble.gbas";
+						if (!((((local4_life_1326) < (0)) ? 1 : 0))) { __pc = 1887; break; }
+					
+					case 1891:
+						__debugInfo = "226:\Scramble.gbas";
+						GETFONTSIZE(global3_plx_ref, global3_ply_ref);
+						
+					__debugInfo = "227:\Scramble.gbas";
+					PRINT("GAME OVER", ((((global7_screenx_ref[0]) / (2))) - (((global3_plx_ref[0]) * (4.5)))), 100, 0);
+					__debugInfo = "228:\Scramble.gbas";
+					SHOWSCREEN();
+					case 1912:
+						__debugInfo = "229:\Scramble.gbas";
+						if (!((((func9_UserInput(3)) == (0)) ? 1 : 0))) {__pc = 7398; break;}
+					
+					case 1911:
+						__debugInfo = "228:\Scramble.gbas";
+						HIBERNATE();
+						
+					__debugInfo = "228:\Scramble.gbas";
+					__pc = 1912; break; //back jump
+					
+				case 7398:
+					;
+						
+					case 1913:
+						__debugInfo = "230:\Scramble.gbas";
+						__pc = __labels["restart"]; break;
+						
+					__debugInfo = "226:\Scramble.gbas";
+					
+				case 1887: //dummy jumper1
+					;
+						
+					__debugInfo = "222:\Scramble.gbas";
+					
+				case 1865: //dummy jumper1
+					;
+						
+					__debugInfo = "185:\Scramble.gbas";
+					__pc = 7388;
+					break;
+					
+				case 1665: //dummy jumper1
+					
+					case 1925:
+						__debugInfo = "234:\Scramble.gbas";
+						local5_delta_1318 = ((((global6_gameon) - (GETTIMERALL()))) / (1000));
+						
+					__debugInfo = "235:\Scramble.gbas";
+					global3_plx_ref[0] = MAX(1, ((global3_plx_ref[0]) - (((((local5_dtime_1320) / (1000))) * (local5_delta_1318)))));
+					__debugInfo = "236:\Scramble.gbas";
+					global4_scrn = MAX(1, ((global4_scrn) - (((((local5_dtime_1320) / (1000))) * (local5_delta_1318)))));
+					__debugInfo = "237:\Scramble.gbas";
+					global3_ply_ref[0] = ((func8_bottomat(unref(global3_plx_ref[0]))) - (CAST2INT(((MIN(7, ((func8_bottomat(unref(global3_plx_ref[0]))) - (func9_ceilingat(unref(global3_plx_ref[0])))))) / (2)))));
+					__debugInfo = "238:\Scramble.gbas";
+					global8_gameover = 0;
+					__debugInfo = "239:\Scramble.gbas";
+					global4_tank = 100;
+					__debugInfo = "234:\Scramble.gbas";
+					
+				case 7388: //dummy jumper2
+					;
+						
+					case 2005:
+						__debugInfo = "247:\Scramble.gbas";
+						if (!(global7_flicker)) { __pc = 1975; break; }
+					
+					case 1980:
+						__debugInfo = "243:\Scramble.gbas";
+						ALPHAMODE(-(0.3));
+						
+					__debugInfo = "244:\Scramble.gbas";
+					global1_y = ((((MOD(CAST2INT(((GETTIMERALL()) / (50))), 7)) * (global7_screeny_ref[0]))) / (7));
+					__debugInfo = "245:\Scramble.gbas";
+					DRAWRECT(0, global1_y, unref(global7_screenx_ref[0]), ((global7_screeny_ref[0]) / (7)), 0);
+					__debugInfo = "246:\Scramble.gbas";
+					ALPHAMODE(0);
+					__debugInfo = "243:\Scramble.gbas";
+					
+				case 1975: //dummy jumper1
+					;
+						
+					__debugInfo = "250:\Scramble.gbas";
+					ALPHAMODE(0.7);
+					__debugInfo = "251:\Scramble.gbas";
+					global7_hiscore = MAX(global5_score, global7_hiscore);
+					__debugInfo = "252:\Scramble.gbas";
+					PRINT(FORMAT_Str(6, 0, global5_score), ((global7_screenx_ref[0]) / (10)), ((global7_screeny_ref[0]) / (10)), 0);
+					__debugInfo = "253:\Scramble.gbas";
+					PRINT(FORMAT_Str(6, 0, global7_hiscore), ((((global7_screenx_ref[0]) / (2))) - (((global7_screenx_ref[0]) / (10)))), ((global7_screeny_ref[0]) / (10)), 0);
+					__debugInfo = "255:\Scramble.gbas";
+					func4_Line(((global7_screenx_ref[0]) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), ((((((global7_screenx_ref[0]) * (0.8))) * (global4_tank))) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), RGB(0, 255, 0));
+					case 2089:
+						__debugInfo = "256:\Scramble.gbas";
+						if (!(global9_colormode)) { __pc = 2066; break; }
+					
+					case 2088:
+						__debugInfo = "256:\Scramble.gbas";
+						func4_Line(((((((global7_screenx_ref[0]) * (0.8))) * (global4_tank))) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), ((global7_screenx_ref[0]) * (0.8)), ((global7_screeny_ref[0]) * (0.85)), RGB(255, 0, 0));
+						
+					__debugInfo = "256:\Scramble.gbas";
+					
+				case 2066: //dummy jumper1
+					;
+						
+					__debugInfo = "257:\Scramble.gbas";
+					
+					case 2117:
+						__debugInfo = "260:\Scramble.gbas";
+						local1_i_1327 = 1
+					
+				case 2094: //dummy for1
+					if (!toCheck(local1_i_1327, local4_life_1326, 1)) {__pc = 2097; break;}
+					
+					case 2116:
+						__debugInfo = "259:\Scramble.gbas";
+						func5_thing(0, ((((local1_i_1327) * (32))) + (32)), ((global7_screeny_ref[0]) * (0.15)), RGB(0, 128, 255), 16, 0);
+						
+					__debugInfo = "259:\Scramble.gbas";
+					local1_i_1327 += 1;
+					__pc = 2094; break; //back jump
+					
+				case 2097: //dummy for
+					;
+						
+					__debugInfo = "260:\Scramble.gbas";
+					;
+					__debugInfo = "262:\Scramble.gbas";
+					SHOWSCREEN();
+					__debugInfo = "174:\Scramble.gbas";
+					__pc = 2119; break; //back jump
+					
+				case 7386:
+					;
+					
+				__debugInfo = "13:\Scramble.gbas";__pc = -1; break;
+				default:
+					throwError("Gotocounter exception pc: "+__pc);
+				
+			}
+		}
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4541,553 +5186,628 @@ window['main'] = function(){
 	}
 	
 }
-window['GLB_ON_LOOP'] = function() {
-	stackPush("sub: GLB_ON_LOOP", __debugInfo);
+window['func9_UserInput'] = function(param2_tp) {
+	stackPush("function: UserInput", __debugInfo);
 	try {
-		var local2_ox_1366 = 0.0, local2_oy_1367 = 0.0;
-		__debugInfo = "40:\Elefantastic.gbas";
-		ALPHAMODE(-(1));
-		__debugInfo = "40:\Elefantastic.gbas";
-		local2_ox_1366 = global2_mx_ref[0];
-		__debugInfo = "41:\Elefantastic.gbas";
-		local2_oy_1367 = global2_my_ref[0];
-		__debugInfo = "42:\Elefantastic.gbas";
-		MOUSESTATE(global2_mx_ref, global2_my_ref, global2_ml_ref, global2_mr_ref);
-		__debugInfo = "43:\Elefantastic.gbas";
-		global10_MouseSpeed.attr1_X = ((global2_mx_ref[0]) - (local2_ox_1366));
-		__debugInfo = "44:\Elefantastic.gbas";
-		global10_MouseSpeed.attr1_Y = ((global2_my_ref[0]) - (local2_oy_1367));
-		__debugInfo = "46:\Elefantastic.gbas";
-		STRETCHSPRITE(global5_BGSpr, 0, 0, unref(global11_ScreenWidth_ref[0]), unref(global12_ScreenHeight_ref[0]));
-		__debugInfo = "64:\Elefantastic.gbas";
-		if (global10_FirstStart) {
-			__debugInfo = "49:\Elefantastic.gbas";
-			{
-				var local16___SelectHelper1__1368 = 0;
-				__debugInfo = "49:\Elefantastic.gbas";
-				local16___SelectHelper1__1368 = global9_GameState;
-				__debugInfo = "54:\Elefantastic.gbas";
-				if ((((local16___SelectHelper1__1368) == (~~(0))) ? 1 : 0)) {
-					__debugInfo = "51:\Elefantastic.gbas";
-					InitMainGame();
-					__debugInfo = "51:\Elefantastic.gbas";
-				} else {
-					__debugInfo = "53:\Elefantastic.gbas";
-					DEBUG((((("Unknown Gamestate ") + (CAST2STRING(global9_GameState)))) + ("\n")));
-					__debugInfo = "53:\Elefantastic.gbas";
+		var local8_speedlim_1331 = 0.0, local2_rv_1332 = 0.0;
+		__debugInfo = "269:\Scramble.gbas";
+		local8_speedlim_1331 = 12;
+		__debugInfo = "270:\Scramble.gbas";
+		{
+			var local16___SelectHelper1__1333 = 0.0;
+			__debugInfo = "270:\Scramble.gbas";
+			local16___SelectHelper1__1333 = param2_tp;
+			__debugInfo = "276:\Scramble.gbas";
+			if ((((local16___SelectHelper1__1333) == (0)) ? 1 : 0)) {
+				__debugInfo = "271:\Scramble.gbas";
+				local2_rv_1332 = ((((((((MOUSEAXIS(0)) / (local8_speedlim_1331))) + (KEY(205)))) - (KEY(203)))) + (GETJOYX(0)));
+				__debugInfo = "271:\Scramble.gbas";
+			} else if ((((local16___SelectHelper1__1333) == (1)) ? 1 : 0)) {
+				__debugInfo = "272:\Scramble.gbas";
+				local2_rv_1332 = ((((((((MOUSEAXIS(1)) / (local8_speedlim_1331))) + (KEY(200)))) - (KEY(208)))) + (GETJOYY(0)));
+				__debugInfo = "272:\Scramble.gbas";
+			} else if ((((local16___SelectHelper1__1333) == (2)) ? 1 : 0)) {
+				__debugInfo = "273:\Scramble.gbas";
+				local2_rv_1332 = ((((((MOUSEAXIS(2)) + (KEY(52)))) - (KEY(51)))) + (GETJOYZ(0)));
+				__debugInfo = "273:\Scramble.gbas";
+			} else if ((((local16___SelectHelper1__1333) == (3)) ? 1 : 0)) {
+				__debugInfo = "274:\Scramble.gbas";
+				local2_rv_1332 = ((((MOUSEAXIS(3)) + (KEY(42)))) + (GETJOYBUTTON(0, 0)));
+				__debugInfo = "274:\Scramble.gbas";
+			} else if ((((local16___SelectHelper1__1333) == (4)) ? 1 : 0)) {
+				__debugInfo = "275:\Scramble.gbas";
+				local2_rv_1332 = ((((MOUSEAXIS(4)) + (KEY(29)))) + (GETJOYBUTTON(0, 1)));
+				__debugInfo = "275:\Scramble.gbas";
+			};
+			__debugInfo = "270:\Scramble.gbas";
+		};
+		__debugInfo = "277:\Scramble.gbas";
+		if ((((local2_rv_1332) > (1)) ? 1 : 0)) {
+			__debugInfo = "277:\Scramble.gbas";
+			local2_rv_1332 = 1;
+			__debugInfo = "277:\Scramble.gbas";
+		};
+		__debugInfo = "278:\Scramble.gbas";
+		if ((((local2_rv_1332) < (-(1))) ? 1 : 0)) {
+			__debugInfo = "278:\Scramble.gbas";
+			local2_rv_1332 = -(1);
+			__debugInfo = "278:\Scramble.gbas";
+		};
+		__debugInfo = "279:\Scramble.gbas";
+		return tryClone(local2_rv_1332);
+		__debugInfo = "280:\Scramble.gbas";
+		return 0;
+		__debugInfo = "269:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_SINq'] = function(param1_a) {
+	stackPush("function: SINq", __debugInfo);
+	try {
+		__debugInfo = "283:\Scramble.gbas";
+		if ((((param1_a) < (0)) ? 1 : 0)) {
+			__debugInfo = "283:\Scramble.gbas";
+			param1_a = ((180) - (param1_a));
+			__debugInfo = "283:\Scramble.gbas";
+		};
+		__debugInfo = "284:\Scramble.gbas";
+		return tryClone(global5_q_sin.arrAccess(MOD(~~(param1_a), 360)).values[tmpPositionCache]);
+		__debugInfo = "285:\Scramble.gbas";
+		return 0;
+		__debugInfo = "283:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_Show'] = function(param5_dtime, param6_isdemo) {
+	stackPush("function: Show", __debugInfo);
+	try {
+		var local2_sc_1336 = 0.0, local4_offx_1337 = 0.0, local4_offy_1338 = 0.0, local1_i_1339 = 0.0, local1_j_1340 = 0.0, local3_col_1341 = 0.0, local1_x_1342 = 0.0, local1_y_1343 = 0.0, local3_phi_1344 = 0.0, local5_sight_1345 = 0.0, local6_bsight_1346 = 0.0;
+		__debugInfo = "305:\Scramble.gbas";
+		if (KEY(33)) {
+			__debugInfo = "303:\Scramble.gbas";
+			while (KEY(33)) {
+				
+			};
+			__debugInfo = "304:\Scramble.gbas";
+			global7_flicker = ((1) - (global7_flicker));
+			__debugInfo = "303:\Scramble.gbas";
+		};
+		__debugInfo = "310:\Scramble.gbas";
+		if (KEY(46)) {
+			__debugInfo = "308:\Scramble.gbas";
+			while (KEY(46)) {
+				
+			};
+			__debugInfo = "309:\Scramble.gbas";
+			global9_colormode = ((1) - (global9_colormode));
+			__debugInfo = "308:\Scramble.gbas";
+		};
+		__debugInfo = "313:\Scramble.gbas";
+		local2_sc_1336 = global5_scale;
+		__debugInfo = "314:\Scramble.gbas";
+		local4_offx_1337 = ((((global4_scrn) * (local2_sc_1336))) - (((global7_screenx_ref[0]) / (2))));
+		__debugInfo = "315:\Scramble.gbas";
+		local4_offy_1338 = ((local2_sc_1336) - (((global7_screeny_ref[0]) * (0.5))));
+		__debugInfo = "316:\Scramble.gbas";
+		local3_col_1341 = RGB(255, 128, 0);
+		__debugInfo = "317:\Scramble.gbas";
+		local5_sight_1345 = INTEGER(((30) + (global4_scrn)));
+		__debugInfo = "318:\Scramble.gbas";
+		local6_bsight_1346 = INTEGER(((global4_scrn) - (30)));
+		__debugInfo = "319:\Scramble.gbas";
+		{
+			__debugInfo = "327:\Scramble.gbas";
+			for (local1_i_1339 = MAX(0, INTEGER(((global4_scrn) - (16))));toCheck(local1_i_1339, MIN(local5_sight_1345, ((BOUNDS(global4_cave, 0)) - (2))), 1);local1_i_1339 += 1) {
+				__debugInfo = "321:\Scramble.gbas";
+				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (1))) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
+				__debugInfo = "322:\Scramble.gbas";
+				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (1))) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
+				__debugInfo = "324:\Scramble.gbas";
+				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (4))) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
+				__debugInfo = "325:\Scramble.gbas";
+				local1_y_1343 = ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 1).values[tmpPositionCache]))) / (2));
+				__debugInfo = "326:\Scramble.gbas";
+				func4_Line(((((((local1_i_1339) + (0.5))) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (0.5))) * (local2_sc_1336))) - (local4_offx_1337)), ((((((local1_y_1343) + (2))) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
+				__debugInfo = "321:\Scramble.gbas";
+			};
+			__debugInfo = "327:\Scramble.gbas";
+		};
+		__debugInfo = "330:\Scramble.gbas";
+		func8_MoveUfos();
+		__debugInfo = "330:\Scramble.gbas";
+		{
+			__debugInfo = "345:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "332:\Scramble.gbas";
+				local1_x_1342 = global3_ufo.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
+				__debugInfo = "333:\Scramble.gbas";
+				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
+					__debugInfo = "333:\Scramble.gbas";
+					break;
+					__debugInfo = "333:\Scramble.gbas";
 				};
-				__debugInfo = "49:\Elefantastic.gbas";
-			};
-			__debugInfo = "55:\Elefantastic.gbas";
-			global10_FirstStart = 0;
-			__debugInfo = "49:\Elefantastic.gbas";
-		} else {
-			__debugInfo = "57:\Elefantastic.gbas";
-			{
-				var local16___SelectHelper2__1369 = 0;
-				__debugInfo = "57:\Elefantastic.gbas";
-				local16___SelectHelper2__1369 = global9_GameState;
-				__debugInfo = "63:\Elefantastic.gbas";
-				if ((((local16___SelectHelper2__1369) == (~~(0))) ? 1 : 0)) {
-					__debugInfo = "59:\Elefantastic.gbas";
-					UpdateMainGame();
-					__debugInfo = "60:\Elefantastic.gbas";
-					RenderMainGame();
-					__debugInfo = "59:\Elefantastic.gbas";
-				} else {
-					__debugInfo = "62:\Elefantastic.gbas";
-					DEBUG((((("Unknown Gamestate ") + (CAST2STRING(global9_GameState)))) + ("\n")));
-					__debugInfo = "62:\Elefantastic.gbas";
-				};
-				__debugInfo = "57:\Elefantastic.gbas";
-			};
-			__debugInfo = "57:\Elefantastic.gbas";
-		};
-		__debugInfo = "66:\Elefantastic.gbas";
-		SHOWSCREEN();
-		__debugInfo = "40:\Elefantastic.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['GLB_ON_LOADING'] = function() {
-	stackPush("sub: GLB_ON_LOADING", __debugInfo);
-	try {
-		__debugInfo = "70:\Elefantastic.gbas";
-		PRINT("Game is loading...", 10, 10, 0);
-		__debugInfo = "71:\Elefantastic.gbas";
-		SHOWSCREEN();
-		__debugInfo = "70:\Elefantastic.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "28:\CollisionObject.gbas";
-		{
-			var local16___SelectHelper3__1372 = 0;
-			__debugInfo = "28:\CollisionObject.gbas";
-			local16___SelectHelper3__1372 = param4_self.attr3_Typ;
-			__debugInfo = "41:\CollisionObject.gbas";
-			if ((((local16___SelectHelper3__1372) == (~~(1))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper3__1372) == (~~(2))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper3__1372) == (~~(3))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper3__1372) == (~~(4))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper3__1372) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "40:\CollisionObject.gbas";
-				DEBUG((((("Unknown Collision Object ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "40:\CollisionObject.gbas";
-			};
-			__debugInfo = "28:\CollisionObject.gbas";
-		};
-		__debugInfo = "42:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "28:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		__debugInfo = "46:\CollisionObject.gbas";
-		{
-			var local16___SelectHelper4__1375 = 0;
-			__debugInfo = "46:\CollisionObject.gbas";
-			local16___SelectHelper4__1375 = param4_self.attr3_Typ;
-			__debugInfo = "70:\CollisionObject.gbas";
-			if ((((local16___SelectHelper4__1375) == (~~(1))) ? 1 : 0)) {
-				__debugInfo = "58:\CollisionObject.gbas";
-				if (param4_self.attr4_Info.arrAccess(~~(0)).values[tmpPositionCache]) {
-					var local1_a_1376 = 0.0, local1_s_1377 = 0.0, local1_c_1378 = 0.0, local3_col_1379 = 0.0;
-					__debugInfo = "49:\CollisionObject.gbas";
-					STARTPOLY(global7_LineImg, 2);
-					__debugInfo = "50:\CollisionObject.gbas";
-					local1_a_1376 = (((param4_self.attr6_DirVec).Angle()) + (90));
-					__debugInfo = "50:\CollisionObject.gbas";
-					local1_s_1377 = SIN(local1_a_1376);
-					__debugInfo = "51:\CollisionObject.gbas";
-					local1_c_1378 = COS(local1_a_1376);
-					__debugInfo = "52:\CollisionObject.gbas";
-					local3_col_1379 = 0;
-					__debugInfo = "53:\CollisionObject.gbas";
-					POLYVECTOR(((param4_self.attr6_PosVec.attr1_X) + (((local1_c_1378) * (param4_self.attr9_Thickness)))), ((param4_self.attr6_PosVec.attr1_Y) + (((local1_s_1377) * (param4_self.attr9_Thickness)))), 0, 0, local3_col_1379);
-					__debugInfo = "54:\CollisionObject.gbas";
-					POLYVECTOR(((param4_self.attr6_PosVec.attr1_X) - (((local1_c_1378) * (param4_self.attr9_Thickness)))), ((param4_self.attr6_PosVec.attr1_Y) - (((local1_s_1377) * (param4_self.attr9_Thickness)))), 1, 0, local3_col_1379);
-					__debugInfo = "55:\CollisionObject.gbas";
-					POLYVECTOR(((param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache].attr1_X) + (((local1_c_1378) * (param4_self.attr9_Thickness)))), ((param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache].attr1_Y) + (((local1_s_1377) * (param4_self.attr9_Thickness)))), 1, 0, local3_col_1379);
-					__debugInfo = "56:\CollisionObject.gbas";
-					POLYVECTOR(((param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache].attr1_X) - (((local1_c_1378) * (param4_self.attr9_Thickness)))), ((param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache].attr1_Y) - (((local1_s_1377) * (param4_self.attr9_Thickness)))), 1, 1, local3_col_1379);
-					__debugInfo = "57:\CollisionObject.gbas";
-					ENDPOLY();
-					__debugInfo = "49:\CollisionObject.gbas";
-				};
-				__debugInfo = "58:\CollisionObject.gbas";
-			} else if ((((local16___SelectHelper4__1375) == (~~(2))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper4__1375) == (~~(3))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper4__1375) == (~~(4))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper4__1375) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "69:\CollisionObject.gbas";
-				DEBUG((((("Unknown Collision Object ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "69:\CollisionObject.gbas";
-			};
-			__debugInfo = "46:\CollisionObject.gbas";
-		};
-		__debugInfo = "71:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "46:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_11_DoCollision'] = function(param3_Obj, param3_Pen, param1_V, param4_self) {
-	stackPush("method: DoCollision", __debugInfo);
-	try {
-		__debugInfo = "74:\CollisionObject.gbas";
-		{
-			var local16___SelectHelper5__1385 = 0;
-			__debugInfo = "74:\CollisionObject.gbas";
-			local16___SelectHelper5__1385 = param4_self.attr3_Typ;
-			__debugInfo = "96:\CollisionObject.gbas";
-			if ((((local16___SelectHelper5__1385) == (~~(1))) ? 1 : 0)) {
-				var local1_T_1386 = new type4_TVec(), local1_S_1387 = new type4_TVec();
-				__debugInfo = "77:\CollisionObject.gbas";
-				local1_T_1386 = param4_self.attr9_NormalVec.clone(/* In Assign */);
-				__debugInfo = "78:\CollisionObject.gbas";
-				(local1_T_1386).MulVec(param3_Pen);
-				__debugInfo = "79:\CollisionObject.gbas";
-				(param3_Obj.attr6_PosVec).AddVec(local1_T_1386);
-				__debugInfo = "80:\CollisionObject.gbas";
-				local1_T_1386 = param1_V.clone(/* In Assign */);
-				__debugInfo = "81:\CollisionObject.gbas";
-				(local1_T_1386).Normalize();
-				__debugInfo = "83:\CollisionObject.gbas";
-				local1_S_1387 = param1_V.clone(/* In Assign */);
-				__debugInfo = "84:\CollisionObject.gbas";
-				(local1_S_1387).NormalVec();
-				__debugInfo = "85:\CollisionObject.gbas";
-				(param3_Obj.attr8_SpeedVec).Bounce(local1_S_1387, local1_T_1386);
-				__debugInfo = "77:\CollisionObject.gbas";
-			} else if ((((local16___SelectHelper5__1385) == (~~(2))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper5__1385) == (~~(3))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper5__1385) == (~~(4))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper5__1385) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "95:\CollisionObject.gbas";
-				DEBUG((((("Unknown Collision Object ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "95:\CollisionObject.gbas";
-			};
-			__debugInfo = "74:\CollisionObject.gbas";
-		};
-		__debugInfo = "98:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "74:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_6_GetPen'] = function(param3_Obj, param3_Pen_ref, param1_V, param4_self) {
-	stackPush("method: GetPen", __debugInfo);
-	try {
-		__debugInfo = "101:\CollisionObject.gbas";
-		(param4_self).FindIntersection(param3_Obj, param1_V);
-		__debugInfo = "103:\CollisionObject.gbas";
-		param3_Pen_ref[0] = ((((param3_Obj.attr6_Radius) + (param4_self.attr9_Thickness))) - ((param1_V).Length()));
-		__debugInfo = "104:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "101:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_16_FindIntersection'] = function(param3_Obj, param6_ResVec, param4_self) {
-	stackPush("method: FindIntersection", __debugInfo);
-	try {
-		var local2_V3_1397 = new type4_TVec(), local15_NormalizedMyVec_1398 = new type4_TVec();
-		__debugInfo = "108:\CollisionObject.gbas";
-		local2_V3_1397 = param3_Obj.attr6_PosVec.clone(/* In Assign */);
-		__debugInfo = "109:\CollisionObject.gbas";
-		(local2_V3_1397).SubVec(param4_self.attr6_PosVec);
-		__debugInfo = "112:\CollisionObject.gbas";
-		local15_NormalizedMyVec_1398 = param4_self.attr6_DirVec.clone(/* In Assign */);
-		__debugInfo = "113:\CollisionObject.gbas";
-		(local15_NormalizedMyVec_1398).Normalize();
-		__debugInfo = "132:\CollisionObject.gbas";
-		if (((((local2_V3_1397).DotProd(local15_NormalizedMyVec_1398)) < (0)) ? 1 : 0)) {
-			__debugInfo = "116:\CollisionObject.gbas";
-			(param6_ResVec).SetVec(local2_V3_1397);
-			__debugInfo = "116:\CollisionObject.gbas";
-		} else {
-			var local5_MyPos_1399 = new type4_TVec(), local2_V4_1400 = new type4_TVec();
-			__debugInfo = "119:\CollisionObject.gbas";
-			local5_MyPos_1399 = param4_self.attr6_PosVec.clone(/* In Assign */);
-			__debugInfo = "120:\CollisionObject.gbas";
-			(local5_MyPos_1399).AddVec(param4_self.attr6_DirVec);
-			__debugInfo = "123:\CollisionObject.gbas";
-			local2_V4_1400 = param3_Obj.attr6_PosVec.clone(/* In Assign */);
-			__debugInfo = "124:\CollisionObject.gbas";
-			(local2_V4_1400).SubVec(local5_MyPos_1399);
-			__debugInfo = "131:\CollisionObject.gbas";
-			if (((((local2_V4_1400).DotProd(local15_NormalizedMyVec_1398)) > (0)) ? 1 : 0)) {
-				__debugInfo = "127:\CollisionObject.gbas";
-				(param6_ResVec).SetVec(local2_V4_1400);
-				__debugInfo = "127:\CollisionObject.gbas";
-			} else {
-				__debugInfo = "129:\CollisionObject.gbas";
-				(local2_V3_1397).Project(param4_self.attr9_NormalVec);
-				__debugInfo = "130:\CollisionObject.gbas";
-				(param6_ResVec).SetVec(local2_V3_1397);
-				__debugInfo = "129:\CollisionObject.gbas";
-			};
-			__debugInfo = "119:\CollisionObject.gbas";
-		};
-		__debugInfo = "133:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "108:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_10_CreateLine'] = function(param8_StartVec, param6_EndVec, param7_Visible, param4_self) {
-	stackPush("method: CreateLine", __debugInfo);
-	try {
-		var local4_self_ref_1405 = [param4_self]; /* NEWCODEHERE */
-		__debugInfo = "137:\CollisionObject.gbas";
-		local4_self_ref_1405[0].attr3_Typ = ~~(1);
-		__debugInfo = "138:\CollisionObject.gbas";
-		local4_self_ref_1405[0].attr6_PosVec = param8_StartVec.clone(/* In Assign */);
-		__debugInfo = "139:\CollisionObject.gbas";
-		DIM(local4_self_ref_1405[0].attr7_InfoVec, [1], new type4_TVec());
-		__debugInfo = "140:\CollisionObject.gbas";
-		local4_self_ref_1405[0].attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache] = param6_EndVec.clone(/* In Assign */);
-		__debugInfo = "141:\CollisionObject.gbas";
-		DIM(local4_self_ref_1405[0].attr4_Info, [1], 0.0);
-		__debugInfo = "142:\CollisionObject.gbas";
-		local4_self_ref_1405[0].attr4_Info.arrAccess(~~(0)).values[tmpPositionCache] = param7_Visible;
-		__debugInfo = "144:\CollisionObject.gbas";
-		(local4_self_ref_1405[0]).UpdateVectors();
-		__debugInfo = "145:\CollisionObject.gbas";
-		DIMPUSH(global16_CollisionObjects_ref[0], local4_self_ref_1405);
-		__debugInfo = "146:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "137:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method23_type16_TCollisionObject_13_UpdateVectors'] = function(param4_self) {
-	stackPush("method: UpdateVectors", __debugInfo);
-	try {
-		__debugInfo = "149:\CollisionObject.gbas";
-		{
-			var local16___SelectHelper6__1408 = 0;
-			__debugInfo = "149:\CollisionObject.gbas";
-			local16___SelectHelper6__1408 = param4_self.attr3_Typ;
-			__debugInfo = "170:\CollisionObject.gbas";
-			if ((((local16___SelectHelper6__1408) == (~~(1))) ? 1 : 0)) {
-				var local1_P_1409 = new type4_TVec();
-				__debugInfo = "151:\CollisionObject.gbas";
-				(param4_self.attr6_DirVec).SetVec(param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache]);
-				__debugInfo = "152:\CollisionObject.gbas";
-				(param4_self.attr6_DirVec).SubVec(param4_self.attr6_PosVec);
-				__debugInfo = "155:\CollisionObject.gbas";
-				(param4_self.attr13_CollisionRect).SetPos(param4_self.attr6_PosVec);
-				__debugInfo = "157:\CollisionObject.gbas";
-				local1_P_1409 = param4_self.attr7_InfoVec.arrAccess(~~(0)).values[tmpPositionCache].clone(/* In Assign */);
-				__debugInfo = "158:\CollisionObject.gbas";
-				(local1_P_1409).SubVec(param4_self.attr6_PosVec);
-				__debugInfo = "159:\CollisionObject.gbas";
-				(param4_self.attr13_CollisionRect).SetSize(local1_P_1409.attr1_X, local1_P_1409.attr1_Y);
-				__debugInfo = "151:\CollisionObject.gbas";
-			} else if ((((local16___SelectHelper6__1408) == (~~(2))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper6__1408) == (~~(3))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper6__1408) == (~~(4))) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper6__1408) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "169:\CollisionObject.gbas";
-				DEBUG((((("Unknown Collision Object ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "169:\CollisionObject.gbas";
-			};
-			__debugInfo = "149:\CollisionObject.gbas";
-		};
-		__debugInfo = "172:\CollisionObject.gbas";
-		param4_self.attr9_NormalVec = param4_self.attr6_DirVec.clone(/* In Assign */);
-		__debugInfo = "173:\CollisionObject.gbas";
-		(param4_self.attr9_NormalVec).NormalVec();
-		__debugInfo = "174:\CollisionObject.gbas";
-		(param4_self.attr9_NormalVec).Normalize();
-		__debugInfo = "176:\CollisionObject.gbas";
-		return 0;
-		__debugInfo = "149:\CollisionObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method21_type14_TFallingObject_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		var local4_SubT_1412 = 0.0, local8_SubSpeed_1413 = new type4_TVec();
-		__debugInfo = "24:\FallingObject.gbas";
-		(param4_self.attr8_SpeedVec).AddVec(param4_self.attr7_MassVec);
-		__debugInfo = "28:\FallingObject.gbas";
-		if (((((param4_self.attr8_SpeedVec).Length()) > (12)) ? 1 : 0)) {
-			
-		};
-		__debugInfo = "32:\FallingObject.gbas";
-		local4_SubT_1412 = INTEGER(((((MAX(ABS(param4_self.attr8_SpeedVec.attr1_X), ABS(param4_self.attr8_SpeedVec.attr1_Y))) / (3))) + (1)));
-		__debugInfo = "34:\FallingObject.gbas";
-		local8_SubSpeed_1413 = param4_self.attr8_SpeedVec.clone(/* In Assign */);
-		__debugInfo = "35:\FallingObject.gbas";
-		(local8_SubSpeed_1413).DivVec(local4_SubT_1412);
-		__debugInfo = "36:\FallingObject.gbas";
-		{
-			var local1_i_1414 = 0.0;
-			__debugInfo = "64:\FallingObject.gbas";
-			for (local1_i_1414 = 1;toCheck(local1_i_1414, local4_SubT_1412, 1);local1_i_1414 += 1) {
-				var local3_Pen_1415 = 0.0, local1_V_1416 = new type4_TVec(), local3_Obj_1417 = 0;
-				__debugInfo = "38:\FallingObject.gbas";
-				(param4_self.attr6_PosVec).AddVec(local8_SubSpeed_1413);
-				__debugInfo = "39:\FallingObject.gbas";
-				(param4_self.attr13_CollisionRect).SetXY(((param4_self.attr6_PosVec.attr1_X) - (((param4_self.attr6_Radius) * (2)))), ((param4_self.attr6_PosVec.attr1_Y) - (((param4_self.attr6_Radius) * (2)))));
-				__debugInfo = "40:\FallingObject.gbas";
-				local3_Pen_1415 = -(1);
-				__debugInfo = "41:\FallingObject.gbas";
-				local3_Obj_1417 = -(1);
-				__debugInfo = "41:\FallingObject.gbas";
-				{
-					var local1_j_1418 = 0.0;
-					__debugInfo = "54:\FallingObject.gbas";
-					for (local1_j_1418 = 0;toCheck(local1_j_1418, ((BOUNDS(global16_CollisionObjects_ref[0], 0)) - (1)), 1);local1_j_1418 += 1) {
-						var alias1_O_ref_1419 = [new type16_TCollisionObject()], local6_TmpPen_ref_1420 = [0.0], local4_TmpV_1421 = new type4_TVec();
-						__debugInfo = "43:\FallingObject.gbas";
-						alias1_O_ref_1419 = global16_CollisionObjects_ref[0].arrAccess(~~(local1_j_1418)).values[tmpPositionCache] /* ALIAS */;
-						__debugInfo = "53:\FallingObject.gbas";
-						if ((param4_self.attr13_CollisionRect).Collision(alias1_O_ref_1419[0].attr13_CollisionRect)) {
-							__debugInfo = "46:\FallingObject.gbas";
-							(alias1_O_ref_1419[0]).GetPen(param4_self, local6_TmpPen_ref_1420, local4_TmpV_1421);
-							__debugInfo = "52:\FallingObject.gbas";
-							if (((((((local6_TmpPen_ref_1420[0]) >= (local3_Pen_1415)) ? 1 : 0)) && ((((local6_TmpPen_ref_1420[0]) >= (0)) ? 1 : 0))) ? 1 : 0)) {
-								__debugInfo = "49:\FallingObject.gbas";
-								local3_Pen_1415 = local6_TmpPen_ref_1420[0];
-								__debugInfo = "50:\FallingObject.gbas";
-								local1_V_1416 = local4_TmpV_1421.clone(/* In Assign */);
-								__debugInfo = "51:\FallingObject.gbas";
-								local3_Obj_1417 = ~~(local1_j_1418);
-								__debugInfo = "49:\FallingObject.gbas";
-							};
-							__debugInfo = "46:\FallingObject.gbas";
-						};
-						__debugInfo = "43:\FallingObject.gbas";
+				__debugInfo = "344:\Scramble.gbas";
+				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
+					__debugInfo = "335:\Scramble.gbas";
+					local1_y_1343 = global3_ufo.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache];
+					__debugInfo = "336:\Scramble.gbas";
+					local3_phi_1344 = 0;
+					__debugInfo = "341:\Scramble.gbas";
+					if ((((global3_ufo.arrAccess(~~(local1_i_1339), 3).values[tmpPositionCache]) == (1)) ? 1 : 0)) {
+						__debugInfo = "338:\Scramble.gbas";
+						local3_phi_1344 = ((-(GETTIMERALL())) * (0.7));
+						__debugInfo = "338:\Scramble.gbas";
+					} else {
+						__debugInfo = "340:\Scramble.gbas";
+						local3_phi_1344 = ((SIN(((GETTIMERALL()) * (20)))) * (15));
+						__debugInfo = "340:\Scramble.gbas";
 					};
-					__debugInfo = "54:\FallingObject.gbas";
+					__debugInfo = "342:\Scramble.gbas";
+					func5_thing(2, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, local3_phi_1344);
+					__debugInfo = "343:\Scramble.gbas";
+					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
+						__debugInfo = "343:\Scramble.gbas";
+						global8_gameover = 1;
+						__debugInfo = "343:\Scramble.gbas";
+					};
+					__debugInfo = "335:\Scramble.gbas";
 				};
-				__debugInfo = "63:\FallingObject.gbas";
-				if (((((((local3_Pen_1415) >= (0)) ? 1 : 0)) && ((((local3_Obj_1417) != (-(1))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "58:\FallingObject.gbas";
-					(global16_CollisionObjects_ref[0].arrAccess(local3_Obj_1417).values[tmpPositionCache][0]).DoCollision(param4_self, INTEGER(((local3_Pen_1415) - (1))), local1_V_1416);
-					__debugInfo = "59:\FallingObject.gbas";
-					local4_SubT_1412 = INTEGER(((((MAX(ABS(param4_self.attr8_SpeedVec.attr1_X), ABS(param4_self.attr8_SpeedVec.attr1_Y))) / (3))) + (1)));
-					__debugInfo = "60:\FallingObject.gbas";
-					local8_SubSpeed_1413 = param4_self.attr8_SpeedVec.clone(/* In Assign */);
-					__debugInfo = "61:\FallingObject.gbas";
-					(local8_SubSpeed_1413).DivVec(local4_SubT_1412);
-					__debugInfo = "62:\FallingObject.gbas";
-					local1_i_1414 = 1;
-					__debugInfo = "58:\FallingObject.gbas";
-				};
-				__debugInfo = "38:\FallingObject.gbas";
+				__debugInfo = "332:\Scramble.gbas";
 			};
-			__debugInfo = "64:\FallingObject.gbas";
+			__debugInfo = "345:\Scramble.gbas";
 		};
-		__debugInfo = "66:\FallingObject.gbas";
+		__debugInfo = "348:\Scramble.gbas";
+		//label: fuels;
+		__debugInfo = "350:\Scramble.gbas";
+		local3_col_1341 = RGB(128, 255, 0);
+		__debugInfo = "350:\Scramble.gbas";
 		{
-			var local16___SelectHelper7__1422 = 0;
-			__debugInfo = "66:\FallingObject.gbas";
-			local16___SelectHelper7__1422 = param4_self.attr3_Typ;
-			__debugInfo = "71:\FallingObject.gbas";
-			if ((((local16___SelectHelper7__1422) == (1)) ? 1 : 0)) {
-				__debugInfo = "68:\FallingObject.gbas";
-				param4_self.attr4_Info.arrAccess(0).values[tmpPositionCache]+=(param4_self.attr8_SpeedVec).Length();
-				__debugInfo = "68:\FallingObject.gbas";
-			} else {
-				__debugInfo = "70:\FallingObject.gbas";
-				DEBUG("Unknown falling object\n");
-				__debugInfo = "70:\FallingObject.gbas";
+			__debugInfo = "359:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_fuel, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "352:\Scramble.gbas";
+				local1_x_1342 = global4_fuel.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
+				__debugInfo = "353:\Scramble.gbas";
+				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
+					__debugInfo = "353:\Scramble.gbas";
+					break;
+					__debugInfo = "353:\Scramble.gbas";
+				};
+				__debugInfo = "358:\Scramble.gbas";
+				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
+					__debugInfo = "355:\Scramble.gbas";
+					local1_y_1343 = func8_bottomat(local1_x_1342);
+					__debugInfo = "356:\Scramble.gbas";
+					func5_thing(((6) + (global4_fuel.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache])), ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
+					__debugInfo = "357:\Scramble.gbas";
+					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
+						__debugInfo = "357:\Scramble.gbas";
+						global8_gameover = 1;
+						__debugInfo = "357:\Scramble.gbas";
+					};
+					__debugInfo = "355:\Scramble.gbas";
+				};
+				__debugInfo = "352:\Scramble.gbas";
 			};
-			__debugInfo = "66:\FallingObject.gbas";
+			__debugInfo = "359:\Scramble.gbas";
 		};
-		__debugInfo = "75:\FallingObject.gbas";
-		if ((((param4_self.attr6_PosVec.attr1_Y) > (((((global10_CurrentMap.attr6_Height_ref[0]) + (32))) * (32)))) ? 1 : 0)) {
-			__debugInfo = "74:\FallingObject.gbas";
+		__debugInfo = "360:\Scramble.gbas";
+		//label: rockets;
+		__debugInfo = "361:\Scramble.gbas";
+		local3_col_1341 = RGB(255, 255, 0);
+		__debugInfo = "361:\Scramble.gbas";
+		{
+			__debugInfo = "380:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global6_rocket, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "363:\Scramble.gbas";
+				local1_x_1342 = global6_rocket.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
+				__debugInfo = "364:\Scramble.gbas";
+				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
+					__debugInfo = "364:\Scramble.gbas";
+					break;
+					__debugInfo = "364:\Scramble.gbas";
+				};
+				__debugInfo = "379:\Scramble.gbas";
+				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
+					__debugInfo = "366:\Scramble.gbas";
+					local1_y_1343 = global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
+					__debugInfo = "376:\Scramble.gbas";
+					if ((((((((((local1_x_1342) < (((global3_plx_ref[0]) + (CAST2INT(((MOD(~~(((local1_x_1342) - (2))), 10)) / (5))))))) ? 1 : 0)) || ((((((local1_x_1342) - (global3_plx_ref[0]))) < (((((local1_y_1343) - (global3_ply_ref[0]))) / (2)))) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) < (((func8_bottomat(local1_x_1342)) - (0.1)))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "368:\Scramble.gbas";
+						local1_y_1343+=-(((param5_dtime) / (1500)));
+						__debugInfo = "375:\Scramble.gbas";
+						if ((((local1_y_1343) < (func9_ceilingat(local1_x_1342))) ? 1 : 0)) {
+							__debugInfo = "370:\Scramble.gbas";
+							global6_rocket.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = 0;
+							__debugInfo = "371:\Scramble.gbas";
+							global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = 10000;
+							__debugInfo = "372:\Scramble.gbas";
+							if ((((param6_isdemo) == (0)) ? 1 : 0)) {
+								__debugInfo = "372:\Scramble.gbas";
+								func7_addboom(local1_x_1342, local1_y_1343);
+								__debugInfo = "372:\Scramble.gbas";
+							};
+							__debugInfo = "370:\Scramble.gbas";
+						} else {
+							__debugInfo = "374:\Scramble.gbas";
+							global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = local1_y_1343;
+							__debugInfo = "374:\Scramble.gbas";
+						};
+						__debugInfo = "368:\Scramble.gbas";
+					};
+					__debugInfo = "377:\Scramble.gbas";
+					func5_thing(4, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
+					__debugInfo = "378:\Scramble.gbas";
+					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
+						__debugInfo = "378:\Scramble.gbas";
+						global8_gameover = 1;
+						__debugInfo = "378:\Scramble.gbas";
+					};
+					__debugInfo = "366:\Scramble.gbas";
+				};
+				__debugInfo = "363:\Scramble.gbas";
+			};
+			__debugInfo = "380:\Scramble.gbas";
+		};
+		__debugInfo = "381:\Scramble.gbas";
+		//label: bombs;
+		__debugInfo = "383:\Scramble.gbas";
+		local3_col_1341 = RGB(240, 240, 240);
+		__debugInfo = "383:\Scramble.gbas";
+		{
+			__debugInfo = "396:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_bomb, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "385:\Scramble.gbas";
+				global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) + (((param5_dtime) / (2500))));
+				__debugInfo = "386:\Scramble.gbas";
+				global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (((((param5_dtime) * (global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]))) / (1200))));
+				__debugInfo = "387:\Scramble.gbas";
+				global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) + (((param5_dtime) / (1800))));
+				__debugInfo = "388:\Scramble.gbas";
+				local3_phi_1344 = ATAN(-(0.5), global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]);
+				__debugInfo = "389:\Scramble.gbas";
+				func5_thing(1, ((((global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, local3_phi_1344);
+				__debugInfo = "390:\Scramble.gbas";
+				local1_y_1343 = func8_bottomat(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]);
+				__debugInfo = "395:\Scramble.gbas";
+				if ((((func6_impact(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache], global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache])) || ((((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) > (local1_y_1343)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "393:\Scramble.gbas";
+					func7_addboom(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache], global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]);
+					__debugInfo = "394:\Scramble.gbas";
+					DIMDEL(global4_bomb, ~~(local1_i_1339));
+					__debugInfo = "393:\Scramble.gbas";
+				};
+				__debugInfo = "385:\Scramble.gbas";
+			};
+			__debugInfo = "396:\Scramble.gbas";
+		};
+		__debugInfo = "397:\Scramble.gbas";
+		//label: shots;
+		__debugInfo = "398:\Scramble.gbas";
+		{
+			__debugInfo = "409:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_shot, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "400:\Scramble.gbas";
+				local1_y_1343 = global4_shot.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
+				__debugInfo = "401:\Scramble.gbas";
+				local1_x_1342 = global4_shot.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
+				__debugInfo = "402:\Scramble.gbas";
+				global4_shot.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = ((local1_x_1342) + (((param5_dtime) / (500))));
+				__debugInfo = "407:\Scramble.gbas";
+				if ((((((((((func6_impact(local1_x_1342, local1_y_1343)) || ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) < (func9_ceilingat(local1_x_1342))) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) > (func8_bottomat(local1_x_1342))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "404:\Scramble.gbas";
+					if ((((param6_isdemo) == (0)) ? 1 : 0)) {
+						__debugInfo = "404:\Scramble.gbas";
+						func7_addboom(local1_x_1342, local1_y_1343);
+						__debugInfo = "404:\Scramble.gbas";
+					};
+					__debugInfo = "405:\Scramble.gbas";
+					DIMDEL(global4_shot, ~~(local1_i_1339));
+					__debugInfo = "406:\Scramble.gbas";
+					local1_i_1339+=-(1);
+					__debugInfo = "404:\Scramble.gbas";
+				};
+				__debugInfo = "408:\Scramble.gbas";
+				func5_thing(5, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
+				__debugInfo = "400:\Scramble.gbas";
+			};
+			__debugInfo = "409:\Scramble.gbas";
+		};
+		__debugInfo = "410:\Scramble.gbas";
+		//label: player;
+		__debugInfo = "412:\Scramble.gbas";
+		local3_col_1341 = RGB(0, 128, 255);
+		__debugInfo = "413:\Scramble.gbas";
+		func5_thing(0, ((((global3_plx_ref[0]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global3_ply_ref[0]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
+		__debugInfo = "414:\Scramble.gbas";
+		//label: booms;
+		__debugInfo = "415:\Scramble.gbas";
+		{
+			__debugInfo = "425:\Scramble.gbas";
+			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_boom, 0)) - (1)), 1);local1_i_1339 += 1) {
+				__debugInfo = "417:\Scramble.gbas";
+				global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache] = ((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) + (((param5_dtime) / (1000))));
+				__debugInfo = "424:\Scramble.gbas";
+				if ((((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) > (3)) ? 1 : 0)) {
+					__debugInfo = "419:\Scramble.gbas";
+					DIMDEL(global4_boom, ~~(local1_i_1339));
+					__debugInfo = "420:\Scramble.gbas";
+					local1_i_1339 = ((local1_i_1339) - (1));
+					__debugInfo = "419:\Scramble.gbas";
+				} else {
+					__debugInfo = "422:\Scramble.gbas";
+					local3_col_1341 = RGB(255, ~~(((255) - (((((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) / (3))) * (255))))), 0);
+					__debugInfo = "423:\Scramble.gbas";
+					func5_thing(3, ((((global4_boom.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_boom.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, ((local2_sc_1336) * (global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache])), ((0.7) * (GETTIMERALL())));
+					__debugInfo = "422:\Scramble.gbas";
+				};
+				__debugInfo = "417:\Scramble.gbas";
+			};
+			__debugInfo = "425:\Scramble.gbas";
+		};
+		__debugInfo = "427:\Scramble.gbas";
+		if (func8_col_wall(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]))) {
+			__debugInfo = "427:\Scramble.gbas";
+			global8_gameover = 1;
+			__debugInfo = "427:\Scramble.gbas";
+		};
+		__debugInfo = "428:\Scramble.gbas";
+		return 0;
+		__debugInfo = "305:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func6_impact'] = function(param3_shx, param3_shy) {
+	stackPush("function: impact", __debugInfo);
+	try {
+		var local1_x_1349 = 0.0, local1_y_1350 = 0.0, local1_i_1351 = 0.0;
+		__debugInfo = "435:\Scramble.gbas";
+		{
+			__debugInfo = "447:\Scramble.gbas";
+			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1351 += 1) {
+				__debugInfo = "437:\Scramble.gbas";
+				local1_x_1349 = global3_ufo.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache];
+				__debugInfo = "438:\Scramble.gbas";
+				local1_y_1350 = global3_ufo.arrAccess(~~(local1_i_1351), 2).values[tmpPositionCache];
+				__debugInfo = "445:\Scramble.gbas";
+				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, local1_y_1350)) {
+					__debugInfo = "443:\Scramble.gbas";
+					if ((((global3_ufo.arrAccess(~~(local1_i_1351), 3).values[tmpPositionCache]) == (0)) ? 1 : 0)) {
+						__debugInfo = "441:\Scramble.gbas";
+						global5_score+=100;
+						__debugInfo = "442:\Scramble.gbas";
+						DIMDEL(global3_ufo, ~~(local1_i_1351));
+						__debugInfo = "441:\Scramble.gbas";
+					};
+					__debugInfo = "444:\Scramble.gbas";
+					return tryClone(1);
+					__debugInfo = "443:\Scramble.gbas";
+				};
+				__debugInfo = "446:\Scramble.gbas";
+				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
+					__debugInfo = "446:\Scramble.gbas";
+					break;
+					__debugInfo = "446:\Scramble.gbas";
+				};
+				__debugInfo = "437:\Scramble.gbas";
+			};
+			__debugInfo = "447:\Scramble.gbas";
+		};
+		__debugInfo = "449:\Scramble.gbas";
+		{
+			__debugInfo = "464:\Scramble.gbas";
+			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global4_fuel, 0)) - (1)), 1);local1_i_1351 += 1) {
+				__debugInfo = "451:\Scramble.gbas";
+				local1_x_1349 = global4_fuel.arrAccess(~~(local1_i_1351), 0).values[tmpPositionCache];
+				__debugInfo = "462:\Scramble.gbas";
+				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, func8_bottomat(local1_x_1349))) {
+					__debugInfo = "459:\Scramble.gbas";
+					if (global4_fuel.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache]) {
+						__debugInfo = "454:\Scramble.gbas";
+						PLAYSOUND(3, 0, 1);
+						__debugInfo = "455:\Scramble.gbas";
+						global4_tank = MIN(100, ((global4_tank) + (10)));
+						__debugInfo = "456:\Scramble.gbas";
+						global5_score+=150;
+						__debugInfo = "454:\Scramble.gbas";
+					} else {
+						__debugInfo = "458:\Scramble.gbas";
+						global5_score+=((((RND(4)) * (100))) + (100));
+						__debugInfo = "458:\Scramble.gbas";
+					};
+					__debugInfo = "460:\Scramble.gbas";
+					DIMDEL(global4_fuel, ~~(local1_i_1351));
+					__debugInfo = "461:\Scramble.gbas";
+					return tryClone(1);
+					__debugInfo = "459:\Scramble.gbas";
+				};
+				__debugInfo = "463:\Scramble.gbas";
+				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
+					__debugInfo = "463:\Scramble.gbas";
+					break;
+					__debugInfo = "463:\Scramble.gbas";
+				};
+				__debugInfo = "451:\Scramble.gbas";
+			};
+			__debugInfo = "464:\Scramble.gbas";
+		};
+		__debugInfo = "466:\Scramble.gbas";
+		{
+			__debugInfo = "475:\Scramble.gbas";
+			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global6_rocket, 0)) - (1)), 1);local1_i_1351 += 1) {
+				__debugInfo = "468:\Scramble.gbas";
+				local1_x_1349 = global6_rocket.arrAccess(~~(local1_i_1351), 0).values[tmpPositionCache];
+				__debugInfo = "473:\Scramble.gbas";
+				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, global6_rocket.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache])) {
+					__debugInfo = "470:\Scramble.gbas";
+					global5_score+=((50) + (((RND(1)) * (30))));
+					__debugInfo = "471:\Scramble.gbas";
+					DIMDEL(global6_rocket, ~~(local1_i_1351));
+					__debugInfo = "472:\Scramble.gbas";
+					return tryClone(1);
+					__debugInfo = "470:\Scramble.gbas";
+				};
+				__debugInfo = "474:\Scramble.gbas";
+				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
+					__debugInfo = "474:\Scramble.gbas";
+					break;
+					__debugInfo = "474:\Scramble.gbas";
+				};
+				__debugInfo = "468:\Scramble.gbas";
+			};
+			__debugInfo = "475:\Scramble.gbas";
+		};
+		__debugInfo = "476:\Scramble.gbas";
+		return 0;
+		__debugInfo = "477:\Scramble.gbas";
+		return 0;
+		__debugInfo = "435:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func8_Interpol'] = function(param1_a, param1_b, param1_x) {
+	stackPush("function: Interpol", __debugInfo);
+	try {
+		__debugInfo = "484:\Scramble.gbas";
+		return tryClone(((((((param1_b) - (param1_a))) * (param1_x))) + (param1_a)));
+		__debugInfo = "485:\Scramble.gbas";
+		return 0;
+		__debugInfo = "484:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func8_bottomat'] = function(param1_x) {
+	stackPush("function: bottomat", __debugInfo);
+	try {
+		var local1_i_1353 = 0.0, local1_j_1354 = 0.0;
+		__debugInfo = "489:\Scramble.gbas";
+		local1_i_1353 = MOD(INTEGER(ABS(param1_x)), BOUNDS(global4_cave, 0));
+		__debugInfo = "490:\Scramble.gbas";
+		local1_j_1354 = MOD(((INTEGER(ABS(param1_x))) + (1)), BOUNDS(global4_cave, 0));
+		__debugInfo = "491:\Scramble.gbas";
+		return tryClone(func8_Interpol(global4_cave.arrAccess(~~(local1_i_1353), 1).values[tmpPositionCache], global4_cave.arrAccess(~~(local1_j_1354), 1).values[tmpPositionCache], ((param1_x) - (local1_i_1353))));
+		__debugInfo = "492:\Scramble.gbas";
+		return 0;
+		__debugInfo = "489:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func9_ceilingat'] = function(param1_x) {
+	stackPush("function: ceilingat", __debugInfo);
+	try {
+		var local1_i_1356 = 0.0, local1_j_1357 = 0.0;
+		__debugInfo = "496:\Scramble.gbas";
+		local1_i_1356 = MOD(INTEGER(ABS(param1_x)), BOUNDS(global4_cave, 0));
+		__debugInfo = "497:\Scramble.gbas";
+		local1_j_1357 = MOD(((INTEGER(ABS(param1_x))) + (1)), BOUNDS(global4_cave, 0));
+		__debugInfo = "498:\Scramble.gbas";
+		return tryClone(func8_Interpol(global4_cave.arrAccess(~~(local1_i_1356), 0).values[tmpPositionCache], global4_cave.arrAccess(~~(local1_j_1357), 0).values[tmpPositionCache], ((param1_x) - (local1_i_1356))));
+		__debugInfo = "499:\Scramble.gbas";
+		return 0;
+		__debugInfo = "496:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func5_thing'] = function(param2_id, param1_x, param1_y, param3_col, param2_sc, param3_phi) {
+	stackPush("function: thing", __debugInfo);
+	try {
+		var local1_i_1364 = 0.0, local2_x1_1365 = 0.0, local2_y1_1366 = 0.0, local2_x2_1367 = 0.0, local2_y2_1368 = 0.0, local2_cp_1369 = 0.0, local2_sp_1370 = 0.0;
+		__debugInfo = "503:\Scramble.gbas";
+		local2_sp_1370 = SIN(param3_phi);
+		__debugInfo = "504:\Scramble.gbas";
+		local2_cp_1369 = COS(param3_phi);
+		__debugInfo = "504:\Scramble.gbas";
+		{
+			__debugInfo = "512:\Scramble.gbas";
+			for (local1_i_1364 = 0;toCheck(local1_i_1364, ((global4_objn.arrAccess(~~(param2_id)).values[tmpPositionCache]) - (2)), 1);local1_i_1364 += 1) {
+				__debugInfo = "506:\Scramble.gbas";
+				local2_x1_1365 = ((((global4_objx.arrAccess(~~(param2_id), ~~(local1_i_1364)).values[tmpPositionCache]) - (0.5))) * (param2_sc));
+				__debugInfo = "507:\Scramble.gbas";
+				local2_y1_1366 = ((((global4_objy.arrAccess(~~(param2_id), ~~(local1_i_1364)).values[tmpPositionCache]) - (1))) * (param2_sc));
+				__debugInfo = "508:\Scramble.gbas";
+				local2_x2_1367 = ((((global4_objx.arrAccess(~~(param2_id), ~~(((local1_i_1364) + (1)))).values[tmpPositionCache]) - (0.5))) * (param2_sc));
+				__debugInfo = "509:\Scramble.gbas";
+				local2_y2_1368 = ((((global4_objy.arrAccess(~~(param2_id), ~~(((local1_i_1364) + (1)))).values[tmpPositionCache]) - (1))) * (param2_sc));
+				__debugInfo = "511:\Scramble.gbas";
+				func4_Line(((((((local2_x1_1365) * (local2_cp_1369))) - (((local2_y1_1366) * (local2_sp_1370))))) + (param1_x)), ((((((local2_x1_1365) * (local2_sp_1370))) + (((local2_y1_1366) * (local2_cp_1369))))) + (param1_y)), ((((((local2_x2_1367) * (local2_cp_1369))) - (((local2_y2_1368) * (local2_sp_1370))))) + (param1_x)), ((((((local2_x2_1367) * (local2_sp_1370))) + (((local2_y2_1368) * (local2_cp_1369))))) + (param1_y)), param3_col);
+				__debugInfo = "506:\Scramble.gbas";
+			};
+			__debugInfo = "512:\Scramble.gbas";
+		};
+		__debugInfo = "513:\Scramble.gbas";
+		return 0;
+		__debugInfo = "503:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func8_col_thth'] = function(param2_x1, param2_y1, param2_x2, param2_y2) {
+	stackPush("function: col_thth", __debugInfo);
+	try {
+		var local1_x_1375 = 0.0, local1_y_1376 = 0.0;
+		__debugInfo = "519:\Scramble.gbas";
+		local1_x_1375 = ((param2_x1) - (param2_x2));
+		__debugInfo = "520:\Scramble.gbas";
+		local1_y_1376 = ((param2_y1) - (param2_y2));
+		__debugInfo = "521:\Scramble.gbas";
+		local1_x_1375 = ((((local1_x_1375) * (local1_x_1375))) + (((local1_y_1376) * (local1_y_1376))));
+		__debugInfo = "522:\Scramble.gbas";
+		if ((((local1_x_1375) < (1)) ? 1 : 0)) {
+			__debugInfo = "522:\Scramble.gbas";
 			return tryClone(1);
-			__debugInfo = "74:\FallingObject.gbas";
+			__debugInfo = "522:\Scramble.gbas";
 		};
-		__debugInfo = "76:\FallingObject.gbas";
+		__debugInfo = "523:\Scramble.gbas";
 		return 0;
-		__debugInfo = "24:\FallingObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method21_type14_TFallingObject_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		__debugInfo = "80:\FallingObject.gbas";
-		{
-			var local16___SelectHelper8__1425 = 0;
-			__debugInfo = "80:\FallingObject.gbas";
-			local16___SelectHelper8__1425 = param4_self.attr3_Typ;
-			__debugInfo = "89:\FallingObject.gbas";
-			if ((((local16___SelectHelper8__1425) == (1)) ? 1 : 0)) {
-				var local1_z_1426 = 0.0, local1_a_1427 = 0.0;
-				__debugInfo = "82:\FallingObject.gbas";
-				local1_z_1426 = param4_self.attr4_Info.arrAccess(1).values[tmpPositionCache];
-				__debugInfo = "84:\FallingObject.gbas";
-				local1_a_1427 = ((((param4_self.attr6_Radius) * (((local1_z_1426) * (4))))) + (((param4_self.attr10_RealRadius) * (local1_z_1426))));
-				__debugInfo = "85:\FallingObject.gbas";
-				ROTOZOOMSPRITE(global9_PlanetSpr, ((((param4_self.attr6_PosVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X))) - (local1_a_1427)), ((((param4_self.attr6_PosVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y))) - (local1_a_1427)), param4_self.attr4_Info.arrAccess(0).values[tmpPositionCache], local1_z_1426);
-				__debugInfo = "82:\FallingObject.gbas";
-			} else {
-				__debugInfo = "88:\FallingObject.gbas";
-				DEBUG("Unknown falling object\n");
-				__debugInfo = "88:\FallingObject.gbas";
-			};
-			__debugInfo = "80:\FallingObject.gbas";
-		};
-		__debugInfo = "90:\FallingObject.gbas";
+		__debugInfo = "524:\Scramble.gbas";
 		return 0;
-		__debugInfo = "80:\FallingObject.gbas";
+		__debugInfo = "519:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5097,268 +5817,31 @@ window['method21_type14_TFallingObject_6_Render'] = function(param4_self) {
 	}
 	
 };
-window['method21_type14_TFallingObject_6_Create'] = function(param3_Typ, param6_Radius, param1_X, param1_Y, param4_self) {
-	stackPush("method: Create", __debugInfo);
+window['func8_col_wall'] = function(param1_x, param1_y) {
+	stackPush("function: col_wall", __debugInfo);
 	try {
-		__debugInfo = "93:\FallingObject.gbas";
-		param4_self.attr3_Typ = param3_Typ;
-		__debugInfo = "94:\FallingObject.gbas";
-		(param4_self.attr6_PosVec).SetXY(param1_X, param1_Y);
-		__debugInfo = "95:\FallingObject.gbas";
-		param4_self.attr6_Radius = ~~(param6_Radius);
-		__debugInfo = "96:\FallingObject.gbas";
-		param4_self.attr7_MassVec = global7_Gravity.clone(/* In Assign */);
-		__debugInfo = "97:\FallingObject.gbas";
-		(param4_self.attr7_MassVec).MulVec(((param6_Radius) / (50)));
-		__debugInfo = "99:\FallingObject.gbas";
-		{
-			var local16___SelectHelper9__1434 = 0;
-			__debugInfo = "99:\FallingObject.gbas";
-			local16___SelectHelper9__1434 = param4_self.attr3_Typ;
-			__debugInfo = "116:\FallingObject.gbas";
-			if ((((local16___SelectHelper9__1434) == (1)) ? 1 : 0)) {
-				var local2_sx_ref_1435 = [0], local2_sy_ref_1436 = [0], local1_m_1437 = 0.0, local1_z_1438 = 0.0, local3_tmp_1439 = new type4_TVec();
-				__debugInfo = "101:\FallingObject.gbas";
-				DIM(param4_self.attr4_Info, [2], 0.0);
-				__debugInfo = "103:\FallingObject.gbas";
-				GETSPRITESIZE(global9_PlanetSpr, local2_sx_ref_1435, local2_sy_ref_1436);
-				__debugInfo = "104:\FallingObject.gbas";
-				local1_m_1437 = MAX(unref(local2_sx_ref_1435[0]), unref(local2_sy_ref_1436[0]));
-				__debugInfo = "105:\FallingObject.gbas";
-				param4_self.attr10_RealRadius = ~~(((local1_m_1437) / (2)));
-				__debugInfo = "106:\FallingObject.gbas";
-				param4_self.attr4_Info.arrAccess(1).values[tmpPositionCache] = ((((param4_self.attr6_Radius) / (local1_m_1437))) * (2));
-				__debugInfo = "108:\FallingObject.gbas";
-				local1_z_1438 = param4_self.attr4_Info.arrAccess(1).values[tmpPositionCache];
-				__debugInfo = "110:\FallingObject.gbas";
-				(local3_tmp_1439).SetXY(((((param4_self.attr6_Radius) * (local1_z_1438))) * (2)), ((((param4_self.attr6_Radius) * (local1_z_1438))) * (2)));
-				__debugInfo = "111:\FallingObject.gbas";
-				(param4_self.attr6_PosVec).SubVec(local3_tmp_1439);
-				__debugInfo = "113:\FallingObject.gbas";
-				(param4_self.attr13_CollisionRect).SetSize(((param4_self.attr6_Radius) * (4)), ((param4_self.attr6_Radius) * (4)));
-				__debugInfo = "101:\FallingObject.gbas";
-			} else {
-				__debugInfo = "115:\FallingObject.gbas";
-				DEBUG("Unknown falling object\n");
-				__debugInfo = "115:\FallingObject.gbas";
-			};
-			__debugInfo = "99:\FallingObject.gbas";
+		var local1_c_1379 = 0.0;
+		__debugInfo = "528:\Scramble.gbas";
+		local1_c_1379 = func8_bottomat(param1_x);
+		__debugInfo = "529:\Scramble.gbas";
+		if ((((local1_c_1379) < (param1_y)) ? 1 : 0)) {
+			__debugInfo = "529:\Scramble.gbas";
+			return tryClone(1);
+			__debugInfo = "529:\Scramble.gbas";
 		};
-		__debugInfo = "118:\FallingObject.gbas";
-		DIMPUSH(global14_FallingObjects, param4_self);
-		__debugInfo = "119:\FallingObject.gbas";
+		__debugInfo = "530:\Scramble.gbas";
+		local1_c_1379 = func9_ceilingat(param1_x);
+		__debugInfo = "531:\Scramble.gbas";
+		if ((((local1_c_1379) > (param1_y)) ? 1 : 0)) {
+			__debugInfo = "531:\Scramble.gbas";
+			return tryClone(1);
+			__debugInfo = "531:\Scramble.gbas";
+		};
+		__debugInfo = "532:\Scramble.gbas";
 		return 0;
-		__debugInfo = "93:\FallingObject.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['UpdateMainGame'] = function() {
-	stackPush("sub: UpdateMainGame", __debugInfo);
-	try {
-		__debugInfo = "28:\MainGame.gbas";
-		if (((((((((GETTIMERALL()) - (global13_LastCreateObj))) >= (global14_CreateObjDelay_ref[0])) ? 1 : 0)) || ((((global13_LastCreateObj) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "27:\MainGame.gbas";
-			if ((((BOUNDS(global14_FallingObjects, 0)) <= (global6_MaxObj_ref[0])) ? 1 : 0)) {
-				var local2_FO_1440 = new type14_TFallingObject();
-				__debugInfo = "25:\MainGame.gbas";
-				(local2_FO_1440).Create(1, 12, global8_SpawnPos.attr1_X, global8_SpawnPos.attr1_Y);
-				__debugInfo = "26:\MainGame.gbas";
-				global13_LastCreateObj = GETTIMERALL();
-				__debugInfo = "25:\MainGame.gbas";
-			};
-			__debugInfo = "27:\MainGame.gbas";
-		};
-		__debugInfo = "38:\MainGame.gbas";
-		if (((func9_IsFixTool()) ? 0 : 1)) {
-			__debugInfo = "37:\MainGame.gbas";
-			if (global2_ml_ref[0]) {
-				__debugInfo = "32:\MainGame.gbas";
-				(global10_CurrentMap.attr6_Scroll).AddVec(global10_MouseSpeed);
-				__debugInfo = "33:\MainGame.gbas";
-				global10_CurrentMap.attr11_ScrollSpeed = global10_MouseSpeed.clone(/* In Assign */);
-				__debugInfo = "32:\MainGame.gbas";
-			} else {
-				__debugInfo = "35:\MainGame.gbas";
-				(global10_CurrentMap.attr11_ScrollSpeed).MulVec(0.9);
-				__debugInfo = "36:\MainGame.gbas";
-				(global10_CurrentMap.attr6_Scroll).AddVec(global10_CurrentMap.attr11_ScrollSpeed);
-				__debugInfo = "35:\MainGame.gbas";
-			};
-			__debugInfo = "37:\MainGame.gbas";
-		};
-		__debugInfo = "40:\MainGame.gbas";
-		{
-			var local17___SelectHelper10__1441 = 0;
-			__debugInfo = "40:\MainGame.gbas";
-			local17___SelectHelper10__1441 = global12_SelectedTool;
-			__debugInfo = "54:\MainGame.gbas";
-			if ((((local17___SelectHelper10__1441) == (~~(1))) ? 1 : 0)) {
-				__debugInfo = "53:\MainGame.gbas";
-				if ((((global2_ml_ref[0]) && (((global11_Line_Picked) ? 0 : 1))) ? 1 : 0)) {
-					__debugInfo = "43:\MainGame.gbas";
-					global11_Line_Picked = 1;
-					__debugInfo = "44:\MainGame.gbas";
-					global14_Line_PickedPos = func9_CreateVec(((global2_mx_ref[0]) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((global2_my_ref[0]) + (global10_CurrentMap.attr6_Scroll.attr1_Y))).clone(/* In Assign */);
-					__debugInfo = "43:\MainGame.gbas";
-				} else if ((((global11_Line_Picked) && (((global2_ml_ref[0]) ? 0 : 1))) ? 1 : 0)) {
-					var local1_l_1442 = new type16_TCollisionObject(), local1_b_1443 = new type4_TVec();
-					__debugInfo = "46:\MainGame.gbas";
-					global11_Line_Picked = 0;
-					__debugInfo = "51:\MainGame.gbas";
-					local1_b_1443 = func9_CreateVec(((global2_mx_ref[0]) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((global2_my_ref[0]) + (global10_CurrentMap.attr6_Scroll.attr1_Y))).clone(/* In Assign */);
-					__debugInfo = "52:\MainGame.gbas";
-					(local1_l_1442).CreateLine(global14_Line_PickedPos, local1_b_1443, 1);
-					__debugInfo = "46:\MainGame.gbas";
-				};
-				__debugInfo = "53:\MainGame.gbas";
-			};
-			__debugInfo = "40:\MainGame.gbas";
-		};
-		__debugInfo = "57:\MainGame.gbas";
-		(global10_CurrentMap).Update();
-		__debugInfo = "61:\MainGame.gbas";
-		var forEachSaver2754 = global14_FallingObjects;
-		for(var forEachCounter2754 = 0 ; forEachCounter2754 < forEachSaver2754.values.length ; forEachCounter2754++) {
-			var local3_Obj_1444 = forEachSaver2754.values[forEachCounter2754];
-		{
-				__debugInfo = "60:\MainGame.gbas";
-				if ((local3_Obj_1444).Update()) {
-					__debugInfo = "60:\MainGame.gbas";
-					//DELETE!!111
-					forEachSaver2754.values[forEachCounter2754] = local3_Obj_1444;
-					DIMDEL(forEachSaver2754, forEachCounter2754);
-					forEachCounter2754--;
-					continue;
-					__debugInfo = "60:\MainGame.gbas";
-				};
-				__debugInfo = "60:\MainGame.gbas";
-			}
-			forEachSaver2754.values[forEachCounter2754] = local3_Obj_1444;
-		
-		};
-		__debugInfo = "65:\MainGame.gbas";
-		var forEachSaver2765 = global16_CollisionObjects_ref[0];
-		for(var forEachCounter2765 = 0 ; forEachCounter2765 < forEachSaver2765.values.length ; forEachCounter2765++) {
-			var local3_Obj_ref_1445 = forEachSaver2765.values[forEachCounter2765];
-		{
-				__debugInfo = "64:\MainGame.gbas";
-				if ((local3_Obj_ref_1445[0]).Update()) {
-					__debugInfo = "64:\MainGame.gbas";
-					//DELETE!!111
-					forEachSaver2765.values[forEachCounter2765] = local3_Obj_ref_1445[0];
-					DIMDEL(forEachSaver2765, forEachCounter2765);
-					forEachCounter2765--;
-					continue;
-					__debugInfo = "64:\MainGame.gbas";
-				};
-				__debugInfo = "64:\MainGame.gbas";
-			}
-			forEachSaver2765.values[forEachCounter2765] = local3_Obj_ref_1445;
-		
-		};
-		__debugInfo = "28:\MainGame.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['RenderMainGame'] = function() {
-	stackPush("sub: RenderMainGame", __debugInfo);
-	try {
-		__debugInfo = "72:\MainGame.gbas";
-		var forEachSaver2774 = global14_FallingObjects;
-		for(var forEachCounter2774 = 0 ; forEachCounter2774 < forEachSaver2774.values.length ; forEachCounter2774++) {
-			var local3_Obj_1446 = forEachSaver2774.values[forEachCounter2774];
-		{
-				__debugInfo = "71:\MainGame.gbas";
-				(local3_Obj_1446).Render();
-				__debugInfo = "71:\MainGame.gbas";
-			}
-			forEachSaver2774.values[forEachCounter2774] = local3_Obj_1446;
-		
-		};
-		__debugInfo = "74:\MainGame.gbas";
-		(global10_CurrentMap).Render();
-		__debugInfo = "78:\MainGame.gbas";
-		var forEachSaver2784 = global16_CollisionObjects_ref[0];
-		for(var forEachCounter2784 = 0 ; forEachCounter2784 < forEachSaver2784.values.length ; forEachCounter2784++) {
-			var local3_Obj_ref_1447 = forEachSaver2784.values[forEachCounter2784];
-		{
-				__debugInfo = "77:\MainGame.gbas";
-				(local3_Obj_ref_1447[0]).Render();
-				__debugInfo = "77:\MainGame.gbas";
-			}
-			forEachSaver2784.values[forEachCounter2784] = local3_Obj_ref_1447;
-		
-		};
-		__debugInfo = "80:\MainGame.gbas";
-		{
-			var local17___SelectHelper11__1448 = 0;
-			__debugInfo = "80:\MainGame.gbas";
-			local17___SelectHelper11__1448 = global12_SelectedTool;
-			__debugInfo = "85:\MainGame.gbas";
-			if ((((local17___SelectHelper11__1448) == (~~(1))) ? 1 : 0)) {
-				__debugInfo = "84:\MainGame.gbas";
-				if (global11_Line_Picked) {
-					__debugInfo = "83:\MainGame.gbas";
-					DRAWLINE(((global14_Line_PickedPos.attr1_X) - (global10_CurrentMap.attr6_Scroll.attr1_X)), ((global14_Line_PickedPos.attr1_Y) - (global10_CurrentMap.attr6_Scroll.attr1_Y)), unref(global2_mx_ref[0]), unref(global2_my_ref[0]), RGB(255, 0, 0));
-					__debugInfo = "83:\MainGame.gbas";
-				};
-				__debugInfo = "84:\MainGame.gbas";
-			};
-			__debugInfo = "80:\MainGame.gbas";
-		};
-		__debugInfo = "72:\MainGame.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['InitMainGame'] = function() {
-	stackPush("sub: InitMainGame", __debugInfo);
-	try {
-		__debugInfo = "89:\MainGame.gbas";
-		(global10_CurrentMap).Create("map0");
-		__debugInfo = "89:\MainGame.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func9_IsFixTool'] = function() {
-	stackPush("function: IsFixTool", __debugInfo);
-	try {
-		__debugInfo = "98:\MainGame.gbas";
-		if ((((global12_SelectedTool) != (1)) ? 1 : 0)) {
-			__debugInfo = "95:\MainGame.gbas";
-			return tryClone(0);
-			__debugInfo = "95:\MainGame.gbas";
-		} else {
-			__debugInfo = "97:\MainGame.gbas";
-			return 1;
-			__debugInfo = "97:\MainGame.gbas";
-		};
-		__debugInfo = "99:\MainGame.gbas";
+		__debugInfo = "533:\Scramble.gbas";
 		return 0;
-		__debugInfo = "98:\MainGame.gbas";
+		__debugInfo = "528:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5368,67 +5851,23 @@ window['func9_IsFixTool'] = function() {
 	}
 	
 };
-window['method14_type8_TGameMap_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
+window['func7_addshot'] = function(param1_x, param1_y) {
+	stackPush("function: addshot", __debugInfo);
 	try {
-		__debugInfo = "19:\Map.gbas";
-		if ((((param4_self.attr6_Scroll.attr1_X) > (CAST2INT(((global11_ScreenWidth_ref[0]) / (4))))) ? 1 : 0)) {
-			__debugInfo = "17:\Map.gbas";
-			param4_self.attr6_Scroll.attr1_X = CAST2INT(((global11_ScreenWidth_ref[0]) / (4)));
-			__debugInfo = "18:\Map.gbas";
-			(param4_self.attr11_ScrollSpeed).Reverse();
-			__debugInfo = "17:\Map.gbas";
-		};
-		__debugInfo = "23:\Map.gbas";
-		if ((((param4_self.attr6_Scroll.attr1_X) < (-(((((param4_self.attr5_Width_ref[0]) * (32))) - (((CAST2INT(((global11_ScreenWidth_ref[0]) / (4)))) * (3))))))) ? 1 : 0)) {
-			__debugInfo = "21:\Map.gbas";
-			param4_self.attr6_Scroll.attr1_X = -(((((param4_self.attr5_Width_ref[0]) * (32))) - (((CAST2INT(((global11_ScreenWidth_ref[0]) / (4)))) * (3)))));
-			__debugInfo = "22:\Map.gbas";
-			(param4_self.attr11_ScrollSpeed).Reverse();
-			__debugInfo = "21:\Map.gbas";
-		};
-		__debugInfo = "27:\Map.gbas";
-		if ((((param4_self.attr6_Scroll.attr1_Y) > (CAST2INT(((global12_ScreenHeight_ref[0]) / (4))))) ? 1 : 0)) {
-			__debugInfo = "25:\Map.gbas";
-			param4_self.attr6_Scroll.attr1_Y = CAST2INT(((global12_ScreenHeight_ref[0]) / (4)));
-			__debugInfo = "26:\Map.gbas";
-			(param4_self.attr11_ScrollSpeed).Reverse();
-			__debugInfo = "25:\Map.gbas";
-		};
-		__debugInfo = "31:\Map.gbas";
-		if ((((param4_self.attr6_Scroll.attr1_Y) < (-(((((param4_self.attr6_Height_ref[0]) * (32))) - (((CAST2INT(((global12_ScreenHeight_ref[0]) / (4)))) * (3))))))) ? 1 : 0)) {
-			__debugInfo = "29:\Map.gbas";
-			param4_self.attr6_Scroll.attr1_Y = -(((((param4_self.attr6_Height_ref[0]) * (32))) - (((CAST2INT(((global12_ScreenHeight_ref[0]) / (4)))) * (3)))));
-			__debugInfo = "30:\Map.gbas";
-			(param4_self.attr11_ScrollSpeed).Reverse();
-			__debugInfo = "29:\Map.gbas";
-		};
-		__debugInfo = "33:\Map.gbas";
-		{
-			var local1_x_1451 = 0.0;
-			__debugInfo = "39:\Map.gbas";
-			for (local1_x_1451 = 0;toCheck(local1_x_1451, ((param4_self.attr5_Width_ref[0]) - (1)), 1);local1_x_1451 += 1) {
-				__debugInfo = "34:\Map.gbas";
-				{
-					var local1_y_1452 = 0.0;
-					__debugInfo = "38:\Map.gbas";
-					for (local1_y_1452 = 0;toCheck(local1_y_1452, ((param4_self.attr6_Height_ref[0]) - (1)), 1);local1_y_1452 += 1) {
-						var alias1_T_ref_1453 = [new type5_TTile()];
-						__debugInfo = "36:\Map.gbas";
-						alias1_T_ref_1453 = param4_self.attr5_Tiles_ref[0].arrAccess(~~(local1_x_1451), ~~(local1_y_1452)).values[tmpPositionCache] /* ALIAS */;
-						__debugInfo = "37:\Map.gbas";
-						(alias1_T_ref_1453[0]).Update();
-						__debugInfo = "36:\Map.gbas";
-					};
-					__debugInfo = "38:\Map.gbas";
-				};
-				__debugInfo = "34:\Map.gbas";
-			};
-			__debugInfo = "39:\Map.gbas";
-		};
-		__debugInfo = "40:\Map.gbas";
+		var local1_m_1382 = 0.0;
+		__debugInfo = "537:\Scramble.gbas";
+		PLAYSOUND(2, 0, 1);
+		__debugInfo = "538:\Scramble.gbas";
+		local1_m_1382 = BOUNDS(global4_shot, 0);
+		__debugInfo = "539:\Scramble.gbas";
+		REDIM(global4_shot, [~~(((local1_m_1382) + (1))), 2], 0.0 );
+		__debugInfo = "540:\Scramble.gbas";
+		global4_shot.arrAccess(~~(local1_m_1382), 0).values[tmpPositionCache] = param1_x;
+		__debugInfo = "541:\Scramble.gbas";
+		global4_shot.arrAccess(~~(local1_m_1382), 1).values[tmpPositionCache] = param1_y;
+		__debugInfo = "542:\Scramble.gbas";
 		return 0;
-		__debugInfo = "19:\Map.gbas";
+		__debugInfo = "537:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5438,35 +5877,25 @@ window['method14_type8_TGameMap_6_Update'] = function(param4_self) {
 	}
 	
 };
-window['method14_type8_TGameMap_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
+window['func8_dropbomb'] = function(param1_x, param1_y) {
+	stackPush("function: dropbomb", __debugInfo);
 	try {
-		__debugInfo = "42:\Map.gbas";
-		{
-			var local1_x_1456 = 0.0;
-			__debugInfo = "48:\Map.gbas";
-			for (local1_x_1456 = 0;toCheck(local1_x_1456, ((param4_self.attr5_Width_ref[0]) - (1)), 1);local1_x_1456 += 1) {
-				__debugInfo = "43:\Map.gbas";
-				{
-					var local1_y_1457 = 0.0;
-					__debugInfo = "47:\Map.gbas";
-					for (local1_y_1457 = 0;toCheck(local1_y_1457, ((param4_self.attr6_Height_ref[0]) - (1)), 1);local1_y_1457 += 1) {
-						var alias1_T_ref_1458 = [new type5_TTile()];
-						__debugInfo = "45:\Map.gbas";
-						alias1_T_ref_1458 = param4_self.attr5_Tiles_ref[0].arrAccess(~~(local1_x_1456), ~~(local1_y_1457)).values[tmpPositionCache] /* ALIAS */;
-						__debugInfo = "46:\Map.gbas";
-						(alias1_T_ref_1458[0]).Render();
-						__debugInfo = "45:\Map.gbas";
-					};
-					__debugInfo = "47:\Map.gbas";
-				};
-				__debugInfo = "43:\Map.gbas";
-			};
-			__debugInfo = "48:\Map.gbas";
-		};
-		__debugInfo = "49:\Map.gbas";
+		var local1_m_1385 = 0.0;
+		__debugInfo = "546:\Scramble.gbas";
+		PLAYSOUND(0, 0, 1);
+		__debugInfo = "547:\Scramble.gbas";
+		local1_m_1385 = BOUNDS(global4_bomb, 0);
+		__debugInfo = "548:\Scramble.gbas";
+		REDIM(global4_bomb, [~~(((local1_m_1385) + (1))), 3], 0.0 );
+		__debugInfo = "549:\Scramble.gbas";
+		global4_bomb.arrAccess(~~(local1_m_1385), 0).values[tmpPositionCache] = param1_x;
+		__debugInfo = "550:\Scramble.gbas";
+		global4_bomb.arrAccess(~~(local1_m_1385), 1).values[tmpPositionCache] = param1_y;
+		__debugInfo = "551:\Scramble.gbas";
+		global4_bomb.arrAccess(~~(local1_m_1385), 2).values[tmpPositionCache] = 0;
+		__debugInfo = "552:\Scramble.gbas";
 		return 0;
-		__debugInfo = "42:\Map.gbas";
+		__debugInfo = "546:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5476,232 +5905,164 @@ window['method14_type8_TGameMap_6_Render'] = function(param4_self) {
 	}
 	
 };
-window['method14_type8_TGameMap_6_Create'] = function(param8_File_Str, param4_self) {
-	stackPush("method: Create", __debugInfo);
+window['func7_addboom'] = function(param1_x, param1_y) {
+	stackPush("function: addboom", __debugInfo);
 	try {
-		var local4_file_1462 = 0, local1_r_ref_1463 = [0], local3_Foo_ref_1464 = [0], local3_myr_ref_1465 = [0];
-		__debugInfo = "53:\Map.gbas";
-		local4_file_1462 = GENFILE();
-		__debugInfo = "54:\Map.gbas";
-		if (((OPENFILE(local4_file_1462, (((("map/") + (param8_File_Str))) + (".map")), 1)) ? 0 : 1)) {
-			__debugInfo = "54:\Map.gbas";
-			DEBUG("Map loading failed\n");
-			__debugInfo = "54:\Map.gbas";
+		var local1_m_1388 = 0.0;
+		__debugInfo = "556:\Scramble.gbas";
+		PLAYSOUND(1, 0, 1);
+		__debugInfo = "557:\Scramble.gbas";
+		local1_m_1388 = BOUNDS(global4_boom, 0);
+		__debugInfo = "558:\Scramble.gbas";
+		REDIM(global4_boom, [~~(((local1_m_1388) + (1))), 3], 0.0 );
+		__debugInfo = "559:\Scramble.gbas";
+		global4_boom.arrAccess(~~(local1_m_1388), 0).values[tmpPositionCache] = param1_x;
+		__debugInfo = "560:\Scramble.gbas";
+		global4_boom.arrAccess(~~(local1_m_1388), 1).values[tmpPositionCache] = param1_y;
+		__debugInfo = "561:\Scramble.gbas";
+		global4_boom.arrAccess(~~(local1_m_1388), 2).values[tmpPositionCache] = 0;
+		__debugInfo = "562:\Scramble.gbas";
+		return 0;
+		__debugInfo = "556:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_Line'] = function(param2_x1, param2_y1, param2_x2, param2_y2, param3_col) {
+	stackPush("function: Line", __debugInfo);
+	try {
+		var local1_c_1394 = 0.0, local1_s_1395 = 0.0, local1_p_1396 = 0.0, local1_w_1397 = 0.0, local2_dx_1398 = 0.0, local2_dy_1399 = 0.0, local3_ddx_1400 = 0.0, local3_ddy_1401 = 0.0, local2_ux_1402 = 0.0, local2_uy_1403 = 0.0, local2_lg_1404 = 0.0;
+		__debugInfo = "568:\Scramble.gbas";
+		if ((((global9_colormode) == (0)) ? 1 : 0)) {
+			__debugInfo = "568:\Scramble.gbas";
+			param3_col = RGB(200, 200, 150);
+			__debugInfo = "568:\Scramble.gbas";
 		};
-		__debugInfo = "56:\Map.gbas";
-		READUBYTE(local4_file_1462, local1_r_ref_1463);
-		__debugInfo = "60:\Map.gbas";
-		if ((((local1_r_ref_1463[0]) != (42)) ? 1 : 0)) {
-			__debugInfo = "58:\Map.gbas";
-			DEBUG("Unsupported file format");
-			__debugInfo = "59:\Map.gbas";
+		__debugInfo = "569:\Scramble.gbas";
+		ALPHAMODE(0.7);
+		__debugInfo = "572:\Scramble.gbas";
+		local1_w_1397 = 16;
+		__debugInfo = "575:\Scramble.gbas";
+		local3_ddx_1400 = ((param2_x2) - (param2_x1));
+		__debugInfo = "576:\Scramble.gbas";
+		local3_ddy_1401 = ((param2_y2) - (param2_y1));
+		__debugInfo = "577:\Scramble.gbas";
+		local2_lg_1404 = SQR(((((local3_ddx_1400) * (local3_ddx_1400))) + (((local3_ddy_1401) * (local3_ddy_1401)))));
+		__debugInfo = "578:\Scramble.gbas";
+		if ((((local2_lg_1404) < (0.5)) ? 1 : 0)) {
+			__debugInfo = "578:\Scramble.gbas";
 			return 0;
-			__debugInfo = "58:\Map.gbas";
+			__debugInfo = "578:\Scramble.gbas";
 		};
-		__debugInfo = "62:\Map.gbas";
-		READLONG(local4_file_1462, param4_self.attr5_Width_ref);
-		__debugInfo = "63:\Map.gbas";
-		READLONG(local4_file_1462, param4_self.attr6_Height_ref);
-		__debugInfo = "64:\Map.gbas";
-		DEBUG((((((((("Map size: ") + (CAST2STRING(param4_self.attr5_Width_ref[0])))) + (", "))) + (CAST2STRING(param4_self.attr6_Height_ref[0])))) + ("\n")));
-		__debugInfo = "66:\Map.gbas";
-		local3_Foo_ref_1464[0] = 42;
-		__debugInfo = "67:\Map.gbas";
-		READLONG(local4_file_1462, local3_Foo_ref_1464);
-		__debugInfo = "68:\Map.gbas";
-		READLONG(local4_file_1462, global14_CreateObjDelay_ref);
-		__debugInfo = "69:\Map.gbas";
-		READLONG(local4_file_1462, global6_MaxObj_ref);
-		__debugInfo = "70:\Map.gbas";
-		READLONG(local4_file_1462, local3_Foo_ref_1464);
-		__debugInfo = "71:\Map.gbas";
-		READLONG(local4_file_1462, local3_Foo_ref_1464);
-		__debugInfo = "75:\Map.gbas";
-		if ((((global6_MaxObj_ref[0]) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "74:\Map.gbas";
-			global6_MaxObj_ref[0] = 25;
-			__debugInfo = "74:\Map.gbas";
-		};
-		__debugInfo = "77:\Map.gbas";
-		DIM(unref(param4_self.attr5_Tiles_ref[0]), [param4_self.attr5_Width_ref[0], param4_self.attr6_Height_ref[0]], [new type5_TTile()]);
-		__debugInfo = "82:\Map.gbas";
-		READUBYTE(local4_file_1462, local3_myr_ref_1465);
-		__debugInfo = "126:\Map.gbas";
-		while ((((local3_myr_ref_1465[0]) != (42)) ? 1 : 0)) {
-			__debugInfo = "83:\Map.gbas";
-			{
-				var local1_x_1466 = 0;
-				__debugInfo = "124:\Map.gbas";
-				for (local1_x_1466 = 0;toCheck(local1_x_1466, ((param4_self.attr5_Width_ref[0]) - (1)), 1);local1_x_1466 += 1) {
-					__debugInfo = "84:\Map.gbas";
-					{
-						var local1_y_1467 = 0.0;
-						__debugInfo = "123:\Map.gbas";
-						for (local1_y_1467 = 0;toCheck(local1_y_1467, ((param4_self.attr6_Height_ref[0]) - (1)), 1);local1_y_1467 += 1) {
-							__debugInfo = "86:\Map.gbas";
-							{
-								var local17___SelectHelper12__1468 = 0;
-								__debugInfo = "86:\Map.gbas";
-								local17___SelectHelper12__1468 = local3_myr_ref_1465[0];
-								__debugInfo = "122:\Map.gbas";
-								if ((((local17___SelectHelper12__1468) == (0)) ? 1 : 0)) {
-									var local3_Typ_1469 = 0, alias1_T_ref_1472 = [new type5_TTile()];
-									__debugInfo = "88:\Map.gbas";
-									READUBYTE(local4_file_1462, local1_r_ref_1463);
-									__debugInfo = "89:\Map.gbas";
-									local3_Typ_1469 = 0;
-									__debugInfo = "95:\Map.gbas";
-									if (local1_r_ref_1463[0]) {
-										var local1_l_ref_1470 = [0], local8_data_Str_ref_1471 = [""];
-										__debugInfo = "92:\Map.gbas";
-										READLONG(local4_file_1462, local1_l_ref_1470);
-										__debugInfo = "93:\Map.gbas";
-										READSTR(local4_file_1462, local8_data_Str_ref_1471, unref(local1_l_ref_1470[0]));
-										__debugInfo = "94:\Map.gbas";
-										local3_Typ_1469 = INT2STR(local8_data_Str_ref_1471[0]);
-										__debugInfo = "92:\Map.gbas";
-									};
-									__debugInfo = "97:\Map.gbas";
-									alias1_T_ref_1472 = param4_self.attr5_Tiles_ref[0].arrAccess(local1_x_1466, ~~(local1_y_1467)).values[tmpPositionCache] /* ALIAS */;
-									__debugInfo = "98:\Map.gbas";
-									(alias1_T_ref_1472[0]).Create(local3_Typ_1469, local1_x_1466, ~~(local1_y_1467));
-									__debugInfo = "88:\Map.gbas";
-								} else if ((((local17___SelectHelper12__1468) == (1)) ? 1 : 0)) {
-									__debugInfo = "100:\Map.gbas";
-									READUBYTE(local4_file_1462, local1_r_ref_1463);
-									__debugInfo = "121:\Map.gbas";
-									if (local1_r_ref_1463[0]) {
-										var local1_l_ref_1473 = [0], local8_data_Str_ref_1474 = [""], local10_Params_Str_1475 = new GLBArray();
-										__debugInfo = "103:\Map.gbas";
-										READLONG(local4_file_1462, local1_l_ref_1473);
-										__debugInfo = "104:\Map.gbas";
-										DEBUG((((("l: ") + (CAST2STRING(local1_l_ref_1473[0])))) + ("\n")));
-										__debugInfo = "105:\Map.gbas";
-										READSTR(local4_file_1462, local8_data_Str_ref_1474, unref(local1_l_ref_1473[0]));
-										__debugInfo = "120:\Map.gbas";
-										if (SPLITSTR(unref(local8_data_Str_ref_1474[0]), unref(local10_Params_Str_1475), "\n", 1)) {
-											__debugInfo = "108:\Map.gbas";
-											{
-												var local17___SelectHelper13__1476 = "";
-												__debugInfo = "108:\Map.gbas";
-												local17___SelectHelper13__1476 = local10_Params_Str_1475.arrAccess(0).values[tmpPositionCache];
-												__debugInfo = "119:\Map.gbas";
-												if ((((local17___SelectHelper13__1476) == ("mirror")) ? 1 : 0)) {
-													
-												} else if ((((local17___SelectHelper13__1476) == ("roundmirror")) ? 1 : 0)) {
-													
-												} else if ((((local17___SelectHelper13__1476) == ("blackhole")) ? 1 : 0)) {
-													
-												} else if ((((local17___SelectHelper13__1476) == ("airstream")) ? 1 : 0)) {
-													
-												} else {
-													__debugInfo = "118:\Map.gbas";
-													DEBUG((((((((("Unknown Parameter ") + (local10_Params_Str_1475.arrAccess(0).values[tmpPositionCache]))) + (" "))) + (local8_data_Str_ref_1474[0]))) + ("\n")));
-													__debugInfo = "118:\Map.gbas";
-												};
-												__debugInfo = "108:\Map.gbas";
-											};
-											__debugInfo = "108:\Map.gbas";
-										};
-										__debugInfo = "103:\Map.gbas";
-									};
-									__debugInfo = "100:\Map.gbas";
-								};
-								__debugInfo = "86:\Map.gbas";
-							};
-							__debugInfo = "86:\Map.gbas";
-						};
-						__debugInfo = "123:\Map.gbas";
-					};
-					__debugInfo = "84:\Map.gbas";
-				};
-				__debugInfo = "124:\Map.gbas";
-			};
-			__debugInfo = "125:\Map.gbas";
-			READUBYTE(local4_file_1462, local3_myr_ref_1465);
-			__debugInfo = "83:\Map.gbas";
-		};
-		__debugInfo = "139:\Map.gbas";
+		__debugInfo = "581:\Scramble.gbas";
+		local2_lg_1404 = ((local2_lg_1404) * (2));
+		__debugInfo = "583:\Scramble.gbas";
+		local2_dx_1398 = ((((local3_ddx_1400) * (local1_w_1397))) / (local2_lg_1404));
+		__debugInfo = "584:\Scramble.gbas";
+		local2_dy_1399 = ((((local3_ddy_1401) * (local1_w_1397))) / (local2_lg_1404));
+		__debugInfo = "586:\Scramble.gbas";
+		local2_ux_1402 = local2_dy_1399;
+		__debugInfo = "587:\Scramble.gbas";
+		local2_uy_1403 = -(local2_dx_1398);
+		__debugInfo = "590:\Scramble.gbas";
+		STARTPOLY(0, 0);
+		__debugInfo = "591:\Scramble.gbas";
+		POLYVECTOR(((((param2_x1) + (local2_ux_1402))) - (local2_dx_1398)), ((((param2_y1) + (local2_uy_1403))) - (local2_dy_1399)), 0.5, 0.5, param3_col);
+		__debugInfo = "592:\Scramble.gbas";
+		POLYVECTOR(((((param2_x1) - (local2_ux_1402))) - (local2_dx_1398)), ((((param2_y1) - (local2_uy_1403))) - (local2_dy_1399)), 0.5, 63.5, param3_col);
+		__debugInfo = "593:\Scramble.gbas";
+		POLYVECTOR(((param2_x1) - (local2_ux_1402)), ((param2_y1) - (local2_uy_1403)), 31.5, 63.5, param3_col);
+		__debugInfo = "594:\Scramble.gbas";
+		POLYVECTOR(((param2_x1) + (local2_ux_1402)), ((param2_y1) + (local2_uy_1403)), 31.5, 0.5, param3_col);
+		__debugInfo = "595:\Scramble.gbas";
+		ENDPOLY();
+		__debugInfo = "598:\Scramble.gbas";
+		STARTPOLY(0, 0);
+		__debugInfo = "599:\Scramble.gbas";
+		POLYVECTOR(((param2_x1) + (local2_ux_1402)), ((param2_y1) + (local2_uy_1403)), 31.5, 0.5, param3_col);
+		__debugInfo = "600:\Scramble.gbas";
+		POLYVECTOR(((param2_x1) - (local2_ux_1402)), ((param2_y1) - (local2_uy_1403)), 31.5, 63.5, param3_col);
+		__debugInfo = "601:\Scramble.gbas";
+		POLYVECTOR(((param2_x2) - (local2_ux_1402)), ((param2_y2) - (local2_uy_1403)), 31.5, 63.5, param3_col);
+		__debugInfo = "602:\Scramble.gbas";
+		POLYVECTOR(((param2_x2) + (local2_ux_1402)), ((param2_y2) + (local2_uy_1403)), 31.5, 0.5, param3_col);
+		__debugInfo = "603:\Scramble.gbas";
+		ENDPOLY();
+		__debugInfo = "606:\Scramble.gbas";
+		STARTPOLY(0, 0);
+		__debugInfo = "607:\Scramble.gbas";
+		POLYVECTOR(((param2_x2) + (local2_ux_1402)), ((param2_y2) + (local2_uy_1403)), 31.5, 0.5, param3_col);
+		__debugInfo = "608:\Scramble.gbas";
+		POLYVECTOR(((param2_x2) - (local2_ux_1402)), ((param2_y2) - (local2_uy_1403)), 31.5, 63.5, param3_col);
+		__debugInfo = "609:\Scramble.gbas";
+		POLYVECTOR(((((param2_x2) - (local2_ux_1402))) + (local2_dx_1398)), ((((param2_y2) - (local2_uy_1403))) + (local2_dy_1399)), 63.5, 63.5, param3_col);
+		__debugInfo = "610:\Scramble.gbas";
+		POLYVECTOR(((((param2_x2) + (local2_ux_1402))) + (local2_dx_1398)), ((((param2_y2) + (local2_uy_1403))) + (local2_dy_1399)), 63.5, 0.5, param3_col);
+		__debugInfo = "611:\Scramble.gbas";
+		ENDPOLY();
+		__debugInfo = "612:\Scramble.gbas";
+		return 0;
+		__debugInfo = "568:\Scramble.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func8_MoveUfos'] = function() {
+	stackPush("function: MoveUfos", __debugInfo);
+	try {
+		var local1_i_1405 = 0.0, local3_spd_1406 = 0.0, local2_y1_1407 = 0.0, local2_y2_1408 = 0.0, local1_x_1409 = 0.0;
+		__debugInfo = "617:\Scramble.gbas";
+		local3_spd_1406 = 1;
+		__debugInfo = "617:\Scramble.gbas";
 		{
-			var local1_x_1477 = 0;
-			__debugInfo = "181:\Map.gbas";
-			for (local1_x_1477 = 0;toCheck(local1_x_1477, ((param4_self.attr5_Width_ref[0]) - (1)), 1);local1_x_1477 += 1) {
-				__debugInfo = "140:\Map.gbas";
+			__debugInfo = "631:\Scramble.gbas";
+			for (local1_i_1405 = 0;toCheck(local1_i_1405, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1405 += 1) {
+				__debugInfo = "619:\Scramble.gbas";
 				{
-					var local1_y_1478 = 0;
-					__debugInfo = "180:\Map.gbas";
-					for (local1_y_1478 = 0;toCheck(local1_y_1478, ((param4_self.attr6_Height_ref[0]) - (1)), 1);local1_y_1478 += 1) {
-						var alias1_t_ref_1479 = [new type5_TTile()];
-						__debugInfo = "142:\Map.gbas";
-						alias1_t_ref_1479 = param4_self.attr5_Tiles_ref[0].arrAccess(local1_x_1477, local1_y_1478).values[tmpPositionCache] /* ALIAS */;
-						__debugInfo = "179:\Map.gbas";
-						if ((alias1_t_ref_1479[0]).IsSolid()) {
-							var local4_dirl_ref_1480 = [0], local4_dirr_ref_1481 = [0], local4_dirt_ref_1482 = [0], local4_dirb_ref_1483 = [0], local1_l_1484 = new type16_TCollisionObject(), local1_a_1485 = new type4_TVec(), local1_b_1486 = new type4_TVec();
-							__debugInfo = "145:\Map.gbas";
-							(param4_self).Empty(local1_x_1477, local1_y_1478, local4_dirl_ref_1480, local4_dirr_ref_1481, local4_dirt_ref_1482, local4_dirb_ref_1483);
-							__debugInfo = "157:\Map.gbas";
-							if (local4_dirt_ref_1482[0]) {
-								__debugInfo = "153:\Map.gbas";
-								local1_a_1485 = func9_CreateVec(((local1_x_1477) * (32)), ((local1_y_1478) * (32))).clone(/* In Assign */);
-								__debugInfo = "154:\Map.gbas";
-								local1_b_1486 = func9_CreateVec(((((local1_x_1477) + (1))) * (32)), ((local1_y_1478) * (32))).clone(/* In Assign */);
-								__debugInfo = "155:\Map.gbas";
-								(local1_l_1484).CreateLine(local1_a_1485, local1_b_1486, 0);
-								__debugInfo = "156:\Map.gbas";
-								DIMPUSH(alias1_t_ref_1479[0].attr12_RelatedLines, ((BOUNDS(global16_CollisionObjects_ref[0], 0)) - (1)));
-								__debugInfo = "153:\Map.gbas";
-							};
-							__debugInfo = "164:\Map.gbas";
-							if (local4_dirr_ref_1481[0]) {
-								__debugInfo = "160:\Map.gbas";
-								local1_a_1485 = func9_CreateVec(((((local1_x_1477) + (1))) * (32)), ((local1_y_1478) * (32))).clone(/* In Assign */);
-								__debugInfo = "161:\Map.gbas";
-								local1_b_1486 = func9_CreateVec(((((local1_x_1477) + (1))) * (32)), ((((local1_y_1478) + (1))) * (32))).clone(/* In Assign */);
-								__debugInfo = "162:\Map.gbas";
-								(local1_l_1484).CreateLine(local1_a_1485, local1_b_1486, 0);
-								__debugInfo = "163:\Map.gbas";
-								DIMPUSH(alias1_t_ref_1479[0].attr12_RelatedLines, ((BOUNDS(global16_CollisionObjects_ref[0], 0)) - (1)));
-								__debugInfo = "160:\Map.gbas";
-							};
-							__debugInfo = "171:\Map.gbas";
-							if (local4_dirb_ref_1483[0]) {
-								__debugInfo = "167:\Map.gbas";
-								local1_a_1485 = func9_CreateVec(((((local1_x_1477) + (1))) * (32)), ((((local1_y_1478) + (1))) * (32))).clone(/* In Assign */);
-								__debugInfo = "168:\Map.gbas";
-								local1_b_1486 = func9_CreateVec(((local1_x_1477) * (32)), ((((local1_y_1478) + (1))) * (32))).clone(/* In Assign */);
-								__debugInfo = "169:\Map.gbas";
-								(local1_l_1484).CreateLine(local1_a_1485, local1_b_1486, 0);
-								__debugInfo = "170:\Map.gbas";
-								DIMPUSH(alias1_t_ref_1479[0].attr12_RelatedLines, ((BOUNDS(global16_CollisionObjects_ref[0], 0)) - (1)));
-								__debugInfo = "167:\Map.gbas";
-							};
-							__debugInfo = "178:\Map.gbas";
-							if (local4_dirl_ref_1480[0]) {
-								__debugInfo = "174:\Map.gbas";
-								local1_a_1485 = func9_CreateVec(((local1_x_1477) * (32)), ((local1_y_1478) * (32))).clone(/* In Assign */);
-								__debugInfo = "175:\Map.gbas";
-								local1_b_1486 = func9_CreateVec(((local1_x_1477) * (32)), ((((local1_y_1478) + (1))) * (32))).clone(/* In Assign */);
-								__debugInfo = "176:\Map.gbas";
-								(local1_l_1484).CreateLine(local1_a_1485, local1_b_1486, 0);
-								__debugInfo = "177:\Map.gbas";
-								DIMPUSH(alias1_t_ref_1479[0].attr12_RelatedLines, ((BOUNDS(global16_CollisionObjects_ref[0], 0)) - (1)));
-								__debugInfo = "174:\Map.gbas";
-							};
-							__debugInfo = "145:\Map.gbas";
+					var local16___SelectHelper2__1410 = 0.0;
+					__debugInfo = "619:\Scramble.gbas";
+					local16___SelectHelper2__1410 = global3_ufo.arrAccess(~~(local1_i_1405), 3).values[tmpPositionCache];
+					__debugInfo = "630:\Scramble.gbas";
+					if ((((local16___SelectHelper2__1410) == (0)) ? 1 : 0)) {
+						__debugInfo = "621:\Scramble.gbas";
+						local1_x_1409 = ((((((global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]) - (global4_scrn))) * (0.5))) + (global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]));
+						__debugInfo = "622:\Scramble.gbas";
+						global3_ufo.arrAccess(~~(local1_i_1405), 1).values[tmpPositionCache] = local1_x_1409;
+						__debugInfo = "627:\Scramble.gbas";
+						if ((((local1_x_1409) > (0)) ? 1 : 0)) {
+							__debugInfo = "624:\Scramble.gbas";
+							local2_y1_1407 = ((func9_ceilingat(local1_x_1409)) + (0.5));
+							__debugInfo = "625:\Scramble.gbas";
+							local2_y2_1408 = ((func8_bottomat(local1_x_1409)) - (0.5));
+							__debugInfo = "626:\Scramble.gbas";
+							global3_ufo.arrAccess(~~(local1_i_1405), 2).values[tmpPositionCache] = ((((((((((((1) + (func4_SINq(((local1_x_1409) * (30)))))) / (2))) * (((local2_y2_1408) - (local2_y1_1407))))) * (0.75))) + (((((local2_y2_1408) - (local2_y1_1407))) * (0.1))))) + (local2_y1_1407));
+							__debugInfo = "624:\Scramble.gbas";
 						};
-						__debugInfo = "142:\Map.gbas";
+						__debugInfo = "621:\Scramble.gbas";
+					} else if ((((local16___SelectHelper2__1410) == (1)) ? 1 : 0)) {
+						__debugInfo = "629:\Scramble.gbas";
+						global3_ufo.arrAccess(~~(local1_i_1405), 1).values[tmpPositionCache] = ((((((global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]) - (global4_scrn))) * (2.1))) + (global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]));
+						__debugInfo = "629:\Scramble.gbas";
 					};
-					__debugInfo = "180:\Map.gbas";
+					__debugInfo = "619:\Scramble.gbas";
 				};
-				__debugInfo = "140:\Map.gbas";
+				__debugInfo = "619:\Scramble.gbas";
 			};
-			__debugInfo = "181:\Map.gbas";
+			__debugInfo = "631:\Scramble.gbas";
 		};
-		__debugInfo = "183:\Map.gbas";
-		CLOSEFILE(local4_file_1462);
-		__debugInfo = "184:\Map.gbas";
+		__debugInfo = "632:\Scramble.gbas";
 		return 0;
-		__debugInfo = "53:\Map.gbas";
+		__debugInfo = "617:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5711,140 +6072,110 @@ window['method14_type8_TGameMap_6_Create'] = function(param8_File_Str, param4_se
 	}
 	
 };
-window['method14_type8_TGameMap_5_Empty'] = function(param1_x, param1_y, param1_l_ref, param1_r_ref, param1_t_ref, param1_b_ref, param4_self) {
-	stackPush("method: Empty", __debugInfo);
+window['func9_LoadLevel'] = function() {
+	stackPush("function: LoadLevel", __debugInfo);
 	try {
-		__debugInfo = "196:\Map.gbas";
-		if ((((param1_y) == (0)) ? 1 : 0)) {
-			__debugInfo = "188:\Map.gbas";
-			param1_t_ref[0] = 1;
-			__debugInfo = "188:\Map.gbas";
-		} else {
-			var alias2_t1_ref_1495 = [new type5_TTile()];
-			__debugInfo = "190:\Map.gbas";
-			alias2_t1_ref_1495 = param4_self.attr5_Tiles_ref[0].arrAccess(param1_x, ((param1_y) - (1))).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "195:\Map.gbas";
-			if ((alias2_t1_ref_1495[0]).IsSolid()) {
-				__debugInfo = "192:\Map.gbas";
-				param1_t_ref[0] = 0;
-				__debugInfo = "192:\Map.gbas";
-			} else {
-				__debugInfo = "194:\Map.gbas";
-				param1_t_ref[0] = 1;
-				__debugInfo = "194:\Map.gbas";
-			};
-			__debugInfo = "190:\Map.gbas";
-		};
-		__debugInfo = "207:\Map.gbas";
-		if ((((param1_x) == (((param4_self.attr5_Width_ref[0]) - (1)))) ? 1 : 0)) {
-			__debugInfo = "199:\Map.gbas";
-			param1_r_ref[0] = 1;
-			__debugInfo = "199:\Map.gbas";
-		} else {
-			var alias2_t1_ref_1496 = [new type5_TTile()];
-			__debugInfo = "201:\Map.gbas";
-			alias2_t1_ref_1496 = param4_self.attr5_Tiles_ref[0].arrAccess(((param1_x) + (1)), param1_y).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "206:\Map.gbas";
-			if ((alias2_t1_ref_1496[0]).IsSolid()) {
-				__debugInfo = "203:\Map.gbas";
-				param1_r_ref[0] = 0;
-				__debugInfo = "203:\Map.gbas";
-			} else {
-				__debugInfo = "205:\Map.gbas";
-				param1_r_ref[0] = 1;
-				__debugInfo = "205:\Map.gbas";
-			};
-			__debugInfo = "201:\Map.gbas";
-		};
-		__debugInfo = "218:\Map.gbas";
-		if ((((param1_y) == (((param4_self.attr6_Height_ref[0]) - (1)))) ? 1 : 0)) {
-			__debugInfo = "210:\Map.gbas";
-			param1_b_ref[0] = 1;
-			__debugInfo = "210:\Map.gbas";
-		} else {
-			var alias2_t1_ref_1497 = [new type5_TTile()];
-			__debugInfo = "212:\Map.gbas";
-			alias2_t1_ref_1497 = param4_self.attr5_Tiles_ref[0].arrAccess(param1_x, ((param1_y) + (1))).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "217:\Map.gbas";
-			if ((alias2_t1_ref_1497[0]).IsSolid()) {
-				__debugInfo = "214:\Map.gbas";
-				param1_b_ref[0] = 0;
-				__debugInfo = "214:\Map.gbas";
-			} else {
-				__debugInfo = "216:\Map.gbas";
-				param1_b_ref[0] = 1;
-				__debugInfo = "216:\Map.gbas";
-			};
-			__debugInfo = "212:\Map.gbas";
-		};
-		__debugInfo = "229:\Map.gbas";
-		if ((((param1_x) == (0)) ? 1 : 0)) {
-			__debugInfo = "221:\Map.gbas";
-			param1_l_ref[0] = 1;
-			__debugInfo = "221:\Map.gbas";
-		} else {
-			var alias2_t1_ref_1498 = [new type5_TTile()];
-			__debugInfo = "223:\Map.gbas";
-			alias2_t1_ref_1498 = param4_self.attr5_Tiles_ref[0].arrAccess(((param1_x) - (1)), param1_y).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "228:\Map.gbas";
-			if ((alias2_t1_ref_1498[0]).IsSolid()) {
-				__debugInfo = "225:\Map.gbas";
-				param1_l_ref[0] = 0;
-				__debugInfo = "225:\Map.gbas";
-			} else {
-				__debugInfo = "227:\Map.gbas";
-				param1_l_ref[0] = 1;
-				__debugInfo = "227:\Map.gbas";
-			};
-			__debugInfo = "223:\Map.gbas";
-		};
-		__debugInfo = "230:\Map.gbas";
-		return 0;
-		__debugInfo = "196:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TTile_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "252:\Map.gbas";
+		var local1_x_1411 = 0.0, local1_y_1412 = 0.0, local1_i_1413 = 0.0, local3_num_1414 = 0.0, local6_up_Str_ref_1415 = [""], local6_lo_Str_ref_1416 = [""], local6_en_Str_ref_1417 = [""], local1_y_1418 = 0.0, local2_by_1419 = 0.0, local5_nfuel_1420 = 0.0, local7_nrocket_1421 = 0.0, local4_nufo_1422 = 0.0, local9_data1_Str_1423 = new GLBArray(), local9_data2_Str_1424 = new GLBArray(), local9_data3_Str_1425 = new GLBArray();
+		__debugInfo = "646:\Scramble.gbas";
+		DIM(global4_cave, [1320, 2], 0.0);
+		__debugInfo = "646:\Scramble.gbas";
 		{
-			var local17___SelectHelper14__1501 = 0;
-			__debugInfo = "252:\Map.gbas";
-			local17___SelectHelper14__1501 = param4_self.attr3_Typ;
-			__debugInfo = "267:\Map.gbas";
-			if ((((local17___SelectHelper14__1501) == (0)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper14__1501) == (1)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper14__1501) == (2)) ? 1 : 0)) {
-				__debugInfo = "257:\Map.gbas";
-				DRAWSPRITE(global9_SolidTile, ((param4_self.attr6_PosVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((param4_self.attr6_PosVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y)));
-				__debugInfo = "257:\Map.gbas";
-			} else if ((((local17___SelectHelper14__1501) == (3)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper14__1501) == (4)) ? 1 : 0)) {
-				__debugInfo = "262:\Map.gbas";
-				DRAWANIM(global9_DestrTile, ~~(param4_self.attr4_Info.arrAccess(~~(0)).values[tmpPositionCache]), ((param4_self.attr6_PosVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((param4_self.attr6_PosVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y)));
-				__debugInfo = "262:\Map.gbas";
-			} else if ((((local17___SelectHelper14__1501) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "266:\Map.gbas";
-				DEBUG((((("Unknown tile type ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "266:\Map.gbas";
+			__debugInfo = "686:\Scramble.gbas";
+			for (local1_y_1412 = 0;toCheck(local1_y_1412, 60, 1);local1_y_1412 += 1) {
+				__debugInfo = "648:\Scramble.gbas";
+				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (1))), local6_up_Str_ref_1415);
+				__debugInfo = "649:\Scramble.gbas";
+				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (2))), local6_lo_Str_ref_1416);
+				__debugInfo = "650:\Scramble.gbas";
+				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (3))), local6_en_Str_ref_1417);
+				__debugInfo = "651:\Scramble.gbas";
+				local3_num_1414 = SPLITSTR(unref(local6_up_Str_ref_1415[0]), unref(local9_data1_Str_1423), ",", 1);
+				__debugInfo = "652:\Scramble.gbas";
+				local3_num_1414 = SPLITSTR(unref(local6_lo_Str_ref_1416[0]), unref(local9_data2_Str_1424), ",", 1);
+				__debugInfo = "653:\Scramble.gbas";
+				local3_num_1414 = SPLITSTR(unref(local6_en_Str_ref_1417[0]), unref(local9_data3_Str_1425), ",", 1);
+				__debugInfo = "653:\Scramble.gbas";
+				{
+					__debugInfo = "685:\Scramble.gbas";
+					for (local1_x_1411 = 0;toCheck(local1_x_1411, ((local3_num_1414) - (1)), 1);local1_x_1411 += 1) {
+						__debugInfo = "655:\Scramble.gbas";
+						global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache] = ((9) - (INTEGER(FLOAT2STR(local9_data2_Str_1424.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))));
+						__debugInfo = "656:\Scramble.gbas";
+						global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache] = ((-(10)) + (INTEGER(FLOAT2STR(local9_data1_Str_1423.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))));
+						__debugInfo = "657:\Scramble.gbas";
+						if ((((global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]) >= (((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (1)))) ? 1 : 0)) {
+							__debugInfo = "657:\Scramble.gbas";
+							global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache] = ((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (2));
+							__debugInfo = "657:\Scramble.gbas";
+						};
+						__debugInfo = "659:\Scramble.gbas";
+						local2_by_1419 = global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache];
+						__debugInfo = "660:\Scramble.gbas";
+						{
+							var local16___SelectHelper3__1426 = 0;
+							__debugInfo = "660:\Scramble.gbas";
+							local16___SelectHelper3__1426 = INTEGER(FLOAT2STR(local9_data3_Str_1425.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]));
+							__debugInfo = "683:\Scramble.gbas";
+							if ((((local16___SelectHelper3__1426) == (1)) ? 1 : 0)) {
+								__debugInfo = "662:\Scramble.gbas";
+								REDIM(global6_rocket, [~~(((local7_nrocket_1421) + (1))), 2], 0.0 );
+								__debugInfo = "663:\Scramble.gbas";
+								global6_rocket.arrAccess(~~(local7_nrocket_1421), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
+								__debugInfo = "664:\Scramble.gbas";
+								global6_rocket.arrAccess(~~(local7_nrocket_1421), 1).values[tmpPositionCache] = local2_by_1419;
+								__debugInfo = "665:\Scramble.gbas";
+								local7_nrocket_1421+=1;
+								__debugInfo = "662:\Scramble.gbas";
+							} else if (((((((local16___SelectHelper3__1426) >= (2)) ? 1 : 0)) && ((((local16___SelectHelper3__1426) <= (3)) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "667:\Scramble.gbas";
+								REDIM(global4_fuel, [~~(((local5_nfuel_1420) + (1))), 2], 0.0 );
+								__debugInfo = "668:\Scramble.gbas";
+								global4_fuel.arrAccess(~~(local5_nfuel_1420), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
+								__debugInfo = "669:\Scramble.gbas";
+								global4_fuel.arrAccess(~~(local5_nfuel_1420), 1).values[tmpPositionCache] = ((INTEGER(FLOAT2STR(local9_data3_Str_1425.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))) - (2));
+								__debugInfo = "670:\Scramble.gbas";
+								local5_nfuel_1420+=1;
+								__debugInfo = "667:\Scramble.gbas";
+							} else if ((((local16___SelectHelper3__1426) == (4)) ? 1 : 0)) {
+								__debugInfo = "672:\Scramble.gbas";
+								REDIM(global3_ufo, [~~(((local4_nufo_1422) + (1))), 4], 0.0 );
+								__debugInfo = "673:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
+								__debugInfo = "674:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 2).values[tmpPositionCache] = ((global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]) + (((((MOD(~~(((((local4_nufo_1422) * (local4_nufo_1422))) + (local1_x_1411))), 10)) * (((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]))))) / (10))));
+								__debugInfo = "675:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 3).values[tmpPositionCache] = 1;
+								__debugInfo = "676:\Scramble.gbas";
+								local4_nufo_1422+=1;
+								__debugInfo = "672:\Scramble.gbas";
+							} else if ((((local16___SelectHelper3__1426) == (5)) ? 1 : 0)) {
+								__debugInfo = "678:\Scramble.gbas";
+								REDIM(global3_ufo, [~~(((local4_nufo_1422) + (1))), 4], 0.0 );
+								__debugInfo = "679:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
+								__debugInfo = "680:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 2).values[tmpPositionCache] = local2_by_1419;
+								__debugInfo = "681:\Scramble.gbas";
+								global3_ufo.arrAccess(~~(local4_nufo_1422), 3).values[tmpPositionCache] = 0;
+								__debugInfo = "682:\Scramble.gbas";
+								local4_nufo_1422+=1;
+								__debugInfo = "678:\Scramble.gbas";
+							};
+							__debugInfo = "660:\Scramble.gbas";
+						};
+						__debugInfo = "684:\Scramble.gbas";
+						local1_i_1413+=1;
+						__debugInfo = "655:\Scramble.gbas";
+					};
+					__debugInfo = "685:\Scramble.gbas";
+				};
+				__debugInfo = "648:\Scramble.gbas";
 			};
-			__debugInfo = "252:\Map.gbas";
+			__debugInfo = "686:\Scramble.gbas";
 		};
-		__debugInfo = "268:\Map.gbas";
+		__debugInfo = "687:\Scramble.gbas";
 		return 0;
-		__debugInfo = "252:\Map.gbas";
+		__debugInfo = "646:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5854,133 +6185,187 @@ window['method11_type5_TTile_6_Update'] = function(param4_self) {
 	}
 	
 };
-window['method11_type5_TTile_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
+window['func12_WideScroller'] = function(param12_filename_Str) {
+	stackPush("function: WideScroller", __debugInfo);
 	try {
-		__debugInfo = "271:\Map.gbas";
+		var local8_text_Str_1428 = new GLBArray(), local5_a_Str_ref_1429 = [""], local7_maxline_1430 = 0.0, local1_z_1431 = 0.0, local2_dz_1432 = 0.0, local2_dx_1433 = 0.0, local1_y_1434 = 0.0, local2_fx_ref_1435 = [0.0], local2_fy_ref_1436 = [0.0], local6_hi_Str_1437 = new GLBArray(), local2_hi_1438 = new GLBArray();
+		__debugInfo = "700:\Scramble.gbas";
+		DIM(local8_text_Str_1428, [1024], "");
+		__debugInfo = "702:\Scramble.gbas";
+		GETFONTSIZE(local2_fx_ref_1435, local2_fy_ref_1436);
+		__debugInfo = "704:\Scramble.gbas";
+		local2_fy_ref_1436[0] = ((local2_fy_ref_1436[0]) * (1.2));
+		__debugInfo = "705:\Scramble.gbas";
+		local7_maxline_1430 = ((local7_maxline_1430) + (2));
+		__debugInfo = "706:\Scramble.gbas";
+		local8_text_Str_1428.arrAccess(~~(local7_maxline_1430)).values[tmpPositionCache] = "-= HIGHSCORES =-";
+		__debugInfo = "707:\Scramble.gbas";
+		local7_maxline_1430+=1;
+		__debugInfo = "709:\Scramble.gbas";
+		SYSTEMPOINTER(1);
+		__debugInfo = "710:\Scramble.gbas";
+		func14_ReadHighScores(unref(local6_hi_Str_1437), unref(local2_hi_1438), global8_name_Str, global5_score);
+		__debugInfo = "711:\Scramble.gbas";
+		SYSTEMPOINTER(0);
+		__debugInfo = "712:\Scramble.gbas";
 		{
-			var local17___SelectHelper15__1504 = 0;
-			__debugInfo = "271:\Map.gbas";
-			local17___SelectHelper15__1504 = param4_self.attr3_Typ;
-			__debugInfo = "285:\Map.gbas";
-			if ((((local17___SelectHelper15__1504) == (0)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper15__1504) == (1)) ? 1 : 0)) {
-				__debugInfo = "274:\Map.gbas";
-				DRAWRECT(((param4_self.attr6_PosVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((param4_self.attr6_PosVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y)), 32, 32, RGB(255, 0, 0));
-				__debugInfo = "274:\Map.gbas";
-			} else if ((((local17___SelectHelper15__1504) == (2)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper15__1504) == (3)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper15__1504) == (4)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper15__1504) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "284:\Map.gbas";
-				DEBUG((((("Unknown tile type ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "284:\Map.gbas";
+			var local1_i_1439 = 0.0;
+			__debugInfo = "715:\Scramble.gbas";
+			for (local1_i_1439 = 0;toCheck(local1_i_1439, ((BOUNDS(local2_hi_1438, 0)) - (1)), 1);local1_i_1439 += 1) {
+				__debugInfo = "714:\Scramble.gbas";
+				local8_text_Str_1428.arrAccess(~~(((local1_i_1439) + (local7_maxline_1430)))).values[tmpPositionCache] = ((MID_Str(((local6_hi_Str_1437.arrAccess(~~(local1_i_1439)).values[tmpPositionCache]) + ("................")), 0, 12)) + (FORMAT_Str(6, 0, local2_hi_1438.arrAccess(~~(local1_i_1439)).values[tmpPositionCache])));
+				__debugInfo = "714:\Scramble.gbas";
 			};
-			__debugInfo = "271:\Map.gbas";
+			__debugInfo = "715:\Scramble.gbas";
 		};
-		__debugInfo = "286:\Map.gbas";
-		return 0;
-		__debugInfo = "271:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TTile_6_Create'] = function(param3_Typ, param1_X, param1_Y, param4_self) {
-	stackPush("method: Create", __debugInfo);
-	try {
-		__debugInfo = "289:\Map.gbas";
-		param4_self.attr3_Typ = param3_Typ;
-		__debugInfo = "290:\Map.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "291:\Map.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "293:\Map.gbas";
-		(param4_self.attr6_PosVec).SetXY(((param1_X) * (32)), ((param1_Y) * (32)));
-		__debugInfo = "295:\Map.gbas";
+		__debugInfo = "716:\Scramble.gbas";
+		local7_maxline_1430 = ((((local7_maxline_1430) + (BOUNDS(local2_hi_1438, 0)))) + (4));
+		__debugInfo = "718:\Scramble.gbas";
 		{
-			var local17___SelectHelper16__1510 = 0;
-			__debugInfo = "295:\Map.gbas";
-			local17___SelectHelper16__1510 = param4_self.attr3_Typ;
-			__debugInfo = "310:\Map.gbas";
-			if ((((local17___SelectHelper16__1510) == (0)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper16__1510) == (1)) ? 1 : 0)) {
-				__debugInfo = "298:\Map.gbas";
-				global8_SpawnPos = param4_self.attr6_PosVec.clone(/* In Assign */);
-				__debugInfo = "298:\Map.gbas";
-			} else if ((((local17___SelectHelper16__1510) == (2)) ? 1 : 0)) {
-				
-			} else if ((((local17___SelectHelper16__1510) == (3)) ? 1 : 0)) {
-				__debugInfo = "302:\Map.gbas";
-				global9_TargetPos = param4_self.attr6_PosVec.clone(/* In Assign */);
-				__debugInfo = "302:\Map.gbas";
-			} else if ((((local17___SelectHelper16__1510) == (4)) ? 1 : 0)) {
-				__debugInfo = "304:\Map.gbas";
-				DIM(param4_self.attr4_Info, [1], 0.0);
-				__debugInfo = "305:\Map.gbas";
-				param4_self.attr4_Info.arrAccess(~~(0)).values[tmpPositionCache] = 0;
-				__debugInfo = "304:\Map.gbas";
-			} else if ((((local17___SelectHelper16__1510) == (~~(5))) ? 1 : 0)) {
-				
-			} else {
-				__debugInfo = "309:\Map.gbas";
-				DEBUG((((("Unknown tile type ") + (CAST2STRING(param4_self.attr3_Typ)))) + ("\n")));
-				__debugInfo = "309:\Map.gbas";
+			var local1_i_1440 = 0.0;
+			__debugInfo = "726:\Scramble.gbas";
+			for (local1_i_1440 = 0;toCheck(local1_i_1440, 255, 1);local1_i_1440 += 1) {
+				__debugInfo = "720:\Scramble.gbas";
+				func7_GETFILE(param12_filename_Str, ~~(local1_i_1440), local5_a_Str_ref_1429);
+				__debugInfo = "721:\Scramble.gbas";
+				if ((((local5_a_Str_ref_1429[0]) == ("NO_FILE")) ? 1 : 0)) {
+					__debugInfo = "721:\Scramble.gbas";
+					return 0;
+					__debugInfo = "721:\Scramble.gbas";
+				};
+				__debugInfo = "722:\Scramble.gbas";
+				if ((((local5_a_Str_ref_1429[0]) == ("NO_DATA")) ? 1 : 0)) {
+					__debugInfo = "722:\Scramble.gbas";
+					local5_a_Str_ref_1429[0] = "";
+					__debugInfo = "722:\Scramble.gbas";
+				};
+				__debugInfo = "723:\Scramble.gbas";
+				if ((((local5_a_Str_ref_1429[0]) == ("EOF")) ? 1 : 0)) {
+					__debugInfo = "723:\Scramble.gbas";
+					break;
+					__debugInfo = "723:\Scramble.gbas";
+				};
+				__debugInfo = "724:\Scramble.gbas";
+				local8_text_Str_1428.arrAccess(~~(local7_maxline_1430)).values[tmpPositionCache] = local5_a_Str_ref_1429[0];
+				__debugInfo = "725:\Scramble.gbas";
+				local7_maxline_1430+=1;
+				__debugInfo = "720:\Scramble.gbas";
 			};
-			__debugInfo = "295:\Map.gbas";
+			__debugInfo = "726:\Scramble.gbas";
 		};
-		__debugInfo = "311:\Map.gbas";
-		return 0;
-		__debugInfo = "289:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TTile_7_IsSolid'] = function(param4_self) {
-	stackPush("method: IsSolid", __debugInfo);
-	try {
-		__debugInfo = "314:\Map.gbas";
-		{
-			var local17___SelectHelper17__1513 = 0;
-			__debugInfo = "314:\Map.gbas";
-			local17___SelectHelper17__1513 = param4_self.attr3_Typ;
-			__debugInfo = "321:\Map.gbas";
-			if ((((local17___SelectHelper17__1513) == (2)) ? 1 : 0)) {
-				__debugInfo = "316:\Map.gbas";
-				return 1;
-				__debugInfo = "316:\Map.gbas";
-			} else if ((((local17___SelectHelper17__1513) == (4)) ? 1 : 0)) {
-				__debugInfo = "318:\Map.gbas";
-				return 1;
-				__debugInfo = "318:\Map.gbas";
-			} else if ((((local17___SelectHelper17__1513) == (~~(5))) ? 1 : 0)) {
-				__debugInfo = "320:\Map.gbas";
-				return 1;
-				__debugInfo = "320:\Map.gbas";
+		__debugInfo = "728:\Scramble.gbas";
+		while (func9_UserInput(3)) {
+			__debugInfo = "727:\Scramble.gbas";
+			HIBERNATE();
+			__debugInfo = "727:\Scramble.gbas";
+		};
+		__debugInfo = "730:\Scramble.gbas";
+		LIMITFPS(60);
+		__debugInfo = "769:\Scramble.gbas";
+		while (1) {
+			__debugInfo = "731:\Scramble.gbas";
+			{
+				var local2_zt_1441 = 0.0;
+				__debugInfo = "768:\Scramble.gbas";
+				for (local2_zt_1441 = global7_screeny_ref[0];toCheck(local2_zt_1441, -(((local7_maxline_1430) * (local2_fy_ref_1436[0]))), -(0.4));local2_zt_1441 += -(0.4)) {
+					__debugInfo = "733:\Scramble.gbas";
+					global5_dtime = ((GETTIMER()) * (5));
+					__debugInfo = "734:\Scramble.gbas";
+					global4_scrn = ((global4_scrn) + (((global5_dtime) / (5000))));
+					__debugInfo = "735:\Scramble.gbas";
+					global3_plx_ref[0] = global4_scrn;
+					__debugInfo = "736:\Scramble.gbas";
+					global3_ply_ref[0] = ((((func8_bottomat(unref(global3_plx_ref[0]))) + (func9_ceilingat(unref(global3_plx_ref[0]))))) / (2));
+					__debugInfo = "737:\Scramble.gbas";
+					{
+						var local16___SelectHelper4__1443 = 0.0;
+						__debugInfo = "737:\Scramble.gbas";
+						local16___SelectHelper4__1443 = global4_scrn;
+						__debugInfo = "741:\Scramble.gbas";
+						if ((((local16___SelectHelper4__1443) < (50)) ? 1 : 0)) {
+							__debugInfo = "738:\Scramble.gbas";
+							ALPHAMODE(((global4_scrn) / (200)));
+							__debugInfo = "738:\Scramble.gbas";
+						} else if (((((((local16___SelectHelper4__1443) >= (500)) ? 1 : 0)) && ((((local16___SelectHelper4__1443) <= (550)) ? 1 : 0))) ? 1 : 0)) {
+							__debugInfo = "739:\Scramble.gbas";
+							ALPHAMODE(((((global4_scrn) - (550))) / (200)));
+							__debugInfo = "739:\Scramble.gbas";
+						} else {
+							__debugInfo = "740:\Scramble.gbas";
+							ALPHAMODE(0.5);
+							__debugInfo = "740:\Scramble.gbas";
+						};
+						__debugInfo = "737:\Scramble.gbas";
+					};
+					__debugInfo = "743:\Scramble.gbas";
+					if ((((global4_scrn) >= (600)) ? 1 : 0)) {
+						__debugInfo = "743:\Scramble.gbas";
+						global4_scrn = 0;
+						__debugInfo = "743:\Scramble.gbas";
+					};
+					__debugInfo = "744:\Scramble.gbas";
+					func4_Show(global5_dtime, 1);
+					__debugInfo = "746:\Scramble.gbas";
+					ALPHAMODE(0.5);
+					__debugInfo = "746:\Scramble.gbas";
+					{
+						__debugInfo = "758:\Scramble.gbas";
+						for (local1_z_1431 = 0;toCheck(local1_z_1431, ((local7_maxline_1430) - (1)), 1);local1_z_1431 += 1) {
+							__debugInfo = "748:\Scramble.gbas";
+							local2_dz_1432 = ((((local1_z_1431) * (local2_fy_ref_1436[0]))) + (local2_zt_1441));
+							__debugInfo = "749:\Scramble.gbas";
+							local2_dx_1433 = ((((global7_screenx_ref[0]) - ((((local8_text_Str_1428.arrAccess(~~(local1_z_1431)).values[tmpPositionCache]).length) * (local2_fx_ref_1435[0]))))) / (2));
+							__debugInfo = "757:\Scramble.gbas";
+							if (((((((local2_dz_1432) < (((global7_screeny_ref[0]) + (local2_fy_ref_1436[0])))) ? 1 : 0)) && ((((local2_dz_1432) > (-(20))) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "751:\Scramble.gbas";
+								local5_a_Str_ref_1429[0] = local8_text_Str_1428.arrAccess(~~(local1_z_1431)).values[tmpPositionCache];
+								__debugInfo = "755:\Scramble.gbas";
+								if ((((MID_Str(unref(local5_a_Str_ref_1429[0]), 0, 1)) == ("#")) ? 1 : 0)) {
+									__debugInfo = "753:\Scramble.gbas";
+									func5_thing(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1429[0]), 1, 1)), local2_dx_1433, ((local2_dz_1432) + (local2_fy_ref_1436[0])), RGB(200, 200, 150), ((local2_fy_ref_1436[0]) * (2)), 0);
+									__debugInfo = "754:\Scramble.gbas";
+									local5_a_Str_ref_1429[0] = (("  ") + (MID_Str(unref(local5_a_Str_ref_1429[0]), 2, 1000)));
+									__debugInfo = "753:\Scramble.gbas";
+								};
+								__debugInfo = "756:\Scramble.gbas";
+								PRINT(unref(local5_a_Str_ref_1429[0]), local2_dx_1433, local2_dz_1432, 0);
+								__debugInfo = "751:\Scramble.gbas";
+							};
+							__debugInfo = "748:\Scramble.gbas";
+						};
+						__debugInfo = "758:\Scramble.gbas";
+					};
+					__debugInfo = "759:\Scramble.gbas";
+					if (func9_UserInput(3)) {
+						__debugInfo = "759:\Scramble.gbas";
+						return tryClone(1);
+						__debugInfo = "759:\Scramble.gbas";
+					};
+					__debugInfo = "766:\Scramble.gbas";
+					if (global7_flicker) {
+						__debugInfo = "762:\Scramble.gbas";
+						ALPHAMODE(-(0.3));
+						__debugInfo = "763:\Scramble.gbas";
+						local1_y_1434 = ((((MOD(CAST2INT(((GETTIMERALL()) / (50))), 7)) * (global7_screeny_ref[0]))) / (7));
+						__debugInfo = "764:\Scramble.gbas";
+						DRAWRECT(0, local1_y_1434, unref(global7_screenx_ref[0]), ((global7_screeny_ref[0]) / (7)), 0);
+						__debugInfo = "765:\Scramble.gbas";
+						ALPHAMODE(0);
+						__debugInfo = "762:\Scramble.gbas";
+					};
+					__debugInfo = "767:\Scramble.gbas";
+					SHOWSCREEN();
+					__debugInfo = "733:\Scramble.gbas";
+				};
+				__debugInfo = "768:\Scramble.gbas";
 			};
-			__debugInfo = "314:\Map.gbas";
+			__debugInfo = "731:\Scramble.gbas";
 		};
-		__debugInfo = "322:\Map.gbas";
-		return tryClone(0);
-		__debugInfo = "323:\Map.gbas";
+		__debugInfo = "771:\Scramble.gbas";
+		LIMITFPS(-(1));
+		__debugInfo = "772:\Scramble.gbas";
 		return 0;
-		__debugInfo = "314:\Map.gbas";
+		__debugInfo = "700:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5990,335 +6375,65 @@ window['method11_type5_TTile_7_IsSolid'] = function(param4_self) {
 	}
 	
 };
-window['method11_type5_TRect_6_SetPos'] = function(param1_V, param4_self) {
-	stackPush("method: SetPos", __debugInfo);
+window['func14_ReadHighScores'] = function(param9_names_Str, param6_scores, param12_username_Str, param8_thescore) {
+	stackPush("function: ReadHighScores", __debugInfo);
 	try {
-		__debugInfo = "13:\Rect.gbas";
-		(param4_self.attr8_StartVec).SetVec(param1_V);
-		__debugInfo = "14:\Rect.gbas";
-		return 0;
-		__debugInfo = "13:\Rect.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TRect_5_SetXY'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: SetXY", __debugInfo);
-	try {
-		__debugInfo = "17:\Rect.gbas";
-		(param4_self.attr8_StartVec).SetXY(param1_X, param1_Y);
-		__debugInfo = "18:\Rect.gbas";
-		return 0;
-		__debugInfo = "17:\Rect.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TRect_7_SetSize'] = function(param1_W, param1_H, param4_self) {
-	stackPush("method: SetSize", __debugInfo);
-	try {
-		__debugInfo = "21:\Rect.gbas";
-		param4_self.attr5_Width = param1_W;
-		__debugInfo = "22:\Rect.gbas";
-		param4_self.attr6_Height = param1_H;
-		__debugInfo = "23:\Rect.gbas";
-		return 0;
-		__debugInfo = "21:\Rect.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TRect_9_Collision'] = function(param1_R, param4_self) {
-	stackPush("method: Collision", __debugInfo);
-	try {
-		__debugInfo = "26:\Rect.gbas";
-		return tryClone(BOXCOLL(~~(param1_R.attr8_StartVec.attr1_X), ~~(param1_R.attr8_StartVec.attr1_Y), ~~(param1_R.attr5_Width), ~~(param1_R.attr6_Height), ~~(param4_self.attr8_StartVec.attr1_X), ~~(param4_self.attr8_StartVec.attr1_Y), ~~(param4_self.attr5_Width), ~~(param4_self.attr6_Height)));
-		__debugInfo = "27:\Rect.gbas";
-		return 0;
-		__debugInfo = "26:\Rect.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TRect_4_Draw'] = function(param4_self) {
-	stackPush("method: Draw", __debugInfo);
-	try {
-		__debugInfo = "30:\Rect.gbas";
-		DRAWRECT(((param4_self.attr8_StartVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((param4_self.attr8_StartVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y)), param4_self.attr5_Width, param4_self.attr6_Height, RGB(0, 0, 255));
-		__debugInfo = "31:\Rect.gbas";
-		DRAWLINE(((param4_self.attr8_StartVec.attr1_X) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((param4_self.attr8_StartVec.attr1_Y) + (global10_CurrentMap.attr6_Scroll.attr1_Y)), ((((param4_self.attr8_StartVec.attr1_X) + (param4_self.attr5_Width))) + (global10_CurrentMap.attr6_Scroll.attr1_X)), ((((param4_self.attr8_StartVec.attr1_Y) + (param4_self.attr6_Height))) + (global10_CurrentMap.attr6_Scroll.attr1_Y)), RGB(255, 0, 0));
-		__debugInfo = "32:\Rect.gbas";
-		return 0;
-		__debugInfo = "30:\Rect.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func7_LoadSpr'] = function(param8_Path_Str) {
-	stackPush("function: LoadSpr", __debugInfo);
-	try {
-		var local2_ID_1531 = 0;
-		__debugInfo = "9:\Util.gbas";
-		local2_ID_1531 = GENSPRITE();
-		__debugInfo = "10:\Util.gbas";
-		LOADSPRITE((((("gfx/") + (param8_Path_Str))) + (".png")), local2_ID_1531);
-		__debugInfo = "11:\Util.gbas";
-		return tryClone(local2_ID_1531);
-		__debugInfo = "12:\Util.gbas";
-		return 0;
-		__debugInfo = "9:\Util.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func7_LoadAni'] = function(param8_Path_Str, param1_w, param1_h) {
-	stackPush("function: LoadAni", __debugInfo);
-	try {
-		var local2_ID_1535 = 0;
-		__debugInfo = "15:\Util.gbas";
-		local2_ID_1535 = GENSPRITE();
-		__debugInfo = "16:\Util.gbas";
-		LOADANIM((((("gfx/") + (param8_Path_Str))) + (".png")), local2_ID_1535, param1_w, param1_h);
-		__debugInfo = "17:\Util.gbas";
-		return tryClone(local2_ID_1535);
-		__debugInfo = "18:\Util.gbas";
-		return 0;
-		__debugInfo = "15:\Util.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_MulVec'] = function(param3_Val, param4_self) {
-	stackPush("method: MulVec", __debugInfo);
-	try {
-		__debugInfo = "13:\Vec.gbas";
-		param4_self.attr1_X = ((param4_self.attr1_X) * (param3_Val));
-		__debugInfo = "14:\Vec.gbas";
-		param4_self.attr1_Y = ((param4_self.attr1_Y) * (param3_Val));
-		__debugInfo = "15:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "16:\Vec.gbas";
-		return 0;
-		__debugInfo = "13:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_DivVec'] = function(param3_Val, param4_self) {
-	stackPush("method: DivVec", __debugInfo);
-	try {
-		__debugInfo = "19:\Vec.gbas";
-		param4_self.attr1_X = ((param4_self.attr1_X) / (param3_Val));
-		__debugInfo = "20:\Vec.gbas";
-		param4_self.attr1_Y = ((param4_self.attr1_Y) / (param3_Val));
-		__debugInfo = "21:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "22:\Vec.gbas";
-		return 0;
-		__debugInfo = "19:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_AddVec'] = function(param1_V, param4_self) {
-	stackPush("method: AddVec", __debugInfo);
-	try {
-		__debugInfo = "25:\Vec.gbas";
-		param4_self.attr1_X+=param1_V.attr1_X;
-		__debugInfo = "26:\Vec.gbas";
-		param4_self.attr1_Y+=param1_V.attr1_Y;
-		__debugInfo = "27:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "28:\Vec.gbas";
-		return 0;
-		__debugInfo = "25:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_SubVec'] = function(param1_V, param4_self) {
-	stackPush("method: SubVec", __debugInfo);
-	try {
-		__debugInfo = "31:\Vec.gbas";
-		param4_self.attr1_X+=-(param1_V.attr1_X);
-		__debugInfo = "32:\Vec.gbas";
-		param4_self.attr1_Y+=-(param1_V.attr1_Y);
-		__debugInfo = "33:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "34:\Vec.gbas";
-		return 0;
-		__debugInfo = "31:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_5_SetXY'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: SetXY", __debugInfo);
-	try {
-		__debugInfo = "37:\Vec.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "38:\Vec.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "39:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "40:\Vec.gbas";
-		return 0;
-		__debugInfo = "37:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_SetVec'] = function(param1_V, param4_self) {
-	stackPush("method: SetVec", __debugInfo);
-	try {
-		__debugInfo = "43:\Vec.gbas";
-		param4_self.attr1_X = param1_V.attr1_X;
-		__debugInfo = "44:\Vec.gbas";
-		param4_self.attr1_Y = param1_V.attr1_Y;
-		__debugInfo = "45:\Vec.gbas";
-		param4_self.attr4_vlen = param1_V.attr4_vlen;
-		__debugInfo = "46:\Vec.gbas";
-		return 0;
-		__debugInfo = "43:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_7_Reverse'] = function(param4_self) {
-	stackPush("method: Reverse", __debugInfo);
-	try {
-		__debugInfo = "49:\Vec.gbas";
-		(param4_self).MulVec(-(1));
-		__debugInfo = "50:\Vec.gbas";
-		return 0;
-		__debugInfo = "49:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_Length'] = function(param4_self) {
-	stackPush("method: Length", __debugInfo);
-	try {
-		__debugInfo = "55:\Vec.gbas";
-		if ((((param4_self.attr4_vlen) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "54:\Vec.gbas";
-			param4_self.attr4_vlen = SQR(((((param4_self.attr1_X) * (param4_self.attr1_X))) + (((param4_self.attr1_Y) * (param4_self.attr1_Y)))));
-			__debugInfo = "54:\Vec.gbas";
-		};
-		__debugInfo = "56:\Vec.gbas";
-		return tryClone(param4_self.attr4_vlen);
-		__debugInfo = "57:\Vec.gbas";
-		return 0;
-		__debugInfo = "55:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_9_Normalize'] = function(param4_self) {
-	stackPush("method: Normalize", __debugInfo);
-	try {
-		__debugInfo = "62:\Vec.gbas";
-		if ((((param4_self.attr4_vlen) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "61:\Vec.gbas";
-			(param4_self).Length();
-			__debugInfo = "61:\Vec.gbas";
-		};
-		__debugInfo = "71:\Vec.gbas";
-		if ((((param4_self.attr4_vlen) > (0)) ? 1 : 0)) {
-			__debugInfo = "64:\Vec.gbas";
-			param4_self.attr1_X = ((param4_self.attr1_X) / (param4_self.attr4_vlen));
-			__debugInfo = "65:\Vec.gbas";
-			param4_self.attr1_Y = ((param4_self.attr1_Y) / (param4_self.attr4_vlen));
-			__debugInfo = "66:\Vec.gbas";
-			param4_self.attr4_vlen = 1;
-			__debugInfo = "64:\Vec.gbas";
+		var local2_ct_1448 = 0.0, local1_i_1449 = 0.0, local7_str_Str_1450 = "", local9_proxy_Str_1451 = "", local4_port_1452 = 0.0;
+		__debugInfo = "778:\Scramble.gbas";
+		local7_str_Str_1450 = "highscores/listgame.php";
+		__debugInfo = "779:\Scramble.gbas";
+		local7_str_Str_1450 = ((local7_str_Str_1450) + ("?game=scramble"));
+		__debugInfo = "780:\Scramble.gbas";
+		local7_str_Str_1450 = ((((local7_str_Str_1450) + ("&name="))) + (param12_username_Str));
+		__debugInfo = "781:\Scramble.gbas";
+		local7_str_Str_1450 = ((((local7_str_Str_1450) + ("&score="))) + (CAST2STRING(param8_thescore)));
+		__debugInfo = "782:\Scramble.gbas";
+		local7_str_Str_1450 = ((local7_str_Str_1450) + ("&secret=3e5b72ec"));
+		__debugInfo = "784:\Scramble.gbas";
+		PRINT(".: WebGet scores :.", 0, 0, 0);
+		__debugInfo = "785:\Scramble.gbas";
+		SHOWSCREEN();
+		__debugInfo = "787:\Scramble.gbas";
+		INIOPEN("config.ini");
+		__debugInfo = "788:\Scramble.gbas";
+		local9_proxy_Str_1451 = INIGET_Str("server", "proxy", "NO_DATA");
+		__debugInfo = "789:\Scramble.gbas";
+		local4_port_1452 = FLOAT2STR(INIGET_Str("server", "port", "NO_DATA"));
+		__debugInfo = "790:\Scramble.gbas";
+		KILLFILE("scores.ini");
+		__debugInfo = "795:\Scramble.gbas";
+		if (((((((local4_port_1452) == (0)) ? 1 : 0)) || ((((local9_proxy_Str_1451) == ("NO_DATA")) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "792:\Scramble.gbas";
+			NETWEBGET("www.glbasic.com", (("/") + (local7_str_Str_1450)), 80, "scores.ini", 5000);
+			__debugInfo = "792:\Scramble.gbas";
 		} else {
-			__debugInfo = "68:\Vec.gbas";
-			param4_self.attr1_X = 0;
-			__debugInfo = "69:\Vec.gbas";
-			param4_self.attr1_Y = 0;
-			__debugInfo = "70:\Vec.gbas";
-			param4_self.attr4_vlen = 0;
-			__debugInfo = "68:\Vec.gbas";
+			__debugInfo = "794:\Scramble.gbas";
+			NETWEBGET(local9_proxy_Str_1451, (("http://www.glbasic.com/") + (local7_str_Str_1450)), ~~(local4_port_1452), "scores.ini", 5000);
+			__debugInfo = "794:\Scramble.gbas";
 		};
-		__debugInfo = "72:\Vec.gbas";
+		__debugInfo = "797:\Scramble.gbas";
+		INIOPEN("scores.ini");
+		__debugInfo = "798:\Scramble.gbas";
+		local2_ct_1448 = FLOAT2STR(INIGET_Str("scores", "count", "NO_DATA"));
+		__debugInfo = "799:\Scramble.gbas";
+		DIM(param9_names_Str, [~~(local2_ct_1448)], "");
+		__debugInfo = "800:\Scramble.gbas";
+		DIM(param6_scores, [~~(local2_ct_1448)], 0.0);
+		__debugInfo = "801:\Scramble.gbas";
+		{
+			__debugInfo = "805:\Scramble.gbas";
+			for (local1_i_1449 = 1;toCheck(local1_i_1449, local2_ct_1448, 1);local1_i_1449 += 1) {
+				__debugInfo = "803:\Scramble.gbas";
+				param9_names_Str.arrAccess(~~(((local1_i_1449) - (1)))).values[tmpPositionCache] = INIGET_Str("scores", (("n") + (CAST2STRING(local1_i_1449))), "NO_DATA");
+				__debugInfo = "804:\Scramble.gbas";
+				param6_scores.arrAccess(~~(((local1_i_1449) - (1)))).values[tmpPositionCache] = FLOAT2STR(INIGET_Str("scores", (("s") + (CAST2STRING(local1_i_1449))), "NO_DATA"));
+				__debugInfo = "803:\Scramble.gbas";
+			};
+			__debugInfo = "805:\Scramble.gbas";
+		};
+		__debugInfo = "806:\Scramble.gbas";
 		return 0;
-		__debugInfo = "62:\Vec.gbas";
+		__debugInfo = "778:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6328,135 +6443,44 @@ window['method10_type4_TVec_9_Normalize'] = function(param4_self) {
 	}
 	
 };
-window['method10_type4_TVec_9_NormalVec'] = function(param4_self) {
-	stackPush("method: NormalVec", __debugInfo);
+window['func7_GETFILE'] = function(param8_File_Str, param3_lin, param7_dat_Str_ref) {
+	stackPush("function: GETFILE", __debugInfo);
 	try {
-		var local3_tmp_1563 = 0.0;
-		__debugInfo = "75:\Vec.gbas";
-		local3_tmp_1563 = param4_self.attr1_Y;
-		__debugInfo = "76:\Vec.gbas";
-		param4_self.attr1_Y = param4_self.attr1_X;
-		__debugInfo = "77:\Vec.gbas";
-		param4_self.attr1_X = -(local3_tmp_1563);
-		__debugInfo = "78:\Vec.gbas";
+		var local1_f_1456 = 0.0;
+		__debugInfo = "824:\Scramble.gbas";
+		param3_lin = MIN(param3_lin, 255);
+		__debugInfo = "825:\Scramble.gbas";
+		local1_f_1456 = GENFILE();
+		__debugInfo = "834:\Scramble.gbas";
+		if (OPENFILE(~~(local1_f_1456), param8_File_Str, 1)) {
+			__debugInfo = "826:\Scramble.gbas";
+			{
+				var local1_i_1457 = 0.0;
+				__debugInfo = "830:\Scramble.gbas";
+				for (local1_i_1457 = 0;toCheck(local1_i_1457, param3_lin, 1);local1_i_1457 += 1) {
+					__debugInfo = "828:\Scramble.gbas";
+					if (ENDOFFILE(~~(local1_f_1456))) {
+						__debugInfo = "828:\Scramble.gbas";
+						break;
+						__debugInfo = "828:\Scramble.gbas";
+					};
+					__debugInfo = "829:\Scramble.gbas";
+					READLINE(~~(local1_f_1456), param7_dat_Str_ref);
+					__debugInfo = "828:\Scramble.gbas";
+				};
+				__debugInfo = "830:\Scramble.gbas";
+			};
+			__debugInfo = "831:\Scramble.gbas";
+			CLOSEFILE(~~(local1_f_1456));
+			__debugInfo = "826:\Scramble.gbas";
+		} else {
+			__debugInfo = "833:\Scramble.gbas";
+			param7_dat_Str_ref[0] = "";
+			__debugInfo = "833:\Scramble.gbas";
+		};
+		__debugInfo = "835:\Scramble.gbas";
 		return 0;
-		__debugInfo = "75:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_6_Bounce'] = function(param13_NormalizedVec, param7_NormVec, param4_self) {
-	stackPush("method: Bounce", __debugInfo);
-	try {
-		var local5_Proj1_1568 = new type4_TVec(), local5_Proj2_1569 = new type4_TVec(), local3_tmp_1570 = new type4_TVec();
-		__debugInfo = "82:\Vec.gbas";
-		local5_Proj1_1568 = param4_self.clone(/* In Assign */);
-		__debugInfo = "83:\Vec.gbas";
-		local5_Proj2_1569 = param4_self.clone(/* In Assign */);
-		__debugInfo = "84:\Vec.gbas";
-		(local5_Proj1_1568).Project(param13_NormalizedVec);
-		__debugInfo = "85:\Vec.gbas";
-		(local5_Proj2_1569).Project(param7_NormVec);
-		__debugInfo = "87:\Vec.gbas";
-		local3_tmp_1570 = param7_NormVec.clone(/* In Assign */);
-		__debugInfo = "88:\Vec.gbas";
-		(local3_tmp_1570).MulVec((local5_Proj2_1569).Length());
-		__debugInfo = "90:\Vec.gbas";
-		param4_self.attr1_X = ((local5_Proj1_1568.attr1_X) + (local3_tmp_1570.attr1_X));
-		__debugInfo = "91:\Vec.gbas";
-		param4_self.attr1_Y = ((local5_Proj1_1568.attr1_Y) + (local3_tmp_1570.attr1_Y));
-		__debugInfo = "92:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "93:\Vec.gbas";
-		return 0;
-		__debugInfo = "82:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_7_Project'] = function(param1_V, param4_self) {
-	stackPush("method: Project", __debugInfo);
-	try {
-		var local1_T_1574 = new type4_TVec();
-		__debugInfo = "97:\Vec.gbas";
-		local1_T_1574 = param1_V.clone(/* In Assign */);
-		__debugInfo = "98:\Vec.gbas";
-		(local1_T_1574).Normalize();
-		__debugInfo = "99:\Vec.gbas";
-		(local1_T_1574).MulVec((param4_self).DotProd(local1_T_1574));
-		__debugInfo = "100:\Vec.gbas";
-		param4_self.attr1_X = local1_T_1574.attr1_X;
-		__debugInfo = "101:\Vec.gbas";
-		param4_self.attr1_Y = local1_T_1574.attr1_Y;
-		__debugInfo = "102:\Vec.gbas";
-		param4_self.attr4_vlen = -(1);
-		__debugInfo = "103:\Vec.gbas";
-		return 0;
-		__debugInfo = "97:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_7_DotProd'] = function(param1_V, param4_self) {
-	stackPush("method: DotProd", __debugInfo);
-	try {
-		__debugInfo = "106:\Vec.gbas";
-		return tryClone(((((param4_self.attr1_X) * (param1_V.attr1_X))) + (((param4_self.attr1_Y) * (param1_V.attr1_Y)))));
-		__debugInfo = "107:\Vec.gbas";
-		return 0;
-		__debugInfo = "106:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TVec_5_Angle'] = function(param4_self) {
-	stackPush("method: Angle", __debugInfo);
-	try {
-		__debugInfo = "110:\Vec.gbas";
-		return tryClone(ATAN(param4_self.attr1_Y, param4_self.attr1_X));
-		__debugInfo = "111:\Vec.gbas";
-		return 0;
-		__debugInfo = "110:\Vec.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func9_CreateVec'] = function(param1_X, param1_Y) {
-	stackPush("function: CreateVec", __debugInfo);
-	try {
-		var local1_V_1582 = new type4_TVec();
-		__debugInfo = "116:\Vec.gbas";
-		(local1_V_1582).SetXY(param1_X, param1_Y);
-		__debugInfo = "117:\Vec.gbas";
-		return tryClone(local1_V_1582);
-		__debugInfo = "118:\Vec.gbas";
-		return tryClone(unref(new type4_TVec()));
-		__debugInfo = "116:\Vec.gbas";
+		__debugInfo = "824:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6469,11 +6493,11 @@ window['func9_CreateVec'] = function(param1_X, param1_Y) {
 window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 	stackPush("method: ToString_Str", __debugInfo);
 	try {
-		__debugInfo = "125:\Vec.gbas";
+		__debugInfo = "866:\Scramble.gbas";
 		return "Object";
-		__debugInfo = "126:\Vec.gbas";
+		__debugInfo = "867:\Scramble.gbas";
 		return "";
-		__debugInfo = "125:\Vec.gbas";
+		__debugInfo = "866:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6486,19 +6510,19 @@ window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 	stackPush("method: Equals", __debugInfo);
 	try {
-		__debugInfo = "132:\Vec.gbas";
+		__debugInfo = "873:\Scramble.gbas";
 		if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
-			__debugInfo = "129:\Vec.gbas";
+			__debugInfo = "870:\Scramble.gbas";
 			return 1;
-			__debugInfo = "129:\Vec.gbas";
+			__debugInfo = "870:\Scramble.gbas";
 		} else {
-			__debugInfo = "131:\Vec.gbas";
+			__debugInfo = "872:\Scramble.gbas";
 			return tryClone(0);
-			__debugInfo = "131:\Vec.gbas";
+			__debugInfo = "872:\Scramble.gbas";
 		};
-		__debugInfo = "133:\Vec.gbas";
+		__debugInfo = "874:\Scramble.gbas";
 		return 0;
-		__debugInfo = "132:\Vec.gbas";
+		__debugInfo = "873:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6511,11 +6535,11 @@ window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 	stackPush("method: ToHashCode", __debugInfo);
 	try {
-		__debugInfo = "135:\Vec.gbas";
+		__debugInfo = "876:\Scramble.gbas";
 		return 0;
-		__debugInfo = "136:\Vec.gbas";
+		__debugInfo = "877:\Scramble.gbas";
 		return 0;
-		__debugInfo = "135:\Vec.gbas";
+		__debugInfo = "876:\Scramble.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6524,365 +6548,6 @@ window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 		stackPop();
 	}
 	
-};
-var vtbl_type16_TCollisionObject = {
-	Update: method23_type16_TCollisionObject_6_Update, 
-	Render: method23_type16_TCollisionObject_6_Render, 
-	DoCollision: method23_type16_TCollisionObject_11_DoCollision, 
-	GetPen: method23_type16_TCollisionObject_6_GetPen, 
-	FindIntersection: method23_type16_TCollisionObject_16_FindIntersection, 
-	CreateLine: method23_type16_TCollisionObject_10_CreateLine, 
-	UpdateVectors: method23_type16_TCollisionObject_13_UpdateVectors, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type16_TCollisionObject'] = function() {
-	this.attr3_Typ = 0;
-	this.attr6_PosVec = new type4_TVec();
-	this.attr9_NormalVec = new type4_TVec();
-	this.attr6_DirVec = new type4_TVec();
-	this.attr13_CollisionRect = new type5_TRect();
-	this.attr9_Thickness = 0;
-	this.attr4_Info = new GLBArray();
-	this.attr7_InfoVec = new GLBArray();
-	this.vtbl = vtbl_type16_TCollisionObject;
-	this.attr9_Thickness = 1;
-	return this;
-	
-};
-window['type16_TCollisionObject'].prototype.clone = function() {
-	var other = new type16_TCollisionObject();
-	other.attr3_Typ = this.attr3_Typ;
-	other.attr6_PosVec = tryClone(this.attr6_PosVec);
-	other.attr9_NormalVec = tryClone(this.attr9_NormalVec);
-	other.attr6_DirVec = tryClone(this.attr6_DirVec);
-	other.attr13_CollisionRect = tryClone(this.attr13_CollisionRect);
-	other.attr9_Thickness = this.attr9_Thickness;
-	other.attr4_Info = tryClone(this.attr4_Info);
-	other.attr7_InfoVec = tryClone(this.attr7_InfoVec);
-	other.vtbl = this.vtbl;
-	return other;
-};
-type16_TCollisionObject.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type16_TCollisionObject.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type16_TCollisionObject.prototype.DoCollision = function() {
-	 return this.vtbl.DoCollision(arguments[0], arguments[1], arguments[2], this);
-};
-type16_TCollisionObject.prototype.GetPen = function() {
-	 return this.vtbl.GetPen(arguments[0], arguments[1], arguments[2], this);
-};
-type16_TCollisionObject.prototype.FindIntersection = function() {
-	 return this.vtbl.FindIntersection(arguments[0], arguments[1], this);
-};
-type16_TCollisionObject.prototype.CreateLine = function() {
-	 return this.vtbl.CreateLine(arguments[0], arguments[1], arguments[2], this);
-};
-type16_TCollisionObject.prototype.UpdateVectors = function() {
-	 return this.vtbl.UpdateVectors(this);
-};
-type16_TCollisionObject.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type16_TCollisionObject.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type16_TCollisionObject.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
-};
-var vtbl_type14_TFallingObject = {
-	Update: method21_type14_TFallingObject_6_Update, 
-	Render: method21_type14_TFallingObject_6_Render, 
-	Create: method21_type14_TFallingObject_6_Create, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type14_TFallingObject'] = function() {
-	this.attr3_Typ = 0;
-	this.attr6_PosVec = new type4_TVec();
-	this.attr8_SpeedVec = new type4_TVec();
-	this.attr7_MassVec = new type4_TVec();
-	this.attr13_CollisionRect = new type5_TRect();
-	this.attr6_Radius = 0;
-	this.attr10_RealRadius = 0;
-	this.attr4_Info = new GLBArray();
-	this.vtbl = vtbl_type14_TFallingObject;
-	return this;
-	
-};
-window['type14_TFallingObject'].prototype.clone = function() {
-	var other = new type14_TFallingObject();
-	other.attr3_Typ = this.attr3_Typ;
-	other.attr6_PosVec = tryClone(this.attr6_PosVec);
-	other.attr8_SpeedVec = tryClone(this.attr8_SpeedVec);
-	other.attr7_MassVec = tryClone(this.attr7_MassVec);
-	other.attr13_CollisionRect = tryClone(this.attr13_CollisionRect);
-	other.attr6_Radius = this.attr6_Radius;
-	other.attr10_RealRadius = this.attr10_RealRadius;
-	other.attr4_Info = tryClone(this.attr4_Info);
-	other.vtbl = this.vtbl;
-	return other;
-};
-type14_TFallingObject.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type14_TFallingObject.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type14_TFallingObject.prototype.Create = function() {
-	 return this.vtbl.Create(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type14_TFallingObject.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type14_TFallingObject.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type14_TFallingObject.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
-};
-var vtbl_type8_TGameMap = {
-	Update: method14_type8_TGameMap_6_Update, 
-	Render: method14_type8_TGameMap_6_Render, 
-	Create: method14_type8_TGameMap_6_Create, 
-	Empty: method14_type8_TGameMap_5_Empty, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type8_TGameMap'] = function() {
-	this.attr5_Tiles_ref = [new GLBArray()];
-	this.attr5_Width_ref = [0];
-	this.attr6_Height_ref = [0];
-	this.attr6_Scroll = new type4_TVec();
-	this.attr11_ScrollSpeed = new type4_TVec();
-	this.vtbl = vtbl_type8_TGameMap;
-	return this;
-	
-};
-window['type8_TGameMap'].prototype.clone = function() {
-	var other = new type8_TGameMap();
-	other.attr5_Tiles_ref = tryClone(this.attr5_Tiles_ref);
-	other.attr5_Width_ref = tryClone(this.attr5_Width_ref);
-	other.attr6_Height_ref = tryClone(this.attr6_Height_ref);
-	other.attr6_Scroll = tryClone(this.attr6_Scroll);
-	other.attr11_ScrollSpeed = tryClone(this.attr11_ScrollSpeed);
-	other.vtbl = this.vtbl;
-	return other;
-};
-type8_TGameMap.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type8_TGameMap.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type8_TGameMap.prototype.Create = function() {
-	 return this.vtbl.Create(arguments[0], this);
-};
-type8_TGameMap.prototype.Empty = function() {
-	 return this.vtbl.Empty(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], this);
-};
-type8_TGameMap.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type8_TGameMap.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type8_TGameMap.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
-};
-var vtbl_type5_TTile = {
-	Update: method11_type5_TTile_6_Update, 
-	Render: method11_type5_TTile_6_Render, 
-	Create: method11_type5_TTile_6_Create, 
-	IsSolid: method11_type5_TTile_7_IsSolid, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type5_TTile'] = function() {
-	this.attr3_Typ = 0;
-	this.attr1_X = 0;
-	this.attr1_Y = 0;
-	this.attr6_PosVec = new type4_TVec();
-	this.attr4_Info = new GLBArray();
-	this.attr12_RelatedLines = new GLBArray();
-	this.vtbl = vtbl_type5_TTile;
-	return this;
-	
-};
-window['type5_TTile'].prototype.clone = function() {
-	var other = new type5_TTile();
-	other.attr3_Typ = this.attr3_Typ;
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr6_PosVec = tryClone(this.attr6_PosVec);
-	other.attr4_Info = tryClone(this.attr4_Info);
-	other.attr12_RelatedLines = tryClone(this.attr12_RelatedLines);
-	other.vtbl = this.vtbl;
-	return other;
-};
-type5_TTile.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type5_TTile.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type5_TTile.prototype.Create = function() {
-	 return this.vtbl.Create(arguments[0], arguments[1], arguments[2], this);
-};
-type5_TTile.prototype.IsSolid = function() {
-	 return this.vtbl.IsSolid(this);
-};
-type5_TTile.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type5_TTile.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type5_TTile.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
-};
-var vtbl_type5_TRect = {
-	SetPos: method11_type5_TRect_6_SetPos, 
-	SetXY: method11_type5_TRect_5_SetXY, 
-	SetSize: method11_type5_TRect_7_SetSize, 
-	Collision: method11_type5_TRect_9_Collision, 
-	Draw: method11_type5_TRect_4_Draw, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type5_TRect'] = function() {
-	this.attr8_StartVec = new type4_TVec();
-	this.attr5_Width = 0.0;
-	this.attr6_Height = 0.0;
-	this.vtbl = vtbl_type5_TRect;
-	return this;
-	
-};
-window['type5_TRect'].prototype.clone = function() {
-	var other = new type5_TRect();
-	other.attr8_StartVec = tryClone(this.attr8_StartVec);
-	other.attr5_Width = this.attr5_Width;
-	other.attr6_Height = this.attr6_Height;
-	other.vtbl = this.vtbl;
-	return other;
-};
-type5_TRect.prototype.SetPos = function() {
-	 return this.vtbl.SetPos(arguments[0], this);
-};
-type5_TRect.prototype.SetXY = function() {
-	 return this.vtbl.SetXY(arguments[0], arguments[1], this);
-};
-type5_TRect.prototype.SetSize = function() {
-	 return this.vtbl.SetSize(arguments[0], arguments[1], this);
-};
-type5_TRect.prototype.Collision = function() {
-	 return this.vtbl.Collision(arguments[0], this);
-};
-type5_TRect.prototype.Draw = function() {
-	 return this.vtbl.Draw(this);
-};
-type5_TRect.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type5_TRect.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type5_TRect.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
-};
-var vtbl_type4_TVec = {
-	MulVec: method10_type4_TVec_6_MulVec, 
-	DivVec: method10_type4_TVec_6_DivVec, 
-	AddVec: method10_type4_TVec_6_AddVec, 
-	SubVec: method10_type4_TVec_6_SubVec, 
-	SetXY: method10_type4_TVec_5_SetXY, 
-	SetVec: method10_type4_TVec_6_SetVec, 
-	Reverse: method10_type4_TVec_7_Reverse, 
-	Length: method10_type4_TVec_6_Length, 
-	Normalize: method10_type4_TVec_9_Normalize, 
-	NormalVec: method10_type4_TVec_9_NormalVec, 
-	Bounce: method10_type4_TVec_6_Bounce, 
-	Project: method10_type4_TVec_7_Project, 
-	DotProd: method10_type4_TVec_7_DotProd, 
-	Angle: method10_type4_TVec_5_Angle, 
-	ToString_Str: method13_type7_TObject_12_ToString_Str, 
-	Equals: method13_type7_TObject_6_Equals, 
-	ToHashCode: method13_type7_TObject_10_ToHashCode
-};
-window ['type4_TVec'] = function() {
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr4_vlen = 0.0;
-	this.vtbl = vtbl_type4_TVec;
-	return this;
-	
-};
-window['type4_TVec'].prototype.clone = function() {
-	var other = new type4_TVec();
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr4_vlen = this.attr4_vlen;
-	other.vtbl = this.vtbl;
-	return other;
-};
-type4_TVec.prototype.MulVec = function() {
-	 return this.vtbl.MulVec(arguments[0], this);
-};
-type4_TVec.prototype.DivVec = function() {
-	 return this.vtbl.DivVec(arguments[0], this);
-};
-type4_TVec.prototype.AddVec = function() {
-	 return this.vtbl.AddVec(arguments[0], this);
-};
-type4_TVec.prototype.SubVec = function() {
-	 return this.vtbl.SubVec(arguments[0], this);
-};
-type4_TVec.prototype.SetXY = function() {
-	 return this.vtbl.SetXY(arguments[0], arguments[1], this);
-};
-type4_TVec.prototype.SetVec = function() {
-	 return this.vtbl.SetVec(arguments[0], this);
-};
-type4_TVec.prototype.Reverse = function() {
-	 return this.vtbl.Reverse(this);
-};
-type4_TVec.prototype.Length = function() {
-	 return this.vtbl.Length(this);
-};
-type4_TVec.prototype.Normalize = function() {
-	 return this.vtbl.Normalize(this);
-};
-type4_TVec.prototype.NormalVec = function() {
-	 return this.vtbl.NormalVec(this);
-};
-type4_TVec.prototype.Bounce = function() {
-	 return this.vtbl.Bounce(arguments[0], arguments[1], this);
-};
-type4_TVec.prototype.Project = function() {
-	 return this.vtbl.Project(arguments[0], this);
-};
-type4_TVec.prototype.DotProd = function() {
-	 return this.vtbl.DotProd(arguments[0], this);
-};
-type4_TVec.prototype.Angle = function() {
-	 return this.vtbl.Angle(this);
-};
-type4_TVec.prototype.ToString_Str = function() {
-	 return this.vtbl.ToString_Str(this);
-};
-type4_TVec.prototype.Equals = function() {
-	 return this.vtbl.Equals(arguments[0], this);
-};
-type4_TVec.prototype.ToHashCode = function() {
-	 return this.vtbl.ToHashCode(this);
 };
 var vtbl_type7_TObject = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
@@ -6956,6 +6621,6 @@ type10_DataBuffer.prototype.Equals = function() {
 type10_DataBuffer.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var const9_MAIN_GAME = 0, const14_OBJECT_IS_LINE = 1, const19_OBJECT_IS_ROUNDLINE = 2, const19_OBJECT_IS_AIRSTREAM = 3, const18_OBJECT_IS_CHAINSAW = 4, const19_OBJECT_IS_BLACKHOLE = 5, const19_LINE_INFO_ENDPOSVEC = 0, const17_LINE_INFO_VISIBLE = 0, const17_FALLING_IS_PLANET = 1, const20_INFO_PLANET_ROTATION = 0, const16_INFO_PLANET_ZOOM = 1, const8_STEPSIZE = 3, const12_TOOL_IS_LINE = 1, const8_TILESIZE = 32, const13_TILE_IS_EMPTY = 0, const13_TILE_IS_SPAWN = 1, const13_TILE_IS_SOLID = 2, const14_TILE_IS_TARGET = 3, const13_TILE_IS_DESTR = 4, const14_TILE_IS_KILLER = 5, const16_INFO_DESTR_STATE = 0, const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global9_SolidTile = 0, global5_BGSpr = 0, global9_DestrTile = 0, global9_PlanetSpr = 0, global7_LineImg = 0, global9_GameState = 0, global2_mx_ref = [0.0], global2_my_ref = [0.0], global2_ml_ref = [0.0], global2_mr_ref = [0.0], global10_MouseSpeed = new type4_TVec(), global11_ScreenWidth_ref = [0], global12_ScreenHeight_ref = [0], global10_FirstStart = 0, global7_Gravity = new type4_TVec(), global10_CurrentMap = new type8_TGameMap(), global14_FallingObjects = new GLBArray(), global16_CollisionObjects_ref = [new GLBArray()], global14_CreateObjDelay_ref = [0], global6_MaxObj_ref = [0], global13_LastCreateObj = 0, global8_SpawnPos = new type4_TVec(), global9_TargetPos = new type4_TVec(), global12_SelectedTool = 0, global11_Line_Picked = 0, global14_Line_PickedPos = new type4_TVec(), global6_Objs3D = new GLBArray();
+var const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global7_screenx_ref = [0.0], global7_screeny_ref = [0.0], global8_gameover = 0.0, global5_score = 0.0, global6_gameon = 0.0, global7_hiscore = 0.0, global5_scale = 0.0, global4_boom = new GLBArray(), global4_shot = new GLBArray(), global6_rocket = new GLBArray(), global3_ufo = new GLBArray(), global3_plx_ref = [0.0], global3_ply_ref = [0.0], global4_objx = new GLBArray(), global4_objy = new GLBArray(), global4_objn = new GLBArray(), global4_scrn = 0.0, global4_cave = new GLBArray(), global4_fuel = new GLBArray(), global4_bomb = new GLBArray(), global4_tank = 0.0, global9_colormode = 0.0, global7_flicker = 0.0, global8_name_Str = "", global5_q_sin = new GLBArray(), global5_q_cos = new GLBArray(), global5_scale = 0.0, global8_gameover = 0.0, global4_scrn = 0.0, global4_tank = 0.0, global9_colormode = 0.0, global4_scrn = 0.0, global4_cave = new GLBArray(), global5_score = 0.0, global8_name_Str = "", global7_flicker = 0.0, global6_Objs3D = new GLBArray(), global1_y = 0.0, global5_dtime = 0.0;
 window['initStatics'] = function() {}
 for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();

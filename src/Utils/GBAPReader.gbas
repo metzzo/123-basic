@@ -1,0 +1,93 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Tuesday, November 15, 2011
+// IDE Version: 10.159
+GLOBAL GFX_WIDTH	= 640
+GLOBAL GFX_HEIGHT	= 480
+GLOBAL FULLSCREEN%	= FALSE
+GLOBAL FRAMERATE%	= 60
+
+GLOBAL APPNAME$ 	= "GLBasic Program"
+GLOBAL DEBUGMODE%	= TRUE
+GLOBAL CONSOLE		= TRUE
+GLOBAL STRICT		= TRUE
+GLOBAL USRDEF_VERS$ = "0.00001"
+
+GLOBAL GbapOutput$, GbapPath$, GbapName$
+FUNCTION ReadGBAP$: Path$, Name$
+	GbapName$ = Name$
+
+	Ignore = FALSE
+	GbapOutput$ = ""
+	LOCAL x AS XML
+	LOCAL proto AS XMLEvent
+	proto = GBAPReader
+	GbapPath$ = Path$
+	x.ReadXML(Path$+Name$, proto)
+
+
+	LOCAL F% = GENFILE()
+	OPENFILE(F, "Tmp/tmp.txt", 0)
+	WRITESTR F, GbapOutput$
+	CLOSEFILE F
+
+
+	RETURN GbapOutput$
+ENDFUNCTION
+
+GLOBAL Ignore% = FALSE
+
+FUNCTION GBAPReader: Name$, Attributes[] AS xmlAttribute
+	SELECT Name$
+		CASE "PLATFORM"
+			LOCAL Active% = FALSE
+			FOREACH Att IN Attributes[]
+				IF Att.Name$ = "NAME" AND (Att.Value$ = "HTML5" OR Att.Value$ = "WIN32") THEN Active = TRUE
+			NEXT
+
+			IF Active
+				FOREACH Att IN Attributes[]
+					SELECT Att.Name$
+						CASE "FULLSCREEN"
+							FULLSCREEN = INTEGER(Att.Value$)
+						CASE "RESX"
+							GFX_WIDTH = INTEGER(Att.Value$)
+						CASE "RESY"
+							GFX_HEIGHT = INTEGER(Att.Value$)
+						CASE "FRAMERATE"
+							FRAMERATE = INTEGER(Att.Value$)
+					ENDSELECT
+				NEXT
+			ENDIF
+		CASE "GLBASIC"
+			FOREACH Att IN Attributes[]
+				SELECT Att.Name$
+					CASE "APP_NAME"
+						APPNAME$ = Att.Value$
+					CASE "CONSOLE_PRG"
+						CONSOLE = INTEGER(Att.Value$)
+					CASE "DEBUG"
+						DEBUGMODE = INTEGER(Att.Value$)
+					CASE "USERDEF_VERSION"
+						USRDEF_VERS$ = Att.Value$
+					CASE "STRICT"
+						STRICT = INTEGER(Att.Value$)
+				ENDSELECT
+			NEXT
+		CASE "EDITFILES"
+			Ignore = TRUE
+		CASE "SRCFILES"
+			Ignore = FALSE
+		CASE "FILE"
+			IF Ignore = FALSE
+				LOCAL Att AS xmlAttribute
+				Att  = Attributes[0]
+
+				IF LEN(Att.Value$) > 5 AND RIGHT$(Att.Value$,5) = ".gbas"
+					//source
+					GbapOutput$ = GbapOutput$ + "//$$RESETFILE"+Att.Value$+"\n"
+					GbapOutput$ = GbapOutput$ + LoadFile$(GbapPath$+Att.Value$) + "\n"
+				ENDIF
+			ENDIF
+	ENDSELECT
+ENDFUNCTION

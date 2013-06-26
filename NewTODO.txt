@@ -1,0 +1,18 @@
+
+First Release
+	DFolgende Tests müssen ohne Probleme auf Chrome und FF gehen:
+		- ddgui
+			- Keine Schrift 
+		- JumpIt
+			- Kollisionsabfrage fehlerhaft (vllt was mit Arrayzugriff?)
+			- Buttons falsch positioniert
+		- KeydefMenu
+			- GETNUMJOYSTICKS not defined fehlermeldung
+		- Mem2Sprite
+			- Nichts zu sehen.
+		- Pong
+			- Keine Hintergrundmusik (pongtune.mp3)
+		- Scramble
+			- wtf
+		
+	Tutorial für die Installation schreiben

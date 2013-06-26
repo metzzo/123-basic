@@ -48,8 +48,6 @@ DIM gqSin[360]
 FOR i=0 TO 359; gqSin[i] = SIN(i); NEXT
 
 ?IFNDEF HTML5
-
-
 GLOBAL FuncStack$[]
 DIMPUSH FuncStack$[], "GLB_ON_LOOP"
 WHILE TRUE

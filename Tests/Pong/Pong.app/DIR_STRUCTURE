@@ -1,4 +1,3 @@
-folder:/Media
 static:/back.bmp
 static:/ball.bmp
 static:/bat.bmp
@@ -10,7 +9,7 @@ static:/Pong.exe
 static:/pong.wav
 static:/pongtune.mp3
 static:/smalfont.bmp
-var:compileTime=2012-06-12 21:49:53
+var:compileTime=2013-06-26 13:19:49
 var:userDefVersion=000.001
 var:hostId=290816d5
 var:viewMode=2d

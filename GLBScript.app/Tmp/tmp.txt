@@ -1,977 +1,860 @@
-//$$RESETFILE.\Elefantastic.gbas
+//$$RESETFILE.\Scramble.gbas
 // --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
+// Project:
+// Start: Tuesday, May 16, 2006
+// IDE Version: 3.131
+
+GLOBAL screenx, screeny, gameover, score, gameon, hiscore, scale
+GLOBAL boom[], shot[], rocket[], ufo[], plx, ply, objx[], objy[], objn[]
+GLOBAL scrn, cave[], fuel[], bomb[], tank, colormode, flicker
+LOCAL vel, delta, oldscrn, dtime, newbomb, newshot, reload
+GLOBAL name$
+LOCAL speedlim, mscale, life, i, facspeed
+GETSCREENSIZE screenx, screeny
+hiscore = 10000
+flicker=FALSE
+colormode=TRUE
+
+GLOBAL q_sin[], q_cos[]
+DIM q_sin[360]
+DIM q_cos[360]
+FOR i=0 TO 359
+	q_sin[i] = SIN(i)
+	q_cos[i] = COS(i)
+NEXT
+
+DIM objn[20]
+DIM objx[20][20]
+DIM objy[20][20]
+DIM cave[0][2] // top, bottom
+
+DIM fuel[0][2]   // x,typ(0mystery,1fuel)
+DIM rocket[0][2] // x,y
+DIM bomb[0][3] // x,y,vy
+DIM shot[0][2] // x,y
+DIM boom[0][3] // x,y,scale
+DIM ufo[0][3]   // x_in_level,x,y,type(0ufo,1comet) Get y from ufo_xy function
+
+LOADSPRITE "line.bmp", 0
+
+LOADSOUND "sfx/bomb.wav", 0, 4
+LOADSOUND "sfx/implosion.wav", 1, 4
+LOADSOUND "sfx/shot.wav", 2, 4
+LOADSOUND "sfx/fuel.wav", 3, 2
+LOADSOUND "sfx/hahaha.wav",4,1
+
+// center point = 0.5 / 1.0
+
+// ship: >
+i=0
+objn[i]=7
+objx[i][0] =.2; objy[i][0]=1
+objx[i][1] =.1; objy[i][1]=0.5
+objx[i][2] =.4; objy[i][2]=0.8
+objx[i][3] =1.1;objy[i][3]=1.0
+objx[i][4] =.1; objy[i][4]=1.2
+objx[i][5] =.2; objy[i][5]=1
+objx[i][6] =.5; objy[i][6]=1
+
+// bomb: v
+i=1
+objn[i]=5
+objx[i][0] = .3; objy[i][0]=.3
+objx[i][1] = .5; objy[i][1]=1
+objx[i][2] = .7; objy[i][2]=.3
+objx[i][3] = .5; objy[i][3]=.5
+objx[i][4] = .3; objy[i][4]=.3
 
 
-SETCURRENTDIR("Media") // go to media files
-SYSTEMPOINTER TRUE
-
-CONSTANT MAIN_GAME = 0
-
-GLOBAL SolidTile% = LoadSpr("solidtile")
-GLOBAL BGSpr% = LoadSpr("bg")
-GLOBAL DestrTile% = LoadAni("destrtile", 32, 32)
-GLOBAL PlanetSpr% = LoadSpr("planet1")
-GLOBAL LineImg% = LoadSpr("line")
-
-
-GLOBAL GameState% = MAIN_GAME
-
-GLOBAL mx, my, ml, mr
-GLOBAL MouseSpeed AS TVec
-
-GLOBAL ScreenWidth%, ScreenHeight%
-GLOBAL FirstStart% = TRUE
-GETSCREENSIZE ScreenWidth, ScreenHeight
+// ufo: <->
+i=2
+objn[i]=6
+objx[i][0]=.2; objy[i][0]=1.2
+objx[i][1]=0; objy[i][1]=.9
+objx[i][2]=.5; objy[i][2]=.7
+objx[i][3]=1; objy[i][3]=.9
+objx[i][4]=.8; objy[i][4]=1.2
+objx[i][5]=.2; objy[i][5]=1.2
 
 
-GLOBAL Gravity AS TVec
-Gravity = CreateVec(0, .75)
+// boom: *
+i=3
+objn[i]=6
+objx[i][0] = .3; objy[i][0]=1.5
+objx[i][1] = 0;  objy[i][1]=.5
+objx[i][2] = 1;  objy[i][2]=1.5
+objx[i][3] = -.2;objy[i][3]=1
+objx[i][4] = 1.2;objy[i][4]=.7
+objx[i][5] = .3; objy[i][5]=1.5
+
+// rocket: ^
+i=4
+objn[i]=5
+objx[i][0] = .2; objy[i][0]=1
+objx[i][1] = .5; objy[i][1]=0
+objx[i][2] = .8; objy[i][2]=1
+objx[i][3] = .5; objy[i][3]=.9
+objx[i][4] = .2; objy[i][4]=1
+
+// shot: -
+i=5
+objn[i]=2
+objx[i][0] = 0; objy[i][0]=1
+objx[i][1] = 1; objy[i][1]=1
+
+//        ___
+// score: |X|
+i=6
+objn[i]=6
+objx[i][0] = 0; objy[i][0]=0
+objx[i][1] = 1.0; objy[i][1]=1.0
+objx[i][2] = 1.0; objy[i][2]=0
+objx[i][3] = 0; objy[i][3]=1.0
+objx[i][4] = 0; objy[i][4]=0
+objx[i][5] = 1.0; objy[i][5]=0
+
+//        ^
+//       [ ]
+// fuel: / \.
+i=7
+objn[i]=9
+objx[i][0]=.1; objy[i][0]=1
+objx[i][1]=.3; objy[i][1]=.7
+objx[i][2]=0 ; objy[i][2]=.7
+objx[i][3]=0 ; objy[i][3]=.1
+objx[i][4]=.5; objy[i][4]=.0
+objx[i][5]=1 ; objy[i][5]=.1
+objx[i][6]=1 ; objy[i][6]=.7
+objx[i][7]=.7; objy[i][7]=.7
+objx[i][8]=.9; objy[i][8]=1
 
 
-?IFNDEF HTML5
-WHILE TRUE
-	GOSUB GLB_ON_LOOP
-WEND
-?ENDIF
-SUB GLB_ON_LOOP:
-	ALPHAMODE -1
-	LOCAL ox = mx, oy = my
-	MOUSESTATE mx, my, ml, mr
-	MouseSpeed.X = mx - ox
-	MouseSpeed.Y = my - oy
+	LOADBMP "backgnd.bmp"
+	INIOPEN "config.ini"
+	name$ = INIGET$("player1", "name")
+	PRINT "Enter your name:", 100, 120
+	//INPUT name$, 100, 140
+	name$ = "robi"
+restart:
+	LoadLevel()
+	scale = 20; mscale = 30
 
-	STRETCHSPRITE BGSpr, 0, 0, ScreenWidth, ScreenHeight
+	WideScroller("readme-REALLY-DO!.txt")
 
-	IF FirstStart
-		SELECT GameState
-			CASE MAIN_GAME
-				GOSUB InitMainGame
-			DEFAULT
-				DEBUG "Unknown Gamestate "+GameState+"\n"
-		ENDSELECT
-		FirstStart = FALSE
-	ELSE
-		SELECT GameState
-			CASE MAIN_GAME
-				GOSUB UpdateMainGame
-				GOSUB RenderMainGame
-			DEFAULT
-				DEBUG "Unknown Gamestate "+GameState+"\n"
-		ENDSELECT
-	ENDIF
+	// Prepare Game
+	// -----------------------------------
+	LoadLevel()
+	tank = 100
+	life = 3
+	scrn=0
+	plx=scrn
+	ply = (cave[0][1]+cave[0][0])/2
+	scale = 20; mscale = 30
+	speedlim = 12
+	gameover = FALSE
+	reload   = FALSE
+	score    = 0
 
-	SHOWSCREEN
-ENDSUB
-
-SUB GLB_ON_LOADING:
-	PRINT "Game is loading...", 10, 10
-	SHOWSCREEN
-ENDSUB
+	facspeed = 0.7/8000 // player speed
 
 
-//$$RESETFILE.\CollisionObject.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
+	newshot = GETTIMERALL()
+	newbomb = GETTIMERALL()
+	gameon  = GETTIMERALL()
 
-CONSTANT OBJECT_IS_LINE = 1
-CONSTANT OBJECT_IS_ROUNDLINE = 2
-CONSTANT OBJECT_IS_AIRSTREAM = 3
-CONSTANT OBJECT_IS_CHAINSAW = 4
-CONSTANT OBJECT_IS_BLACKHOLE = 5
+	// MAINGAME
+	// -----------------------------------
+	WHILE TRUE
+		// game won
+		IF scrn>=1200
+			LoadLevel()
+			scrn=0
+			plx=0
+			ply = cave[0][1]-1
+		ENDIF
 
-CONSTANT LINE_INFO_ENDPOSVEC = 0
-CONSTANT LINE_INFO_VISIBLE = 0
+		dtime = GETTIMER()*5
 
-TYPE TCollisionObject
-	Typ%
-	PosVec AS TVec
-	NormalVec AS TVec
-	DirVec AS TVec
-	CollisionRect AS TRect
-	Thickness% = 1
+		Show(dtime, FALSE)
 
-	Info[]
-	InfoVec[] AS TVec
+		IF gameon<=GETTIMERALL()
+			IF (UserInput(4)OR KEY(29)) AND reload=FALSE AND newbomb<GETTIMERALL()
+				newbomb = GETTIMERALL() + 500
+				dropbomb(plx, ply)
+				reload = TRUE
+			ENDIF
 
-	FUNCTION Update:
-		SELECT self.Typ
-			CASE OBJECT_IS_LINE
+			IF UserInput(3) AND newshot<GETTIMERALL()
+				newshot = GETTIMERALL() + 200
+				addshot(plx,ply)
+			ENDIF
 
-			CASE OBJECT_IS_ROUNDLINE
+			IF UserInput(4) = FALSE THEN reload=FALSE
 
-			CASE OBJECT_IS_AIRSTREAM
+			// get 220 blocks with 100 tank
+			// scrolling = dtime/4000
+			//
+			tank = tank - dtime/8800
+			oldscrn = scrn
+			scrn=scrn + dtime/2000 // scroll speed
+			IF INTEGER(oldscrn) > INTEGER(scrn) THEN score=score+10
 
-			CASE OBJECT_IS_CHAINSAW
-
-			CASE OBJECT_IS_BLACKHOLE
-
-			DEFAULT
-				DEBUG "Unknown Collision Object "+self.Typ+"\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION Render:
-		//self.CollisionRect.Draw()
-		SELECT self.Typ
-			CASE OBJECT_IS_LINE
-				IF self.Info[LINE_INFO_VISIBLE]
-					STARTPOLY LineImg,2
-					LOCAL a = self.DirVec.Angle()+90
-					LOCAL s = SIN(a), c = COS(a)
-					LOCAL col = 0
-					POLYVECTOR self.PosVec.X+c*self.Thickness, self.PosVec.Y+s*self.Thickness,0,0,col
-					POLYVECTOR self.PosVec.X-c*self.Thickness, self.PosVec.Y-s*self.Thickness,1,0,col
-					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X+c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y+s*self.Thickness,1,0,col
-					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X-c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y-s*self.Thickness,1,1,col
-					ENDPOLY
-				ENDIF
-				//DRAWLINE self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, self.InfoVec[LINE_INFO_ENDPOSVEC].X + CurrentMap.Scroll.X, self.InfoVec[LINE_INFO_ENDPOSVEC].Y + CurrentMap.Scroll.Y, RGB(255,0,0)
-			CASE OBJECT_IS_ROUNDLINE
-
-			CASE OBJECT_IS_AIRSTREAM
-
-			CASE OBJECT_IS_CHAINSAW
-
-			CASE OBJECT_IS_BLACKHOLE
-
-			DEFAULT
-				DEBUG "Unknown Collision Object "+self.Typ+"\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION DoCollision: Obj AS TFallingObject, Pen, V AS TVec
-		SELECT self.Typ
-			CASE OBJECT_IS_LINE
-				LOCAL T AS TVec
-				T = self.NormalVec
-				T.MulVec(Pen)
-				Obj.PosVec.AddVec(T)
-				T = V
-				T.Normalize()
-				LOCAL S AS TVec
-				S = V
-				S.NormalVec()
-				Obj.SpeedVec.Bounce(S, T)
-			CASE OBJECT_IS_ROUNDLINE
-
-			CASE OBJECT_IS_AIRSTREAM
-
-			CASE OBJECT_IS_CHAINSAW
-
-			CASE OBJECT_IS_BLACKHOLE
-
-			DEFAULT
-				DEBUG "Unknown Collision Object "+self.Typ+"\n"
-		ENDSELECT
-
-	ENDFUNCTION
-
-	FUNCTION GetPen: Obj AS TFallingObject, BYREF Pen, V AS TVec
-		FindIntersection(Obj, V)
-
-		Pen = (Obj.Radius + self.Thickness) - V.Length()
-	ENDFUNCTION
-
-	FUNCTION FindIntersection: Obj AS TFallingObject, ResVec AS TVec
-		LOCAL V3 AS TVec
-		V3 = Obj.PosVec
-		V3.SubVec(self.PosVec)
-
-		LOCAL NormalizedMyVec AS TVec
-		NormalizedMyVec = self.DirVec
-		NormalizedMyVec.Normalize()
-
-		IF V3.DotProd(NormalizedMyVec) < 0
-			ResVec.SetVec(V3)
-		ELSE
-			LOCAL MyPos AS TVec
-			MyPos = self.PosVec
-			MyPos.AddVec(self.DirVec)
-
-			LOCAL V4 AS TVec
-			V4 = Obj.PosVec
-			V4.SubVec(MyPos)
-
-			IF V4.DotProd(NormalizedMyVec) >  0
-				ResVec.SetVec(V4)
+			vel = speedlim * UserInput(0) // [0;1]
+			vel = vel * dtime*facspeed
+			plx = plx+dtime/3000 + vel
+			// no fuel - dive
+			IF tank>0
+				vel = speedlim * UserInput(1) // [0;1]
+				vel = vel * dtime*facspeed
+				ply = ply+vel
 			ELSE
-				V3.Project(self.NormalVec)
-				ResVec.SetVec(V3)
+				ply = ply + dtime*facspeed
+				tank=0
 			ENDIF
-		ENDIF
-	ENDFUNCTION
+			// zoom
+			mscale = mscale + UserInput(2)*dtime*.05
+			IF mscale < 20 THEN mscale=20
+			IF mscale>70 THEN mscale=70
+			scale = scale + (mscale-scale)*dtime/2000
 
-
-	FUNCTION CreateLine: StartVec AS TVec, EndVec AS TVec, Visible% = FALSE
-		self.Typ = OBJECT_IS_LINE
-		self.PosVec = StartVec
-		DIM self.InfoVec[1]
-		self.InfoVec[LINE_INFO_ENDPOSVEC] = EndVec
-		DIM self.Info[1]
-		self.Info[LINE_INFO_VISIBLE] = Visible
-
-		self.UpdateVectors()
-		DIMPUSH CollisionObjects[], self
-	ENDFUNCTION
-
-	FUNCTION UpdateVectors:
-		SELECT self.Typ
-			CASE OBJECT_IS_LINE
-				self.DirVec.SetVec(self.InfoVec[LINE_INFO_ENDPOSVEC])
-				self.DirVec.SubVec(self.PosVec)
-
-
-				self.CollisionRect.SetPos(self.PosVec)
-				LOCAL P AS TVec
-				P = self.InfoVec[LINE_INFO_ENDPOSVEC]
-				P.SubVec(self.PosVec)
-				self.CollisionRect.SetSize(P.X, P.Y)
-			CASE OBJECT_IS_ROUNDLINE
-
-			CASE OBJECT_IS_AIRSTREAM
-
-			CASE OBJECT_IS_CHAINSAW
-
-			CASE OBJECT_IS_BLACKHOLE
-
-			DEFAULT
-				DEBUG "Unknown Collision Object "+self.Typ+"\n"
-		ENDSELECT
-
-		self.NormalVec = self.DirVec
-		self.NormalVec.NormalVec()
-		self.NormalVec.Normalize()
-
-	ENDFUNCTION
-ENDTYPE
-
-//$$RESETFILE.\FallingObject.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
-
-CONSTANT FALLING_IS_PLANET% = 1
-
-CONSTANT INFO_PLANET_ROTATION% = 0
-CONSTANT INFO_PLANET_ZOOM% = 1
-
-TYPE TFallingObject
-	Typ%
-
-	PosVec AS TVec
-	SpeedVec AS TVec
-	MassVec AS TVec
-	CollisionRect AS TRect
-
-	Radius%; RealRadius%
-	Info[]
-
-	FUNCTION Update:
-		self.SpeedVec.AddVec(self.MassVec)
-		IF self.SpeedVec.Length() > 12
-		//	self.SpeedVec.Normalize()
-		//	self.SpeedVec.MulVec(12)
-		ENDIF
-		//self.PosVec.AddVec(self.SpeedVec)
-
-		CONSTANT STEPSIZE = 3.0
-		LOCAL SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
-		LOCAL SubSpeed AS TVec
-		SubSpeed = self.SpeedVec
-		SubSpeed.DivVec(SubT)
-
-		FOR i = 1 TO SubT
-			self.PosVec.AddVec(SubSpeed)
-			self.CollisionRect.SetXY(self.PosVec.X - self.Radius*2, self.PosVec.Y - self.Radius*2)
-
-			LOCAL Pen = -1, V AS TVec, Obj% = -1
-			FOR j = 0 TO LEN(CollisionObjects[])-1
-				ALIAS O AS CollisionObjects[j]
-				LOCAL TmpPen, TmpV AS TVec
-				IF self.CollisionRect.Collision(O.CollisionRect)
-					O.GetPen(self, TmpPen, TmpV)
-					// DEBUG TmpPen+"\n"
-					IF TmpPen >= Pen AND TmpPen >= 0
-						Pen = TmpPen
-						V = TmpV
-						Obj = j
-					ENDIF
+			// player crashed
+			IF gameover
+				life = life - 1
+				PLAYSOUND( 4,0,1)
+				gameon = GETTIMERALL() + 1500
+				IF life<0
+					GETFONTSIZE plx, ply
+					PRINT "GAME OVER", screenx/2 - plx*4.5,100
+					SHOWSCREEN
+					WHILE UserInput(3) = 0; HIBERNATE; WEND
+					GOTO restart
 				ENDIF
-			NEXT
-
-			IF Pen >= 0 AND Obj <> -1
-				// DEBUG "lol "+V.X+" "+V.Y+"\n"
-				CollisionObjects[Obj].DoCollision(self, INTEGER(Pen-1), V)
-				SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
-				SubSpeed = self.SpeedVec
-				SubSpeed.DivVec(SubT)
-				i = 1
 			ENDIF
+		ELSE
+			delta = (gameon - GETTIMERALL())/1000
+			plx = MAX(1, plx - dtime/1000*delta)
+			scrn= MAX(1, scrn- dtime/1000*delta)
+			ply = bottomat(plx) - MIN(7, (bottomat(plx) - ceilingat(plx)))/2
+			gameover=FALSE
+			tank=100
+		ENDIF
+
+		IF flicker
+			ALPHAMODE -.3
+			y = MOD(GETTIMERALL()/50, 7)*screeny/7
+			DRAWRECT 0, y, screenx, screeny/7, 0
+			ALPHAMODE 0
+		ENDIF
+
+		// score
+		ALPHAMODE .7
+		hiscore = MAX(score, hiscore)
+		PRINT FORMAT$(6, 0, score), screenx/10, screeny/10
+		PRINT FORMAT$(6, 0, hiscore), screenx/2-screenx/10, screeny/10
+		// fuel
+		Line(screenx*.1, screeny*.85, screenx*.8*tank*.01, screeny*.85, RGB(0x00,0xff,0x00))
+		IF colormode THEN Line(screenx*.8*tank*.01, screeny*.85, screenx*.8, screeny*.85, RGB(0xff,0x00,0x00))
+
+		FOR i=1 TO life
+			thing(0, i*32+32, screeny*.15, RGB(0x00, 0x80, 0xff), 16,0)
 		NEXT
 
-		SELECT self.Typ
-			CASE FALLING_IS_PLANET
-				INC self.Info[INFO_PLANET_ROTATION], self.SpeedVec.Length()
-			DEFAULT
-				DEBUG "Unknown falling object\n"
-		ENDSELECT
+		SHOWSCREEN
+	WEND
 
-		IF self.PosVec.Y > (CurrentMap.Height+32)*TILESIZE
+
+
+FUNCTION UserInput: tp
+LOCAL speedlim, rv
+	speedlim = 12 // max movement of mouse
+	SELECT tp
+		CASE 0; rv = MOUSEAXIS(0)/speedlim + KEY(205)-KEY(203)+GETJOYX(0)
+		CASE 1; rv = MOUSEAXIS(1)/speedlim + KEY(200)-KEY(208)+GETJOYY(0)
+		CASE 2; rv = MOUSEAXIS(2)          + KEY(52)-KEY(51)+GETJOYZ(0)
+		CASE 3; rv = MOUSEAXIS(3) + KEY(42)+GETJOYBUTTON(0,0)
+		CASE 4; rv = MOUSEAXIS(4) + KEY(29)+GETJOYBUTTON(0,1)
+	ENDSELECT
+	IF rv>1  THEN rv=1
+	IF rv<-1 THEN rv=-1
+RETURN rv
+ENDFUNCTION
+
+FUNCTION SINq: a
+	IF a<0 THEN a =180-a
+	RETURN q_sin[MOD(a,360)]
+ENDFUNCTION
+
+FUNCTION COSq: a
+	IF a<0 THEN a=-a
+	RETURN q_cos[MOD(a,360)]
+ENDFUNCTION
+
+
+// -----------------------------------------
+// Show everything and move it all
+// -----------------------------------------
+FUNCTION Show: dtime, isdemo
+LOCAL sc, offx, offy, i, j, col, x, y, phi, sight, bsight
+GLOBAL scale, gameover, scrn
+
+
+	// F key
+	IF KEY(33)
+		WHILE KEY(33); WEND
+		flicker = 1-flicker
+	ENDIF
+	// C key
+	IF KEY(46)
+		WHILE KEY(46); WEND
+		colormode = 1-colormode
+	ENDIF
+
+
+	sc = scale
+	offx = scrn*sc - screenx/2
+	offy = sc-screeny*.5
+	col=RGB(0xff, 0x80, 0x00)
+	sight = INTEGER(30 + scrn)
+	bsight= INTEGER(scrn - 30)
+
+	FOR i=MAX(0, INTEGER(scrn-16)) TO MIN(sight, BOUNDS(cave[],0)-2)
+		Line(i*sc-offx, cave[i][0]*sc-offy, (i+1)*sc-offx, cave[i+1][0]*sc-offy, col)
+		Line(i*sc-offx, cave[i][1]*sc-offy, (i+1)*sc-offx, cave[i+1][1]*sc-offy, col)
+
+		Line(i*sc-offx, cave[i][1]*sc-offy, i*sc-offx, (cave[i][1]+4)*sc-offy, col)
+		y=(cave[i][1] + cave[i+1][1])/2
+		Line((i+.5)*sc-offx, y*sc-offy, (i+.5)*sc-offx, (y+2)*sc-offy, col)
+	NEXT
+
+	// ufos/comets
+	MoveUfos()
+	FOR i=0 TO BOUNDS(ufo[],0)-1
+		x = ufo[i][1]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = ufo[i][2]
+			phi = 0
+			IF ufo[i][3] = 1
+				phi = -GETTIMERALL()*.07
+			ELSE
+				phi = SIN(GETTIMERALL()*20)*15
+			ENDIF
+			thing(2, x*sc-offx, y*sc-offy, col, sc, phi)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+
+
+@fuels:
+	// fuel depots
+	col = RGB(0x80, 0xff, 0x00)
+	FOR i=0 TO BOUNDS(fuel[],0)-1
+		x = fuel[i][0]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = bottomat(x)
+			thing(6+fuel[i][1], x*sc-offx, y*sc-offy, col, sc, 0)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+@rockets:
+	col = RGB(0xff, 0xff, 0x00)
+	FOR i=0 TO BOUNDS(rocket[],0)-1
+		x = rocket[i][0]
+		IF x>sight THEN BREAK
+		IF x>bsight
+			y = rocket[i][1]
+			IF (x<plx+MOD(x-2,10)/5 OR x-plx<(y-ply)/2 OR y<bottomat(x)-.01)
+				DEC y, dtime/1500
+				IF y<ceilingat(x)
+					rocket[i][0] = 0
+					rocket[i][1] = 10000
+					IF isdemo=FALSE THEN addboom(x,y)
+				ELSE
+					rocket[i][1] = y
+				ENDIF
+			ENDIF
+			thing(4, x*sc-offx, y*sc-offy, col, sc, 0)
+			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
+		ENDIF
+	NEXT
+@bombs:
+	// bombs
+	col = RGB(0xf0, 0xf0, 0xf0)
+	FOR i=0 TO BOUNDS(bomb[],0)-1
+		bomb[i][2] = bomb[i][2] + dtime/2500
+		bomb[i][1] = bomb[i][1] + dtime * bomb[i][2]/1200
+		bomb[i][0]  =bomb[i][0] + dtime/1800
+		phi = ATAN(-.5, bomb[i][2])
+		thing(1, bomb[i][0]*sc-offx, bomb[i][1]*sc-offy, col, sc, phi)
+		y = bottomat(bomb[i][0])
+
+		IF impact(bomb[i][0], bomb[i][1]) OR bomb[i][1] > y
+			addboom(bomb[i][0], bomb[i][1])
+			DIMDEL bomb[], i
+		ENDIF
+	NEXT
+@shots:
+	// shots
+	FOR i=0 TO BOUNDS(shot[],0)-1
+		y = shot[i][1]
+		x = shot[i][0]
+		shot[i][0] = x+dtime/500
+		IF impact(x, y) OR x>sight OR y<ceilingat(x) OR y>bottomat(x)
+			IF isdemo=FALSE THEN addboom(x,y)
+			DIMDEL shot[], i
+			DEC i,1
+		ENDIF
+		thing(5, x*sc-offx, y*sc-offy, col, sc, 0)
+	NEXT
+@player:
+	// player
+	col = RGB(0x00, 0x80, 0xff)
+	thing(0, plx*sc-offx, ply*sc-offy, col, sc, 0)
+@booms:
+	// boom
+	FOR i=0 TO BOUNDS(boom[],0)-1
+		boom[i][2] = boom[i][2] + dtime/1000
+		IF boom[i][2]>3
+			DIMDEL boom[], i
+			i=i-1
+		ELSE
+			col = RGB(0xff, 0xff - boom[i][2]/3*255, 0x00)
+			thing(3, boom[i][0]*sc-offx, boom[i][1]*sc-offy, col, sc*boom[i][2], 0.7*GETTIMERALL())
+		ENDIF
+	NEXT
+
+	IF col_wall(plx, ply) THEN gameover=TRUE
+ENDFUNCTION
+
+// does shot impact? Make boom, return true
+FUNCTION impact: shx,shy
+GLOBAL tank
+LOCAL x, y, i
+
+	// ufo
+	FOR i=0 TO BOUNDS(ufo[],0)-1
+		x = ufo[i][1]
+		y = ufo[i][2]
+		IF col_thth(shx, shy, x, y)
+			IF ufo[i][3] = 0
+				INC score, 100
+				DIMDEL ufo[], i
+			ENDIF
 			RETURN TRUE
 		ENDIF
-	ENDFUNCTION
+		IF x>shx THEN BREAK
+	NEXT
 
-	FUNCTION Render:
-		//self.CollisionRect.Draw()
-		SELECT self.Typ
-			CASE FALLING_IS_PLANET
-				LOCAL z = self.Info[INFO_PLANET_ZOOM]
-				//DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
-				LOCAL a = self.Radius * (z*4) + self.RealRadius*z
-				ROTOZOOMSPRITE PlanetSpr, self.PosVec.X + CurrentMap.Scroll.X-a, self.PosVec.Y + CurrentMap.Scroll.Y-a, self.Info[INFO_PLANET_ROTATION], z
-
-			DEFAULT
-				DEBUG "Unknown falling object\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION Create: Typ%, Radius, X, Y
-		self.Typ = Typ
-		self.PosVec.SetXY(X, Y)
-		self.Radius = Radius
-		self.MassVec = Gravity
-		self.MassVec.MulVec(Radius/50)
-
-		SELECT self.Typ
-			CASE FALLING_IS_PLANET
-				DIM self.Info[2]
-				LOCAL sx%, sy%
-				GETSPRITESIZE PlanetSpr, sx%, sy%
-				LOCAL m = MAX(sx, sy)
-				self.RealRadius = m/2
-				self.Info[INFO_PLANET_ZOOM] = Radius / m * 2
-
-				LOCAL z = self.Info[INFO_PLANET_ZOOM]
-				LOCAL tmp AS TVec
-				tmp.SetXY(Radius*z*2,  Radius*z*2)
-				self.PosVec.SubVec(tmp)
-
-				self.CollisionRect.SetSize(Radius*4, Radius*4)
-			DEFAULT
-				DEBUG "Unknown falling object\n"
-		ENDSELECT
-
-		DIMPUSH FallingObjects[], self
-	ENDFUNCTION
-ENDTYPE
-
-
-
-//$$RESETFILE.\MainGame.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
-
-GLOBAL CurrentMap AS TGameMap
-
-GLOBAL FallingObjects[] AS TFallingObject
-GLOBAL CollisionObjects[] AS TCollisionObject
-
-GLOBAL CreateObjDelay%, MaxObj%, LastCreateObj%
-GLOBAL SpawnPos AS TVec
-GLOBAL TargetPos AS TVec
-
-CONSTANT TOOL_IS_LINE = 1
-
-GLOBAL SelectedTool% = TOOL_IS_LINE
-GLOBAL Line_Picked%, Line_PickedPos AS TVec
-
-SUB UpdateMainGame:
-	IF GETTIMERALL() - LastCreateObj >= CreateObjDelay OR LastCreateObj = 0
-		IF LEN(FallingObjects[]) <= MaxObj
-			LOCAL FO AS TFallingObject
-			FO.Create(FALLING_IS_PLANET, 12, SpawnPos.X, SpawnPos.Y)
-			LastCreateObj = GETTIMERALL()
-		ENDIF
-	ENDIF
-
-	IF NOT IsFixTool()
-		IF ml
-			CurrentMap.Scroll.AddVec(MouseSpeed)
-			CurrentMap.ScrollSpeed = MouseSpeed
-		ELSE
-			CurrentMap.ScrollSpeed.MulVec(.9)
-			CurrentMap.Scroll.AddVec(CurrentMap.ScrollSpeed)
-		ENDIF
-	ENDIF
-
-	SELECT SelectedTool
-		CASE TOOL_IS_LINE
-			IF ml AND NOT Line_Picked
-				Line_Picked = TRUE
-				Line_PickedPos = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
-			ELSEIF Line_Picked AND NOT ml
-				Line_Picked = FALSE
-				//SelectedTool = 0
-
-				LOCAL l AS TCollisionObject
-				LOCAL b AS TVec
-				b = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
-				l.CreateLine(Line_PickedPos, b, TRUE)
+	// fuel depots
+	FOR i=0 TO BOUNDS(fuel[],0)-1
+		x = fuel[i][0]
+		IF col_thth(shx, shy, x, bottomat(x))
+			IF fuel[i][1]
+				PLAYSOUND( 3,0,1)
+				tank = MIN(100, tank+10)
+				INC score, 150
+			ELSE
+				INC score, RND(4)*100+100
 			ENDIF
-	ENDSELECT
-
-
-	CurrentMap.Update()
-
-	FOREACH Obj IN FallingObjects[]
-		IF Obj.Update() THEN DELETE Obj
+			DIMDEL fuel[], i
+			RETURN TRUE
+		ENDIF
+		IF x>shx THEN BREAK
 	NEXT
 
-	FOREACH Obj IN CollisionObjects[]
-		IF Obj.Update() THEN DELETE Obj
+	// rockets
+	FOR i=0 TO BOUNDS(rocket[],0)-1
+		x = rocket[i][0]
+		IF col_thth(shx, shy, x, rocket[i][1])
+			INC score, 50+RND(1)*30
+			DIMDEL rocket[], i
+			RETURN TRUE
+		ENDIF
+		IF x>shx THEN BREAK
 	NEXT
+RETURN FALSE
+ENDFUNCTION
 
-ENDSUB
 
-SUB RenderMainGame:
-	FOREACH Obj IN FallingObjects[]
-		Obj.Render()
+// INTERPOL - give value between a and b with factor x
+//            x=0 -> a
+//            x=1 -> b
+FUNCTION Interpol: a, b, x
+	RETURN (b-a)*x+a
+ENDFUNCTION
+
+FUNCTION bottomat: x
+LOCAL i, j
+	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
+	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
+	RETURN Interpol(cave[i][1], cave[j][1], x-i)
+ENDFUNCTION
+
+FUNCTION ceilingat: x
+LOCAL i, j
+	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
+	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
+	RETURN Interpol(cave[i][0], cave[j][0], x-i)
+ENDFUNCTION
+
+FUNCTION thing: id, x, y, col, sc, phi
+LOCAL i, x1,y1,x2,y2, cp, sp
+	sp = SIN(phi)
+	cp = COS(phi)
+	FOR i=0 TO objn[id]-2
+		x1 = (objx[id][i  ]-0.5)*sc
+		y1 = (objy[id][i  ]-1.0)*sc
+		x2 = (objx[id][i+1]-0.5)*sc
+		y2 = (objy[id][i+1]-1.0)*sc
+		Line(	x1*cp-y1*sp + x, x1*sp+y1*cp + y, _
+				x2*cp-y2*sp + x, x2*sp+y2*cp + y, col)
 	NEXT
+ENDFUNCTION
 
-	CurrentMap.Render()
 
-	FOREACH Obj IN CollisionObjects[]
-		Obj.Render()
-	NEXT
+// collision of thing/thing
+FUNCTION col_thth: x1,y1, x2,y2
+LOCAL x,y
+	x = x1-x2
+	y = y1-y2
+	x = x*x+y*y // SQR(a)<1 <-> a<1
+	IF x<1 THEN RETURN TRUE
+RETURN FALSE
+ENDFUNCTION
 
-	SELECT SelectedTool
-		CASE TOOL_IS_LINE
-			IF Line_Picked
-				DRAWLINE Line_PickedPos.X - CurrentMap.Scroll.X, Line_PickedPos.Y - CurrentMap.Scroll.Y, mx, my, RGB(255,0,0)
+FUNCTION col_wall: x,y
+LOCAL c
+	c = bottomat(x)
+	IF c<y THEN RETURN TRUE
+	c = ceilingat(x)
+	IF c>y THEN RETURN TRUE
+RETURN FALSE
+ENDFUNCTION
+
+FUNCTION addshot: x,y
+LOCAL m
+	PLAYSOUND( 2,0,1)
+	m=BOUNDS(shot[], 0)
+	REDIM shot[m+1][2]
+	shot[m][0]=x
+	shot[m][1]=y
+ENDFUNCTION
+
+FUNCTION dropbomb: x,y
+LOCAL m
+	PLAYSOUND( 0,0,1)
+	m  =BOUNDS(bomb[],0)
+	REDIM bomb[m+1][3]
+	bomb[m][0]=x
+	bomb[m][1]=y
+	bomb[m][2]=0
+ENDFUNCTION
+
+FUNCTION addboom: x,y
+LOCAL m
+	PLAYSOUND( 1,0,1)
+	m  =BOUNDS(boom[],0)
+	REDIM boom[m+1][3]
+	boom[m][0]=x
+	boom[m][1]=y
+	boom[m][2]=0
+ENDFUNCTION
+
+FUNCTION Line: x1, y1, x2, y2, col
+LOCAL c,s,p, w, dx, dy, ddx, ddy, ux, uy, lg
+GLOBAL colormode
+
+	IF colormode=FALSE THEN col=RGB(200,200,150)
+	ALPHAMODE .7
+
+	//line width
+	w = 16
+
+	// direction of line
+	ddx = x2-x1
+	ddy = y2-y1
+	lg = SQR(ddx*ddx+ddy*ddy)
+	IF lg<0.5 THEN RETURN
+
+	// short caps
+	lg=lg*2
+	// dir vector
+	dx=ddx*w/lg
+	dy=ddy*w/lg
+	// up vector
+	ux=dy
+	uy=-dx
+
+	// cap1
+	STARTPOLY 0
+		POLYVECTOR x1+ux-dx, y1+uy-dy,  0.5, 0.5,col
+		POLYVECTOR x1-ux-dx, y1-uy-dy,  0.5,63.5,col
+		POLYVECTOR x1-ux,    y1-uy,    31.5,63.5,col
+		POLYVECTOR x1+ux,    y1+uy,    31.5, 0.5,col
+	ENDPOLY
+
+	// center
+	STARTPOLY 0
+		POLYVECTOR x1+ux, y1+uy, 31.5,  0.5,col
+		POLYVECTOR x1-ux, y1-uy, 31.5, 63.5,col
+		POLYVECTOR x2-ux, y2-uy, 31.5, 63.5,col
+		POLYVECTOR x2+ux, y2+uy, 31.5,  0.5,col
+	ENDPOLY
+
+	// cap2
+	STARTPOLY 0
+		POLYVECTOR x2+ux,    y2+uy,    31.5,  0.5,col
+		POLYVECTOR x2-ux,    y2-uy,    31.5, 63.5,col
+		POLYVECTOR x2-ux+dx, y2-uy+dy, 63.5, 63.5,col
+		POLYVECTOR x2+ux+dx, y2+uy+dy, 63.5,  0.5,col
+	ENDPOLY
+ENDFUNCTION
+
+FUNCTION MoveUfos:
+GLOBAL scrn
+LOCAL i, spd, y1, y2, x
+	spd = 1
+	FOR i=0 TO BOUNDS(ufo[], 0)-1
+		SELECT ufo[i][3]
+		CASE 0 // ufo
+			x = (ufo[i][0]-scrn)*.5+ufo[i][0]
+			ufo[i][1] = x
+			IF x>0
+				y1 = ceilingat(x)+.5
+				y2 = bottomat(x)-.5
+				ufo[i][2] = (1+SINq(x*30))/2 * (y2-y1)*.75 + (y2-y1)*.1 + y1
 			ENDIF
-	ENDSELECT
-ENDSUB
+		CASE 1 // comet
+			ufo[i][1] = (ufo[i][0]-scrn)*2.1 + ufo[i][0]
+		ENDSELECT
+	NEXT
+ENDFUNCTION
 
-SUB InitMainGame:
-	CurrentMap.Create("map0")
-	
-ENDSUB
+FUNCTION LoadLevel:
+LOCAL x, y, i, num, up$, lo$, en$, y,by
+LOCAL nfuel, nrocket, nufo
+LOCAL data1$[], data2$[], data3$[]
+GLOBAL cave[]
+	// line 1+2 = ycoord
+	// line3:
+	// 1=rocket
+	// 2=mystery
+	// 3=fuel
+	// 4=asteroids
+	// 5=ufo
+	DIM cave[6*10*22][2]
+	FOR y=0 TO 10*6
+		GETFILE "level.txt", y*4+1, up$
+		GETFILE "level.txt", y*4+2, lo$
+		GETFILE "level.txt", y*4+3, en$
+		num = SPLITSTR(up$, data1$[], ",")
+		num = SPLITSTR(lo$, data2$[], ",")
+		num = SPLITSTR(en$, data3$[], ",")
+		FOR x=0 TO num-1
+			cave[i][1] = 9 - INTEGER(data2$[x])
+			cave[i][0] = -10 + INTEGER(data1$[x])// +2.5
+			IF cave[i][0] >= cave[i][1]-1 THEN cave[i][0] = cave[i][1]-2
 
-FUNCTION IsFixTool%:
-	IF SelectedTool <> TOOL_IS_LINE
-		RETURN FALSE
-	ELSE
-		RETURN TRUE
-	ENDIF
+			by = cave[i][1]
+			SELECT INTEGER(data3$[x])
+				CASE 1
+					REDIM rocket[nrocket+1][2]
+					rocket[nrocket][0] = i-.5
+					rocket[nrocket][1] = by
+					INC nrocket,1
+				CASE 2 TO 3
+					REDIM fuel[nfuel+1][2]
+					fuel[nfuel][0] = i-.5
+					fuel[nfuel][1] = INTEGER(data3$[x])-2
+					INC nfuel,1
+				CASE 4
+					REDIM ufo[nufo+1][4]
+					ufo[nufo][0] = i-.5
+					ufo[nufo][2] = cave[i][0] + MOD(nufo*nufo+x,10)*(cave[i][1]-cave[i][0])/10
+					ufo[nufo][3] = 1
+					INC nufo, 1
+				CASE 5
+					REDIM ufo[nufo+1][4]
+					ufo[nufo][0] = i-.5
+					ufo[nufo][2] = by // get's calced automatically
+					ufo[nufo][3] = 0
+					INC nufo, 1
+			ENDSELECT
+			INC i, 1
+		NEXT
+	NEXT
 ENDFUNCTION
 
 
 
-//$$RESETFILE.\Map.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
 
-CONSTANT TILESIZE% = 32
+// ------------------------------------------------------------- //
+//   --- WIDESCROLLER ---
+// ------------------------------------------------------------- //
+FUNCTION WideScroller: filename$
+GLOBAL score, name$, flicker
+	// Diese Variablen sind als LOCAL definiert:
+	// filename$, void
+	LOCAL text$[], a$, maxline, z, dz, dx, y, fx, fy, hi$[], hi[]
+	DIM text$[1024]
 
-TYPE TGameMap
-	Tiles[] AS TTile
-	Width%; Height%
-	Scroll AS TVec
-	ScrollSpeed AS TVec
+	GETFONTSIZE fx, fy // Neuer, guter Befehl / New and good command (24.10.01)
 
-	FUNCTION Update:
-		IF self.Scroll.X > ScreenWidth/4
-			self.Scroll.X = ScreenWidth/4
-			self.ScrollSpeed.Reverse()
-		ENDIF
-		IF self.Scroll.X <  -(self.Width*TILESIZE - ScreenWidth/4*3)
-			self.Scroll.X = -(self.Width*TILESIZE - ScreenWidth/4*3)
-			self.ScrollSpeed.Reverse()
-		ENDIF
-		IF self.Scroll.Y > ScreenHeight/4
-			self.Scroll.Y = ScreenHeight/4
-			self.ScrollSpeed.Reverse()
-		ENDIF
-		IF self.Scroll.Y <  -(self.Height*TILESIZE - ScreenHeight/4*3)
-			self.Scroll.Y = -(self.Height*TILESIZE - ScreenHeight/4*3)
-			self.ScrollSpeed.Reverse()
-		ENDIF
+	fy=fy*1.2 // Platz lassen / Leave space
+	maxline=maxline+2
+	text$[maxline] = "-= HIGHSCORES =-"
+	INC maxline, 1
+	// The firewall might want a mouse pointer
+	SYSTEMPOINTER TRUE
+	ReadHighScores(hi$[], hi[], name$, score)
+	SYSTEMPOINTER FALSE
+
+	FOR i=0 TO BOUNDS(hi[], 0)-1
+		text$[i + maxline] = MID$(hi$[i]+"................", 0, 12) + FORMAT$(6,0,hi[i])
+	NEXT
+	maxline = maxline + BOUNDS(hi[], 0) + 4
 
 
-		FOR x = 0 TO self.Width - 1
-			FOR y = 0 TO self.Height - 1
-				ALIAS T AS self.Tiles[x][y]
-				T.Update()
-			NEXT
-		NEXT
-	ENDFUNCTION
+	FOR i=0 TO 255
+		GETFILE filename$, i, a$
+		IF a$="NO_FILE" THEN RETURN FALSE
+		IF a$="NO_DATA" THEN a$ = ""
+		IF a$="EOF" THEN BREAK
+		text$[maxline]=a$
+		INC maxline, 1
+	NEXT
 
-	FUNCTION Render:
-		FOR x = 0 TO self.Width - 1
-			FOR y = 0 TO self.Height - 1
-				ALIAS T AS self.Tiles[x][y]
-				T.Render()
-			NEXT
-		NEXT
-	ENDFUNCTION
+	WHILE UserInput(3); HIBERNATE; WEND
 
+	LIMITFPS 60
+	WHILE TRUE
+		FOR zt=screeny TO 0-maxline*fy STEP -0.4 // Aufwärts / Move upwards
+			dtime = GETTIMER()*5
+			scrn = scrn + dtime / 5000
+			plx = scrn
+			ply = (bottomat(plx) + ceilingat(plx) )/2
+			SELECT scrn
+				CASE <50; ALPHAMODE scrn/200
+				CASE 500 TO 550; ALPHAMODE (scrn-550)/200
+				DEFAULT; ALPHAMODE .5
+			ENDSELECT
 
-	FUNCTION Create: File$
-		LOCAL file% = GENFILE()
-		IF NOT OPENFILE(file, "map/"+File$+".map", TRUE) THEN DEBUG "Map loading failed\n"
-		LOCAL r%
-		READUBYTE file, r
-		IF r <> 42
-			DEBUG "Unsupported file format"
-			RETURN
-		ENDIF
+			IF scrn>=600 THEN scrn=0
+			Show(dtime, TRUE)
 
-		READLONG file, self.Width
-		READLONG file, self.Height
-		DEBUG "Map size: "+self.Width+", "+self.Height+"\n"
-
-		LOCAL Foo% = 42
-		READLONG file, Foo // Elephant lifes
-		READLONG file, CreateObjDelay% // Elephant delay
-		READLONG file, MaxObj% // Max Elephants
-		READLONG file, Foo // Max Anti Materie
-		READLONG file, Foo // Max Matter
-
-		IF MaxObj = -1
-			MaxObj = 25
-		ENDIF
-
-		DIM self.Tiles[self.Width][self.Height]
-
-
-
-		LOCAL myr%
-		READUBYTE file, myr
-		WHILE myr <> 42
-			FOR x% = 0 TO self.Width - 1
-				FOR y = 0 TO self.Height - 1
-					SELECT myr
-						CASE 0
-							READUBYTE file, r
-							LOCAL Typ% = 0
-							IF r
-								LOCAL l%, data$
-								READLONG file, l
-								READSTR file, data$, l
-								Typ = data$
-							ENDIF
-
-							ALIAS T AS self.Tiles[x][y]
-							T.Create(Typ, x, y)
-						CASE 1
-							READUBYTE file, r
-							IF r
-								LOCAL l%, data$
-								READLONG file, l
-								DEBUG "l: "+l+"\n"
-								READSTR file, data$, l
-								LOCAL Params$[]
-								IF SPLITSTR(data$, Params$[], "\n")
-									SELECT Params$[0]
-										CASE "mirror"
-
-										CASE "roundmirror"
-
-										CASE "blackhole"
-
-										CASE "airstream"
-
-										DEFAULT
-											DEBUG "Unknown Parameter "+Params$[0]+" "+data$+"\n"
-									ENDSELECT
-								ENDIF
-							ENDIF
-					ENDSELECT
-				NEXT
-			NEXT
-			READUBYTE file, myr
-		WEND
-
-		?IFDEF GLB_DEBUG
-		// map
-		FOR y = 0 TO self.Height - 1
-			FOR x = 0 TO self.Width - 1
-				ALIAS t AS self.Tiles[x][y]
-				DEBUG t.Typ+ ", "
-			NEXT
-			DEBUG "\n"
-		NEXT
-		?ENDIF
-
-		// create collision lines
-		FOR x% = 0 TO self.Width - 1
-			FOR y% = 0 TO self.Height - 1
-				ALIAS t AS self.Tiles[x][y]
-				IF t.IsSolid()
-					LOCAL dirl%, dirr%, dirt%, dirb%
-					self.Empty(x, y, dirl, dirr, dirt, dirb)
-
-
-					LOCAL l AS TCollisionObject
-					LOCAL a AS TVec, b AS TVec
-
-
-					IF dirt
-						a = CreateVec(x*TILESIZE,y*TILESIZE)
-						b = CreateVec((x+1)*TILESIZE,y*TILESIZE)
-						l.CreateLine(a, b)
-						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+			ALPHAMODE .5
+			FOR z=0 TO maxline-1
+				dz=z*fy+zt
+				dx=(screenx-LEN(text$[z])*fx)/2
+				IF dz<screeny+fy AND dz>-20
+					a$ = text$[z]
+					IF MID$(a$,0,1)="#"
+						thing(MID$(a$, 1,1), dx, dz+fy, RGB(200,200,150), fy*2, 0)
+						a$ = "  " + MID$(a$, 2, 1000)
 					ENDIF
-
-					IF dirr
-						a = CreateVec((x+1)*TILESIZE,y*TILESIZE)
-						b = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
-						l.CreateLine(a, b)
-						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
-					ENDIF
-
-					IF dirb
-						a = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
-						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
-						l.CreateLine(a, b)
-						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
-					ENDIF
-
-					IF dirl
-						a = CreateVec(x*TILESIZE,y*TILESIZE)
-						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
-						l.CreateLine(a, b)
-						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
-					ENDIF
+					PRINT a$, dx, dz
 				ENDIF
 			NEXT
+			IF UserInput(3) THEN RETURN TRUE
+
+			IF flicker
+				ALPHAMODE -.3
+				y = MOD(GETTIMERALL()/50, 7)*screeny/7
+				DRAWRECT 0, y, screenx, screeny/7, 0
+				ALPHAMODE 0
+			ENDIF
+			SHOWSCREEN
 		NEXT
+	WEND
 
-		CLOSEFILE file
-	ENDFUNCTION
-
-	FUNCTION Empty: x%, y%, BYREF l%, BYREF r%, BYREF t%, BYREF b%
-		IF y = 0
-			t = TRUE
-		ELSE
-			ALIAS t1 AS self.Tiles[x][y-1]
-			IF t1.IsSolid()
-				t = FALSE
-			ELSE
-				t = TRUE
-			ENDIF
-		ENDIF
-
-		IF x = self.Width - 1
-			r = TRUE
-		ELSE
-			ALIAS t1 AS self.Tiles[x+1][y]
-			IF t1.IsSolid()
-				r = FALSE
-			ELSE
-				r = TRUE
-			ENDIF
-		ENDIF
-
-		IF y = self.Height - 1
-			b = TRUE
-		ELSE
-			ALIAS t1 AS self.Tiles[x][y+1]
-			IF t1.IsSolid()
-				b = FALSE
-			ELSE
-				b = TRUE
-			ENDIF
-		ENDIF
-
-		IF x = 0
-			l = TRUE
-		ELSE
-			ALIAS t1 AS self.Tiles[x-1][y]
-			IF t1.IsSolid()
-				l = FALSE
-			ELSE
-				l = TRUE
-			ENDIF
-		ENDIF
-	ENDFUNCTION
-ENDTYPE
+	LIMITFPS -1
+ENDFUNCTION // WIDESCROLLER
 
 
+FUNCTION ReadHighScores: names$[], scores[], username$, thescore
+LOCAL ct, i, str$, proxy$, port
 
-CONSTANT TILE_IS_EMPTY%  = 0
-CONSTANT TILE_IS_SPAWN%	 = 1
-CONSTANT TILE_IS_SOLID%  = 2
-CONSTANT TILE_IS_TARGET% = 3
-CONSTANT TILE_IS_DESTR%  = 4
-CONSTANT TILE_IS_KILLER  = 5
+	str$ = "highscores/listgame.php"
+	str$ = str$ + "?game=scramble"
+	str$ = str$ + "&name="+username$
+	str$ = str$ + "&score="+thescore
+	str$ = str$ + "&secret=3e5b72ec"
 
-CONSTANT INFO_DESTR_STATE = 0
+	PRINT ".: WebGet scores :.", 0, 0
+	SHOWSCREEN
 
-TYPE TTile
-	Typ%
-	X%; Y%
-	PosVec AS TVec
-	Info[]
-	RelatedLines%[]
+	INIOPEN "config.ini"
+	proxy$ = INIGET$("server", "proxy")
+	port   = INIGET$("server", "port")
+	KILLFILE "scores.ini"
+	IF port=0 OR proxy$="NO_DATA"
+		NETWEBGET("www.glbasic.com", "/"+str$, 80, "scores.ini")
+	ELSE
+		NETWEBGET(proxy$, "http://www.glbasic.com/" + str$, port, "scores.ini")
+	ENDIF
 
-	FUNCTION Update:
-		SELECT self.Typ
-			CASE TILE_IS_EMPTY
-			CASE TILE_IS_SPAWN
+	INIOPEN "scores.ini"
+	ct = INIGET$("scores", "count")
+	DIM names$[ct]
+	DIM scores[ct]
 
-			CASE TILE_IS_SOLID
-				DRAWSPRITE SolidTile, self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
-			CASE TILE_IS_TARGET
-
-			CASE TILE_IS_DESTR
-				//DRAWRECT self.PosVec.X, self.PosVec.Y, 32, 32, RGB(255,0,0)
-				DRAWANIM DestrTile, self.Info[INFO_DESTR_STATE], self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
-			CASE TILE_IS_KILLER
-
-			DEFAULT
-				DEBUG "Unknown tile type "+self.Typ+"\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION Render:
-		SELECT self.Typ
-			CASE TILE_IS_EMPTY
-			CASE TILE_IS_SPAWN
-				DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
-			CASE TILE_IS_SOLID
-
-			CASE TILE_IS_TARGET
-
-			CASE TILE_IS_DESTR
-
-			CASE TILE_IS_KILLER
-
-			DEFAULT
-				DEBUG "Unknown tile type "+self.Typ+"\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION Create: Typ%, X%, Y%
-		self.Typ = Typ
-		self.X = X
-		self.Y = Y
-
-		self.PosVec.SetXY(X*TILESIZE, Y*TILESIZE)
-
-		SELECT self.Typ
-			CASE TILE_IS_EMPTY
-			CASE TILE_IS_SPAWN
-				SpawnPos = self.PosVec
-			CASE TILE_IS_SOLID
-
-			CASE TILE_IS_TARGET
-				TargetPos = self.PosVec
-			CASE TILE_IS_DESTR
-				DIM self.Info[1]
-				self.Info[INFO_DESTR_STATE] = 0
-			CASE TILE_IS_KILLER
-
-			DEFAULT
-				DEBUG "Unknown tile type "+self.Typ+"\n"
-		ENDSELECT
-	ENDFUNCTION
-
-	FUNCTION IsSolid%:
-		SELECT self.Typ
-			CASE TILE_IS_SOLID
-				RETURN TRUE
-			CASE TILE_IS_DESTR
-				RETURN TRUE
-			CASE TILE_IS_KILLER
-				RETURN TRUE
-		ENDSELECT
-		RETURN FALSE
-	ENDFUNCTION
-ENDTYPE
-
-
-//$$RESETFILE.\Rect.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Tuesday, August 07, 2012
-// IDE Version: 10.283
-
-
-TYPE TRect
-	StartVec AS TVec
-	Width; Height
-
-	FUNCTION SetPos: V AS TVec
-		self.StartVec.SetVec(V)
-	ENDFUNCTION
-
-	FUNCTION SetXY: X, Y
-		self.StartVec.SetXY(X, Y)
-	ENDFUNCTION
-
-	FUNCTION SetSize: W, H
-		self.Width = W
-		self.Height = H
-	ENDFUNCTION
-
-	FUNCTION Collision: R AS TRect
-		RETURN BOXCOLL(R.StartVec.X, R.StartVec.Y, R.Width, R.Height, self.StartVec.X, self.StartVec.Y, self.Width, self.Height)
-	ENDFUNCTION
-
-	FUNCTION Draw:
-		DRAWRECT self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.Width, self.Height, RGB(0,0,255)
-		DRAWLINE self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.StartVec.X+self.Width + CurrentMap.Scroll.X, self.StartVec.Y+self.Height + CurrentMap.Scroll.Y, RGB(255,0,0)
-	ENDFUNCTION
-ENDTYPE
-
-
-//$$RESETFILE.\Util.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
-
-
-FUNCTION LoadSpr%: Path$
-	LOCAL ID% = GENSPRITE()
-	LOADSPRITE "gfx/"+Path$+".png", ID
-	RETURN ID
-ENDFUNCTION
-
-FUNCTION LoadAni%: Path$, w%, h%
-	LOCAL ID% = GENSPRITE()
-	LOADANIM "gfx/"+Path$+".png", ID, w, h
-	RETURN ID
+	FOR i=1 TO ct
+		names$[i-1] = INIGET$("scores", "n"+i)
+		scores[i-1] = INIGET$("scores", "s"+i)
+	NEXT
 ENDFUNCTION
 
 
-//$$RESETFILE.\Vec.gbas
-// --------------------------------- //
-// Project: Elefantastic
-// Start: Saturday, August 04, 2012
-// IDE Version: 10.283
 
 
-TYPE TVec
-	X; Y
-	vlen
 
-	FUNCTION MulVec: Val
-		self.X = self.X * Val
-		self.Y = self.Y * Val
-		self.vlen = -1
-	ENDFUNCTION
 
-	FUNCTION DivVec: Val
-		self.X = self.X / Val
-		self.Y = self.Y / Val
-		self.vlen = -1
-	ENDFUNCTION
 
-	FUNCTION AddVec: V AS TVec
-		INC self.X, V.X
-		INC self.Y, V.Y
-		self.vlen = -1
-	ENDFUNCTION
 
-	FUNCTION SubVec: V AS TVec
-		DEC self.X, V.X
-		DEC self.Y, V.Y
-		self.vlen = -1
-	ENDFUNCTION
 
-	FUNCTION SetXY: X, Y
-		self.X = X
-		self.Y = Y
-		self.vlen = -1
-	ENDFUNCTION
 
-	FUNCTION SetVec: V AS TVec
-		self.X = V.X
-		self.Y = V.Y
-		self.vlen = V.vlen
-	ENDFUNCTION
 
-	FUNCTION Reverse:
-		self.MulVec(-1)
-	ENDFUNCTION
 
-	FUNCTION Length:
-		IF self.vlen = -1
-			self.vlen = SQR(self.X*self.X + self.Y*self.Y)
-		ENDIF
-		RETURN self.vlen
-	ENDFUNCTION
 
-	FUNCTION Normalize:
-		IF self.vlen = -1
-			self.Length()
-		ENDIF
-		IF self.vlen > 0
-			self.X = self.X / self.vlen
-			self.Y = self.Y / self.vlen
-			self.vlen = 1
-		ELSE
-			self.X = 0
-			self.Y = 0
-			self.vlen = 0
-		ENDIF
-	ENDFUNCTION
 
-	FUNCTION NormalVec:
-		LOCAL tmp = self.Y
-		self.Y = self.X
-		self.X = -tmp
-	ENDFUNCTION
+?IFDEF HTML5
 
-	FUNCTION Bounce: NormalizedVec AS TVec, NormVec AS TVec
-		LOCAL Proj1 AS TVec, Proj2 AS TVec
-		Proj1 = self
-		Proj2 = self
-		Proj1.Project(NormalizedVec)
-		Proj2.Project(NormVec)
-		LOCAL tmp AS TVec
-		tmp = NormVec
-		tmp.MulVec(Proj2.Length())
-
-		self.X = Proj1.X + tmp.X
-		self.Y = Proj1.Y + tmp.Y
-		self.vlen = -1
-	ENDFUNCTION
-
-	FUNCTION Project: V AS TVec
-		LOCAL T AS TVec
-		T = V
-		T.Normalize()
-		T.MulVec(self.DotProd(T))
-		self.X = T.X
-		self.Y = T.Y
-		self.vlen = -1
-	ENDFUNCTION
-
-	FUNCTION DotProd: V AS TVec
-		RETURN self.X*V.X + self.Y*V.Y
-	ENDFUNCTION
-	
-	FUNCTION Angle:
-		RETURN ATAN(self.Y, self.X)
-	ENDFUNCTION
-ENDTYPE
-
-FUNCTION CreateVec AS TVec: X, Y
-	LOCAL V AS TVec
-	V.SetXY(X, Y)
-	RETURN V
+FUNCTION GETFILE AS void: File$, lin%, BYREF dat$
+	lin = MIN(lin, 255)
+	LOCAL f = GENFILE()
+	IF OPENFILE(f, File$, 1)
+		FOR i = 0 TO lin
+			IF ENDOFFILE(f) THEN BREAK
+			READLINE f, dat$
+		NEXT
+		CLOSEFILE f
+	ELSE
+		dat$ = ""
+	ENDIF
 ENDFUNCTION
+
+
+?ENDIF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
