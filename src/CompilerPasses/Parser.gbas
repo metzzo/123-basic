@@ -1290,19 +1290,32 @@ FUNCTION Identifier%: IsCommand%
 		ENDIF
 
 		LOCAL Found% = FALSE
-
-		FOREACH Vari IN Varis[]
+		
+		FOREACH Vari% IN Varis[]
 			IF Name$ = Compiler.Varis[Vari].Name$
 				IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1 AND Expr = -1
 					//sieht gut aus!
-					ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
-					FOREACH A IN Typ.Attributes[]
-						IF Vari = A
-							//yep es ist ein impliztes self
-							SuperExpr = CreateVariableExpression(Compiler.Funcs[Compiler.currentFunc].SelfVar)
+					// CHANGE: 28.6.2013: Überprüfung, ob es nicht doch eine Lokale Variable/Parameter gibt
+					LOCAL IsNotImplicit% = FALSE
+					FOREACH OtherVari% IN Varis[]
+						IF Compiler.Varis[OtherVari].Name$ = Name$ AND (Compiler.Varis[OtherVari].Typ = VARI_IS_LOCAL OR Compiler.Varis[OtherVari].Typ = VARI_IS_PARAM OR Compiler.Varis[OtherVari].Typ = VARI_IS_STATIC OR Compiler.Varis[OtherVari].Typ = VARI_IS_ALIAS  OR Compiler.Varis[OtherVari].Typ = VARI_IS_CONST) AND OtherVari <> Vari
+							IsNotImplicit = TRUE
 							BREAK
 						ENDIF
 					NEXT
+					
+					IF NOT IsNotImplicit
+						ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
+						FOREACH A IN Typ.Attributes[]
+							IF Vari = A
+								//yep es ist ein impliztes self, aber nur wenn es keine andere
+								SuperExpr = CreateVariableExpression(Compiler.Funcs[Compiler.currentFunc].SelfVar)
+								BREAK
+							ENDIF
+						NEXT
+					ELSE
+						CONTINUE
+					ENDIF
 				ENDIF
 				Expr = CreateVariableExpression(Vari)
 				Found = TRUE
@@ -1871,7 +1884,7 @@ FUNCTION Keyword%:
 
 				LOCAL IsImplicit% = -1
 				LOCAL varExpr%
-				IF IsIdentifier()
+				IF IsIdentifier(FALSE, TRUE)
 					// Die Variable existiert bereits
 					varExpr = Identifier(TRUE)
 				ELSE
@@ -2254,7 +2267,7 @@ FUNCTION IsKeyword%:
 ENDFUNCTION
 
 //! Ist es ein Identifier (Variable/Funktion/...)
-FUNCTION IsIdentifier%: CheckType% = FALSE
+FUNCTION IsIdentifier%: CheckType% = FALSE, IgnoreImplicitSelf% = FALSE
 	IF IsToken("GLOBAL") OR IsToken("LOCAL") THEN RETURN TRUE //LOCAL/GLOBAL
 
 	IF IsType() AND CheckType
@@ -2283,11 +2296,15 @@ FUNCTION IsIdentifier%: CheckType% = FALSE
 	GetVaris(Varis[])
 	FOR i = LEN(Varis[])-1 TO 0 STEP -1
 		IF CleanVariable$(Current$) = Compiler.Varis[Varis[i]].Name$
-			RETURN TRUE
+			IF IgnoreImplicitSelf AND Compiler.Varis[Varis[i]].Typ = VARI_IS_ATTR
+				RETURN FALSE
+			ELSE
+				RETURN TRUE
+			ENDIF
 		ENDIF
 	NEXT
 
-	IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1
+	IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1 AND NOT IgnoreImplicitSelf
 		//sieht gut aus!
 		ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
 		LOCAL myTyp% = Typ.ID

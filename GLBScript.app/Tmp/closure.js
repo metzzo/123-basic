@@ -180,7 +180,7 @@ function SHELLEND(cmd) {
 
 function CALLBYNAME(name) {
 	var ret = 1;
-	return eval("if (window['"+name+"']) window."+name+"(); else ret = 0;");
+	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
 }
 
 //------------------------------------------------------------
@@ -250,7 +250,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return true;
+		return cur != to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
@@ -2270,6 +2270,7 @@ var hibernate	= false;	//SOlls warten
 var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
+var inFullscreen= false;
 
 var waitForFont = false;
 
@@ -2582,6 +2583,9 @@ function init2D(canvasName) {
 			lastKey = CHR_Str(ev.which);
 	}
 	
+	// gamepad listener
+	gamepads = navigator.getGamepads || navigator.webkitGetGamepads || navigator.webkitGamepads || navigator.gamepads || navigator.mozGetGamepads || navigator.mozGamepads;
+	
 	USESCREEN(-1);
 	CLEARSCREEN(RGB(0,0,0)); //black background color
 	SHOWSCREEN();
@@ -2703,7 +2707,20 @@ function SMOOTHSHADING(mode) {
 	// Do nothing...
 }
 
-function SETSCREEN(width, height) {
+function SETSCREEN(width, height, fullscreen) {
+	if (fullscreen && !inFullscreen) {
+		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		inFullscreen = true;
+	} else if (!fullscreen && inFullscreen) {
+		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		inFullscreen = false;
+	}
+	var e = frontbuffer.canvas;
+	e.width = width;
+	e.height = height;
+	e = backbuffer.canvas;
+	e.width = width;
+	e.height = height;
 	canvas.width = width;
 	canvas.height = height;
 }
@@ -3337,6 +3354,7 @@ var globalSpeedX, globalSpeedY; //für HIBERNATE
 var touches		= [];
 var touchable	= document ? ('createTouch' in document) : false;
 
+var gamepads;
 
 /**
 * @constructor
@@ -3411,7 +3429,54 @@ function updateTouches(t, state) {
 	}
 }
 
+// GAMEPAD
+function GETNUMJOYSTICKS() {
+	if (!!gamepads) {
+		return gamepads.length;
+	} else return 0;
+}
 
+function GETJOYNAME_Str(n) {
+	return gamepads[n].id;
+}
+
+function GETJOYX(n) {
+	return gamepads[n].axes[0];
+}
+
+function GETJOYY(n) {
+	return gamepads[n].axes[1];
+}
+
+function GETJOYZ(n) {
+	return 0; // umimplemented
+}
+
+function GETJOYRX(n) {
+	return gamepads[n].axes[2];
+}
+
+function GETJOYRY(n) {
+	return gamepads[n].axes[3];
+}
+
+function GETJOYRZ(n) {
+	return 0;
+}
+
+function GETJOYBUTTON(n, m) {
+	return gamepads[n].buttons[m];
+}
+
+function GETDIGIX(n) {
+	return gamepads[n].buttons[15]-gamepads[n].buttons[14];
+}
+
+function GETDIGIY(n) {
+	return gamepads[n].buttons[13]-gamepads[n].buttons[12];
+}
+
+// stuff
 function MOUSEAXIS(info) {
 	if (currentMouse >= 0 && currentMouse < touches.length) {} else {
 		return;
@@ -4115,7 +4180,12 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		var dx = 0, dy = 0
+		if (sx < 0) dx = spr.img.width*sx;
+		if (sy < 0) dy = spr.img.height*sy;
+		
+		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
 		context.restore();
@@ -4130,7 +4200,6 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
-		//context.drawImage(spr.img, CAST2INT(x), CAST2INT(y), CAST2INT(width), CAST2INT(height));
 		context.restore();
 	}
 }
@@ -4514,669 +4583,132 @@ function LOADBMP(path) {
 var __debugInfo = "";
 var debugMode = true;
 window['main'] = function(){
-		var __labels = {"restart": 1541};
-		
 	stackPush("main", __debugInfo);
 	try {
-		var local3_vel_1317 = 0.0, local5_delta_1318 = 0.0, local7_oldscrn_1319 = 0.0, local5_dtime_1320 = 0.0, local7_newbomb_1321 = 0.0, local7_newshot_1322 = 0.0, local6_reload_1323 = 0.0, local8_speedlim_1324 = 0.0, local6_mscale_1325 = 0.0, local4_life_1326 = 0.0, local1_i_1327 = 0.0, local8_facspeed_1328 = 0.0;
-		var __pc = 643;
-		while(__pc >= 0) {
-			switch(__pc) {
-				case 643:
-					__debugInfo = "13:\Scramble.gbas";
-					GETSCREENSIZE(global7_screenx_ref, global7_screeny_ref);
-					
-				__debugInfo = "14:\Scramble.gbas";
-				global7_hiscore = 10000;
-				__debugInfo = "15:\Scramble.gbas";
-				global7_flicker = 0;
-				__debugInfo = "16:\Scramble.gbas";
-				global9_colormode = 1;
-				__debugInfo = "19:\Scramble.gbas";
-				DIM(global5_q_sin, [360], 0.0);
-				__debugInfo = "20:\Scramble.gbas";
-				DIM(global5_q_cos, [360], 0.0);
-				__debugInfo = "20:\Scramble.gbas";
-				
-					case 688:
-						__debugInfo = "24:\Scramble.gbas";
-						local1_i_1327 = 0
-					
-				case 668: //dummy for1
-					if (!toCheck(local1_i_1327, 359, 1)) {__pc = 672; break;}
-					
-					case 680:
-						__debugInfo = "22:\Scramble.gbas";
-						global5_q_sin.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = SIN(local1_i_1327);
-						
-					__debugInfo = "23:\Scramble.gbas";
-					global5_q_cos.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = COS(local1_i_1327);
-					__debugInfo = "22:\Scramble.gbas";
-					local1_i_1327 += 1;
-					__pc = 668; break; //back jump
-					
-				case 672: //dummy for
-					;
-						
-					__debugInfo = "24:\Scramble.gbas";
-					;
-				__debugInfo = "26:\Scramble.gbas";
-				DIM(global4_objn, [20], 0.0);
-				__debugInfo = "27:\Scramble.gbas";
-				DIM(global4_objx, [20, 20], 0.0);
-				__debugInfo = "28:\Scramble.gbas";
-				DIM(global4_objy, [20, 20], 0.0);
-				__debugInfo = "29:\Scramble.gbas";
-				DIM(global4_cave, [0, 2], 0.0);
-				__debugInfo = "31:\Scramble.gbas";
-				DIM(global4_fuel, [0, 2], 0.0);
-				__debugInfo = "32:\Scramble.gbas";
-				DIM(global6_rocket, [0, 2], 0.0);
-				__debugInfo = "33:\Scramble.gbas";
-				DIM(global4_bomb, [0, 3], 0.0);
-				__debugInfo = "34:\Scramble.gbas";
-				DIM(global4_shot, [0, 2], 0.0);
-				__debugInfo = "35:\Scramble.gbas";
-				DIM(global4_boom, [0, 3], 0.0);
-				__debugInfo = "36:\Scramble.gbas";
-				DIM(global3_ufo, [0, 3], 0.0);
-				__debugInfo = "38:\Scramble.gbas";
-				LOADSPRITE("line.bmp", 0);
-				__debugInfo = "40:\Scramble.gbas";
-				LOADSOUND("sfx/bomb.wav", 0, 4);
-				__debugInfo = "41:\Scramble.gbas";
-				LOADSOUND("sfx/implosion.wav", 1, 4);
-				__debugInfo = "42:\Scramble.gbas";
-				LOADSOUND("sfx/shot.wav", 2, 4);
-				__debugInfo = "43:\Scramble.gbas";
-				LOADSOUND("sfx/fuel.wav", 3, 2);
-				__debugInfo = "44:\Scramble.gbas";
-				LOADSOUND("sfx/hahaha.wav", 4, 1);
-				__debugInfo = "49:\Scramble.gbas";
-				local1_i_1327 = 0;
-				__debugInfo = "50:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 7;
-				__debugInfo = "50:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
-				__debugInfo = "51:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
-				__debugInfo = "51:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.1;
-				__debugInfo = "52:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
-				__debugInfo = "52:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.4;
-				__debugInfo = "53:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.8;
-				__debugInfo = "53:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1.1;
-				__debugInfo = "54:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
-				__debugInfo = "54:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.1;
-				__debugInfo = "55:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
-				__debugInfo = "55:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.2;
-				__debugInfo = "56:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
-				__debugInfo = "56:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 0.5;
-				__debugInfo = "57:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 1;
-				__debugInfo = "60:\Scramble.gbas";
-				local1_i_1327 = 1;
-				__debugInfo = "61:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 5;
-				__debugInfo = "61:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
-				__debugInfo = "62:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
-				__debugInfo = "62:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
-				__debugInfo = "63:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
-				__debugInfo = "63:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
-				__debugInfo = "64:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.3;
-				__debugInfo = "64:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
-				__debugInfo = "65:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
-				__debugInfo = "65:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.3;
-				__debugInfo = "66:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.3;
-				__debugInfo = "70:\Scramble.gbas";
-				local1_i_1327 = 2;
-				__debugInfo = "71:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
-				__debugInfo = "71:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
-				__debugInfo = "72:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1.2;
-				__debugInfo = "72:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
-				__debugInfo = "73:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.9;
-				__debugInfo = "73:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.5;
-				__debugInfo = "74:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
-				__debugInfo = "74:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
-				__debugInfo = "75:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.9;
-				__debugInfo = "75:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.8;
-				__debugInfo = "76:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
-				__debugInfo = "76:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.2;
-				__debugInfo = "77:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1.2;
-				__debugInfo = "81:\Scramble.gbas";
-				local1_i_1327 = 3;
-				__debugInfo = "82:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
-				__debugInfo = "82:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.3;
-				__debugInfo = "83:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1.5;
-				__debugInfo = "83:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
-				__debugInfo = "84:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
-				__debugInfo = "84:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
-				__debugInfo = "85:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1.5;
-				__debugInfo = "85:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = -(0.2);
-				__debugInfo = "86:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
-				__debugInfo = "86:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1.2;
-				__debugInfo = "87:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.7;
-				__debugInfo = "87:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.3;
-				__debugInfo = "88:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1.5;
-				__debugInfo = "91:\Scramble.gbas";
-				local1_i_1327 = 4;
-				__debugInfo = "92:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 5;
-				__debugInfo = "92:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.2;
-				__debugInfo = "93:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
-				__debugInfo = "93:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.5;
-				__debugInfo = "94:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0;
-				__debugInfo = "94:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.8;
-				__debugInfo = "95:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
-				__debugInfo = "95:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.5;
-				__debugInfo = "96:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.9;
-				__debugInfo = "96:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.2;
-				__debugInfo = "97:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 1;
-				__debugInfo = "100:\Scramble.gbas";
-				local1_i_1327 = 5;
-				__debugInfo = "101:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 2;
-				__debugInfo = "101:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
-				__debugInfo = "102:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
-				__debugInfo = "102:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
-				__debugInfo = "103:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
-				__debugInfo = "107:\Scramble.gbas";
-				local1_i_1327 = 6;
-				__debugInfo = "108:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 6;
-				__debugInfo = "108:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
-				__debugInfo = "109:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0;
-				__debugInfo = "109:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
-				__debugInfo = "110:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 1;
-				__debugInfo = "110:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 1;
-				__debugInfo = "111:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0;
-				__debugInfo = "111:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0;
-				__debugInfo = "112:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 1;
-				__debugInfo = "112:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
-				__debugInfo = "113:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
-				__debugInfo = "113:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
-				__debugInfo = "114:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0;
-				__debugInfo = "119:\Scramble.gbas";
-				local1_i_1327 = 7;
-				__debugInfo = "120:\Scramble.gbas";
-				global4_objn.arrAccess(~~(local1_i_1327)).values[tmpPositionCache] = 9;
-				__debugInfo = "120:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 0.1;
-				__debugInfo = "121:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 0).values[tmpPositionCache] = 1;
-				__debugInfo = "121:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.3;
-				__debugInfo = "122:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 1).values[tmpPositionCache] = 0.7;
-				__debugInfo = "122:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0;
-				__debugInfo = "123:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 2).values[tmpPositionCache] = 0.7;
-				__debugInfo = "123:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0;
-				__debugInfo = "124:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 3).values[tmpPositionCache] = 0.1;
-				__debugInfo = "124:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0.5;
-				__debugInfo = "125:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 4).values[tmpPositionCache] = 0;
-				__debugInfo = "125:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 1;
-				__debugInfo = "126:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 5).values[tmpPositionCache] = 0.1;
-				__debugInfo = "126:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 1;
-				__debugInfo = "127:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 6).values[tmpPositionCache] = 0.7;
-				__debugInfo = "127:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 7).values[tmpPositionCache] = 0.7;
-				__debugInfo = "128:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 7).values[tmpPositionCache] = 0.7;
-				__debugInfo = "128:\Scramble.gbas";
-				global4_objx.arrAccess(~~(local1_i_1327), 8).values[tmpPositionCache] = 0.9;
-				__debugInfo = "129:\Scramble.gbas";
-				global4_objy.arrAccess(~~(local1_i_1327), 8).values[tmpPositionCache] = 1;
-				__debugInfo = "132:\Scramble.gbas";
-				LOADBMP("backgnd.bmp");
-				__debugInfo = "133:\Scramble.gbas";
-				INIOPEN("config.ini");
-				__debugInfo = "134:\Scramble.gbas";
-				global8_name_Str = INIGET_Str("player1", "name", "NO_DATA");
-				__debugInfo = "135:\Scramble.gbas";
-				PRINT("Enter your name:", 100, 120, 0);
-				__debugInfo = "137:\Scramble.gbas";
-				global8_name_Str = "robi";
-				case 1541:
-					__debugInfo = "138:\Scramble.gbas";
-					//label: restart;
-					
-				__debugInfo = "139:\Scramble.gbas";
-				func9_LoadLevel();
-				__debugInfo = "139:\Scramble.gbas";
-				global5_scale = 20;
-				__debugInfo = "140:\Scramble.gbas";
-				local6_mscale_1325 = 30;
-				__debugInfo = "142:\Scramble.gbas";
-				func12_WideScroller("readme-REALLY-DO!.txt");
-				__debugInfo = "146:\Scramble.gbas";
-				func9_LoadLevel();
-				__debugInfo = "147:\Scramble.gbas";
-				global4_tank = 100;
-				__debugInfo = "148:\Scramble.gbas";
-				local4_life_1326 = 3;
-				__debugInfo = "149:\Scramble.gbas";
-				global4_scrn = 0;
-				__debugInfo = "150:\Scramble.gbas";
-				global3_plx_ref[0] = global4_scrn;
-				__debugInfo = "151:\Scramble.gbas";
-				global3_ply_ref[0] = ((((global4_cave.arrAccess(0, 1).values[tmpPositionCache]) + (global4_cave.arrAccess(0, 0).values[tmpPositionCache]))) / (2));
-				__debugInfo = "151:\Scramble.gbas";
-				global5_scale = 20;
-				__debugInfo = "152:\Scramble.gbas";
-				local6_mscale_1325 = 30;
-				__debugInfo = "153:\Scramble.gbas";
-				local8_speedlim_1324 = 12;
-				__debugInfo = "154:\Scramble.gbas";
-				global8_gameover = 0;
-				__debugInfo = "155:\Scramble.gbas";
-				local6_reload_1323 = 0;
-				__debugInfo = "156:\Scramble.gbas";
-				global5_score = 0;
-				__debugInfo = "158:\Scramble.gbas";
-				local8_facspeed_1328 = ((0.7) / (8000));
-				__debugInfo = "161:\Scramble.gbas";
-				local7_newshot_1322 = GETTIMERALL();
-				__debugInfo = "162:\Scramble.gbas";
-				local7_newbomb_1321 = GETTIMERALL();
-				__debugInfo = "163:\Scramble.gbas";
-				global6_gameon = GETTIMERALL();
-				case 2119:
-					__debugInfo = "263:\Scramble.gbas";
-					if (!(1)) {__pc = 7386; break;}
-					
-					case 1651:
-						__debugInfo = "174:\Scramble.gbas";
-						if (!((((global4_scrn) >= (1200)) ? 1 : 0))) { __pc = 1631; break; }
-					
-					case 1633:
-						__debugInfo = "170:\Scramble.gbas";
-						func9_LoadLevel();
-						
-					__debugInfo = "171:\Scramble.gbas";
-					global4_scrn = 0;
-					__debugInfo = "172:\Scramble.gbas";
-					global3_plx_ref[0] = 0;
-					__debugInfo = "173:\Scramble.gbas";
-					global3_ply_ref[0] = ((global4_cave.arrAccess(0, 1).values[tmpPositionCache]) - (1));
-					__debugInfo = "170:\Scramble.gbas";
-					
-				case 1631: //dummy jumper1
-					;
-						
-					__debugInfo = "176:\Scramble.gbas";
-					local5_dtime_1320 = ((GETTIMER()) * (5));
-					__debugInfo = "178:\Scramble.gbas";
-					func4_Show(local5_dtime_1320, 0);
-					case 1974:
-						__debugInfo = "240:\Scramble.gbas";
-						if (!((((global6_gameon) <= (GETTIMERALL())) ? 1 : 0))) { __pc = 1665; break; }
-					
-					case 1697:
-						__debugInfo = "185:\Scramble.gbas";
-						if (!((((((((((func9_UserInput(4)) || (KEY(29))) ? 1 : 0)) && ((((local6_reload_1323) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((local7_newbomb_1321) < (GETTIMERALL())) ? 1 : 0))) ? 1 : 0))) { __pc = 1682; break; }
-					
-					case 1689:
-						__debugInfo = "182:\Scramble.gbas";
-						local7_newbomb_1321 = ((GETTIMERALL()) + (500));
-						
-					__debugInfo = "183:\Scramble.gbas";
-					func8_dropbomb(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]));
-					__debugInfo = "184:\Scramble.gbas";
-					local6_reload_1323 = 1;
-					__debugInfo = "182:\Scramble.gbas";
-					
-				case 1682: //dummy jumper1
-					;
-						
-					case 1717:
-						__debugInfo = "190:\Scramble.gbas";
-						if (!((((func9_UserInput(3)) && ((((local7_newshot_1322) < (GETTIMERALL())) ? 1 : 0))) ? 1 : 0))) { __pc = 1706; break; }
-					
-					case 1713:
-						__debugInfo = "188:\Scramble.gbas";
-						local7_newshot_1322 = ((GETTIMERALL()) + (200));
-						
-					__debugInfo = "189:\Scramble.gbas";
-					func7_addshot(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]));
-					__debugInfo = "188:\Scramble.gbas";
-					
-				case 1706: //dummy jumper1
-					;
-						
-					case 1727:
-						__debugInfo = "192:\Scramble.gbas";
-						if (!((((func9_UserInput(4)) == (0)) ? 1 : 0))) { __pc = 1722; break; }
-					
-					case 1726:
-						__debugInfo = "192:\Scramble.gbas";
-						local6_reload_1323 = 0;
-						
-					__debugInfo = "192:\Scramble.gbas";
-					
-				case 1722: //dummy jumper1
-					;
-						
-					__debugInfo = "197:\Scramble.gbas";
-					global4_tank = ((global4_tank) - (((local5_dtime_1320) / (8800))));
-					__debugInfo = "198:\Scramble.gbas";
-					local7_oldscrn_1319 = global4_scrn;
-					__debugInfo = "199:\Scramble.gbas";
-					global4_scrn = ((global4_scrn) + (((local5_dtime_1320) / (2000))));
-					case 1760:
-						__debugInfo = "200:\Scramble.gbas";
-						if (!((((INTEGER(local7_oldscrn_1319)) > (INTEGER(global4_scrn))) ? 1 : 0))) { __pc = 1752; break; }
-					
-					case 1759:
-						__debugInfo = "200:\Scramble.gbas";
-						global5_score = ((global5_score) + (10));
-						
-					__debugInfo = "200:\Scramble.gbas";
-					
-				case 1752: //dummy jumper1
-					;
-						
-					__debugInfo = "202:\Scramble.gbas";
-					local3_vel_1317 = ((local8_speedlim_1324) * (func9_UserInput(0)));
-					__debugInfo = "203:\Scramble.gbas";
-					local3_vel_1317 = ((((local3_vel_1317) * (local5_dtime_1320))) * (local8_facspeed_1328));
-					__debugInfo = "204:\Scramble.gbas";
-					global3_plx_ref[0] = ((((global3_plx_ref[0]) + (((local5_dtime_1320) / (3000))))) + (local3_vel_1317));
-					case 1820:
-						__debugInfo = "213:\Scramble.gbas";
-						if (!((((global4_tank) > (0)) ? 1 : 0))) { __pc = 1788; break; }
-					
-					case 1795:
-						__debugInfo = "207:\Scramble.gbas";
-						local3_vel_1317 = ((local8_speedlim_1324) * (func9_UserInput(1)));
-						
-					__debugInfo = "208:\Scramble.gbas";
-					local3_vel_1317 = ((((local3_vel_1317) * (local5_dtime_1320))) * (local8_facspeed_1328));
-					__debugInfo = "209:\Scramble.gbas";
-					global3_ply_ref[0] = ((global3_ply_ref[0]) + (local3_vel_1317));
-					__debugInfo = "207:\Scramble.gbas";
-					__pc = 7393;
-					break;
-					
-				case 1788: //dummy jumper1
-					
-					case 1815:
-						__debugInfo = "211:\Scramble.gbas";
-						global3_ply_ref[0] = ((global3_ply_ref[0]) + (((local5_dtime_1320) * (local8_facspeed_1328))));
-						
-					__debugInfo = "212:\Scramble.gbas";
-					global4_tank = 0;
-					__debugInfo = "211:\Scramble.gbas";
-					
-				case 7393: //dummy jumper2
-					;
-						
-					__debugInfo = "215:\Scramble.gbas";
-					local6_mscale_1325 = ((local6_mscale_1325) + (((((func9_UserInput(2)) * (local5_dtime_1320))) * (0.5))));
-					case 1841:
-						__debugInfo = "216:\Scramble.gbas";
-						if (!((((local6_mscale_1325) < (20)) ? 1 : 0))) { __pc = 1835; break; }
-					
-					case 1840:
-						__debugInfo = "216:\Scramble.gbas";
-						local6_mscale_1325 = 20;
-						
-					__debugInfo = "216:\Scramble.gbas";
-					
-				case 1835: //dummy jumper1
-					;
-						
-					case 1852:
-						__debugInfo = "217:\Scramble.gbas";
-						if (!((((local6_mscale_1325) > (70)) ? 1 : 0))) { __pc = 1846; break; }
-					
-					case 1851:
-						__debugInfo = "217:\Scramble.gbas";
-						local6_mscale_1325 = 70;
-						
-					__debugInfo = "217:\Scramble.gbas";
-					
-				case 1846: //dummy jumper1
-					;
-						
-					__debugInfo = "218:\Scramble.gbas";
-					global5_scale = ((global5_scale) + (((((((local6_mscale_1325) - (global5_scale))) * (local5_dtime_1320))) / (2000))));
-					case 1915:
-						__debugInfo = "232:\Scramble.gbas";
-						if (!(global8_gameover)) { __pc = 1865; break; }
-					
-					case 1872:
-						__debugInfo = "222:\Scramble.gbas";
-						local4_life_1326 = ((local4_life_1326) - (1));
-						
-					__debugInfo = "223:\Scramble.gbas";
-					PLAYSOUND(4, 0, 1);
-					__debugInfo = "224:\Scramble.gbas";
-					global6_gameon = ((GETTIMERALL()) + (1500));
-					case 1914:
-						__debugInfo = "231:\Scramble.gbas";
-						if (!((((local4_life_1326) < (0)) ? 1 : 0))) { __pc = 1887; break; }
-					
-					case 1891:
-						__debugInfo = "226:\Scramble.gbas";
-						GETFONTSIZE(global3_plx_ref, global3_ply_ref);
-						
-					__debugInfo = "227:\Scramble.gbas";
-					PRINT("GAME OVER", ((((global7_screenx_ref[0]) / (2))) - (((global3_plx_ref[0]) * (4.5)))), 100, 0);
-					__debugInfo = "228:\Scramble.gbas";
-					SHOWSCREEN();
-					case 1912:
-						__debugInfo = "229:\Scramble.gbas";
-						if (!((((func9_UserInput(3)) == (0)) ? 1 : 0))) {__pc = 7398; break;}
-					
-					case 1911:
-						__debugInfo = "228:\Scramble.gbas";
-						HIBERNATE();
-						
-					__debugInfo = "228:\Scramble.gbas";
-					__pc = 1912; break; //back jump
-					
-				case 7398:
-					;
-						
-					case 1913:
-						__debugInfo = "230:\Scramble.gbas";
-						__pc = __labels["restart"]; break;
-						
-					__debugInfo = "226:\Scramble.gbas";
-					
-				case 1887: //dummy jumper1
-					;
-						
-					__debugInfo = "222:\Scramble.gbas";
-					
-				case 1865: //dummy jumper1
-					;
-						
-					__debugInfo = "185:\Scramble.gbas";
-					__pc = 7388;
-					break;
-					
-				case 1665: //dummy jumper1
-					
-					case 1925:
-						__debugInfo = "234:\Scramble.gbas";
-						local5_delta_1318 = ((((global6_gameon) - (GETTIMERALL()))) / (1000));
-						
-					__debugInfo = "235:\Scramble.gbas";
-					global3_plx_ref[0] = MAX(1, ((global3_plx_ref[0]) - (((((local5_dtime_1320) / (1000))) * (local5_delta_1318)))));
-					__debugInfo = "236:\Scramble.gbas";
-					global4_scrn = MAX(1, ((global4_scrn) - (((((local5_dtime_1320) / (1000))) * (local5_delta_1318)))));
-					__debugInfo = "237:\Scramble.gbas";
-					global3_ply_ref[0] = ((func8_bottomat(unref(global3_plx_ref[0]))) - (CAST2INT(((MIN(7, ((func8_bottomat(unref(global3_plx_ref[0]))) - (func9_ceilingat(unref(global3_plx_ref[0])))))) / (2)))));
-					__debugInfo = "238:\Scramble.gbas";
-					global8_gameover = 0;
-					__debugInfo = "239:\Scramble.gbas";
-					global4_tank = 100;
-					__debugInfo = "234:\Scramble.gbas";
-					
-				case 7388: //dummy jumper2
-					;
-						
-					case 2005:
-						__debugInfo = "247:\Scramble.gbas";
-						if (!(global7_flicker)) { __pc = 1975; break; }
-					
-					case 1980:
-						__debugInfo = "243:\Scramble.gbas";
-						ALPHAMODE(-(0.3));
-						
-					__debugInfo = "244:\Scramble.gbas";
-					global1_y = ((((MOD(CAST2INT(((GETTIMERALL()) / (50))), 7)) * (global7_screeny_ref[0]))) / (7));
-					__debugInfo = "245:\Scramble.gbas";
-					DRAWRECT(0, global1_y, unref(global7_screenx_ref[0]), ((global7_screeny_ref[0]) / (7)), 0);
-					__debugInfo = "246:\Scramble.gbas";
-					ALPHAMODE(0);
-					__debugInfo = "243:\Scramble.gbas";
-					
-				case 1975: //dummy jumper1
-					;
-						
-					__debugInfo = "250:\Scramble.gbas";
-					ALPHAMODE(0.7);
-					__debugInfo = "251:\Scramble.gbas";
-					global7_hiscore = MAX(global5_score, global7_hiscore);
-					__debugInfo = "252:\Scramble.gbas";
-					PRINT(FORMAT_Str(6, 0, global5_score), ((global7_screenx_ref[0]) / (10)), ((global7_screeny_ref[0]) / (10)), 0);
-					__debugInfo = "253:\Scramble.gbas";
-					PRINT(FORMAT_Str(6, 0, global7_hiscore), ((((global7_screenx_ref[0]) / (2))) - (((global7_screenx_ref[0]) / (10)))), ((global7_screeny_ref[0]) / (10)), 0);
-					__debugInfo = "255:\Scramble.gbas";
-					func4_Line(((global7_screenx_ref[0]) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), ((((((global7_screenx_ref[0]) * (0.8))) * (global4_tank))) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), RGB(0, 255, 0));
-					case 2089:
-						__debugInfo = "256:\Scramble.gbas";
-						if (!(global9_colormode)) { __pc = 2066; break; }
-					
-					case 2088:
-						__debugInfo = "256:\Scramble.gbas";
-						func4_Line(((((((global7_screenx_ref[0]) * (0.8))) * (global4_tank))) * (0.1)), ((global7_screeny_ref[0]) * (0.85)), ((global7_screenx_ref[0]) * (0.8)), ((global7_screeny_ref[0]) * (0.85)), RGB(255, 0, 0));
-						
-					__debugInfo = "256:\Scramble.gbas";
-					
-				case 2066: //dummy jumper1
-					;
-						
-					__debugInfo = "257:\Scramble.gbas";
-					
-					case 2117:
-						__debugInfo = "260:\Scramble.gbas";
-						local1_i_1327 = 1
-					
-				case 2094: //dummy for1
-					if (!toCheck(local1_i_1327, local4_life_1326, 1)) {__pc = 2097; break;}
-					
-					case 2116:
-						__debugInfo = "259:\Scramble.gbas";
-						func5_thing(0, ((((local1_i_1327) * (32))) + (32)), ((global7_screeny_ref[0]) * (0.15)), RGB(0, 128, 255), 16, 0);
-						
-					__debugInfo = "259:\Scramble.gbas";
-					local1_i_1327 += 1;
-					__pc = 2094; break; //back jump
-					
-				case 2097: //dummy for
-					;
-						
-					__debugInfo = "260:\Scramble.gbas";
-					;
-					__debugInfo = "262:\Scramble.gbas";
-					SHOWSCREEN();
-					__debugInfo = "174:\Scramble.gbas";
-					__pc = 2119; break; //back jump
-					
-				case 7386:
-					;
-					
-				__debugInfo = "13:\Scramble.gbas";__pc = -1; break;
-				default:
-					throwError("Gotocounter exception pc: "+__pc);
-				
-			}
-		}
+		var local2_dx_ref_1391 = [0], local2_dy_ref_1392 = [0];
+		__debugInfo = "28:\JumpIt.gbas";
+		LIMITFPS(30);
+		__debugInfo = "29:\JumpIt.gbas";
+		global12_Hardware_Str = PLATFORMINFO_Str("DEVICE");
+		__debugInfo = "31:\JumpIt.gbas";
+		GETDESKTOPSIZE(local2_dx_ref_1391, local2_dy_ref_1392);
+		__debugInfo = "33:\JumpIt.gbas";
+		SYSTEMPOINTER(1);
+		__debugInfo = "38:\JumpIt.gbas";
+		if ((((global12_Hardware_Str) == ("DESKTOP")) ? 1 : 0)) {
+			__debugInfo = "36:\JumpIt.gbas";
+			local2_dx_ref_1391[0] = 800;
+			__debugInfo = "37:\JumpIt.gbas";
+			local2_dy_ref_1392[0] = 600;
+			__debugInfo = "36:\JumpIt.gbas";
+		};
+		__debugInfo = "40:\JumpIt.gbas";
+		SETSCREEN(unref(local2_dx_ref_1391[0]), unref(local2_dy_ref_1392[0]), 0);
+		__debugInfo = "45:\JumpIt.gbas";
+		if ((((local2_dx_ref_1391[0]) < (local2_dy_ref_1392[0])) ? 1 : 0)) {
+			__debugInfo = "44:\JumpIt.gbas";
+			if (((((((global12_Hardware_Str) != ("DESKTOP")) ? 1 : 0)) || ((((global12_Hardware_Str) == ("WIZ")) ? 1 : 0))) ? 1 : 0)) {
+				__debugInfo = "43:\JumpIt.gbas";
+				SETORIENTATION(1);
+				__debugInfo = "43:\JumpIt.gbas";
+			};
+			__debugInfo = "44:\JumpIt.gbas";
+		};
+		__debugInfo = "47:\JumpIt.gbas";
+		SETCURRENTDIR("Media");
+		__debugInfo = "51:\JumpIt.gbas";
+		global9_Gamestate = ~~(0);
+		__debugInfo = "53:\JumpIt.gbas";
+		global10_SelectTile = 0;
+		__debugInfo = "61:\JumpIt.gbas";
+		global11_PlayerImage = GENSPRITE();
+		__debugInfo = "62:\JumpIt.gbas";
+		LOADANIM("spieler.png", global11_PlayerImage, 16, 32);
+		__debugInfo = "69:\JumpIt.gbas";
+		global11_LadderImage = GENSPRITE();
+		__debugInfo = "70:\JumpIt.gbas";
+		LOADSPRITE("leiter.png", global11_LadderImage);
+		__debugInfo = "73:\JumpIt.gbas";
+		global10_SpikeImage = GENSPRITE();
+		__debugInfo = "74:\JumpIt.gbas";
+		LOADSPRITE("stachel.png", global10_SpikeImage);
+		__debugInfo = "77:\JumpIt.gbas";
+		global15_TrampolineImage = GENSPRITE();
+		__debugInfo = "78:\JumpIt.gbas";
+		LOADSPRITE("trampolin.png", global15_TrampolineImage);
+		__debugInfo = "81:\JumpIt.gbas";
+		global8_PigImage = GENSPRITE();
+		__debugInfo = "82:\JumpIt.gbas";
+		LOADANIM("schwein.png", global8_PigImage, 32, 32);
+		__debugInfo = "85:\JumpIt.gbas";
+		global10_HumanImage = GENSPRITE();
+		__debugInfo = "86:\JumpIt.gbas";
+		LOADSPRITE("fettmonster.png", global10_HumanImage);
+		__debugInfo = "89:\JumpIt.gbas";
+		global9_BirdImage = GENSPRITE();
+		__debugInfo = "90:\JumpIt.gbas";
+		LOADANIM("vogel.png", global9_BirdImage, 32, 16);
+		__debugInfo = "93:\JumpIt.gbas";
+		global9_ShitImage = GENSPRITE();
+		__debugInfo = "94:\JumpIt.gbas";
+		LOADSPRITE("exkrement.png", global9_ShitImage);
+		__debugInfo = "97:\JumpIt.gbas";
+		global10_LlamaImage = GENSPRITE();
+		__debugInfo = "98:\JumpIt.gbas";
+		LOADANIM("llama.png", global10_LlamaImage, 46, 64);
+		__debugInfo = "101:\JumpIt.gbas";
+		global9_SpitImage = GENSPRITE();
+		__debugInfo = "102:\JumpIt.gbas";
+		LOADSPRITE("spucke.png", global9_SpitImage);
+		__debugInfo = "105:\JumpIt.gbas";
+		global9_DoorImage = GENSPRITE();
+		__debugInfo = "106:\JumpIt.gbas";
+		LOADSPRITE("tuer.png", global9_DoorImage);
+		__debugInfo = "109:\JumpIt.gbas";
+		global12_TriggerImage = GENSPRITE();
+		__debugInfo = "110:\JumpIt.gbas";
+		LOADANIM("schalter.png", global12_TriggerImage, 32, 16);
+		__debugInfo = "113:\JumpIt.gbas";
+		global12_DynamitImage = GENSPRITE();
+		__debugInfo = "114:\JumpIt.gbas";
+		LOADSPRITE("dynamit.png", global12_DynamitImage);
+		__debugInfo = "117:\JumpIt.gbas";
+		global14_ExplosionImage = GENSPRITE();
+		__debugInfo = "118:\JumpIt.gbas";
+		LOADANIM("explosion.png", global14_ExplosionImage, 32, 32);
+		__debugInfo = "121:\JumpIt.gbas";
+		global9_MenuImage = GENSPRITE();
+		__debugInfo = "122:\JumpIt.gbas";
+		LOADSPRITE("menu.png", global9_MenuImage);
+		__debugInfo = "125:\JumpIt.gbas";
+		global11_ButtonImage = GENSPRITE();
+		__debugInfo = "126:\JumpIt.gbas";
+		LOADSPRITE("button.png", global11_ButtonImage);
+		__debugInfo = "129:\JumpIt.gbas";
+		global10_ArrowImage = GENSPRITE();
+		__debugInfo = "130:\JumpIt.gbas";
+		LOADSPRITE("pfeil.png", global10_ArrowImage);
+		__debugInfo = "133:\JumpIt.gbas";
+		global9_JumpImage = GENSPRITE();
+		__debugInfo = "134:\JumpIt.gbas";
+		LOADSPRITE("springen.png", global9_JumpImage);
+		__debugInfo = "140:\JumpIt.gbas";
+		CLEARSCREEN(RGB(63, 156, 255));
+		__debugInfo = "142:\JumpIt.gbas";
+		Init();
+		__debugInfo = "143:\JumpIt.gbas";
+		global9_Title_Str = "JumpIt Spielmenue";
+		__debugInfo = "144:\JumpIt.gbas";
+		global9_Menu1_Str = "Spielen";
+		__debugInfo = "145:\JumpIt.gbas";
+		global9_Menu2_Str = "Mapeditor";
+		__debugInfo = "146:\JumpIt.gbas";
+		global9_Menu3_Str = "Beenden";
+		__debugInfo = "147:\JumpIt.gbas";
+		PUSHLOOP("MENU_LOOP");
+		__debugInfo = "257:\JumpIt.gbas";
+		global9_Menu3_Str = "";
+		__debugInfo = "28:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5186,1254 +4718,31 @@ window['main'] = function(){
 	}
 	
 }
-window['func9_UserInput'] = function(param2_tp) {
-	stackPush("function: UserInput", __debugInfo);
+window['GLB_ON_LOOP'] = function() {
+	stackPush("sub: GLB_ON_LOOP", __debugInfo);
 	try {
-		var local8_speedlim_1331 = 0.0, local2_rv_1332 = 0.0;
-		__debugInfo = "269:\Scramble.gbas";
-		local8_speedlim_1331 = 12;
-		__debugInfo = "270:\Scramble.gbas";
+		__debugInfo = "158:\JumpIt.gbas";
 		{
-			var local16___SelectHelper1__1333 = 0.0;
-			__debugInfo = "270:\Scramble.gbas";
-			local16___SelectHelper1__1333 = param2_tp;
-			__debugInfo = "276:\Scramble.gbas";
-			if ((((local16___SelectHelper1__1333) == (0)) ? 1 : 0)) {
-				__debugInfo = "271:\Scramble.gbas";
-				local2_rv_1332 = ((((((((MOUSEAXIS(0)) / (local8_speedlim_1331))) + (KEY(205)))) - (KEY(203)))) + (GETJOYX(0)));
-				__debugInfo = "271:\Scramble.gbas";
-			} else if ((((local16___SelectHelper1__1333) == (1)) ? 1 : 0)) {
-				__debugInfo = "272:\Scramble.gbas";
-				local2_rv_1332 = ((((((((MOUSEAXIS(1)) / (local8_speedlim_1331))) + (KEY(200)))) - (KEY(208)))) + (GETJOYY(0)));
-				__debugInfo = "272:\Scramble.gbas";
-			} else if ((((local16___SelectHelper1__1333) == (2)) ? 1 : 0)) {
-				__debugInfo = "273:\Scramble.gbas";
-				local2_rv_1332 = ((((((MOUSEAXIS(2)) + (KEY(52)))) - (KEY(51)))) + (GETJOYZ(0)));
-				__debugInfo = "273:\Scramble.gbas";
-			} else if ((((local16___SelectHelper1__1333) == (3)) ? 1 : 0)) {
-				__debugInfo = "274:\Scramble.gbas";
-				local2_rv_1332 = ((((MOUSEAXIS(3)) + (KEY(42)))) + (GETJOYBUTTON(0, 0)));
-				__debugInfo = "274:\Scramble.gbas";
-			} else if ((((local16___SelectHelper1__1333) == (4)) ? 1 : 0)) {
-				__debugInfo = "275:\Scramble.gbas";
-				local2_rv_1332 = ((((MOUSEAXIS(4)) + (KEY(29)))) + (GETJOYBUTTON(0, 1)));
-				__debugInfo = "275:\Scramble.gbas";
+			var ex_Str = "";
+			__debugInfo = "159:\JumpIt.gbas";
+			try {
+				__debugInfo = "155:\JumpIt.gbas";
+				Update();
+				__debugInfo = "156:\JumpIt.gbas";
+				Update();
+				__debugInfo = "157:\JumpIt.gbas";
+				Render();
+				__debugInfo = "155:\JumpIt.gbas";
+			} catch (ex_Str) {
+				if (ex_Str instanceof GLBException) ex_Str = ex_Str.getText(); else throwError(ex_Str);{
+					
+				}
 			};
-			__debugInfo = "270:\Scramble.gbas";
+			__debugInfo = "159:\JumpIt.gbas";
 		};
-		__debugInfo = "277:\Scramble.gbas";
-		if ((((local2_rv_1332) > (1)) ? 1 : 0)) {
-			__debugInfo = "277:\Scramble.gbas";
-			local2_rv_1332 = 1;
-			__debugInfo = "277:\Scramble.gbas";
-		};
-		__debugInfo = "278:\Scramble.gbas";
-		if ((((local2_rv_1332) < (-(1))) ? 1 : 0)) {
-			__debugInfo = "278:\Scramble.gbas";
-			local2_rv_1332 = -(1);
-			__debugInfo = "278:\Scramble.gbas";
-		};
-		__debugInfo = "279:\Scramble.gbas";
-		return tryClone(local2_rv_1332);
-		__debugInfo = "280:\Scramble.gbas";
-		return 0;
-		__debugInfo = "269:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func4_SINq'] = function(param1_a) {
-	stackPush("function: SINq", __debugInfo);
-	try {
-		__debugInfo = "283:\Scramble.gbas";
-		if ((((param1_a) < (0)) ? 1 : 0)) {
-			__debugInfo = "283:\Scramble.gbas";
-			param1_a = ((180) - (param1_a));
-			__debugInfo = "283:\Scramble.gbas";
-		};
-		__debugInfo = "284:\Scramble.gbas";
-		return tryClone(global5_q_sin.arrAccess(MOD(~~(param1_a), 360)).values[tmpPositionCache]);
-		__debugInfo = "285:\Scramble.gbas";
-		return 0;
-		__debugInfo = "283:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func4_Show'] = function(param5_dtime, param6_isdemo) {
-	stackPush("function: Show", __debugInfo);
-	try {
-		var local2_sc_1336 = 0.0, local4_offx_1337 = 0.0, local4_offy_1338 = 0.0, local1_i_1339 = 0.0, local1_j_1340 = 0.0, local3_col_1341 = 0.0, local1_x_1342 = 0.0, local1_y_1343 = 0.0, local3_phi_1344 = 0.0, local5_sight_1345 = 0.0, local6_bsight_1346 = 0.0;
-		__debugInfo = "305:\Scramble.gbas";
-		if (KEY(33)) {
-			__debugInfo = "303:\Scramble.gbas";
-			while (KEY(33)) {
-				
-			};
-			__debugInfo = "304:\Scramble.gbas";
-			global7_flicker = ((1) - (global7_flicker));
-			__debugInfo = "303:\Scramble.gbas";
-		};
-		__debugInfo = "310:\Scramble.gbas";
-		if (KEY(46)) {
-			__debugInfo = "308:\Scramble.gbas";
-			while (KEY(46)) {
-				
-			};
-			__debugInfo = "309:\Scramble.gbas";
-			global9_colormode = ((1) - (global9_colormode));
-			__debugInfo = "308:\Scramble.gbas";
-		};
-		__debugInfo = "313:\Scramble.gbas";
-		local2_sc_1336 = global5_scale;
-		__debugInfo = "314:\Scramble.gbas";
-		local4_offx_1337 = ((((global4_scrn) * (local2_sc_1336))) - (((global7_screenx_ref[0]) / (2))));
-		__debugInfo = "315:\Scramble.gbas";
-		local4_offy_1338 = ((local2_sc_1336) - (((global7_screeny_ref[0]) * (0.5))));
-		__debugInfo = "316:\Scramble.gbas";
-		local3_col_1341 = RGB(255, 128, 0);
-		__debugInfo = "317:\Scramble.gbas";
-		local5_sight_1345 = INTEGER(((30) + (global4_scrn)));
-		__debugInfo = "318:\Scramble.gbas";
-		local6_bsight_1346 = INTEGER(((global4_scrn) - (30)));
-		__debugInfo = "319:\Scramble.gbas";
-		{
-			__debugInfo = "327:\Scramble.gbas";
-			for (local1_i_1339 = MAX(0, INTEGER(((global4_scrn) - (16))));toCheck(local1_i_1339, MIN(local5_sight_1345, ((BOUNDS(global4_cave, 0)) - (2))), 1);local1_i_1339 += 1) {
-				__debugInfo = "321:\Scramble.gbas";
-				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (1))) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
-				__debugInfo = "322:\Scramble.gbas";
-				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (1))) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
-				__debugInfo = "324:\Scramble.gbas";
-				func4_Line(((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), ((((local1_i_1339) * (local2_sc_1336))) - (local4_offx_1337)), ((((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (4))) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
-				__debugInfo = "325:\Scramble.gbas";
-				local1_y_1343 = ((((global4_cave.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (global4_cave.arrAccess(~~(((local1_i_1339) + (1))), 1).values[tmpPositionCache]))) / (2));
-				__debugInfo = "326:\Scramble.gbas";
-				func4_Line(((((((local1_i_1339) + (0.5))) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), ((((((local1_i_1339) + (0.5))) * (local2_sc_1336))) - (local4_offx_1337)), ((((((local1_y_1343) + (2))) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341);
-				__debugInfo = "321:\Scramble.gbas";
-			};
-			__debugInfo = "327:\Scramble.gbas";
-		};
-		__debugInfo = "330:\Scramble.gbas";
-		func8_MoveUfos();
-		__debugInfo = "330:\Scramble.gbas";
-		{
-			__debugInfo = "345:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "332:\Scramble.gbas";
-				local1_x_1342 = global3_ufo.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
-				__debugInfo = "333:\Scramble.gbas";
-				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
-					__debugInfo = "333:\Scramble.gbas";
-					break;
-					__debugInfo = "333:\Scramble.gbas";
-				};
-				__debugInfo = "344:\Scramble.gbas";
-				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
-					__debugInfo = "335:\Scramble.gbas";
-					local1_y_1343 = global3_ufo.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache];
-					__debugInfo = "336:\Scramble.gbas";
-					local3_phi_1344 = 0;
-					__debugInfo = "341:\Scramble.gbas";
-					if ((((global3_ufo.arrAccess(~~(local1_i_1339), 3).values[tmpPositionCache]) == (1)) ? 1 : 0)) {
-						__debugInfo = "338:\Scramble.gbas";
-						local3_phi_1344 = ((-(GETTIMERALL())) * (0.7));
-						__debugInfo = "338:\Scramble.gbas";
-					} else {
-						__debugInfo = "340:\Scramble.gbas";
-						local3_phi_1344 = ((SIN(((GETTIMERALL()) * (20)))) * (15));
-						__debugInfo = "340:\Scramble.gbas";
-					};
-					__debugInfo = "342:\Scramble.gbas";
-					func5_thing(2, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, local3_phi_1344);
-					__debugInfo = "343:\Scramble.gbas";
-					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
-						__debugInfo = "343:\Scramble.gbas";
-						global8_gameover = 1;
-						__debugInfo = "343:\Scramble.gbas";
-					};
-					__debugInfo = "335:\Scramble.gbas";
-				};
-				__debugInfo = "332:\Scramble.gbas";
-			};
-			__debugInfo = "345:\Scramble.gbas";
-		};
-		__debugInfo = "348:\Scramble.gbas";
-		//label: fuels;
-		__debugInfo = "350:\Scramble.gbas";
-		local3_col_1341 = RGB(128, 255, 0);
-		__debugInfo = "350:\Scramble.gbas";
-		{
-			__debugInfo = "359:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_fuel, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "352:\Scramble.gbas";
-				local1_x_1342 = global4_fuel.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
-				__debugInfo = "353:\Scramble.gbas";
-				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
-					__debugInfo = "353:\Scramble.gbas";
-					break;
-					__debugInfo = "353:\Scramble.gbas";
-				};
-				__debugInfo = "358:\Scramble.gbas";
-				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
-					__debugInfo = "355:\Scramble.gbas";
-					local1_y_1343 = func8_bottomat(local1_x_1342);
-					__debugInfo = "356:\Scramble.gbas";
-					func5_thing(((6) + (global4_fuel.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache])), ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
-					__debugInfo = "357:\Scramble.gbas";
-					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
-						__debugInfo = "357:\Scramble.gbas";
-						global8_gameover = 1;
-						__debugInfo = "357:\Scramble.gbas";
-					};
-					__debugInfo = "355:\Scramble.gbas";
-				};
-				__debugInfo = "352:\Scramble.gbas";
-			};
-			__debugInfo = "359:\Scramble.gbas";
-		};
-		__debugInfo = "360:\Scramble.gbas";
-		//label: rockets;
-		__debugInfo = "361:\Scramble.gbas";
-		local3_col_1341 = RGB(255, 255, 0);
-		__debugInfo = "361:\Scramble.gbas";
-		{
-			__debugInfo = "380:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global6_rocket, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "363:\Scramble.gbas";
-				local1_x_1342 = global6_rocket.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
-				__debugInfo = "364:\Scramble.gbas";
-				if ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0)) {
-					__debugInfo = "364:\Scramble.gbas";
-					break;
-					__debugInfo = "364:\Scramble.gbas";
-				};
-				__debugInfo = "379:\Scramble.gbas";
-				if ((((local1_x_1342) > (local6_bsight_1346)) ? 1 : 0)) {
-					__debugInfo = "366:\Scramble.gbas";
-					local1_y_1343 = global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
-					__debugInfo = "376:\Scramble.gbas";
-					if ((((((((((local1_x_1342) < (((global3_plx_ref[0]) + (CAST2INT(((MOD(~~(((local1_x_1342) - (2))), 10)) / (5))))))) ? 1 : 0)) || ((((((local1_x_1342) - (global3_plx_ref[0]))) < (((((local1_y_1343) - (global3_ply_ref[0]))) / (2)))) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) < (((func8_bottomat(local1_x_1342)) - (0.1)))) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "368:\Scramble.gbas";
-						local1_y_1343+=-(((param5_dtime) / (1500)));
-						__debugInfo = "375:\Scramble.gbas";
-						if ((((local1_y_1343) < (func9_ceilingat(local1_x_1342))) ? 1 : 0)) {
-							__debugInfo = "370:\Scramble.gbas";
-							global6_rocket.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = 0;
-							__debugInfo = "371:\Scramble.gbas";
-							global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = 10000;
-							__debugInfo = "372:\Scramble.gbas";
-							if ((((param6_isdemo) == (0)) ? 1 : 0)) {
-								__debugInfo = "372:\Scramble.gbas";
-								func7_addboom(local1_x_1342, local1_y_1343);
-								__debugInfo = "372:\Scramble.gbas";
-							};
-							__debugInfo = "370:\Scramble.gbas";
-						} else {
-							__debugInfo = "374:\Scramble.gbas";
-							global6_rocket.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = local1_y_1343;
-							__debugInfo = "374:\Scramble.gbas";
-						};
-						__debugInfo = "368:\Scramble.gbas";
-					};
-					__debugInfo = "377:\Scramble.gbas";
-					func5_thing(4, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
-					__debugInfo = "378:\Scramble.gbas";
-					if (func8_col_thth(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]), local1_x_1342, local1_y_1343)) {
-						__debugInfo = "378:\Scramble.gbas";
-						global8_gameover = 1;
-						__debugInfo = "378:\Scramble.gbas";
-					};
-					__debugInfo = "366:\Scramble.gbas";
-				};
-				__debugInfo = "363:\Scramble.gbas";
-			};
-			__debugInfo = "380:\Scramble.gbas";
-		};
-		__debugInfo = "381:\Scramble.gbas";
-		//label: bombs;
-		__debugInfo = "383:\Scramble.gbas";
-		local3_col_1341 = RGB(240, 240, 240);
-		__debugInfo = "383:\Scramble.gbas";
-		{
-			__debugInfo = "396:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_bomb, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "385:\Scramble.gbas";
-				global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) + (((param5_dtime) / (2500))));
-				__debugInfo = "386:\Scramble.gbas";
-				global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) + (((((param5_dtime) * (global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]))) / (1200))));
-				__debugInfo = "387:\Scramble.gbas";
-				global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = ((global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) + (((param5_dtime) / (1800))));
-				__debugInfo = "388:\Scramble.gbas";
-				local3_phi_1344 = ATAN(-(0.5), global4_bomb.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]);
-				__debugInfo = "389:\Scramble.gbas";
-				func5_thing(1, ((((global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, local3_phi_1344);
-				__debugInfo = "390:\Scramble.gbas";
-				local1_y_1343 = func8_bottomat(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]);
-				__debugInfo = "395:\Scramble.gbas";
-				if ((((func6_impact(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache], global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache])) || ((((global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) > (local1_y_1343)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "393:\Scramble.gbas";
-					func7_addboom(global4_bomb.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache], global4_bomb.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]);
-					__debugInfo = "394:\Scramble.gbas";
-					DIMDEL(global4_bomb, ~~(local1_i_1339));
-					__debugInfo = "393:\Scramble.gbas";
-				};
-				__debugInfo = "385:\Scramble.gbas";
-			};
-			__debugInfo = "396:\Scramble.gbas";
-		};
-		__debugInfo = "397:\Scramble.gbas";
-		//label: shots;
-		__debugInfo = "398:\Scramble.gbas";
-		{
-			__debugInfo = "409:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_shot, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "400:\Scramble.gbas";
-				local1_y_1343 = global4_shot.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache];
-				__debugInfo = "401:\Scramble.gbas";
-				local1_x_1342 = global4_shot.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache];
-				__debugInfo = "402:\Scramble.gbas";
-				global4_shot.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache] = ((local1_x_1342) + (((param5_dtime) / (500))));
-				__debugInfo = "407:\Scramble.gbas";
-				if ((((((((((func6_impact(local1_x_1342, local1_y_1343)) || ((((local1_x_1342) > (local5_sight_1345)) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) < (func9_ceilingat(local1_x_1342))) ? 1 : 0))) ? 1 : 0)) || ((((local1_y_1343) > (func8_bottomat(local1_x_1342))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "404:\Scramble.gbas";
-					if ((((param6_isdemo) == (0)) ? 1 : 0)) {
-						__debugInfo = "404:\Scramble.gbas";
-						func7_addboom(local1_x_1342, local1_y_1343);
-						__debugInfo = "404:\Scramble.gbas";
-					};
-					__debugInfo = "405:\Scramble.gbas";
-					DIMDEL(global4_shot, ~~(local1_i_1339));
-					__debugInfo = "406:\Scramble.gbas";
-					local1_i_1339+=-(1);
-					__debugInfo = "404:\Scramble.gbas";
-				};
-				__debugInfo = "408:\Scramble.gbas";
-				func5_thing(5, ((((local1_x_1342) * (local2_sc_1336))) - (local4_offx_1337)), ((((local1_y_1343) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
-				__debugInfo = "400:\Scramble.gbas";
-			};
-			__debugInfo = "409:\Scramble.gbas";
-		};
-		__debugInfo = "410:\Scramble.gbas";
-		//label: player;
-		__debugInfo = "412:\Scramble.gbas";
-		local3_col_1341 = RGB(0, 128, 255);
-		__debugInfo = "413:\Scramble.gbas";
-		func5_thing(0, ((((global3_plx_ref[0]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global3_ply_ref[0]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, local2_sc_1336, 0);
-		__debugInfo = "414:\Scramble.gbas";
-		//label: booms;
-		__debugInfo = "415:\Scramble.gbas";
-		{
-			__debugInfo = "425:\Scramble.gbas";
-			for (local1_i_1339 = 0;toCheck(local1_i_1339, ((BOUNDS(global4_boom, 0)) - (1)), 1);local1_i_1339 += 1) {
-				__debugInfo = "417:\Scramble.gbas";
-				global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache] = ((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) + (((param5_dtime) / (1000))));
-				__debugInfo = "424:\Scramble.gbas";
-				if ((((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) > (3)) ? 1 : 0)) {
-					__debugInfo = "419:\Scramble.gbas";
-					DIMDEL(global4_boom, ~~(local1_i_1339));
-					__debugInfo = "420:\Scramble.gbas";
-					local1_i_1339 = ((local1_i_1339) - (1));
-					__debugInfo = "419:\Scramble.gbas";
-				} else {
-					__debugInfo = "422:\Scramble.gbas";
-					local3_col_1341 = RGB(255, ~~(((255) - (((((global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache]) / (3))) * (255))))), 0);
-					__debugInfo = "423:\Scramble.gbas";
-					func5_thing(3, ((((global4_boom.arrAccess(~~(local1_i_1339), 0).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offx_1337)), ((((global4_boom.arrAccess(~~(local1_i_1339), 1).values[tmpPositionCache]) * (local2_sc_1336))) - (local4_offy_1338)), local3_col_1341, ((local2_sc_1336) * (global4_boom.arrAccess(~~(local1_i_1339), 2).values[tmpPositionCache])), ((0.7) * (GETTIMERALL())));
-					__debugInfo = "422:\Scramble.gbas";
-				};
-				__debugInfo = "417:\Scramble.gbas";
-			};
-			__debugInfo = "425:\Scramble.gbas";
-		};
-		__debugInfo = "427:\Scramble.gbas";
-		if (func8_col_wall(unref(global3_plx_ref[0]), unref(global3_ply_ref[0]))) {
-			__debugInfo = "427:\Scramble.gbas";
-			global8_gameover = 1;
-			__debugInfo = "427:\Scramble.gbas";
-		};
-		__debugInfo = "428:\Scramble.gbas";
-		return 0;
-		__debugInfo = "305:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func6_impact'] = function(param3_shx, param3_shy) {
-	stackPush("function: impact", __debugInfo);
-	try {
-		var local1_x_1349 = 0.0, local1_y_1350 = 0.0, local1_i_1351 = 0.0;
-		__debugInfo = "435:\Scramble.gbas";
-		{
-			__debugInfo = "447:\Scramble.gbas";
-			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1351 += 1) {
-				__debugInfo = "437:\Scramble.gbas";
-				local1_x_1349 = global3_ufo.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache];
-				__debugInfo = "438:\Scramble.gbas";
-				local1_y_1350 = global3_ufo.arrAccess(~~(local1_i_1351), 2).values[tmpPositionCache];
-				__debugInfo = "445:\Scramble.gbas";
-				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, local1_y_1350)) {
-					__debugInfo = "443:\Scramble.gbas";
-					if ((((global3_ufo.arrAccess(~~(local1_i_1351), 3).values[tmpPositionCache]) == (0)) ? 1 : 0)) {
-						__debugInfo = "441:\Scramble.gbas";
-						global5_score+=100;
-						__debugInfo = "442:\Scramble.gbas";
-						DIMDEL(global3_ufo, ~~(local1_i_1351));
-						__debugInfo = "441:\Scramble.gbas";
-					};
-					__debugInfo = "444:\Scramble.gbas";
-					return tryClone(1);
-					__debugInfo = "443:\Scramble.gbas";
-				};
-				__debugInfo = "446:\Scramble.gbas";
-				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
-					__debugInfo = "446:\Scramble.gbas";
-					break;
-					__debugInfo = "446:\Scramble.gbas";
-				};
-				__debugInfo = "437:\Scramble.gbas";
-			};
-			__debugInfo = "447:\Scramble.gbas";
-		};
-		__debugInfo = "449:\Scramble.gbas";
-		{
-			__debugInfo = "464:\Scramble.gbas";
-			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global4_fuel, 0)) - (1)), 1);local1_i_1351 += 1) {
-				__debugInfo = "451:\Scramble.gbas";
-				local1_x_1349 = global4_fuel.arrAccess(~~(local1_i_1351), 0).values[tmpPositionCache];
-				__debugInfo = "462:\Scramble.gbas";
-				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, func8_bottomat(local1_x_1349))) {
-					__debugInfo = "459:\Scramble.gbas";
-					if (global4_fuel.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache]) {
-						__debugInfo = "454:\Scramble.gbas";
-						PLAYSOUND(3, 0, 1);
-						__debugInfo = "455:\Scramble.gbas";
-						global4_tank = MIN(100, ((global4_tank) + (10)));
-						__debugInfo = "456:\Scramble.gbas";
-						global5_score+=150;
-						__debugInfo = "454:\Scramble.gbas";
-					} else {
-						__debugInfo = "458:\Scramble.gbas";
-						global5_score+=((((RND(4)) * (100))) + (100));
-						__debugInfo = "458:\Scramble.gbas";
-					};
-					__debugInfo = "460:\Scramble.gbas";
-					DIMDEL(global4_fuel, ~~(local1_i_1351));
-					__debugInfo = "461:\Scramble.gbas";
-					return tryClone(1);
-					__debugInfo = "459:\Scramble.gbas";
-				};
-				__debugInfo = "463:\Scramble.gbas";
-				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
-					__debugInfo = "463:\Scramble.gbas";
-					break;
-					__debugInfo = "463:\Scramble.gbas";
-				};
-				__debugInfo = "451:\Scramble.gbas";
-			};
-			__debugInfo = "464:\Scramble.gbas";
-		};
-		__debugInfo = "466:\Scramble.gbas";
-		{
-			__debugInfo = "475:\Scramble.gbas";
-			for (local1_i_1351 = 0;toCheck(local1_i_1351, ((BOUNDS(global6_rocket, 0)) - (1)), 1);local1_i_1351 += 1) {
-				__debugInfo = "468:\Scramble.gbas";
-				local1_x_1349 = global6_rocket.arrAccess(~~(local1_i_1351), 0).values[tmpPositionCache];
-				__debugInfo = "473:\Scramble.gbas";
-				if (func8_col_thth(param3_shx, param3_shy, local1_x_1349, global6_rocket.arrAccess(~~(local1_i_1351), 1).values[tmpPositionCache])) {
-					__debugInfo = "470:\Scramble.gbas";
-					global5_score+=((50) + (((RND(1)) * (30))));
-					__debugInfo = "471:\Scramble.gbas";
-					DIMDEL(global6_rocket, ~~(local1_i_1351));
-					__debugInfo = "472:\Scramble.gbas";
-					return tryClone(1);
-					__debugInfo = "470:\Scramble.gbas";
-				};
-				__debugInfo = "474:\Scramble.gbas";
-				if ((((local1_x_1349) > (param3_shx)) ? 1 : 0)) {
-					__debugInfo = "474:\Scramble.gbas";
-					break;
-					__debugInfo = "474:\Scramble.gbas";
-				};
-				__debugInfo = "468:\Scramble.gbas";
-			};
-			__debugInfo = "475:\Scramble.gbas";
-		};
-		__debugInfo = "476:\Scramble.gbas";
-		return 0;
-		__debugInfo = "477:\Scramble.gbas";
-		return 0;
-		__debugInfo = "435:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_Interpol'] = function(param1_a, param1_b, param1_x) {
-	stackPush("function: Interpol", __debugInfo);
-	try {
-		__debugInfo = "484:\Scramble.gbas";
-		return tryClone(((((((param1_b) - (param1_a))) * (param1_x))) + (param1_a)));
-		__debugInfo = "485:\Scramble.gbas";
-		return 0;
-		__debugInfo = "484:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_bottomat'] = function(param1_x) {
-	stackPush("function: bottomat", __debugInfo);
-	try {
-		var local1_i_1353 = 0.0, local1_j_1354 = 0.0;
-		__debugInfo = "489:\Scramble.gbas";
-		local1_i_1353 = MOD(INTEGER(ABS(param1_x)), BOUNDS(global4_cave, 0));
-		__debugInfo = "490:\Scramble.gbas";
-		local1_j_1354 = MOD(((INTEGER(ABS(param1_x))) + (1)), BOUNDS(global4_cave, 0));
-		__debugInfo = "491:\Scramble.gbas";
-		return tryClone(func8_Interpol(global4_cave.arrAccess(~~(local1_i_1353), 1).values[tmpPositionCache], global4_cave.arrAccess(~~(local1_j_1354), 1).values[tmpPositionCache], ((param1_x) - (local1_i_1353))));
-		__debugInfo = "492:\Scramble.gbas";
-		return 0;
-		__debugInfo = "489:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func9_ceilingat'] = function(param1_x) {
-	stackPush("function: ceilingat", __debugInfo);
-	try {
-		var local1_i_1356 = 0.0, local1_j_1357 = 0.0;
-		__debugInfo = "496:\Scramble.gbas";
-		local1_i_1356 = MOD(INTEGER(ABS(param1_x)), BOUNDS(global4_cave, 0));
-		__debugInfo = "497:\Scramble.gbas";
-		local1_j_1357 = MOD(((INTEGER(ABS(param1_x))) + (1)), BOUNDS(global4_cave, 0));
-		__debugInfo = "498:\Scramble.gbas";
-		return tryClone(func8_Interpol(global4_cave.arrAccess(~~(local1_i_1356), 0).values[tmpPositionCache], global4_cave.arrAccess(~~(local1_j_1357), 0).values[tmpPositionCache], ((param1_x) - (local1_i_1356))));
-		__debugInfo = "499:\Scramble.gbas";
-		return 0;
-		__debugInfo = "496:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func5_thing'] = function(param2_id, param1_x, param1_y, param3_col, param2_sc, param3_phi) {
-	stackPush("function: thing", __debugInfo);
-	try {
-		var local1_i_1364 = 0.0, local2_x1_1365 = 0.0, local2_y1_1366 = 0.0, local2_x2_1367 = 0.0, local2_y2_1368 = 0.0, local2_cp_1369 = 0.0, local2_sp_1370 = 0.0;
-		__debugInfo = "503:\Scramble.gbas";
-		local2_sp_1370 = SIN(param3_phi);
-		__debugInfo = "504:\Scramble.gbas";
-		local2_cp_1369 = COS(param3_phi);
-		__debugInfo = "504:\Scramble.gbas";
-		{
-			__debugInfo = "512:\Scramble.gbas";
-			for (local1_i_1364 = 0;toCheck(local1_i_1364, ((global4_objn.arrAccess(~~(param2_id)).values[tmpPositionCache]) - (2)), 1);local1_i_1364 += 1) {
-				__debugInfo = "506:\Scramble.gbas";
-				local2_x1_1365 = ((((global4_objx.arrAccess(~~(param2_id), ~~(local1_i_1364)).values[tmpPositionCache]) - (0.5))) * (param2_sc));
-				__debugInfo = "507:\Scramble.gbas";
-				local2_y1_1366 = ((((global4_objy.arrAccess(~~(param2_id), ~~(local1_i_1364)).values[tmpPositionCache]) - (1))) * (param2_sc));
-				__debugInfo = "508:\Scramble.gbas";
-				local2_x2_1367 = ((((global4_objx.arrAccess(~~(param2_id), ~~(((local1_i_1364) + (1)))).values[tmpPositionCache]) - (0.5))) * (param2_sc));
-				__debugInfo = "509:\Scramble.gbas";
-				local2_y2_1368 = ((((global4_objy.arrAccess(~~(param2_id), ~~(((local1_i_1364) + (1)))).values[tmpPositionCache]) - (1))) * (param2_sc));
-				__debugInfo = "511:\Scramble.gbas";
-				func4_Line(((((((local2_x1_1365) * (local2_cp_1369))) - (((local2_y1_1366) * (local2_sp_1370))))) + (param1_x)), ((((((local2_x1_1365) * (local2_sp_1370))) + (((local2_y1_1366) * (local2_cp_1369))))) + (param1_y)), ((((((local2_x2_1367) * (local2_cp_1369))) - (((local2_y2_1368) * (local2_sp_1370))))) + (param1_x)), ((((((local2_x2_1367) * (local2_sp_1370))) + (((local2_y2_1368) * (local2_cp_1369))))) + (param1_y)), param3_col);
-				__debugInfo = "506:\Scramble.gbas";
-			};
-			__debugInfo = "512:\Scramble.gbas";
-		};
-		__debugInfo = "513:\Scramble.gbas";
-		return 0;
-		__debugInfo = "503:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_col_thth'] = function(param2_x1, param2_y1, param2_x2, param2_y2) {
-	stackPush("function: col_thth", __debugInfo);
-	try {
-		var local1_x_1375 = 0.0, local1_y_1376 = 0.0;
-		__debugInfo = "519:\Scramble.gbas";
-		local1_x_1375 = ((param2_x1) - (param2_x2));
-		__debugInfo = "520:\Scramble.gbas";
-		local1_y_1376 = ((param2_y1) - (param2_y2));
-		__debugInfo = "521:\Scramble.gbas";
-		local1_x_1375 = ((((local1_x_1375) * (local1_x_1375))) + (((local1_y_1376) * (local1_y_1376))));
-		__debugInfo = "522:\Scramble.gbas";
-		if ((((local1_x_1375) < (1)) ? 1 : 0)) {
-			__debugInfo = "522:\Scramble.gbas";
-			return tryClone(1);
-			__debugInfo = "522:\Scramble.gbas";
-		};
-		__debugInfo = "523:\Scramble.gbas";
-		return 0;
-		__debugInfo = "524:\Scramble.gbas";
-		return 0;
-		__debugInfo = "519:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_col_wall'] = function(param1_x, param1_y) {
-	stackPush("function: col_wall", __debugInfo);
-	try {
-		var local1_c_1379 = 0.0;
-		__debugInfo = "528:\Scramble.gbas";
-		local1_c_1379 = func8_bottomat(param1_x);
-		__debugInfo = "529:\Scramble.gbas";
-		if ((((local1_c_1379) < (param1_y)) ? 1 : 0)) {
-			__debugInfo = "529:\Scramble.gbas";
-			return tryClone(1);
-			__debugInfo = "529:\Scramble.gbas";
-		};
-		__debugInfo = "530:\Scramble.gbas";
-		local1_c_1379 = func9_ceilingat(param1_x);
-		__debugInfo = "531:\Scramble.gbas";
-		if ((((local1_c_1379) > (param1_y)) ? 1 : 0)) {
-			__debugInfo = "531:\Scramble.gbas";
-			return tryClone(1);
-			__debugInfo = "531:\Scramble.gbas";
-		};
-		__debugInfo = "532:\Scramble.gbas";
-		return 0;
-		__debugInfo = "533:\Scramble.gbas";
-		return 0;
-		__debugInfo = "528:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func7_addshot'] = function(param1_x, param1_y) {
-	stackPush("function: addshot", __debugInfo);
-	try {
-		var local1_m_1382 = 0.0;
-		__debugInfo = "537:\Scramble.gbas";
-		PLAYSOUND(2, 0, 1);
-		__debugInfo = "538:\Scramble.gbas";
-		local1_m_1382 = BOUNDS(global4_shot, 0);
-		__debugInfo = "539:\Scramble.gbas";
-		REDIM(global4_shot, [~~(((local1_m_1382) + (1))), 2], 0.0 );
-		__debugInfo = "540:\Scramble.gbas";
-		global4_shot.arrAccess(~~(local1_m_1382), 0).values[tmpPositionCache] = param1_x;
-		__debugInfo = "541:\Scramble.gbas";
-		global4_shot.arrAccess(~~(local1_m_1382), 1).values[tmpPositionCache] = param1_y;
-		__debugInfo = "542:\Scramble.gbas";
-		return 0;
-		__debugInfo = "537:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_dropbomb'] = function(param1_x, param1_y) {
-	stackPush("function: dropbomb", __debugInfo);
-	try {
-		var local1_m_1385 = 0.0;
-		__debugInfo = "546:\Scramble.gbas";
-		PLAYSOUND(0, 0, 1);
-		__debugInfo = "547:\Scramble.gbas";
-		local1_m_1385 = BOUNDS(global4_bomb, 0);
-		__debugInfo = "548:\Scramble.gbas";
-		REDIM(global4_bomb, [~~(((local1_m_1385) + (1))), 3], 0.0 );
-		__debugInfo = "549:\Scramble.gbas";
-		global4_bomb.arrAccess(~~(local1_m_1385), 0).values[tmpPositionCache] = param1_x;
-		__debugInfo = "550:\Scramble.gbas";
-		global4_bomb.arrAccess(~~(local1_m_1385), 1).values[tmpPositionCache] = param1_y;
-		__debugInfo = "551:\Scramble.gbas";
-		global4_bomb.arrAccess(~~(local1_m_1385), 2).values[tmpPositionCache] = 0;
-		__debugInfo = "552:\Scramble.gbas";
-		return 0;
-		__debugInfo = "546:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func7_addboom'] = function(param1_x, param1_y) {
-	stackPush("function: addboom", __debugInfo);
-	try {
-		var local1_m_1388 = 0.0;
-		__debugInfo = "556:\Scramble.gbas";
-		PLAYSOUND(1, 0, 1);
-		__debugInfo = "557:\Scramble.gbas";
-		local1_m_1388 = BOUNDS(global4_boom, 0);
-		__debugInfo = "558:\Scramble.gbas";
-		REDIM(global4_boom, [~~(((local1_m_1388) + (1))), 3], 0.0 );
-		__debugInfo = "559:\Scramble.gbas";
-		global4_boom.arrAccess(~~(local1_m_1388), 0).values[tmpPositionCache] = param1_x;
-		__debugInfo = "560:\Scramble.gbas";
-		global4_boom.arrAccess(~~(local1_m_1388), 1).values[tmpPositionCache] = param1_y;
-		__debugInfo = "561:\Scramble.gbas";
-		global4_boom.arrAccess(~~(local1_m_1388), 2).values[tmpPositionCache] = 0;
-		__debugInfo = "562:\Scramble.gbas";
-		return 0;
-		__debugInfo = "556:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func4_Line'] = function(param2_x1, param2_y1, param2_x2, param2_y2, param3_col) {
-	stackPush("function: Line", __debugInfo);
-	try {
-		var local1_c_1394 = 0.0, local1_s_1395 = 0.0, local1_p_1396 = 0.0, local1_w_1397 = 0.0, local2_dx_1398 = 0.0, local2_dy_1399 = 0.0, local3_ddx_1400 = 0.0, local3_ddy_1401 = 0.0, local2_ux_1402 = 0.0, local2_uy_1403 = 0.0, local2_lg_1404 = 0.0;
-		__debugInfo = "568:\Scramble.gbas";
-		if ((((global9_colormode) == (0)) ? 1 : 0)) {
-			__debugInfo = "568:\Scramble.gbas";
-			param3_col = RGB(200, 200, 150);
-			__debugInfo = "568:\Scramble.gbas";
-		};
-		__debugInfo = "569:\Scramble.gbas";
-		ALPHAMODE(0.7);
-		__debugInfo = "572:\Scramble.gbas";
-		local1_w_1397 = 16;
-		__debugInfo = "575:\Scramble.gbas";
-		local3_ddx_1400 = ((param2_x2) - (param2_x1));
-		__debugInfo = "576:\Scramble.gbas";
-		local3_ddy_1401 = ((param2_y2) - (param2_y1));
-		__debugInfo = "577:\Scramble.gbas";
-		local2_lg_1404 = SQR(((((local3_ddx_1400) * (local3_ddx_1400))) + (((local3_ddy_1401) * (local3_ddy_1401)))));
-		__debugInfo = "578:\Scramble.gbas";
-		if ((((local2_lg_1404) < (0.5)) ? 1 : 0)) {
-			__debugInfo = "578:\Scramble.gbas";
-			return 0;
-			__debugInfo = "578:\Scramble.gbas";
-		};
-		__debugInfo = "581:\Scramble.gbas";
-		local2_lg_1404 = ((local2_lg_1404) * (2));
-		__debugInfo = "583:\Scramble.gbas";
-		local2_dx_1398 = ((((local3_ddx_1400) * (local1_w_1397))) / (local2_lg_1404));
-		__debugInfo = "584:\Scramble.gbas";
-		local2_dy_1399 = ((((local3_ddy_1401) * (local1_w_1397))) / (local2_lg_1404));
-		__debugInfo = "586:\Scramble.gbas";
-		local2_ux_1402 = local2_dy_1399;
-		__debugInfo = "587:\Scramble.gbas";
-		local2_uy_1403 = -(local2_dx_1398);
-		__debugInfo = "590:\Scramble.gbas";
-		STARTPOLY(0, 0);
-		__debugInfo = "591:\Scramble.gbas";
-		POLYVECTOR(((((param2_x1) + (local2_ux_1402))) - (local2_dx_1398)), ((((param2_y1) + (local2_uy_1403))) - (local2_dy_1399)), 0.5, 0.5, param3_col);
-		__debugInfo = "592:\Scramble.gbas";
-		POLYVECTOR(((((param2_x1) - (local2_ux_1402))) - (local2_dx_1398)), ((((param2_y1) - (local2_uy_1403))) - (local2_dy_1399)), 0.5, 63.5, param3_col);
-		__debugInfo = "593:\Scramble.gbas";
-		POLYVECTOR(((param2_x1) - (local2_ux_1402)), ((param2_y1) - (local2_uy_1403)), 31.5, 63.5, param3_col);
-		__debugInfo = "594:\Scramble.gbas";
-		POLYVECTOR(((param2_x1) + (local2_ux_1402)), ((param2_y1) + (local2_uy_1403)), 31.5, 0.5, param3_col);
-		__debugInfo = "595:\Scramble.gbas";
-		ENDPOLY();
-		__debugInfo = "598:\Scramble.gbas";
-		STARTPOLY(0, 0);
-		__debugInfo = "599:\Scramble.gbas";
-		POLYVECTOR(((param2_x1) + (local2_ux_1402)), ((param2_y1) + (local2_uy_1403)), 31.5, 0.5, param3_col);
-		__debugInfo = "600:\Scramble.gbas";
-		POLYVECTOR(((param2_x1) - (local2_ux_1402)), ((param2_y1) - (local2_uy_1403)), 31.5, 63.5, param3_col);
-		__debugInfo = "601:\Scramble.gbas";
-		POLYVECTOR(((param2_x2) - (local2_ux_1402)), ((param2_y2) - (local2_uy_1403)), 31.5, 63.5, param3_col);
-		__debugInfo = "602:\Scramble.gbas";
-		POLYVECTOR(((param2_x2) + (local2_ux_1402)), ((param2_y2) + (local2_uy_1403)), 31.5, 0.5, param3_col);
-		__debugInfo = "603:\Scramble.gbas";
-		ENDPOLY();
-		__debugInfo = "606:\Scramble.gbas";
-		STARTPOLY(0, 0);
-		__debugInfo = "607:\Scramble.gbas";
-		POLYVECTOR(((param2_x2) + (local2_ux_1402)), ((param2_y2) + (local2_uy_1403)), 31.5, 0.5, param3_col);
-		__debugInfo = "608:\Scramble.gbas";
-		POLYVECTOR(((param2_x2) - (local2_ux_1402)), ((param2_y2) - (local2_uy_1403)), 31.5, 63.5, param3_col);
-		__debugInfo = "609:\Scramble.gbas";
-		POLYVECTOR(((((param2_x2) - (local2_ux_1402))) + (local2_dx_1398)), ((((param2_y2) - (local2_uy_1403))) + (local2_dy_1399)), 63.5, 63.5, param3_col);
-		__debugInfo = "610:\Scramble.gbas";
-		POLYVECTOR(((((param2_x2) + (local2_ux_1402))) + (local2_dx_1398)), ((((param2_y2) + (local2_uy_1403))) + (local2_dy_1399)), 63.5, 0.5, param3_col);
-		__debugInfo = "611:\Scramble.gbas";
-		ENDPOLY();
-		__debugInfo = "612:\Scramble.gbas";
-		return 0;
-		__debugInfo = "568:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func8_MoveUfos'] = function() {
-	stackPush("function: MoveUfos", __debugInfo);
-	try {
-		var local1_i_1405 = 0.0, local3_spd_1406 = 0.0, local2_y1_1407 = 0.0, local2_y2_1408 = 0.0, local1_x_1409 = 0.0;
-		__debugInfo = "617:\Scramble.gbas";
-		local3_spd_1406 = 1;
-		__debugInfo = "617:\Scramble.gbas";
-		{
-			__debugInfo = "631:\Scramble.gbas";
-			for (local1_i_1405 = 0;toCheck(local1_i_1405, ((BOUNDS(global3_ufo, 0)) - (1)), 1);local1_i_1405 += 1) {
-				__debugInfo = "619:\Scramble.gbas";
-				{
-					var local16___SelectHelper2__1410 = 0.0;
-					__debugInfo = "619:\Scramble.gbas";
-					local16___SelectHelper2__1410 = global3_ufo.arrAccess(~~(local1_i_1405), 3).values[tmpPositionCache];
-					__debugInfo = "630:\Scramble.gbas";
-					if ((((local16___SelectHelper2__1410) == (0)) ? 1 : 0)) {
-						__debugInfo = "621:\Scramble.gbas";
-						local1_x_1409 = ((((((global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]) - (global4_scrn))) * (0.5))) + (global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]));
-						__debugInfo = "622:\Scramble.gbas";
-						global3_ufo.arrAccess(~~(local1_i_1405), 1).values[tmpPositionCache] = local1_x_1409;
-						__debugInfo = "627:\Scramble.gbas";
-						if ((((local1_x_1409) > (0)) ? 1 : 0)) {
-							__debugInfo = "624:\Scramble.gbas";
-							local2_y1_1407 = ((func9_ceilingat(local1_x_1409)) + (0.5));
-							__debugInfo = "625:\Scramble.gbas";
-							local2_y2_1408 = ((func8_bottomat(local1_x_1409)) - (0.5));
-							__debugInfo = "626:\Scramble.gbas";
-							global3_ufo.arrAccess(~~(local1_i_1405), 2).values[tmpPositionCache] = ((((((((((((1) + (func4_SINq(((local1_x_1409) * (30)))))) / (2))) * (((local2_y2_1408) - (local2_y1_1407))))) * (0.75))) + (((((local2_y2_1408) - (local2_y1_1407))) * (0.1))))) + (local2_y1_1407));
-							__debugInfo = "624:\Scramble.gbas";
-						};
-						__debugInfo = "621:\Scramble.gbas";
-					} else if ((((local16___SelectHelper2__1410) == (1)) ? 1 : 0)) {
-						__debugInfo = "629:\Scramble.gbas";
-						global3_ufo.arrAccess(~~(local1_i_1405), 1).values[tmpPositionCache] = ((((((global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]) - (global4_scrn))) * (2.1))) + (global3_ufo.arrAccess(~~(local1_i_1405), 0).values[tmpPositionCache]));
-						__debugInfo = "629:\Scramble.gbas";
-					};
-					__debugInfo = "619:\Scramble.gbas";
-				};
-				__debugInfo = "619:\Scramble.gbas";
-			};
-			__debugInfo = "631:\Scramble.gbas";
-		};
-		__debugInfo = "632:\Scramble.gbas";
-		return 0;
-		__debugInfo = "617:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func9_LoadLevel'] = function() {
-	stackPush("function: LoadLevel", __debugInfo);
-	try {
-		var local1_x_1411 = 0.0, local1_y_1412 = 0.0, local1_i_1413 = 0.0, local3_num_1414 = 0.0, local6_up_Str_ref_1415 = [""], local6_lo_Str_ref_1416 = [""], local6_en_Str_ref_1417 = [""], local1_y_1418 = 0.0, local2_by_1419 = 0.0, local5_nfuel_1420 = 0.0, local7_nrocket_1421 = 0.0, local4_nufo_1422 = 0.0, local9_data1_Str_1423 = new GLBArray(), local9_data2_Str_1424 = new GLBArray(), local9_data3_Str_1425 = new GLBArray();
-		__debugInfo = "646:\Scramble.gbas";
-		DIM(global4_cave, [1320, 2], 0.0);
-		__debugInfo = "646:\Scramble.gbas";
-		{
-			__debugInfo = "686:\Scramble.gbas";
-			for (local1_y_1412 = 0;toCheck(local1_y_1412, 60, 1);local1_y_1412 += 1) {
-				__debugInfo = "648:\Scramble.gbas";
-				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (1))), local6_up_Str_ref_1415);
-				__debugInfo = "649:\Scramble.gbas";
-				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (2))), local6_lo_Str_ref_1416);
-				__debugInfo = "650:\Scramble.gbas";
-				func7_GETFILE("level.txt", ~~(((((local1_y_1412) * (4))) + (3))), local6_en_Str_ref_1417);
-				__debugInfo = "651:\Scramble.gbas";
-				local3_num_1414 = SPLITSTR(unref(local6_up_Str_ref_1415[0]), unref(local9_data1_Str_1423), ",", 1);
-				__debugInfo = "652:\Scramble.gbas";
-				local3_num_1414 = SPLITSTR(unref(local6_lo_Str_ref_1416[0]), unref(local9_data2_Str_1424), ",", 1);
-				__debugInfo = "653:\Scramble.gbas";
-				local3_num_1414 = SPLITSTR(unref(local6_en_Str_ref_1417[0]), unref(local9_data3_Str_1425), ",", 1);
-				__debugInfo = "653:\Scramble.gbas";
-				{
-					__debugInfo = "685:\Scramble.gbas";
-					for (local1_x_1411 = 0;toCheck(local1_x_1411, ((local3_num_1414) - (1)), 1);local1_x_1411 += 1) {
-						__debugInfo = "655:\Scramble.gbas";
-						global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache] = ((9) - (INTEGER(FLOAT2STR(local9_data2_Str_1424.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))));
-						__debugInfo = "656:\Scramble.gbas";
-						global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache] = ((-(10)) + (INTEGER(FLOAT2STR(local9_data1_Str_1423.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))));
-						__debugInfo = "657:\Scramble.gbas";
-						if ((((global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]) >= (((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (1)))) ? 1 : 0)) {
-							__debugInfo = "657:\Scramble.gbas";
-							global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache] = ((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (2));
-							__debugInfo = "657:\Scramble.gbas";
-						};
-						__debugInfo = "659:\Scramble.gbas";
-						local2_by_1419 = global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache];
-						__debugInfo = "660:\Scramble.gbas";
-						{
-							var local16___SelectHelper3__1426 = 0;
-							__debugInfo = "660:\Scramble.gbas";
-							local16___SelectHelper3__1426 = INTEGER(FLOAT2STR(local9_data3_Str_1425.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]));
-							__debugInfo = "683:\Scramble.gbas";
-							if ((((local16___SelectHelper3__1426) == (1)) ? 1 : 0)) {
-								__debugInfo = "662:\Scramble.gbas";
-								REDIM(global6_rocket, [~~(((local7_nrocket_1421) + (1))), 2], 0.0 );
-								__debugInfo = "663:\Scramble.gbas";
-								global6_rocket.arrAccess(~~(local7_nrocket_1421), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
-								__debugInfo = "664:\Scramble.gbas";
-								global6_rocket.arrAccess(~~(local7_nrocket_1421), 1).values[tmpPositionCache] = local2_by_1419;
-								__debugInfo = "665:\Scramble.gbas";
-								local7_nrocket_1421+=1;
-								__debugInfo = "662:\Scramble.gbas";
-							} else if (((((((local16___SelectHelper3__1426) >= (2)) ? 1 : 0)) && ((((local16___SelectHelper3__1426) <= (3)) ? 1 : 0))) ? 1 : 0)) {
-								__debugInfo = "667:\Scramble.gbas";
-								REDIM(global4_fuel, [~~(((local5_nfuel_1420) + (1))), 2], 0.0 );
-								__debugInfo = "668:\Scramble.gbas";
-								global4_fuel.arrAccess(~~(local5_nfuel_1420), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
-								__debugInfo = "669:\Scramble.gbas";
-								global4_fuel.arrAccess(~~(local5_nfuel_1420), 1).values[tmpPositionCache] = ((INTEGER(FLOAT2STR(local9_data3_Str_1425.arrAccess(~~(local1_x_1411)).values[tmpPositionCache]))) - (2));
-								__debugInfo = "670:\Scramble.gbas";
-								local5_nfuel_1420+=1;
-								__debugInfo = "667:\Scramble.gbas";
-							} else if ((((local16___SelectHelper3__1426) == (4)) ? 1 : 0)) {
-								__debugInfo = "672:\Scramble.gbas";
-								REDIM(global3_ufo, [~~(((local4_nufo_1422) + (1))), 4], 0.0 );
-								__debugInfo = "673:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
-								__debugInfo = "674:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 2).values[tmpPositionCache] = ((global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]) + (((((MOD(~~(((((local4_nufo_1422) * (local4_nufo_1422))) + (local1_x_1411))), 10)) * (((global4_cave.arrAccess(~~(local1_i_1413), 1).values[tmpPositionCache]) - (global4_cave.arrAccess(~~(local1_i_1413), 0).values[tmpPositionCache]))))) / (10))));
-								__debugInfo = "675:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 3).values[tmpPositionCache] = 1;
-								__debugInfo = "676:\Scramble.gbas";
-								local4_nufo_1422+=1;
-								__debugInfo = "672:\Scramble.gbas";
-							} else if ((((local16___SelectHelper3__1426) == (5)) ? 1 : 0)) {
-								__debugInfo = "678:\Scramble.gbas";
-								REDIM(global3_ufo, [~~(((local4_nufo_1422) + (1))), 4], 0.0 );
-								__debugInfo = "679:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 0).values[tmpPositionCache] = ((local1_i_1413) - (0.5));
-								__debugInfo = "680:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 2).values[tmpPositionCache] = local2_by_1419;
-								__debugInfo = "681:\Scramble.gbas";
-								global3_ufo.arrAccess(~~(local4_nufo_1422), 3).values[tmpPositionCache] = 0;
-								__debugInfo = "682:\Scramble.gbas";
-								local4_nufo_1422+=1;
-								__debugInfo = "678:\Scramble.gbas";
-							};
-							__debugInfo = "660:\Scramble.gbas";
-						};
-						__debugInfo = "684:\Scramble.gbas";
-						local1_i_1413+=1;
-						__debugInfo = "655:\Scramble.gbas";
-					};
-					__debugInfo = "685:\Scramble.gbas";
-				};
-				__debugInfo = "648:\Scramble.gbas";
-			};
-			__debugInfo = "686:\Scramble.gbas";
-		};
-		__debugInfo = "687:\Scramble.gbas";
-		return 0;
-		__debugInfo = "646:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func12_WideScroller'] = function(param12_filename_Str) {
-	stackPush("function: WideScroller", __debugInfo);
-	try {
-		var local8_text_Str_1428 = new GLBArray(), local5_a_Str_ref_1429 = [""], local7_maxline_1430 = 0.0, local1_z_1431 = 0.0, local2_dz_1432 = 0.0, local2_dx_1433 = 0.0, local1_y_1434 = 0.0, local2_fx_ref_1435 = [0.0], local2_fy_ref_1436 = [0.0], local6_hi_Str_1437 = new GLBArray(), local2_hi_1438 = new GLBArray();
-		__debugInfo = "700:\Scramble.gbas";
-		DIM(local8_text_Str_1428, [1024], "");
-		__debugInfo = "702:\Scramble.gbas";
-		GETFONTSIZE(local2_fx_ref_1435, local2_fy_ref_1436);
-		__debugInfo = "704:\Scramble.gbas";
-		local2_fy_ref_1436[0] = ((local2_fy_ref_1436[0]) * (1.2));
-		__debugInfo = "705:\Scramble.gbas";
-		local7_maxline_1430 = ((local7_maxline_1430) + (2));
-		__debugInfo = "706:\Scramble.gbas";
-		local8_text_Str_1428.arrAccess(~~(local7_maxline_1430)).values[tmpPositionCache] = "-= HIGHSCORES =-";
-		__debugInfo = "707:\Scramble.gbas";
-		local7_maxline_1430+=1;
-		__debugInfo = "709:\Scramble.gbas";
-		SYSTEMPOINTER(1);
-		__debugInfo = "710:\Scramble.gbas";
-		func14_ReadHighScores(unref(local6_hi_Str_1437), unref(local2_hi_1438), global8_name_Str, global5_score);
-		__debugInfo = "711:\Scramble.gbas";
-		SYSTEMPOINTER(0);
-		__debugInfo = "712:\Scramble.gbas";
-		{
-			var local1_i_1439 = 0.0;
-			__debugInfo = "715:\Scramble.gbas";
-			for (local1_i_1439 = 0;toCheck(local1_i_1439, ((BOUNDS(local2_hi_1438, 0)) - (1)), 1);local1_i_1439 += 1) {
-				__debugInfo = "714:\Scramble.gbas";
-				local8_text_Str_1428.arrAccess(~~(((local1_i_1439) + (local7_maxline_1430)))).values[tmpPositionCache] = ((MID_Str(((local6_hi_Str_1437.arrAccess(~~(local1_i_1439)).values[tmpPositionCache]) + ("................")), 0, 12)) + (FORMAT_Str(6, 0, local2_hi_1438.arrAccess(~~(local1_i_1439)).values[tmpPositionCache])));
-				__debugInfo = "714:\Scramble.gbas";
-			};
-			__debugInfo = "715:\Scramble.gbas";
-		};
-		__debugInfo = "716:\Scramble.gbas";
-		local7_maxline_1430 = ((((local7_maxline_1430) + (BOUNDS(local2_hi_1438, 0)))) + (4));
-		__debugInfo = "718:\Scramble.gbas";
-		{
-			var local1_i_1440 = 0.0;
-			__debugInfo = "726:\Scramble.gbas";
-			for (local1_i_1440 = 0;toCheck(local1_i_1440, 255, 1);local1_i_1440 += 1) {
-				__debugInfo = "720:\Scramble.gbas";
-				func7_GETFILE(param12_filename_Str, ~~(local1_i_1440), local5_a_Str_ref_1429);
-				__debugInfo = "721:\Scramble.gbas";
-				if ((((local5_a_Str_ref_1429[0]) == ("NO_FILE")) ? 1 : 0)) {
-					__debugInfo = "721:\Scramble.gbas";
-					return 0;
-					__debugInfo = "721:\Scramble.gbas";
-				};
-				__debugInfo = "722:\Scramble.gbas";
-				if ((((local5_a_Str_ref_1429[0]) == ("NO_DATA")) ? 1 : 0)) {
-					__debugInfo = "722:\Scramble.gbas";
-					local5_a_Str_ref_1429[0] = "";
-					__debugInfo = "722:\Scramble.gbas";
-				};
-				__debugInfo = "723:\Scramble.gbas";
-				if ((((local5_a_Str_ref_1429[0]) == ("EOF")) ? 1 : 0)) {
-					__debugInfo = "723:\Scramble.gbas";
-					break;
-					__debugInfo = "723:\Scramble.gbas";
-				};
-				__debugInfo = "724:\Scramble.gbas";
-				local8_text_Str_1428.arrAccess(~~(local7_maxline_1430)).values[tmpPositionCache] = local5_a_Str_ref_1429[0];
-				__debugInfo = "725:\Scramble.gbas";
-				local7_maxline_1430+=1;
-				__debugInfo = "720:\Scramble.gbas";
-			};
-			__debugInfo = "726:\Scramble.gbas";
-		};
-		__debugInfo = "728:\Scramble.gbas";
-		while (func9_UserInput(3)) {
-			__debugInfo = "727:\Scramble.gbas";
-			HIBERNATE();
-			__debugInfo = "727:\Scramble.gbas";
-		};
-		__debugInfo = "730:\Scramble.gbas";
-		LIMITFPS(60);
-		__debugInfo = "769:\Scramble.gbas";
-		while (1) {
-			__debugInfo = "731:\Scramble.gbas";
-			{
-				var local2_zt_1441 = 0.0;
-				__debugInfo = "768:\Scramble.gbas";
-				for (local2_zt_1441 = global7_screeny_ref[0];toCheck(local2_zt_1441, -(((local7_maxline_1430) * (local2_fy_ref_1436[0]))), -(0.4));local2_zt_1441 += -(0.4)) {
-					__debugInfo = "733:\Scramble.gbas";
-					global5_dtime = ((GETTIMER()) * (5));
-					__debugInfo = "734:\Scramble.gbas";
-					global4_scrn = ((global4_scrn) + (((global5_dtime) / (5000))));
-					__debugInfo = "735:\Scramble.gbas";
-					global3_plx_ref[0] = global4_scrn;
-					__debugInfo = "736:\Scramble.gbas";
-					global3_ply_ref[0] = ((((func8_bottomat(unref(global3_plx_ref[0]))) + (func9_ceilingat(unref(global3_plx_ref[0]))))) / (2));
-					__debugInfo = "737:\Scramble.gbas";
-					{
-						var local16___SelectHelper4__1443 = 0.0;
-						__debugInfo = "737:\Scramble.gbas";
-						local16___SelectHelper4__1443 = global4_scrn;
-						__debugInfo = "741:\Scramble.gbas";
-						if ((((local16___SelectHelper4__1443) < (50)) ? 1 : 0)) {
-							__debugInfo = "738:\Scramble.gbas";
-							ALPHAMODE(((global4_scrn) / (200)));
-							__debugInfo = "738:\Scramble.gbas";
-						} else if (((((((local16___SelectHelper4__1443) >= (500)) ? 1 : 0)) && ((((local16___SelectHelper4__1443) <= (550)) ? 1 : 0))) ? 1 : 0)) {
-							__debugInfo = "739:\Scramble.gbas";
-							ALPHAMODE(((((global4_scrn) - (550))) / (200)));
-							__debugInfo = "739:\Scramble.gbas";
-						} else {
-							__debugInfo = "740:\Scramble.gbas";
-							ALPHAMODE(0.5);
-							__debugInfo = "740:\Scramble.gbas";
-						};
-						__debugInfo = "737:\Scramble.gbas";
-					};
-					__debugInfo = "743:\Scramble.gbas";
-					if ((((global4_scrn) >= (600)) ? 1 : 0)) {
-						__debugInfo = "743:\Scramble.gbas";
-						global4_scrn = 0;
-						__debugInfo = "743:\Scramble.gbas";
-					};
-					__debugInfo = "744:\Scramble.gbas";
-					func4_Show(global5_dtime, 1);
-					__debugInfo = "746:\Scramble.gbas";
-					ALPHAMODE(0.5);
-					__debugInfo = "746:\Scramble.gbas";
-					{
-						__debugInfo = "758:\Scramble.gbas";
-						for (local1_z_1431 = 0;toCheck(local1_z_1431, ((local7_maxline_1430) - (1)), 1);local1_z_1431 += 1) {
-							__debugInfo = "748:\Scramble.gbas";
-							local2_dz_1432 = ((((local1_z_1431) * (local2_fy_ref_1436[0]))) + (local2_zt_1441));
-							__debugInfo = "749:\Scramble.gbas";
-							local2_dx_1433 = ((((global7_screenx_ref[0]) - ((((local8_text_Str_1428.arrAccess(~~(local1_z_1431)).values[tmpPositionCache]).length) * (local2_fx_ref_1435[0]))))) / (2));
-							__debugInfo = "757:\Scramble.gbas";
-							if (((((((local2_dz_1432) < (((global7_screeny_ref[0]) + (local2_fy_ref_1436[0])))) ? 1 : 0)) && ((((local2_dz_1432) > (-(20))) ? 1 : 0))) ? 1 : 0)) {
-								__debugInfo = "751:\Scramble.gbas";
-								local5_a_Str_ref_1429[0] = local8_text_Str_1428.arrAccess(~~(local1_z_1431)).values[tmpPositionCache];
-								__debugInfo = "755:\Scramble.gbas";
-								if ((((MID_Str(unref(local5_a_Str_ref_1429[0]), 0, 1)) == ("#")) ? 1 : 0)) {
-									__debugInfo = "753:\Scramble.gbas";
-									func5_thing(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1429[0]), 1, 1)), local2_dx_1433, ((local2_dz_1432) + (local2_fy_ref_1436[0])), RGB(200, 200, 150), ((local2_fy_ref_1436[0]) * (2)), 0);
-									__debugInfo = "754:\Scramble.gbas";
-									local5_a_Str_ref_1429[0] = (("  ") + (MID_Str(unref(local5_a_Str_ref_1429[0]), 2, 1000)));
-									__debugInfo = "753:\Scramble.gbas";
-								};
-								__debugInfo = "756:\Scramble.gbas";
-								PRINT(unref(local5_a_Str_ref_1429[0]), local2_dx_1433, local2_dz_1432, 0);
-								__debugInfo = "751:\Scramble.gbas";
-							};
-							__debugInfo = "748:\Scramble.gbas";
-						};
-						__debugInfo = "758:\Scramble.gbas";
-					};
-					__debugInfo = "759:\Scramble.gbas";
-					if (func9_UserInput(3)) {
-						__debugInfo = "759:\Scramble.gbas";
-						return tryClone(1);
-						__debugInfo = "759:\Scramble.gbas";
-					};
-					__debugInfo = "766:\Scramble.gbas";
-					if (global7_flicker) {
-						__debugInfo = "762:\Scramble.gbas";
-						ALPHAMODE(-(0.3));
-						__debugInfo = "763:\Scramble.gbas";
-						local1_y_1434 = ((((MOD(CAST2INT(((GETTIMERALL()) / (50))), 7)) * (global7_screeny_ref[0]))) / (7));
-						__debugInfo = "764:\Scramble.gbas";
-						DRAWRECT(0, local1_y_1434, unref(global7_screenx_ref[0]), ((global7_screeny_ref[0]) / (7)), 0);
-						__debugInfo = "765:\Scramble.gbas";
-						ALPHAMODE(0);
-						__debugInfo = "762:\Scramble.gbas";
-					};
-					__debugInfo = "767:\Scramble.gbas";
-					SHOWSCREEN();
-					__debugInfo = "733:\Scramble.gbas";
-				};
-				__debugInfo = "768:\Scramble.gbas";
-			};
-			__debugInfo = "731:\Scramble.gbas";
-		};
-		__debugInfo = "771:\Scramble.gbas";
-		LIMITFPS(-(1));
-		__debugInfo = "772:\Scramble.gbas";
-		return 0;
-		__debugInfo = "700:\Scramble.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func14_ReadHighScores'] = function(param9_names_Str, param6_scores, param12_username_Str, param8_thescore) {
-	stackPush("function: ReadHighScores", __debugInfo);
-	try {
-		var local2_ct_1448 = 0.0, local1_i_1449 = 0.0, local7_str_Str_1450 = "", local9_proxy_Str_1451 = "", local4_port_1452 = 0.0;
-		__debugInfo = "778:\Scramble.gbas";
-		local7_str_Str_1450 = "highscores/listgame.php";
-		__debugInfo = "779:\Scramble.gbas";
-		local7_str_Str_1450 = ((local7_str_Str_1450) + ("?game=scramble"));
-		__debugInfo = "780:\Scramble.gbas";
-		local7_str_Str_1450 = ((((local7_str_Str_1450) + ("&name="))) + (param12_username_Str));
-		__debugInfo = "781:\Scramble.gbas";
-		local7_str_Str_1450 = ((((local7_str_Str_1450) + ("&score="))) + (CAST2STRING(param8_thescore)));
-		__debugInfo = "782:\Scramble.gbas";
-		local7_str_Str_1450 = ((local7_str_Str_1450) + ("&secret=3e5b72ec"));
-		__debugInfo = "784:\Scramble.gbas";
-		PRINT(".: WebGet scores :.", 0, 0, 0);
-		__debugInfo = "785:\Scramble.gbas";
+		__debugInfo = "161:\JumpIt.gbas";
 		SHOWSCREEN();
-		__debugInfo = "787:\Scramble.gbas";
-		INIOPEN("config.ini");
-		__debugInfo = "788:\Scramble.gbas";
-		local9_proxy_Str_1451 = INIGET_Str("server", "proxy", "NO_DATA");
-		__debugInfo = "789:\Scramble.gbas";
-		local4_port_1452 = FLOAT2STR(INIGET_Str("server", "port", "NO_DATA"));
-		__debugInfo = "790:\Scramble.gbas";
-		KILLFILE("scores.ini");
-		__debugInfo = "795:\Scramble.gbas";
-		if (((((((local4_port_1452) == (0)) ? 1 : 0)) || ((((local9_proxy_Str_1451) == ("NO_DATA")) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "792:\Scramble.gbas";
-			NETWEBGET("www.glbasic.com", (("/") + (local7_str_Str_1450)), 80, "scores.ini", 5000);
-			__debugInfo = "792:\Scramble.gbas";
-		} else {
-			__debugInfo = "794:\Scramble.gbas";
-			NETWEBGET(local9_proxy_Str_1451, (("http://www.glbasic.com/") + (local7_str_Str_1450)), ~~(local4_port_1452), "scores.ini", 5000);
-			__debugInfo = "794:\Scramble.gbas";
-		};
-		__debugInfo = "797:\Scramble.gbas";
-		INIOPEN("scores.ini");
-		__debugInfo = "798:\Scramble.gbas";
-		local2_ct_1448 = FLOAT2STR(INIGET_Str("scores", "count", "NO_DATA"));
-		__debugInfo = "799:\Scramble.gbas";
-		DIM(param9_names_Str, [~~(local2_ct_1448)], "");
-		__debugInfo = "800:\Scramble.gbas";
-		DIM(param6_scores, [~~(local2_ct_1448)], 0.0);
-		__debugInfo = "801:\Scramble.gbas";
-		{
-			__debugInfo = "805:\Scramble.gbas";
-			for (local1_i_1449 = 1;toCheck(local1_i_1449, local2_ct_1448, 1);local1_i_1449 += 1) {
-				__debugInfo = "803:\Scramble.gbas";
-				param9_names_Str.arrAccess(~~(((local1_i_1449) - (1)))).values[tmpPositionCache] = INIGET_Str("scores", (("n") + (CAST2STRING(local1_i_1449))), "NO_DATA");
-				__debugInfo = "804:\Scramble.gbas";
-				param6_scores.arrAccess(~~(((local1_i_1449) - (1)))).values[tmpPositionCache] = FLOAT2STR(INIGET_Str("scores", (("s") + (CAST2STRING(local1_i_1449))), "NO_DATA"));
-				__debugInfo = "803:\Scramble.gbas";
-			};
-			__debugInfo = "805:\Scramble.gbas";
-		};
-		__debugInfo = "806:\Scramble.gbas";
-		return 0;
-		__debugInfo = "778:\Scramble.gbas";
+		__debugInfo = "158:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6443,44 +4752,2394 @@ window['func14_ReadHighScores'] = function(param9_names_Str, param6_scores, para
 	}
 	
 };
-window['func7_GETFILE'] = function(param8_File_Str, param3_lin, param7_dat_Str_ref) {
-	stackPush("function: GETFILE", __debugInfo);
+window['Update'] = function() {
+	stackPush("sub: Update", __debugInfo);
 	try {
-		var local1_f_1456 = 0.0;
-		__debugInfo = "824:\Scramble.gbas";
-		param3_lin = MIN(param3_lin, 255);
-		__debugInfo = "825:\Scramble.gbas";
-		local1_f_1456 = GENFILE();
-		__debugInfo = "834:\Scramble.gbas";
-		if (OPENFILE(~~(local1_f_1456), param8_File_Str, 1)) {
-			__debugInfo = "826:\Scramble.gbas";
-			{
-				var local1_i_1457 = 0.0;
-				__debugInfo = "830:\Scramble.gbas";
-				for (local1_i_1457 = 0;toCheck(local1_i_1457, param3_lin, 1);local1_i_1457 += 1) {
-					__debugInfo = "828:\Scramble.gbas";
-					if (ENDOFFILE(~~(local1_f_1456))) {
-						__debugInfo = "828:\Scramble.gbas";
-						break;
-						__debugInfo = "828:\Scramble.gbas";
-					};
-					__debugInfo = "829:\Scramble.gbas";
-					READLINE(~~(local1_f_1456), param7_dat_Str_ref);
-					__debugInfo = "828:\Scramble.gbas";
+		__debugInfo = "167:\JumpIt.gbas";
+		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
+		__debugInfo = "169:\JumpIt.gbas";
+		{
+			var local16___SelectHelper1__1394 = 0;
+			__debugInfo = "169:\JumpIt.gbas";
+			local16___SelectHelper1__1394 = global9_Gamestate;
+			__debugInfo = "189:\JumpIt.gbas";
+			if ((((local16___SelectHelper1__1394) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "171:\JumpIt.gbas";
+				(global3_Map).Update();
+				__debugInfo = "174:\JumpIt.gbas";
+				var forEachSaver1673 = global6_Enemys;
+				for(var forEachCounter1673 = 0 ; forEachCounter1673 < forEachSaver1673.values.length ; forEachCounter1673++) {
+					var local5_Enemy_1395 = forEachSaver1673.values[forEachCounter1673];
+				{
+						__debugInfo = "173:\JumpIt.gbas";
+						(local5_Enemy_1395).Update();
+						__debugInfo = "173:\JumpIt.gbas";
+					}
+					forEachSaver1673.values[forEachCounter1673] = local5_Enemy_1395;
+				
 				};
-				__debugInfo = "830:\Scramble.gbas";
+				__debugInfo = "178:\JumpIt.gbas";
+				var forEachSaver1688 = global5_Shits;
+				for(var forEachCounter1688 = 0 ; forEachCounter1688 < forEachSaver1688.values.length ; forEachCounter1688++) {
+					var local4_Shit_1396 = forEachSaver1688.values[forEachCounter1688];
+				{
+						__debugInfo = "176:\JumpIt.gbas";
+						(local4_Shit_1396).Update();
+						__debugInfo = "177:\JumpIt.gbas";
+						if (local4_Shit_1396.attr3_Del) {
+							__debugInfo = "177:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
+							DIMDEL(forEachSaver1688, forEachCounter1688);
+							forEachCounter1688--;
+							continue;
+							__debugInfo = "177:\JumpIt.gbas";
+						};
+						__debugInfo = "176:\JumpIt.gbas";
+					}
+					forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
+				
+				};
+				__debugInfo = "182:\JumpIt.gbas";
+				var forEachSaver1703 = global5_Spits;
+				for(var forEachCounter1703 = 0 ; forEachCounter1703 < forEachSaver1703.values.length ; forEachCounter1703++) {
+					var local4_Spit_1397 = forEachSaver1703.values[forEachCounter1703];
+				{
+						__debugInfo = "180:\JumpIt.gbas";
+						(local4_Spit_1397).Update();
+						__debugInfo = "181:\JumpIt.gbas";
+						if (local4_Spit_1397.attr3_Del) {
+							__debugInfo = "181:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
+							DIMDEL(forEachSaver1703, forEachCounter1703);
+							forEachCounter1703--;
+							continue;
+							__debugInfo = "181:\JumpIt.gbas";
+						};
+						__debugInfo = "180:\JumpIt.gbas";
+					}
+					forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
+				
+				};
+				__debugInfo = "186:\JumpIt.gbas";
+				var forEachSaver1718 = global10_Explosions;
+				for(var forEachCounter1718 = 0 ; forEachCounter1718 < forEachSaver1718.values.length ; forEachCounter1718++) {
+					var local9_Explosion_1398 = forEachSaver1718.values[forEachCounter1718];
+				{
+						__debugInfo = "184:\JumpIt.gbas";
+						(local9_Explosion_1398).Update();
+						__debugInfo = "185:\JumpIt.gbas";
+						if (local9_Explosion_1398.attr3_Del) {
+							__debugInfo = "185:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
+							DIMDEL(forEachSaver1718, forEachCounter1718);
+							forEachCounter1718--;
+							continue;
+							__debugInfo = "185:\JumpIt.gbas";
+						};
+						__debugInfo = "184:\JumpIt.gbas";
+					}
+					forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
+				
+				};
+				__debugInfo = "187:\JumpIt.gbas";
+				(global6_Player).Update();
+				__debugInfo = "171:\JumpIt.gbas";
 			};
-			__debugInfo = "831:\Scramble.gbas";
-			CLOSEFILE(~~(local1_f_1456));
-			__debugInfo = "826:\Scramble.gbas";
-		} else {
-			__debugInfo = "833:\Scramble.gbas";
-			param7_dat_Str_ref[0] = "";
-			__debugInfo = "833:\Scramble.gbas";
+			__debugInfo = "169:\JumpIt.gbas";
 		};
-		__debugInfo = "835:\Scramble.gbas";
+		__debugInfo = "167:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['Render'] = function() {
+	stackPush("sub: Render", __debugInfo);
+	try {
+		var local5_Width_ref_1399 = [0.0], local6_Height_ref_1400 = [0.0];
+		__debugInfo = "195:\JumpIt.gbas";
+		GETSCREENSIZE(local5_Width_ref_1399, local6_Height_ref_1400);
+		__debugInfo = "205:\JumpIt.gbas";
+		{
+			var local16___SelectHelper2__1401 = 0;
+			__debugInfo = "205:\JumpIt.gbas";
+			local16___SelectHelper2__1401 = global9_Gamestate;
+			__debugInfo = "233:\JumpIt.gbas";
+			if ((((local16___SelectHelper2__1401) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "209:\JumpIt.gbas";
+				var forEachSaver1741 = global5_Shits;
+				for(var forEachCounter1741 = 0 ; forEachCounter1741 < forEachSaver1741.values.length ; forEachCounter1741++) {
+					var local4_Shit_1402 = forEachSaver1741.values[forEachCounter1741];
+				{
+						__debugInfo = "208:\JumpIt.gbas";
+						(local4_Shit_1402).Render();
+						__debugInfo = "208:\JumpIt.gbas";
+					}
+					forEachSaver1741.values[forEachCounter1741] = local4_Shit_1402;
+				
+				};
+				__debugInfo = "211:\JumpIt.gbas";
+				(global3_Map).Render();
+				__debugInfo = "215:\JumpIt.gbas";
+				var forEachSaver1751 = global5_Spits;
+				for(var forEachCounter1751 = 0 ; forEachCounter1751 < forEachSaver1751.values.length ; forEachCounter1751++) {
+					var local4_Spit_1403 = forEachSaver1751.values[forEachCounter1751];
+				{
+						__debugInfo = "214:\JumpIt.gbas";
+						(local4_Spit_1403).Render();
+						__debugInfo = "214:\JumpIt.gbas";
+					}
+					forEachSaver1751.values[forEachCounter1751] = local4_Spit_1403;
+				
+				};
+				__debugInfo = "219:\JumpIt.gbas";
+				var forEachSaver1759 = global6_Enemys;
+				for(var forEachCounter1759 = 0 ; forEachCounter1759 < forEachSaver1759.values.length ; forEachCounter1759++) {
+					var local5_Enemy_1404 = forEachSaver1759.values[forEachCounter1759];
+				{
+						__debugInfo = "218:\JumpIt.gbas";
+						(local5_Enemy_1404).Render();
+						__debugInfo = "218:\JumpIt.gbas";
+					}
+					forEachSaver1759.values[forEachCounter1759] = local5_Enemy_1404;
+				
+				};
+				__debugInfo = "223:\JumpIt.gbas";
+				var forEachSaver1767 = global10_Explosions;
+				for(var forEachCounter1767 = 0 ; forEachCounter1767 < forEachSaver1767.values.length ; forEachCounter1767++) {
+					var local9_Explosion_1405 = forEachSaver1767.values[forEachCounter1767];
+				{
+						__debugInfo = "222:\JumpIt.gbas";
+						(local9_Explosion_1405).Render();
+						__debugInfo = "222:\JumpIt.gbas";
+					}
+					forEachSaver1767.values[forEachCounter1767] = local9_Explosion_1405;
+				
+				};
+				__debugInfo = "225:\JumpIt.gbas";
+				(global6_Player).Render();
+				__debugInfo = "232:\JumpIt.gbas";
+				if (global12_Hardware_Str) {
+					__debugInfo = "228:\JumpIt.gbas";
+					func10_GameButton(42, ((local6_Height_ref_1400[0]) - (42)), "<");
+					__debugInfo = "229:\JumpIt.gbas";
+					func10_GameButton(((local5_Width_ref_1399[0]) - (42)), ((local6_Height_ref_1400[0]) - (42)), ">");
+					__debugInfo = "230:\JumpIt.gbas";
+					func10_GameButton(42, ((local6_Height_ref_1400[0]) - (125)), "jump");
+					__debugInfo = "231:\JumpIt.gbas";
+					func10_GameButton(((local5_Width_ref_1399[0]) - (42)), ((local6_Height_ref_1400[0]) - (125)), "jump");
+					__debugInfo = "228:\JumpIt.gbas";
+				};
+				__debugInfo = "209:\JumpIt.gbas";
+			};
+			__debugInfo = "205:\JumpIt.gbas";
+		};
+		__debugInfo = "195:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['Init'] = function() {
+	stackPush("sub: Init", __debugInfo);
+	try {
+		var local5_Width_ref_1406 = [0.0], local6_Height_ref_1407 = [0.0];
+		__debugInfo = "239:\JumpIt.gbas";
+		GETSCREENSIZE(local5_Width_ref_1406, local6_Height_ref_1407);
+		__debugInfo = "240:\JumpIt.gbas";
+		{
+			var local16___SelectHelper3__1408 = 0;
+			__debugInfo = "240:\JumpIt.gbas";
+			local16___SelectHelper3__1408 = global9_Gamestate;
+			__debugInfo = "244:\JumpIt.gbas";
+			if ((((local16___SelectHelper3__1408) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "242:\JumpIt.gbas";
+				(global6_Player).Init(100, 100, 16, 32);
+				__debugInfo = "243:\JumpIt.gbas";
+				(global3_Map).Init("map3.map");
+				__debugInfo = "242:\JumpIt.gbas";
+			};
+			__debugInfo = "240:\JumpIt.gbas";
+		};
+		__debugInfo = "246:\JumpIt.gbas";
+		DIM(global17_LastMousePosition, [0], 0);
+		__debugInfo = "239:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['MENU_LOOP'] = function() {
+	stackPush("sub: MENU_LOOP", __debugInfo);
+	try {
+		var local1_x_ref_1409 = [0.0], local1_y_ref_1410 = [0.0], local1_w_ref_1411 = [0.0], local1_h_ref_1412 = [0.0], local2_iw_ref_1413 = [0.0], local2_ih_ref_1414 = [0.0], local2_hh_1415 = 0.0;
+		__debugInfo = "262:\JumpIt.gbas";
+		GETFONTSIZE(local1_x_ref_1409, local1_y_ref_1410);
+		__debugInfo = "264:\JumpIt.gbas";
+		GETSCREENSIZE(local1_w_ref_1411, local1_h_ref_1412);
+		__debugInfo = "266:\JumpIt.gbas";
+		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1413, local2_ih_ref_1414);
+		__debugInfo = "269:\JumpIt.gbas";
+		local2_hh_1415 = ((local1_h_ref_1412[0]) - (150));
+		__debugInfo = "271:\JumpIt.gbas";
+		global6_Action = 0;
+		__debugInfo = "273:\JumpIt.gbas";
+		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
+		__debugInfo = "274:\JumpIt.gbas";
+		Render();
+		__debugInfo = "276:\JumpIt.gbas";
+		STRETCHSPRITE(global9_MenuImage, ((local1_w_ref_1411[0]) - (KERNLEN(global9_Title_Str, 1))), 8, ((-(local1_w_ref_1411[0])) - (KERNLEN(global9_Title_Str, 1))), unref(local2_ih_ref_1414[0]));
+		__debugInfo = "277:\JumpIt.gbas";
+		PRINT(global9_Title_Str, 20, ((40) - (((local1_y_ref_1410[0]) / (2)))), 0);
+		__debugInfo = "279:\JumpIt.gbas";
+		if (func6_Button(global9_Menu1_Str, ((((local2_hh_1415) / (3))) + (100)))) {
+			__debugInfo = "279:\JumpIt.gbas";
+			global6_Action = 1;
+			__debugInfo = "279:\JumpIt.gbas";
+		};
+		__debugInfo = "280:\JumpIt.gbas";
+		if (func6_Button(global9_Menu2_Str, ((((((local2_hh_1415) / (3))) * (2))) + (100)))) {
+			__debugInfo = "280:\JumpIt.gbas";
+			global6_Action = 2;
+			__debugInfo = "280:\JumpIt.gbas";
+		};
+		__debugInfo = "281:\JumpIt.gbas";
+		if ((((global9_Menu3_Str) != ("")) ? 1 : 0)) {
+			__debugInfo = "281:\JumpIt.gbas";
+			if (func6_Button(global9_Menu3_Str, ((local2_hh_1415) + (100)))) {
+				__debugInfo = "281:\JumpIt.gbas";
+				global6_Action = 3;
+				__debugInfo = "281:\JumpIt.gbas";
+			};
+			__debugInfo = "281:\JumpIt.gbas";
+		};
+		__debugInfo = "283:\JumpIt.gbas";
+		{
+			var local16___SelectHelper4__1416 = 0;
+			__debugInfo = "283:\JumpIt.gbas";
+			local16___SelectHelper4__1416 = global6_Action;
+			__debugInfo = "289:\JumpIt.gbas";
+			if ((((local16___SelectHelper4__1416) == (1)) ? 1 : 0)) {
+				__debugInfo = "285:\JumpIt.gbas";
+				global9_Gamestate = ~~(0);
+				__debugInfo = "286:\JumpIt.gbas";
+				POPLOOP();
+				__debugInfo = "285:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper4__1416) == (3)) ? 1 : 0)) {
+				__debugInfo = "288:\JumpIt.gbas";
+				END();
+				__debugInfo = "288:\JumpIt.gbas";
+			};
+			__debugInfo = "283:\JumpIt.gbas";
+		};
+		__debugInfo = "290:\JumpIt.gbas";
+		if (global6_Action) {
+			__debugInfo = "290:\JumpIt.gbas";
+			Init();
+			__debugInfo = "290:\JumpIt.gbas";
+		};
+		__debugInfo = "292:\JumpIt.gbas";
+		SHOWSCREEN();
+		__debugInfo = "262:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func6_Button'] = function(param8_Text_Str, param1_Y) {
+	stackPush("function: Button", __debugInfo);
+	try {
+		var local1_x_ref_1419 = [0.0], local1_y_ref_1420 = [0.0], local1_w_ref_1421 = [0.0], local1_h_ref_1422 = [0.0], local2_iw_ref_1423 = [0.0], local2_ih_ref_1424 = [0.0];
+		__debugInfo = "297:\JumpIt.gbas";
+		GETFONTSIZE(local1_x_ref_1419, local1_y_ref_1420);
+		__debugInfo = "299:\JumpIt.gbas";
+		GETSCREENSIZE(local1_w_ref_1421, local1_h_ref_1422);
+		__debugInfo = "301:\JumpIt.gbas";
+		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1423, local2_ih_ref_1424);
+		__debugInfo = "310:\JumpIt.gbas";
+		if (BOXCOLL(0, ~~(((param1_Y) - (32))), unref(~~(local1_w_ref_1421[0])), unref(~~(local2_ih_ref_1424[0])), unref(~~(global6_MouseX_ref[0])), unref(~~(global6_MouseY_ref[0])), 1, 1)) {
+			__debugInfo = "304:\JumpIt.gbas";
+			ALPHAMODE(0);
+			__debugInfo = "307:\JumpIt.gbas";
+			if (global2_ML_ref[0]) {
+				__debugInfo = "306:\JumpIt.gbas";
+				return 1;
+				__debugInfo = "306:\JumpIt.gbas";
+			};
+			__debugInfo = "304:\JumpIt.gbas";
+		} else {
+			__debugInfo = "309:\JumpIt.gbas";
+			ALPHAMODE(-(0.75));
+			__debugInfo = "309:\JumpIt.gbas";
+		};
+		__debugInfo = "311:\JumpIt.gbas";
+		STRETCHSPRITE(global9_MenuImage, 0, ((param1_Y) - (32)), unref(local1_w_ref_1421[0]), unref(local2_ih_ref_1424[0]));
+		__debugInfo = "312:\JumpIt.gbas";
+		ALPHAMODE(0);
+		__debugInfo = "314:\JumpIt.gbas";
+		PRINT(param8_Text_Str, 40, ((param1_Y) - (((local1_y_ref_1420[0]) / (2)))), 0);
+		__debugInfo = "316:\JumpIt.gbas";
+		return tryClone(0);
+		__debugInfo = "317:\JumpIt.gbas";
 		return 0;
-		__debugInfo = "824:\Scramble.gbas";
+		__debugInfo = "297:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func10_GameButton'] = function(param1_X, param1_Y, param8_Text_Str) {
+	stackPush("function: GameButton", __debugInfo);
+	try {
+		__debugInfo = "325:\JumpIt.gbas";
+		if (func16_UpdateGameButton(param1_X, param1_Y)) {
+			__debugInfo = "322:\JumpIt.gbas";
+			ALPHAMODE(0.5);
+			__debugInfo = "322:\JumpIt.gbas";
+		} else {
+			__debugInfo = "324:\JumpIt.gbas";
+			ALPHAMODE(-(0.5));
+			__debugInfo = "324:\JumpIt.gbas";
+		};
+		__debugInfo = "327:\JumpIt.gbas";
+		DRAWSPRITE(global11_ButtonImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+		__debugInfo = "328:\JumpIt.gbas";
+		{
+			var local16___SelectHelper5__1428 = "";
+			__debugInfo = "328:\JumpIt.gbas";
+			local16___SelectHelper5__1428 = param8_Text_Str;
+			__debugInfo = "335:\JumpIt.gbas";
+			if ((((local16___SelectHelper5__1428) == ("<")) ? 1 : 0)) {
+				__debugInfo = "330:\JumpIt.gbas";
+				DRAWSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+				__debugInfo = "330:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper5__1428) == (">")) ? 1 : 0)) {
+				__debugInfo = "332:\JumpIt.gbas";
+				ZOOMSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)), -(1), 1);
+				__debugInfo = "332:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper5__1428) == ("jump")) ? 1 : 0)) {
+				__debugInfo = "334:\JumpIt.gbas";
+				DRAWSPRITE(global9_JumpImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+				__debugInfo = "334:\JumpIt.gbas";
+			};
+			__debugInfo = "328:\JumpIt.gbas";
+		};
+		__debugInfo = "337:\JumpIt.gbas";
+		ALPHAMODE(0);
+		__debugInfo = "338:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "325:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func16_UpdateGameButton'] = function(param1_X, param1_Y) {
+	stackPush("function: UpdateGameButton", __debugInfo);
+	try {
+		var local2_MX_ref_1431 = [0.0], local2_MY_ref_1432 = [0.0], local2_ML_ref_1433 = [0.0], local2_MR_ref_1434 = [0.0];
+		__debugInfo = "341:\JumpIt.gbas";
+		{
+			var local1_i_1435 = 0.0;
+			__debugInfo = "349:\JumpIt.gbas";
+			for (local1_i_1435 = 0;toCheck(local1_i_1435, ((GETMOUSECOUNT()) - (1)), 1);local1_i_1435 += 1) {
+				__debugInfo = "343:\JumpIt.gbas";
+				SETACTIVEMOUSE(~~(local1_i_1435));
+				__debugInfo = "344:\JumpIt.gbas";
+				MOUSESTATE(local2_MX_ref_1431, local2_MY_ref_1432, local2_ML_ref_1433, local2_MR_ref_1434);
+				__debugInfo = "348:\JumpIt.gbas";
+				if ((((BOXCOLL(~~(((param1_X) - (32))), ~~(((param1_Y) - (32))), 64, 64, unref(~~(local2_MX_ref_1431[0])), unref(~~(local2_MY_ref_1432[0])), 1, 1)) && (local2_ML_ref_1433[0])) ? 1 : 0)) {
+					__debugInfo = "346:\JumpIt.gbas";
+					SETACTIVEMOUSE(0);
+					__debugInfo = "347:\JumpIt.gbas";
+					return tryClone(1);
+					__debugInfo = "346:\JumpIt.gbas";
+				};
+				__debugInfo = "343:\JumpIt.gbas";
+			};
+			__debugInfo = "349:\JumpIt.gbas";
+		};
+		__debugInfo = "350:\JumpIt.gbas";
+		SETACTIVEMOUSE(0);
+		__debugInfo = "351:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "352:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "341:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "80:\Enemy.gbas";
+		if (param4_self.attr4_Fall) {
+			__debugInfo = "27:\Enemy.gbas";
+			param4_self.attr2_VY = ((param4_self.attr2_VY) + (0.2));
+			__debugInfo = "29:\Enemy.gbas";
+			param4_self.attr1_Y+=param4_self.attr2_VY;
+			__debugInfo = "27:\Enemy.gbas";
+		} else {
+			__debugInfo = "31:\Enemy.gbas";
+			param4_self.attr4_Anim+=1;
+			__debugInfo = "32:\Enemy.gbas";
+			{
+				var local16___SelectHelper6__1438 = 0;
+				__debugInfo = "32:\Enemy.gbas";
+				local16___SelectHelper6__1438 = param4_self.attr3_Typ;
+				__debugInfo = "79:\Enemy.gbas";
+				if ((((local16___SelectHelper6__1438) == (~~(1))) ? 1 : 0)) {
+					__debugInfo = "36:\Enemy.gbas";
+					if (((((((((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "35:\Enemy.gbas";
+						param4_self.attr2_VX = -(param4_self.attr2_VX);
+						__debugInfo = "35:\Enemy.gbas";
+					};
+					__debugInfo = "37:\Enemy.gbas";
+					param4_self.attr1_X+=param4_self.attr2_VX;
+					__debugInfo = "38:\Enemy.gbas";
+					param4_self.attr2_VY = func4_QCOS(CAST2INT(((GETTIMERALL()) / (10))));
+					__debugInfo = "41:\Enemy.gbas";
+					if ((global3_Map).Collision(((param4_self.attr1_X) + (4)), ((param4_self.attr1_Y) + (param4_self.attr2_VY)), ((param4_self.attr5_Width) - (8)), param4_self.attr6_Height)) {
+						__debugInfo = "40:\Enemy.gbas";
+						param4_self.attr2_VY = 0;
+						__debugInfo = "40:\Enemy.gbas";
+					};
+					__debugInfo = "43:\Enemy.gbas";
+					param4_self.attr12_EventCounter+=1;
+					__debugInfo = "47:\Enemy.gbas";
+					if ((((MOD(param4_self.attr12_EventCounter, ~~(RND(500)))) == (5)) ? 1 : 0)) {
+						var local1_S_1439 = new type5_TShit();
+						__debugInfo = "46:\Enemy.gbas";
+						(local1_S_1439).Init(param4_self.attr1_X, param4_self.attr1_Y);
+						__debugInfo = "46:\Enemy.gbas";
+					};
+					__debugInfo = "49:\Enemy.gbas";
+					param4_self.attr1_Y+=param4_self.attr2_VY;
+					__debugInfo = "51:\Enemy.gbas";
+					param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 30);
+					__debugInfo = "36:\Enemy.gbas";
+				} else if (((((((local16___SelectHelper6__1438) >= (~~(2))) ? 1 : 0)) && ((((local16___SelectHelper6__1438) <= (~~(4))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "53:\Enemy.gbas";
+					{
+						var local16___SelectHelper7__1440 = 0;
+						__debugInfo = "53:\Enemy.gbas";
+						local16___SelectHelper7__1440 = param4_self.attr3_Typ;
+						__debugInfo = "73:\Enemy.gbas";
+						if ((((local16___SelectHelper7__1440) == (~~(4))) ? 1 : 0)) {
+							var local4_Look_1441 = 0.0;
+							__debugInfo = "55:\Enemy.gbas";
+							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
+							__debugInfo = "56:\Enemy.gbas";
+							param4_self.attr12_EventCounter+=1;
+							__debugInfo = "63:\Enemy.gbas";
+							if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+								__debugInfo = "60:\Enemy.gbas";
+								local4_Look_1441 = 0;
+								__debugInfo = "60:\Enemy.gbas";
+							} else {
+								__debugInfo = "62:\Enemy.gbas";
+								local4_Look_1441 = ((param4_self.attr5_Width) / (2));
+								__debugInfo = "62:\Enemy.gbas";
+							};
+							__debugInfo = "70:\Enemy.gbas";
+							if (((((((MOD(param4_self.attr12_EventCounter, 55)) == (5)) ? 1 : 0)) && (((((global3_Map).RayCollision(((param4_self.attr1_X) + (local4_Look_1441)), ((param4_self.attr1_Y) + (4)), global6_Player.attr1_X, global6_Player.attr1_Y)) == (0)) ? 1 : 0))) ? 1 : 0)) {
+								var local1_S_1442 = new type5_TSpit();
+								__debugInfo = "69:\Enemy.gbas";
+								(local1_S_1442).Init(((param4_self.attr1_X) + (local4_Look_1441)), ((param4_self.attr1_Y) + (4)), ((param4_self.attr2_VX) * (4)), ((param4_self.attr2_VY) - (RND(2))));
+								__debugInfo = "69:\Enemy.gbas";
+							};
+							__debugInfo = "55:\Enemy.gbas";
+						} else if ((((local16___SelectHelper7__1440) == (~~(2))) ? 1 : 0)) {
+							__debugInfo = "72:\Enemy.gbas";
+							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 10);
+							__debugInfo = "72:\Enemy.gbas";
+						};
+						__debugInfo = "53:\Enemy.gbas";
+					};
+					__debugInfo = "77:\Enemy.gbas";
+					if (((((((((((((((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0))) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "76:\Enemy.gbas";
+						param4_self.attr2_VX = -(param4_self.attr2_VX);
+						__debugInfo = "76:\Enemy.gbas";
+					};
+					__debugInfo = "78:\Enemy.gbas";
+					param4_self.attr1_X+=param4_self.attr2_VX;
+					__debugInfo = "53:\Enemy.gbas";
+				};
+				__debugInfo = "32:\Enemy.gbas";
+			};
+			__debugInfo = "31:\Enemy.gbas";
+		};
+		__debugInfo = "81:\Enemy.gbas";
+		return 0;
+		__debugInfo = "80:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local5_Frame_1445 = 0;
+		__debugInfo = "84:\Enemy.gbas";
+		local5_Frame_1445 = 0;
+		__debugInfo = "86:\Enemy.gbas";
+		{
+			var local16___SelectHelper8__1446 = 0;
+			__debugInfo = "86:\Enemy.gbas";
+			local16___SelectHelper8__1446 = param4_self.attr3_Typ;
+			__debugInfo = "139:\Enemy.gbas";
+			if ((((local16___SelectHelper8__1446) == (~~(1))) ? 1 : 0)) {
+				var local3_Dir_1447 = 0;
+				__debugInfo = "93:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) > (0)) ? 1 : 0)) {
+					__debugInfo = "90:\Enemy.gbas";
+					local3_Dir_1447 = 1;
+					__debugInfo = "90:\Enemy.gbas";
+				} else {
+					__debugInfo = "92:\Enemy.gbas";
+					local3_Dir_1447 = 0;
+					__debugInfo = "92:\Enemy.gbas";
+				};
+				__debugInfo = "100:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
+					__debugInfo = "95:\Enemy.gbas";
+					local5_Frame_1445 = 2;
+					__debugInfo = "95:\Enemy.gbas";
+				} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+					__debugInfo = "97:\Enemy.gbas";
+					local5_Frame_1445 = 1;
+					__debugInfo = "97:\Enemy.gbas";
+				} else {
+					__debugInfo = "99:\Enemy.gbas";
+					local5_Frame_1445 = 0;
+					__debugInfo = "99:\Enemy.gbas";
+				};
+				__debugInfo = "102:\Enemy.gbas";
+				func9_TurnImage(global9_BirdImage, local5_Frame_1445, local3_Dir_1447, param4_self.attr1_X, param4_self.attr1_Y, 6);
+				__debugInfo = "93:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1446) == (~~(2))) ? 1 : 0)) {
+				var local3_Dir_1448 = 0;
+				__debugInfo = "109:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+					__debugInfo = "106:\Enemy.gbas";
+					local3_Dir_1448 = 0;
+					__debugInfo = "106:\Enemy.gbas";
+				} else {
+					__debugInfo = "108:\Enemy.gbas";
+					local3_Dir_1448 = 1;
+					__debugInfo = "108:\Enemy.gbas";
+				};
+				__debugInfo = "115:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+					__debugInfo = "112:\Enemy.gbas";
+					local5_Frame_1445 = 1;
+					__debugInfo = "112:\Enemy.gbas";
+				} else {
+					__debugInfo = "114:\Enemy.gbas";
+					local5_Frame_1445 = 0;
+					__debugInfo = "114:\Enemy.gbas";
+				};
+				__debugInfo = "118:\Enemy.gbas";
+				func9_TurnImage(global8_PigImage, local5_Frame_1445, local3_Dir_1448, param4_self.attr1_X, param4_self.attr1_Y, 4);
+				__debugInfo = "109:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1446) == (~~(3))) ? 1 : 0)) {
+				__debugInfo = "120:\Enemy.gbas";
+				ROTOSPRITE(global10_HumanImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)), -(MOD(~~(param4_self.attr1_X), 360)));
+				__debugInfo = "120:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1446) == (~~(4))) ? 1 : 0)) {
+				var local3_Dir_1449 = 0;
+				__debugInfo = "127:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+					__debugInfo = "124:\Enemy.gbas";
+					local3_Dir_1449 = 1;
+					__debugInfo = "124:\Enemy.gbas";
+				} else {
+					__debugInfo = "126:\Enemy.gbas";
+					local3_Dir_1449 = 0;
+					__debugInfo = "126:\Enemy.gbas";
+				};
+				__debugInfo = "135:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+					__debugInfo = "130:\Enemy.gbas";
+					local5_Frame_1445 = 2;
+					__debugInfo = "130:\Enemy.gbas";
+				} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+					__debugInfo = "132:\Enemy.gbas";
+					local5_Frame_1445 = 1;
+					__debugInfo = "132:\Enemy.gbas";
+				} else {
+					__debugInfo = "134:\Enemy.gbas";
+					local5_Frame_1445 = 0;
+					__debugInfo = "134:\Enemy.gbas";
+				};
+				__debugInfo = "138:\Enemy.gbas";
+				func9_TurnImage(global10_LlamaImage, local5_Frame_1445, local3_Dir_1449, param4_self.attr1_X, param4_self.attr1_Y, 6);
+				__debugInfo = "127:\Enemy.gbas";
+			};
+			__debugInfo = "86:\Enemy.gbas";
+		};
+		__debugInfo = "140:\Enemy.gbas";
+		return 0;
+		__debugInfo = "84:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_4_Init'] = function(param3_Typ, param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "143:\Enemy.gbas";
+		param4_self.attr3_Typ = param3_Typ;
+		__debugInfo = "144:\Enemy.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "145:\Enemy.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "146:\Enemy.gbas";
+		param4_self.attr5_Width = 32;
+		__debugInfo = "147:\Enemy.gbas";
+		param4_self.attr6_Height = 32;
+		__debugInfo = "149:\Enemy.gbas";
+		{
+			var local16___SelectHelper9__1455 = 0;
+			__debugInfo = "149:\Enemy.gbas";
+			local16___SelectHelper9__1455 = param4_self.attr3_Typ;
+			__debugInfo = "181:\Enemy.gbas";
+			if ((((local16___SelectHelper9__1455) == (~~(1))) ? 1 : 0)) {
+				__debugInfo = "151:\Enemy.gbas";
+				param4_self.attr6_Height = 16;
+				__debugInfo = "156:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "153:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "153:\Enemy.gbas";
+				} else {
+					__debugInfo = "155:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "155:\Enemy.gbas";
+				};
+				__debugInfo = "151:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1455) == (~~(2))) ? 1 : 0)) {
+				__debugInfo = "162:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "159:\Enemy.gbas";
+					param4_self.attr2_VX = 2;
+					__debugInfo = "159:\Enemy.gbas";
+				} else {
+					__debugInfo = "161:\Enemy.gbas";
+					param4_self.attr2_VX = -(2);
+					__debugInfo = "161:\Enemy.gbas";
+				};
+				__debugInfo = "162:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1455) == (~~(3))) ? 1 : 0)) {
+				__debugInfo = "164:\Enemy.gbas";
+				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
+				__debugInfo = "165:\Enemy.gbas";
+				param4_self.attr6_Height = 64;
+				__debugInfo = "166:\Enemy.gbas";
+				param4_self.attr5_Width = 64;
+				__debugInfo = "171:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "168:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "168:\Enemy.gbas";
+				} else {
+					__debugInfo = "170:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "170:\Enemy.gbas";
+				};
+				__debugInfo = "164:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1455) == (~~(4))) ? 1 : 0)) {
+				__debugInfo = "173:\Enemy.gbas";
+				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
+				__debugInfo = "174:\Enemy.gbas";
+				param4_self.attr6_Height = 64;
+				__debugInfo = "175:\Enemy.gbas";
+				param4_self.attr5_Width = 64;
+				__debugInfo = "180:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "177:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "177:\Enemy.gbas";
+				} else {
+					__debugInfo = "179:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "179:\Enemy.gbas";
+				};
+				__debugInfo = "173:\Enemy.gbas";
+			};
+			__debugInfo = "149:\Enemy.gbas";
+		};
+		__debugInfo = "183:\Enemy.gbas";
+		DIMPUSH(global6_Enemys, param4_self);
+		__debugInfo = "184:\Enemy.gbas";
+		return 0;
+		__debugInfo = "143:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_13_IsDestroyable'] = function(param4_self) {
+	stackPush("method: IsDestroyable", __debugInfo);
+	try {
+		__debugInfo = "191:\Enemy.gbas";
+		if ((((param4_self.attr3_Typ) == (3)) ? 1 : 0)) {
+			__debugInfo = "188:\Enemy.gbas";
+			return 0;
+			__debugInfo = "188:\Enemy.gbas";
+		} else {
+			__debugInfo = "190:\Enemy.gbas";
+			return tryClone(1);
+			__debugInfo = "190:\Enemy.gbas";
+		};
+		__debugInfo = "192:\Enemy.gbas";
+		return 0;
+		__debugInfo = "191:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "16:\Explosion.gbas";
+		param4_self.attr4_Anim+=1;
+		__debugInfo = "17:\Explosion.gbas";
+		if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
+			__debugInfo = "17:\Explosion.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "17:\Explosion.gbas";
+		};
+		__debugInfo = "18:\Explosion.gbas";
+		return 0;
+		__debugInfo = "16:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local5_Frame_1462 = 0;
+		__debugInfo = "30:\Explosion.gbas";
+		if ((((param4_self.attr4_Anim) > (15)) ? 1 : 0)) {
+			__debugInfo = "23:\Explosion.gbas";
+			local5_Frame_1462 = 3;
+			__debugInfo = "23:\Explosion.gbas";
+		} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+			__debugInfo = "25:\Explosion.gbas";
+			local5_Frame_1462 = 2;
+			__debugInfo = "25:\Explosion.gbas";
+		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+			__debugInfo = "27:\Explosion.gbas";
+			local5_Frame_1462 = 1;
+			__debugInfo = "27:\Explosion.gbas";
+		} else {
+			__debugInfo = "29:\Explosion.gbas";
+			local5_Frame_1462 = 0;
+			__debugInfo = "29:\Explosion.gbas";
+		};
+		__debugInfo = "32:\Explosion.gbas";
+		DRAWANIM(global14_ExplosionImage, local5_Frame_1462, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "33:\Explosion.gbas";
+		return 0;
+		__debugInfo = "30:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_4_Init'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "36:\Explosion.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "37:\Explosion.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "39:\Explosion.gbas";
+		DIMPUSH(global10_Explosions, param4_self);
+		__debugInfo = "40:\Explosion.gbas";
+		return 0;
+		__debugInfo = "36:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_9_InitEmpty'] = function(param5_Width, param6_Height, param11_Tileset_Str, param4_self) {
+	stackPush("method: InitEmpty", __debugInfo);
+	try {
+		__debugInfo = "25:\Map.gbas";
+		param4_self.attr6_IsSnow = 0;
+		__debugInfo = "26:\Map.gbas";
+		param4_self.attr5_Width = param5_Width;
+		__debugInfo = "27:\Map.gbas";
+		param4_self.attr6_Height = param6_Height;
+		__debugInfo = "29:\Map.gbas";
+		param4_self.attr7_ScrollX = 0;
+		__debugInfo = "30:\Map.gbas";
+		param4_self.attr7_ScrollY = 0;
+		__debugInfo = "32:\Map.gbas";
+		DIM(global5_Spits, [0], new type5_TSpit());
+		__debugInfo = "33:\Map.gbas";
+		DIM(global5_Shits, [0], new type5_TShit());
+		__debugInfo = "34:\Map.gbas";
+		DIM(global6_Enemys, [0], new type6_TEnemy());
+		__debugInfo = "35:\Map.gbas";
+		(global6_Player).Init(100, 100, 16, 32);
+		__debugInfo = "37:\Map.gbas";
+		param4_self.attr7_Tileset = GENSPRITE();
+		__debugInfo = "38:\Map.gbas";
+		param4_self.attr15_TilesetPath_Str = param11_Tileset_Str;
+		__debugInfo = "39:\Map.gbas";
+		LOADANIM(param11_Tileset_Str, param4_self.attr7_Tileset, 32, 32);
+		__debugInfo = "40:\Map.gbas";
+		if ((((INSTR(param11_Tileset_Str, "snowtileset", 0)) != (-(1))) ? 1 : 0)) {
+			__debugInfo = "40:\Map.gbas";
+			param4_self.attr6_IsSnow = 1;
+			__debugInfo = "40:\Map.gbas";
+		};
+		__debugInfo = "44:\Map.gbas";
+		DIM(param4_self.attr5_Datas, [param4_self.attr5_Width, param4_self.attr6_Height], 0);
+		__debugInfo = "46:\Map.gbas";
+		param4_self.attr6_HasFBO = INT2STR(PLATFORMINFO_Str("GLEX:glBindFramebufferEXT"));
+		__debugInfo = "53:\Map.gbas";
+		if (param4_self.attr6_HasFBO) {
+			__debugInfo = "48:\Map.gbas";
+			param4_self.attr5_SprID = GENSPRITE();
+			__debugInfo = "49:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 0;
+			__debugInfo = "50:\Map.gbas";
+			param4_self.attr8_ScreenID = 0;
+			__debugInfo = "51:\Map.gbas";
+			LOADSPRITE("", param4_self.attr5_SprID);
+			__debugInfo = "52:\Map.gbas";
+			CREATESCREEN(param4_self.attr8_ScreenID, param4_self.attr5_SprID, ~~(((param4_self.attr5_Width) * (32))), ~~(((param4_self.attr6_Height) * (32))));
+			__debugInfo = "48:\Map.gbas";
+		};
+		__debugInfo = "54:\Map.gbas";
+		return 0;
+		__debugInfo = "25:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_4_Save'] = function(param8_File_Str, param4_self) {
+	stackPush("method: Save", __debugInfo);
+	try {
+		var local3_Chn_1475 = 0;
+		__debugInfo = "57:\Map.gbas";
+		local3_Chn_1475 = GENFILE();
+		__debugInfo = "58:\Map.gbas";
+		if (DOESFILEEXIST(param8_File_Str)) {
+			__debugInfo = "58:\Map.gbas";
+			KILLFILE(param8_File_Str);
+			__debugInfo = "58:\Map.gbas";
+		};
+		__debugInfo = "59:\Map.gbas";
+		if ((((OPENFILE(local3_Chn_1475, param8_File_Str, 0)) == (0)) ? 1 : 0)) {
+			__debugInfo = "59:\Map.gbas";
+			END();
+			__debugInfo = "59:\Map.gbas";
+		};
+		__debugInfo = "62:\Map.gbas";
+		WRITELINE(local3_Chn_1475, CAST2STRING(param4_self.attr5_Width));
+		__debugInfo = "63:\Map.gbas";
+		WRITELINE(local3_Chn_1475, CAST2STRING(param4_self.attr6_Height));
+		__debugInfo = "64:\Map.gbas";
+		WRITELINE(local3_Chn_1475, param4_self.attr15_TilesetPath_Str);
+		__debugInfo = "65:\Map.gbas";
+		WRITELINE(local3_Chn_1475, param4_self.attr11_NextMap_Str);
+		__debugInfo = "65:\Map.gbas";
+		{
+			var local1_y_1476 = 0.0;
+			__debugInfo = "90:\Map.gbas";
+			for (local1_y_1476 = 0;toCheck(local1_y_1476, ((param4_self.attr6_Height) - (1)), 1);local1_y_1476 += 1) {
+				var local8_Line_Str_1477 = "";
+				__debugInfo = "67:\Map.gbas";
+				local8_Line_Str_1477 = "";
+				__debugInfo = "67:\Map.gbas";
+				{
+					var local1_x_1478 = 0.0;
+					__debugInfo = "88:\Map.gbas";
+					for (local1_x_1478 = 0;toCheck(local1_x_1478, ((param4_self.attr5_Width) - (1)), 1);local1_x_1478 += 1) {
+						var local12_PositionData_1479 = 0;
+						__debugInfo = "69:\Map.gbas";
+						if ((((local1_x_1478) > (0)) ? 1 : 0)) {
+							__debugInfo = "69:\Map.gbas";
+							local8_Line_Str_1477 = ((local8_Line_Str_1477) + (","));
+							__debugInfo = "69:\Map.gbas";
+						};
+						__debugInfo = "70:\Map.gbas";
+						local12_PositionData_1479 = param4_self.attr5_Datas.arrAccess(~~(local1_x_1478), ~~(local1_y_1476)).values[tmpPositionCache];
+						__debugInfo = "85:\Map.gbas";
+						var forEachSaver3458 = global6_Enemys;
+						for(var forEachCounter3458 = 0 ; forEachCounter3458 < forEachSaver3458.values.length ; forEachCounter3458++) {
+							var local4_Enem_1480 = forEachSaver3458.values[forEachCounter3458];
+						{
+								__debugInfo = "84:\Map.gbas";
+								if (((((((INTEGER(((local4_Enem_1480.attr1_X) / (32)))) == (local1_x_1478)) ? 1 : 0)) && ((((INTEGER(((((((local4_Enem_1480.attr1_Y) + (local4_Enem_1480.attr6_Height))) - (1))) / (32)))) == (local1_y_1476)) ? 1 : 0))) ? 1 : 0)) {
+									__debugInfo = "73:\Map.gbas";
+									{
+										var local17___SelectHelper10__1481 = 0;
+										__debugInfo = "73:\Map.gbas";
+										local17___SelectHelper10__1481 = local4_Enem_1480.attr3_Typ;
+										__debugInfo = "82:\Map.gbas";
+										if ((((local17___SelectHelper10__1481) == (~~(1))) ? 1 : 0)) {
+											__debugInfo = "75:\Map.gbas";
+											local12_PositionData_1479 = 8;
+											__debugInfo = "75:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1481) == (~~(2))) ? 1 : 0)) {
+											__debugInfo = "77:\Map.gbas";
+											local12_PositionData_1479 = 6;
+											__debugInfo = "77:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1481) == (~~(4))) ? 1 : 0)) {
+											__debugInfo = "79:\Map.gbas";
+											local12_PositionData_1479 = 9;
+											__debugInfo = "79:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1481) == (~~(3))) ? 1 : 0)) {
+											__debugInfo = "81:\Map.gbas";
+											local12_PositionData_1479 = 7;
+											__debugInfo = "81:\Map.gbas";
+										};
+										__debugInfo = "73:\Map.gbas";
+									};
+									__debugInfo = "83:\Map.gbas";
+									break;
+									__debugInfo = "73:\Map.gbas";
+								};
+								__debugInfo = "84:\Map.gbas";
+							}
+							forEachSaver3458.values[forEachCounter3458] = local4_Enem_1480;
+						
+						};
+						__debugInfo = "87:\Map.gbas";
+						local8_Line_Str_1477 = ((local8_Line_Str_1477) + (CAST2STRING(local12_PositionData_1479)));
+						__debugInfo = "69:\Map.gbas";
+					};
+					__debugInfo = "88:\Map.gbas";
+				};
+				__debugInfo = "89:\Map.gbas";
+				WRITELINE(local3_Chn_1475, local8_Line_Str_1477);
+				__debugInfo = "67:\Map.gbas";
+			};
+			__debugInfo = "90:\Map.gbas";
+		};
+		__debugInfo = "92:\Map.gbas";
+		CLOSEFILE(local3_Chn_1475);
+		__debugInfo = "93:\Map.gbas";
+		return 0;
+		__debugInfo = "57:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_4_Init'] = function(param8_Name_Str, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		var local3_Chn_1485 = 0, local8_Line_Str_ref_1486 = [""], local11_Tileset_Str_1487 = "", local1_x_1488 = 0, local1_y_1489 = 0;
+		__debugInfo = "96:\Map.gbas";
+		local3_Chn_1485 = GENFILE();
+		__debugInfo = "99:\Map.gbas";
+		if ((((OPENFILE(local3_Chn_1485, param8_Name_Str, 1)) == (0)) ? 1 : 0)) {
+			__debugInfo = "99:\Map.gbas";
+			END();
+			__debugInfo = "99:\Map.gbas";
+		};
+		__debugInfo = "101:\Map.gbas";
+		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
+		__debugInfo = "102:\Map.gbas";
+		param4_self.attr5_Width = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1486[0])));
+		__debugInfo = "104:\Map.gbas";
+		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
+		__debugInfo = "105:\Map.gbas";
+		param4_self.attr6_Height = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1486[0])));
+		__debugInfo = "107:\Map.gbas";
+		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
+		__debugInfo = "108:\Map.gbas";
+		local11_Tileset_Str_1487 = local8_Line_Str_ref_1486[0];
+		__debugInfo = "110:\Map.gbas";
+		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
+		__debugInfo = "111:\Map.gbas";
+		param4_self.attr11_NextMap_Str = local8_Line_Str_ref_1486[0];
+		__debugInfo = "113:\Map.gbas";
+		(param4_self).InitEmpty(param4_self.attr5_Width, param4_self.attr6_Height, local11_Tileset_Str_1487);
+		__debugInfo = "153:\Map.gbas";
+		while ((((ENDOFFILE(local3_Chn_1485)) == (0)) ? 1 : 0)) {
+			var local9_Tiles_Str_1490 = new GLBArray();
+			__debugInfo = "117:\Map.gbas";
+			READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
+			__debugInfo = "120:\Map.gbas";
+			SPLITSTR(unref(local8_Line_Str_ref_1486[0]), unref(local9_Tiles_Str_1490), ",", 1);
+			__debugInfo = "123:\Map.gbas";
+			local1_x_1488 = 0;
+			__debugInfo = "150:\Map.gbas";
+			var forEachSaver3675 = local9_Tiles_Str_1490;
+			for(var forEachCounter3675 = 0 ; forEachCounter3675 < forEachSaver3675.values.length ; forEachCounter3675++) {
+				var local4_tile_1491 = forEachSaver3675.values[forEachCounter3675];
+			{
+					__debugInfo = "125:\Map.gbas";
+					param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = func7_Convert(local4_tile_1491);
+					__debugInfo = "126:\Map.gbas";
+					{
+						var local17___SelectHelper11__1492 = 0;
+						__debugInfo = "126:\Map.gbas";
+						local17___SelectHelper11__1492 = param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache];
+						__debugInfo = "148:\Map.gbas";
+						if ((((local17___SelectHelper11__1492) == (4)) ? 1 : 0)) {
+							__debugInfo = "128:\Map.gbas";
+							global6_Player.attr1_X = ((local1_x_1488) * (32));
+							__debugInfo = "129:\Map.gbas";
+							global6_Player.attr1_Y = ((local1_y_1489) * (32));
+							__debugInfo = "130:\Map.gbas";
+							param4_self.attr6_SpawnX = ~~(global6_Player.attr1_X);
+							__debugInfo = "131:\Map.gbas";
+							param4_self.attr6_SpawnY = ~~(global6_Player.attr1_Y);
+							__debugInfo = "132:\Map.gbas";
+							param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = 0;
+							__debugInfo = "128:\Map.gbas";
+						} else if (((((((local17___SelectHelper11__1492) >= (6)) ? 1 : 0)) && ((((local17___SelectHelper11__1492) <= (9)) ? 1 : 0))) ? 1 : 0)) {
+							var local3_Typ_1493 = 0.0, local5_Enemy_1495 = new type6_TEnemy();
+							__debugInfo = "135:\Map.gbas";
+							{
+								var local17___SelectHelper12__1494 = 0;
+								__debugInfo = "135:\Map.gbas";
+								local17___SelectHelper12__1494 = param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache];
+								__debugInfo = "144:\Map.gbas";
+								if ((((local17___SelectHelper12__1494) == (6)) ? 1 : 0)) {
+									__debugInfo = "137:\Map.gbas";
+									local3_Typ_1493 = 2;
+									__debugInfo = "137:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1494) == (7)) ? 1 : 0)) {
+									__debugInfo = "139:\Map.gbas";
+									local3_Typ_1493 = 3;
+									__debugInfo = "139:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1494) == (8)) ? 1 : 0)) {
+									__debugInfo = "141:\Map.gbas";
+									local3_Typ_1493 = 1;
+									__debugInfo = "141:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1494) == (9)) ? 1 : 0)) {
+									__debugInfo = "143:\Map.gbas";
+									local3_Typ_1493 = 4;
+									__debugInfo = "143:\Map.gbas";
+								};
+								__debugInfo = "135:\Map.gbas";
+							};
+							__debugInfo = "146:\Map.gbas";
+							(local5_Enemy_1495).Init(~~(local3_Typ_1493), ((local1_x_1488) * (32)), ((local1_y_1489) * (32)));
+							__debugInfo = "147:\Map.gbas";
+							param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = 0;
+							__debugInfo = "135:\Map.gbas";
+						};
+						__debugInfo = "126:\Map.gbas";
+					};
+					__debugInfo = "149:\Map.gbas";
+					local1_x_1488+=1;
+					__debugInfo = "125:\Map.gbas";
+				}
+				forEachSaver3675.values[forEachCounter3675] = local4_tile_1491;
+			
+			};
+			__debugInfo = "152:\Map.gbas";
+			local1_y_1489+=1;
+			__debugInfo = "117:\Map.gbas";
+		};
+		__debugInfo = "155:\Map.gbas";
+		CLOSEFILE(local3_Chn_1485);
+		__debugInfo = "156:\Map.gbas";
+		return 0;
+		__debugInfo = "96:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "171:\Map.gbas";
+		if (param4_self.attr8_SpikeDir) {
+			__debugInfo = "160:\Map.gbas";
+			param4_self.attr13_SpikePosition+=-(0.5);
+			__debugInfo = "164:\Map.gbas";
+			if ((((param4_self.attr13_SpikePosition) <= (0)) ? 1 : 0)) {
+				__debugInfo = "162:\Map.gbas";
+				param4_self.attr13_SpikePosition = 0;
+				__debugInfo = "163:\Map.gbas";
+				param4_self.attr8_SpikeDir = 0;
+				__debugInfo = "162:\Map.gbas";
+			};
+			__debugInfo = "160:\Map.gbas";
+		} else {
+			__debugInfo = "166:\Map.gbas";
+			param4_self.attr13_SpikePosition+=0.5;
+			__debugInfo = "170:\Map.gbas";
+			if ((((param4_self.attr13_SpikePosition) >= (32)) ? 1 : 0)) {
+				__debugInfo = "168:\Map.gbas";
+				param4_self.attr8_SpikeDir = 1;
+				__debugInfo = "169:\Map.gbas";
+				param4_self.attr13_SpikePosition = 32;
+				__debugInfo = "168:\Map.gbas";
+			};
+			__debugInfo = "166:\Map.gbas";
+		};
+		__debugInfo = "172:\Map.gbas";
+		return 0;
+		__debugInfo = "171:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local10_TmpScrollX_1500 = 0.0, local10_TmpScrollY_1501 = 0.0;
+		__debugInfo = "175:\Map.gbas";
+		local10_TmpScrollX_1500 = param4_self.attr7_ScrollX;
+		__debugInfo = "176:\Map.gbas";
+		local10_TmpScrollY_1501 = param4_self.attr7_ScrollY;
+		__debugInfo = "183:\Map.gbas";
+		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
+			__debugInfo = "179:\Map.gbas";
+			USESCREEN(param4_self.attr8_ScreenID);
+			__debugInfo = "180:\Map.gbas";
+			DRAWRECT(0, 0, ((param4_self.attr5_Width) * (32)), ((param4_self.attr6_Height) * (32)), RGB(255, 0, 128));
+			__debugInfo = "181:\Map.gbas";
+			param4_self.attr7_ScrollX = 0;
+			__debugInfo = "182:\Map.gbas";
+			param4_self.attr7_ScrollY = 0;
+			__debugInfo = "179:\Map.gbas";
+		};
+		__debugInfo = "215:\Map.gbas";
+		if (((((((param4_self.attr6_HasFBO) == (0)) ? 1 : 0)) || ((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			var local5_width_ref_1502 = [0.0], local6_height_ref_1503 = [0.0], local2_sx_1504 = 0.0, local2_sy_1505 = 0.0;
+			__debugInfo = "187:\Map.gbas";
+			GETSCREENSIZE(local5_width_ref_1502, local6_height_ref_1503);
+			__debugInfo = "188:\Map.gbas";
+			local5_width_ref_1502[0] = ((INTEGER(((local5_width_ref_1502[0]) / (32)))) + (1));
+			__debugInfo = "189:\Map.gbas";
+			local6_height_ref_1503[0] = ((INTEGER(((local6_height_ref_1503[0]) / (32)))) + (1));
+			__debugInfo = "190:\Map.gbas";
+			local2_sx_1504 = ((-(INTEGER(((param4_self.attr7_ScrollX) / (32))))) - (1));
+			__debugInfo = "191:\Map.gbas";
+			local2_sy_1505 = ((-(INTEGER(((param4_self.attr7_ScrollY) / (32))))) - (1));
+			__debugInfo = "194:\Map.gbas";
+			{
+				var local1_x_1506 = 0.0;
+				__debugInfo = "201:\Map.gbas";
+				for (local1_x_1506 = local2_sx_1504;toCheck(local1_x_1506, ((local2_sx_1504) + (local5_width_ref_1502[0])), 1);local1_x_1506 += 1) {
+					__debugInfo = "195:\Map.gbas";
+					{
+						var local1_y_1507 = 0.0;
+						__debugInfo = "200:\Map.gbas";
+						for (local1_y_1507 = local2_sy_1505;toCheck(local1_y_1507, ((local2_sy_1505) + (local6_height_ref_1503[0])), 1);local1_y_1507 += 1) {
+							__debugInfo = "199:\Map.gbas";
+							if (((((((((((((local1_x_1506) >= (0)) ? 1 : 0)) && ((((local1_y_1507) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1506) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1507) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "198:\Map.gbas";
+								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1506), ~~(local1_y_1507)).values[tmpPositionCache]) != (1)) ? 1 : 0)) {
+									__debugInfo = "198:\Map.gbas";
+									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1506), ~~(local1_y_1507)).values[tmpPositionCache], local1_x_1506, local1_y_1507, 0);
+									__debugInfo = "198:\Map.gbas";
+								};
+								__debugInfo = "198:\Map.gbas";
+							};
+							__debugInfo = "199:\Map.gbas";
+						};
+						__debugInfo = "200:\Map.gbas";
+					};
+					__debugInfo = "195:\Map.gbas";
+				};
+				__debugInfo = "201:\Map.gbas";
+			};
+			__debugInfo = "205:\Map.gbas";
+			STARTPOLY(param4_self.attr7_Tileset, 2);
+			__debugInfo = "205:\Map.gbas";
+			{
+				var local1_x_1508 = 0.0;
+				__debugInfo = "212:\Map.gbas";
+				for (local1_x_1508 = local2_sx_1504;toCheck(local1_x_1508, ((local2_sx_1504) + (local5_width_ref_1502[0])), 1);local1_x_1508 += 1) {
+					__debugInfo = "206:\Map.gbas";
+					{
+						var local1_y_1509 = 0.0;
+						__debugInfo = "211:\Map.gbas";
+						for (local1_y_1509 = local2_sy_1505;toCheck(local1_y_1509, ((local2_sy_1505) + (local6_height_ref_1503[0])), 1);local1_y_1509 += 1) {
+							__debugInfo = "210:\Map.gbas";
+							if (((((((((((((local1_x_1508) >= (0)) ? 1 : 0)) && ((((local1_y_1509) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1508) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1509) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "209:\Map.gbas";
+								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache]) == (1)) ? 1 : 0)) {
+									__debugInfo = "209:\Map.gbas";
+									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache], local1_x_1508, local1_y_1509, 1);
+									__debugInfo = "209:\Map.gbas";
+								};
+								__debugInfo = "209:\Map.gbas";
+							};
+							__debugInfo = "210:\Map.gbas";
+						};
+						__debugInfo = "211:\Map.gbas";
+					};
+					__debugInfo = "206:\Map.gbas";
+				};
+				__debugInfo = "212:\Map.gbas";
+			};
+			__debugInfo = "213:\Map.gbas";
+			ENDPOLY();
+			__debugInfo = "187:\Map.gbas";
+		};
+		__debugInfo = "222:\Map.gbas";
+		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
+			__debugInfo = "218:\Map.gbas";
+			USESCREEN(-(1));
+			__debugInfo = "219:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 1;
+			__debugInfo = "220:\Map.gbas";
+			param4_self.attr7_ScrollX = local10_TmpScrollX_1500;
+			__debugInfo = "221:\Map.gbas";
+			param4_self.attr7_ScrollY = local10_TmpScrollY_1501;
+			__debugInfo = "218:\Map.gbas";
+		};
+		__debugInfo = "225:\Map.gbas";
+		if (param4_self.attr13_IsRenderedFBO) {
+			__debugInfo = "224:\Map.gbas";
+			DRAWSPRITE(param4_self.attr5_SprID, param4_self.attr7_ScrollX, param4_self.attr7_ScrollY);
+			__debugInfo = "224:\Map.gbas";
+		};
+		__debugInfo = "226:\Map.gbas";
+		return 0;
+		__debugInfo = "175:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_10_RenderTile'] = function(param4_Tile, param1_x, param1_y, param6_IsPoly, param4_self) {
+	stackPush("method: RenderTile", __debugInfo);
+	try {
+		__debugInfo = "229:\Map.gbas";
+		if (((((((((((((((param1_x) >= (0)) ? 1 : 0)) && ((((param1_y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_x) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1)) {
+			__debugInfo = "229:\Map.gbas";
+			return 0;
+			__debugInfo = "229:\Map.gbas";
+		};
+		__debugInfo = "231:\Map.gbas";
+		{
+			var local17___SelectHelper13__1516 = 0;
+			__debugInfo = "231:\Map.gbas";
+			local17___SelectHelper13__1516 = param4_Tile;
+			__debugInfo = "274:\Map.gbas";
+			if ((((local17___SelectHelper13__1516) == (1)) ? 1 : 0)) {
+				__debugInfo = "233:\Map.gbas";
+				param4_Tile;
+				__debugInfo = "246:\Map.gbas";
+				if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) - (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "239:\Map.gbas";
+					if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "236:\Map.gbas";
+						param4_Tile = 1;
+						__debugInfo = "236:\Map.gbas";
+					} else {
+						__debugInfo = "238:\Map.gbas";
+						param4_Tile = 2;
+						__debugInfo = "238:\Map.gbas";
+					};
+					__debugInfo = "239:\Map.gbas";
+				} else if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]) == (0)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "241:\Map.gbas";
+					param4_Tile = 3;
+					__debugInfo = "241:\Map.gbas";
+				} else if (((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) {
+					__debugInfo = "243:\Map.gbas";
+					param4_Tile = 1;
+					__debugInfo = "243:\Map.gbas";
+				} else {
+					__debugInfo = "245:\Map.gbas";
+					param4_Tile = 0;
+					__debugInfo = "245:\Map.gbas";
+				};
+				__debugInfo = "257:\Map.gbas";
+				if ((((param6_IsPoly) == (0)) ? 1 : 0)) {
+					__debugInfo = "249:\Map.gbas";
+					DRAWANIM(param4_self.attr7_Tileset, param4_Tile, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+					__debugInfo = "249:\Map.gbas";
+				} else {
+					__debugInfo = "251:\Map.gbas";
+					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((param4_Tile) * (32)), 0, RGB(255, 255, 255));
+					__debugInfo = "252:\Map.gbas";
+					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((((param4_Tile) + (1))) * (32)), 0, RGB(255, 255, 255));
+					__debugInfo = "253:\Map.gbas";
+					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((param4_Tile) * (32)), 31, RGB(255, 255, 255));
+					__debugInfo = "254:\Map.gbas";
+					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((((param4_Tile) + (1))) * (32)), 31, RGB(255, 255, 255));
+					__debugInfo = "256:\Map.gbas";
+					POLYNEWSTRIP();
+					__debugInfo = "251:\Map.gbas";
+				};
+				__debugInfo = "233:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (2)) ? 1 : 0)) {
+				__debugInfo = "259:\Map.gbas";
+				DRAWSPRITE(global11_LadderImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "259:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (3)) ? 1 : 0)) {
+				__debugInfo = "261:\Map.gbas";
+				DRAWSPRITE(global10_SpikeImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (param4_self.attr13_SpikePosition)));
+				__debugInfo = "261:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (4)) ? 1 : 0)) {
+				
+			} else if ((((local17___SelectHelper13__1516) == (5)) ? 1 : 0)) {
+				__debugInfo = "265:\Map.gbas";
+				DRAWSPRITE(global15_TrampolineImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "265:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (10)) ? 1 : 0)) {
+				__debugInfo = "267:\Map.gbas";
+				DRAWSPRITE(global9_DoorImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "267:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (11)) ? 1 : 0)) {
+				__debugInfo = "269:\Map.gbas";
+				DRAWSPRITE(global12_DynamitImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "269:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (12)) ? 1 : 0)) {
+				__debugInfo = "271:\Map.gbas";
+				DRAWANIM(global12_TriggerImage, 0, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "271:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1516) == (13)) ? 1 : 0)) {
+				__debugInfo = "273:\Map.gbas";
+				DRAWANIM(global12_TriggerImage, 1, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "273:\Map.gbas";
+			};
+			__debugInfo = "231:\Map.gbas";
+		};
+		__debugInfo = "275:\Map.gbas";
+		return 0;
+		__debugInfo = "229:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_8_PickTile'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: PickTile", __debugInfo);
+	try {
+		__debugInfo = "288:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "281:\Map.gbas";
+			param1_X = INTEGER(((param1_X) / (32)));
+			__debugInfo = "282:\Map.gbas";
+			param1_Y = INTEGER(((param1_Y) / (32)));
+			__debugInfo = "283:\Map.gbas";
+			param4_self.attr9_LastPickX = ~~(param1_X);
+			__debugInfo = "284:\Map.gbas";
+			param4_self.attr9_LastPickY = ~~(param1_Y);
+			__debugInfo = "285:\Map.gbas";
+			return tryClone(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]);
+			__debugInfo = "281:\Map.gbas";
+		} else {
+			__debugInfo = "287:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "287:\Map.gbas";
+		};
+		__debugInfo = "289:\Map.gbas";
+		return 0;
+		__debugInfo = "288:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_10_RemoveTile'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: RemoveTile", __debugInfo);
+	try {
+		__debugInfo = "296:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "294:\Map.gbas";
+			param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache] = 0;
+			__debugInfo = "295:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 0;
+			__debugInfo = "294:\Map.gbas";
+		};
+		__debugInfo = "297:\Map.gbas";
+		return 0;
+		__debugInfo = "296:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_14_CollisionPoint'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: CollisionPoint", __debugInfo);
+	try {
+		var local4_TmpY_1529 = 0.0;
+		__debugInfo = "301:\Map.gbas";
+		local4_TmpY_1529 = param1_Y;
+		__debugInfo = "322:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "304:\Map.gbas";
+			param1_X = INTEGER(((param1_X) / (32)));
+			__debugInfo = "305:\Map.gbas";
+			param1_Y = INTEGER(((param1_Y) / (32)));
+			__debugInfo = "319:\Map.gbas";
+			if ((((func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache])) == (0)) ? 1 : 0)) {
+				__debugInfo = "315:\Map.gbas";
+				if ((((((((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (5)) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (12)) ? 1 : 0))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (13)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "314:\Map.gbas";
+					if ((((MOD(~~(local4_TmpY_1529), 32)) > (16)) ? 1 : 0)) {
+						__debugInfo = "311:\Map.gbas";
+						return 1;
+						__debugInfo = "311:\Map.gbas";
+					} else {
+						__debugInfo = "313:\Map.gbas";
+						return tryClone(0);
+						__debugInfo = "313:\Map.gbas";
+					};
+					__debugInfo = "314:\Map.gbas";
+				};
+				__debugInfo = "316:\Map.gbas";
+				return 1;
+				__debugInfo = "315:\Map.gbas";
+			} else {
+				__debugInfo = "318:\Map.gbas";
+				return tryClone(0);
+				__debugInfo = "318:\Map.gbas";
+			};
+			__debugInfo = "304:\Map.gbas";
+		} else {
+			__debugInfo = "321:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "321:\Map.gbas";
+		};
+		__debugInfo = "323:\Map.gbas";
+		return 0;
+		__debugInfo = "301:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_12_RayCollision'] = function(param2_X1, param2_Y1, param2_X2, param2_Y2, param4_self) {
+	stackPush("method: RayCollision", __debugInfo);
+	try {
+		var local6_Length_1536 = 0.0, local6_DeltaX_1537 = 0.0, local6_DeltaY_1538 = 0.0;
+		__debugInfo = "327:\Map.gbas";
+		local6_Length_1536 = SQR(((((((((param2_X1) * (param2_X1))) + (((param2_Y1) * (param2_Y1))))) + (((param2_X2) * (param2_X2))))) + (((param2_Y2) * (param2_Y2)))));
+		__debugInfo = "328:\Map.gbas";
+		local6_DeltaX_1537 = ((((param2_X1) - (param2_X2))) / (local6_Length_1536));
+		__debugInfo = "329:\Map.gbas";
+		local6_DeltaY_1538 = ((((param2_Y1) - (param2_Y2))) / (local6_Length_1536));
+		__debugInfo = "329:\Map.gbas";
+		{
+			var local1_i_1539 = 0.0;
+			__debugInfo = "334:\Map.gbas";
+			for (local1_i_1539 = 0;toCheck(local1_i_1539, local6_Length_1536, 1);local1_i_1539 += 1) {
+				__debugInfo = "333:\Map.gbas";
+				if ((param4_self).CollisionPoint(((param2_X1) - (((local6_DeltaX_1537) * (local1_i_1539)))), ((param2_Y1) - (((local6_DeltaY_1538) * (local1_i_1539)))))) {
+					__debugInfo = "332:\Map.gbas";
+					return tryClone(1);
+					__debugInfo = "332:\Map.gbas";
+				};
+				__debugInfo = "333:\Map.gbas";
+			};
+			__debugInfo = "334:\Map.gbas";
+		};
+		__debugInfo = "335:\Map.gbas";
+		return 0;
+		__debugInfo = "336:\Map.gbas";
+		return 0;
+		__debugInfo = "327:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_9_Collision'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
+	stackPush("method: Collision", __debugInfo);
+	try {
+		__debugInfo = "339:\Map.gbas";
+		{
+			var local2_XX_1546 = 0.0;
+			__debugInfo = "344:\Map.gbas";
+			for (local2_XX_1546 = param1_X;toCheck(local2_XX_1546, ((param1_X) + (param5_Width)), 4);local2_XX_1546 += 4) {
+				__debugInfo = "340:\Map.gbas";
+				{
+					var local2_YY_1547 = 0.0;
+					__debugInfo = "343:\Map.gbas";
+					for (local2_YY_1547 = param1_Y;toCheck(local2_YY_1547, ((param1_Y) + (param6_Height)), 4);local2_YY_1547 += 4) {
+						__debugInfo = "342:\Map.gbas";
+						if ((param4_self).CollisionPoint(local2_XX_1546, local2_YY_1547)) {
+							__debugInfo = "342:\Map.gbas";
+							return 1;
+							__debugInfo = "342:\Map.gbas";
+						};
+						__debugInfo = "342:\Map.gbas";
+					};
+					__debugInfo = "343:\Map.gbas";
+				};
+				__debugInfo = "340:\Map.gbas";
+			};
+			__debugInfo = "344:\Map.gbas";
+		};
+		__debugInfo = "351:\Map.gbas";
+		if (((((((((((param4_self).CollisionPoint(param1_X, param1_Y)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), param1_Y))) ? 1 : 0)) || ((param4_self).CollisionPoint(param1_X, ((param1_Y) + (param6_Height))))) ? 1 : 0)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), ((param1_Y) + (param6_Height))))) ? 1 : 0)) {
+			__debugInfo = "348:\Map.gbas";
+			return 1;
+			__debugInfo = "348:\Map.gbas";
+		} else {
+			__debugInfo = "350:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "350:\Map.gbas";
+		};
+		__debugInfo = "352:\Map.gbas";
+		return 0;
+		__debugInfo = "339:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func15_IsCollisionTile'] = function(param3_Typ) {
+	stackPush("function: IsCollisionTile", __debugInfo);
+	try {
+		__debugInfo = "360:\Map.gbas";
+		if (((((((((((((param3_Typ) == (0)) ? 1 : 0)) || ((((param3_Typ) == (2)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (3)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (10)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "357:\Map.gbas";
+			return 1;
+			__debugInfo = "357:\Map.gbas";
+		} else {
+			__debugInfo = "359:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "359:\Map.gbas";
+		};
+		__debugInfo = "361:\Map.gbas";
+		return 0;
+		__debugInfo = "360:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func7_Convert'] = function(param8_Text_Str) {
+	stackPush("function: Convert", __debugInfo);
+	try {
+		__debugInfo = "364:\Map.gbas";
+		{
+			var local17___SelectHelper14__1550 = "";
+			__debugInfo = "364:\Map.gbas";
+			local17___SelectHelper14__1550 = param8_Text_Str;
+			__debugInfo = "373:\Map.gbas";
+			if ((((local17___SelectHelper14__1550) == ("A")) ? 1 : 0)) {
+				__debugInfo = "366:\Map.gbas";
+				return 10;
+				__debugInfo = "366:\Map.gbas";
+			} else if ((((local17___SelectHelper14__1550) == ("B")) ? 1 : 0)) {
+				__debugInfo = "368:\Map.gbas";
+				return 11;
+				__debugInfo = "368:\Map.gbas";
+			} else if ((((local17___SelectHelper14__1550) == ("C")) ? 1 : 0)) {
+				__debugInfo = "370:\Map.gbas";
+				return 12;
+				__debugInfo = "370:\Map.gbas";
+			} else {
+				__debugInfo = "372:\Map.gbas";
+				return tryClone(INTEGER(FLOAT2STR(param8_Text_Str)));
+				__debugInfo = "372:\Map.gbas";
+			};
+			__debugInfo = "364:\Map.gbas";
+		};
+		__debugInfo = "374:\Map.gbas";
+		return 0;
+		__debugInfo = "364:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_4_Init'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "16:\Player.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "17:\Player.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "18:\Player.gbas";
+		param4_self.attr2_VX = 0;
+		__debugInfo = "19:\Player.gbas";
+		param4_self.attr2_VY = 0;
+		__debugInfo = "21:\Player.gbas";
+		param4_self.attr5_Width = param5_Width;
+		__debugInfo = "22:\Player.gbas";
+		param4_self.attr6_Height = param6_Height;
+		__debugInfo = "23:\Player.gbas";
+		return 0;
+		__debugInfo = "16:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		var local8_ScrWidth_ref_1559 = [0.0], local9_ScrHeight_ref_1560 = [0.0], local4_OldX_1561 = 0.0, local4_OldY_1562 = 0.0;
+		__debugInfo = "27:\Player.gbas";
+		GETSCREENSIZE(local8_ScrWidth_ref_1559, local9_ScrHeight_ref_1560);
+		__debugInfo = "30:\Player.gbas";
+		param4_self.attr2_VY+=0.5;
+		__debugInfo = "33:\Player.gbas";
+		if ((((KEY(203)) || (func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1560[0]) - (42))))) ? 1 : 0)) {
+			__debugInfo = "33:\Player.gbas";
+			param4_self.attr2_VX+=-(1);
+			__debugInfo = "33:\Player.gbas";
+		};
+		__debugInfo = "34:\Player.gbas";
+		if ((((KEY(205)) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1559[0]) - (42)), ((local9_ScrHeight_ref_1560[0]) - (42))))) ? 1 : 0)) {
+			__debugInfo = "34:\Player.gbas";
+			param4_self.attr2_VX+=1;
+			__debugInfo = "34:\Player.gbas";
+		};
+		__debugInfo = "47:\Player.gbas";
+		if ((((KEY(57)) || ((((func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1560[0]) - (125)))) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1559[0]) - (42)), ((local9_ScrHeight_ref_1560[0]) - (125))))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "46:\Player.gbas";
+			if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) == (2)) ? 1 : 0)) {
+				__debugInfo = "37:\Player.gbas";
+				param4_self.attr2_VY = 0;
+				__debugInfo = "38:\Player.gbas";
+				param4_self.attr1_Y+=-(4);
+				__debugInfo = "42:\Player.gbas";
+				while (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) != (2)) ? 1 : 0)) {
+					__debugInfo = "41:\Player.gbas";
+					param4_self.attr1_Y+=1;
+					__debugInfo = "41:\Player.gbas";
+				};
+				__debugInfo = "37:\Player.gbas";
+			} else if (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) || ((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1))))) ? 1 : 0)) {
+				__debugInfo = "45:\Player.gbas";
+				param4_self.attr2_VY = -(8);
+				__debugInfo = "45:\Player.gbas";
+			};
+			__debugInfo = "46:\Player.gbas";
+		};
+		__debugInfo = "58:\Player.gbas";
+		if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2))))))) == (10)) ? 1 : 0)) {
+			__debugInfo = "57:\Player.gbas";
+			if ((((global3_Map.attr11_NextMap_Str) == ("")) ? 1 : 0)) {
+				__debugInfo = "53:\Player.gbas";
+				END();
+				__debugInfo = "53:\Player.gbas";
+			} else {
+				__debugInfo = "55:\Player.gbas";
+				(global3_Map).Init(global3_Map.attr11_NextMap_Str);
+				__debugInfo = "56:\Player.gbas";
+				throw new GLBException("Exit", "\Player.gbas", 56);
+				__debugInfo = "55:\Player.gbas";
+			};
+			__debugInfo = "57:\Player.gbas";
+		};
+		__debugInfo = "61:\Player.gbas";
+		param4_self.attr2_VX = ((param4_self.attr2_VX) * (((0.77) + (((global3_Map.attr6_IsSnow) * (0.1))))));
+		__debugInfo = "64:\Player.gbas";
+		if ((((param4_self.attr2_VY) > (31)) ? 1 : 0)) {
+			__debugInfo = "64:\Player.gbas";
+			param4_self.attr2_VY = 31;
+			__debugInfo = "64:\Player.gbas";
+		};
+		__debugInfo = "65:\Player.gbas";
+		if ((((param4_self.attr2_VY) < (-33)) ? 1 : 0)) {
+			__debugInfo = "65:\Player.gbas";
+			param4_self.attr2_VY = -33;
+			__debugInfo = "65:\Player.gbas";
+		};
+		__debugInfo = "69:\Player.gbas";
+		local4_OldX_1561 = param4_self.attr1_X;
+		__debugInfo = "70:\Player.gbas";
+		local4_OldY_1562 = param4_self.attr1_Y;
+		__debugInfo = "73:\Player.gbas";
+		param4_self.attr1_X+=param4_self.attr2_VX;
+		__debugInfo = "76:\Player.gbas";
+		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
+			__debugInfo = "75:\Player.gbas";
+			param4_self.attr1_X = local4_OldX_1561;
+			__debugInfo = "75:\Player.gbas";
+		};
+		__debugInfo = "78:\Player.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "82:\Player.gbas";
+		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
+			__debugInfo = "80:\Player.gbas";
+			param4_self.attr1_Y = local4_OldY_1562;
+			__debugInfo = "81:\Player.gbas";
+			param4_self.attr2_VY = 0;
+			__debugInfo = "80:\Player.gbas";
+		};
+		__debugInfo = "90:\Player.gbas";
+		if ((((ABS(param4_self.attr2_VX)) > (0.1)) ? 1 : 0)) {
+			__debugInfo = "86:\Player.gbas";
+			param4_self.attr4_Anim+=1;
+			__debugInfo = "87:\Player.gbas";
+			param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
+			__debugInfo = "86:\Player.gbas";
+		} else {
+			__debugInfo = "89:\Player.gbas";
+			param4_self.attr4_Anim = 13;
+			__debugInfo = "89:\Player.gbas";
+		};
+		__debugInfo = "95:\Player.gbas";
+		if ((((((((global3_Map).PickTile(((param4_self.attr1_X) + (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "94:\Player.gbas";
+			(param4_self).Reset();
+			__debugInfo = "94:\Player.gbas";
+		};
+		__debugInfo = "100:\Player.gbas";
+		if (((((((((((global3_Map).PickTile(((param4_self.attr1_X) + (2)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0))) ? 1 : 0)) && ((((ABS(param4_self.attr2_VY)) > (0.25)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "99:\Player.gbas";
+			param4_self.attr2_VY = ((-(param4_self.attr2_VY)) * (1.1));
+			__debugInfo = "99:\Player.gbas";
+		};
+		__debugInfo = "160:\Player.gbas";
+		if ((((((((global3_Map).PickTile(param4_self.attr1_X, ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0))) ? 1 : 0)) {
+			var local8_LastPosX_1563 = 0.0, local8_LastPosY_1564 = 0.0, local4_Dist_1565 = 0.0;
+			__debugInfo = "105:\Player.gbas";
+			global3_Map.attr5_Datas.arrAccess(global3_Map.attr9_LastPickX, global3_Map.attr9_LastPickY).values[tmpPositionCache] = 13;
+			__debugInfo = "106:\Player.gbas";
+			global3_Map.attr13_IsRenderedFBO = 0;
+			__debugInfo = "109:\Player.gbas";
+			local4_Dist_1565 = -(1);
+			__debugInfo = "109:\Player.gbas";
+			{
+				var local1_x_1566 = 0.0;
+				__debugInfo = "121:\Player.gbas";
+				for (local1_x_1566 = 0;toCheck(local1_x_1566, ((global3_Map.attr5_Width) - (1)), 1);local1_x_1566 += 1) {
+					__debugInfo = "110:\Player.gbas";
+					{
+						var local1_y_1567 = 0.0;
+						__debugInfo = "120:\Player.gbas";
+						for (local1_y_1567 = 0;toCheck(local1_y_1567, ((global3_Map.attr6_Height) - (1)), 1);local1_y_1567 += 1) {
+							__debugInfo = "119:\Player.gbas";
+							if ((((global3_Map.attr5_Datas.arrAccess(~~(local1_x_1566), ~~(local1_y_1567)).values[tmpPositionCache]) == (11)) ? 1 : 0)) {
+								var local7_TmpDist_1568 = 0.0;
+								__debugInfo = "113:\Player.gbas";
+								local7_TmpDist_1568 = SQR(((((((local1_x_1566) - (global3_Map.attr9_LastPickX))) * (((local1_x_1566) - (global3_Map.attr9_LastPickX))))) + (((((local1_y_1567) - (global3_Map.attr9_LastPickY))) * (((local1_y_1567) - (global3_Map.attr9_LastPickY)))))));
+								__debugInfo = "118:\Player.gbas";
+								if (((((((local4_Dist_1565) == (-(1))) ? 1 : 0)) || ((((local7_TmpDist_1568) < (local4_Dist_1565)) ? 1 : 0))) ? 1 : 0)) {
+									__debugInfo = "115:\Player.gbas";
+									local4_Dist_1565 = local7_TmpDist_1568;
+									__debugInfo = "116:\Player.gbas";
+									local8_LastPosX_1563 = local1_x_1566;
+									__debugInfo = "117:\Player.gbas";
+									local8_LastPosY_1564 = local1_y_1567;
+									__debugInfo = "115:\Player.gbas";
+								};
+								__debugInfo = "113:\Player.gbas";
+							};
+							__debugInfo = "119:\Player.gbas";
+						};
+						__debugInfo = "120:\Player.gbas";
+					};
+					__debugInfo = "110:\Player.gbas";
+				};
+				__debugInfo = "121:\Player.gbas";
+			};
+			__debugInfo = "159:\Player.gbas";
+			if ((((local4_Dist_1565) != (-(1))) ? 1 : 0)) {
+				var local2_X1_1569 = 0.0, local2_Y1_1570 = 0.0, local2_X2_1571 = 0.0, local2_Y2_1572 = 0.0, local5_Angle_1573 = 0.0;
+				__debugInfo = "126:\Player.gbas";
+				local2_Y1_1570 = ((((local8_LastPosY_1564) * (32))) + (16));
+				__debugInfo = "127:\Player.gbas";
+				local2_Y2_1572 = ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
+				__debugInfo = "127:\Player.gbas";
+				local2_X1_1569 = ((((local8_LastPosX_1563) * (32))) + (16));
+				__debugInfo = "128:\Player.gbas";
+				local2_X2_1571 = ((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
+				__debugInfo = "129:\Player.gbas";
+				local5_Angle_1573 = -(MOD(~~(((ATAN(((local2_Y1_1570) - (local2_Y2_1572)), ((local2_X1_1569) - (local2_X2_1571)))) + (180))), 360));
+				__debugInfo = "130:\Player.gbas";
+				local4_Dist_1565 = SQR(((((((local2_X1_1569) - (local2_X2_1571))) * (((local2_X1_1569) - (local2_X2_1571))))) + (((((local2_Y1_1570) - (local2_Y2_1572))) * (((local2_Y1_1570) - (local2_Y2_1572)))))));
+				__debugInfo = "136:\Player.gbas";
+				if ((((local4_Dist_1565) < (512)) ? 1 : 0)) {
+					var local8_Strength_1574 = 0.0;
+					__debugInfo = "133:\Player.gbas";
+					local8_Strength_1574 = ((((256) / (((local4_Dist_1565) + (1))))) * (16));
+					__debugInfo = "134:\Player.gbas";
+					param4_self.attr2_VX+=((func4_QCOS(local5_Angle_1573)) * (local8_Strength_1574));
+					__debugInfo = "135:\Player.gbas";
+					param4_self.attr2_VY+=((func4_QSIN(local5_Angle_1573)) * (local8_Strength_1574));
+					__debugInfo = "133:\Player.gbas";
+				};
+				__debugInfo = "138:\Player.gbas";
+				{
+					var local1_X_1575 = 0.0;
+					__debugInfo = "151:\Player.gbas";
+					for (local1_X_1575 = -(1);toCheck(local1_X_1575, 1, 1);local1_X_1575 += 1) {
+						__debugInfo = "139:\Player.gbas";
+						{
+							var local1_Y_1576 = 0.0;
+							__debugInfo = "150:\Player.gbas";
+							for (local1_Y_1576 = -(1);toCheck(local1_Y_1576, 1, 1);local1_Y_1576 += 1) {
+								__debugInfo = "141:\Player.gbas";
+								(global3_Map).RemoveTile(((local8_LastPosX_1563) + (local1_X_1575)), ((local8_LastPosY_1564) + (local1_Y_1576)));
+								__debugInfo = "141:\Player.gbas";
+								{
+									var local2_XX_1577 = 0.0;
+									__debugInfo = "149:\Player.gbas";
+									for (local2_XX_1577 = -(0.5);toCheck(local2_XX_1577, 0.5, 0.5);local2_XX_1577 += 0.5) {
+										__debugInfo = "142:\Player.gbas";
+										{
+											var local2_YY_1578 = 0.0;
+											__debugInfo = "148:\Player.gbas";
+											for (local2_YY_1578 = -(0.5);toCheck(local2_YY_1578, 0.5, 0.5);local2_YY_1578 += 0.5) {
+												__debugInfo = "147:\Player.gbas";
+												if ((((INTEGER(RND(2))) > (1)) ? 1 : 0)) {
+													var local3_Exp_1579 = new type10_TExplosion();
+													__debugInfo = "146:\Player.gbas";
+													(local3_Exp_1579).Init(((((((local8_LastPosX_1563) + (local1_X_1575))) + (local2_XX_1577))) * (32)), ((((((local8_LastPosY_1564) + (local1_Y_1576))) + (local2_YY_1578))) * (32)));
+													__debugInfo = "146:\Player.gbas";
+												};
+												__debugInfo = "147:\Player.gbas";
+											};
+											__debugInfo = "148:\Player.gbas";
+										};
+										__debugInfo = "142:\Player.gbas";
+									};
+									__debugInfo = "149:\Player.gbas";
+								};
+								__debugInfo = "141:\Player.gbas";
+							};
+							__debugInfo = "150:\Player.gbas";
+						};
+						__debugInfo = "139:\Player.gbas";
+					};
+					__debugInfo = "151:\Player.gbas";
+				};
+				__debugInfo = "158:\Player.gbas";
+				var forEachSaver5982 = global6_Enemys;
+				for(var forEachCounter5982 = 0 ; forEachCounter5982 < forEachSaver5982.values.length ; forEachCounter5982++) {
+					var local5_Enemy_1580 = forEachSaver5982.values[forEachCounter5982];
+				{
+						__debugInfo = "157:\Player.gbas";
+						if ((((SQR(((((((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))) * (((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))))) + (((local5_Enemy_1580.attr1_Y) - (((local8_LastPosY_1564) * (32)))))))) < (32)) ? 1 : 0)) {
+							__debugInfo = "156:\Player.gbas";
+							local5_Enemy_1580.attr4_Fall = 1;
+							__debugInfo = "156:\Player.gbas";
+						};
+						__debugInfo = "157:\Player.gbas";
+					}
+					forEachSaver5982.values[forEachCounter5982] = local5_Enemy_1580;
+				
+				};
+				__debugInfo = "126:\Player.gbas";
+			};
+			__debugInfo = "105:\Player.gbas";
+		};
+		__debugInfo = "173:\Player.gbas";
+		var forEachSaver6112 = global6_Enemys;
+		for(var forEachCounter6112 = 0 ; forEachCounter6112 < forEachSaver6112.values.length ; forEachCounter6112++) {
+			var local5_Enemy_1581 = forEachSaver6112.values[forEachCounter6112];
+		{
+				__debugInfo = "172:\Player.gbas";
+				if ((((local5_Enemy_1581.attr4_Fall) == (0)) ? 1 : 0)) {
+					__debugInfo = "171:\Player.gbas";
+					if (((((((BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) + (4)), ~~(((local5_Enemy_1581.attr1_X) + (4))), ~~(((local5_Enemy_1581.attr1_Y) - (8))), ~~(((local5_Enemy_1581.attr5_Width) - (8))), 16)) && ((local5_Enemy_1581).IsDestroyable())) ? 1 : 0)) && ((((param4_self.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "167:\Player.gbas";
+						local5_Enemy_1581.attr4_Fall = 1;
+						__debugInfo = "167:\Player.gbas";
+					} else if (BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) - (4)), ~~(((local5_Enemy_1581.attr1_X) + (2))), ~~(((local5_Enemy_1581.attr1_Y) + (2))), ~~(((local5_Enemy_1581.attr5_Width) - (4))), ~~(((local5_Enemy_1581.attr6_Height) - (4))))) {
+						__debugInfo = "169:\Player.gbas";
+						(param4_self).Reset();
+						__debugInfo = "170:\Player.gbas";
+						break;
+						__debugInfo = "169:\Player.gbas";
+					};
+					__debugInfo = "171:\Player.gbas";
+				};
+				__debugInfo = "172:\Player.gbas";
+			}
+			forEachSaver6112.values[forEachCounter6112] = local5_Enemy_1581;
+		
+		};
+		__debugInfo = "181:\Player.gbas";
+		var forEachSaver6152 = global5_Shits;
+		for(var forEachCounter6152 = 0 ; forEachCounter6152 < forEachSaver6152.values.length ; forEachCounter6152++) {
+			var local1_S_1582 = forEachSaver6152.values[forEachCounter6152];
+		{
+				__debugInfo = "180:\Player.gbas";
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1582.attr1_X), ~~(local1_S_1582.attr1_Y), 16, 16)) && ((((local1_S_1582.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "178:\Player.gbas";
+					(param4_self).Reset();
+					__debugInfo = "179:\Player.gbas";
+					//DELETE!!111
+					forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
+					DIMDEL(forEachSaver6152, forEachCounter6152);
+					forEachCounter6152--;
+					continue;
+					__debugInfo = "178:\Player.gbas";
+				};
+				__debugInfo = "180:\Player.gbas";
+			}
+			forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
+		
+		};
+		__debugInfo = "189:\Player.gbas";
+		var forEachSaver6192 = global5_Spits;
+		for(var forEachCounter6192 = 0 ; forEachCounter6192 < forEachSaver6192.values.length ; forEachCounter6192++) {
+			var local1_S_1583 = forEachSaver6192.values[forEachCounter6192];
+		{
+				__debugInfo = "188:\Player.gbas";
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1583.attr1_X), ~~(local1_S_1583.attr1_Y), 8, 8)) && ((((local1_S_1583.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "186:\Player.gbas";
+					(param4_self).Reset();
+					__debugInfo = "187:\Player.gbas";
+					//DELETE!!111
+					forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
+					DIMDEL(forEachSaver6192, forEachCounter6192);
+					forEachCounter6192--;
+					continue;
+					__debugInfo = "186:\Player.gbas";
+				};
+				__debugInfo = "188:\Player.gbas";
+			}
+			forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
+		
+		};
+		__debugInfo = "195:\Player.gbas";
+		if ((((((param4_self.attr1_Y) - (((param4_self.attr6_Height) * (2))))) > (((global3_Map.attr6_Height) * (32)))) ? 1 : 0)) {
+			__debugInfo = "194:\Player.gbas";
+			(param4_self).Reset();
+			__debugInfo = "194:\Player.gbas";
+		};
+		__debugInfo = "198:\Player.gbas";
+		global3_Map.attr7_ScrollX = ((((-(param4_self.attr1_X)) + (((local8_ScrWidth_ref_1559[0]) / (2))))) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
+		__debugInfo = "199:\Player.gbas";
+		global3_Map.attr7_ScrollY = ((((-(param4_self.attr1_Y)) + (((local9_ScrHeight_ref_1560[0]) / (2))))) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
+		__debugInfo = "200:\Player.gbas";
+		return 0;
+		__debugInfo = "27:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local7_CurAnim_1586 = 0, local3_Dir_1587 = 0;
+		__debugInfo = "210:\Player.gbas";
+		if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+			__debugInfo = "205:\Player.gbas";
+			local7_CurAnim_1586 = 0;
+			__debugInfo = "205:\Player.gbas";
+		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+			__debugInfo = "207:\Player.gbas";
+			local7_CurAnim_1586 = 1;
+			__debugInfo = "207:\Player.gbas";
+		} else {
+			__debugInfo = "209:\Player.gbas";
+			local7_CurAnim_1586 = 2;
+			__debugInfo = "209:\Player.gbas";
+		};
+		__debugInfo = "217:\Player.gbas";
+		if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+			__debugInfo = "214:\Player.gbas";
+			local3_Dir_1587 = 1;
+			__debugInfo = "214:\Player.gbas";
+		} else {
+			__debugInfo = "216:\Player.gbas";
+			local3_Dir_1587 = 0;
+			__debugInfo = "216:\Player.gbas";
+		};
+		__debugInfo = "220:\Player.gbas";
+		func9_TurnImage(global11_PlayerImage, local7_CurAnim_1586, local3_Dir_1587, ((param4_self.attr1_X) + (1)), param4_self.attr1_Y, 6);
+		__debugInfo = "221:\Player.gbas";
+		return 0;
+		__debugInfo = "210:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_5_Reset'] = function(param4_self) {
+	stackPush("method: Reset", __debugInfo);
+	try {
+		__debugInfo = "224:\Player.gbas";
+		param4_self.attr1_X = global3_Map.attr6_SpawnX;
+		__debugInfo = "225:\Player.gbas";
+		param4_self.attr1_Y = global3_Map.attr6_SpawnY;
+		__debugInfo = "226:\Player.gbas";
+		param4_self.attr2_VX = 0;
+		__debugInfo = "227:\Player.gbas";
+		param4_self.attr2_VY = 0;
+		__debugInfo = "228:\Player.gbas";
+		return 0;
+		__debugInfo = "224:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func9_TurnImage'] = function(param3_Img, param5_Frame, param3_Dir, param1_X, param1_Y, param8_MaxFrame) {
+	stackPush("function: TurnImage", __debugInfo);
+	try {
+		__debugInfo = "235:\Player.gbas";
+		if (param3_Dir) {
+			__debugInfo = "234:\Player.gbas";
+			param5_Frame = ((((param8_MaxFrame) - (1))) - (param5_Frame));
+			__debugInfo = "234:\Player.gbas";
+		};
+		__debugInfo = "237:\Player.gbas";
+		DRAWANIM(param3_Img, param5_Frame, ((param1_X) + (global3_Map.attr7_ScrollX)), ((param1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "238:\Player.gbas";
+		return 0;
+		__debugInfo = "235:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_QSIN'] = function(param1_x) {
+	stackPush("function: QSIN", __debugInfo);
+	try {
+		__debugInfo = "13:\qmath.gbas";
+		return tryClone(SIN(param1_x));
+		__debugInfo = "29:\qmath.gbas";
+		return 0;
+		__debugInfo = "13:\qmath.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_QCOS'] = function(param1_x) {
+	stackPush("function: QCOS", __debugInfo);
+	try {
+		__debugInfo = "35:\qmath.gbas";
+		return tryClone(COS(param1_x));
+		__debugInfo = "39:\qmath.gbas";
+		return 0;
+		__debugInfo = "35:\qmath.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		__debugInfo = "17:\Shit.gbas";
+		DRAWSPRITE(global9_ShitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "18:\Shit.gbas";
+		return 0;
+		__debugInfo = "17:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "23:\Shit.gbas";
+		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
+			__debugInfo = "22:\Shit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "22:\Shit.gbas";
+		};
+		__debugInfo = "25:\Shit.gbas";
+		if ((((param4_self.attr1_Y) > (((((global3_Map.attr6_Height) * (32))) + (640)))) ? 1 : 0)) {
+			__debugInfo = "25:\Shit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "25:\Shit.gbas";
+		};
+		__debugInfo = "36:\Shit.gbas";
+		if ((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((((param4_self.attr1_Y) + (param4_self.attr2_VY))) + (16)))) {
+			__debugInfo = "31:\Shit.gbas";
+			while (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((param4_self.attr1_Y) + (16)))) == (0)) ? 1 : 0)) {
+				__debugInfo = "30:\Shit.gbas";
+				param4_self.attr1_Y+=1;
+				__debugInfo = "30:\Shit.gbas";
+			};
+			__debugInfo = "32:\Shit.gbas";
+			param4_self.attr2_VY = 0;
+			__debugInfo = "33:\Shit.gbas";
+			param4_self.attr3_Age+=1;
+			__debugInfo = "31:\Shit.gbas";
+		} else {
+			__debugInfo = "35:\Shit.gbas";
+			param4_self.attr2_VY+=1;
+			__debugInfo = "35:\Shit.gbas";
+		};
+		__debugInfo = "37:\Shit.gbas";
+		param4_self.attr2_VY = MIN(param4_self.attr2_VY, 8);
+		__debugInfo = "40:\Shit.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "41:\Shit.gbas";
+		return 0;
+		__debugInfo = "23:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_4_Init'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "44:\Shit.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "45:\Shit.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "46:\Shit.gbas";
+		param4_self.attr2_VY = 1;
+		__debugInfo = "48:\Shit.gbas";
+		DIMPUSH(global5_Shits, param4_self);
+		__debugInfo = "49:\Shit.gbas";
+		return 0;
+		__debugInfo = "44:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		var local4_OldX_1608 = 0.0, local4_OldY_1609 = 0.0;
+		__debugInfo = "16:\Spit.gbas";
+		param4_self.attr2_VX = ((param4_self.attr2_VX) * (0.99));
+		__debugInfo = "17:\Spit.gbas";
+		param4_self.attr2_VY+=0.1;
+		__debugInfo = "18:\Spit.gbas";
+		param4_self.attr3_Age+=1;
+		__debugInfo = "22:\Spit.gbas";
+		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
+			__debugInfo = "21:\Spit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "21:\Spit.gbas";
+		};
+		__debugInfo = "25:\Spit.gbas";
+		local4_OldX_1608 = param4_self.attr1_X;
+		__debugInfo = "26:\Spit.gbas";
+		local4_OldY_1609 = param4_self.attr1_Y;
+		__debugInfo = "28:\Spit.gbas";
+		param4_self.attr1_X+=param4_self.attr2_VX;
+		__debugInfo = "32:\Spit.gbas";
+		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
+			__debugInfo = "30:\Spit.gbas";
+			param4_self.attr2_VX = -(param4_self.attr2_VX);
+			__debugInfo = "31:\Spit.gbas";
+			param4_self.attr1_X = local4_OldX_1608;
+			__debugInfo = "30:\Spit.gbas";
+		};
+		__debugInfo = "33:\Spit.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "37:\Spit.gbas";
+		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
+			__debugInfo = "35:\Spit.gbas";
+			param4_self.attr2_VY = -(param4_self.attr2_VY);
+			__debugInfo = "36:\Spit.gbas";
+			param4_self.attr1_Y = local4_OldY_1609;
+			__debugInfo = "35:\Spit.gbas";
+		};
+		__debugInfo = "38:\Spit.gbas";
+		return 0;
+		__debugInfo = "16:\Spit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		__debugInfo = "41:\Spit.gbas";
+		DRAWSPRITE(global9_SpitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "42:\Spit.gbas";
+		return 0;
+		__debugInfo = "41:\Spit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_4_Init'] = function(param1_X, param1_Y, param4_DirX, param4_DirY, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "45:\Spit.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "46:\Spit.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "47:\Spit.gbas";
+		param4_self.attr2_VX = param4_DirX;
+		__debugInfo = "48:\Spit.gbas";
+		param4_self.attr2_VY = param4_DirY;
+		__debugInfo = "50:\Spit.gbas";
+		DIMPUSH(global5_Spits, param4_self);
+		__debugInfo = "51:\Spit.gbas";
+		return 0;
+		__debugInfo = "45:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6493,11 +7152,11 @@ window['func7_GETFILE'] = function(param8_File_Str, param3_lin, param7_dat_Str_r
 window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 	stackPush("method: ToString_Str", __debugInfo);
 	try {
-		__debugInfo = "866:\Scramble.gbas";
+		__debugInfo = "59:\Spit.gbas";
 		return "Object";
-		__debugInfo = "867:\Scramble.gbas";
+		__debugInfo = "60:\Spit.gbas";
 		return "";
-		__debugInfo = "866:\Scramble.gbas";
+		__debugInfo = "59:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6510,19 +7169,19 @@ window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 	stackPush("method: Equals", __debugInfo);
 	try {
-		__debugInfo = "873:\Scramble.gbas";
+		__debugInfo = "66:\Spit.gbas";
 		if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
-			__debugInfo = "870:\Scramble.gbas";
+			__debugInfo = "63:\Spit.gbas";
 			return 1;
-			__debugInfo = "870:\Scramble.gbas";
+			__debugInfo = "63:\Spit.gbas";
 		} else {
-			__debugInfo = "872:\Scramble.gbas";
+			__debugInfo = "65:\Spit.gbas";
 			return tryClone(0);
-			__debugInfo = "872:\Scramble.gbas";
+			__debugInfo = "65:\Spit.gbas";
 		};
-		__debugInfo = "874:\Scramble.gbas";
+		__debugInfo = "67:\Spit.gbas";
 		return 0;
-		__debugInfo = "873:\Scramble.gbas";
+		__debugInfo = "66:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6535,11 +7194,11 @@ window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 	stackPush("method: ToHashCode", __debugInfo);
 	try {
-		__debugInfo = "876:\Scramble.gbas";
+		__debugInfo = "69:\Spit.gbas";
 		return 0;
-		__debugInfo = "877:\Scramble.gbas";
+		__debugInfo = "70:\Spit.gbas";
 		return 0;
-		__debugInfo = "876:\Scramble.gbas";
+		__debugInfo = "69:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6548,6 +7207,369 @@ window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 		stackPop();
 	}
 	
+};
+var vtbl_type6_TEnemy = {
+	Update: method12_type6_TEnemy_6_Update, 
+	Render: method12_type6_TEnemy_6_Render, 
+	Init: method12_type6_TEnemy_4_Init, 
+	IsDestroyable: method12_type6_TEnemy_13_IsDestroyable, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type6_TEnemy'] = function() {
+	this.attr3_Typ = 0;
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr5_Width = 0.0;
+	this.attr6_Height = 0.0;
+	this.attr4_Anim = 0;
+	this.attr4_Fall = 0;
+	this.attr12_EventCounter = 0;
+	this.vtbl = vtbl_type6_TEnemy;
+	return this;
+	
+};
+window['type6_TEnemy'].prototype.clone = function() {
+	var other = new type6_TEnemy();
+	other.attr3_Typ = this.attr3_Typ;
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr4_Anim = this.attr4_Anim;
+	other.attr4_Fall = this.attr4_Fall;
+	other.attr12_EventCounter = this.attr12_EventCounter;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type6_TEnemy.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type6_TEnemy.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type6_TEnemy.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], this);
+};
+type6_TEnemy.prototype.IsDestroyable = function() {
+	 return this.vtbl.IsDestroyable(this);
+};
+type6_TEnemy.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type6_TEnemy.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type6_TEnemy.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type10_TExplosion = {
+	Update: method17_type10_TExplosion_6_Update, 
+	Render: method17_type10_TExplosion_6_Render, 
+	Init: method17_type10_TExplosion_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type10_TExplosion'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr4_Anim = 0;
+	this.attr3_Del = 0;
+	this.vtbl = vtbl_type10_TExplosion;
+	return this;
+	
+};
+window['type10_TExplosion'].prototype.clone = function() {
+	var other = new type10_TExplosion();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr4_Anim = this.attr4_Anim;
+	other.attr3_Del = this.attr3_Del;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type10_TExplosion.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type10_TExplosion.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type10_TExplosion.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], this);
+};
+type10_TExplosion.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type10_TExplosion.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type10_TExplosion.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type4_TMap = {
+	InitEmpty: method10_type4_TMap_9_InitEmpty, 
+	Save: method10_type4_TMap_4_Save, 
+	Init: method10_type4_TMap_4_Init, 
+	Update: method10_type4_TMap_6_Update, 
+	Render: method10_type4_TMap_6_Render, 
+	RenderTile: method10_type4_TMap_10_RenderTile, 
+	PickTile: method10_type4_TMap_8_PickTile, 
+	RemoveTile: method10_type4_TMap_10_RemoveTile, 
+	CollisionPoint: method10_type4_TMap_14_CollisionPoint, 
+	RayCollision: method10_type4_TMap_12_RayCollision, 
+	Collision: method10_type4_TMap_9_Collision, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type4_TMap'] = function() {
+	this.attr6_IsSnow = 0;
+	this.attr5_Datas = new GLBArray();
+	this.attr5_Width = 0;
+	this.attr6_Height = 0;
+	this.attr7_ScrollX = 0.0;
+	this.attr7_ScrollY = 0.0;
+	this.attr7_Tileset = 0;
+	this.attr15_TilesetPath_Str = "";
+	this.attr13_SpikePosition = 0.0;
+	this.attr8_SpikeDir = 0;
+	this.attr6_SpawnX = 0;
+	this.attr6_SpawnY = 0;
+	this.attr11_NextMap_Str = "";
+	this.attr9_LastPickX = 0;
+	this.attr9_LastPickY = 0;
+	this.attr6_HasFBO = 0;
+	this.attr13_IsRenderedFBO = 0;
+	this.attr8_ScreenID = 0;
+	this.attr5_SprID = 0;
+	this.vtbl = vtbl_type4_TMap;
+	this.attr11_NextMap_Str = "";
+	return this;
+	
+};
+window['type4_TMap'].prototype.clone = function() {
+	var other = new type4_TMap();
+	other.attr6_IsSnow = this.attr6_IsSnow;
+	other.attr5_Datas = tryClone(this.attr5_Datas);
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr7_ScrollX = this.attr7_ScrollX;
+	other.attr7_ScrollY = this.attr7_ScrollY;
+	other.attr7_Tileset = this.attr7_Tileset;
+	other.attr15_TilesetPath_Str = this.attr15_TilesetPath_Str;
+	other.attr13_SpikePosition = this.attr13_SpikePosition;
+	other.attr8_SpikeDir = this.attr8_SpikeDir;
+	other.attr6_SpawnX = this.attr6_SpawnX;
+	other.attr6_SpawnY = this.attr6_SpawnY;
+	other.attr11_NextMap_Str = this.attr11_NextMap_Str;
+	other.attr9_LastPickX = this.attr9_LastPickX;
+	other.attr9_LastPickY = this.attr9_LastPickY;
+	other.attr6_HasFBO = this.attr6_HasFBO;
+	other.attr13_IsRenderedFBO = this.attr13_IsRenderedFBO;
+	other.attr8_ScreenID = this.attr8_ScreenID;
+	other.attr5_SprID = this.attr5_SprID;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type4_TMap.prototype.InitEmpty = function() {
+	 return this.vtbl.InitEmpty(arguments[0], arguments[1], arguments[2], this);
+};
+type4_TMap.prototype.Save = function() {
+	 return this.vtbl.Save(arguments[0], this);
+};
+type4_TMap.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], this);
+};
+type4_TMap.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type4_TMap.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type4_TMap.prototype.RenderTile = function() {
+	 return this.vtbl.RenderTile(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.PickTile = function() {
+	 return this.vtbl.PickTile(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.RemoveTile = function() {
+	 return this.vtbl.RemoveTile(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.CollisionPoint = function() {
+	 return this.vtbl.CollisionPoint(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.RayCollision = function() {
+	 return this.vtbl.RayCollision(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.Collision = function() {
+	 return this.vtbl.Collision(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type4_TMap.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type4_TMap.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type7_TPlayer = {
+	Init: method13_type7_TPlayer_4_Init, 
+	Update: method13_type7_TPlayer_6_Update, 
+	Render: method13_type7_TPlayer_6_Render, 
+	Reset: method13_type7_TPlayer_5_Reset, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type7_TPlayer'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr5_Width = 0;
+	this.attr6_Height = 0;
+	this.attr4_Anim = 0;
+	this.vtbl = vtbl_type7_TPlayer;
+	return this;
+	
+};
+window['type7_TPlayer'].prototype.clone = function() {
+	var other = new type7_TPlayer();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr4_Anim = this.attr4_Anim;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type7_TPlayer.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type7_TPlayer.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type7_TPlayer.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type7_TPlayer.prototype.Reset = function() {
+	 return this.vtbl.Reset(this);
+};
+type7_TPlayer.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type7_TPlayer.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type7_TPlayer.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type5_TShit = {
+	Render: method11_type5_TShit_6_Render, 
+	Update: method11_type5_TShit_6_Update, 
+	Init: method11_type5_TShit_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type5_TShit'] = function() {
+	this.attr3_Del = 0;
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr3_Age = 0;
+	this.attr2_Al = 0.0;
+	this.vtbl = vtbl_type5_TShit;
+	return this;
+	
+};
+window['type5_TShit'].prototype.clone = function() {
+	var other = new type5_TShit();
+	other.attr3_Del = this.attr3_Del;
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VY = this.attr2_VY;
+	other.attr3_Age = this.attr3_Age;
+	other.attr2_Al = this.attr2_Al;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type5_TShit.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type5_TShit.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type5_TShit.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], this);
+};
+type5_TShit.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type5_TShit.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type5_TShit.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type5_TSpit = {
+	Update: method11_type5_TSpit_6_Update, 
+	Render: method11_type5_TSpit_6_Render, 
+	Init: method11_type5_TSpit_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type5_TSpit'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr3_Age = 0;
+	this.attr2_Al = 0.0;
+	this.attr3_Del = 0;
+	this.vtbl = vtbl_type5_TSpit;
+	return this;
+	
+};
+window['type5_TSpit'].prototype.clone = function() {
+	var other = new type5_TSpit();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr3_Age = this.attr3_Age;
+	other.attr2_Al = this.attr2_Al;
+	other.attr3_Del = this.attr3_Del;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type5_TSpit.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type5_TSpit.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type5_TSpit.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type5_TSpit.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type5_TSpit.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type5_TSpit.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
 };
 var vtbl_type7_TObject = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
@@ -6621,6 +7643,6 @@ type10_DataBuffer.prototype.Equals = function() {
 type10_DataBuffer.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global7_screenx_ref = [0.0], global7_screeny_ref = [0.0], global8_gameover = 0.0, global5_score = 0.0, global6_gameon = 0.0, global7_hiscore = 0.0, global5_scale = 0.0, global4_boom = new GLBArray(), global4_shot = new GLBArray(), global6_rocket = new GLBArray(), global3_ufo = new GLBArray(), global3_plx_ref = [0.0], global3_ply_ref = [0.0], global4_objx = new GLBArray(), global4_objy = new GLBArray(), global4_objn = new GLBArray(), global4_scrn = 0.0, global4_cave = new GLBArray(), global4_fuel = new GLBArray(), global4_bomb = new GLBArray(), global4_tank = 0.0, global9_colormode = 0.0, global7_flicker = 0.0, global8_name_Str = "", global5_q_sin = new GLBArray(), global5_q_cos = new GLBArray(), global5_scale = 0.0, global8_gameover = 0.0, global4_scrn = 0.0, global4_tank = 0.0, global9_colormode = 0.0, global4_scrn = 0.0, global4_cave = new GLBArray(), global5_score = 0.0, global8_name_Str = "", global7_flicker = 0.0, global6_Objs3D = new GLBArray(), global1_y = 0.0, global5_dtime = 0.0;
+var const13_STATE_IS_GAME = 0, const7_IS_BIRD = 1, const6_IS_PIG = 2, const8_IS_HUMAN = 3, const8_IS_LLAMA = 4, const8_Tilesize = 32, const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global12_Hardware_Str = "", global9_Gamestate = 0, global11_EditorEnemy = new type6_TEnemy(), global10_SelectTile = 0, global6_MouseX_ref = [0.0], global6_MouseY_ref = [0.0], global2_ML_ref = [0.0], global2_MR_ref = [0.0], global11_PlayerImage = 0, global11_LadderImage = 0, global10_SpikeImage = 0, global15_TrampolineImage = 0, global8_PigImage = 0, global10_HumanImage = 0, global9_BirdImage = 0, global9_ShitImage = 0, global10_LlamaImage = 0, global9_SpitImage = 0, global9_DoorImage = 0, global12_TriggerImage = 0, global12_DynamitImage = 0, global14_ExplosionImage = 0, global9_MenuImage = 0, global11_ButtonImage = 0, global10_ArrowImage = 0, global9_JumpImage = 0, global6_Player = new type7_TPlayer(), global3_Map = new type4_TMap(), global17_LastMousePosition = new GLBArray(), global9_Title_Str = "", global9_Menu1_Str = "", global9_Menu2_Str = "", global9_Menu3_Str = "", global6_Action = 0, global6_Enemys = new GLBArray(), global10_Explosions = new GLBArray(), global5_Shits = new GLBArray(), global5_Spits = new GLBArray(), global6_Objs3D = new GLBArray();
 window['initStatics'] = function() {}
 for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();

@@ -12,7 +12,7 @@ FUNCTION RunTests:
 		LOCAL Files$[]
 		LOCAL d$ = GETCURRENTDIR$()
 		SETCURRENTDIR("../Tests")
-		
+
 		GETFILELIST("", Files$[])
 		LOCAL rd$ = GETCURRENTDIR$()
 		SETCURRENTDIR(d$)
@@ -32,7 +32,7 @@ FUNCTION RunTests:
 					ENDIF
 				ELSE
 					STDOUT "Test file "+F$+"\n"
-					
+
 				ENDIF
 			ENDIF
 		NEXT

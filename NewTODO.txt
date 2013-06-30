@@ -5,7 +5,7 @@ First Release
 			- Keine Schrift 
 		- JumpIt
 			- Kollisionsabfrage fehlerhaft (vllt was mit Arrayzugriff?)
-			- Buttons falsch positioniert
+			- Buttons falsch positioniert: wahrscheinlich weil GETSCREENSIZE einen falschen rückgabewert hat (gibt 800/600 aus, obwohl es 640/480 ist)
 		- KeydefMenu
 			- GETNUMJOYSTICKS not defined fehlermeldung
 		- Mem2Sprite

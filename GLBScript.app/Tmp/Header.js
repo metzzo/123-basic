@@ -180,7 +180,7 @@ function SHELLEND(cmd) {
 
 function CALLBYNAME(name) {
 	var ret = 1;
-	return eval("if (window['"+name+"']) window."+name+"(); else ret = 0;");
+	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
 }
 
 //------------------------------------------------------------
@@ -250,7 +250,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return true;
+		return cur != to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
@@ -2270,6 +2270,7 @@ var hibernate	= false;	//SOlls warten
 var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
+var inFullscreen= false;
 
 var waitForFont = false;
 
@@ -2582,6 +2583,9 @@ function init2D(canvasName) {
 			lastKey = CHR_Str(ev.which);
 	}
 	
+	// gamepad listener
+	gamepads = navigator.getGamepads || navigator.webkitGetGamepads || navigator.webkitGamepads || navigator.gamepads || navigator.mozGetGamepads || navigator.mozGamepads;
+	
 	USESCREEN(-1);
 	CLEARSCREEN(RGB(0,0,0)); //black background color
 	SHOWSCREEN();
@@ -2703,7 +2707,20 @@ function SMOOTHSHADING(mode) {
 	// Do nothing...
 }
 
-function SETSCREEN(width, height) {
+function SETSCREEN(width, height, fullscreen) {
+	if (fullscreen && !inFullscreen) {
+		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		inFullscreen = true;
+	} else if (!fullscreen && inFullscreen) {
+		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		inFullscreen = false;
+	}
+	var e = frontbuffer.canvas;
+	e.width = width;
+	e.height = height;
+	e = backbuffer.canvas;
+	e.width = width;
+	e.height = height;
 	canvas.width = width;
 	canvas.height = height;
 }
@@ -3337,6 +3354,7 @@ var globalSpeedX, globalSpeedY; //für HIBERNATE
 var touches		= [];
 var touchable	= document ? ('createTouch' in document) : false;
 
+var gamepads;
 
 /**
 * @constructor
@@ -3411,7 +3429,54 @@ function updateTouches(t, state) {
 	}
 }
 
+// GAMEPAD
+function GETNUMJOYSTICKS() {
+	if (!!gamepads) {
+		return gamepads.length;
+	} else return 0;
+}
 
+function GETJOYNAME_Str(n) {
+	return gamepads[n].id;
+}
+
+function GETJOYX(n) {
+	return gamepads[n].axes[0];
+}
+
+function GETJOYY(n) {
+	return gamepads[n].axes[1];
+}
+
+function GETJOYZ(n) {
+	return 0; // umimplemented
+}
+
+function GETJOYRX(n) {
+	return gamepads[n].axes[2];
+}
+
+function GETJOYRY(n) {
+	return gamepads[n].axes[3];
+}
+
+function GETJOYRZ(n) {
+	return 0;
+}
+
+function GETJOYBUTTON(n, m) {
+	return gamepads[n].buttons[m];
+}
+
+function GETDIGIX(n) {
+	return gamepads[n].buttons[15]-gamepads[n].buttons[14];
+}
+
+function GETDIGIY(n) {
+	return gamepads[n].buttons[13]-gamepads[n].buttons[12];
+}
+
+// stuff
 function MOUSEAXIS(info) {
 	if (currentMouse >= 0 && currentMouse < touches.length) {} else {
 		return;
@@ -4115,7 +4180,12 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		var dx = 0, dy = 0
+		if (sx < 0) dx = spr.img.width*sx;
+		if (sy < 0) dy = spr.img.height*sy;
+		
+		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
 		context.restore();
@@ -4130,7 +4200,6 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
-		//context.drawImage(spr.img, CAST2INT(x), CAST2INT(y), CAST2INT(width), CAST2INT(height));
 		context.restore();
 	}
 }

@@ -1,860 +1,1356 @@
-//$$RESETFILE.\Scramble.gbas
+//$$RESETFILE.\JumpIt.gbas
 // --------------------------------- //
-// Project:
-// Start: Tuesday, May 16, 2006
-// IDE Version: 3.131
+// Project: JumpIt
+// Start: Sunday, September 25, 2011
+// IDE Version: 10.118
 
-GLOBAL screenx, screeny, gameover, score, gameon, hiscore, scale
-GLOBAL boom[], shot[], rocket[], ufo[], plx, ply, objx[], objy[], objn[]
-GLOBAL scrn, cave[], fuel[], bomb[], tank, colormode, flicker
-LOCAL vel, delta, oldscrn, dtime, newbomb, newshot, reload
-GLOBAL name$
-LOCAL speedlim, mscale, life, i, facspeed
-GETSCREENSIZE screenx, screeny
-hiscore = 10000
-flicker=FALSE
-colormode=TRUE
-
-GLOBAL q_sin[], q_cos[]
-DIM q_sin[360]
-DIM q_cos[360]
-FOR i=0 TO 359
-	q_sin[i] = SIN(i)
-	q_cos[i] = COS(i)
-NEXT
-
-DIM objn[20]
-DIM objx[20][20]
-DIM objy[20][20]
-DIM cave[0][2] // top, bottom
-
-DIM fuel[0][2]   // x,typ(0mystery,1fuel)
-DIM rocket[0][2] // x,y
-DIM bomb[0][3] // x,y,vy
-DIM shot[0][2] // x,y
-DIM boom[0][3] // x,y,scale
-DIM ufo[0][3]   // x_in_level,x,y,type(0ufo,1comet) Get y from ufo_xy function
-
-LOADSPRITE "line.bmp", 0
-
-LOADSOUND "sfx/bomb.wav", 0, 4
-LOADSOUND "sfx/implosion.wav", 1, 4
-LOADSOUND "sfx/shot.wav", 2, 4
-LOADSOUND "sfx/fuel.wav", 3, 2
-LOADSOUND "sfx/hahaha.wav",4,1
-
-// center point = 0.5 / 1.0
-
-// ship: >
-i=0
-objn[i]=7
-objx[i][0] =.2; objy[i][0]=1
-objx[i][1] =.1; objy[i][1]=0.5
-objx[i][2] =.4; objy[i][2]=0.8
-objx[i][3] =1.1;objy[i][3]=1.0
-objx[i][4] =.1; objy[i][4]=1.2
-objx[i][5] =.2; objy[i][5]=1
-objx[i][6] =.5; objy[i][6]=1
-
-// bomb: v
-i=1
-objn[i]=5
-objx[i][0] = .3; objy[i][0]=.3
-objx[i][1] = .5; objy[i][1]=1
-objx[i][2] = .7; objy[i][2]=.3
-objx[i][3] = .5; objy[i][3]=.5
-objx[i][4] = .3; objy[i][4]=.3
+// viele Level
+// Einspieler Modus
+// 4 Gegnertypen
+// Pixelgrafik (Paint.NET)
+// Levelwechsel
+// Leiter
+// Stacheln
+// Startpunkt
+// Trampolin
+// Mapeditor
+// Bomben + Schalter
 
 
-// ufo: <->
-i=2
-objn[i]=6
-objx[i][0]=.2; objy[i][0]=1.2
-objx[i][1]=0; objy[i][1]=.9
-objx[i][2]=.5; objy[i][2]=.7
-objx[i][3]=1; objy[i][3]=.9
-objx[i][4]=.8; objy[i][4]=1.2
-objx[i][5]=.2; objy[i][5]=1.2
+//Gegner
+// 1) Schwein (geht)
+// 2) Vogel (fliegt, kackt)
+// 3) Fetter Mensch (der rollt/überrollt)
+// 4) Llama (spuckt)
 
+?OPTIMIZE NONE
 
-// boom: *
-i=3
-objn[i]=6
-objx[i][0] = .3; objy[i][0]=1.5
-objx[i][1] = 0;  objy[i][1]=.5
-objx[i][2] = 1;  objy[i][2]=1.5
-objx[i][3] = -.2;objy[i][3]=1
-objx[i][4] = 1.2;objy[i][4]=.7
-objx[i][5] = .3; objy[i][5]=1.5
+LIMITFPS 30
+GLOBAL Hardware$ = PLATFORMINFO$("DEVICE")
+ LOCAL dx%, dy%
+GETDESKTOPSIZE dx, dy
 
-// rocket: ^
-i=4
-objn[i]=5
-objx[i][0] = .2; objy[i][0]=1
-objx[i][1] = .5; objy[i][1]=0
-objx[i][2] = .8; objy[i][2]=1
-objx[i][3] = .5; objy[i][3]=.9
-objx[i][4] = .2; objy[i][4]=1
+SYSTEMPOINTER TRUE
 
-// shot: -
-i=5
-objn[i]=2
-objx[i][0] = 0; objy[i][0]=1
-objx[i][1] = 1; objy[i][1]=1
+IF Hardware$ = "DESKTOP"
+	dx = 800
+	dy = 600
+ENDIF
 
-//        ___
-// score: |X|
-i=6
-objn[i]=6
-objx[i][0] = 0; objy[i][0]=0
-objx[i][1] = 1.0; objy[i][1]=1.0
-objx[i][2] = 1.0; objy[i][2]=0
-objx[i][3] = 0; objy[i][3]=1.0
-objx[i][4] = 0; objy[i][4]=0
-objx[i][5] = 1.0; objy[i][5]=0
-
-//        ^
-//       [ ]
-// fuel: / \.
-i=7
-objn[i]=9
-objx[i][0]=.1; objy[i][0]=1
-objx[i][1]=.3; objy[i][1]=.7
-objx[i][2]=0 ; objy[i][2]=.7
-objx[i][3]=0 ; objy[i][3]=.1
-objx[i][4]=.5; objy[i][4]=.0
-objx[i][5]=1 ; objy[i][5]=.1
-objx[i][6]=1 ; objy[i][6]=.7
-objx[i][7]=.7; objy[i][7]=.7
-objx[i][8]=.9; objy[i][8]=1
-
-
-	LOADBMP "backgnd.bmp"
-	INIOPEN "config.ini"
-	name$ = INIGET$("player1", "name")
-	PRINT "Enter your name:", 100, 120
-	//INPUT name$, 100, 140
-	name$ = "robi"
-restart:
-	LoadLevel()
-	scale = 20; mscale = 30
-
-	WideScroller("readme-REALLY-DO!.txt")
-
-	// Prepare Game
-	// -----------------------------------
-	LoadLevel()
-	tank = 100
-	life = 3
-	scrn=0
-	plx=scrn
-	ply = (cave[0][1]+cave[0][0])/2
-	scale = 20; mscale = 30
-	speedlim = 12
-	gameover = FALSE
-	reload   = FALSE
-	score    = 0
-
-	facspeed = 0.7/8000 // player speed
-
-
-	newshot = GETTIMERALL()
-	newbomb = GETTIMERALL()
-	gameon  = GETTIMERALL()
-
-	// MAINGAME
-	// -----------------------------------
-	WHILE TRUE
-		// game won
-		IF scrn>=1200
-			LoadLevel()
-			scrn=0
-			plx=0
-			ply = cave[0][1]-1
-		ENDIF
-
-		dtime = GETTIMER()*5
-
-		Show(dtime, FALSE)
-
-		IF gameon<=GETTIMERALL()
-			IF (UserInput(4)OR KEY(29)) AND reload=FALSE AND newbomb<GETTIMERALL()
-				newbomb = GETTIMERALL() + 500
-				dropbomb(plx, ply)
-				reload = TRUE
-			ENDIF
-
-			IF UserInput(3) AND newshot<GETTIMERALL()
-				newshot = GETTIMERALL() + 200
-				addshot(plx,ply)
-			ENDIF
-
-			IF UserInput(4) = FALSE THEN reload=FALSE
-
-			// get 220 blocks with 100 tank
-			// scrolling = dtime/4000
-			//
-			tank = tank - dtime/8800
-			oldscrn = scrn
-			scrn=scrn + dtime/2000 // scroll speed
-			IF INTEGER(oldscrn) > INTEGER(scrn) THEN score=score+10
-
-			vel = speedlim * UserInput(0) // [0;1]
-			vel = vel * dtime*facspeed
-			plx = plx+dtime/3000 + vel
-			// no fuel - dive
-			IF tank>0
-				vel = speedlim * UserInput(1) // [0;1]
-				vel = vel * dtime*facspeed
-				ply = ply+vel
-			ELSE
-				ply = ply + dtime*facspeed
-				tank=0
-			ENDIF
-			// zoom
-			mscale = mscale + UserInput(2)*dtime*.05
-			IF mscale < 20 THEN mscale=20
-			IF mscale>70 THEN mscale=70
-			scale = scale + (mscale-scale)*dtime/2000
-
-			// player crashed
-			IF gameover
-				life = life - 1
-				PLAYSOUND( 4,0,1)
-				gameon = GETTIMERALL() + 1500
-				IF life<0
-					GETFONTSIZE plx, ply
-					PRINT "GAME OVER", screenx/2 - plx*4.5,100
-					SHOWSCREEN
-					WHILE UserInput(3) = 0; HIBERNATE; WEND
-					GOTO restart
-				ENDIF
-			ENDIF
-		ELSE
-			delta = (gameon - GETTIMERALL())/1000
-			plx = MAX(1, plx - dtime/1000*delta)
-			scrn= MAX(1, scrn- dtime/1000*delta)
-			ply = bottomat(plx) - MIN(7, (bottomat(plx) - ceilingat(plx)))/2
-			gameover=FALSE
-			tank=100
-		ENDIF
-
-		IF flicker
-			ALPHAMODE -.3
-			y = MOD(GETTIMERALL()/50, 7)*screeny/7
-			DRAWRECT 0, y, screenx, screeny/7, 0
-			ALPHAMODE 0
-		ENDIF
-
-		// score
-		ALPHAMODE .7
-		hiscore = MAX(score, hiscore)
-		PRINT FORMAT$(6, 0, score), screenx/10, screeny/10
-		PRINT FORMAT$(6, 0, hiscore), screenx/2-screenx/10, screeny/10
-		// fuel
-		Line(screenx*.1, screeny*.85, screenx*.8*tank*.01, screeny*.85, RGB(0x00,0xff,0x00))
-		IF colormode THEN Line(screenx*.8*tank*.01, screeny*.85, screenx*.8, screeny*.85, RGB(0xff,0x00,0x00))
-
-		FOR i=1 TO life
-			thing(0, i*32+32, screeny*.15, RGB(0x00, 0x80, 0xff), 16,0)
-		NEXT
-
-		SHOWSCREEN
-	WEND
-
-
-
-FUNCTION UserInput: tp
-LOCAL speedlim, rv
-	speedlim = 12 // max movement of mouse
-	SELECT tp
-		CASE 0; rv = MOUSEAXIS(0)/speedlim + KEY(205)-KEY(203)+GETJOYX(0)
-		CASE 1; rv = MOUSEAXIS(1)/speedlim + KEY(200)-KEY(208)+GETJOYY(0)
-		CASE 2; rv = MOUSEAXIS(2)          + KEY(52)-KEY(51)+GETJOYZ(0)
-		CASE 3; rv = MOUSEAXIS(3) + KEY(42)+GETJOYBUTTON(0,0)
-		CASE 4; rv = MOUSEAXIS(4) + KEY(29)+GETJOYBUTTON(0,1)
-	ENDSELECT
-	IF rv>1  THEN rv=1
-	IF rv<-1 THEN rv=-1
-RETURN rv
-ENDFUNCTION
-
-FUNCTION SINq: a
-	IF a<0 THEN a =180-a
-	RETURN q_sin[MOD(a,360)]
-ENDFUNCTION
-
-FUNCTION COSq: a
-	IF a<0 THEN a=-a
-	RETURN q_cos[MOD(a,360)]
-ENDFUNCTION
-
-
-// -----------------------------------------
-// Show everything and move it all
-// -----------------------------------------
-FUNCTION Show: dtime, isdemo
-LOCAL sc, offx, offy, i, j, col, x, y, phi, sight, bsight
-GLOBAL scale, gameover, scrn
-
-
-	// F key
-	IF KEY(33)
-		WHILE KEY(33); WEND
-		flicker = 1-flicker
+SETSCREEN dx, dy, FALSE
+IF dx < dy
+	IF Hardware$ <> "DESKTOP" OR Hardware$ = "WIZ"
+		SETORIENTATION 1
 	ENDIF
-	// C key
-	IF KEY(46)
-		WHILE KEY(46); WEND
-		colormode = 1-colormode
-	ENDIF
+ENDIF
+
+SETCURRENTDIR("Media") // go to media files
+
+CONSTANT STATE_IS_GAME = 0
+
+GLOBAL Gamestate% = STATE_IS_GAME
+GLOBAL EditorEnemy AS TEnemy
+GLOBAL SelectTile% = 0
+GLOBAL MouseX, MouseY, ML, MR
+
+//LOADFONT "smalfont.png", 0
+//LOADFONT "smalfont2.png", 1
+//SETFONT 0
+
+GLOBAL PlayerImage%
+PlayerImage = GENSPRITE()
+LOADANIM "spieler.png", PlayerImage, 16, 32
+
+//GLOBAL BGImage%
+//BGImage = GENSPRITE()
+//LOADSPRITE "bg.png", BGImage
+
+GLOBAL LadderImage%
+LadderImage = GENSPRITE()
+LOADSPRITE "leiter.png", LadderImage
+
+GLOBAL SpikeImage%
+SpikeImage = GENSPRITE()
+LOADSPRITE "stachel.png", SpikeImage
+
+GLOBAL TrampolineImage%
+TrampolineImage = GENSPRITE()
+LOADSPRITE "trampolin.png", TrampolineImage
+
+GLOBAL PigImage%
+PigImage = GENSPRITE()
+LOADANIM "schwein.png", PigImage, 32, 32
+
+GLOBAL HumanImage%
+HumanImage = GENSPRITE()
+LOADSPRITE "fettmonster.png", HumanImage
+
+GLOBAL BirdImage%
+BirdImage = GENSPRITE()
+LOADANIM "vogel.png", BirdImage, 32, 16
+
+GLOBAL ShitImage%
+ShitImage = GENSPRITE()
+LOADSPRITE "exkrement.png", ShitImage
+
+GLOBAL LlamaImage%
+LlamaImage = GENSPRITE()
+LOADANIM "llama.png", LlamaImage, 46, 64
+
+GLOBAL SpitImage%
+SpitImage = GENSPRITE()
+LOADSPRITE "spucke.png", SpitImage
+
+GLOBAL DoorImage%
+DoorImage = GENSPRITE()
+LOADSPRITE "tuer.png", DoorImage
+
+GLOBAL TriggerImage%
+TriggerImage = GENSPRITE()
+LOADANIM "schalter.png", TriggerImage, 32, 16
+
+GLOBAL DynamitImage%
+DynamitImage = GENSPRITE()
+LOADSPRITE "dynamit.png", DynamitImage
+
+GLOBAL ExplosionImage%
+ExplosionImage = GENSPRITE()
+LOADANIM "explosion.png", ExplosionImage, 32, 32
+
+GLOBAL MenuImage%
+MenuImage = GENSPRITE()
+LOADSPRITE "menu.png", MenuImage
+
+GLOBAL ButtonImage%
+ButtonImage = GENSPRITE()
+LOADSPRITE "button.png", ButtonImage
+
+GLOBAL ArrowImage%
+ArrowImage = GENSPRITE()
+LOADSPRITE "pfeil.png", ArrowImage
+
+GLOBAL JumpImage%
+JumpImage = GENSPRITE()
+LOADSPRITE "springen.png", JumpImage
 
 
-	sc = scale
-	offx = scrn*sc - screenx/2
-	offy = sc-screeny*.5
-	col=RGB(0xff, 0x80, 0x00)
-	sight = INTEGER(30 + scrn)
-	bsight= INTEGER(scrn - 30)
+GLOBAL Player AS TPlayer //"erstellt" den Spieler.
+GLOBAL Map AS TMap
 
-	FOR i=MAX(0, INTEGER(scrn-16)) TO MIN(sight, BOUNDS(cave[],0)-2)
-		Line(i*sc-offx, cave[i][0]*sc-offy, (i+1)*sc-offx, cave[i+1][0]*sc-offy, col)
-		Line(i*sc-offx, cave[i][1]*sc-offy, (i+1)*sc-offx, cave[i+1][1]*sc-offy, col)
+CLEARSCREEN RGB(63,156,255)
 
-		Line(i*sc-offx, cave[i][1]*sc-offy, i*sc-offx, (cave[i][1]+4)*sc-offy, col)
-		y=(cave[i][1] + cave[i+1][1])/2
-		Line((i+.5)*sc-offx, y*sc-offy, (i+.5)*sc-offx, (y+2)*sc-offy, col)
-	NEXT
+GOSUB Init
+Title$ = "JumpIt Spielmenue"
+Menu1$ = "Spielen"
+Menu2$ = "Mapeditor"
+Menu3$ = "Beenden"
+PUSHLOOP "MENU_LOOP"
 
-	// ufos/comets
-	MoveUfos()
-	FOR i=0 TO BOUNDS(ufo[],0)-1
-		x = ufo[i][1]
-		IF x>sight THEN BREAK
-		IF x>bsight
-			y = ufo[i][2]
-			phi = 0
-			IF ufo[i][3] = 1
-				phi = -GETTIMERALL()*.07
-			ELSE
-				phi = SIN(GETTIMERALL()*20)*15
-			ENDIF
-			thing(2, x*sc-offx, y*sc-offy, col, sc, phi)
-			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
-		ENDIF
-	NEXT
-
-
-@fuels:
-	// fuel depots
-	col = RGB(0x80, 0xff, 0x00)
-	FOR i=0 TO BOUNDS(fuel[],0)-1
-		x = fuel[i][0]
-		IF x>sight THEN BREAK
-		IF x>bsight
-			y = bottomat(x)
-			thing(6+fuel[i][1], x*sc-offx, y*sc-offy, col, sc, 0)
-			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
-		ENDIF
-	NEXT
-@rockets:
-	col = RGB(0xff, 0xff, 0x00)
-	FOR i=0 TO BOUNDS(rocket[],0)-1
-		x = rocket[i][0]
-		IF x>sight THEN BREAK
-		IF x>bsight
-			y = rocket[i][1]
-			IF (x<plx+MOD(x-2,10)/5 OR x-plx<(y-ply)/2 OR y<bottomat(x)-.01)
-				DEC y, dtime/1500
-				IF y<ceilingat(x)
-					rocket[i][0] = 0
-					rocket[i][1] = 10000
-					IF isdemo=FALSE THEN addboom(x,y)
-				ELSE
-					rocket[i][1] = y
-				ENDIF
-			ENDIF
-			thing(4, x*sc-offx, y*sc-offy, col, sc, 0)
-			IF col_thth(plx, ply, x, y) THEN gameover=TRUE
-		ENDIF
-	NEXT
-@bombs:
-	// bombs
-	col = RGB(0xf0, 0xf0, 0xf0)
-	FOR i=0 TO BOUNDS(bomb[],0)-1
-		bomb[i][2] = bomb[i][2] + dtime/2500
-		bomb[i][1] = bomb[i][1] + dtime * bomb[i][2]/1200
-		bomb[i][0]  =bomb[i][0] + dtime/1800
-		phi = ATAN(-.5, bomb[i][2])
-		thing(1, bomb[i][0]*sc-offx, bomb[i][1]*sc-offy, col, sc, phi)
-		y = bottomat(bomb[i][0])
-
-		IF impact(bomb[i][0], bomb[i][1]) OR bomb[i][1] > y
-			addboom(bomb[i][0], bomb[i][1])
-			DIMDEL bomb[], i
-		ENDIF
-	NEXT
-@shots:
-	// shots
-	FOR i=0 TO BOUNDS(shot[],0)-1
-		y = shot[i][1]
-		x = shot[i][0]
-		shot[i][0] = x+dtime/500
-		IF impact(x, y) OR x>sight OR y<ceilingat(x) OR y>bottomat(x)
-			IF isdemo=FALSE THEN addboom(x,y)
-			DIMDEL shot[], i
-			DEC i,1
-		ENDIF
-		thing(5, x*sc-offx, y*sc-offy, col, sc, 0)
-	NEXT
-@player:
-	// player
-	col = RGB(0x00, 0x80, 0xff)
-	thing(0, plx*sc-offx, ply*sc-offy, col, sc, 0)
-@booms:
-	// boom
-	FOR i=0 TO BOUNDS(boom[],0)-1
-		boom[i][2] = boom[i][2] + dtime/1000
-		IF boom[i][2]>3
-			DIMDEL boom[], i
-			i=i-1
-		ELSE
-			col = RGB(0xff, 0xff - boom[i][2]/3*255, 0x00)
-			thing(3, boom[i][0]*sc-offx, boom[i][1]*sc-offy, col, sc*boom[i][2], 0.7*GETTIMERALL())
-		ENDIF
-	NEXT
-
-	IF col_wall(plx, ply) THEN gameover=TRUE
-ENDFUNCTION
-
-// does shot impact? Make boom, return true
-FUNCTION impact: shx,shy
-GLOBAL tank
-LOCAL x, y, i
-
-	// ufo
-	FOR i=0 TO BOUNDS(ufo[],0)-1
-		x = ufo[i][1]
-		y = ufo[i][2]
-		IF col_thth(shx, shy, x, y)
-			IF ufo[i][3] = 0
-				INC score, 100
-				DIMDEL ufo[], i
-			ENDIF
-			RETURN TRUE
-		ENDIF
-		IF x>shx THEN BREAK
-	NEXT
-
-	// fuel depots
-	FOR i=0 TO BOUNDS(fuel[],0)-1
-		x = fuel[i][0]
-		IF col_thth(shx, shy, x, bottomat(x))
-			IF fuel[i][1]
-				PLAYSOUND( 3,0,1)
-				tank = MIN(100, tank+10)
-				INC score, 150
-			ELSE
-				INC score, RND(4)*100+100
-			ENDIF
-			DIMDEL fuel[], i
-			RETURN TRUE
-		ENDIF
-		IF x>shx THEN BREAK
-	NEXT
-
-	// rockets
-	FOR i=0 TO BOUNDS(rocket[],0)-1
-		x = rocket[i][0]
-		IF col_thth(shx, shy, x, rocket[i][1])
-			INC score, 50+RND(1)*30
-			DIMDEL rocket[], i
-			RETURN TRUE
-		ENDIF
-		IF x>shx THEN BREAK
-	NEXT
-RETURN FALSE
-ENDFUNCTION
-
-
-// INTERPOL - give value between a and b with factor x
-//            x=0 -> a
-//            x=1 -> b
-FUNCTION Interpol: a, b, x
-	RETURN (b-a)*x+a
-ENDFUNCTION
-
-FUNCTION bottomat: x
-LOCAL i, j
-	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
-	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
-	RETURN Interpol(cave[i][1], cave[j][1], x-i)
-ENDFUNCTION
-
-FUNCTION ceilingat: x
-LOCAL i, j
-	i = MOD(INTEGER(ABS(x))  , BOUNDS(cave[],0))
-	j = MOD(INTEGER(ABS(x))+1, BOUNDS(cave[],0))
-	RETURN Interpol(cave[i][0], cave[j][0], x-i)
-ENDFUNCTION
-
-FUNCTION thing: id, x, y, col, sc, phi
-LOCAL i, x1,y1,x2,y2, cp, sp
-	sp = SIN(phi)
-	cp = COS(phi)
-	FOR i=0 TO objn[id]-2
-		x1 = (objx[id][i  ]-0.5)*sc
-		y1 = (objy[id][i  ]-1.0)*sc
-		x2 = (objx[id][i+1]-0.5)*sc
-		y2 = (objy[id][i+1]-1.0)*sc
-		Line(	x1*cp-y1*sp + x, x1*sp+y1*cp + y, _
-				x2*cp-y2*sp + x, x2*sp+y2*cp + y, col)
-	NEXT
-ENDFUNCTION
-
-
-// collision of thing/thing
-FUNCTION col_thth: x1,y1, x2,y2
-LOCAL x,y
-	x = x1-x2
-	y = y1-y2
-	x = x*x+y*y // SQR(a)<1 <-> a<1
-	IF x<1 THEN RETURN TRUE
-RETURN FALSE
-ENDFUNCTION
-
-FUNCTION col_wall: x,y
-LOCAL c
-	c = bottomat(x)
-	IF c<y THEN RETURN TRUE
-	c = ceilingat(x)
-	IF c>y THEN RETURN TRUE
-RETURN FALSE
-ENDFUNCTION
-
-FUNCTION addshot: x,y
-LOCAL m
-	PLAYSOUND( 2,0,1)
-	m=BOUNDS(shot[], 0)
-	REDIM shot[m+1][2]
-	shot[m][0]=x
-	shot[m][1]=y
-ENDFUNCTION
-
-FUNCTION dropbomb: x,y
-LOCAL m
-	PLAYSOUND( 0,0,1)
-	m  =BOUNDS(bomb[],0)
-	REDIM bomb[m+1][3]
-	bomb[m][0]=x
-	bomb[m][1]=y
-	bomb[m][2]=0
-ENDFUNCTION
-
-FUNCTION addboom: x,y
-LOCAL m
-	PLAYSOUND( 1,0,1)
-	m  =BOUNDS(boom[],0)
-	REDIM boom[m+1][3]
-	boom[m][0]=x
-	boom[m][1]=y
-	boom[m][2]=0
-ENDFUNCTION
-
-FUNCTION Line: x1, y1, x2, y2, col
-LOCAL c,s,p, w, dx, dy, ddx, ddy, ux, uy, lg
-GLOBAL colormode
-
-	IF colormode=FALSE THEN col=RGB(200,200,150)
-	ALPHAMODE .7
-
-	//line width
-	w = 16
-
-	// direction of line
-	ddx = x2-x1
-	ddy = y2-y1
-	lg = SQR(ddx*ddx+ddy*ddy)
-	IF lg<0.5 THEN RETURN
-
-	// short caps
-	lg=lg*2
-	// dir vector
-	dx=ddx*w/lg
-	dy=ddy*w/lg
-	// up vector
-	ux=dy
-	uy=-dx
-
-	// cap1
-	STARTPOLY 0
-		POLYVECTOR x1+ux-dx, y1+uy-dy,  0.5, 0.5,col
-		POLYVECTOR x1-ux-dx, y1-uy-dy,  0.5,63.5,col
-		POLYVECTOR x1-ux,    y1-uy,    31.5,63.5,col
-		POLYVECTOR x1+ux,    y1+uy,    31.5, 0.5,col
-	ENDPOLY
-
-	// center
-	STARTPOLY 0
-		POLYVECTOR x1+ux, y1+uy, 31.5,  0.5,col
-		POLYVECTOR x1-ux, y1-uy, 31.5, 63.5,col
-		POLYVECTOR x2-ux, y2-uy, 31.5, 63.5,col
-		POLYVECTOR x2+ux, y2+uy, 31.5,  0.5,col
-	ENDPOLY
-
-	// cap2
-	STARTPOLY 0
-		POLYVECTOR x2+ux,    y2+uy,    31.5,  0.5,col
-		POLYVECTOR x2-ux,    y2-uy,    31.5, 63.5,col
-		POLYVECTOR x2-ux+dx, y2-uy+dy, 63.5, 63.5,col
-		POLYVECTOR x2+ux+dx, y2+uy+dy, 63.5,  0.5,col
-	ENDPOLY
-ENDFUNCTION
-
-FUNCTION MoveUfos:
-GLOBAL scrn
-LOCAL i, spd, y1, y2, x
-	spd = 1
-	FOR i=0 TO BOUNDS(ufo[], 0)-1
-		SELECT ufo[i][3]
-		CASE 0 // ufo
-			x = (ufo[i][0]-scrn)*.5+ufo[i][0]
-			ufo[i][1] = x
-			IF x>0
-				y1 = ceilingat(x)+.5
-				y2 = bottomat(x)-.5
-				ufo[i][2] = (1+SINq(x*30))/2 * (y2-y1)*.75 + (y2-y1)*.1 + y1
-			ENDIF
-		CASE 1 // comet
-			ufo[i][1] = (ufo[i][0]-scrn)*2.1 + ufo[i][0]
-		ENDSELECT
-	NEXT
-ENDFUNCTION
-
-FUNCTION LoadLevel:
-LOCAL x, y, i, num, up$, lo$, en$, y,by
-LOCAL nfuel, nrocket, nufo
-LOCAL data1$[], data2$[], data3$[]
-GLOBAL cave[]
-	// line 1+2 = ycoord
-	// line3:
-	// 1=rocket
-	// 2=mystery
-	// 3=fuel
-	// 4=asteroids
-	// 5=ufo
-	DIM cave[6*10*22][2]
-	FOR y=0 TO 10*6
-		GETFILE "level.txt", y*4+1, up$
-		GETFILE "level.txt", y*4+2, lo$
-		GETFILE "level.txt", y*4+3, en$
-		num = SPLITSTR(up$, data1$[], ",")
-		num = SPLITSTR(lo$, data2$[], ",")
-		num = SPLITSTR(en$, data3$[], ",")
-		FOR x=0 TO num-1
-			cave[i][1] = 9 - INTEGER(data2$[x])
-			cave[i][0] = -10 + INTEGER(data1$[x])// +2.5
-			IF cave[i][0] >= cave[i][1]-1 THEN cave[i][0] = cave[i][1]-2
-
-			by = cave[i][1]
-			SELECT INTEGER(data3$[x])
-				CASE 1
-					REDIM rocket[nrocket+1][2]
-					rocket[nrocket][0] = i-.5
-					rocket[nrocket][1] = by
-					INC nrocket,1
-				CASE 2 TO 3
-					REDIM fuel[nfuel+1][2]
-					fuel[nfuel][0] = i-.5
-					fuel[nfuel][1] = INTEGER(data3$[x])-2
-					INC nfuel,1
-				CASE 4
-					REDIM ufo[nufo+1][4]
-					ufo[nufo][0] = i-.5
-					ufo[nufo][2] = cave[i][0] + MOD(nufo*nufo+x,10)*(cave[i][1]-cave[i][0])/10
-					ufo[nufo][3] = 1
-					INC nufo, 1
-				CASE 5
-					REDIM ufo[nufo+1][4]
-					ufo[nufo][0] = i-.5
-					ufo[nufo][2] = by // get's calced automatically
-					ufo[nufo][3] = 0
-					INC nufo, 1
-			ENDSELECT
-			INC i, 1
-		NEXT
-	NEXT
-ENDFUNCTION
+GLOBAL LastMousePosition%[]
 
 
 
+SUB GLB_ON_LOOP:
+	TRY
+		GOSUB Update
+		GOSUB Update
+		GOSUB Render
+	CATCH ex$
+	FINALLY
 
-// ------------------------------------------------------------- //
-//   --- WIDESCROLLER ---
-// ------------------------------------------------------------- //
-FUNCTION WideScroller: filename$
-GLOBAL score, name$, flicker
-	// Diese Variablen sind als LOCAL definiert:
-	// filename$, void
-	LOCAL text$[], a$, maxline, z, dz, dx, y, fx, fy, hi$[], hi[]
-	DIM text$[1024]
-
-	GETFONTSIZE fx, fy // Neuer, guter Befehl / New and good command (24.10.01)
-
-	fy=fy*1.2 // Platz lassen / Leave space
-	maxline=maxline+2
-	text$[maxline] = "-= HIGHSCORES =-"
-	INC maxline, 1
-	// The firewall might want a mouse pointer
-	SYSTEMPOINTER TRUE
-	ReadHighScores(hi$[], hi[], name$, score)
-	SYSTEMPOINTER FALSE
-
-	FOR i=0 TO BOUNDS(hi[], 0)-1
-		text$[i + maxline] = MID$(hi$[i]+"................", 0, 12) + FORMAT$(6,0,hi[i])
-	NEXT
-	maxline = maxline + BOUNDS(hi[], 0) + 4
-
-
-	FOR i=0 TO 255
-		GETFILE filename$, i, a$
-		IF a$="NO_FILE" THEN RETURN FALSE
-		IF a$="NO_DATA" THEN a$ = ""
-		IF a$="EOF" THEN BREAK
-		text$[maxline]=a$
-		INC maxline, 1
-	NEXT
-
-	WHILE UserInput(3); HIBERNATE; WEND
-
-	LIMITFPS 60
-	WHILE TRUE
-		FOR zt=screeny TO 0-maxline*fy STEP -0.4 // Aufwärts / Move upwards
-			dtime = GETTIMER()*5
-			scrn = scrn + dtime / 5000
-			plx = scrn
-			ply = (bottomat(plx) + ceilingat(plx) )/2
-			SELECT scrn
-				CASE <50; ALPHAMODE scrn/200
-				CASE 500 TO 550; ALPHAMODE (scrn-550)/200
-				DEFAULT; ALPHAMODE .5
-			ENDSELECT
-
-			IF scrn>=600 THEN scrn=0
-			Show(dtime, TRUE)
-
-			ALPHAMODE .5
-			FOR z=0 TO maxline-1
-				dz=z*fy+zt
-				dx=(screenx-LEN(text$[z])*fx)/2
-				IF dz<screeny+fy AND dz>-20
-					a$ = text$[z]
-					IF MID$(a$,0,1)="#"
-						thing(MID$(a$, 1,1), dx, dz+fy, RGB(200,200,150), fy*2, 0)
-						a$ = "  " + MID$(a$, 2, 1000)
-					ENDIF
-					PRINT a$, dx, dz
-				ENDIF
-			NEXT
-			IF UserInput(3) THEN RETURN TRUE
-
-			IF flicker
-				ALPHAMODE -.3
-				y = MOD(GETTIMERALL()/50, 7)*screeny/7
-				DRAWRECT 0, y, screenx, screeny/7, 0
-				ALPHAMODE 0
-			ENDIF
-			SHOWSCREEN
-		NEXT
-	WEND
-
-	LIMITFPS -1
-ENDFUNCTION // WIDESCROLLER
-
-
-FUNCTION ReadHighScores: names$[], scores[], username$, thescore
-LOCAL ct, i, str$, proxy$, port
-
-	str$ = "highscores/listgame.php"
-	str$ = str$ + "?game=scramble"
-	str$ = str$ + "&name="+username$
-	str$ = str$ + "&score="+thescore
-	str$ = str$ + "&secret=3e5b72ec"
-
-	PRINT ".: WebGet scores :.", 0, 0
 	SHOWSCREEN
+ENDSUB
 
-	INIOPEN "config.ini"
-	proxy$ = INIGET$("server", "proxy")
-	port   = INIGET$("server", "port")
-	KILLFILE "scores.ini"
-	IF port=0 OR proxy$="NO_DATA"
-		NETWEBGET("www.glbasic.com", "/"+str$, 80, "scores.ini")
+
+
+SUB Update:
+	MOUSESTATE MouseX, MouseY, ML, MR
+
+	SELECT Gamestate
+		CASE STATE_IS_GAME
+			Map.Update()
+			FOREACH Enemy IN Enemys[]
+				Enemy.Update()
+			NEXT
+			FOREACH Shit IN Shits[]
+				Shit.Update()
+				IF Shit.Del THEN DELETE Shit
+			NEXT
+			FOREACH Spit IN Spits[]
+				Spit.Update()
+				IF Spit.Del THEN DELETE Spit
+			NEXT
+			FOREACH Explosion IN Explosions[]
+				Explosion.Update()
+				IF Explosion.Del THEN DELETE Explosion
+			NEXT
+			Player.Update()
+
+	ENDSELECT
+ENDSUB
+
+
+SUB Render:
+	LOCAL Width, Height
+	GETSCREENSIZE Width, Height
+//	LOCAL SprWidth, SprHeight
+//	GETSPRITESIZE BGImage, SprWidth, SprHeight
+//	STARTPOLY BGImage, 0
+//	POLYVECTOR 0		,0		,0,0,RGB(255,255,255)
+//	POLYVECTOR Width	,0		,SprWidth,0,RGB(255,255,255)
+//	POLYVECTOR Width	,Height	,SprWidth,SprHeight,RGB(255,255,255)
+//	POLYVECTOR 0		,Height	,0,SprHeight,RGB(255,255,255)
+//	ENDPOLY
+
+	SELECT Gamestate
+		CASE STATE_IS_GAME
+			FOREACH Shit IN Shits[]
+				Shit.Render()
+			NEXT
+
+			Map.Render()
+
+			FOREACH Spit IN Spits[]
+				Spit.Render()
+			NEXT
+
+			FOREACH Enemy IN Enemys[]
+				Enemy.Render()
+			NEXT
+
+			FOREACH Explosion IN Explosions[]
+				Explosion.Render()
+			NEXT
+
+			Player.Render()
+
+			IF Hardware$
+				GameButton(42,Height - 42, "<")
+				GameButton(Width - 42,Height - 42, ">")
+				GameButton(42, Height - 125, "jump")
+				GameButton(Width - 42, Height - 125, "jump")
+			ENDIF
+	ENDSELECT
+ENDSUB
+
+
+SUB Init:
+	LOCAL Width, Height
+	GETSCREENSIZE Width, Height
+	SELECT Gamestate
+		CASE STATE_IS_GAME
+			Player.Init(100,100)
+			Map.Init("map3.map")
+	ENDSELECT
+
+	DIM LastMousePosition[0]
+ENDSUB
+
+
+FUNCTION IsEnemy%:
+	IF SelectTile = 8 OR SelectTile = 6 OR SelectTile = 9 OR SelectTile = 7
+		RETURN TRUE
 	ELSE
-		NETWEBGET(proxy$, "http://www.glbasic.com/" + str$, port, "scores.ini")
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+GLOBAL Title$, Menu1$, Menu2$, Menu3$ = "", Action%
+
+SUB MENU_LOOP:
+	LOCAL x,y
+	GETFONTSIZE x,y
+	LOCAL w, h
+	GETSCREENSIZE w, h
+	LOCAL iw, ih
+	GETSPRITESIZE MenuImage, iw, ih
+
+
+	LOCAL hh = h-150
+
+	Action% = 0
+
+	MOUSESTATE MouseX, MouseY, ML, MR
+	GOSUB Render
+	//Render() //geht komischerweise
+	STRETCHSPRITE MenuImage, w - LEN(Title$, TRUE), 40 - 32, -w - LEN(Title$, TRUE), ih
+	PRINT Title$, 20,40-y/2
+
+	IF Button(Menu1$, hh/3+100) THEN Action = 1
+	IF Button(Menu2$, hh/3*2+100) THEN Action = 2
+	IF Menu3$ <> "" THEN IF Button(Menu3$, hh+100) THEN Action = 3
+
+	SELECT Action
+		CASE 1
+			Gamestate = STATE_IS_GAME
+			POPLOOP
+		CASE 3
+			END
+	ENDSELECT
+	IF Action THEN GOSUB Init
+
+	SHOWSCREEN
+ENDSUB
+
+FUNCTION Button%: Text$, Y
+	LOCAL x,y
+	GETFONTSIZE x,y
+	LOCAL w, h
+	GETSCREENSIZE w, h
+	LOCAL iw, ih
+	GETSPRITESIZE MenuImage, iw, ih
+
+	IF BOXCOLL(0, Y - 32, w, ih, MouseX, MouseY, 1, 1)
+		ALPHAMODE 0
+		IF ML
+			RETURN TRUE
+		ENDIF
+	ELSE
+		ALPHAMODE -.75
+	ENDIF
+	STRETCHSPRITE MenuImage, 0, Y-32, w, ih
+	ALPHAMODE 0
+
+	PRINT Text$, 40, Y-y/2
+
+	RETURN FALSE
+ENDFUNCTION
+
+
+FUNCTION GameButton%: X, Y, Text$
+	IF UpdateGameButton(X, Y)
+		ALPHAMODE .5
+	ELSE
+		ALPHAMODE -0.5
 	ENDIF
 
-	INIOPEN "scores.ini"
-	ct = INIGET$("scores", "count")
-	DIM names$[ct]
-	DIM scores[ct]
+	DRAWSPRITE ButtonImage, X - 32, Y - 32
+	SELECT Text$
+		CASE "<"
+			DRAWSPRITE ArrowImage, X - 32, Y - 32
+		CASE ">"
+			ZOOMSPRITE ArrowImage, X - 32, Y - 32, -1, 1
+		CASE "jump"
+			DRAWSPRITE JumpImage, X- 32, Y -32
+	ENDSELECT
 
-	FOR i=1 TO ct
-		names$[i-1] = INIGET$("scores", "n"+i)
-		scores[i-1] = INIGET$("scores", "s"+i)
+	ALPHAMODE 0
+ENDFUNCTION
+
+FUNCTION UpdateGameButton: X, Y
+	LOCAL MX, MY, ML, MR
+	FOR i = 0 TO GETMOUSECOUNT()-1
+		SETACTIVEMOUSE i
+		MOUSESTATE MX, MY, ML, MR
+		IF BOXCOLL(X-32, Y-32, 64, 64, MX, MY, 1, 1) AND ML
+			SETACTIVEMOUSE 0
+			RETURN TRUE
+		ENDIF
 	NEXT
+	SETACTIVEMOUSE 0
+	RETURN FALSE
 ENDFUNCTION
 
+//$$RESETFILE.\Enemy.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Monday, September 26, 2011
+// IDE Version: 10.118
+
+CONSTANT IS_BIRD 	= 1
+CONSTANT IS_PIG 	= 2
+CONSTANT IS_HUMAN 	= 3
+CONSTANT IS_LLAMA 	= 4
+
+GLOBAL Enemys[] AS TEnemy
+
+
+TYPE TEnemy
+	Typ% //vogel = 1, schwein = 2, mensch = 3 oder Llama = 4
+	X; Y
+	VX; VY
+	Width; Height
+	Anim%
+	Fall%
+	EventCounter%
+
+
+	FUNCTION Update:
+		IF self.Fall
+			self.VY = self.VY +.2
+
+			INC self.Y, self.VY
+		ELSE
+			INC self.Anim
+			SELECT self.Typ
+				CASE IS_BIRD
+					IF (Map.CollisionPoint(self.X + 2 + self.VX, self.Y+self.Height/2) OR Map.CollisionPoint(self.X - 2 + self.VX + self.Width, self.Y+self.Height/2)) OR self.X + self.VX < 0 OR self.X + self.VX > Map.Width*Tilesize
+						self.VX = -self.VX
+					ENDIF
+					INC self.X, self.VX
+					self.VY = QCOS(GETTIMERALL()/10)
+					IF Map.Collision(self.X+4,self.Y + self.VY,self.Width-8,self.Height)
+						self.VY = 0
+					ENDIF
+
+					INC self.EventCounter
+					IF MOD(self.EventCounter, RND(500)) = 5
+						LOCAL S AS TShit
+						S.Init(self.X, self.Y)
+					ENDIF
+
+					INC self.Y, self.VY
+
+					self.Anim = MOD(self.Anim, 15*2)
+				CASE IS_PIG TO IS_LLAMA
+					SELECT self.Typ
+						CASE IS_LLAMA
+							self.Anim = MOD(self.Anim, 15)
+							INC self.EventCounter
+
+							LOCAL Look
+							IF self.VX < 0
+								Look = 0
+							ELSE
+								Look = self.Width/2
+							ENDIF
+
+							IF MOD(self.EventCounter, 55) = 5 AND Map.RayCollision(self.X + Look, self.Y + 4, Player.X, Player.Y) = FALSE
+
+
+								LOCAL S AS TSpit
+								S.Init(self.X+Look, self.Y+4, self.VX*4, self.VY  - RND(2))
+							ENDIF
+						CASE IS_PIG
+							self.Anim = MOD(self.Anim, 10)
+					ENDSELECT
+
+					IF (Map.CollisionPoint(self.X + self.VX, self.Y + self.Height + 1) = FALSE OR Map.CollisionPoint(self.X+self.Width+self.VX, self.Y + self.Height + 1) = FALSE) OR (Map.CollisionPoint(self.X + 2 + self.VX, self.Y+self.Height/2) OR Map.CollisionPoint(self.X - 2 + self.VX + self.Width, self.Y+self.Height/2)) OR self.X + self.VX < 0 OR self.X + self.VX > Map.Width*Tilesize
+						self.VX = -self.VX
+					ENDIF
+					INC self.X, self.VX
+			ENDSELECT
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL Frame% = 0
+
+		SELECT self.Typ
+			CASE IS_BIRD
+				LOCAL Dir%
+				IF self.VX > 0
+					Dir = 1
+				ELSE
+					Dir = 0
+				ENDIF
+				IF self.Anim > 10*2
+					Frame = 2
+				ELSEIF self.Anim > 5*2
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+				TurnImage(BirdImage,Frame, Dir, self.X, self.Y, 6)
+			CASE IS_PIG
+				LOCAL Dir%
+				IF self.VX < 0
+					Dir = 0
+				ELSE
+					Dir = 1
+				ENDIF
+
+				IF self.Anim > 5
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+
+				TurnImage(PigImage, Frame, Dir, self.X, self.Y, 4)
+			CASE IS_HUMAN
+				ROTOSPRITE HumanImage, self.X + Map.ScrollX, self.Y + Map.ScrollY, -MOD(self.X, 360)
+			CASE IS_LLAMA
+				LOCAL Dir%
+				IF self.VX < 0
+					Dir = 1
+				ELSE
+					Dir = 0
+				ENDIF
+
+				IF self.Anim > 10
+					Frame = 2
+				ELSEIF self.Anim > 5
+					Frame = 1
+				ELSE
+					Frame = 0
+				ENDIF
+
+
+				TurnImage(LlamaImage, Frame, Dir, self.X, self.Y, 6)
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Init: Typ%, X, Y
+		self.Typ 	= Typ
+		self.X 		= X
+		self.Y 		= Y
+		self.Width 	= Tilesize
+		self.Height = Tilesize
+
+		SELECT self.Typ
+			CASE IS_BIRD
+				self.Height 	= Tilesize/2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+			CASE IS_PIG
+				IF INTEGER(RND(2))
+					self.VX 	= 2
+				ELSE
+					self.VX		= -2
+				ENDIF
+			CASE IS_HUMAN
+				self.Y 			= self.Y - Tilesize
+				self.Height 	= Tilesize*2
+				self.Width 		= Tilesize*2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+			CASE IS_LLAMA
+				self.Y = self.Y - Tilesize
+				self.Height 	= Tilesize*2
+				self.Width 		= Tilesize*2
+				IF INTEGER(RND(2))
+					self.VX 	= 1
+				ELSE
+					self.VX 	= -1
+				ENDIF
+		ENDSELECT
+
+		DIMPUSH Enemys[], self
+	ENDFUNCTION
+
+	FUNCTION IsDestroyable:
+		IF self.Typ = IS_HUMAN
+			RETURN FALSE
+		ELSE
+			RETURN TRUE
+		ENDIF
+	ENDFUNCTION
+ENDTYPE
+
+//$$RESETFILE.\Explosion.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Saturday, October 01, 2011
+// IDE Version: 10.118
+
+
+GLOBAL Explosions[] AS TExplosion
+
+TYPE TExplosion
+	X;Y
+	Anim%
+	Del%
+
+	FUNCTION Update:
+		INC self.Anim
+		IF self.Anim> 20 THEN self.Del = TRUE
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL Frame%
+		IF self.Anim>15
+			Frame = 3
+		ELSEIF self.Anim>10
+			Frame = 2
+		ELSEIF self.Anim>5
+			Frame = 1
+		ELSE
+			Frame = 0
+		ENDIF
+
+		DRAWANIM ExplosionImage, Frame, self.X + Map.ScrollX, self.Y + Map.ScrollY
+	ENDFUNCTION
+
+	FUNCTION Init: X, Y
+		self.X = X
+		self.Y = Y
+
+		DIMPUSH Explosions[], self
+	ENDFUNCTION
+ENDTYPE
+
+//$$RESETFILE.\Map.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Sunday, September 25, 2011
+// IDE Version: 10.118
+
+CONSTANT Tilesize = 32
+
+//Spielkarte
+
+TYPE TMap
+	IsSnow%
+	Datas%[]
+	Width%; Height%
+	ScrollX; ScrollY
+	Tileset% //die frames gespeichert
+	TilesetPath$
+	SpikePosition; SpikeDir%
+	SpawnX%; SpawnY%
+	NextMap$ = ""
+	LastPickX%; LastPickY%
+	HasFBO%; IsRenderedFBO%; ScreenID%; SprID%
+
+	FUNCTION InitEmpty: Width%, Height%, Tileset$
+		self.IsSnow = FALSE
+		self.Width = Width
+		self.Height = Height
+
+		self.ScrollX = 0
+		self.ScrollY = 0
+
+		DIM Spits[0]
+		DIM Shits[0]
+		DIM Enemys[0]
+		Player.Init(100,100)
+
+		self.Tileset = GENSPRITE()
+		self.TilesetPath$ = Tileset$
+		LOADANIM Tileset$, self.Tileset, 32, 32
+		IF INSTR(Tileset$,"snowtileset") <> -1 THEN self.IsSnow = TRUE
 
 
 
+		DIM self.Datas[self.Width][self.Height]
+
+		self.HasFBO = PLATFORMINFO$("GLEX:glBindFramebufferEXT")
+		IF self.HasFBO
+			self.SprID = GENSPRITE()
+			self.IsRenderedFBO = 0
+			self.ScreenID = 0
+			LOADSPRITE "", self.SprID
+			CREATESCREEN self.ScreenID, self.SprID, self.Width*Tilesize, self.Height*Tilesize
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Save: File$
+		LOCAL Chn% = GENFILE()
+		IF DOESFILEEXIST(File$) THEN KILLFILE File$
+		IF OPENFILE(Chn, File$, 0) = FALSE THEN END
 
 
+		WRITELINE Chn, self.Width
+		WRITELINE Chn, self.Height
+		WRITELINE Chn, self.TilesetPath$
+		WRITELINE Chn, self.NextMap$
+		FOR y = 0 TO self.Height -1
+			LOCAL Line$ = ""
+			FOR x = 0 TO self.Width -1
+				IF x > 0 THEN Line$ = Line$ + ","
+				LOCAL PositionData% = self.Datas[x][y]
+				FOREACH Enem IN Enemys[]
+					IF INTEGER(Enem.X/Tilesize) = x AND INTEGER((Enem.Y + Enem.Height - 1)/Tilesize) = y
+						SELECT Enem.Typ
+							CASE IS_BIRD
+								PositionData = 8
+							CASE IS_PIG
+								PositionData = 6
+							CASE IS_LLAMA
+								PositionData = 9
+							CASE IS_HUMAN
+								PositionData = 7
+						ENDSELECT
+						BREAK
+					ENDIF
+				NEXT
 
-
-
-
-
-
-
-
-?IFDEF HTML5
-
-FUNCTION GETFILE AS void: File$, lin%, BYREF dat$
-	lin = MIN(lin, 255)
-	LOCAL f = GENFILE()
-	IF OPENFILE(f, File$, 1)
-		FOR i = 0 TO lin
-			IF ENDOFFILE(f) THEN BREAK
-			READLINE f, dat$
+				Line$ = Line$ + PositionData
+			NEXT
+			WRITELINE Chn, Line$
 		NEXT
-		CLOSEFILE f
+
+		CLOSEFILE Chn
+	ENDFUNCTION
+
+	FUNCTION Init: Name$
+		LOCAL Chn% = GENFILE()
+		LOCAL Line$, Tileset$
+
+		IF OPENFILE(Chn, Name$, 1) = FALSE THEN END
+
+		READLINE Chn, Line$
+		self.Width = INTEGER(Line$)
+
+		READLINE Chn, Line$
+		self.Height = INTEGER(Line$)
+
+		READLINE Chn, Line$
+		Tileset$ = Line$
+
+		READLINE Chn, Line$
+		self.NextMap$ = Line$
+
+		self.InitEmpty(self.Width, self.Height, Tileset$)
+
+		LOCAL x%, y%
+		WHILE ENDOFFILE(Chn) = FALSE
+			READLINE Chn, Line$
+			LOCAL Tiles$[]
+
+			SPLITSTR(Line$, Tiles$[], ",")
+
+
+			x = 0
+			FOREACH tile IN Tiles$[]
+				self.Datas[x][y] = Convert(tile)
+				SELECT self.Datas[x][y]
+					CASE 4
+						Player.X = x*Tilesize
+						Player.Y = y*Tilesize
+						self.SpawnX = Player.X
+						self.SpawnY = Player.Y
+						self.Datas[x][y] = 0
+					CASE 6 TO 9
+						LOCAL Typ
+						SELECT self.Datas[x][y]
+							CASE 6
+								Typ = IS_PIG
+							CASE 7
+								Typ = IS_HUMAN
+							CASE 8
+								Typ = IS_BIRD
+							CASE 9
+								Typ = IS_LLAMA
+						ENDSELECT
+						LOCAL Enemy AS TEnemy
+						Enemy.Init(Typ,x*Tilesize, y*Tilesize)
+						self.Datas[x][y] = 0
+				ENDSELECT
+				INC x
+			NEXT
+
+			INC y
+		WEND
+
+		CLOSEFILE Chn
+	ENDFUNCTION
+
+	FUNCTION Update:
+		IF self.SpikeDir
+			DEC self.SpikePosition, 0.5
+			IF self.SpikePosition <= 0
+				self.SpikePosition = 0
+				self.SpikeDir = FALSE
+			ENDIF
+		ELSE
+			INC self.SpikePosition, 0.5
+			IF self.SpikePosition >= Tilesize
+				self.SpikeDir = TRUE
+				self.SpikePosition = Tilesize
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL TmpScrollX, TmpScrollY
+		TmpScrollX = self.ScrollX; TmpScrollY = self.ScrollY
+
+		IF self.IsRenderedFBO = FALSE AND self.HasFBO
+			USESCREEN self.ScreenID
+			DRAWRECT 0,0,self.Width*Tilesize,self.Height*Tilesize,RGB(255,0,128)
+			self.ScrollX = 0
+			self.ScrollY = 0
+		ENDIF
+
+		IF self.HasFBO = FALSE OR self.IsRenderedFBO = FALSE
+			LOCAL width, height
+			GETSCREENSIZE width, height
+			width = INTEGER(width/Tilesize)+1
+			height = INTEGER(height/Tilesize)+1
+			LOCAL sx = -INTEGER(self.ScrollX/Tilesize)-1
+			LOCAL sy = -INTEGER(self.ScrollY/Tilesize)-1
+
+
+			//alles aus die tiles rendern
+			FOR x =sx TO sx + width
+				FOR y = sy TO sy + height
+					IF x >= 0 AND y >= 0 AND x < self.Width AND y < self.Height
+						IF self.Datas[x][y] <> 1 THEN RenderTile(self.Datas[x][y], x, y, FALSE)
+					ENDIF
+				NEXT
+			NEXT
+
+
+			//tiles rendern
+			STARTPOLY self.Tileset, 2
+			FOR x =sx TO sx + width
+				FOR y = sy TO sy + height
+					IF x >= 0 AND y >= 0 AND x < self.Width AND y < self.Height
+						IF self.Datas[x][y] = 1 THEN RenderTile(self.Datas[x][y], x, y, TRUE)
+					ENDIF
+				NEXT
+			NEXT
+			ENDPOLY
+
+		ENDIF
+
+		IF self.IsRenderedFBO = FALSE AND self.HasFBO
+			USESCREEN -1
+			self.IsRenderedFBO = TRUE
+			self.ScrollX = TmpScrollX
+			self.ScrollY = TmpScrollY
+		ENDIF
+		IF self.IsRenderedFBO
+			DRAWSPRITE self.SprID, self.ScrollX, self.ScrollY
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION RenderTile: Tile%, x, y, IsPoly%
+		IF NOT(x>=0 AND y >=0 AND x < Map.Width AND y <Map.Height) THEN RETURN
+
+		SELECT Tile
+			CASE 1
+				LOCAL Tile%
+				IF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = 0 OR IsCollisionTile(self.Datas[x-1][y]))
+					IF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = (self.Width-1) OR IsCollisionTile(self.Datas[x+1][y]))
+						Tile = 1
+					ELSE
+						Tile = 2
+					ENDIF
+				ELSEIF (y = 0 OR IsCollisionTile(self.Datas[x][y-1])) AND (x = (self.Width-1) OR self.Datas[x+1][y] = 0)
+					Tile = 3
+				ELSEIF y = 0 OR IsCollisionTile(self.Datas[x][y-1])
+					Tile = 1
+				ELSE
+					Tile = 0
+				ENDIF
+
+				IF IsPoly = FALSE
+					DRAWANIM self.Tileset, Tile, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+				ELSE
+					POLYVECTOR x*Tilesize + self.ScrollX			, y*Tilesize + self.ScrollY -1				, Tile*Tilesize			, 0 		, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX + Tilesize	, y*Tilesize + self.ScrollY	-1				, (Tile+1)*Tilesize		, 0			, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX			, y*Tilesize + self.ScrollY + Tilesize -1	, Tile*Tilesize			, Tilesize-1, RGB(255,255,255)
+					POLYVECTOR x*Tilesize + self.ScrollX + Tilesize , y*Tilesize + self.ScrollY + Tilesize -1	, (Tile+1)*Tilesize		, Tilesize-1, RGB(255,255,255)
+
+					POLYNEWSTRIP
+				ENDIF
+			CASE 2
+				DRAWSPRITE LadderImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 3
+				DRAWSPRITE SpikeImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY + self.SpikePosition
+			CASE 4
+				//DRAWRECT x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY, Tilesize, Tilesize, RGB(0,255,0)
+			CASE 5
+				DRAWSPRITE TrampolineImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY + 16
+			CASE 10
+				DRAWSPRITE DoorImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 11
+				DRAWSPRITE DynamitImage, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY
+			CASE 12
+				DRAWANIM TriggerImage, 0, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY+Tilesize/2
+			CASE 13
+				DRAWANIM TriggerImage, 1, x*Tilesize + self.ScrollX, y*Tilesize + self.ScrollY+Tilesize/2
+		ENDSELECT
+	ENDFUNCTION
+
+	//Gibt das tile an der gegebenen Stelle zurück
+	FUNCTION PickTile:  X, Y
+		IF X >= 0 AND Y >= 0 AND X < self.Width*Tilesize AND Y < self.Height*Tilesize
+			//yay es ist in der map!
+			X = INTEGER(X/Tilesize)
+			Y = INTEGER(Y/Tilesize)
+			self.LastPickX = X
+			self.LastPickY = Y
+			RETURN self.Datas[X][Y]
+		ELSE
+			RETURN 0
+		ENDIF
+	ENDFUNCTION
+
+	//entfernt das tile an der position
+	FUNCTION RemoveTile: X, Y
+		IF X >= 0 AND Y>=0 AND X<Map.Width AND Y < Map.Height
+			self.Datas[X][Y] = 0
+			self.IsRenderedFBO = FALSE
+		ENDIF
+	ENDFUNCTION
+
+	//Punktskollision
+	FUNCTION CollisionPoint%: X, Y
+		LOCAL TmpY = Y
+		IF X >= 0 AND Y >= 0 AND X < self.Width*Tilesize AND Y < self.Height*Tilesize
+			//yay es ist in der map!
+			X = INTEGER(X/Tilesize)
+			Y = INTEGER(Y/Tilesize)
+
+			IF IsCollisionTile(self.Datas[X][Y]) = FALSE
+				IF self.Datas[X][Y] = 5 OR self.Datas[X][Y] = 12 OR self.Datas[X][Y] = 13
+					//halbteil!
+					IF MOD(TmpY,32) > 16
+						RETURN TRUE
+					ELSE
+						RETURN FALSE
+					ENDIF
+				ENDIF
+				RETURN TRUE
+			ELSE
+				RETURN FALSE
+			ENDIF
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+
+	//Linienkollision
+	FUNCTION RayCollision: X1, Y1, X2, Y2
+		LOCAL Length = SQR(X1*X1 + Y1*Y1 + X2*X2 + Y2*Y2)
+		LOCAL DeltaX = (X1 - X2)/Length
+		LOCAL DeltaY = (Y1 - Y2)/Length
+		FOR i = 0 TO Length
+			IF CollisionPoint(X1 - DeltaX*i, Y1 - DeltaY*i)
+				RETURN TRUE
+			ENDIF
+		NEXT
+		RETURN FALSE
+	ENDFUNCTION
+
+	//Rechteckskollision
+	FUNCTION Collision%: X, Y, Width, Height
+		FOR XX = X TO X + Width STEP 4
+			FOR YY = Y TO Y + Height STEP 4
+				IF CollisionPoint(XX, YY) THEN RETURN TRUE
+			NEXT
+		NEXT
+
+		//eckpunkte!
+		IF CollisionPoint(X,Y) OR CollisionPoint(X + Width, Y) OR CollisionPoint(X, Y + Height) OR CollisionPoint(X + Width, Y + Height)
+			RETURN TRUE
+		ELSE
+			RETURN FALSE
+		ENDIF
+	ENDFUNCTION
+ENDTYPE
+
+FUNCTION IsCollisionTile%: Typ%
+	IF Typ = 0 OR Typ = 2 OR Typ = 3 OR Typ = 10
+		RETURN TRUE
 	ELSE
-		dat$ = ""
+		RETURN FALSE
 	ENDIF
 ENDFUNCTION
 
+FUNCTION Convert%: Text$
+	SELECT Text$
+		CASE "A"
+			RETURN 10
+		CASE "B"
+			RETURN 11
+		CASE "C"
+			RETURN 12
+		DEFAULT
+			RETURN INTEGER(Text$)
+	ENDSELECT
+ENDFUNCTION
 
-?ENDIF
+//$$RESETFILE.\Player.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Sunday, September 25, 2011
+// IDE Version: 10.118
+
+// Spieler
+TYPE TPlayer
+	X; Y
+	VX; VY
+	Width%; Height%
+	Anim%
+	// ...
+
+	FUNCTION Init: X, Y, Width% = 16, Height% = 32
+		self.X 		= X
+		self.Y 		= Y
+		self.VX 	= 0
+		self.VY 	= 0
+
+		self.Width 	= Width
+		self.Height = Height
+	ENDFUNCTION
+
+	FUNCTION Update:
+		LOCAL ScrWidth, ScrHeight
+		GETSCREENSIZE ScrWidth, ScrHeight
+
+		//schwerkraft
+		INC self.VY, .5
+
+		//bewegung
+		IF KEY(203) OR UpdateGameButton(42,ScrHeight - 42) THEN DEC self.VX, 1//links
+		IF KEY(205) OR UpdateGameButton(ScrWidth - 42,ScrHeight - 42) THEN INC self.VX, 1 //rechts
+		IF KEY(57) OR (UpdateGameButton(42, ScrHeight - 125) OR UpdateGameButton(ScrWidth - 42, ScrHeight - 125))
+			IF Map.PickTile(self.X+self.Width/2, self.Y) = 2 //leiter
+				self.VY = 0
+				DEC self.Y, 4
+
+				WHILE Map.PickTile(self.X+self.Width/2, self.Y) <> 2
+					INC self.Y, 1
+				WEND
+
+			ELSEIF (Map.CollisionPoint(self.X + 1, self.Y + self.Height + 1) OR Map.CollisionPoint(self.X + self.Width - 1, self.Y + self.Height + 1)) //springen
+				self.VY = -8
+			ENDIF
+		ENDIF
+
+		//nächste map laden?
+		IF Map.PickTile(self.X+self.Width/2, self.Y+self.Height/2) = 10
+			//yay nächste map!111
+			IF Map.NextMap$ = ""
+				END //TODO
+			ELSE
+				Map.Init(Map.NextMap$)
+				THROW "Exit"
+			ENDIF
+		ENDIF
+
+		//trägheit
+		self.VX = self.VX * (.77+Map.IsSnow*.1)
+
+		//grenze
+		IF self.VY > Tilesize-1 THEN self.VY = Tilesize-1
+		IF self.VY < -Tilesize-1 THEN self.VY = -Tilesize-1
+
+
+		LOCAL OldX, OldY
+		OldX = self.X
+		OldY = self.Y
+
+		//bewege und kollision
+		INC self.X, self.VX
+		IF Map.Collision(self.X+1, self.Y+1, self.Width-2, self.Height-2)
+			self.X = OldX
+		ENDIF
+
+		INC self.Y, self.VY
+		IF Map.Collision(self.X+1, self.Y+1, self.Width-2, self.Height-2)
+			self.Y = OldY
+			self.VY = 0
+		ENDIF
+
+		//animation
+		IF ABS(self.VX)>.1
+			INC self.Anim, 1
+			self.Anim = MOD(self.Anim, 15)
+		ELSE
+			self.Anim = 13
+		ENDIF
+
+		//spikes
+		IF Map.PickTile(self.X+4, self.Y - Map.SpikePosition  + Tilesize  - 1) = 3 OR Map.PickTile(self.X + self.Width-4, self.Y - Map.SpikePosition + Tilesize - 1) = 3
+			self.Reset()
+		ENDIF
+
+		//trampolin
+		IF Map.PickTile(self.X+2, self.Y + self.Height + self.VY - 16) = 5 OR Map.PickTile(self.X + self.Width-4, self.Y + self.Height + self.VY - 16) = 5 AND ABS(self.VY)>.25
+			self.VY = -self.VY*1.1
+		ENDIF
+
+		//schalter
+		IF Map.PickTile(self.X, self.Y + self.Height + self.VY - 16) = 12 OR Map.PickTile(self.X + self.Width-4, self.Y + self.Height + self.VY - 16) = 12
+			//yay es ist in der map!
+			Map.Datas[Map.LastPickX][Map.LastPickY] = 13
+			Map.IsRenderedFBO = FALSE
+
+			//suche das nächste dynamit
+			LOCAL LastPosX, LastPosY, Dist = -1
+			FOR x = 0 TO Map.Width - 1
+				FOR y = 0 TO Map.Height - 1
+					IF Map.Datas[x][y] = 11
+						LOCAL TmpDist = SQR((x-Map.LastPickX)*(x-Map.LastPickX) + (y-Map.LastPickY)*(y-Map.LastPickY))
+						IF Dist = -1 OR TmpDist < Dist
+							Dist = TmpDist
+							LastPosX = x
+							LastPosY = y
+						ENDIF
+					ENDIF
+				NEXT
+			NEXT
+
+			IF Dist <> -1
+				//druckwelle
+				LOCAL X1, Y1, X2,Y2
+				//DEBUG LastPosX+" "+LastPosY+"\n"
+				Y1 = LastPosY*Tilesize + 16; Y2 = self.Y + self.Height/2
+				X1 = LastPosX*Tilesize + 16; X2 = self.X + self.Width/2
+				LOCAL Angle = -MOD(ATAN((Y1 - Y2), (X1 - X2)) + 180, 360)
+				LOCAL Dist = SQR((X1 - X2)*(X1 - X2) + (Y1 - Y2)*(Y1 - Y2))
+				//DEBUG Dist
+				IF Dist < 512
+					LOCAL Strength = 256/(Dist+1)*16
+					INC self.VX, QCOS(Angle)*Strength
+					INC self.VY, QSIN(Angle)*Strength
+				ENDIF
+
+				//explosion und so
+				FOR X = -1 TO 1
+					FOR Y = -1 TO 1
+						Map.RemoveTile(LastPosX+X, LastPosY+Y)
+						FOR XX = -0.5 TO 0.5 STEP 0.5
+							FOR YY = -0.5 TO 0.5 STEP 0.5
+								IF (INTEGER(RND(2))>1)
+									LOCAL Exp AS TExplosion
+									Exp.Init((LastPosX+X+XX)*Tilesize, (LastPosY+Y+YY)*Tilesize)
+								ENDIF
+							NEXT
+						NEXT
+					NEXT
+				NEXT
+
+				//gegner aua machen
+				FOREACH Enemy IN Enemys[]
+					IF SQR((Enemy.X - LastPosX*Tilesize)*(Enemy.X - LastPosX*Tilesize) + (Enemy.Y - LastPosY*Tilesize)) < Tilesize
+						Enemy.Fall = TRUE
+					ENDIF
+				NEXT
+			ENDIF
+		ENDIF
+
+
+		//gegner kollision
+		FOREACH Enemy IN Enemys[]
+			IF Enemy.Fall = FALSE
+				IF BOXCOLL(self.X+2,self.Y+2,self.Width-4,self.Height+4,Enemy.X+4,Enemy.Y-8,Enemy.Width-8,16) AND Enemy.IsDestroyable() AND self.VY<>0
+					Enemy.Fall = TRUE
+				ELSEIF BOXCOLL(self.X+2,self.Y+2,self.Width-4,self.Height-4,Enemy.X+2,Enemy.Y+2,Enemy.Width-4,Enemy.Height-4)
+					self.Reset()
+					BREAK
+				ENDIF
+			ENDIF
+		NEXT
+
+		//exkrementkollision
+		FOREACH S IN Shits[]
+			IF BOXCOLL(self.X, self.Y, self.Width, self.Height, S.X, S.Y, 16, 16) AND S.VY <> 0
+				self.Reset()
+				DELETE S
+			ENDIF
+		NEXT
+
+		//spuckkollision
+		FOREACH S IN Spits[]
+			IF BOXCOLL(self.X, self.Y, self.Width, self.Height, S.X, S.Y, 8, 8) AND S.VY <> 0
+				self.Reset()
+				DELETE S
+			ENDIF
+		NEXT
+
+
+		//ist der spieler unter die Map gefallen?
+		IF (self.Y - self.Height*2) > Map.Height*Tilesize
+			self.Reset()
+		ENDIF
+
+		//scrolling
+		Map.ScrollX = -self.X + ScrWidth/2 + self.Width/2
+		Map.ScrollY = -self.Y + ScrHeight/2 + self.Height/2
+	ENDFUNCTION
+
+	FUNCTION Render:
+		LOCAL CurAnim%
+		IF self.Anim > 10
+			CurAnim = 0
+		ELSEIF self.Anim > 5
+			CurAnim = 1
+		ELSE
+			CurAnim = 2
+		ENDIF
+		LOCAL Dir%
+
+		IF self.VX < 0
+			Dir = 1
+		ELSE
+			Dir = 0
+		ENDIF
+
+
+		TurnImage(PlayerImage, CurAnim, Dir, self.X + 1, self.Y, 6)
+	ENDFUNCTION
+
+	FUNCTION Reset:
+		self.X = Map.SpawnX
+		self.Y = Map.SpawnY
+		self.VX = 0
+		self.VY = 0
+	ENDFUNCTION
+ENDTYPE
+
+
+FUNCTION TurnImage: Img%, Frame%, Dir%,X,Y, MaxFrame%
+	IF Dir
+		Frame = (MaxFrame - 1) - Frame
+	ENDIF
+
+	DRAWANIM Img,Frame, X + Map.ScrollX, Y + Map.ScrollY
+ENDFUNCTION
+
+//$$RESETFILE.\qmath.gbas
+// --------------------------------- //
+// Project: qmath - quick math approximations
+// Start: Thursday, March 15, 2007
+// IDE Version: 4.126
+
+
+
+// Qedo http://www.glbasic.com/forum/index.php?topic=6446
+FUNCTION QSIN: x
+	?IFDEF HTML5
+	//does not work well..
+	RETURN SIN(x)
+	?ELSE
+    WHILE x>360.0;  DEC x, 360.0; WEND
+    WHILE x<0;      INC x, 360.0; WEND
+
+    IF x>180.0 THEN x = 180.0-x
+
+	IF x>0
+		x = (0.022221532036391804173392430864397 - 0.00012345295575773224540773572702443 * x) * x
+		x = 0.225*(x*x-x)+x
+	ELSE
+		x = (0.022221532036391804173392430864397 + 0.00012345295575773224540773572702443 * x) * x
+		x = 0.225*(-x*x-x)+x
+	ENDIF
+	RETURN x
+	?ENDIF
+ENDFUNCTION
+
+
+
+FUNCTION QCOS: x
+	?IFDEF HTML5
+	RETURN COS(x)
+	?ELSE
+	RETURN QSIN(x+90)
+	?ENDIF
+ENDFUNCTION
+
+
+FUNCTION QSQR: y
+	RETURN SQR(y)
+ENDFUNCTION
 
 
 
 
 
+//$$RESETFILE.\Shit.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Tuesday, September 27, 2011
+// IDE Version: 10.118
+
+GLOBAL Shits[] AS TShit
+
+TYPE TShit
+	Del%
+	X;Y
+	VY
+	Age%
+	Al
+
+	FUNCTION Render:
+		DRAWSPRITE ShitImage, self.X + Map.ScrollX, self.Y + Map.ScrollY
+	ENDFUNCTION
+
+	FUNCTION Update:
+		IF self.Age > 149
+			self.Del = TRUE
+		ENDIF
+
+		IF self.Y > Map.Height*Tilesize + Tilesize*20 THEN self.Del = TRUE
 
 
+		IF Map.CollisionPoint(self.X+8,self.Y + self.VY + 16)
+			WHILE Map.CollisionPoint(self.X+8,self.Y + 16) = FALSE
+				INC self.Y
+			WEND
+			self.VY = 0
+			INC self.Age
+		ELSE
+			INC self.VY, 1
+		ENDIF
+		self.VY = MIN(self.VY, 8)
 
 
+		INC self.Y, self.VY
+	ENDFUNCTION
+
+	FUNCTION Init: X, Y
+		self.X 	= X
+		self.Y 	= Y
+		self.VY = 1
+
+		DIMPUSH Shits[], self
+	ENDFUNCTION
+ENDTYPE
+
+//$$RESETFILE.\Spit.gbas
+// --------------------------------- //
+// Project: JumpIt
+// Start: Tuesday, September 27, 2011
+// IDE Version: 10.118
+GLOBAL Spits[] AS TSpit
+
+TYPE TSpit
+	X;Y
+	VX;VY
+	Age%; Al
+	Del%
 
 
+	FUNCTION Update:
+		self.VX = self.VX * .99
+		INC self.VY, .1
+		INC self.Age
+
+		IF self.Age > 149
+			self.Del = TRUE
+		ENDIF
 
 
+		LOCAL OldX, OldY
+		OldX = self.X; OldY = self.Y
 
+		INC self.X, self.VX
+		IF Map.Collision(self.X, self.Y, 8,8)
+			self.VX =  -self.VX
+			self.X = OldX
+		ENDIF
+		INC self.Y, self.VY
+		IF Map.Collision(self.X, self.Y, 8,8)
+			self.VY =  -self.VY
+			self.Y = OldY
+		ENDIF
+	ENDFUNCTION
 
+	FUNCTION Render:
+		DRAWSPRITE SpitImage, self.X+Map.ScrollX, self.Y+Map.ScrollY
+	ENDFUNCTION
 
+	FUNCTION Init: X, Y, DirX, DirY
+		self.X 	= X
+		self.Y	= Y
+		self.VX = DirX
+		self.VY = DirY
 
-
-
-
-
+		DIMPUSH Spits[], self
+	ENDFUNCTION
+ENDTYPE
 

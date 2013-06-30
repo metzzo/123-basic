@@ -33,6 +33,7 @@ editable:/Libs/js/xna.xcl
 static:/Libs/js/xna.xcl.GLBSCRIPT_DATA
 folder:/Media
 static:/Media/smalfont.png
+editable:/Media/Thumbs.db
 folder:/Target
 editable:/Target/Doc.gbas
 static:/Target/Doc.gbas.GLBSCRIPT_DATA
@@ -45,7 +46,7 @@ static:/DIR_STRUCTURE
 static:/GLBFile.html
 static:/GLBScript.exe
 static:/GLBScript.js
-var:compileTime=2012-08-01 20:45:45
+var:compileTime=2013-06-28 09:18:18
 var:userDefVersion=000.005
 var:hostId=290816d5
 var:viewMode=console

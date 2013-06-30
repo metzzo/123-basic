@@ -180,7 +180,7 @@ function SHELLEND(cmd) {
 
 function CALLBYNAME(name) {
 	var ret = 1;
-	return eval("if (window['"+name+"']) window."+name+"(); else ret = 0;");
+	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
 }
 
 //------------------------------------------------------------
@@ -250,7 +250,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return true;
+		return cur != to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
@@ -2270,6 +2270,7 @@ var hibernate	= false;	//SOlls warten
 var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
+var inFullscreen= false;
 
 var waitForFont = false;
 
@@ -2582,6 +2583,9 @@ function init2D(canvasName) {
 			lastKey = CHR_Str(ev.which);
 	}
 	
+	// gamepad listener
+	gamepads = navigator.getGamepads || navigator.webkitGetGamepads || navigator.webkitGamepads || navigator.gamepads || navigator.mozGetGamepads || navigator.mozGamepads;
+	
 	USESCREEN(-1);
 	CLEARSCREEN(RGB(0,0,0)); //black background color
 	SHOWSCREEN();
@@ -2596,8 +2600,17 @@ function init2D(canvasName) {
 	
 	SYSTEMPOINTER(0);
 	
-	if (DOESFILEEXIST("Media/smalfont.png")) {
-		LOADFONT("Media/smalfont.png", 0);
+	var possibleDirs = ["Media/smalfont.png", "smalfont.png", "smallfont.png", "Media/smallfont.png", "Media/smalfont.bmp", "smalfont.bmp", "smallfont.bmp", "Media/smallfont.bmp"];
+	var f = null;
+	for (var i = 0; i < possibleDirs.length; i++) {
+		if (DOESFILEEXIST(possibleDirs[i])) {
+			f = possibleDirs[i];
+			break;
+		}
+	}
+	
+	if (f != null) {
+		LOADFONT(f, 0);
 		SETFONT(0);
 		waitForFont = true;
 	}
@@ -2694,7 +2707,20 @@ function SMOOTHSHADING(mode) {
 	// Do nothing...
 }
 
-function SETSCREEN(width, height) {
+function SETSCREEN(width, height, fullscreen) {
+	if (fullscreen && !inFullscreen) {
+		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		inFullscreen = true;
+	} else if (!fullscreen && inFullscreen) {
+		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		inFullscreen = false;
+	}
+	var e = frontbuffer.canvas;
+	e.width = width;
+	e.height = height;
+	e = backbuffer.canvas;
+	e.width = width;
+	e.height = height;
 	canvas.width = width;
 	canvas.height = height;
 }
@@ -3328,6 +3354,7 @@ var globalSpeedX, globalSpeedY; //für HIBERNATE
 var touches		= [];
 var touchable	= document ? ('createTouch' in document) : false;
 
+var gamepads;
 
 /**
 * @constructor
@@ -3402,7 +3429,54 @@ function updateTouches(t, state) {
 	}
 }
 
+// GAMEPAD
+function GETNUMJOYSTICKS() {
+	if (!!gamepads) {
+		return gamepads.length;
+	} else return 0;
+}
 
+function GETJOYNAME_Str(n) {
+	return gamepads[n].id;
+}
+
+function GETJOYX(n) {
+	return gamepads[n].axes[0];
+}
+
+function GETJOYY(n) {
+	return gamepads[n].axes[1];
+}
+
+function GETJOYZ(n) {
+	return 0; // umimplemented
+}
+
+function GETJOYRX(n) {
+	return gamepads[n].axes[2];
+}
+
+function GETJOYRY(n) {
+	return gamepads[n].axes[3];
+}
+
+function GETJOYRZ(n) {
+	return 0;
+}
+
+function GETJOYBUTTON(n, m) {
+	return gamepads[n].buttons[m];
+}
+
+function GETDIGIX(n) {
+	return gamepads[n].buttons[15]-gamepads[n].buttons[14];
+}
+
+function GETDIGIY(n) {
+	return gamepads[n].buttons[13]-gamepads[n].buttons[12];
+}
+
+// stuff
 function MOUSEAXIS(info) {
 	if (currentMouse >= 0 && currentMouse < touches.length) {} else {
 		return;
@@ -4106,7 +4180,12 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		var dx = 0, dy = 0
+		if (sx < 0) dx = spr.img.width*sx;
+		if (sy < 0) dy = spr.img.height*sy;
+		
+		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
 		context.restore();
@@ -4121,7 +4200,6 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
-		//context.drawImage(spr.img, CAST2INT(x), CAST2INT(y), CAST2INT(width), CAST2INT(height));
 		context.restore();
 	}
 }
@@ -4889,7 +4967,7 @@ window['Init'] = function() {
 				__debugInfo = "242:\JumpIt.gbas";
 				(global6_Player).Init(100, 100, 16, 32);
 				__debugInfo = "243:\JumpIt.gbas";
-				(global3_Map).Init("map1.map");
+				(global3_Map).Init("map3.map");
 				__debugInfo = "242:\JumpIt.gbas";
 			};
 			__debugInfo = "240:\JumpIt.gbas";
@@ -6287,12 +6365,12 @@ window['method10_type4_TMap_9_Collision'] = function(param1_X, param1_Y, param5_
 		{
 			var local2_XX_1546 = 0.0;
 			__debugInfo = "344:\Map.gbas";
-			for (local2_XX_1546 = param1_X;toCheck(local2_XX_1546, ((param1_X) + (param4_self.attr5_Width)), 4);local2_XX_1546 += 4) {
+			for (local2_XX_1546 = param1_X;toCheck(local2_XX_1546, ((param1_X) + (param5_Width)), 4);local2_XX_1546 += 4) {
 				__debugInfo = "340:\Map.gbas";
 				{
 					var local2_YY_1547 = 0.0;
 					__debugInfo = "343:\Map.gbas";
-					for (local2_YY_1547 = param1_Y;toCheck(local2_YY_1547, ((param1_Y) + (param4_self.attr6_Height)), 4);local2_YY_1547 += 4) {
+					for (local2_YY_1547 = param1_Y;toCheck(local2_YY_1547, ((param1_Y) + (param6_Height)), 4);local2_YY_1547 += 4) {
 						__debugInfo = "342:\Map.gbas";
 						if ((param4_self).CollisionPoint(local2_XX_1546, local2_YY_1547)) {
 							__debugInfo = "342:\Map.gbas";
@@ -6589,7 +6667,7 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 				__debugInfo = "126:\Player.gbas";
 				local2_Y1_1570 = ((((local8_LastPosY_1564) * (32))) + (16));
 				__debugInfo = "127:\Player.gbas";
-				local2_Y1_1570 = ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
+				local2_Y2_1572 = ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
 				__debugInfo = "127:\Player.gbas";
 				local2_X1_1569 = ((((local8_LastPosX_1563) * (32))) + (16));
 				__debugInfo = "128:\Player.gbas";
@@ -6611,29 +6689,31 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 				};
 				__debugInfo = "138:\Player.gbas";
 				{
+					var local1_X_1575 = 0.0;
 					__debugInfo = "151:\Player.gbas";
-					for (param4_self.attr1_X = -(1);toCheck(param4_self.attr1_X, 1, 1);param4_self.attr1_X += 1) {
+					for (local1_X_1575 = -(1);toCheck(local1_X_1575, 1, 1);local1_X_1575 += 1) {
 						__debugInfo = "139:\Player.gbas";
 						{
+							var local1_Y_1576 = 0.0;
 							__debugInfo = "150:\Player.gbas";
-							for (param4_self.attr1_Y = -(1);toCheck(param4_self.attr1_Y, 1, 1);param4_self.attr1_Y += 1) {
+							for (local1_Y_1576 = -(1);toCheck(local1_Y_1576, 1, 1);local1_Y_1576 += 1) {
 								__debugInfo = "141:\Player.gbas";
-								(global3_Map).RemoveTile(((local8_LastPosX_1563) + (param4_self.attr1_X)), ((local8_LastPosY_1564) + (param4_self.attr1_Y)));
+								(global3_Map).RemoveTile(((local8_LastPosX_1563) + (local1_X_1575)), ((local8_LastPosY_1564) + (local1_Y_1576)));
 								__debugInfo = "141:\Player.gbas";
 								{
-									var local2_XX_1575 = 0.0;
+									var local2_XX_1577 = 0.0;
 									__debugInfo = "149:\Player.gbas";
-									for (local2_XX_1575 = -(0.5);toCheck(local2_XX_1575, 0.5, 0.5);local2_XX_1575 += 0.5) {
+									for (local2_XX_1577 = -(0.5);toCheck(local2_XX_1577, 0.5, 0.5);local2_XX_1577 += 0.5) {
 										__debugInfo = "142:\Player.gbas";
 										{
-											var local2_YY_1576 = 0.0;
+											var local2_YY_1578 = 0.0;
 											__debugInfo = "148:\Player.gbas";
-											for (local2_YY_1576 = -(0.5);toCheck(local2_YY_1576, 0.5, 0.5);local2_YY_1576 += 0.5) {
+											for (local2_YY_1578 = -(0.5);toCheck(local2_YY_1578, 0.5, 0.5);local2_YY_1578 += 0.5) {
 												__debugInfo = "147:\Player.gbas";
 												if ((((INTEGER(RND(2))) > (1)) ? 1 : 0)) {
-													var local3_Exp_1577 = new type10_TExplosion();
+													var local3_Exp_1579 = new type10_TExplosion();
 													__debugInfo = "146:\Player.gbas";
-													(local3_Exp_1577).Init(((((((local8_LastPosX_1563) + (param4_self.attr1_X))) + (local2_XX_1575))) * (32)), ((((((local8_LastPosY_1564) + (param4_self.attr1_Y))) + (local2_YY_1576))) * (32)));
+													(local3_Exp_1579).Init(((((((local8_LastPosX_1563) + (local1_X_1575))) + (local2_XX_1577))) * (32)), ((((((local8_LastPosY_1564) + (local1_Y_1576))) + (local2_YY_1578))) * (32)));
 													__debugInfo = "146:\Player.gbas";
 												};
 												__debugInfo = "147:\Player.gbas";
@@ -6653,19 +6733,19 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 					__debugInfo = "151:\Player.gbas";
 				};
 				__debugInfo = "158:\Player.gbas";
-				var forEachSaver6000 = global6_Enemys;
-				for(var forEachCounter6000 = 0 ; forEachCounter6000 < forEachSaver6000.values.length ; forEachCounter6000++) {
-					var local5_Enemy_1578 = forEachSaver6000.values[forEachCounter6000];
+				var forEachSaver5982 = global6_Enemys;
+				for(var forEachCounter5982 = 0 ; forEachCounter5982 < forEachSaver5982.values.length ; forEachCounter5982++) {
+					var local5_Enemy_1580 = forEachSaver5982.values[forEachCounter5982];
 				{
 						__debugInfo = "157:\Player.gbas";
-						if ((((SQR(((((((local5_Enemy_1578.attr1_X) - (((local8_LastPosX_1563) * (32))))) * (((local5_Enemy_1578.attr1_X) - (((local8_LastPosX_1563) * (32))))))) + (((local5_Enemy_1578.attr1_Y) - (((local8_LastPosY_1564) * (32)))))))) < (32)) ? 1 : 0)) {
+						if ((((SQR(((((((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))) * (((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))))) + (((local5_Enemy_1580.attr1_Y) - (((local8_LastPosY_1564) * (32)))))))) < (32)) ? 1 : 0)) {
 							__debugInfo = "156:\Player.gbas";
-							local5_Enemy_1578.attr4_Fall = 1;
+							local5_Enemy_1580.attr4_Fall = 1;
 							__debugInfo = "156:\Player.gbas";
 						};
 						__debugInfo = "157:\Player.gbas";
 					}
-					forEachSaver6000.values[forEachCounter6000] = local5_Enemy_1578;
+					forEachSaver5982.values[forEachCounter5982] = local5_Enemy_1580;
 				
 				};
 				__debugInfo = "126:\Player.gbas";
@@ -6673,18 +6753,18 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 			__debugInfo = "105:\Player.gbas";
 		};
 		__debugInfo = "173:\Player.gbas";
-		var forEachSaver6130 = global6_Enemys;
-		for(var forEachCounter6130 = 0 ; forEachCounter6130 < forEachSaver6130.values.length ; forEachCounter6130++) {
-			var local5_Enemy_1579 = forEachSaver6130.values[forEachCounter6130];
+		var forEachSaver6112 = global6_Enemys;
+		for(var forEachCounter6112 = 0 ; forEachCounter6112 < forEachSaver6112.values.length ; forEachCounter6112++) {
+			var local5_Enemy_1581 = forEachSaver6112.values[forEachCounter6112];
 		{
 				__debugInfo = "172:\Player.gbas";
-				if ((((local5_Enemy_1579.attr4_Fall) == (0)) ? 1 : 0)) {
+				if ((((local5_Enemy_1581.attr4_Fall) == (0)) ? 1 : 0)) {
 					__debugInfo = "171:\Player.gbas";
-					if (((((((BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) + (4)), ~~(((local5_Enemy_1579.attr1_X) + (4))), ~~(((local5_Enemy_1579.attr1_Y) - (8))), ~~(((local5_Enemy_1579.attr5_Width) - (8))), 16)) && ((local5_Enemy_1579).IsDestroyable())) ? 1 : 0)) && ((((param4_self.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+					if (((((((BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) + (4)), ~~(((local5_Enemy_1581.attr1_X) + (4))), ~~(((local5_Enemy_1581.attr1_Y) - (8))), ~~(((local5_Enemy_1581.attr5_Width) - (8))), 16)) && ((local5_Enemy_1581).IsDestroyable())) ? 1 : 0)) && ((((param4_self.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
 						__debugInfo = "167:\Player.gbas";
-						local5_Enemy_1579.attr4_Fall = 1;
+						local5_Enemy_1581.attr4_Fall = 1;
 						__debugInfo = "167:\Player.gbas";
-					} else if (BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) - (4)), ~~(((local5_Enemy_1579.attr1_X) + (2))), ~~(((local5_Enemy_1579.attr1_Y) + (2))), ~~(((local5_Enemy_1579.attr5_Width) - (4))), ~~(((local5_Enemy_1579.attr6_Height) - (4))))) {
+					} else if (BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) - (4)), ~~(((local5_Enemy_1581.attr1_X) + (2))), ~~(((local5_Enemy_1581.attr1_Y) + (2))), ~~(((local5_Enemy_1581.attr5_Width) - (4))), ~~(((local5_Enemy_1581.attr6_Height) - (4))))) {
 						__debugInfo = "169:\Player.gbas";
 						(param4_self).Reset();
 						__debugInfo = "170:\Player.gbas";
@@ -6695,51 +6775,51 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 				};
 				__debugInfo = "172:\Player.gbas";
 			}
-			forEachSaver6130.values[forEachCounter6130] = local5_Enemy_1579;
+			forEachSaver6112.values[forEachCounter6112] = local5_Enemy_1581;
 		
 		};
 		__debugInfo = "181:\Player.gbas";
-		var forEachSaver6170 = global5_Shits;
-		for(var forEachCounter6170 = 0 ; forEachCounter6170 < forEachSaver6170.values.length ; forEachCounter6170++) {
-			var local1_S_1580 = forEachSaver6170.values[forEachCounter6170];
+		var forEachSaver6152 = global5_Shits;
+		for(var forEachCounter6152 = 0 ; forEachCounter6152 < forEachSaver6152.values.length ; forEachCounter6152++) {
+			var local1_S_1582 = forEachSaver6152.values[forEachCounter6152];
 		{
 				__debugInfo = "180:\Player.gbas";
-				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1580.attr1_X), ~~(local1_S_1580.attr1_Y), 16, 16)) && ((((local1_S_1580.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1582.attr1_X), ~~(local1_S_1582.attr1_Y), 16, 16)) && ((((local1_S_1582.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
 					__debugInfo = "178:\Player.gbas";
 					(param4_self).Reset();
 					__debugInfo = "179:\Player.gbas";
 					//DELETE!!111
-					forEachSaver6170.values[forEachCounter6170] = local1_S_1580;
-					DIMDEL(forEachSaver6170, forEachCounter6170);
-					forEachCounter6170--;
+					forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
+					DIMDEL(forEachSaver6152, forEachCounter6152);
+					forEachCounter6152--;
 					continue;
 					__debugInfo = "178:\Player.gbas";
 				};
 				__debugInfo = "180:\Player.gbas";
 			}
-			forEachSaver6170.values[forEachCounter6170] = local1_S_1580;
+			forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
 		
 		};
 		__debugInfo = "189:\Player.gbas";
-		var forEachSaver6210 = global5_Spits;
-		for(var forEachCounter6210 = 0 ; forEachCounter6210 < forEachSaver6210.values.length ; forEachCounter6210++) {
-			var local1_S_1581 = forEachSaver6210.values[forEachCounter6210];
+		var forEachSaver6192 = global5_Spits;
+		for(var forEachCounter6192 = 0 ; forEachCounter6192 < forEachSaver6192.values.length ; forEachCounter6192++) {
+			var local1_S_1583 = forEachSaver6192.values[forEachCounter6192];
 		{
 				__debugInfo = "188:\Player.gbas";
-				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1581.attr1_X), ~~(local1_S_1581.attr1_Y), 8, 8)) && ((((local1_S_1581.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1583.attr1_X), ~~(local1_S_1583.attr1_Y), 8, 8)) && ((((local1_S_1583.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
 					__debugInfo = "186:\Player.gbas";
 					(param4_self).Reset();
 					__debugInfo = "187:\Player.gbas";
 					//DELETE!!111
-					forEachSaver6210.values[forEachCounter6210] = local1_S_1581;
-					DIMDEL(forEachSaver6210, forEachCounter6210);
-					forEachCounter6210--;
+					forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
+					DIMDEL(forEachSaver6192, forEachCounter6192);
+					forEachCounter6192--;
 					continue;
 					__debugInfo = "186:\Player.gbas";
 				};
 				__debugInfo = "188:\Player.gbas";
 			}
-			forEachSaver6210.values[forEachCounter6210] = local1_S_1581;
+			forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
 		
 		};
 		__debugInfo = "195:\Player.gbas";
@@ -6767,33 +6847,33 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 window['method13_type7_TPlayer_6_Render'] = function(param4_self) {
 	stackPush("method: Render", __debugInfo);
 	try {
-		var local7_CurAnim_1584 = 0, local3_Dir_1585 = 0;
+		var local7_CurAnim_1586 = 0, local3_Dir_1587 = 0;
 		__debugInfo = "210:\Player.gbas";
 		if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
 			__debugInfo = "205:\Player.gbas";
-			local7_CurAnim_1584 = 0;
+			local7_CurAnim_1586 = 0;
 			__debugInfo = "205:\Player.gbas";
 		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
 			__debugInfo = "207:\Player.gbas";
-			local7_CurAnim_1584 = 1;
+			local7_CurAnim_1586 = 1;
 			__debugInfo = "207:\Player.gbas";
 		} else {
 			__debugInfo = "209:\Player.gbas";
-			local7_CurAnim_1584 = 2;
+			local7_CurAnim_1586 = 2;
 			__debugInfo = "209:\Player.gbas";
 		};
 		__debugInfo = "217:\Player.gbas";
 		if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
 			__debugInfo = "214:\Player.gbas";
-			local3_Dir_1585 = 1;
+			local3_Dir_1587 = 1;
 			__debugInfo = "214:\Player.gbas";
 		} else {
 			__debugInfo = "216:\Player.gbas";
-			local3_Dir_1585 = 0;
+			local3_Dir_1587 = 0;
 			__debugInfo = "216:\Player.gbas";
 		};
 		__debugInfo = "220:\Player.gbas";
-		func9_TurnImage(global11_PlayerImage, local7_CurAnim_1584, local3_Dir_1585, ((param4_self.attr1_X) + (1)), param4_self.attr1_Y, 6);
+		func9_TurnImage(global11_PlayerImage, local7_CurAnim_1586, local3_Dir_1587, ((param4_self.attr1_X) + (1)), param4_self.attr1_Y, 6);
 		__debugInfo = "221:\Player.gbas";
 		return 0;
 		__debugInfo = "210:\Player.gbas";
@@ -6978,7 +7058,7 @@ window['method11_type5_TShit_4_Init'] = function(param1_X, param1_Y, param4_self
 window['method11_type5_TSpit_6_Update'] = function(param4_self) {
 	stackPush("method: Update", __debugInfo);
 	try {
-		var local4_OldX_1606 = 0.0, local4_OldY_1607 = 0.0;
+		var local4_OldX_1608 = 0.0, local4_OldY_1609 = 0.0;
 		__debugInfo = "16:\Spit.gbas";
 		param4_self.attr2_VX = ((param4_self.attr2_VX) * (0.99));
 		__debugInfo = "17:\Spit.gbas";
@@ -6992,9 +7072,9 @@ window['method11_type5_TSpit_6_Update'] = function(param4_self) {
 			__debugInfo = "21:\Spit.gbas";
 		};
 		__debugInfo = "25:\Spit.gbas";
-		local4_OldX_1606 = param4_self.attr1_X;
+		local4_OldX_1608 = param4_self.attr1_X;
 		__debugInfo = "26:\Spit.gbas";
-		local4_OldY_1607 = param4_self.attr1_Y;
+		local4_OldY_1609 = param4_self.attr1_Y;
 		__debugInfo = "28:\Spit.gbas";
 		param4_self.attr1_X+=param4_self.attr2_VX;
 		__debugInfo = "32:\Spit.gbas";
@@ -7002,7 +7082,7 @@ window['method11_type5_TSpit_6_Update'] = function(param4_self) {
 			__debugInfo = "30:\Spit.gbas";
 			param4_self.attr2_VX = -(param4_self.attr2_VX);
 			__debugInfo = "31:\Spit.gbas";
-			param4_self.attr1_X = local4_OldX_1606;
+			param4_self.attr1_X = local4_OldX_1608;
 			__debugInfo = "30:\Spit.gbas";
 		};
 		__debugInfo = "33:\Spit.gbas";
@@ -7012,7 +7092,7 @@ window['method11_type5_TSpit_6_Update'] = function(param4_self) {
 			__debugInfo = "35:\Spit.gbas";
 			param4_self.attr2_VY = -(param4_self.attr2_VY);
 			__debugInfo = "36:\Spit.gbas";
-			param4_self.attr1_Y = local4_OldY_1607;
+			param4_self.attr1_Y = local4_OldY_1609;
 			__debugInfo = "35:\Spit.gbas";
 		};
 		__debugInfo = "38:\Spit.gbas";

@@ -78,18 +78,18 @@ GbapPath$ = "./"
 
 ?IFNDEF HTML5
 	InitCompiler()
-	
+
 	?IFDEF TEST_BEFORE
 		PushTimer()
 		RunTests()
 		PopTimer("Tests")
 	?ENDIF
-	
+
 	LOCAL ProjPath$	 = ""
 	LOCAL ProjName$	 = ""
 	LOCAL Target$	 = ""
 	LOCAL Input$	 = ""
-	
+
 	//?IFNDEF GLB_DEBUG
 	LOCAL c$ = GETCOMMANDLINE$()
 	IF INSTR(c$, "-N") <> -1
@@ -99,7 +99,7 @@ GbapPath$ = "./"
 	ELSE
 		ArgumentError("Missing option '-N'")
 	ENDIF
-	
+
 	IF INSTR(c$, "-P") <> -1
 		LOCAL StartPos% = INSTR(c$, "-P")+3
 		LOCAL EndPos% = INSTR(c$, "\"", StartPos)
@@ -107,7 +107,7 @@ GbapPath$ = "./"
 	ELSE
 		ArgumentError("Missing option '-P'")
 	ENDIF
-	
+
 	IF INSTR(c$, "-G") <> -1
 		LOCAL StartPos% = INSTR(c$, "-G")+2
 		LOCAL EndPos% = INSTR(c$, "\"", StartPos)
@@ -116,36 +116,36 @@ GbapPath$ = "./"
 		ArgumentError("Missing option -G")
 	ENDIF
 	//?ENDIF
-	
+
 	//STDOUT "Path "+ProjPath$+"\n"
 	//STDOUT "Name:"+ProjName$+"\n"
 	//STDOUT "Target:"+Target$+"\n"
-	
-	
-	
+
+
+
 	PushTimer()
 	Input$ = ReadGBAP$(ProjPath$, ProjName$)
 	PopTimer("Read GBAP")
-	
+
 	?IFDEF DEBUG
 		STDOUT "Compile:\n"+Input$+"\n"
 	?ENDIF
-	
-	
+
+
 	LOCAL Time% = GETTIMERALL()
-	
+
 	LOCAL output$ = Compile$(Input$, Target$)
-	
-	
+
+
 	IF output$ = ""
 		STDOUT "\n\nCompiling failed :(\n"
-	
+
 		KEYWAIT
-	
+
 	ELSE
 		STDOUT "\n\nFunctions: "+LEN(Compiler.Funcs[])+" Variables: "+LEN(Compiler.Varis[])+" AST Nodes: "+LastExprID+" Types: "+LEN(Compiler.Types[])+"\n"
 		STDOUT "Successful compile! Duration: "+(GETTIMERALL()-Time)/1000+" S, time per token: "+(GETTIMERALL()-Time)/Compiler.LastMaxTokens+"MS, tokens: "+Compiler.LastMaxTokens+" \n"
-	
+
 		?IFNDEF HTML5
 			?IFDEF MEASURETIME
 				KEYWAIT
@@ -154,33 +154,33 @@ GbapPath$ = "./"
 	ENDIF
 ?ELSE
 	CONSOLE = FALSE
-	
+
 	EXPORT Compile$
 	EXPORT InitCompiler
 	EXPORT RegisterDefine
-	
+
 	?IFDEF FOR_IDE
 		EXPORT GetIdentifierByPart$, GetIdentifierByPart
-		
-		
+
+
 		FUNCTION GetIdentifierByPart$: Text$
 			LOCAL Result$ = ""
-		
+
 			LOCAL tmpCompiler AS TCompiler
 			tmpCompiler = Compiler
-		
+
 			Compiler.Code$ = Text$+"\n"
-		
+
 			Lexer()
-		
+
 			Analyser()
-		
+
 			Compiler.GetIdent = TRUE
-		
+
 			Parser()
-		
+
 			Compiler = tmpCompiler
-		
+
 			RETURN Result$
 		ENDFUNCTION
 	?ENDIF

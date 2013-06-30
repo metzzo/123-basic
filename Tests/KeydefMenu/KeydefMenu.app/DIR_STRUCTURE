@@ -1,10 +1,15 @@
+folder:/Media
+static:/Media/smalfont.png
+static:/DIR_STRUCTURE
 static:/GLBFile.html
 static:/GLBScript.js
 static:/GLBScript_unopt.js
 static:/KeydefMenu.exe
 editable:/keys.ini
+static:/keys.ini.GLBSCRIPT_DATA
 static:/smalfont.bmp
-var:compileTime=2013-06-26 13:09:41
+static:/smalfont.png
+var:compileTime=2013-06-26 18:47:29
 var:userDefVersion=000.001
 var:hostId=290816d5
 var:viewMode=2d

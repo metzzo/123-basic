@@ -170,7 +170,7 @@ FUNCTION DoTarget$: Name$
 				?IFNDEF GLBSCRIPT
 					IF NOT NoRun
 						LOCAL Run$ = GetAttribute$("command", Ac.Att[])
-		
+
 						LOCAL dir$ = GETCURRENTDIR$()
 						LOCAL projDir$
 						SETCURRENTDIR(GbapPath$)
@@ -179,13 +179,13 @@ FUNCTION DoTarget$: Name$
 						ENDIF
 						projDir$ = GETCURRENTDIR$()
 						SETCURRENTDIR(dir$)
-		
+
 						Run$ = REPLACE$(Run$, "$COMPILERDIR", dir$)
 						Run$ = REPLACE$(Run$, "$PROJECTDIR", projDir$)
 						Run$ = REPLACE$(Run$, "'", "\"")
-		
+
 						STDOUT "RUN '"+Run$+"'\n"
-		
+
 						LOCAL a#
 						IF NOT SHELLCMD(Run$, TRUE, TRUE, a)
 							Error("Command '"+Run$+"' failed...", CODELINE(), CODEFILE$())
