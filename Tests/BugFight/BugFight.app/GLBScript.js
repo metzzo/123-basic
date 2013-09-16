@@ -2596,8 +2596,8 @@ function init2D(canvasName) {
 	
 	SYSTEMPOINTER(0);
 	
-	if (DOESFILEEXIST("/Media/smalfont.png")) {
-		LOADFONT("/Media/smalfont.png", 0);
+	if (DOESFILEEXIST("Media/smalfont.png")) {
+		LOADFONT("Media/smalfont.png", 0);
 		SETFONT(0);
 		waitForFont = true;
 	}
@@ -2867,6 +2867,7 @@ function PLAYMOVIE(movie) {
 
 
 function loadAsset(path) {
+	var oldpath = path;
 	path = path.toLowerCase();
 	
 	if (!!window.assets) {
@@ -2876,7 +2877,7 @@ function loadAsset(path) {
 			}
 		}
 	}
-	return path;
+	return oldpath;
 }
 
 
@@ -3994,7 +3995,7 @@ function drawPolygon(plzTint, tris, polyStack, spr) {
 		
 		if (plzTint) {
 			//schauen ob alle gleiche Farbe haben
-			if (polyStack[0].col == polyStack[1].col && polyStack[1].col == polyStack[2].col && (polyStacj.length > 2 && polyStack[2].col == polyStack[3].col)) {
+			if (polyStack[0].col == polyStack[1].col && polyStack[1].col == polyStack[2].col && (polyStack.length > 2 && polyStack[2].col == polyStack[3].col)) {
 				if (!spr.tint) {
 				//Hat noch nicht die Tinting Farbchannel
 					try {
@@ -4092,9 +4093,9 @@ function ROTOSPRITE(num, x, y, phi) {
 		DRAWSPRITE(num, x, y);
 	} else {
 		context.save();
-		context.translate(x, y);
-		context.rotate(phi * Math.PI / 180); //convert into RAD
 		var spr = getSprite(num);
+		context.translate(x+spr.img.width/2, y+spr.img.height/2);
+		context.rotate(phi * Math.PI / 180); //convert into RAD
 		DRAWSPRITE(num, -spr.img.width/2, -spr.img.height/2);
 		context.restore();
 	}
@@ -4127,7 +4128,8 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 
 function ROTOZOOMSPRITE(num, x, y,phi, scale) {
 	context.save();
-	context.translate(x, y)
+	var spr = getSprite(num);
+	context.translate(x+spr.img.width*scale, y+spr.img.height*scale)
 	context.scale(scale, scale);
 	ROTOSPRITE(num, 0, 0, phi);
 	context.restore();
@@ -4156,7 +4158,6 @@ function ROTOANIM(num, frame, x, y, phi) {
 		context.save();
 		context.translate(x, y);
 		context.rotate(phi * Math.PI / 180); //convert into RAD
-		var spr = getSprite(num);
 		DRAWSPRITE(num, -spr.img.width/2, -spr.img.height/2);
 		context.restore();
 	}
@@ -4394,6 +4395,22 @@ function generateRGBKs( img ) {
 }
 
 function BOXCOLL(x1,y1,breite1,hoehe1,x2,y2,breite2,hoehe2) {
+	if (breite1 < 0) {
+		breite1 = -breite1;
+		x1 -= breite1;
+	}
+	if (hoehe1 < 0) {
+		hoehe1 = -hoehe1;
+		y1 -= hoehe1;
+	}
+	if (breite2 < 0) {
+		breite2 = -breite2;
+		x2 -= breite2;
+	}
+	if (hoehe2 < 0) {
+		hoehe2 = -hoehe2;
+		y2 -= hoehe2;
+	}
     if (x1<=(x2+breite2) && y1<=y2+hoehe2 && (x1+breite1) >=x2 && (y1+hoehe1)>= y2) return 1; else return 0; 
 }
 //------------------------------------------------------------

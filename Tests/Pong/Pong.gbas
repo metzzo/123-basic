@@ -14,7 +14,7 @@ ENDSUB
 // ------------------------------------------------------------- //
 SUB Init:
 	SETTRANSPARENCY RGB(255, 0, 128)
-	
+
 	GOSUB ResetBall
 
 	// Reset Bats

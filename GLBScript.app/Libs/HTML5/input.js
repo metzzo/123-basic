@@ -13,6 +13,7 @@ var globalSpeedX, globalSpeedY; //für HIBERNATE
 var touches		= [];
 var touchable	= document ? ('createTouch' in document) : false;
 
+var gamepads;
 
 /**
 * @constructor
@@ -87,7 +88,54 @@ function updateTouches(t, state) {
 	}
 }
 
+// GAMEPAD
+function GETNUMJOYSTICKS() {
+	if (!!gamepads) {
+		return gamepads.length;
+	} else return 0;
+}
 
+function GETJOYNAME_Str(n) {
+	return gamepads[n].id;
+}
+
+function GETJOYX(n) {
+	return gamepads[n].axes[0];
+}
+
+function GETJOYY(n) {
+	return gamepads[n].axes[1];
+}
+
+function GETJOYZ(n) {
+	return 0; // umimplemented
+}
+
+function GETJOYRX(n) {
+	return gamepads[n].axes[2];
+}
+
+function GETJOYRY(n) {
+	return gamepads[n].axes[3];
+}
+
+function GETJOYRZ(n) {
+	return 0;
+}
+
+function GETJOYBUTTON(n, m) {
+	return gamepads[n].buttons[m];
+}
+
+function GETDIGIX(n) {
+	return gamepads[n].buttons[15]-gamepads[n].buttons[14];
+}
+
+function GETDIGIY(n) {
+	return gamepads[n].buttons[13]-gamepads[n].buttons[12];
+}
+
+// stuff
 function MOUSEAXIS(info) {
 	if (currentMouse >= 0 && currentMouse < touches.length) {} else {
 		return;

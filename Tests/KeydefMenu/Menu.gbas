@@ -1,0 +1,265 @@
+// --------------------------------- //
+// Project: PuzzleBoy
+// Start: Friday, December 08, 2006
+// IDE Version: 4.023
+
+
+//! [root]
+//! button=... (if you pressed a button, else "")
+//! 1name=Start
+//! 1type=button
+//! 1value=1 // must be integer - this is the return value for MenuShow
+//!
+//! 2name=Options
+//! 2type=dir
+//! 2value=options
+//!
+//! [options]
+//! 1name=key repeat
+//! 1type=toggle: off, on
+//! 1value=0
+//! 2name=Key for Left
+//! 2type=key
+//! 2value=... (use the program to fill this out)
+
+
+
+//! Init Menu - call this once before you show the menu
+FUNCTION MenuInit: file$
+GLOBAL menu_dir$, menu_pos, menu_fade, menu_keymode, menu_back
+GLOBAL menu_nullstate AS KEYDEF_STATE
+	INIOPEN file$
+	INIPUT "root", "button", ""
+	menu_dir$ = "root"
+	menu_fade = 0.0001
+	menu_pos = 0
+	menu_back = FALSE
+	menu_keymode = FALSE // waiting for key input?
+	keydef_getstate(menu_nullstate)
+ENDFUNCTION
+
+
+//! Overwrite this function if you want another
+//! navigation method as cursor keys
+//!  1
+//! 254
+//!  3
+CALLBACK FUNCTION MenuNavigate:
+	IF KEY(200) THEN RETURN 1
+	IF KEY(203) THEN RETURN 2
+	IF KEY(208) THEN RETURN 3
+	IF KEY(205) THEN RETURN 4
+	IF KEY( 28) THEN RETURN 5
+	RETURN 0
+ENDFUNCTION
+
+
+//! This function shows the menu and handles all the user input
+// \return button value if pressed, else sets stuff with INIPUT
+FUNCTION MenuShow:
+LOCAL keys AS KEYDEF_STATE
+LOCAL num, i, k, n, k$, name$, items$[], types$[], vals[], val$[]
+STATIC tmp$[]
+STATIC last_key_down = -1
+// parse current menu
+	num=0
+	WHILE TRUE
+		INC num, 1
+		name$ = INIGET$(menu_dir$, num + "name")
+		IF name$ = "NO_DATA" THEN BREAK
+		REDIM items$[num]
+		REDIM types$[num]
+		REDIM vals[num]
+		items$[num-1] = name$
+		types$[num-1] = LCASE$(INIGET$(menu_dir$, num + "type"))
+		vals[num-1]   = INIGET$(menu_dir$, num + "value")
+	WEND
+
+	IF menu_fade = 0
+		IF menu_keymode=FALSE
+			k = MenuNavigate()
+			IF k<>last_key_down
+				SELECT k
+					CASE 1; DEC menu_pos,1 // up
+					CASE 3; INC menu_pos,1 // down
+					CASE 2                 // back
+						IF menu_dir$<>"root"
+							menu_back = TRUE
+							menu_fade = -0.0001
+						ENDIF
+					CASE 4 TO 5 // Enter
+						SELECT MID$(types$[menu_pos], 0, 3)
+							CASE "dir"
+								menu_fade = -0.0001
+							CASE "but"
+								menu_fade = -0.0001
+							CASE "tog"
+								n = SPLITSTR(types$[menu_pos], tmp$[], " ,:")-1
+								IF n
+									vals[menu_pos] = MOD(vals[menu_pos]+n+1, n)
+									INIPUT menu_dir$, (menu_pos+1)+"value", vals[menu_pos]
+								ENDIF
+							CASE "key"
+								menu_keymode=TRUE
+						ENDSELECT
+					DEFAULT
+						last_key_down=-1
+				ENDSELECT
+			ENDIF
+			IF k>0 THEN last_key_down=k
+
+			// wait for key release
+			// WHILE k AND MenuNavigate()=k; WEND
+		ELSE // in keymode
+			// ESC exits this mode
+			IF KEY(1)
+				menu_keymode=FALSE
+			ELSE
+				keydef_getstate(keys)
+				k$=keydef_get_name$(keys, menu_nullstate)
+				IF k$<>""
+					INIPUT menu_dir$, (menu_pos+1)+"value", k$
+					menu_keymode = -1
+				ELSE
+					IF menu_keymode<0 THEN menu_keymode=FALSE
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+
+	// limit menu selection
+	IF num>1
+		menu_pos = MOD(menu_pos+num-1, num-1)
+	ELSE
+		menu_pos = 0
+	ENDIF
+
+	IF menu_fade > 0
+		INC menu_fade, MIN(20.0, GETTIMER())/500.0
+		IF menu_fade >1 THEN menu_fade=0
+	ENDIF
+
+	// fadout / handle actions
+	IF menu_fade < 0
+		DEC menu_fade, MIN(20.0, GETTIMER())/500.0
+		IF menu_fade<=-1
+			menu_fade=0
+			// Back button pressed
+			IF menu_back
+				menu_back = FALSE
+				menu_dir$="root"
+				menu_fade=0.0001
+			ELSE
+				SELECT types$[menu_pos]
+					CASE "dir"
+						menu_dir$=INIGET$( menu_dir$, (menu_pos+1)+"value")
+						IF menu_dir$="NO_DATA" THEN menu_dir$="root"
+						menu_fade = 0.0001
+						menu_pos = 0
+					CASE "button"
+						RETURN vals[menu_pos]
+				ENDSELECT
+			ENDIF
+		ENDIF
+	ENDIF
+
+	// prepare drawing
+	DIM val$[num]
+	FOR i=1 TO num-1
+		IF MID$(LCASE$(types$[i-1]), 0,6) = "toggle"
+			k = SPLITSTR(types$[i-1], tmp$[], " ,:")-1
+			IF k THEN val$[i-1] = tmp$[vals[i-1] +1]
+		ENDIF
+		IF LCASE$(types$[i-1]) = "key"
+			val$[i-1] = keydef_get_nice_name$(INIGET$( menu_dir$, i+"value"))
+		ENDIF
+	NEXT
+
+	MenuDraw(menu_fade, menu_pos, items$[], val$[])
+ENDFUNCTION
+
+
+
+//! this is called to make you draw the menu
+//! You can decide the visual style by overriding this
+//! function with your own (non-callback) function
+// \param fade - fader value
+// \sel - index of selected item
+// \param items$[] - texts for menu lines
+// \param values$[] - texts for values of each line
+//! the fade parameter indicates:
+//! 0.1->1     - fadein
+//! 0          - normal menu
+//! -0.1 -> -1 - fade out
+//! items$[] is an array of menu texts (one for each line)
+//! values$[] is the values for the toggles (on/off e.g.). "" for a button/menu
+CALLBACK FUNCTION MenuDraw: fade, sel, items$[], values$[]
+LOCAL sx, sy, l, fx, fy, num, x, y, w, h, i, ty, t$
+	GETSCREENSIZE sx,sy
+	GETFONTSIZE fx,fy
+
+	num = BOUNDS(items$[],0)
+	IF num=0 THEN RETURN
+
+	w = INTEGER(sx*.75)
+	h = (4 + num)*fy
+	IF fade>0 THEN fade=1-fade
+	x = fade * sx + (sx-w)/2
+	y = (sy-h)/2
+
+	ALPHAMODE -.5
+	DRAWRECT x,y,w,h, RGB(0,0,0)
+	ALPHAMODE 0
+
+	// waiting for key-press
+	IF menu_keymode
+		PRINT "REDEFINE: " + items$[menu_pos], x, y+fy
+	ELSE
+		FOR i=0 TO num-1
+			ty = y + fy*2 + i*fy
+			IF i=sel
+				ALPHAMODE -.7
+				DRAWRECT x, ty, w, fy, RGB(255,255,255)
+				ALPHAMODE 0
+			ENDIF
+			PRINT items$[i], x+fx, ty
+			l = LEN(values$[i])
+			IF l
+				PRINT "["+values$[i]+"]", x+w-(l+3)*fx, ty
+			ENDIF
+		NEXT
+
+		// Vertical border
+		FOR i=-1 TO num
+			ty = y + fy*2 + i*fy
+			PRINT "|", x, ty
+			PRINT "|", x+w-fx, ty
+		NEXT
+
+		// Horizontal border
+		num = INTEGER(w/fx)-1
+		FOR i=0 TO num
+			t$="-"
+			// corner
+			IF i=0 OR i=num THEN t$="#"
+			PRINT t$, x+i*fx, y
+			PRINT t$, x+i*fx, y+h-fy
+		NEXT
+	ENDIF
+ENDFUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

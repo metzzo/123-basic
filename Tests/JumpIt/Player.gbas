@@ -123,7 +123,7 @@ TYPE TPlayer
 				//druckwelle
 				LOCAL X1, Y1, X2,Y2
 				//DEBUG LastPosX+" "+LastPosY+"\n"
-				Y1 = LastPosY*Tilesize + 16; Y1 = self.Y + self.Height/2
+				Y1 = LastPosY*Tilesize + 16; Y2 = self.Y + self.Height/2
 				X1 = LastPosX*Tilesize + 16; X2 = self.X + self.Width/2
 				LOCAL Angle = -MOD(ATAN((Y1 - Y2), (X1 - X2)) + 180, 360)
 				LOCAL Dist = SQR((X1 - X2)*(X1 - X2) + (Y1 - Y2)*(Y1 - Y2))

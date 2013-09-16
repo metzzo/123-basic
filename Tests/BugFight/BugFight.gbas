@@ -58,7 +58,7 @@ TYPE TGameMap EXTENDS TGameObject
 					ENDIF
 				NEXT
 			NEXT
-			
+
 			LOCAL NewSpr% = GENSPRITE()
 			CREATESCREEN ScreenID, NewSpr, Width, Height
 			USESCREEN ScreenID
@@ -197,7 +197,7 @@ SUB GLB_ON_LOOP:
 	LOCAL w%, h%
 	GETSCREENSIZE w, h
 	STRETCHSPRITE Spr, 0, 0, w, h
-	
+
 	LOCAL x, y, ml, mr
 	MOUSESTATE x,y,ml,mr
 	FOREACH Obj IN Objects
@@ -212,7 +212,7 @@ SUB GLB_ON_LOOP:
 	IF ml
 		map.RemoveRect(x - 15, y - 15, 30, 30)
 	ENDIF
-	
+
 	PRINT IIF(map.CheckCollision(x,y), "Coll", "No Coll"), x, y, TRUE
 
 	SHOWSCREEN

@@ -1,6 +1,7 @@
 folder:/Media
 editable:/Media/readme.txt
 static:/Media/readme.txt.GLBSCRIPT_DATA
+static:/Media/smalfont.png
 static:/DIR_STRUCTURE
 static:/DIR_STRUCTURE.GLBSCRIPT_DATA
 static:/frog.wav
@@ -23,7 +24,7 @@ static:/wall.ddd
 static:/wall2.bmp
 static:/water.bmp
 static:/water.ddd
-var:compileTime=2012-06-12 21:48:14
+var:compileTime=2013-06-26 13:34:18
 var:userDefVersion=000.001
 var:hostId=290816d5
 var:viewMode=2d

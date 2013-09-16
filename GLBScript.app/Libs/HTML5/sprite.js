@@ -448,7 +448,12 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		var dx = 0, dy = 0
+		if (sx < 0) dx = spr.img.width*sx;
+		if (sy < 0) dy = spr.img.height*sy;
+		
+		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
 		context.restore();
@@ -463,7 +468,6 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
-		//context.drawImage(spr.img, CAST2INT(x), CAST2INT(y), CAST2INT(width), CAST2INT(height));
 		context.restore();
 	}
 }

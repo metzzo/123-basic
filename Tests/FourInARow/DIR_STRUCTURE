@@ -1,0 +1,20 @@
+folder:/FourInARow.app
+static:/FourInARow.app/DIR_STRUCTURE
+static:/FourInARow.app/DIR_STRUCTURE.GLBSCRIPT_DATA
+static:/FourInARow.app/GLBFile.html
+static:/FourInARow.app/GLBScript.js
+static:/FourInARow.app/GLBScript_unopt.js
+static:/DIR_STRUCTURE
+editable:/FourInARow.gbap
+static:/FourInARow.gbap.GLBSCRIPT_DATA
+editable:/FourInARow.gbas
+static:/FourInARow.gbas.GLBSCRIPT_DATA
+static:/GLBFile.html
+static:/GLBScript.js
+static:/smalfont.png
+var:compileTime=2013-06-26 12:46:09
+var:userDefVersion=000.001
+var:hostId=290816d5
+var:viewMode=2d
+var:GFX_WIDTH=320
+var:GFX_HEIGHT=240

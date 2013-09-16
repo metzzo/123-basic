@@ -1,0 +1,49 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Wednesday, June 26, 2013
+// IDE Version: 10.283
+
+
+
+?IFDEF TEST_BEFORE
+
+FUNCTION RunTests:
+	IF DOESDIREXIST("../Tests")
+		LOCAL Files$[]
+		LOCAL d$ = GETCURRENTDIR$()
+		SETCURRENTDIR("../Tests")
+
+		GETFILELIST("", Files$[])
+		LOCAL rd$ = GETCURRENTDIR$()
+		SETCURRENTDIR(d$)
+		NoRun = TRUE
+		STDOUT "Start Testing\n"
+		FOREACH F$ IN Files$[]
+			IF F$ <> "." AND F$ <> ".."
+				IF DOESDIREXIST(rd$+"/"+F$)
+					STDOUT "Test project "+F$+"\n"
+					LOCAL Input$ = ReadGBAP$(rd$+"/"+F$, "/"+F$+".gbap")
+					LOCAL Output$ = Compile$(Input$, "HTML5")
+					IF Output$ = ""
+						STDOUT "Test failed...\n"
+						KEYWAIT
+					ELSE
+						STDOUT "Test successfull\n"
+					ENDIF
+				ELSE
+					STDOUT "Test file "+F$+"\n"
+
+				ENDIF
+			ENDIF
+		NEXT
+		NoRun = FALSE
+	ELSE
+		STDOUT "Cannot find Tests...\n"
+	ENDIF
+ENDFUNCTION
+
+
+?ENDIF
+
+
+

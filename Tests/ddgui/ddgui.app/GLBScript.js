@@ -180,7 +180,7 @@ function SHELLEND(cmd) {
 
 function CALLBYNAME(name) {
 	var ret = 1;
-	return eval("if (window['"+name+"']) window."+name+"(); else ret = 0;");
+	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
 }
 
 //------------------------------------------------------------
@@ -250,7 +250,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return true;
+		return cur != to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
@@ -2269,7 +2269,7 @@ var usedSoundformat = 'ogg';	//Das benutzte Soundformat
 var hibernate	= false;	//SOlls warten
 var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
-
+var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
 
 var waitForFont = false;
 
@@ -2571,6 +2571,19 @@ function init2D(canvasName) {
 		
 		finishEvent(ev);
 	}
+	// press listener (for INKEY$)
+	document.onkeypress = canvas.onkeypress = function(ev) {
+		if (!ev) ev = window.event();
+		if (ev.keyCode == 8) 
+			lastKey = "\b";
+		else if (ev.keyCode == 13)
+			lastKey = "\n";
+		else
+			lastKey = CHR_Str(ev.which);
+	}
+	
+	// gamepad listener
+	gamepads = navigator.getGamepads || navigator.webkitGetGamepads || navigator.webkitGamepads || navigator.gamepads || navigator.mozGetGamepads || navigator.mozGamepads;
 	
 	USESCREEN(-1);
 	CLEARSCREEN(RGB(0,0,0)); //black background color
@@ -2586,9 +2599,20 @@ function init2D(canvasName) {
 	
 	SYSTEMPOINTER(0);
 	
-	LOADFONT("/Media/smalfont.png", 0);
-	SETFONT(0);
-	waitForFont = true;
+	var possibleDirs = ["Media/smalfont.png", "smalfont.png", "smallfont.png", "Media/smallfont.png", "Media/smalfont.bmp", "smalfont.bmp", "smallfont.bmp", "Media/smallfont.bmp"];
+	var f = null;
+	for (var i = 0; i < possibleDirs.length; i++) {
+		if (DOESFILEEXIST(possibleDirs[i])) {
+			f = possibleDirs[i];
+			break;
+		}
+	}
+	
+	if (f != null) {
+		LOADFONT(f, 0);
+		SETFONT(0);
+		waitForFont = true;
+	}
 	
     update2D(); //call the render function
 }
@@ -2679,7 +2703,7 @@ function SETTRANSPARENCY(rgb) {
 }
 
 function SMOOTHSHADING(mode) {
-	//throwError("TODO: SMOOTHSHADING");
+	// Do nothing...
 }
 
 function SETSCREEN(width, height) {
@@ -2744,18 +2768,17 @@ function GETDESKTOPSIZE(width, height) {
 }
 
 function ISFULLSCREEN() {
-	throwError("TODO: isfullscreen");
+	return 0;
 }
 
 function GETPIXEL(x, y) {
-	var index	= (x * 4) + (y * canvas.width * 4);
-	throwError("TODO: getpixel");
-	return RGB(index, index + 1, index + 2);
+	var data = context.getImageData(x, y, 1, 1);
+	return RGB(data[0], data[1], data[2]);
 }
 
 
 function removeTransparency(image, col) {
-	if (!col) {
+	if (typeof col == 'undefined') {
 		col = transCol
 	}
 	//Weird hack...
@@ -2822,10 +2845,15 @@ function DRAWLINE(x1, y1, x2, y2, col) {
 	context.restore();
 }
 function DRAWRECT(x,y,w,h,col) {
-	context.save();
-	context.fillStyle	= formatColor(col);
-	context.fillRect(CAST2INT(x), CAST2INT(y), CAST2INT(w), CAST2INT(h));
-	context.restore();
+	if (col == transCol) {
+		// delete this from the canvas
+		context.clearRect(x,y,w,h);
+	} else {
+		context.save();
+		context.fillStyle	= formatColor(col);
+		context.fillRect(CAST2INT(x), CAST2INT(y), CAST2INT(w), CAST2INT(h));
+		context.restore();
+	}
 }
 
 function formatColor(col) {
@@ -2850,7 +2878,19 @@ function PLAYMOVIE(movie) {
 
 
 
-
+function loadAsset(path) {
+	var oldpath = path;
+	path = path.toLowerCase();
+	
+	if (!!window.assets) {
+		for (var i = 0; i < window.assets.length; i++) {
+			if (window.assets[i].name.toLowerCase() == path) {
+				return window.assets[i].path;
+			}
+		}
+	}
+	return oldpath;
+}
 
 
 
@@ -2862,6 +2902,9 @@ var transFontCol = null;
 var fonts = [];
 var currentFont = -1;
 
+/**
+ * @constructor
+ */
 function Font(path, num, img) {
 	this.loaded = false;
 	this.path = path;
@@ -3014,7 +3057,7 @@ function LOADFONT(path, num) {
 			}
 		}
 	}
-	image.src = fileSystem.getCurrentDir() + path;
+	image.src = loadAsset(fileSystem.getCurrentDir() + path);
 	
 	register(font);
 	
@@ -3200,17 +3243,21 @@ function SoundChannel(sound) {
 
 function LOADSOUND(file, num, buffer) {
 	if (noSound) return;
+	var ass = loadAsset(file);
 	
-	var fileName = REPLACE_Str(MID_Str(file, MAX(0, file.lastIndexOf('/')), -1),"/","");
-	file = REPLACE_Str(file, fileName, ".html5_convertedsounds_"+fileName)+"/";
-	
-	if (usedSoundFormat == 'ogg') {
-		file +="sound.ogg";
-	} else { //mp3
-		file +="sound.mp3";
+	if (ass == file) {
+		var fileName = REPLACE_Str(MID_Str(file, MAX(0, file.lastIndexOf('/')), -1),"/","");
+		file = REPLACE_Str(file, fileName, ".html5_convertedsounds_"+fileName)+"/";
+		
+		if (usedSoundFormat == 'ogg') {
+			file +="sound.ogg";
+		} else { //mp3
+			file +="sound.mp3";
+		}
+		file = "./"+file;
+	} else {
+		file = ass;
 	}
-	file = "./"+file;
-	
 	
 	var sound = new Sound(file, num, buffer);
 	
@@ -3293,6 +3340,7 @@ var globalSpeedX, globalSpeedY; //für HIBERNATE
 var touches		= [];
 var touchable	= document ? ('createTouch' in document) : false;
 
+var gamepads;
 
 /**
 * @constructor
@@ -3367,7 +3415,54 @@ function updateTouches(t, state) {
 	}
 }
 
+// GAMEPAD
+function GETNUMJOYSTICKS() {
+	if (!!gamepads) {
+		return gamepads.length;
+	} else return 0;
+}
 
+function GETJOYNAME_Str(n) {
+	return gamepads[n].id;
+}
+
+function GETJOYX(n) {
+	return gamepads[n].axes[0];
+}
+
+function GETJOYY(n) {
+	return gamepads[n].axes[1];
+}
+
+function GETJOYZ(n) {
+	return 0; // umimplemented
+}
+
+function GETJOYRX(n) {
+	return gamepads[n].axes[2];
+}
+
+function GETJOYRY(n) {
+	return gamepads[n].axes[3];
+}
+
+function GETJOYRZ(n) {
+	return 0;
+}
+
+function GETJOYBUTTON(n, m) {
+	return gamepads[n].buttons[m];
+}
+
+function GETDIGIX(n) {
+	return gamepads[n].buttons[15]-gamepads[n].buttons[14];
+}
+
+function GETDIGIY(n) {
+	return gamepads[n].buttons[13]-gamepads[n].buttons[12];
+}
+
+// stuff
 function MOUSEAXIS(info) {
 	if (currentMouse >= 0 && currentMouse < touches.length) {} else {
 		return;
@@ -3609,7 +3704,9 @@ function glb2jsKeyCode(key) {
 }
 
 function INKEY_Str() {
-	return "";
+	var k = lastKey;
+	lastKey = "";
+	return k;
 }
 
 function ANYKEY() {
@@ -3679,7 +3776,7 @@ function LOADSPRITE(path, num) {
 			
 			//transparency rauslöschen
 			try {
-				if (!!transCol) {
+				if (typeof transCol != 'undefined' && !!transCol) {
 					spr.img = removeTransparency(spr.oimg);
 				}
 			}  catch(ex) {
@@ -3690,7 +3787,7 @@ function LOADSPRITE(path, num) {
 			
 		}
 	}
-	image.src = fileSystem.getCurrentDir() + path;
+	image.src = loadAsset(fileSystem.getCurrentDir() + path);
 	
 	register(spr);
 	
@@ -3741,7 +3838,41 @@ function LOADANIM(path,num, width, height) {
 
 
 function MEM2SPRITE(pixels, num, width, height) {
-	throwError("TODO: mem2sprite");
+	var buf = document.createElement('canvas');
+	buf.width = width;
+	buf.height = height;
+	var spr = new Sprite(buf, num);
+	register(spr);
+	spr.loaded = true;
+	var scrn = new Screen(buf, -42);
+	try {
+		var isref = pixels.deval instanceof Array;
+		var data = scrn.context.getImageData(0,0,width, height);
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
+				var pos = x + y*width;
+				var p = pixels.arrAccess(pos).values[tmpPositionCache];
+				if (isref) p = p[0]; // Dereferenzieren, falls notwendig
+				
+				var a = (p & 0xFF000000)/0x1000000;
+				var b = (p & 0xFF0000)/0x10000;
+				var g = (p & 0xFF00)/0x100;
+				var r =  p & 0xFF;
+				if (a == -1) a = 255;
+				
+				pos *= 4;
+				data[pos]   = r
+				data[pos+1] = g
+				data[pos+2] = b
+				data[pos+3] = a
+			}
+		}
+		scrn.context.putImageData(data, 0, 0);
+	} catch(ex) {
+		//kann keine imagedata holen
+		return 0;
+	}
+	return 1;
 }
 
 function SPRITE2MEM(pixels, num) {
@@ -3924,7 +4055,7 @@ function drawPolygon(plzTint, tris, polyStack, spr) {
 		
 		if (plzTint) {
 			//schauen ob alle gleiche Farbe haben
-			if (polyStack[0].col == polyStack[1].col && polyStack[1].col == polyStack[2].col && (polyStacj.length > 2 && polyStack[2].col == polyStack[3].col)) {
+			if (polyStack[0].col == polyStack[1].col && polyStack[1].col == polyStack[2].col && (polyStack.length > 2 && polyStack[2].col == polyStack[3].col)) {
 				if (!spr.tint) {
 				//Hat noch nicht die Tinting Farbchannel
 					try {
@@ -4022,9 +4153,9 @@ function ROTOSPRITE(num, x, y, phi) {
 		DRAWSPRITE(num, x, y);
 	} else {
 		context.save();
-		context.translate(x, y);
-		context.rotate(phi * Math.PI / 180); //convert into RAD
 		var spr = getSprite(num);
+		context.translate(x+spr.img.width/2, y+spr.img.height/2);
+		context.rotate(phi * Math.PI / 180); //convert into RAD
 		DRAWSPRITE(num, -spr.img.width/2, -spr.img.height/2);
 		context.restore();
 	}
@@ -4057,7 +4188,8 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 
 function ROTOZOOMSPRITE(num, x, y,phi, scale) {
 	context.save();
-	context.translate(x, y)
+	var spr = getSprite(num);
+	context.translate(x+spr.img.width*scale, y+spr.img.height*scale)
 	context.scale(scale, scale);
 	ROTOSPRITE(num, 0, 0, phi);
 	context.restore();
@@ -4086,7 +4218,6 @@ function ROTOANIM(num, frame, x, y, phi) {
 		context.save();
 		context.translate(x, y);
 		context.rotate(phi * Math.PI / 180); //convert into RAD
-		var spr = getSprite(num);
 		DRAWSPRITE(num, -spr.img.width/2, -spr.img.height/2);
 		context.restore();
 	}
@@ -4324,6 +4455,22 @@ function generateRGBKs( img ) {
 }
 
 function BOXCOLL(x1,y1,breite1,hoehe1,x2,y2,breite2,hoehe2) {
+	if (breite1 < 0) {
+		breite1 = -breite1;
+		x1 -= breite1;
+	}
+	if (hoehe1 < 0) {
+		hoehe1 = -hoehe1;
+		y1 -= hoehe1;
+	}
+	if (breite2 < 0) {
+		breite2 = -breite2;
+		x2 -= breite2;
+	}
+	if (hoehe2 < 0) {
+		hoehe2 = -hoehe2;
+		y2 -= hoehe2;
+	}
     if (x1<=(x2+breite2) && y1<=y2+hoehe2 && (x1+breite1) >=x2 && (y1+hoehe1)>= y2) return 1; else return 0; 
 }
 //------------------------------------------------------------
@@ -4355,8 +4502,9 @@ function CREATESCREEN(scrid, sprid, width, height) {
     buffer.height = height;
 	
 	register(new Screen(buffer, scrid, sprid));
-	register(new Sprite(buffer, sprid));
-	
+	var spr = new Sprite(buffer, sprid);
+	register(spr);
+	spr.loaded = true; //es ist bereits geladen...
 }
 
 function USESCREEN(id) {
@@ -4411,7 +4559,7 @@ function LOADBMP(path) {
 		//fehler
 		throwError("BMP '"+path+"' not found!");
 	}
-	image.src = fileSystem.getCurrentDir() + path;
+	image.src = loadAsset(fileSystem.getCurrentDir() + path);
 	
 }
 var static10_DDgui_show_intern_mouse_down = 0, static10_DDgui_show_intern_movemousex = 0, static10_DDgui_show_intern_movemousey = 0, static12_DDgui_show_intern_ToolTipDelay = 0, static9_DDgui_show_intern_ToolTipMx = 0, static9_DDgui_show_intern_ToolTipMy = 0;
@@ -10595,7 +10743,7 @@ window['func15_DDgui_input_Str'] = function(param8_text_Str, param13_bSpecialCha
 						
 					case 11932:
 						__debugInfo = "3735:\ddgui.gbas";
-						if (!((((((param9_bIsNumber) && (func9_DDgui_get("bShift", "CLICKED"))) ? 1 : 0)) ? 0 : 1))) { __pc = 11890; break; }
+						if (!((((((param9_bIsNumber) ? 0 : 1)) && (func9_DDgui_get("bShift", "CLICKED"))) ? 1 : 0))) { __pc = 11890; break; }
 					
 					var local4_isel_2147 = 0;
 					case 11897:

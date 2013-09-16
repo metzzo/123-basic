@@ -180,7 +180,7 @@ function SHELLEND(cmd) {
 
 function CALLBYNAME(name) {
 	var ret = 1;
-	return eval("if (window['"+name+"']) window."+name+"(); else ret = 0;");
+	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
 }
 
 //------------------------------------------------------------
@@ -250,7 +250,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return true;
+		return cur != to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
