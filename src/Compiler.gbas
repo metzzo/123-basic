@@ -152,6 +152,10 @@ TYPE IdentifierVari
 	ref% = FALSE //Ist es by ref?
 	OwnerVari% = -1 //wenns eine ausweichvariable ist, dann muss die gekennzeichnet werden
 
+	?IFDEF VMCOMPILER
+	Value AS TStackEntry // The value of this variable in the VM
+	?ENDIF
+
 	//VARI_IS_STATIC
 	func% // Zu welcher funktion gehört die Variable
 
@@ -616,7 +620,7 @@ FUNCTION LoadFile$: Path$
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION Error: Msg$, Line%,File$
+FUNCTION Error: Msg$, Line%=42,File$="Unknown"
 	LOCAL tok AS Token
 	tok = GetCurrentToken()
 

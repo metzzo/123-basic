@@ -1,0 +1,409 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Sunday, June 30, 2013
+// IDE Version: 10.283
+
+
+?IFDEF VMCOMPILER
+
+
+?DEFINE DEBUGVM
+
+TYPE TStackEntry
+	intVal%
+	floatVal
+	strVal$
+
+	intArray%[]
+	floatArray#[]
+	strArray%[]
+
+	// etc
+ENDTYPE
+
+PROTOTYPE ScriptFunc: Exec AS Executor
+
+GLOBAL Funcs[] AS ScriptFunc
+GLOBAL FuncMap AS HashMap
+
+FUNCTION RegisterFunc: Name$, Func AS ScriptFunc
+	DIMPUSH Funcs[], Func
+	FuncMap.Put(Name$, LEN(Funcs[])-1)
+ENDFUNCTION
+
+
+TYPE Executor
+	Stack[] AS TStackEntry
+
+
+	comp AS TCompiler
+
+	FUNCTION Execute:
+		self.ExecuteExpr(comp.MainScope)
+	ENDFUNCTION
+
+	FUNCTION PopFloat:
+		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
+
+		LOCAL v = self.Stack[-1].floatVal
+		DIMDEL self.Stack[],-1
+		RETURN v
+	ENDFUNCTION
+
+
+	FUNCTION PopInt%:
+		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
+
+		LOCAL v% = self.Stack[-1].intVal
+		DIMDEL self.Stack[],-1
+		RETURN v
+	ENDFUNCTION
+
+
+	FUNCTION PopStr$:
+		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
+
+		LOCAL v$ = self.Stack[-1].strVal$
+		DIMDEL self.Stack[],-1
+		RETURN v$
+	ENDFUNCTION
+
+
+	FUNCTION PushFloat: v
+		LOCAL e AS TStackEntry
+		e.floatVal = v
+		e.intVal = v
+		e.strVal$ = v+""
+		DIMPUSH self.Stack[], e
+	ENDFUNCTION
+
+	FUNCTION PushInt: v%
+		LOCAL e AS TStackEntry
+		e.intVal = v
+		e.floatVal = v
+		e.strVal$ = v+""
+		DIMPUSH self.Stack[], e
+	ENDFUNCTION
+
+	FUNCTION PushStr: v$
+		LOCAL e AS TStackEntry
+		e.strVal$ = v$
+		e.intVal = INTEGER(v$)
+		e.floatVal = 1*v$
+		DIMPUSH self.Stack[], e
+	ENDFUNCTION
+
+	FUNCTION Push: e AS TStackEntry
+		DIMPUSH self.Stack[], e
+	ENDFUNCTION
+
+	FUNCTION Pop:
+		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
+		DIMDEL self.Stack[], -1
+	ENDFUNCTION
+
+	//! Internal Function that executes a scope
+	FUNCTION ExecuteExpr: exprId%
+		ALIAS expr AS Exprs[exprId]
+		IF expr.Typ = EXPR_IS_EMPTY THEN RETURN // useless
+
+		?IFDEF DEBUGVM
+		STDOUT "\tExecute OpCode "+expr.Typ+"\n"
+		?ENDIF
+		SELECT expr.Typ
+			CASE EXPR_IS_SCOPE
+				FOREACH e IN expr.Exprs[]
+					self.ExecuteExpr(e)
+				NEXT
+			CASE EXPR_IS_OPERATOR
+				// op2
+				self.ExecuteExpr(expr.Right)
+				// op1
+				self.ExecuteExpr(expr.Left)
+
+
+				LOCAL Sym$ = Operators[expr.Op].Sym$
+				LOCAL HasToBeInt = FALSE
+				SELECT Sym$
+					CASE "="
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 = v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "<>"
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 <> v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "OR"
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 OR v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "AND"
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 AND v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "<"
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 < v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE ">"
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 > v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE ">="
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 >= v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "<="
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						LOCAL r%
+						IF v1 <= v2
+							r = TRUE
+						ELSE
+							r = FALSE
+						ENDIF
+						self.PushInt(r)
+					CASE "+"
+						SELECT expr.datatype.Name$
+							CASE "string"
+								LOCAL v1$ = self.PopStr$()
+								LOCAL v2$ = self.PopStr$()
+								?IFDEF DEBUGVM
+								STDOUT "STRCONCAT '"+v1$+"' + '"+v2$+"'\n"
+								?ENDIF
+								self.PushStr(v1$ + v2$)
+							CASE "float"
+								LOCAL v1 = self.PopFloat()
+								LOCAL v2 = self.PopFloat()
+								self.PushFloat(v1 + v2)
+							CASE "int"
+								LOCAL v1% = self.PopInt()
+								LOCAL v2% = self.PopInt()
+								self.PushInt(INTEGER(v1 + v2))
+						ENDSELECT
+					CASE "-"
+						SELECT expr.datatype.Name$
+							CASE "float"
+								LOCAL v1 = self.PopFloat()
+								LOCAL v2 = self.PopFloat()
+								self.PushFloat(v1 - v2)
+							CASE "int"
+								LOCAL v1% = self.PopInt()
+								LOCAL v2% = self.PopInt()
+								self.PushInt(INTEGER(v1 - v2))
+						ENDSELECT
+					CASE "*"
+						SELECT expr.datatype.Name$
+							CASE "float"
+								LOCAL v1 = self.PopFloat()
+								LOCAL v2 = self.PopFloat()
+								self.PushFloat(v1 * v2)
+							CASE "int"
+								LOCAL v1% = self.PopInt()
+								LOCAL v2% = self.PopInt()
+								self.PushInt(INTEGER(v1 * v2))
+						ENDSELECT
+					CASE "/"
+						// always float
+						LOCAL v1 = self.PopFloat()
+						LOCAL v2 = self.PopFloat()
+						self.PushFloat(v1 / v2)
+					CASE "^"
+						SELECT expr.datatype.Name$
+							CASE "float"
+								LOCAL v1 = self.PopFloat()
+								LOCAL v2 = self.PopFloat()
+								self.PushFloat(POW(v1, v2))
+							CASE "int"
+								LOCAL v1% = self.PopInt()
+								LOCAL v2% = self.PopInt()
+								self.PushInt(INTEGER(POW(v1, v2)))
+						ENDSELECT
+				ENDSELECT
+			CASE EXPR_IS_INT
+				self.PushInt(expr.intval)
+			CASE EXPR_IS_FLOAT
+				self.PushFloat(expr.floatval)
+			CASE EXPR_IS_STR
+				self.PushStr(MID$(expr.strval$,1,LEN(expr.strval$)-2))
+			CASE EXPR_IS_FUNCCALL
+				ALIAS Func AS Compiler.Funcs[expr.func]
+				// push parameters
+				FOREACH P IN expr.Params[]
+					self.ExecuteExpr(P)
+				NEXT
+
+
+				IF Func.Native
+					IF FuncMap.DoesKeyExist(Func.Name$)
+						LOCAL p AS ScriptFunc
+						LOCAL Value%
+						FuncMap.GetValue(Func.Name$, Value%)
+						p = Funcs[Value]
+						p(self)
+					ELSE
+						Error("Missing native function"+Func.Name$)
+					ENDIF
+				ELSE
+
+				ENDIF
+			CASE EXPR_IS_PROTOCALL
+				Error("TODO EXPR_IS_PROTOCALL")
+			CASE EXPR_IS_VARI
+				ALIAS vari AS Compiler.Varis[expr.vari]
+				self.Push(vari.Value)
+			CASE EXPR_IS_ARRAY
+
+			CASE EXPR_IS_ASSIGN
+				self.ExecuteExpr(expr.Right)
+				ALIAS vari AS Compiler.Varis[expr.vari]
+				vari.Value = self.Stack[-1]
+				self.Pop()
+			CASE EXPR_IS_DIM
+
+			CASE EXPR_IS_REDIM
+
+			CASE EXPR_IS_CAST2INT
+				self.ExecuteExpr(expr.expr)
+			CASE EXPR_IS_CAST2FLOAT
+				self.ExecuteExpr(expr.expr)
+			CASE EXPR_IS_CAST2STRING
+				self.ExecuteExpr(expr.expr)
+			CASE EXPR_IS_ACCESS
+
+			CASE EXPR_IS_RETURN
+
+			CASE EXPR_IS_FUNCDATA
+
+			CASE EXPR_IS_IF
+
+			CASE EXPR_IS_WHILE
+
+			CASE EXPR_IS_REPEAT
+
+			CASE EXPR_IS_FOR
+
+			CASE EXPR_IS_FOREACH
+
+			CASE EXPR_IS_CONTINUE
+
+			CASE EXPR_IS_BREAK
+
+			CASE EXPR_IS_TRY
+
+			CASE EXPR_IS_THROW
+
+			CASE EXPR_IS_RESTORE
+
+			CASE EXPR_IS_READ
+
+			CASE EXPR_IS_DEFVAL
+
+			CASE EXPR_IS_DIMASEXPR
+
+			CASE EXPR_IS_ALIAS
+
+			CASE EXPR_IS_GOTO
+
+			CASE EXPR_IS_LABEL
+
+			CASE EXPR_IS_INC
+
+			CASE EXPR_IS_DIMPUSH
+
+			CASE EXPR_IS_LEN
+
+			CASE EXPR_IS_BOUND
+
+			CASE EXPR_IS_DIMDATA
+
+			CASE EXPR_IS_DELETE
+
+			CASE EXPR_IS_DIMDEL
+
+			CASE EXPR_IS_NOT
+
+			CASE EXPR_IS_ADDRESSOF
+
+			CASE EXPR_IS_ASSERT
+
+			CASE EXPR_IS_DEBUGOUTPUT
+
+			CASE EXPR_IS_IIF
+
+			CASE EXPR_IS_REQUIRE
+
+			CASE EXPR_IS_SUPER
+
+			CASE EXPR_IS_CAST2OBJ
+
+			CASE EXPR_IS_EMPTY
+			CASE EXPR_IS_DEBUG
+				Error("Invalid Expression")
+			DEFAULT
+				Error("Unknown expression type: "+expr.Typ)
+		ENDSELECT
+	ENDFUNCTION
+
+
+	FUNCTION CallFunction: Name$, Params$[]
+
+	ENDFUNCTION
+
+	FUNCTION Init:
+		self.comp = Compiler
+	ENDFUNCTION
+ENDTYPE
+
+
+//! Generiert JavaScript Code
+FUNCTION VM_Generator$:
+	LOCAL Text$ = "YOLO"
+	RETURN Text$
+ENDFUNCTION
+
+
+?ENDIF
+

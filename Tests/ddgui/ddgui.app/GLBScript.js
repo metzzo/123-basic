@@ -324,7 +324,7 @@ function updateConsole() {
 			window.requestAnimFrame(updateConsole, 100);
 		}
 	} catch(ex) {
-		if (ex instanceof GLBExitException) alert(formatError(ex));
+		if (ex instanceof GLBExitException) throw(formatError(ex));
 	}
 }
 
@@ -2270,6 +2270,7 @@ var hibernate	= false;	//SOlls warten
 var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
+var inFullscreen= false;
 
 var waitForFont = false;
 
@@ -2669,16 +2670,16 @@ function GETTIMER() {
 }
 
 function ALPHAMODE(mode) {
-	/*if (mode < 0) {
-		context.globalCompositeOperation = 'lighter';
-		mode = (1 - mode) - 1;
+	if (mode < 0) {
+		context.globalCompositeOperation = 'darker';
+		mode = ABS((1 - mode) - 1);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'lighter';
 	} else {
 		context.globalCompositeOperation = 'source-over';
 		mode = 1;
 	}
-	canvas.globalAlpha = mode;*/
+	canvas.globalAlpha = mode;
 }
 
 function SETPIXEL(x, y, col) {
@@ -2706,7 +2707,20 @@ function SMOOTHSHADING(mode) {
 	// Do nothing...
 }
 
-function SETSCREEN(width, height) {
+function SETSCREEN(width, height, fullscreen) {
+	if (fullscreen && !inFullscreen) {
+		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		inFullscreen = true;
+	} else if (!fullscreen && inFullscreen) {
+		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		inFullscreen = false;
+	}
+	var e = frontbuffer.canvas;
+	e.width = width;
+	e.height = height;
+	e = backbuffer.canvas;
+	e.width = width;
+	e.height = height;
 	canvas.width = width;
 	canvas.height = height;
 }
@@ -2726,7 +2740,7 @@ function VIEWPORT(x, y, width, height) {
 		context.rect( x,y,width,height );
 		context.clip();
 		
-		
+		context.translate(x, y);
 		inViewport = true;
 	}
 }
@@ -4166,7 +4180,12 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		var dx = 0, dy = 0
+		if (sx < 0) dx = spr.img.width*sx;
+		if (sy < 0) dy = spr.img.height*sy;
+		
+		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
 		context.restore();
@@ -4181,7 +4200,6 @@ function STRETCHSPRITE(num,  x, y, width, height) {
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWSPRITE(num, 0, 0);
-		//context.drawImage(spr.img, CAST2INT(x), CAST2INT(y), CAST2INT(width), CAST2INT(height));
 		context.restore();
 	}
 }
@@ -4567,6 +4585,7 @@ var static9_DDgui_draw_widget_intern_lines_Str = new GLBArray();
 var static7_DDgui_backgnd_QuickGL = 0;
 var static9_DDgui_drawwidget_dummy_Str_ref = [""];
 var static9_DDgui_handlewidget_dummy_Str_ref = [""];
+var static7_DDgui_radio_opt_Str = new GLBArray();
 var static7_DDgui_handleradio_txt_Str = new GLBArray();
 var static7_DDgui_list_opt_Str = new GLBArray();
 var static7_DDgui_drawlist_opt_Str_ref = [new GLBArray()];
@@ -4574,7205 +4593,4396 @@ var static11_ddgui_handletext_st_lasttime = 0, static10_ddgui_handletext_st_last
 var static7_DDgui_drawtab_str_Str = new GLBArray(), static8_DDgui_drawtab_str2_Str_ref = [new GLBArray()];
 var static7_DDgui_handletab_str_Str = new GLBArray(), static8_DDgui_handletab_str2_Str_ref = [new GLBArray()];
 var static7_DDgui_selecttab_str_Str = new GLBArray(), static8_DDgui_selecttab_str2_Str_ref = [new GLBArray()];
-var __debugInfo = "";
-var debugMode = true;
+var debugMode = false;
 window['main'] = function(){
-	stackPush("main", __debugInfo);
-	try {
-		__debugInfo = "14:\ddgui.gbas";
-		global25_gDDguiMinControlDimension = 32;
-		__debugInfo = "15:\ddgui.gbas";
-		global20_DDGUI_AUTO_INPUT_DLG = 1;
-		__debugInfo = "17:\ddgui.gbas";
-		GLB_ON_INIT();
-		__debugInfo = "222:\ddgui.gbas";
-		global17_gDDguiCaretColour = 0;
-		__debugInfo = "14:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	global25_gDDguiMinControlDimension = 32;
+	global20_DDGUI_AUTO_INPUT_DLG = 1;
+	GLB_ON_INIT();
+	global17_gDDguiCaretColour = 0;
 	
 }
 window['GLB_ON_LOOP'] = function() {
-	stackPush("sub: GLB_ON_LOOP", __debugInfo);
-	try {
-		var local3_now_1608 = 0;
-		__debugInfo = "31:\ddgui.gbas";
-		global3_old = GETTIMERALL();
-		__debugInfo = "32:\ddgui.gbas";
-		func10_DDgui_show(0);
-		__debugInfo = "49:\ddgui.gbas";
-		local3_now_1608 = GETTIMERALL();
-		__debugInfo = "50:\ddgui.gbas";
-		global5_delta+=((local3_now_1608) - (global3_old));
-		__debugInfo = "51:\ddgui.gbas";
-		global5_flips+=1;
-		__debugInfo = "57:\ddgui.gbas";
-		if ((((global5_flips) > (300)) ? 1 : 0)) {
-			__debugInfo = "53:\ddgui.gbas";
-			global2_nt = 1000;
-			__debugInfo = "54:\ddgui.gbas";
-			global3_fps = ~~(global5_delta);
-			__debugInfo = "55:\ddgui.gbas";
-			global5_delta = 0;
-			__debugInfo = "56:\ddgui.gbas";
-			global5_flips = 0;
-			__debugInfo = "53:\ddgui.gbas";
-		};
-		__debugInfo = "58:\ddgui.gbas";
-		PRINT((("fps:") + (CAST2STRING(INTEGER(global3_fps)))), 0, 0, 0);
-		__debugInfo = "61:\ddgui.gbas";
-		SHOWSCREEN();
-		__debugInfo = "31:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local3_now_1608 = 0;
+	global3_old = GETTIMERALL();
+	func10_DDgui_show(0);
+	local3_now_1608 = GETTIMERALL();
+	global5_delta+=((local3_now_1608) - (global3_old));
+	global5_flips+=1;
+	if ((((global5_flips) > (300)) ? 1 : 0)) {
+		global2_nt = 1000;
+		global3_fps = ~~(global5_delta);
+		global5_delta = 0;
+		global5_flips = 0;
+		
+	};
+	PRINT((("fps:") + (CAST2STRING(INTEGER(global3_fps)))), 0, 0, 0);
+	SHOWSCREEN();
 	
 };
+window['GLB_ON_LOOP'] = GLB_ON_LOOP;
 window['GLB_ON_INIT'] = function() {
-	stackPush("sub: GLB_ON_INIT", __debugInfo);
-	try {
-		__debugInfo = "73:\ddgui.gbas";
-		func16_DDgui_pushdialog(0, 0, 300, 300, 0);
-		__debugInfo = "76:\ddgui.gbas";
-		func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
-		__debugInfo = "78:\ddgui.gbas";
-		func12_DDgui_widget("", "Static Text", 0, 0);
-		__debugInfo = "79:\ddgui.gbas";
-		func12_DDgui_spacer(10000, 20);
-		__debugInfo = "73:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	func16_DDgui_pushdialog(0, 0, 300, 300, 0);
+	func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+	func12_DDgui_widget("", "Static Text", 0, 0);
+	func12_DDgui_spacer(10000, 20);
+	func9_DDgui_tab("tab1", (((("Lig_sts,ls_test,ra_test|") + ("Buttons,fr_buttons|"))) + ("Texts,st_text,tx_test")), 0);
+	func11_DDgui_combo("ls_test", "one|two|three", 0, 0);
+	func12_DDgui_spacer(10000, 0);
+	func11_DDgui_radio("ra_test", "red|green|blue", 0);
+	func12_DDgui_slider("sl_test", 0.5, 0, 0);
+	func12_DDgui_spacer(10000, 0);
 	
 };
+window['GLB_ON_INIT'] = GLB_ON_INIT;
 window['func11_DDgui_index'] = function(param10_ddgui_vals, param8_name_Str_ref, param6_create) {
-	stackPush("function: DDgui_index", __debugInfo);
-	try {
-		var local2_up_2201 = 0, local2_dn_2202 = 0, local3_mid_2203 = 0;
-		__debugInfo = "358:\ddgui.gbas";
-		local2_up_2201 = 0;
-		__debugInfo = "359:\ddgui.gbas";
-		local2_dn_2202 = ((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) - (1));
-		__debugInfo = "371:\ddgui.gbas";
-		while ((((local2_up_2201) < (local2_dn_2202)) ? 1 : 0)) {
-			__debugInfo = "361:\ddgui.gbas";
-			local3_mid_2203 = CAST2INT(((((local2_up_2201) + (local2_dn_2202))) / (2)));
-			__debugInfo = "370:\ddgui.gbas";
-			if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2203).values[tmpPositionCache][0].attr7_wid_Str) > (param8_name_Str_ref[0])) ? 1 : 0)) {
-				__debugInfo = "363:\ddgui.gbas";
-				local2_dn_2202 = MAX(((local3_mid_2203) - (1)), local2_up_2201);
-				__debugInfo = "363:\ddgui.gbas";
-			} else {
-				__debugInfo = "369:\ddgui.gbas";
-				if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2203).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0)) {
-					__debugInfo = "366:\ddgui.gbas";
-					local2_up_2201 = MIN(local2_dn_2202, ((local3_mid_2203) + (1)));
-					__debugInfo = "366:\ddgui.gbas";
-				} else {
-					__debugInfo = "368:\ddgui.gbas";
-					return tryClone(local3_mid_2203);
-					__debugInfo = "368:\ddgui.gbas";
-				};
-				__debugInfo = "369:\ddgui.gbas";
-			};
-			__debugInfo = "361:\ddgui.gbas";
-		};
-		__debugInfo = "373:\ddgui.gbas";
-		if ((((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2201).values[tmpPositionCache][0].attr7_wid_Str) == (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "373:\ddgui.gbas";
-			return tryClone(local2_up_2201);
-			__debugInfo = "373:\ddgui.gbas";
-		};
-		__debugInfo = "400:\ddgui.gbas";
-		if (param6_create) {
-			var local4_widg_2204 = new type9_DDGUI_WDG(), local5_order_2205 = new type11_DDGUI_ORDER();
-			__debugInfo = "378:\ddgui.gbas";
-			local2_dn_2202 = BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0);
-			__debugInfo = "379:\ddgui.gbas";
-			REDIM(unref(param10_ddgui_vals.attr7_widgets_ref[0]), [((local2_dn_2202) + (1))], [new type9_DDGUI_WDG()] );
-			__debugInfo = "379:\ddgui.gbas";
-			{
-				__debugInfo = "382:\ddgui.gbas";
-				for (local3_mid_2203 = local2_dn_2202;toCheck(local3_mid_2203, ((local2_up_2201) + (1)), -(1));local3_mid_2203 += -(1)) {
-					__debugInfo = "381:\ddgui.gbas";
-					param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2203).values[tmpPositionCache][0] = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(((local3_mid_2203) - (1))).values[tmpPositionCache][0].clone(/* In Assign */);
-					__debugInfo = "381:\ddgui.gbas";
-				};
-				__debugInfo = "382:\ddgui.gbas";
-			};
-			__debugInfo = "383:\ddgui.gbas";
-			if (((((((local2_dn_2202) > (0)) ? 1 : 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2201).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "383:\ddgui.gbas";
-				local2_up_2201 = ((local2_up_2201) + (1));
-				__debugInfo = "383:\ddgui.gbas";
-			};
-			__debugInfo = "385:\ddgui.gbas";
-			local4_widg_2204.attr7_wid_Str = param8_name_Str_ref[0];
-			__debugInfo = "386:\ddgui.gbas";
-			param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2201).values[tmpPositionCache][0] = local4_widg_2204.clone(/* In Assign */);
-			__debugInfo = "390:\ddgui.gbas";
-			local5_order_2205.attr6_id_Str_ref[0] = param8_name_Str_ref[0];
-			__debugInfo = "391:\ddgui.gbas";
-			DIMPUSH(param10_ddgui_vals.attr9_draworder, local5_order_2205);
-			__debugInfo = "397:\ddgui.gbas";
-			var forEachSaver13306 = param10_ddgui_vals.attr9_draworder;
-			for(var forEachCounter13306 = 0 ; forEachCounter13306 < forEachSaver13306.values.length ; forEachCounter13306++) {
-				var local2_od_2206 = forEachSaver13306.values[forEachCounter13306];
-			{
-					__debugInfo = "396:\ddgui.gbas";
-					local2_od_2206.attr5_index = func11_DDgui_index(param10_ddgui_vals, local2_od_2206.attr6_id_Str_ref, 0);
-					__debugInfo = "396:\ddgui.gbas";
-				}
-				forEachSaver13306.values[forEachCounter13306] = local2_od_2206;
+	var local2_up_2225 = 0, local2_dn_2226 = 0, local3_mid_2227 = 0;
+	local2_up_2225 = 0;
+	local2_dn_2226 = ((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) - (1));
+	while ((((local2_up_2225) < (local2_dn_2226)) ? 1 : 0)) {
+		local3_mid_2227 = CAST2INT(((((local2_up_2225) + (local2_dn_2226))) / (2)));
+		if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0].attr7_wid_Str) > (param8_name_Str_ref[0])) ? 1 : 0)) {
+			local2_dn_2226 = MAX(((local3_mid_2227) - (1)), local2_up_2225);
 			
+		} else {
+			if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0)) {
+				local2_up_2225 = MIN(local2_dn_2226, ((local3_mid_2227) + (1)));
+				
+			} else {
+				return tryClone(local3_mid_2227);
+				
 			};
-			__debugInfo = "399:\ddgui.gbas";
-			return tryClone(local2_up_2201);
-			__debugInfo = "378:\ddgui.gbas";
+			
 		};
-		__debugInfo = "401:\ddgui.gbas";
-		return tryClone(-(1));
-		__debugInfo = "402:\ddgui.gbas";
-		return 0;
-		__debugInfo = "358:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0].attr7_wid_Str) == (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
+		return tryClone(local2_up_2225);
+		
+	};
+	if (param6_create) {
+		var local4_widg_2228 = new type9_DDGUI_WDG(), local5_order_2229 = new type11_DDGUI_ORDER();
+		local2_dn_2226 = BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0);
+		REDIM(unref(param10_ddgui_vals.attr7_widgets_ref[0]), [((local2_dn_2226) + (1))], [new type9_DDGUI_WDG()] );
+		{
+			for (local3_mid_2227 = local2_dn_2226;toCheck(local3_mid_2227, ((local2_up_2225) + (1)), -(1));local3_mid_2227 += -(1)) {
+				param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0] = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(((local3_mid_2227) - (1))).values[tmpPositionCache][0].clone(/* In Assign */);
+				
+			};
+			
+		};
+		if (((((((local2_dn_2226) > (0)) ? 1 : 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
+			local2_up_2225 = ((local2_up_2225) + (1));
+			
+		};
+		local4_widg_2228.attr7_wid_Str = param8_name_Str_ref[0];
+		param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0] = local4_widg_2228.clone(/* In Assign */);
+		local5_order_2229.attr6_id_Str_ref[0] = param8_name_Str_ref[0];
+		DIMPUSH(param10_ddgui_vals.attr9_draworder, local5_order_2229);
+		var forEachSaver13510 = param10_ddgui_vals.attr9_draworder;
+		for(var forEachCounter13510 = 0 ; forEachCounter13510 < forEachSaver13510.values.length ; forEachCounter13510++) {
+			var local2_od_2230 = forEachSaver13510.values[forEachCounter13510];
+		{
+				local2_od_2230.attr5_index = func11_DDgui_index(param10_ddgui_vals, local2_od_2230.attr6_id_Str_ref, 0);
+				
+			}
+			forEachSaver13510.values[forEachCounter13510] = local2_od_2230;
+		
+		};
+		return tryClone(local2_up_2225);
+		
+	};
+	return tryClone(-(1));
+	return 0;
 	
 };
 window['func20_DDgui_get_intern_Str'] = function(param3_wdg, param8_name_Str_ref) {
-	stackPush("function: DDgui_get_intern_Str", __debugInfo);
-	try {
-		__debugInfo = "410:\ddgui.gbas";
-		{
-			var local17___SelectHelper10__2311 = "";
-			__debugInfo = "410:\ddgui.gbas";
-			local17___SelectHelper10__2311 = param8_name_Str_ref[0];
-			__debugInfo = "434:\ddgui.gbas";
-			if ((((local17___SelectHelper10__2311) == ("CLICKED")) ? 1 : 0)) {
-				__debugInfo = "411:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr8_wclicked));
-				__debugInfo = "411:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("TEXT")) ? 1 : 0)) {
-				__debugInfo = "412:\ddgui.gbas";
-				return tryClone(unref(param3_wdg.attr9_wtext_Str_ref[0]));
-				__debugInfo = "412:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("WIDTH")) ? 1 : 0)) {
-				__debugInfo = "413:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr6_wwidth));
-				__debugInfo = "413:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("HEIGHT")) ? 1 : 0)) {
-				__debugInfo = "414:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wheight));
-				__debugInfo = "414:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("SELECT")) ? 1 : 0)) {
-				__debugInfo = "415:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wselect));
-				__debugInfo = "415:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("COUNT")) ? 1 : 0)) {
-				__debugInfo = "416:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr6_wcount));
-				__debugInfo = "416:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("HOVER")) ? 1 : 0)) {
-				__debugInfo = "417:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr6_whover));
-				__debugInfo = "417:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("READONLY")) ? 1 : 0)) {
-				__debugInfo = "418:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr9_wreadonly));
-				__debugInfo = "418:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("SELSTART")) ? 1 : 0)) {
-				__debugInfo = "419:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr9_wselstart));
-				__debugInfo = "419:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("SELEND")) ? 1 : 0)) {
-				__debugInfo = "420:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wselend));
-				__debugInfo = "420:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("HIDE")) ? 1 : 0)) {
-				__debugInfo = "421:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr5_whide));
-				__debugInfo = "421:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("TYPE")) ? 1 : 0)) {
-				__debugInfo = "422:\ddgui.gbas";
-				return tryClone(param3_wdg.attr9_wtype_Str);
-				__debugInfo = "422:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("FILTER")) ? 1 : 0)) {
-				__debugInfo = "423:\ddgui.gbas";
-				return tryClone(param3_wdg.attr11_wfilter_Str);
-				__debugInfo = "423:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("TIPTEXT")) ? 1 : 0)) {
-				__debugInfo = "424:\ddgui.gbas";
-				return tryClone(unref(param3_wdg.attr11_tiptext_Str_ref[0]));
-				__debugInfo = "424:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("MINVAL")) ? 1 : 0)) {
-				__debugInfo = "425:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wminval));
-				__debugInfo = "425:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("MAXVAL")) ? 1 : 0)) {
-				__debugInfo = "426:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wmaxval));
-				__debugInfo = "426:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("STEP")) ? 1 : 0)) {
-				__debugInfo = "427:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr5_wstep));
-				__debugInfo = "427:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("SCROLL")) ? 1 : 0)) {
-				__debugInfo = "428:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr7_wscroll));
-				__debugInfo = "428:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("ALIGN")) ? 1 : 0)) {
-				__debugInfo = "429:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr6_walign));
-				__debugInfo = "429:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("XPOS")) ? 1 : 0)) {
-				__debugInfo = "430:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr5_wxpos));
-				__debugInfo = "430:\ddgui.gbas";
-			} else if ((((local17___SelectHelper10__2311) == ("YPOS")) ? 1 : 0)) {
-				__debugInfo = "431:\ddgui.gbas";
-				return tryClone(CAST2STRING(param3_wdg.attr5_wypos));
-				__debugInfo = "431:\ddgui.gbas";
-			} else {
-				__debugInfo = "433:\ddgui.gbas";
-				DEBUG((((("DDgui_get_intern$: Widget property ") + (param8_name_Str_ref[0]))) + (" is unknown\n")));
-				__debugInfo = "433:\ddgui.gbas";
-			};
-			__debugInfo = "410:\ddgui.gbas";
+	{
+		var local17___SelectHelper10__2319 = "";
+		local17___SelectHelper10__2319 = param8_name_Str_ref[0];
+		if ((((local17___SelectHelper10__2319) == ("CLICKED")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr8_wclicked));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TEXT")) ? 1 : 0)) {
+			return tryClone(unref(param3_wdg.attr9_wtext_Str_ref[0]));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("WIDTH")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_wwidth));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HEIGHT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wheight));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELECT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wselect));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("COUNT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_wcount));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HOVER")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_whover));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("READONLY")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr9_wreadonly));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELSTART")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr9_wselstart));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELEND")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wselend));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HIDE")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_whide));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TYPE")) ? 1 : 0)) {
+			return tryClone(param3_wdg.attr9_wtype_Str);
+			
+		} else if ((((local17___SelectHelper10__2319) == ("FILTER")) ? 1 : 0)) {
+			return tryClone(param3_wdg.attr11_wfilter_Str);
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TIPTEXT")) ? 1 : 0)) {
+			return tryClone(unref(param3_wdg.attr11_tiptext_Str_ref[0]));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("MINVAL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wminval));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("MAXVAL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wmaxval));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("STEP")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wstep));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SCROLL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wscroll));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("ALIGN")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_walign));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("XPOS")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wxpos));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("YPOS")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wypos));
+			
+		} else {
+			
 		};
-		__debugInfo = "435:\ddgui.gbas";
-		return "";
-		__debugInfo = "410:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return "";
 	
 };
 window['func13_DDgui_get_Str'] = function(param6_id_Str, param8_name_Str) {
-	stackPush("function: DDgui_get_Str", __debugInfo);
-	try {
-		var local6_id_Str_ref_2207 = [param6_id_Str]; /* NEWCODEHERE */
-		var local8_name_Str_ref_2208 = [param8_name_Str]; /* NEWCODEHERE */
-		__debugInfo = "443:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "441:\ddgui.gbas";
-			DEBUG("DDgui_get$: No active dialog!\n");
-			__debugInfo = "442:\ddgui.gbas";
-			return "";
-			__debugInfo = "441:\ddgui.gbas";
-		};
-		__debugInfo = "466:\ddgui.gbas";
-		if (((((local6_id_Str_ref_2207[0]).length) == (0)) ? 1 : 0)) {
-			__debugInfo = "445:\ddgui.gbas";
-			{
-				var local16___SelectHelper8__2209 = "";
-				__debugInfo = "445:\ddgui.gbas";
-				local16___SelectHelper8__2209 = local8_name_Str_ref_2208[0];
-				__debugInfo = "461:\ddgui.gbas";
-				if ((((local16___SelectHelper8__2209) == ("FOCUS")) ? 1 : 0)) {
-					__debugInfo = "446:\ddgui.gbas";
-					return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str);
-					__debugInfo = "446:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("INKEY")) ? 1 : 0)) {
-					__debugInfo = "447:\ddgui.gbas";
-					return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str);
-					__debugInfo = "447:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("TEXT")) ? 1 : 0)) {
-					__debugInfo = "448:\ddgui.gbas";
-					return tryClone(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0]));
-					__debugInfo = "448:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("COL_BRIGHT")) ? 1 : 0)) {
-					__debugInfo = "449:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright));
-					__debugInfo = "449:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("COL_NORM")) ? 1 : 0)) {
-					__debugInfo = "450:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm));
-					__debugInfo = "450:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
-					__debugInfo = "451:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright));
-					__debugInfo = "451:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("COL_HOVER_NORM")) ? 1 : 0)) {
-					__debugInfo = "452:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm));
-					__debugInfo = "452:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("XPOS")) ? 1 : 0)) {
-					__debugInfo = "453:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos));
-					__debugInfo = "453:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("YPOS")) ? 1 : 0)) {
-					__debugInfo = "454:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos));
-					__debugInfo = "454:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("WIDTH")) ? 1 : 0)) {
-					__debugInfo = "455:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth));
-					__debugInfo = "455:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("HEIGHT")) ? 1 : 0)) {
-					__debugInfo = "456:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight));
-					__debugInfo = "456:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("MOVEABLE")) ? 1 : 0)) {
-					__debugInfo = "457:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable));
-					__debugInfo = "457:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("SCALEABLE")) ? 1 : 0)) {
-					__debugInfo = "458:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable));
-					__debugInfo = "458:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("MOVING")) ? 1 : 0)) {
-					__debugInfo = "459:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr6_moving));
-					__debugInfo = "459:\ddgui.gbas";
-				} else if ((((local16___SelectHelper8__2209) == ("SCALEING")) ? 1 : 0)) {
-					__debugInfo = "460:\ddgui.gbas";
-					return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_scaleing));
-					__debugInfo = "460:\ddgui.gbas";
-				};
-				__debugInfo = "445:\ddgui.gbas";
-			};
-			__debugInfo = "445:\ddgui.gbas";
-		} else {
-			var local2_iw_2210 = 0;
-			__debugInfo = "463:\ddgui.gbas";
-			local2_iw_2210 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2207, 0);
-			__debugInfo = "464:\ddgui.gbas";
-			if ((((local2_iw_2210) >= (0)) ? 1 : 0)) {
-				__debugInfo = "464:\ddgui.gbas";
-				return tryClone(func20_DDgui_get_intern_Str(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2210).values[tmpPositionCache][0]), local8_name_Str_ref_2208));
-				__debugInfo = "464:\ddgui.gbas";
-			};
-			__debugInfo = "465:\ddgui.gbas";
-			DEBUG((((("DDgui_get$: Widget not found ") + (local6_id_Str_ref_2207[0]))) + ("\n")));
-			__debugInfo = "463:\ddgui.gbas";
-		};
-		__debugInfo = "467:\ddgui.gbas";
+	var local6_id_Str_ref_2231 = [param6_id_Str]; /* NEWCODEHERE */
+	var local8_name_Str_ref_2232 = [param8_name_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
 		return "";
-		__debugInfo = "468:\ddgui.gbas";
-		return "";
-		__debugInfo = "443:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if (((((local6_id_Str_ref_2231[0]).length) == (0)) ? 1 : 0)) {
+		{
+			var local16___SelectHelper8__2233 = "";
+			local16___SelectHelper8__2233 = local8_name_Str_ref_2232[0];
+			if ((((local16___SelectHelper8__2233) == ("FOCUS")) ? 1 : 0)) {
+				return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str);
+				
+			} else if ((((local16___SelectHelper8__2233) == ("INKEY")) ? 1 : 0)) {
+				return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str);
+				
+			} else if ((((local16___SelectHelper8__2233) == ("TEXT")) ? 1 : 0)) {
+				return tryClone(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0]));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_BRIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_NORM")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_HOVER_NORM")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("XPOS")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("YPOS")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("WIDTH")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("HEIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("MOVEABLE")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("SCALEABLE")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("MOVING")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr6_moving));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("SCALEING")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_scaleing));
+				
+			};
+			
+		};
+		
+	} else {
+		var local2_iw_2234 = 0;
+		local2_iw_2234 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2231, 0);
+		if ((((local2_iw_2234) >= (0)) ? 1 : 0)) {
+			return tryClone(func20_DDgui_get_intern_Str(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2234).values[tmpPositionCache][0]), local8_name_Str_ref_2232));
+			
+		};
+		
+	};
+	return "";
+	return "";
 	
 };
 window['func9_DDgui_get'] = function(param6_id_Str, param8_name_Str) {
-	stackPush("function: DDgui_get", __debugInfo);
-	try {
-		var local6_id_Str_ref_2211 = [param6_id_Str]; /* NEWCODEHERE */
-		var local8_name_Str_ref_2212 = [param8_name_Str]; /* NEWCODEHERE */
-		__debugInfo = "475:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "473:\ddgui.gbas";
-			DEBUG("DDgui_get: No active dialog!\n");
-			__debugInfo = "474:\ddgui.gbas";
-			return tryClone(0);
-			__debugInfo = "473:\ddgui.gbas";
-		};
-		__debugInfo = "494:\ddgui.gbas";
-		if (((((local6_id_Str_ref_2211[0]).length) == (0)) ? 1 : 0)) {
-			__debugInfo = "477:\ddgui.gbas";
-			return tryClone(FLOAT2STR(func13_DDgui_get_Str(unref(local6_id_Str_ref_2211[0]), unref(local8_name_Str_ref_2212[0]))));
-			__debugInfo = "477:\ddgui.gbas";
-		} else {
-			var local2_iw_2213 = 0;
-			__debugInfo = "479:\ddgui.gbas";
-			local2_iw_2213 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2211, 0);
-			__debugInfo = "492:\ddgui.gbas";
-			if ((((local2_iw_2213) >= (0)) ? 1 : 0)) {
-				var alias3_wdg_ref_2214 = [new type9_DDGUI_WDG()];
-				__debugInfo = "482:\ddgui.gbas";
-				alias3_wdg_ref_2214 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2213).values[tmpPositionCache] /* ALIAS */;
-				__debugInfo = "483:\ddgui.gbas";
-				{
-					var local16___SelectHelper9__2215 = "";
-					__debugInfo = "483:\ddgui.gbas";
-					local16___SelectHelper9__2215 = local8_name_Str_ref_2212[0];
-					__debugInfo = "489:\ddgui.gbas";
-					if ((((local16___SelectHelper9__2215) == ("CLICKED")) ? 1 : 0)) {
-						__debugInfo = "484:\ddgui.gbas";
-						return tryClone(alias3_wdg_ref_2214[0].attr8_wclicked);
-						__debugInfo = "484:\ddgui.gbas";
-					} else if ((((local16___SelectHelper9__2215) == ("SELECT")) ? 1 : 0)) {
-						__debugInfo = "485:\ddgui.gbas";
-						return tryClone(alias3_wdg_ref_2214[0].attr7_wselect);
-						__debugInfo = "485:\ddgui.gbas";
-					} else if ((((local16___SelectHelper9__2215) == ("COUNT")) ? 1 : 0)) {
-						__debugInfo = "486:\ddgui.gbas";
-						return tryClone(alias3_wdg_ref_2214[0].attr6_wcount);
-						__debugInfo = "486:\ddgui.gbas";
-					} else if ((((local16___SelectHelper9__2215) == ("SELSTART")) ? 1 : 0)) {
-						__debugInfo = "487:\ddgui.gbas";
-						return tryClone(alias3_wdg_ref_2214[0].attr9_wselstart);
-						__debugInfo = "487:\ddgui.gbas";
-					} else if ((((local16___SelectHelper9__2215) == ("SELEND")) ? 1 : 0)) {
-						__debugInfo = "488:\ddgui.gbas";
-						return tryClone(alias3_wdg_ref_2214[0].attr7_wselend);
-						__debugInfo = "488:\ddgui.gbas";
-					};
-					__debugInfo = "483:\ddgui.gbas";
+	var local6_id_Str_ref_2235 = [param6_id_Str]; /* NEWCODEHERE */
+	var local8_name_Str_ref_2236 = [param8_name_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	if (((((local6_id_Str_ref_2235[0]).length) == (0)) ? 1 : 0)) {
+		return tryClone(FLOAT2STR(func13_DDgui_get_Str(unref(local6_id_Str_ref_2235[0]), unref(local8_name_Str_ref_2236[0]))));
+		
+	} else {
+		var local2_iw_2237 = 0;
+		local2_iw_2237 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2235, 0);
+		if ((((local2_iw_2237) >= (0)) ? 1 : 0)) {
+			var alias3_wdg_ref_2238 = [new type9_DDGUI_WDG()];
+			alias3_wdg_ref_2238 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2237).values[tmpPositionCache] /* ALIAS */;
+			{
+				var local16___SelectHelper9__2239 = "";
+				local16___SelectHelper9__2239 = local8_name_Str_ref_2236[0];
+				if ((((local16___SelectHelper9__2239) == ("CLICKED")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr8_wclicked);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELECT")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr7_wselect);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("COUNT")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr6_wcount);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELSTART")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr9_wselstart);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELEND")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr7_wselend);
+					
 				};
-				__debugInfo = "491:\ddgui.gbas";
-				return tryClone(FLOAT2STR(func20_DDgui_get_intern_Str(unref(alias3_wdg_ref_2214[0]), local8_name_Str_ref_2212)));
-				__debugInfo = "482:\ddgui.gbas";
+				
 			};
-			__debugInfo = "493:\ddgui.gbas";
-			DEBUG((((("DDgui_get: Widget not found ") + (local6_id_Str_ref_2211[0]))) + ("\n")));
-			__debugInfo = "479:\ddgui.gbas";
+			return tryClone(FLOAT2STR(func20_DDgui_get_intern_Str(unref(alias3_wdg_ref_2238[0]), local8_name_Str_ref_2236)));
+			
 		};
-		__debugInfo = "495:\ddgui.gbas";
-		return 0;
-		__debugInfo = "475:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func9_DDgui_set'] = function(param6_id_Str, param8_name_Str, param7_val_Str) {
-	stackPush("function: DDgui_set", __debugInfo);
-	try {
-		var local6_id_Str_ref_1609 = [param6_id_Str]; /* NEWCODEHERE */
-		__debugInfo = "544:\ddgui.gbas";
-		if (((((local6_id_Str_ref_1609[0]).length) == (0)) ? 1 : 0)) {
-			__debugInfo = "499:\ddgui.gbas";
-			{
-				var local16___SelectHelper1__1612 = "";
-				__debugInfo = "499:\ddgui.gbas";
-				local16___SelectHelper1__1612 = param8_name_Str;
-				__debugInfo = "515:\ddgui.gbas";
-				if ((((local16___SelectHelper1__1612) == ("FOCUS")) ? 1 : 0)) {
-					__debugInfo = "500:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str = param7_val_Str;
-					__debugInfo = "500:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("INKEY")) ? 1 : 0)) {
-					__debugInfo = "501:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str = param7_val_Str;
-					__debugInfo = "501:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("COL_BRIGHT")) ? 1 : 0)) {
-					__debugInfo = "502:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = INT2STR(param7_val_Str);
-					__debugInfo = "502:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("COL_NORM")) ? 1 : 0)) {
-					__debugInfo = "503:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = INT2STR(param7_val_Str);
-					__debugInfo = "503:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
-					__debugInfo = "504:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = INT2STR(param7_val_Str);
-					__debugInfo = "504:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_NORM")) ? 1 : 0)) {
-					__debugInfo = "505:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = INT2STR(param7_val_Str);
-					__debugInfo = "505:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("TEXT")) ? 1 : 0)) {
-					__debugInfo = "506:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0] = param7_val_Str;
-					__debugInfo = "506:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("XPOS")) ? 1 : 0)) {
-					__debugInfo = "507:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = INT2STR(param7_val_Str);
-					__debugInfo = "507:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("YPOS")) ? 1 : 0)) {
-					__debugInfo = "508:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = INT2STR(param7_val_Str);
-					__debugInfo = "508:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("WIDTH")) ? 1 : 0)) {
-					__debugInfo = "509:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = INT2STR(param7_val_Str);
-					__debugInfo = "509:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("HEIGHT")) ? 1 : 0)) {
-					__debugInfo = "510:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = INT2STR(param7_val_Str);
-					__debugInfo = "510:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("MOVEABLE")) ? 1 : 0)) {
-					__debugInfo = "511:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable = INT2STR(param7_val_Str);
-					__debugInfo = "511:\ddgui.gbas";
-				} else if ((((local16___SelectHelper1__1612) == ("SCALEABLE")) ? 1 : 0)) {
-					__debugInfo = "512:\ddgui.gbas";
-					global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable = INT2STR(param7_val_Str);
-					__debugInfo = "512:\ddgui.gbas";
-				} else {
-					__debugInfo = "514:\ddgui.gbas";
-					DEBUG((((("DDgui_set dialog (\"\") property: ") + (param8_name_Str))) + (" is unknown\n")));
-					__debugInfo = "514:\ddgui.gbas";
-				};
-				__debugInfo = "499:\ddgui.gbas";
+	var local6_id_Str_ref_1609 = [param6_id_Str]; /* NEWCODEHERE */
+	if (((((local6_id_Str_ref_1609[0]).length) == (0)) ? 1 : 0)) {
+		{
+			var local16___SelectHelper1__1612 = "";
+			local16___SelectHelper1__1612 = param8_name_Str;
+			if ((((local16___SelectHelper1__1612) == ("FOCUS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("INKEY")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_BRIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_NORM")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_NORM")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("TEXT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("XPOS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("YPOS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("WIDTH")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("HEIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("MOVEABLE")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("SCALEABLE")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable = INT2STR(param7_val_Str);
+				
+			} else {
+				
 			};
-			__debugInfo = "499:\ddgui.gbas";
-		} else {
-			var local2_iw_1613 = 0.0, alias3_wdg_ref_1614 = [new type9_DDGUI_WDG()];
-			__debugInfo = "517:\ddgui.gbas";
-			local2_iw_1613 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1609, 1);
-			__debugInfo = "519:\ddgui.gbas";
-			alias3_wdg_ref_1614 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(~~(local2_iw_1613)).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "521:\ddgui.gbas";
-			{
-				var local16___SelectHelper2__1615 = "";
-				__debugInfo = "521:\ddgui.gbas";
-				local16___SelectHelper2__1615 = param8_name_Str;
-				__debugInfo = "543:\ddgui.gbas";
-				if ((((local16___SelectHelper2__1615) == ("TEXT")) ? 1 : 0)) {
-					__debugInfo = "522:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr9_wtext_Str_ref[0] = param7_val_Str;
-					__debugInfo = "522:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("CLICKED")) ? 1 : 0)) {
-					__debugInfo = "523:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr8_wclicked = INT2STR(param7_val_Str);
-					__debugInfo = "523:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("WIDTH")) ? 1 : 0)) {
-					__debugInfo = "524:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr6_wwidth = INT2STR(param7_val_Str);
-					__debugInfo = "524:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("HEIGHT")) ? 1 : 0)) {
-					__debugInfo = "525:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wheight = INT2STR(param7_val_Str);
-					__debugInfo = "525:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("SELECT")) ? 1 : 0)) {
-					__debugInfo = "526:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wselect = INT2STR(param7_val_Str);
-					__debugInfo = "526:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("COUNT")) ? 1 : 0)) {
-					__debugInfo = "527:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr6_wcount = INT2STR(param7_val_Str);
-					__debugInfo = "527:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("HOVER")) ? 1 : 0)) {
-					__debugInfo = "528:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr6_whover = INT2STR(param7_val_Str);
-					__debugInfo = "528:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("READONLY")) ? 1 : 0)) {
-					__debugInfo = "529:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr9_wreadonly = INT2STR(param7_val_Str);
-					__debugInfo = "529:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("SELSTART")) ? 1 : 0)) {
-					__debugInfo = "530:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr9_wselstart = INT2STR(param7_val_Str);
-					__debugInfo = "530:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("SELEND")) ? 1 : 0)) {
-					__debugInfo = "531:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wselend = INT2STR(param7_val_Str);
-					__debugInfo = "531:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("HIDE")) ? 1 : 0)) {
-					__debugInfo = "532:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr5_whide = INT2STR(param7_val_Str);
-					__debugInfo = "532:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("TYPE")) ? 1 : 0)) {
-					__debugInfo = "533:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr9_wtype_Str = param7_val_Str;
-					__debugInfo = "533:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("FILTER")) ? 1 : 0)) {
-					__debugInfo = "534:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr11_wfilter_Str = param7_val_Str;
-					__debugInfo = "534:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("TIPTEXT")) ? 1 : 0)) {
-					__debugInfo = "535:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr11_tiptext_Str_ref[0] = param7_val_Str;
-					__debugInfo = "535:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("MINVAL")) ? 1 : 0)) {
-					__debugInfo = "536:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wminval = FLOAT2STR(param7_val_Str);
-					__debugInfo = "536:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("MAXVAL")) ? 1 : 0)) {
-					__debugInfo = "537:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wmaxval = FLOAT2STR(param7_val_Str);
-					__debugInfo = "537:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("STEP")) ? 1 : 0)) {
-					__debugInfo = "538:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr5_wstep = FLOAT2STR(param7_val_Str);
-					__debugInfo = "538:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("SCROLL")) ? 1 : 0)) {
-					__debugInfo = "539:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr7_wscroll = INT2STR(param7_val_Str);
-					__debugInfo = "539:\ddgui.gbas";
-				} else if ((((local16___SelectHelper2__1615) == ("ALIGN")) ? 1 : 0)) {
-					__debugInfo = "540:\ddgui.gbas";
-					alias3_wdg_ref_1614[0].attr6_walign = INT2STR(param7_val_Str);
-					__debugInfo = "540:\ddgui.gbas";
-				} else {
-					__debugInfo = "542:\ddgui.gbas";
-					DEBUG((((("DDgui_set: Widget property ") + (param8_name_Str))) + (" is unknown\n")));
-					__debugInfo = "542:\ddgui.gbas";
-				};
-				__debugInfo = "521:\ddgui.gbas";
-			};
-			__debugInfo = "517:\ddgui.gbas";
+			
 		};
-		__debugInfo = "546:\ddgui.gbas";
-		return 0;
-		__debugInfo = "544:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	} else {
+		var local2_iw_1613 = 0.0, alias3_wdg_ref_1614 = [new type9_DDGUI_WDG()];
+		local2_iw_1613 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1609, 1);
+		alias3_wdg_ref_1614 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(~~(local2_iw_1613)).values[tmpPositionCache] /* ALIAS */;
+		{
+			var local16___SelectHelper2__1615 = "";
+			local16___SelectHelper2__1615 = param8_name_Str;
+			if ((((local16___SelectHelper2__1615) == ("TEXT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wtext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("CLICKED")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr8_wclicked = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("WIDTH")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_wwidth = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HEIGHT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wheight = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELECT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wselect = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("COUNT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_wcount = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HOVER")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_whover = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("READONLY")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wreadonly = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELSTART")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wselstart = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELEND")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wselend = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HIDE")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr5_whide = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("TYPE")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wtype_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("FILTER")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr11_wfilter_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("TIPTEXT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr11_tiptext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("MINVAL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wminval = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("MAXVAL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wmaxval = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("STEP")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr5_wstep = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SCROLL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wscroll = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("ALIGN")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_walign = INT2STR(param7_val_Str);
+				
+			} else {
+				
+			};
+			
+		};
+		
+	};
+	return 0;
 	
 };
 window['func17_DDGui_PrintIntern'] = function(param5_t_Str_ref, param1_x, param1_y, param5_bBold) {
-	stackPush("function: DDGui_PrintIntern", __debugInfo);
-	try {
-		__debugInfo = "632:\ddgui.gbas";
-		if (param5_bBold) {
-			__debugInfo = "629:\ddgui.gbas";
-			ALPHAMODE(-(0.5));
-			__debugInfo = "630:\ddgui.gbas";
-			func17_DDGui_PrintIntern(param5_t_Str_ref, ((param1_x) + (1)), param1_y, 0);
-			__debugInfo = "631:\ddgui.gbas";
-			ALPHAMODE(0);
-			__debugInfo = "629:\ddgui.gbas";
-		};
-		__debugInfo = "635:\ddgui.gbas";
-		PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, global18_ddgui_font_kerning.attr11_bHasKerning);
-		__debugInfo = "636:\ddgui.gbas";
-		return 0;
-		__debugInfo = "652:\ddgui.gbas";
-		if (global18_ddgui_font_kerning.attr11_bHasKerning) {
-			var local2_fx_2220 = 0, local2_lt_2221 = 0, local5_c_Str_2222 = "", local4_kern_2223 = 0, local2_ac_2224 = 0;
-			__debugInfo = "642:\ddgui.gbas";
-			local2_lt_2221 = (((param5_t_Str_ref[0]).length) - (1));
-			__debugInfo = "642:\ddgui.gbas";
-			{
-				var local1_c_2225 = 0;
-				__debugInfo = "649:\ddgui.gbas";
-				for (local1_c_2225 = 0;toCheck(local1_c_2225, local2_lt_2221, 1);local1_c_2225 += 1) {
-					__debugInfo = "644:\ddgui.gbas";
-					local5_c_Str_2222 = MID_Str(unref(param5_t_Str_ref[0]), local1_c_2225, 1);
-					__debugInfo = "645:\ddgui.gbas";
-					local2_ac_2224 = ASC(local5_c_Str_2222, 0);
-					__debugInfo = "646:\ddgui.gbas";
-					local4_kern_2223 = global18_ddgui_font_kerning.attr4_left.arrAccess(local2_ac_2224).values[tmpPositionCache];
-					__debugInfo = "647:\ddgui.gbas";
-					PRINT(local5_c_Str_2222, ((param1_x) - (local4_kern_2223)), param1_y, 0);
-					__debugInfo = "648:\ddgui.gbas";
-					param1_x+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2224).values[tmpPositionCache];
-					__debugInfo = "644:\ddgui.gbas";
-				};
-				__debugInfo = "649:\ddgui.gbas";
+	if (param5_bBold) {
+		ALPHAMODE(-(0.5));
+		func17_DDGui_PrintIntern(param5_t_Str_ref, ((param1_x) + (1)), param1_y, 0);
+		ALPHAMODE(0);
+		
+	};
+	PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, global18_ddgui_font_kerning.attr11_bHasKerning);
+	return 0;
+	if (global18_ddgui_font_kerning.attr11_bHasKerning) {
+		var local2_fx_2244 = 0, local2_lt_2245 = 0, local5_c_Str_2246 = "", local4_kern_2247 = 0, local2_ac_2248 = 0;
+		local2_lt_2245 = (((param5_t_Str_ref[0]).length) - (1));
+		{
+			var local1_c_2249 = 0;
+			for (local1_c_2249 = 0;toCheck(local1_c_2249, local2_lt_2245, 1);local1_c_2249 += 1) {
+				local5_c_Str_2246 = MID_Str(unref(param5_t_Str_ref[0]), local1_c_2249, 1);
+				local2_ac_2248 = ASC(local5_c_Str_2246, 0);
+				local4_kern_2247 = global18_ddgui_font_kerning.attr4_left.arrAccess(local2_ac_2248).values[tmpPositionCache];
+				PRINT(local5_c_Str_2246, ((param1_x) - (local4_kern_2247)), param1_y, 0);
+				param1_x+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2248).values[tmpPositionCache];
+				
 			};
-			__debugInfo = "642:\ddgui.gbas";
-		} else {
-			__debugInfo = "651:\ddgui.gbas";
-			PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, 0);
-			__debugInfo = "651:\ddgui.gbas";
+			
 		};
-		__debugInfo = "653:\ddgui.gbas";
-		return 0;
-		__debugInfo = "632:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	} else {
+		PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, 0);
+		
+	};
+	return 0;
 	
 };
 window['func21_DDGui_TextWidthIntern'] = function(param5_t_Str_ref) {
-	stackPush("function: DDGui_TextWidthIntern", __debugInfo);
-	try {
-		__debugInfo = "663:\ddgui.gbas";
-		return tryClone(KERNLEN(param5_t_Str_ref[0], global18_ddgui_font_kerning.attr11_bHasKerning));
-		__debugInfo = "678:\ddgui.gbas";
-		if (global18_ddgui_font_kerning.attr11_bHasKerning) {
-			var local2_fx_2227 = 0, local2_lt_2228 = 0, local5_c_Str_2229 = "", local1_x_2230 = 0, local2_ac_2231 = 0;
-			__debugInfo = "668:\ddgui.gbas";
-			local2_lt_2228 = (((param5_t_Str_ref[0]).length) - (1));
-			__debugInfo = "668:\ddgui.gbas";
-			{
-				var local1_c_2232 = 0;
-				__debugInfo = "672:\ddgui.gbas";
-				for (local1_c_2232 = 0;toCheck(local1_c_2232, local2_lt_2228, 1);local1_c_2232 += 1) {
-					__debugInfo = "670:\ddgui.gbas";
-					local2_ac_2231 = ASC(MID_Str(unref(param5_t_Str_ref[0]), local1_c_2232, 1), 0);
-					__debugInfo = "671:\ddgui.gbas";
-					local1_x_2230+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2231).values[tmpPositionCache];
-					__debugInfo = "670:\ddgui.gbas";
-				};
-				__debugInfo = "672:\ddgui.gbas";
+	return tryClone(KERNLEN(param5_t_Str_ref[0], global18_ddgui_font_kerning.attr11_bHasKerning));
+	if (global18_ddgui_font_kerning.attr11_bHasKerning) {
+		var local2_fx_2251 = 0, local2_lt_2252 = 0, local5_c_Str_2253 = "", local1_x_2254 = 0, local2_ac_2255 = 0;
+		local2_lt_2252 = (((param5_t_Str_ref[0]).length) - (1));
+		{
+			var local1_c_2256 = 0;
+			for (local1_c_2256 = 0;toCheck(local1_c_2256, local2_lt_2252, 1);local1_c_2256 += 1) {
+				local2_ac_2255 = ASC(MID_Str(unref(param5_t_Str_ref[0]), local1_c_2256, 1), 0);
+				local1_x_2254+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2255).values[tmpPositionCache];
+				
 			};
-			__debugInfo = "673:\ddgui.gbas";
-			return tryClone(local1_x_2230);
-			__debugInfo = "668:\ddgui.gbas";
-		} else {
-			var local2_fx_ref_2233 = [0], local2_fy_ref_2234 = [0];
-			__debugInfo = "676:\ddgui.gbas";
-			GETFONTSIZE(local2_fx_ref_2233, local2_fy_ref_2234);
-			__debugInfo = "677:\ddgui.gbas";
-			return tryClone((((param5_t_Str_ref[0]).length) * (local2_fx_ref_2233[0])));
-			__debugInfo = "676:\ddgui.gbas";
+			
 		};
-		__debugInfo = "679:\ddgui.gbas";
-		return 0;
-		__debugInfo = "663:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		return tryClone(local1_x_2254);
+		
+	} else {
+		var local2_fx_ref_2257 = [0], local2_fy_ref_2258 = [0];
+		GETFONTSIZE(local2_fx_ref_2257, local2_fy_ref_2258);
+		return tryClone((((param5_t_Str_ref[0]).length) * (local2_fx_ref_2257[0])));
+		
+	};
+	return 0;
 	
 };
 window['func10_DDgui_init'] = function() {
-	stackPush("function: DDgui_init", __debugInfo);
-	try {
-		__debugInfo = "686:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "686:\ddgui.gbas";
-			DIM(unref(global11_ddgui_stack_ref[0]), [1], [new type9_DDGUI_DLG()]);
-			__debugInfo = "686:\ddgui.gbas";
-		};
-		__debugInfo = "693:\ddgui.gbas";
-		if (((((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "689:\ddgui.gbas";
-			global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = RGB(192, 192, 192);
-			__debugInfo = "690:\ddgui.gbas";
-			global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = RGB(255, 255, 255);
-			__debugInfo = "691:\ddgui.gbas";
-			global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = RGB(64, 144, 255);
-			__debugInfo = "692:\ddgui.gbas";
-			global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = RGB(160, 240, 255);
-			__debugInfo = "689:\ddgui.gbas";
-		};
-		__debugInfo = "694:\ddgui.gbas";
-		DIM(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0]), [0], [new type9_DDGUI_WDG()]);
-		__debugInfo = "695:\ddgui.gbas";
-		DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, [0], new type11_DDGUI_ORDER());
-		__debugInfo = "696:\ddgui.gbas";
-		DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos, [0], new type10_DDGUI_AUTO());
-		__debugInfo = "704:\ddgui.gbas";
-		if ((((((((((((((((((((((PLATFORMINFO_Str("")) == ("WINCE")) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("GP2X")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("ANDROID")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("IPHONE")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PANDORA")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("WEBOS")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PALM_PIXI")) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "702:\ddgui.gbas";
-			global20_DDGUI_AUTO_INPUT_DLG = 1;
-			__debugInfo = "703:\ddgui.gbas";
-			if ((((global20_gDDguiScrollbarWidth) == (0)) ? 1 : 0)) {
-				__debugInfo = "703:\ddgui.gbas";
-				global20_gDDguiScrollbarWidth = 30;
-				__debugInfo = "703:\ddgui.gbas";
-			};
-			__debugInfo = "702:\ddgui.gbas";
-		};
-		__debugInfo = "705:\ddgui.gbas";
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		DIM(unref(global11_ddgui_stack_ref[0]), [1], [new type9_DDGUI_DLG()]);
+		
+	};
+	if (((((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = RGB(192, 192, 192);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = RGB(255, 255, 255);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = RGB(64, 144, 255);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = RGB(160, 240, 255);
+		
+	};
+	DIM(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0]), [0], [new type9_DDGUI_WDG()]);
+	DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, [0], new type11_DDGUI_ORDER());
+	DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos, [0], new type10_DDGUI_AUTO());
+	if ((((((((((((((((((((((PLATFORMINFO_Str("")) == ("WINCE")) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("GP2X")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("ANDROID")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("IPHONE")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PANDORA")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("WEBOS")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PALM_PIXI")) ? 1 : 0))) ? 1 : 0)) {
+		global20_DDGUI_AUTO_INPUT_DLG = 1;
 		if ((((global20_gDDguiScrollbarWidth) == (0)) ? 1 : 0)) {
-			__debugInfo = "705:\ddgui.gbas";
-			global20_gDDguiScrollbarWidth = 20;
-			__debugInfo = "705:\ddgui.gbas";
+			global20_gDDguiScrollbarWidth = 30;
+			
 		};
-		__debugInfo = "707:\ddgui.gbas";
-		return 0;
-		__debugInfo = "686:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((global20_gDDguiScrollbarWidth) == (0)) ? 1 : 0)) {
+		global20_gDDguiScrollbarWidth = 20;
+		
+	};
+	return 0;
 	
 };
 window['func16_DDgui_pushdialog'] = function(param1_x, param1_y, param5_width, param6_height, param16_center_to_screen) {
-	stackPush("function: DDgui_pushdialog", __debugInfo);
-	try {
-		var local2_sx_ref_1621 = [0], local2_sy_ref_1622 = [0], local3_dlg_ref_1623 = [new type9_DDGUI_DLG()];
-		__debugInfo = "789:\ddgui.gbas";
-		if ((((global25_gDDguiMinControlDimension) <= (0)) ? 1 : 0)) {
-			__debugInfo = "776:\ddgui.gbas";
-			global25_gDDguiMinControlDimension = 16;
-			__debugInfo = "776:\ddgui.gbas";
-		};
-		__debugInfo = "791:\ddgui.gbas";
-		DIMPUSH(global11_ddgui_stack_ref[0], local3_dlg_ref_1623);
-		__debugInfo = "793:\ddgui.gbas";
-		GETSCREENSIZE(local2_sx_ref_1621, local2_sy_ref_1622);
-		__debugInfo = "797:\ddgui.gbas";
-		func10_DDgui_init();
-		__debugInfo = "798:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = MIN(param1_x, ((local2_sx_ref_1621[0]) - (1)));
-		__debugInfo = "799:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = MIN(param1_y, ((local2_sy_ref_1622[0]) - (1)));
-		__debugInfo = "800:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = MIN(param5_width, ((local2_sx_ref_1621[0]) - (param1_x)));
-		__debugInfo = "801:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = MIN(param6_height, ((local2_sy_ref_1622[0]) - (param1_y)));
-		__debugInfo = "804:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr8_col_norm;
-		__debugInfo = "805:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr10_col_bright;
-		__debugInfo = "806:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr14_col_hover_norm;
-		__debugInfo = "807:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr16_col_hover_bright;
-		__debugInfo = "810:\ddgui.gbas";
-		if (param16_center_to_screen) {
-			__debugInfo = "810:\ddgui.gbas";
-			func18_DDgui_CenterDialog();
-			__debugInfo = "810:\ddgui.gbas";
-		};
-		__debugInfo = "811:\ddgui.gbas";
-		return 0;
-		__debugInfo = "789:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local2_sx_ref_1621 = [0], local2_sy_ref_1622 = [0], local3_dlg_ref_1623 = [new type9_DDGUI_DLG()];
+	if ((((global25_gDDguiMinControlDimension) <= (0)) ? 1 : 0)) {
+		global25_gDDguiMinControlDimension = 16;
+		
+	};
+	DIMPUSH(global11_ddgui_stack_ref[0], local3_dlg_ref_1623);
+	GETSCREENSIZE(local2_sx_ref_1621, local2_sy_ref_1622);
+	func10_DDgui_init();
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = MIN(param1_x, ((local2_sx_ref_1621[0]) - (1)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = MIN(param1_y, ((local2_sy_ref_1622[0]) - (1)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = MIN(param5_width, ((local2_sx_ref_1621[0]) - (param1_x)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = MIN(param6_height, ((local2_sy_ref_1622[0]) - (param1_y)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr8_col_norm;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr10_col_bright;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr14_col_hover_norm;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr16_col_hover_bright;
+	if (param16_center_to_screen) {
+		func18_DDgui_CenterDialog();
+		
+	};
+	return 0;
 	
 };
 window['func15_DDgui_popdialog'] = function() {
-	stackPush("function: DDgui_popdialog", __debugInfo);
-	try {
-		__debugInfo = "831:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) > (0)) ? 1 : 0)) {
-			var local1_n_2235 = 0, local9_dummy_Str_ref_2236 = [""];
-			__debugInfo = "819:\ddgui.gbas";
-			local1_n_2235 = ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1));
-			__debugInfo = "825:\ddgui.gbas";
-			var forEachSaver14035 = global11_ddgui_stack_ref[0].arrAccess(local1_n_2235).values[tmpPositionCache][0].attr7_widgets_ref[0];
-			for(var forEachCounter14035 = 0 ; forEachCounter14035 < forEachSaver14035.values.length ; forEachCounter14035++) {
-				var local3_wdg_ref_2237 = forEachSaver14035.values[forEachCounter14035];
-			{
-					__debugInfo = "824:\ddgui.gbas";
-					if (local3_wdg_ref_2237[0].attr8_wuserfoo_ref[0]) {
-						__debugInfo = "824:\ddgui.gbas";
-						func12_DDgui_signal(local3_wdg_ref_2237[0].attr7_wid_Str, "DESTROY", local9_dummy_Str_ref_2236);
-						__debugInfo = "824:\ddgui.gbas";
-					};
-					__debugInfo = "824:\ddgui.gbas";
-				}
-				forEachSaver14035.values[forEachCounter14035] = local3_wdg_ref_2237;
-			
-			};
-			__debugInfo = "827:\ddgui.gbas";
-			DIMDEL(global11_ddgui_stack_ref[0], local1_n_2235);
-			__debugInfo = "819:\ddgui.gbas";
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) > (0)) ? 1 : 0)) {
+		var local1_n_2259 = 0, local9_dummy_Str_ref_2260 = [""];
+		local1_n_2259 = ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1));
+		var forEachSaver14239 = global11_ddgui_stack_ref[0].arrAccess(local1_n_2259).values[tmpPositionCache][0].attr7_widgets_ref[0];
+		for(var forEachCounter14239 = 0 ; forEachCounter14239 < forEachSaver14239.values.length ; forEachCounter14239++) {
+			var local3_wdg_ref_2261 = forEachSaver14239.values[forEachCounter14239];
+		{
+				if (local3_wdg_ref_2261[0].attr8_wuserfoo_ref[0]) {
+					func12_DDgui_signal(local3_wdg_ref_2261[0].attr7_wid_Str, "DESTROY", local9_dummy_Str_ref_2260);
+					
+				};
+				
+			}
+			forEachSaver14239.values[forEachCounter14239] = local3_wdg_ref_2261;
+		
 		};
-		__debugInfo = "833:\ddgui.gbas";
-		if (BOUNDS(global11_ddgui_stack_ref[0], 0)) {
-			__debugInfo = "833:\ddgui.gbas";
-			func18_DDgui_resizedialog(0, 0, 0, 0);
-			__debugInfo = "833:\ddgui.gbas";
-		};
-		__debugInfo = "834:\ddgui.gbas";
-		return 0;
-		__debugInfo = "831:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		DIMDEL(global11_ddgui_stack_ref[0], local1_n_2259);
+		
+	};
+	if (BOUNDS(global11_ddgui_stack_ref[0], 0)) {
+		func18_DDgui_resizedialog(0, 0, 0, 0);
+		
+	};
+	return 0;
 	
 };
 window['func10_DDgui_show'] = function(param17_only_show_current) {
-	stackPush("function: DDgui_show", __debugInfo);
-	try {
-		__debugInfo = "844:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "842:\ddgui.gbas";
-			DEBUG("DDshow: No active dialog!\n");
-			__debugInfo = "843:\ddgui.gbas";
-			return tryClone(0);
-			__debugInfo = "842:\ddgui.gbas";
-		};
-		__debugInfo = "852:\ddgui.gbas";
-		if ((((param17_only_show_current) == (0)) ? 1 : 0)) {
-			var local1_i_1625 = 0;
-			__debugInfo = "847:\ddgui.gbas";
-			{
-				__debugInfo = "851:\ddgui.gbas";
-				for (local1_i_1625 = 0;toCheck(local1_i_1625, ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (2)), 1);local1_i_1625 += 1) {
-					var alias3_dlg_ref_1626 = [new type9_DDGUI_DLG()];
-					__debugInfo = "849:\ddgui.gbas";
-					alias3_dlg_ref_1626 = global11_ddgui_stack_ref[0].arrAccess(local1_i_1625).values[tmpPositionCache] /* ALIAS */;
-					__debugInfo = "850:\ddgui.gbas";
-					func17_DDgui_show_intern(unref(alias3_dlg_ref_1626[0]), 0);
-					__debugInfo = "849:\ddgui.gbas";
-				};
-				__debugInfo = "851:\ddgui.gbas";
-			};
-			__debugInfo = "847:\ddgui.gbas";
-		};
-		__debugInfo = "853:\ddgui.gbas";
-		func17_DDgui_show_intern(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), 1);
-		__debugInfo = "857:\ddgui.gbas";
-		var forEachSaver2216 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos;
-		for(var forEachCounter2216 = 0 ; forEachCounter2216 < forEachSaver2216.values.length ; forEachCounter2216++) {
-			var local5_autom_1627 = forEachSaver2216.values[forEachCounter2216];
-		{
-				__debugInfo = "856:\ddgui.gbas";
-				func9_DDgui_set(local5_autom_1627.attr8_idto_Str, local5_autom_1627.attr9_objto_Str, func13_DDgui_get_Str(local5_autom_1627.attr10_idfrom_Str, local5_autom_1627.attr11_objfrom_Str));
-				__debugInfo = "856:\ddgui.gbas";
-			}
-			forEachSaver2216.values[forEachCounter2216] = local5_autom_1627;
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return tryClone(0);
 		
+	};
+	if ((((param17_only_show_current) == (0)) ? 1 : 0)) {
+		var local1_i_1625 = 0;
+		{
+			for (local1_i_1625 = 0;toCheck(local1_i_1625, ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (2)), 1);local1_i_1625 += 1) {
+				var alias3_dlg_ref_1626 = [new type9_DDGUI_DLG()];
+				alias3_dlg_ref_1626 = global11_ddgui_stack_ref[0].arrAccess(local1_i_1625).values[tmpPositionCache] /* ALIAS */;
+				func17_DDgui_show_intern(unref(alias3_dlg_ref_1626[0]), 0);
+				
+			};
+			
 		};
-		__debugInfo = "858:\ddgui.gbas";
-		return 0;
-		__debugInfo = "844:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	func17_DDgui_show_intern(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), 1);
+	var forEachSaver2243 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos;
+	for(var forEachCounter2243 = 0 ; forEachCounter2243 < forEachSaver2243.values.length ; forEachCounter2243++) {
+		var local5_autom_1627 = forEachSaver2243.values[forEachCounter2243];
+	{
+			func9_DDgui_set(local5_autom_1627.attr8_idto_Str, local5_autom_1627.attr9_objto_Str, func13_DDgui_get_Str(local5_autom_1627.attr10_idfrom_Str, local5_autom_1627.attr11_objfrom_Str));
+			
+		}
+		forEachSaver2243.values[forEachCounter2243] = local5_autom_1627;
+	
+	};
+	return 0;
 	
 };
 window['func17_DDgui_show_intern'] = function(param10_ddgui_vals, param10_is_current) {
-	stackPush("function: DDgui_show_intern", __debugInfo);
-	try {
-		var local1_x_1630 = 0, local1_y_1631 = 0, local5_width_1632 = 0, local6_height_1633 = 0, local2_c1_1634 = 0, local2_c2_1635 = 0, local1_i_1636 = 0, local6_id_Str_1637 = "", local7_dy_line_ref_1638 = [0], local4_xpos_ref_1639 = [0], local4_ypos_ref_1640 = [0], local4_ytop_1641 = 0, local5_yclip_1642 = 0, local2_mx_ref_1643 = [0], local2_my_ref_1644 = [0], local2_b1_1645 = 0, local2_b2_1646 = 0, local6_realb1_ref_1647 = [0], local6_realb2_ref_1648 = [0], local2_tx_ref_1649 = [0], local2_ty_ref_1650 = [0], local7_spacing_1651 = 0, local7_movable_1652 = 0, local3_col_1653 = 0, local14_caption_height_1660 = 0, local10_sizer_size_1661 = 0, local9_show_tips_1663 = 0, local5_xclip_1664 = 0, local6_ybclip_1665 = 0, local6_retval_1667 = 0, local10_KickId_Str_1668 = "";
-		__debugInfo = "882:\ddgui.gbas";
-		local7_spacing_1651 = 2;
-		__debugInfo = "883:\ddgui.gbas";
-		MOUSESTATE(local2_mx_ref_1643, local2_my_ref_1644, local6_realb1_ref_1647, local6_realb2_ref_1648);
-		__debugInfo = "884:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1649, local2_ty_ref_1650);
-		__debugInfo = "888:\ddgui.gbas";
-		local14_caption_height_1660 = MAX(unref(local2_ty_ref_1650[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "894:\ddgui.gbas";
-		if (((((((ABS(((local2_mx_ref_1643[0]) - (static9_DDgui_show_intern_ToolTipMx)))) > (4)) ? 1 : 0)) || ((((ABS(((local2_my_ref_1644[0]) - (static9_DDgui_show_intern_ToolTipMy)))) > (4)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "891:\ddgui.gbas";
-			static12_DDgui_show_intern_ToolTipDelay = GETTIMERALL();
-			__debugInfo = "892:\ddgui.gbas";
-			static9_DDgui_show_intern_ToolTipMx = local2_mx_ref_1643[0];
-			__debugInfo = "893:\ddgui.gbas";
-			static9_DDgui_show_intern_ToolTipMy = local2_my_ref_1644[0];
-			__debugInfo = "891:\ddgui.gbas";
-		};
-		__debugInfo = "922:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "897:\ddgui.gbas";
-			local2_b1_1645 = 0;
-			__debugInfo = "904:\ddgui.gbas";
-			if ((((local6_realb1_ref_1647[0]) && ((((static10_DDgui_show_intern_mouse_down) == (0)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "900:\ddgui.gbas";
-				local2_b1_1645 = -(1);
-				__debugInfo = "901:\ddgui.gbas";
-				static10_DDgui_show_intern_mouse_down = 1;
-				__debugInfo = "902:\ddgui.gbas";
-				static10_DDgui_show_intern_movemousex = local2_mx_ref_1643[0];
-				__debugInfo = "903:\ddgui.gbas";
-				static10_DDgui_show_intern_movemousey = local2_my_ref_1644[0];
-				__debugInfo = "900:\ddgui.gbas";
-			};
-			__debugInfo = "914:\ddgui.gbas";
-			if (((((((local6_realb1_ref_1647[0]) == (0)) ? 1 : 0)) && ((((static10_DDgui_show_intern_mouse_down) > (0)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "907:\ddgui.gbas";
-				local2_b1_1645 = 1;
-				__debugInfo = "908:\ddgui.gbas";
-				static10_DDgui_show_intern_mouse_down = 0;
-				__debugInfo = "907:\ddgui.gbas";
-			};
-			__debugInfo = "897:\ddgui.gbas";
-		};
-		__debugInfo = "925:\ddgui.gbas";
-		VIEWPORT(0, 0, 0, 0);
-		__debugInfo = "926:\ddgui.gbas";
-		local2_c1_1634 = param10_ddgui_vals.attr10_col_bright;
-		__debugInfo = "927:\ddgui.gbas";
-		local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "928:\ddgui.gbas";
-		local1_x_1630 = param10_ddgui_vals.attr4_xpos;
-		__debugInfo = "929:\ddgui.gbas";
-		local1_y_1631 = param10_ddgui_vals.attr4_ypos;
-		__debugInfo = "930:\ddgui.gbas";
-		local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
-		__debugInfo = "931:\ddgui.gbas";
-		local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
-		__debugInfo = "952:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "951:\ddgui.gbas";
-			if (param10_ddgui_vals.attr8_moveable) {
-				__debugInfo = "950:\ddgui.gbas";
-				if (local6_realb1_ref_1647[0]) {
-					__debugInfo = "938:\ddgui.gbas";
-					local1_i_1636 = BOXCOLL(local1_x_1630, local1_y_1631, local5_width_1632, local14_caption_height_1660, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
-					__debugInfo = "947:\ddgui.gbas";
-					if (((((((local1_i_1636) || (param10_ddgui_vals.attr6_moving)) ? 1 : 0)) && (((((param10_ddgui_vals.attr9_focus_Str).length) == (0)) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "940:\ddgui.gbas";
-						param10_ddgui_vals.attr6_moving = 1;
-						__debugInfo = "941:\ddgui.gbas";
-						local1_x_1630 = MAX(0, ((((local1_x_1630) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
-						__debugInfo = "942:\ddgui.gbas";
-						local1_y_1631 = MAX(0, ((((local1_y_1631) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
-						__debugInfo = "943:\ddgui.gbas";
-						param10_ddgui_vals.attr4_xpos = local1_x_1630;
-						__debugInfo = "944:\ddgui.gbas";
-						param10_ddgui_vals.attr4_ypos = local1_y_1631;
-						__debugInfo = "940:\ddgui.gbas";
-					} else if (local1_i_1636) {
-						__debugInfo = "946:\ddgui.gbas";
-						param10_ddgui_vals.attr9_focus_Str = "";
-						__debugInfo = "946:\ddgui.gbas";
-					};
-					__debugInfo = "938:\ddgui.gbas";
-				} else {
-					__debugInfo = "949:\ddgui.gbas";
-					param10_ddgui_vals.attr6_moving = 0;
-					__debugInfo = "949:\ddgui.gbas";
-				};
-				__debugInfo = "950:\ddgui.gbas";
-			};
-			__debugInfo = "951:\ddgui.gbas";
-		};
-		__debugInfo = "975:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr8_moveable) || ((param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref[0]).length)) ? 1 : 0)) {
-			__debugInfo = "956:\ddgui.gbas";
-			local7_movable_1652 = 1;
-			__debugInfo = "957:\ddgui.gbas";
-			local1_y_1631 = ((((local1_y_1631) + (local14_caption_height_1660))) + (4));
-			__debugInfo = "960:\ddgui.gbas";
-			func13_DDgui_backgnd(local2_c1_1634, local2_c2_1635, ((local1_x_1630) + (1)), ((((local1_y_1631) - (local14_caption_height_1660))) - (3)), ((local5_width_1632) - (2)), ((local14_caption_height_1660) + (4)));
-			__debugInfo = "962:\ddgui.gbas";
-			func17_DDGui_PrintIntern(param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref, ((local1_x_1630) + (3)), ((((local1_y_1631) - (local14_caption_height_1660))) - (2)), 1);
-			__debugInfo = "963:\ddgui.gbas";
-			func14_DDgui_backrect(local1_x_1630, ((((local1_y_1631) - (local14_caption_height_1660))) - (4)), local5_width_1632, ((((local6_height_1633) + (local14_caption_height_1660))) + (4)), local2_c2_1635);
-			__debugInfo = "965:\ddgui.gbas";
-			param10_ddgui_vals.attr5_rectx = local1_x_1630;
-			__debugInfo = "966:\ddgui.gbas";
-			param10_ddgui_vals.attr5_recty = ((((local1_y_1631) - (local14_caption_height_1660))) - (4));
-			__debugInfo = "967:\ddgui.gbas";
-			param10_ddgui_vals.attr5_rectw = local5_width_1632;
-			__debugInfo = "968:\ddgui.gbas";
-			param10_ddgui_vals.attr5_recth = ((((local6_height_1633) + (local14_caption_height_1660))) + (4));
-			__debugInfo = "956:\ddgui.gbas";
-		} else {
-			__debugInfo = "970:\ddgui.gbas";
-			func14_DDgui_backrect(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, local2_c2_1635);
-			__debugInfo = "971:\ddgui.gbas";
-			param10_ddgui_vals.attr5_rectx = local1_x_1630;
-			__debugInfo = "972:\ddgui.gbas";
-			param10_ddgui_vals.attr5_recty = local1_y_1631;
-			__debugInfo = "973:\ddgui.gbas";
-			param10_ddgui_vals.attr5_rectw = local5_width_1632;
-			__debugInfo = "974:\ddgui.gbas";
-			param10_ddgui_vals.attr5_recth = local6_height_1633;
-			__debugInfo = "970:\ddgui.gbas";
-		};
-		__debugInfo = "979:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_1634, local2_c1_1634, ((local1_x_1630) + (1)), ((local1_y_1631) + (1)), ((local5_width_1632) - (2)), ((local6_height_1633) - (2)));
-		__debugInfo = "982:\ddgui.gbas";
-		local4_ytop_1641 = local1_y_1631;
-		__debugInfo = "983:\ddgui.gbas";
-		local5_yclip_1642 = local4_ytop_1641;
-		__debugInfo = "986:\ddgui.gbas";
-		local10_sizer_size_1661 = MAX(((local2_tx_ref_1649[0]) * (2)), global20_gDDguiScrollbarWidth);
-		__debugInfo = "1003:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "1002:\ddgui.gbas";
-			if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
-				__debugInfo = "1001:\ddgui.gbas";
-				if (local6_realb1_ref_1647[0]) {
-					__debugInfo = "991:\ddgui.gbas";
-					local1_i_1636 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
-					__debugInfo = "998:\ddgui.gbas";
-					if ((((local1_i_1636) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
-						__debugInfo = "993:\ddgui.gbas";
-						param10_ddgui_vals.attr8_scaleing = 1;
-						__debugInfo = "994:\ddgui.gbas";
-						local5_width_1632 = MAX(0, ((((local5_width_1632) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
-						__debugInfo = "995:\ddgui.gbas";
-						local6_height_1633 = MAX(0, ((((local6_height_1633) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
-						__debugInfo = "996:\ddgui.gbas";
-						param10_ddgui_vals.attr4_main.attr6_wwidth = local5_width_1632;
-						__debugInfo = "997:\ddgui.gbas";
-						param10_ddgui_vals.attr4_main.attr7_wheight = local6_height_1633;
-						__debugInfo = "993:\ddgui.gbas";
-					};
-					__debugInfo = "991:\ddgui.gbas";
-				} else {
-					__debugInfo = "1000:\ddgui.gbas";
-					param10_ddgui_vals.attr8_scaleing = 0;
-					__debugInfo = "1000:\ddgui.gbas";
-				};
-				__debugInfo = "1001:\ddgui.gbas";
-			};
-			__debugInfo = "1002:\ddgui.gbas";
-		};
-		__debugInfo = "1015:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
-			__debugInfo = "1006:\ddgui.gbas";
-			local3_col_1653 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
-			__debugInfo = "1007:\ddgui.gbas";
-			if (local3_col_1653) {
-				__debugInfo = "1007:\ddgui.gbas";
-				local2_c2_1635 = param10_ddgui_vals.attr14_col_hover_norm;
-				__debugInfo = "1007:\ddgui.gbas";
-			};
-			__debugInfo = "1008:\ddgui.gbas";
-			local1_i_1636 = ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (3));
-			__debugInfo = "1009:\ddgui.gbas";
-			DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((local10_sizer_size_1661) / (3)))))) - (5)), local1_i_1636, CAST2INT(((local10_sizer_size_1661) / (3))), 2, local2_c2_1635);
-			__debugInfo = "1010:\ddgui.gbas";
-			local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
-			__debugInfo = "1011:\ddgui.gbas";
-			DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((((2) * (local10_sizer_size_1661))) / (3)))))) - (5)), local1_i_1636, CAST2INT(((((2) * (local10_sizer_size_1661))) / (3))), 2, local2_c2_1635);
-			__debugInfo = "1012:\ddgui.gbas";
-			local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
-			__debugInfo = "1013:\ddgui.gbas";
-			DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (5)), local1_i_1636, local10_sizer_size_1661, 2, local2_c2_1635);
-			__debugInfo = "1014:\ddgui.gbas";
-			if (local3_col_1653) {
-				__debugInfo = "1014:\ddgui.gbas";
-				local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
-				__debugInfo = "1014:\ddgui.gbas";
-			};
-			__debugInfo = "1006:\ddgui.gbas";
-		};
-		__debugInfo = "1021:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "1019:\ddgui.gbas";
+	var local1_x_1630 = 0, local1_y_1631 = 0, local5_width_1632 = 0, local6_height_1633 = 0, local2_c1_1634 = 0, local2_c2_1635 = 0, local1_i_1636 = 0, local6_id_Str_1637 = "", local7_dy_line_ref_1638 = [0], local4_xpos_ref_1639 = [0], local4_ypos_ref_1640 = [0], local4_ytop_1641 = 0, local5_yclip_1642 = 0, local2_mx_ref_1643 = [0], local2_my_ref_1644 = [0], local2_b1_1645 = 0, local2_b2_1646 = 0, local6_realb1_ref_1647 = [0], local6_realb2_ref_1648 = [0], local2_tx_ref_1649 = [0], local2_ty_ref_1650 = [0], local7_spacing_1651 = 0, local7_movable_1652 = 0, local3_col_1653 = 0, local14_caption_height_1660 = 0, local10_sizer_size_1661 = 0, local9_show_tips_1663 = 0, local5_xclip_1664 = 0, local6_ybclip_1665 = 0, local6_retval_1667 = 0, local10_KickId_Str_1668 = "";
+	local7_spacing_1651 = 2;
+	MOUSESTATE(local2_mx_ref_1643, local2_my_ref_1644, local6_realb1_ref_1647, local6_realb2_ref_1648);
+	GETFONTSIZE(local2_tx_ref_1649, local2_ty_ref_1650);
+	local14_caption_height_1660 = MAX(unref(local2_ty_ref_1650[0]), global25_gDDguiMinControlDimension);
+	if (((((((ABS(((local2_mx_ref_1643[0]) - (static9_DDgui_show_intern_ToolTipMx)))) > (4)) ? 1 : 0)) || ((((ABS(((local2_my_ref_1644[0]) - (static9_DDgui_show_intern_ToolTipMy)))) > (4)) ? 1 : 0))) ? 1 : 0)) {
+		static12_DDgui_show_intern_ToolTipDelay = GETTIMERALL();
+		static9_DDgui_show_intern_ToolTipMx = local2_mx_ref_1643[0];
+		static9_DDgui_show_intern_ToolTipMy = local2_my_ref_1644[0];
+		
+	};
+	if (param10_is_current) {
+		local2_b1_1645 = 0;
+		if ((((local6_realb1_ref_1647[0]) && ((((static10_DDgui_show_intern_mouse_down) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			local2_b1_1645 = -(1);
+			static10_DDgui_show_intern_mouse_down = 1;
 			static10_DDgui_show_intern_movemousex = local2_mx_ref_1643[0];
-			__debugInfo = "1020:\ddgui.gbas";
 			static10_DDgui_show_intern_movemousey = local2_my_ref_1644[0];
-			__debugInfo = "1019:\ddgui.gbas";
+			
 		};
-		__debugInfo = "1022:\ddgui.gbas";
-		local1_x_1630+=3;
-		__debugInfo = "1023:\ddgui.gbas";
-		local1_y_1631+=3;
-		__debugInfo = "1024:\ddgui.gbas";
-		local4_ytop_1641+=3;
-		__debugInfo = "1025:\ddgui.gbas";
-		local5_yclip_1642+=3;
-		__debugInfo = "1026:\ddgui.gbas";
-		local5_width_1632+=-(6);
-		__debugInfo = "1027:\ddgui.gbas";
-		local6_height_1633+=-(6);
-		__debugInfo = "1028:\ddgui.gbas";
-		local4_ypos_ref_1640[0] = local1_y_1631;
-		__debugInfo = "1029:\ddgui.gbas";
-		local4_xpos_ref_1639[0] = local1_x_1630;
-		__debugInfo = "1053:\ddgui.gbas";
-		if (param10_is_current) {
-			var local4_hgrp_1662 = 0;
-			__debugInfo = "1033:\ddgui.gbas";
-			param10_ddgui_vals.attr4_main.attr10_wscrollmax = MAX(0, ((((param10_ddgui_vals.attr10_realheight) - (local6_height_1633))) - (12)));
-			__debugInfo = "1035:\ddgui.gbas";
-			if (param10_ddgui_vals.attr4_main.attr10_wscrollmax) {
-				__debugInfo = "1035:\ddgui.gbas";
-				param10_ddgui_vals.attr4_main.attr10_wscrollmax+=24;
-				__debugInfo = "1035:\ddgui.gbas";
+		if (((((((local6_realb1_ref_1647[0]) == (0)) ? 1 : 0)) && ((((static10_DDgui_show_intern_mouse_down) > (0)) ? 1 : 0))) ? 1 : 0)) {
+			local2_b1_1645 = 1;
+			static10_DDgui_show_intern_mouse_down = 0;
+			
+		};
+		
+	};
+	VIEWPORT(0, 0, 0, 0);
+	local2_c1_1634 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
+	local1_x_1630 = param10_ddgui_vals.attr4_xpos;
+	local1_y_1631 = param10_ddgui_vals.attr4_ypos;
+	local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
+	local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
+	if (param10_is_current) {
+		if (param10_ddgui_vals.attr8_moveable) {
+			if (local6_realb1_ref_1647[0]) {
+				local1_i_1636 = BOXCOLL(local1_x_1630, local1_y_1631, local5_width_1632, local14_caption_height_1660, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+				if (((((((local1_i_1636) || (param10_ddgui_vals.attr6_moving)) ? 1 : 0)) && (((((param10_ddgui_vals.attr9_focus_Str).length) == (0)) ? 1 : 0))) ? 1 : 0)) {
+					param10_ddgui_vals.attr6_moving = 1;
+					local1_x_1630 = MAX(0, ((((local1_x_1630) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
+					local1_y_1631 = MAX(0, ((((local1_y_1631) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
+					param10_ddgui_vals.attr4_xpos = local1_x_1630;
+					param10_ddgui_vals.attr4_ypos = local1_y_1631;
+					
+				} else if (local1_i_1636) {
+					param10_ddgui_vals.attr9_focus_Str = "";
+					
+				};
+				
+			} else {
+				param10_ddgui_vals.attr6_moving = 0;
+				
 			};
-			__debugInfo = "1040:\ddgui.gbas";
-			if (param10_ddgui_vals.attr9_scaleable) {
-				__debugInfo = "1039:\ddgui.gbas";
-				local4_hgrp_1662 = MAX(32, local10_sizer_size_1661);
-				__debugInfo = "1039:\ddgui.gbas";
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr8_moveable) || ((param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref[0]).length)) ? 1 : 0)) {
+		local7_movable_1652 = 1;
+		local1_y_1631 = ((((local1_y_1631) + (local14_caption_height_1660))) + (4));
+		func13_DDgui_backgnd(local2_c1_1634, local2_c2_1635, ((local1_x_1630) + (1)), ((((local1_y_1631) - (local14_caption_height_1660))) - (3)), ((local5_width_1632) - (2)), ((local14_caption_height_1660) + (4)));
+		func17_DDGui_PrintIntern(param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref, ((local1_x_1630) + (3)), ((((local1_y_1631) - (local14_caption_height_1660))) - (2)), 1);
+		func14_DDgui_backrect(local1_x_1630, ((((local1_y_1631) - (local14_caption_height_1660))) - (4)), local5_width_1632, ((((local6_height_1633) + (local14_caption_height_1660))) + (4)), local2_c2_1635);
+		param10_ddgui_vals.attr5_rectx = local1_x_1630;
+		param10_ddgui_vals.attr5_recty = ((((local1_y_1631) - (local14_caption_height_1660))) - (4));
+		param10_ddgui_vals.attr5_rectw = local5_width_1632;
+		param10_ddgui_vals.attr5_recth = ((((local6_height_1633) + (local14_caption_height_1660))) + (4));
+		
+	} else {
+		func14_DDgui_backrect(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, local2_c2_1635);
+		param10_ddgui_vals.attr5_rectx = local1_x_1630;
+		param10_ddgui_vals.attr5_recty = local1_y_1631;
+		param10_ddgui_vals.attr5_rectw = local5_width_1632;
+		param10_ddgui_vals.attr5_recth = local6_height_1633;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1634, local2_c1_1634, ((local1_x_1630) + (1)), ((local1_y_1631) + (1)), ((local5_width_1632) - (2)), ((local6_height_1633) - (2)));
+	local4_ytop_1641 = local1_y_1631;
+	local5_yclip_1642 = local4_ytop_1641;
+	local10_sizer_size_1661 = MAX(((local2_tx_ref_1649[0]) * (2)), global20_gDDguiScrollbarWidth);
+	if (param10_is_current) {
+		if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+			if (local6_realb1_ref_1647[0]) {
+				local1_i_1636 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+				if ((((local1_i_1636) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+					param10_ddgui_vals.attr8_scaleing = 1;
+					local5_width_1632 = MAX(0, ((((local5_width_1632) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
+					local6_height_1633 = MAX(0, ((((local6_height_1633) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
+					param10_ddgui_vals.attr4_main.attr6_wwidth = local5_width_1632;
+					param10_ddgui_vals.attr4_main.attr7_wheight = local6_height_1633;
+					
+				};
+				
+			} else {
+				param10_ddgui_vals.attr8_scaleing = 0;
+				
 			};
-			__debugInfo = "1052:\ddgui.gbas";
-			if ((((param10_is_current) && (func21_DDgui_handlescrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, ((((local2_mx_ref_1643[0]) - (local1_x_1630))) + (10)), ((local2_my_ref_1644[0]) - (local1_y_1631)), local2_b1_1645, local2_b2_1646, ((local6_height_1633) - (local4_hgrp_1662))))) ? 1 : 0)) {
-				__debugInfo = "1044:\ddgui.gbas";
-				VIEWPORT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633);
-				__debugInfo = "1045:\ddgui.gbas";
-				func19_DDgui_drawscrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, local5_width_1632, ((local6_height_1633) - (local4_hgrp_1662)), local6_height_1633, 0);
-				__debugInfo = "1046:\ddgui.gbas";
-				VIEWPORT(0, 0, 0, 0);
-				__debugInfo = "1048:\ddgui.gbas";
-				local5_width_1632+=-(local10_sizer_size_1661);
-				__debugInfo = "1049:\ddgui.gbas";
-				local1_i_1636 = param10_ddgui_vals.attr4_main.attr7_wscroll;
-				__debugInfo = "1050:\ddgui.gbas";
-				local4_ypos_ref_1640[0] = ((local4_ypos_ref_1640[0]) - (local1_i_1636));
-				__debugInfo = "1051:\ddgui.gbas";
-				local4_ytop_1641 = ((local4_ytop_1641) - (local1_i_1636));
-				__debugInfo = "1044:\ddgui.gbas";
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+		local3_col_1653 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+		if (local3_col_1653) {
+			local2_c2_1635 = param10_ddgui_vals.attr14_col_hover_norm;
+			
+		};
+		local1_i_1636 = ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (3));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((local10_sizer_size_1661) / (3)))))) - (5)), local1_i_1636, CAST2INT(((local10_sizer_size_1661) / (3))), 2, local2_c2_1635);
+		local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((((2) * (local10_sizer_size_1661))) / (3)))))) - (5)), local1_i_1636, CAST2INT(((((2) * (local10_sizer_size_1661))) / (3))), 2, local2_c2_1635);
+		local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (5)), local1_i_1636, local10_sizer_size_1661, 2, local2_c2_1635);
+		if (local3_col_1653) {
+			local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
+			
+		};
+		
+	};
+	if (param10_is_current) {
+		static10_DDgui_show_intern_movemousex = local2_mx_ref_1643[0];
+		static10_DDgui_show_intern_movemousey = local2_my_ref_1644[0];
+		
+	};
+	local1_x_1630+=3;
+	local1_y_1631+=3;
+	local4_ytop_1641+=3;
+	local5_yclip_1642+=3;
+	local5_width_1632+=-(6);
+	local6_height_1633+=-(6);
+	local4_ypos_ref_1640[0] = local1_y_1631;
+	local4_xpos_ref_1639[0] = local1_x_1630;
+	if (param10_is_current) {
+		var local4_hgrp_1662 = 0;
+		param10_ddgui_vals.attr4_main.attr10_wscrollmax = MAX(0, ((((param10_ddgui_vals.attr10_realheight) - (local6_height_1633))) - (12)));
+		if (param10_ddgui_vals.attr4_main.attr10_wscrollmax) {
+			param10_ddgui_vals.attr4_main.attr10_wscrollmax+=24;
+			
+		};
+		if (param10_ddgui_vals.attr9_scaleable) {
+			local4_hgrp_1662 = MAX(32, local10_sizer_size_1661);
+			
+		};
+		if ((((param10_is_current) && (func21_DDgui_handlescrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, ((((local2_mx_ref_1643[0]) - (local1_x_1630))) + (10)), ((local2_my_ref_1644[0]) - (local1_y_1631)), local2_b1_1645, local2_b2_1646, ((local6_height_1633) - (local4_hgrp_1662))))) ? 1 : 0)) {
+			VIEWPORT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633);
+			func19_DDgui_drawscrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, local5_width_1632, ((local6_height_1633) - (local4_hgrp_1662)), local6_height_1633, 0);
+			VIEWPORT(0, 0, 0, 0);
+			local5_width_1632+=-(local10_sizer_size_1661);
+			local1_i_1636 = param10_ddgui_vals.attr4_main.attr7_wscroll;
+			local4_ypos_ref_1640[0] = ((local4_ypos_ref_1640[0]) - (local1_i_1636));
+			local4_ytop_1641 = ((local4_ytop_1641) - (local1_i_1636));
+			
+		};
+		
+	};
+	local7_dy_line_ref_1638[0] = 0;
+	if ((((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) != (BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0))) ? 1 : 0)) {
+		
+	};
+	if ((((((GETTIMERALL()) - (static12_DDgui_show_intern_ToolTipDelay))) > (500)) ? 1 : 0)) {
+		local9_show_tips_1663 = 1;
+		
+	};
+	local5_xclip_1664 = ((local4_xpos_ref_1639[0]) + (local5_width_1632));
+	local6_ybclip_1665 = ((local5_yclip_1642) + (local6_height_1633));
+	{
+		var local2_od_ref_1666 = [0];
+		for (local2_od_ref_1666[0] = 0;toCheck(local2_od_ref_1666[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local2_od_ref_1666[0] += 1) {
+			func24_DDgui_draw_widget_intern(param10_ddgui_vals, local2_od_ref_1666, local4_xpos_ref_1639, local4_ypos_ref_1640, local7_dy_line_ref_1638, local5_width_1632, param10_is_current, local7_spacing_1651, local5_xclip_1664, local5_yclip_1642, local6_ybclip_1665, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), local2_b1_1645, local2_b2_1646, local1_x_1630, local1_y_1631, local9_show_tips_1663);
+			
+		};
+		
+	};
+	VIEWPORT(0, 0, 0, 0);
+	if ((((param10_is_current) == (0)) ? 1 : 0)) {
+		ALPHAMODE(-(0.5));
+		local1_x_1630 = param10_ddgui_vals.attr4_xpos;
+		local1_y_1631 = param10_ddgui_vals.attr4_ypos;
+		local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
+		local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
+		if (local7_movable_1652) {
+			local6_height_1633+=((local14_caption_height_1660) + (4));
+			
+		};
+		DRAWRECT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, RGB(0, 0, 0));
+		ALPHAMODE(0);
+		
+	};
+	SYSTEMPOINTER(1);
+	local6_height_1633 = ((((((local4_ypos_ref_1640[0]) + (local7_spacing_1651))) + (local7_dy_line_ref_1638[0]))) - (local4_ytop_1641));
+	if (param10_is_current) {
+		param10_ddgui_vals.attr10_realheight = local6_height_1633;
+		
+	};
+	local6_retval_1667 = MAX(local6_height_1633, param10_ddgui_vals.attr4_main.attr7_wheight);
+	local1_x_1630 = param10_ddgui_vals.attr15_kick_intern_dlg;
+	param10_ddgui_vals.attr15_kick_intern_dlg = 0;
+	local10_KickId_Str_1668 = param10_ddgui_vals.attr18_kick_intern_id_Str;
+	{
+		var local16___SelectHelper3__1669 = 0;
+		local16___SelectHelper3__1669 = local1_x_1630;
+		if ((((local16___SelectHelper3__1669) == (1)) ? 1 : 0)) {
+			local3_col_1653;
+			local3_col_1653 = func14_DDgui_ColorDlg(INT2STR(MID_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 5, 64)));
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", (("SPR_C") + (CAST2STRING(local3_col_1653))));
+			func9_DDgui_set(local10_KickId_Str_1668, "CLICKED", CAST2STRING(1));
+			
+		} else if ((((local16___SelectHelper3__1669) == (2)) ? 1 : 0)) {
+			var local11_bSingleText_1670 = 0, local9_bIsNumber_1671 = 0, local8_text_Str_1672 = "";
+			local11_bSingleText_1670 = 0;
+			local9_bIsNumber_1671 = 0;
+			if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("SINGLETEXT")) ? 1 : 0)) {
+				local11_bSingleText_1670 = 1;
+				
 			};
-			__debugInfo = "1033:\ddgui.gbas";
-		};
-		__debugInfo = "1055:\ddgui.gbas";
-		local7_dy_line_ref_1638[0] = 0;
-		__debugInfo = "1059:\ddgui.gbas";
-		if ((((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) != (BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0))) ? 1 : 0)) {
-			__debugInfo = "1058:\ddgui.gbas";
-			DEBUG((((((((("Draw order is messed up ") + (CAST2STRING(BOUNDS(param10_ddgui_vals.attr9_draworder, 0))))) + ("/"))) + (CAST2STRING(BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0))))) + ("\n")));
-			__debugInfo = "1058:\ddgui.gbas";
-		};
-		__debugInfo = "1062:\ddgui.gbas";
-		if ((((((GETTIMERALL()) - (static12_DDgui_show_intern_ToolTipDelay))) > (500)) ? 1 : 0)) {
-			__debugInfo = "1062:\ddgui.gbas";
-			local9_show_tips_1663 = 1;
-			__debugInfo = "1062:\ddgui.gbas";
-		};
-		__debugInfo = "1065:\ddgui.gbas";
-		local5_xclip_1664 = ((local4_xpos_ref_1639[0]) + (local5_width_1632));
-		__debugInfo = "1066:\ddgui.gbas";
-		local6_ybclip_1665 = ((local5_yclip_1642) + (local6_height_1633));
-		__debugInfo = "1067:\ddgui.gbas";
-		{
-			var local2_od_ref_1666 = [0];
-			__debugInfo = "1070:\ddgui.gbas";
-			for (local2_od_ref_1666[0] = 0;toCheck(local2_od_ref_1666[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local2_od_ref_1666[0] += 1) {
-				__debugInfo = "1069:\ddgui.gbas";
-				func24_DDgui_draw_widget_intern(param10_ddgui_vals, local2_od_ref_1666, local4_xpos_ref_1639, local4_ypos_ref_1640, local7_dy_line_ref_1638, local5_width_1632, param10_is_current, local7_spacing_1651, local5_xclip_1664, local5_yclip_1642, local6_ybclip_1665, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), local2_b1_1645, local2_b2_1646, local1_x_1630, local1_y_1631, local9_show_tips_1663);
-				__debugInfo = "1069:\ddgui.gbas";
+			if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("NUMBERTEXT")) ? 1 : 0)) {
+				local11_bSingleText_1670 = 1;
+				local9_bIsNumber_1671 = 1;
+				
 			};
-			__debugInfo = "1070:\ddgui.gbas";
-		};
-		__debugInfo = "1071:\ddgui.gbas";
-		VIEWPORT(0, 0, 0, 0);
-		__debugInfo = "1083:\ddgui.gbas";
-		if ((((param10_is_current) == (0)) ? 1 : 0)) {
-			__debugInfo = "1075:\ddgui.gbas";
-			ALPHAMODE(-(0.5));
-			__debugInfo = "1076:\ddgui.gbas";
-			local1_x_1630 = param10_ddgui_vals.attr4_xpos;
-			__debugInfo = "1077:\ddgui.gbas";
-			local1_y_1631 = param10_ddgui_vals.attr4_ypos;
-			__debugInfo = "1078:\ddgui.gbas";
-			local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
-			__debugInfo = "1079:\ddgui.gbas";
-			local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
-			__debugInfo = "1080:\ddgui.gbas";
-			if (local7_movable_1652) {
-				__debugInfo = "1080:\ddgui.gbas";
-				local6_height_1633+=((local14_caption_height_1660) + (4));
-				__debugInfo = "1080:\ddgui.gbas";
-			};
-			__debugInfo = "1081:\ddgui.gbas";
-			DRAWRECT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, RGB(0, 0, 0));
-			__debugInfo = "1082:\ddgui.gbas";
-			ALPHAMODE(0);
-			__debugInfo = "1075:\ddgui.gbas";
-		};
-		__debugInfo = "1084:\ddgui.gbas";
-		SYSTEMPOINTER(1);
-		__debugInfo = "1087:\ddgui.gbas";
-		local6_height_1633 = ((((((local4_ypos_ref_1640[0]) + (local7_spacing_1651))) + (local7_dy_line_ref_1638[0]))) - (local4_ytop_1641));
-		__debugInfo = "1088:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "1088:\ddgui.gbas";
-			param10_ddgui_vals.attr10_realheight = local6_height_1633;
-			__debugInfo = "1088:\ddgui.gbas";
-		};
-		__debugInfo = "1089:\ddgui.gbas";
-		local6_retval_1667 = MAX(local6_height_1633, param10_ddgui_vals.attr4_main.attr7_wheight);
-		__debugInfo = "1093:\ddgui.gbas";
-		local1_x_1630 = param10_ddgui_vals.attr15_kick_intern_dlg;
-		__debugInfo = "1094:\ddgui.gbas";
-		param10_ddgui_vals.attr15_kick_intern_dlg = 0;
-		__debugInfo = "1095:\ddgui.gbas";
-		local10_KickId_Str_1668 = param10_ddgui_vals.attr18_kick_intern_id_Str;
-		__debugInfo = "1097:\ddgui.gbas";
-		{
-			var local16___SelectHelper3__1669 = 0;
-			__debugInfo = "1097:\ddgui.gbas";
-			local16___SelectHelper3__1669 = local1_x_1630;
-			__debugInfo = "1126:\ddgui.gbas";
-			if ((((local16___SelectHelper3__1669) == (1)) ? 1 : 0)) {
-				__debugInfo = "1099:\ddgui.gbas";
-				local3_col_1653;
-				__debugInfo = "1101:\ddgui.gbas";
-				local3_col_1653 = func14_DDgui_ColorDlg(INT2STR(MID_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 5, 64)));
-				__debugInfo = "1102:\ddgui.gbas";
-				func9_DDgui_set(local10_KickId_Str_1668, "TEXT", (("SPR_C") + (CAST2STRING(local3_col_1653))));
-				__debugInfo = "1103:\ddgui.gbas";
+			local8_text_Str_1672 = func15_DDgui_input_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 0, 0, local11_bSingleText_1670, local9_bIsNumber_1671);
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local8_text_Str_1672);
+			
+		} else if ((((local16___SelectHelper3__1669) == (3)) ? 1 : 0)) {
+			var local3_scx_ref_1673 = [0], local3_scy_ref_1674 = [0], local4_isel_1675 = 0;
+			GETSCREENSIZE(local3_scx_ref_1673, local3_scy_ref_1674);
+			local4_isel_1675 = func24_DDgui_button_list_picker(MIN(((local3_scy_ref_1674[0]) - (16)), func9_DDgui_get(local10_KickId_Str_1668, "XPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "YPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "WIDTH")), MAX(16, ((local3_scy_ref_1674[0]) - (func9_DDgui_get(local10_KickId_Str_1668, "YPOS")))), func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), ~~(func9_DDgui_get(local10_KickId_Str_1668, "SELECT")));
+			if ((((local4_isel_1675) >= (0)) ? 1 : 0)) {
+				func9_DDgui_set(local10_KickId_Str_1668, "SELECT", CAST2STRING(local4_isel_1675));
 				func9_DDgui_set(local10_KickId_Str_1668, "CLICKED", CAST2STRING(1));
-				__debugInfo = "1099:\ddgui.gbas";
-			} else if ((((local16___SelectHelper3__1669) == (2)) ? 1 : 0)) {
-				var local11_bSingleText_1670 = 0, local9_bIsNumber_1671 = 0, local8_text_Str_1672 = "";
-				__debugInfo = "1105:\ddgui.gbas";
-				local11_bSingleText_1670 = 0;
-				__debugInfo = "1106:\ddgui.gbas";
-				local9_bIsNumber_1671 = 0;
-				__debugInfo = "1107:\ddgui.gbas";
-				if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("SINGLETEXT")) ? 1 : 0)) {
-					__debugInfo = "1107:\ddgui.gbas";
-					local11_bSingleText_1670 = 1;
-					__debugInfo = "1107:\ddgui.gbas";
-				};
-				__debugInfo = "1111:\ddgui.gbas";
-				if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("NUMBERTEXT")) ? 1 : 0)) {
-					__debugInfo = "1109:\ddgui.gbas";
-					local11_bSingleText_1670 = 1;
-					__debugInfo = "1110:\ddgui.gbas";
-					local9_bIsNumber_1671 = 1;
-					__debugInfo = "1109:\ddgui.gbas";
-				};
-				__debugInfo = "1112:\ddgui.gbas";
-				local8_text_Str_1672 = func15_DDgui_input_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 0, 0, local11_bSingleText_1670, local9_bIsNumber_1671);
-				__debugInfo = "1113:\ddgui.gbas";
-				func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local8_text_Str_1672);
-				__debugInfo = "1105:\ddgui.gbas";
-			} else if ((((local16___SelectHelper3__1669) == (3)) ? 1 : 0)) {
-				var local3_scx_ref_1673 = [0], local3_scy_ref_1674 = [0], local4_isel_1675 = 0;
-				__debugInfo = "1116:\ddgui.gbas";
-				GETSCREENSIZE(local3_scx_ref_1673, local3_scy_ref_1674);
-				__debugInfo = "1118:\ddgui.gbas";
-				local4_isel_1675 = func24_DDgui_button_list_picker(MIN(((local3_scy_ref_1674[0]) - (16)), func9_DDgui_get(local10_KickId_Str_1668, "XPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "YPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "WIDTH")), MAX(16, ((local3_scy_ref_1674[0]) - (func9_DDgui_get(local10_KickId_Str_1668, "YPOS")))), func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), ~~(func9_DDgui_get(local10_KickId_Str_1668, "SELECT")));
-				__debugInfo = "1122:\ddgui.gbas";
-				if ((((local4_isel_1675) >= (0)) ? 1 : 0)) {
-					__debugInfo = "1120:\ddgui.gbas";
-					func9_DDgui_set(local10_KickId_Str_1668, "SELECT", CAST2STRING(local4_isel_1675));
-					__debugInfo = "1121:\ddgui.gbas";
-					func9_DDgui_set(local10_KickId_Str_1668, "CLICKED", CAST2STRING(1));
-					__debugInfo = "1120:\ddgui.gbas";
-				};
-				__debugInfo = "1116:\ddgui.gbas";
-			} else if ((((local16___SelectHelper3__1669) == (4)) ? 1 : 0)) {
-				var local7_ret_Str_1676 = "";
-				__debugInfo = "1124:\ddgui.gbas";
-				local7_ret_Str_1676 = func20_DDgui_FileDialog_Str(1, "*.*", 0);
-				__debugInfo = "1125:\ddgui.gbas";
-				func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local7_ret_Str_1676);
-				__debugInfo = "1124:\ddgui.gbas";
+				
 			};
-			__debugInfo = "1097:\ddgui.gbas";
+			
+		} else if ((((local16___SelectHelper3__1669) == (4)) ? 1 : 0)) {
+			var local7_ret_Str_1676 = "";
+			local7_ret_Str_1676 = func20_DDgui_FileDialog_Str(1, "*.*", 0);
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local7_ret_Str_1676);
+			
 		};
-		__debugInfo = "1131:\ddgui.gbas";
-		return tryClone(local6_retval_1667);
-		__debugInfo = "1132:\ddgui.gbas";
-		return 0;
-		__debugInfo = "882:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return tryClone(local6_retval_1667);
+	return 0;
 	
 };
 window['func24_DDgui_draw_widget_intern'] = function(param10_ddgui_vals, param11_order_index_ref, param4_xpos_ref, param4_ypos_ref, param7_dy_line_ref, param5_width, param10_is_current, param7_spacing, param5_xclip, param5_yclip, param6_ybclip, param2_mx, param2_my, param2_b1, param2_b2, param1_x, param1_y, param9_show_tips) {
-	stackPush("function: DDgui_draw_widget_intern", __debugInfo);
-	try {
-		var local3_vpx_1695 = 0, local3_vpy_1696 = 0, local2_dx_1697 = 0, local2_dy_1698 = 0, local5_vptop_1700 = 0, local4_ytop_1701 = 0, alias3_wdg_ref_1702 = [new type9_DDGUI_WDG()];
-		__debugInfo = "1156:\ddgui.gbas";
-		alias3_wdg_ref_1702 = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(param10_ddgui_vals.attr9_draworder.arrAccess(param11_order_index_ref[0]).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
-		__debugInfo = "1159:\ddgui.gbas";
-		if (alias3_wdg_ref_1702[0].attr5_whide) {
-			__debugInfo = "1159:\ddgui.gbas";
-			return 1;
-			__debugInfo = "1159:\ddgui.gbas";
-		};
-		__debugInfo = "1161:\ddgui.gbas";
-		local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
-		__debugInfo = "1162:\ddgui.gbas";
-		local2_dy_1698 = alias3_wdg_ref_1702[0].attr7_wheight;
-		__debugInfo = "1171:\ddgui.gbas";
-		if ((((((param4_xpos_ref[0]) + (local2_dx_1697))) > (((param5_width) + (param1_x)))) ? 1 : 0)) {
-			__debugInfo = "1166:\ddgui.gbas";
-			param4_xpos_ref[0] = param1_x;
-			__debugInfo = "1167:\ddgui.gbas";
-			param4_ypos_ref[0] = ((((param4_ypos_ref[0]) + (param7_dy_line_ref[0]))) + (param7_spacing));
-			__debugInfo = "1168:\ddgui.gbas";
-			param7_dy_line_ref[0] = local2_dy_1698;
-			__debugInfo = "1170:\ddgui.gbas";
-			if (((((((local2_dx_1697) >= (param5_width)) ? 1 : 0)) && ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("SPACER")) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "1170:\ddgui.gbas";
-				return 1;
-				__debugInfo = "1170:\ddgui.gbas";
-			};
-			__debugInfo = "1166:\ddgui.gbas";
-		};
-		__debugInfo = "1177:\ddgui.gbas";
-		if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) == (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1176:\ddgui.gbas";
-			param4_xpos_ref[0] = ((param4_xpos_ref[0]) + (CAST2INT(((((((((param5_width) + (param1_x))) - (param4_xpos_ref[0]))) - (local2_dx_1697))) / (2)))));
-			__debugInfo = "1176:\ddgui.gbas";
-		};
-		__debugInfo = "1181:\ddgui.gbas";
-		if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) > (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1180:\ddgui.gbas";
-			param4_xpos_ref[0] = ((((param1_x) + (param5_width))) - (local2_dx_1697));
-			__debugInfo = "1180:\ddgui.gbas";
-		};
-		__debugInfo = "1183:\ddgui.gbas";
-		//label: __DrawFrames__;
-		__debugInfo = "1265:\ddgui.gbas";
-		if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
-			var local6_border_1703 = 0, local13_dy_line_frame_ref_1704 = [0], local6_xstart_1705 = 0, local6_ystart_1706 = 0, local4_iord_ref_1709 = [0], local8_fr_width_1710 = 0, local6_wwidth_1711 = 0;
-			__debugInfo = "1185:\ddgui.gbas";
-			local6_border_1703 = 0;
-			__debugInfo = "1186:\ddgui.gbas";
-			if ((((local2_dx_1697) == (10000)) ? 1 : 0)) {
-				__debugInfo = "1186:\ddgui.gbas";
-				local6_border_1703 = 1;
-				__debugInfo = "1186:\ddgui.gbas";
-			};
-			__debugInfo = "1187:\ddgui.gbas";
-			local13_dy_line_frame_ref_1704[0] = 0;
-			__debugInfo = "1188:\ddgui.gbas";
-			local6_xstart_1705 = param4_xpos_ref[0];
-			__debugInfo = "1189:\ddgui.gbas";
-			local6_ystart_1706 = param4_ypos_ref[0];
-			__debugInfo = "1227:\ddgui.gbas";
-			if ((alias3_wdg_ref_1702[0].attr9_wtext_Str_ref[0]).length) {
-				var local2_fx_ref_1707 = [0], local2_fy_ref_1708 = [0];
-				__debugInfo = "1192:\ddgui.gbas";
-				local6_border_1703 = 4;
-				__debugInfo = "1194:\ddgui.gbas";
-				GETFONTSIZE(local2_fx_ref_1707, local2_fy_ref_1708);
-				__debugInfo = "1197:\ddgui.gbas";
-				local3_vpx_1695 = alias3_wdg_ref_1702[0].attr6_wwidth;
-				__debugInfo = "1198:\ddgui.gbas";
-				local3_vpy_1696 = alias3_wdg_ref_1702[0].attr7_wheight;
-				__debugInfo = "1199:\ddgui.gbas";
-				local5_vptop_1700 = param4_ypos_ref[0];
-				__debugInfo = "1201:\ddgui.gbas";
-				local4_ytop_1701 = 0;
-				__debugInfo = "1206:\ddgui.gbas";
-				if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
-					__debugInfo = "1203:\ddgui.gbas";
-					local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
-					__debugInfo = "1204:\ddgui.gbas";
-					local5_vptop_1700+=-(local4_ytop_1701);
-					__debugInfo = "1205:\ddgui.gbas";
-					local3_vpy_1696+=local4_ytop_1701;
-					__debugInfo = "1203:\ddgui.gbas";
-				};
-				__debugInfo = "1207:\ddgui.gbas";
-				if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
-					__debugInfo = "1207:\ddgui.gbas";
-					local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
-					__debugInfo = "1207:\ddgui.gbas";
-				};
-				__debugInfo = "1208:\ddgui.gbas";
-				if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
-					__debugInfo = "1208:\ddgui.gbas";
-					local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
-					__debugInfo = "1208:\ddgui.gbas";
-				};
-				__debugInfo = "1220:\ddgui.gbas";
-				if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "1212:\ddgui.gbas";
-					VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
-					__debugInfo = "1214:\ddgui.gbas";
-					ALPHAMODE(-(0.5));
-					__debugInfo = "1215:\ddgui.gbas";
-					func14_DDgui_backrect(1, ((((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) + (1)), ((alias3_wdg_ref_1702[0].attr6_wwidth) - (2)), ((((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) - (2)), param10_ddgui_vals.attr8_col_norm);
-					__debugInfo = "1216:\ddgui.gbas";
-					ALPHAMODE(0);
-					__debugInfo = "1217:\ddgui.gbas";
-					func14_DDgui_backrect(0, ((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), alias3_wdg_ref_1702[0].attr6_wwidth, ((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), param10_ddgui_vals.attr8_col_norm);
-					__debugInfo = "1218:\ddgui.gbas";
-					DRAWRECT(local6_border_1703, local4_ytop_1701, ((((local6_border_1703) * (4))) + (func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref))), unref(local2_fy_ref_1708[0]), param10_ddgui_vals.attr10_col_bright);
-					__debugInfo = "1219:\ddgui.gbas";
-					func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref, ((local6_border_1703) * (2)), local4_ytop_1701, 0);
-					__debugInfo = "1212:\ddgui.gbas";
-				};
-				__debugInfo = "1222:\ddgui.gbas";
-				param4_ypos_ref[0]+=((local2_fy_ref_1708[0]) + (local6_border_1703));
-				__debugInfo = "1223:\ddgui.gbas";
-				param4_xpos_ref[0]+=local6_border_1703;
-				__debugInfo = "1224:\ddgui.gbas";
-				param4_ypos_ref[0]+=local6_border_1703;
-				__debugInfo = "1225:\ddgui.gbas";
-				local6_xstart_1705+=local6_border_1703;
-				__debugInfo = "1192:\ddgui.gbas";
-			};
-			__debugInfo = "1231:\ddgui.gbas";
-			local8_fr_width_1710 = 0;
-			__debugInfo = "1235:\ddgui.gbas";
-			local6_wwidth_1711 = alias3_wdg_ref_1702[0].attr6_wwidth;
-			__debugInfo = "1236:\ddgui.gbas";
-			if ((((local6_wwidth_1711) < (10000)) ? 1 : 0)) {
-				__debugInfo = "1236:\ddgui.gbas";
-				local6_wwidth_1711+=-(((2) * (local6_border_1703)));
-				__debugInfo = "1236:\ddgui.gbas";
-			};
-			__debugInfo = "1236:\ddgui.gbas";
-			{
-				__debugInfo = "1252:\ddgui.gbas";
-				for (local4_iord_ref_1709[0] = ((param11_order_index_ref[0]) + (1));toCheck(local4_iord_ref_1709[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local4_iord_ref_1709[0] += 1) {
-					var local9_simplewdg_1712 = 0, local4_icur_1713 = 0;
-					__debugInfo = "1239:\ddgui.gbas";
-					local4_icur_1713 = local4_iord_ref_1709[0];
-					__debugInfo = "1244:\ddgui.gbas";
-					local9_simplewdg_1712 = func24_DDgui_draw_widget_intern(param10_ddgui_vals, local4_iord_ref_1709, param4_xpos_ref, param4_ypos_ref, local13_dy_line_frame_ref_1704, local6_wwidth_1711, param10_is_current, param7_spacing, param5_xclip, param5_yclip, param6_ybclip, param2_mx, param2_my, param2_b1, param2_b2, local6_xstart_1705, local6_ystart_1706, param9_show_tips);
-					__debugInfo = "1247:\ddgui.gbas";
-					local8_fr_width_1710 = MAX(local8_fr_width_1710, ((param4_xpos_ref[0]) - (local6_xstart_1705)));
-					__debugInfo = "1251:\ddgui.gbas";
-					if ((((local9_simplewdg_1712) == (0)) ? 1 : 0)) {
-						__debugInfo = "1249:\ddgui.gbas";
-						param11_order_index_ref[0] = local4_iord_ref_1709[0];
-						__debugInfo = "1250:\ddgui.gbas";
-						break;
-						__debugInfo = "1249:\ddgui.gbas";
-					};
-					__debugInfo = "1239:\ddgui.gbas";
-				};
-				__debugInfo = "1252:\ddgui.gbas";
-			};
-			__debugInfo = "1257:\ddgui.gbas";
-			if ((((alias3_wdg_ref_1702[0].attr6_wwidth) == (10000)) ? 1 : 0)) {
-				__debugInfo = "1255:\ddgui.gbas";
-				alias3_wdg_ref_1702[0].attr6_wwidth = ((local8_fr_width_1710) + (((2) * (local6_border_1703))));
-				__debugInfo = "1256:\ddgui.gbas";
-				local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
-				__debugInfo = "1255:\ddgui.gbas";
-			};
-			__debugInfo = "1259:\ddgui.gbas";
-			alias3_wdg_ref_1702[0].attr7_wheight = ((((((param4_ypos_ref[0]) - (local6_ystart_1706))) + (local13_dy_line_frame_ref_1704[0]))) + (((local6_border_1703) * (2))));
-			__debugInfo = "1260:\ddgui.gbas";
-			param4_xpos_ref[0] = local6_xstart_1705;
-			__debugInfo = "1261:\ddgui.gbas";
-			param4_ypos_ref[0] = local6_ystart_1706;
-			__debugInfo = "1185:\ddgui.gbas";
-		} else if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
-			__debugInfo = "1264:\ddgui.gbas";
-			return tryClone(0);
-			__debugInfo = "1264:\ddgui.gbas";
-		};
-		__debugInfo = "1268:\ddgui.gbas";
-		if (param10_is_current) {
-			__debugInfo = "1268:\ddgui.gbas";
-			func18_DDgui_handlewidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), ((param2_mx) - (param4_xpos_ref[0])), ((param2_my) - (param4_ypos_ref[0])), param2_b1, param2_b2);
-			__debugInfo = "1268:\ddgui.gbas";
-		};
-		__debugInfo = "1270:\ddgui.gbas";
-		local3_vpx_1695 = local2_dx_1697;
-		__debugInfo = "1271:\ddgui.gbas";
-		local3_vpy_1696 = local2_dy_1698;
-		__debugInfo = "1272:\ddgui.gbas";
-		local5_vptop_1700 = param4_ypos_ref[0];
-		__debugInfo = "1273:\ddgui.gbas";
-		local4_ytop_1701 = 0;
-		__debugInfo = "1278:\ddgui.gbas";
-		if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
-			__debugInfo = "1275:\ddgui.gbas";
-			local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
-			__debugInfo = "1276:\ddgui.gbas";
-			local5_vptop_1700+=-(local4_ytop_1701);
-			__debugInfo = "1277:\ddgui.gbas";
-			local3_vpy_1696+=local4_ytop_1701;
-			__debugInfo = "1275:\ddgui.gbas";
-		};
-		__debugInfo = "1279:\ddgui.gbas";
-		if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
-			__debugInfo = "1279:\ddgui.gbas";
-			local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
-			__debugInfo = "1279:\ddgui.gbas";
-		};
-		__debugInfo = "1280:\ddgui.gbas";
-		if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
-			__debugInfo = "1280:\ddgui.gbas";
-			local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
-			__debugInfo = "1280:\ddgui.gbas";
-		};
-		__debugInfo = "1283:\ddgui.gbas";
-		alias3_wdg_ref_1702[0].attr5_wxpos = param4_xpos_ref[0];
-		__debugInfo = "1284:\ddgui.gbas";
-		alias3_wdg_ref_1702[0].attr5_wypos = local5_vptop_1700;
-		__debugInfo = "1290:\ddgui.gbas";
-		if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1288:\ddgui.gbas";
-			VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
-			__debugInfo = "1289:\ddgui.gbas";
-			func16_DDgui_drawwidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), local4_ytop_1701);
-			__debugInfo = "1288:\ddgui.gbas";
-		};
-		__debugInfo = "1342:\ddgui.gbas";
-		if (((((((param9_show_tips) && (alias3_wdg_ref_1702[0].attr6_whover)) ? 1 : 0)) && ((alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]).length)) ? 1 : 0)) {
-			var local4_boxx_ref_1714 = [0.0], local4_boxy_ref_1715 = [0.0], local5_frame_1716 = 0, local5_truew_1717 = 0, local12_is_multiline_1718 = 0;
-			__debugInfo = "1295:\ddgui.gbas";
-			local5_frame_1716 = 1;
-			__debugInfo = "1296:\ddgui.gbas";
-			VIEWPORT(0, 0, 0, 0);
-			__debugInfo = "1297:\ddgui.gbas";
-			GETFONTSIZE(local4_boxx_ref_1714, local4_boxy_ref_1715);
-			__debugInfo = "1301:\ddgui.gbas";
-			local12_is_multiline_1718 = INSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), "\n", 0);
-			__debugInfo = "1316:\ddgui.gbas";
-			if ((((local12_is_multiline_1718) != (-(1))) ? 1 : 0)) {
-				__debugInfo = "1303:\ddgui.gbas";
-				SPLITSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), unref(static9_DDgui_draw_widget_intern_lines_Str), "\n", 1);
-				__debugInfo = "1304:\ddgui.gbas";
-				local4_boxy_ref_1715[0] = ((local4_boxy_ref_1715[0]) * (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)));
-				__debugInfo = "1306:\ddgui.gbas";
-				local5_truew_1717 = 0;
-				__debugInfo = "1309:\ddgui.gbas";
-				var forEachSaver3970 = static9_DDgui_draw_widget_intern_lines_Str;
-				for(var forEachCounter3970 = 0 ; forEachCounter3970 < forEachSaver3970.values.length ; forEachCounter3970++) {
-					var local5_l_Str_1719 = forEachSaver3970.values[forEachCounter3970];
-				{
-						__debugInfo = "1308:\ddgui.gbas";
-						local5_truew_1717 = MAX(local5_truew_1717, func21_DDGui_TextWidthIntern(local5_l_Str_1719));
-						__debugInfo = "1308:\ddgui.gbas";
-					}
-					forEachSaver3970.values[forEachCounter3970] = local5_l_Str_1719;
-				
-				};
-				__debugInfo = "1310:\ddgui.gbas";
-				local4_boxx_ref_1714[0] = local5_truew_1717;
-				__debugInfo = "1303:\ddgui.gbas";
-			} else {
-				__debugInfo = "1312:\ddgui.gbas";
-				local5_truew_1717 = func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref);
-				__debugInfo = "1313:\ddgui.gbas";
-				local4_boxx_ref_1714[0] = MAX(local3_vpx_1695, local5_truew_1717);
-				__debugInfo = "1314:\ddgui.gbas";
-				DIM(static9_DDgui_draw_widget_intern_lines_Str, [1], "");
-				__debugInfo = "1315:\ddgui.gbas";
-				static9_DDgui_draw_widget_intern_lines_Str.arrAccess(0).values[tmpPositionCache] = alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0];
-				__debugInfo = "1312:\ddgui.gbas";
-			};
-			__debugInfo = "1317:\ddgui.gbas";
-			param1_x;
-			__debugInfo = "1318:\ddgui.gbas";
-			param1_y;
-			__debugInfo = "1319:\ddgui.gbas";
-			param1_x = MAX(0, ((((param4_xpos_ref[0]) + (((((local3_vpx_1695) - (local4_boxx_ref_1714[0]))) / (2))))) - (local5_frame_1716)));
-			__debugInfo = "1320:\ddgui.gbas";
-			param1_y = MAX(0, ((((param4_ypos_ref[0]) - (local4_boxy_ref_1715[0]))) - (((local5_frame_1716) * (2)))));
-			__debugInfo = "1322:\ddgui.gbas";
-			param1_y+=-(global25_gDDguiMinControlDimension);
-			__debugInfo = "1323:\ddgui.gbas";
-			if ((((param1_y) < (0)) ? 1 : 0)) {
-				__debugInfo = "1323:\ddgui.gbas";
-				param1_y = 0;
-				__debugInfo = "1323:\ddgui.gbas";
-			};
-			__debugInfo = "1325:\ddgui.gbas";
-			ALPHAMODE(-(0.8));
-			__debugInfo = "1326:\ddgui.gbas";
-			DRAWRECT(param1_x, param1_y, ((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2)))), ((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2)))), param10_ddgui_vals.attr16_col_hover_bright);
-			__debugInfo = "1327:\ddgui.gbas";
-			ALPHAMODE(0);
-			__debugInfo = "1328:\ddgui.gbas";
-			func14_DDgui_backrect(param1_x, param1_y, ~~(((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2))))), ~~(((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2))))), param10_ddgui_vals.attr8_col_norm);
-			__debugInfo = "1330:\ddgui.gbas";
-			param1_x+=local5_frame_1716;
-			__debugInfo = "1331:\ddgui.gbas";
-			param1_y+=local5_frame_1716;
-			__debugInfo = "1341:\ddgui.gbas";
-			if (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)) {
-				var local1_w_ref_1720 = [0], local1_h_ref_1721 = [0];
-				__debugInfo = "1334:\ddgui.gbas";
-				GETFONTSIZE(local1_w_ref_1720, local1_h_ref_1721);
-				__debugInfo = "1338:\ddgui.gbas";
-				var forEachSaver4127 = static9_DDgui_draw_widget_intern_lines_Str;
-				for(var forEachCounter4127 = 0 ; forEachCounter4127 < forEachSaver4127.values.length ; forEachCounter4127++) {
-					var local5_l_Str_1722 = forEachSaver4127.values[forEachCounter4127];
-				{
-						__debugInfo = "1336:\ddgui.gbas";
-						func17_DDGui_PrintIntern(local5_l_Str_1722, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (func21_DDGui_TextWidthIntern(local5_l_Str_1722)))) / (2))))), param1_y, 0);
-						__debugInfo = "1337:\ddgui.gbas";
-						param1_y+=local1_h_ref_1721[0];
-						__debugInfo = "1336:\ddgui.gbas";
-					}
-					forEachSaver4127.values[forEachCounter4127] = local5_l_Str_1722;
-				
-				};
-				__debugInfo = "1334:\ddgui.gbas";
-			} else {
-				__debugInfo = "1340:\ddgui.gbas";
-				func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (local5_truew_1717))) / (2))))), param1_y, 0);
-				__debugInfo = "1340:\ddgui.gbas";
-			};
-			__debugInfo = "1295:\ddgui.gbas";
-		};
-		__debugInfo = "1344:\ddgui.gbas";
-		param4_xpos_ref[0] = ((((param4_xpos_ref[0]) + (local3_vpx_1695))) + (param7_spacing));
-		__debugInfo = "1345:\ddgui.gbas";
-		if ((((param7_dy_line_ref[0]) < (local2_dy_1698)) ? 1 : 0)) {
-			__debugInfo = "1345:\ddgui.gbas";
-			param7_dy_line_ref[0] = local2_dy_1698;
-			__debugInfo = "1345:\ddgui.gbas";
-		};
-		__debugInfo = "1347:\ddgui.gbas";
+	var local3_vpx_1695 = 0, local3_vpy_1696 = 0, local2_dx_1697 = 0, local2_dy_1698 = 0, local5_vptop_1700 = 0, local4_ytop_1701 = 0, alias3_wdg_ref_1702 = [new type9_DDGUI_WDG()];
+	alias3_wdg_ref_1702 = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(param10_ddgui_vals.attr9_draworder.arrAccess(param11_order_index_ref[0]).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
+	if (alias3_wdg_ref_1702[0].attr5_whide) {
 		return 1;
-		__debugInfo = "1348:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1156:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
+	local2_dy_1698 = alias3_wdg_ref_1702[0].attr7_wheight;
+	if ((((((param4_xpos_ref[0]) + (local2_dx_1697))) > (((param5_width) + (param1_x)))) ? 1 : 0)) {
+		param4_xpos_ref[0] = param1_x;
+		param4_ypos_ref[0] = ((((param4_ypos_ref[0]) + (param7_dy_line_ref[0]))) + (param7_spacing));
+		param7_dy_line_ref[0] = local2_dy_1698;
+		if (((((((local2_dx_1697) >= (param5_width)) ? 1 : 0)) && ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("SPACER")) ? 1 : 0))) ? 1 : 0)) {
+			return 1;
+			
+		};
+		
+	};
+	if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) == (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
+		param4_xpos_ref[0] = ((param4_xpos_ref[0]) + (CAST2INT(((((((((param5_width) + (param1_x))) - (param4_xpos_ref[0]))) - (local2_dx_1697))) / (2)))));
+		
+	};
+	if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) > (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
+		param4_xpos_ref[0] = ((((param1_x) + (param5_width))) - (local2_dx_1697));
+		
+	};
+	//label: __DrawFrames__;
+	if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
+		var local6_border_1703 = 0, local13_dy_line_frame_ref_1704 = [0], local6_xstart_1705 = 0, local6_ystart_1706 = 0, local4_iord_ref_1709 = [0], local8_fr_width_1710 = 0, local6_wwidth_1711 = 0;
+		local6_border_1703 = 0;
+		if ((((local2_dx_1697) == (10000)) ? 1 : 0)) {
+			local6_border_1703 = 1;
+			
+		};
+		local13_dy_line_frame_ref_1704[0] = 0;
+		local6_xstart_1705 = param4_xpos_ref[0];
+		local6_ystart_1706 = param4_ypos_ref[0];
+		if ((alias3_wdg_ref_1702[0].attr9_wtext_Str_ref[0]).length) {
+			var local2_fx_ref_1707 = [0], local2_fy_ref_1708 = [0];
+			local6_border_1703 = 4;
+			GETFONTSIZE(local2_fx_ref_1707, local2_fy_ref_1708);
+			local3_vpx_1695 = alias3_wdg_ref_1702[0].attr6_wwidth;
+			local3_vpy_1696 = alias3_wdg_ref_1702[0].attr7_wheight;
+			local5_vptop_1700 = param4_ypos_ref[0];
+			local4_ytop_1701 = 0;
+			if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
+				local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
+				local5_vptop_1700+=-(local4_ytop_1701);
+				local3_vpy_1696+=local4_ytop_1701;
+				
+			};
+			if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
+				local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
+				
+			};
+			if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
+				local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
+				
+			};
+			if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
+				VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
+				ALPHAMODE(-(0.5));
+				func14_DDgui_backrect(1, ((((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) + (1)), ((alias3_wdg_ref_1702[0].attr6_wwidth) - (2)), ((((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) - (2)), param10_ddgui_vals.attr8_col_norm);
+				ALPHAMODE(0);
+				func14_DDgui_backrect(0, ((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), alias3_wdg_ref_1702[0].attr6_wwidth, ((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), param10_ddgui_vals.attr8_col_norm);
+				DRAWRECT(local6_border_1703, local4_ytop_1701, ((((local6_border_1703) * (4))) + (func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref))), unref(local2_fy_ref_1708[0]), param10_ddgui_vals.attr10_col_bright);
+				func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref, ((local6_border_1703) * (2)), local4_ytop_1701, 0);
+				
+			};
+			param4_ypos_ref[0]+=((local2_fy_ref_1708[0]) + (local6_border_1703));
+			param4_xpos_ref[0]+=local6_border_1703;
+			param4_ypos_ref[0]+=local6_border_1703;
+			local6_xstart_1705+=local6_border_1703;
+			
+		};
+		local8_fr_width_1710 = 0;
+		local6_wwidth_1711 = alias3_wdg_ref_1702[0].attr6_wwidth;
+		if ((((local6_wwidth_1711) < (10000)) ? 1 : 0)) {
+			local6_wwidth_1711+=-(((2) * (local6_border_1703)));
+			
+		};
+		{
+			for (local4_iord_ref_1709[0] = ((param11_order_index_ref[0]) + (1));toCheck(local4_iord_ref_1709[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local4_iord_ref_1709[0] += 1) {
+				var local9_simplewdg_1712 = 0, local4_icur_1713 = 0;
+				local4_icur_1713 = local4_iord_ref_1709[0];
+				local9_simplewdg_1712 = func24_DDgui_draw_widget_intern(param10_ddgui_vals, local4_iord_ref_1709, param4_xpos_ref, param4_ypos_ref, local13_dy_line_frame_ref_1704, local6_wwidth_1711, param10_is_current, param7_spacing, param5_xclip, param5_yclip, param6_ybclip, param2_mx, param2_my, param2_b1, param2_b2, local6_xstart_1705, local6_ystart_1706, param9_show_tips);
+				local8_fr_width_1710 = MAX(local8_fr_width_1710, ((param4_xpos_ref[0]) - (local6_xstart_1705)));
+				if ((((local9_simplewdg_1712) == (0)) ? 1 : 0)) {
+					param11_order_index_ref[0] = local4_iord_ref_1709[0];
+					break;
+					
+				};
+				
+			};
+			
+		};
+		if ((((alias3_wdg_ref_1702[0].attr6_wwidth) == (10000)) ? 1 : 0)) {
+			alias3_wdg_ref_1702[0].attr6_wwidth = ((local8_fr_width_1710) + (((2) * (local6_border_1703))));
+			local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
+			
+		};
+		alias3_wdg_ref_1702[0].attr7_wheight = ((((((param4_ypos_ref[0]) - (local6_ystart_1706))) + (local13_dy_line_frame_ref_1704[0]))) + (((local6_border_1703) * (2))));
+		param4_xpos_ref[0] = local6_xstart_1705;
+		param4_ypos_ref[0] = local6_ystart_1706;
+		
+	} else if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	if (param10_is_current) {
+		func18_DDgui_handlewidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), ((param2_mx) - (param4_xpos_ref[0])), ((param2_my) - (param4_ypos_ref[0])), param2_b1, param2_b2);
+		
+	};
+	local3_vpx_1695 = local2_dx_1697;
+	local3_vpy_1696 = local2_dy_1698;
+	local5_vptop_1700 = param4_ypos_ref[0];
+	local4_ytop_1701 = 0;
+	if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
+		local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
+		local5_vptop_1700+=-(local4_ytop_1701);
+		local3_vpy_1696+=local4_ytop_1701;
+		
+	};
+	if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
+		local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
+		
+	};
+	if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
+		local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
+		
+	};
+	alias3_wdg_ref_1702[0].attr5_wxpos = param4_xpos_ref[0];
+	alias3_wdg_ref_1702[0].attr5_wypos = local5_vptop_1700;
+	if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
+		VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
+		func16_DDgui_drawwidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), local4_ytop_1701);
+		
+	};
+	if (((((((param9_show_tips) && (alias3_wdg_ref_1702[0].attr6_whover)) ? 1 : 0)) && ((alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]).length)) ? 1 : 0)) {
+		var local4_boxx_ref_1714 = [0.0], local4_boxy_ref_1715 = [0.0], local5_frame_1716 = 0, local5_truew_1717 = 0, local12_is_multiline_1718 = 0;
+		local5_frame_1716 = 1;
+		VIEWPORT(0, 0, 0, 0);
+		GETFONTSIZE(local4_boxx_ref_1714, local4_boxy_ref_1715);
+		local12_is_multiline_1718 = INSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), "\n", 0);
+		if ((((local12_is_multiline_1718) != (-(1))) ? 1 : 0)) {
+			SPLITSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), unref(static9_DDgui_draw_widget_intern_lines_Str), "\n", 1);
+			local4_boxy_ref_1715[0] = ((local4_boxy_ref_1715[0]) * (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)));
+			local5_truew_1717 = 0;
+			var forEachSaver3997 = static9_DDgui_draw_widget_intern_lines_Str;
+			for(var forEachCounter3997 = 0 ; forEachCounter3997 < forEachSaver3997.values.length ; forEachCounter3997++) {
+				var local5_l_Str_1719 = forEachSaver3997.values[forEachCounter3997];
+			{
+					local5_truew_1717 = MAX(local5_truew_1717, func21_DDGui_TextWidthIntern(local5_l_Str_1719));
+					
+				}
+				forEachSaver3997.values[forEachCounter3997] = local5_l_Str_1719;
+			
+			};
+			local4_boxx_ref_1714[0] = local5_truew_1717;
+			
+		} else {
+			local5_truew_1717 = func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref);
+			local4_boxx_ref_1714[0] = MAX(local3_vpx_1695, local5_truew_1717);
+			DIM(static9_DDgui_draw_widget_intern_lines_Str, [1], "");
+			static9_DDgui_draw_widget_intern_lines_Str.arrAccess(0).values[tmpPositionCache] = alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0];
+			
+		};
+		param1_x;
+		param1_y;
+		param1_x = MAX(0, ((((param4_xpos_ref[0]) + (((((local3_vpx_1695) - (local4_boxx_ref_1714[0]))) / (2))))) - (local5_frame_1716)));
+		param1_y = MAX(0, ((((param4_ypos_ref[0]) - (local4_boxy_ref_1715[0]))) - (((local5_frame_1716) * (2)))));
+		param1_y+=-(global25_gDDguiMinControlDimension);
+		if ((((param1_y) < (0)) ? 1 : 0)) {
+			param1_y = 0;
+			
+		};
+		ALPHAMODE(-(0.8));
+		DRAWRECT(param1_x, param1_y, ((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2)))), ((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2)))), param10_ddgui_vals.attr16_col_hover_bright);
+		ALPHAMODE(0);
+		func14_DDgui_backrect(param1_x, param1_y, ~~(((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2))))), ~~(((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2))))), param10_ddgui_vals.attr8_col_norm);
+		param1_x+=local5_frame_1716;
+		param1_y+=local5_frame_1716;
+		if (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)) {
+			var local1_w_ref_1720 = [0], local1_h_ref_1721 = [0];
+			GETFONTSIZE(local1_w_ref_1720, local1_h_ref_1721);
+			var forEachSaver4154 = static9_DDgui_draw_widget_intern_lines_Str;
+			for(var forEachCounter4154 = 0 ; forEachCounter4154 < forEachSaver4154.values.length ; forEachCounter4154++) {
+				var local5_l_Str_1722 = forEachSaver4154.values[forEachCounter4154];
+			{
+					func17_DDGui_PrintIntern(local5_l_Str_1722, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (func21_DDGui_TextWidthIntern(local5_l_Str_1722)))) / (2))))), param1_y, 0);
+					param1_y+=local1_h_ref_1721[0];
+					
+				}
+				forEachSaver4154.values[forEachCounter4154] = local5_l_Str_1722;
+			
+			};
+			
+		} else {
+			func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (local5_truew_1717))) / (2))))), param1_y, 0);
+			
+		};
+		
+	};
+	param4_xpos_ref[0] = ((((param4_xpos_ref[0]) + (local3_vpx_1695))) + (param7_spacing));
+	if ((((param7_dy_line_ref[0]) < (local2_dy_1698)) ? 1 : 0)) {
+		param7_dy_line_ref[0] = local2_dy_1698;
+		
+	};
+	return 1;
+	return 0;
 	
 };
 window['func18_DDgui_resizedialog'] = function(param1_x, param1_y, param5_width, param6_height) {
-	stackPush("function: DDgui_resizedialog", __debugInfo);
-	try {
-		var local1_i_2242 = 0, local6_id_Str_2243 = "", local3_scx_ref_2244 = [0], local3_scy_ref_2245 = [0];
-		__debugInfo = "1358:\ddgui.gbas";
-		GETSCREENSIZE(local3_scx_ref_2244, local3_scy_ref_2245);
-		__debugInfo = "1364:\ddgui.gbas";
-		if (((((((param5_width) > (0)) ? 1 : 0)) && ((((param6_height) > (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1360:\ddgui.gbas";
-			func9_DDgui_set("", "XPOS", CAST2STRING(param1_x));
-			__debugInfo = "1361:\ddgui.gbas";
-			func9_DDgui_set("", "YPOS", CAST2STRING(param1_y));
-			__debugInfo = "1362:\ddgui.gbas";
-			if ((((param5_width) > (0)) ? 1 : 0)) {
-				__debugInfo = "1362:\ddgui.gbas";
-				func9_DDgui_set("", "WIDTH", CAST2STRING(MIN(unref(local3_scx_ref_2244[0]), param5_width)));
-				__debugInfo = "1362:\ddgui.gbas";
-			};
-			__debugInfo = "1363:\ddgui.gbas";
-			if ((((param6_height) > (0)) ? 1 : 0)) {
-				__debugInfo = "1363:\ddgui.gbas";
-				func9_DDgui_set("", "HEIGHT", CAST2STRING(MIN(unref(local3_scy_ref_2245[0]), param6_height)));
-				__debugInfo = "1363:\ddgui.gbas";
-			};
-			__debugInfo = "1360:\ddgui.gbas";
+	var local1_i_2266 = 0, local6_id_Str_2267 = "", local3_scx_ref_2268 = [0], local3_scy_ref_2269 = [0];
+	GETSCREENSIZE(local3_scx_ref_2268, local3_scy_ref_2269);
+	if (((((((param5_width) > (0)) ? 1 : 0)) && ((((param6_height) > (0)) ? 1 : 0))) ? 1 : 0)) {
+		func9_DDgui_set("", "XPOS", CAST2STRING(param1_x));
+		func9_DDgui_set("", "YPOS", CAST2STRING(param1_y));
+		if ((((param5_width) > (0)) ? 1 : 0)) {
+			func9_DDgui_set("", "WIDTH", CAST2STRING(MIN(unref(local3_scx_ref_2268[0]), param5_width)));
+			
 		};
-		__debugInfo = "1368:\ddgui.gbas";
-		var forEachSaver14129 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0];
-		for(var forEachCounter14129 = 0 ; forEachCounter14129 < forEachSaver14129.values.length ; forEachCounter14129++) {
-			var local3_wdg_ref_2246 = forEachSaver14129.values[forEachCounter14129];
-		{
-				__debugInfo = "1367:\ddgui.gbas";
-				func18_DDgui_handlewidget(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), unref(local3_wdg_ref_2246[0]), -(1), -(1), 0, 0);
-				__debugInfo = "1367:\ddgui.gbas";
-			}
-			forEachSaver14129.values[forEachCounter14129] = local3_wdg_ref_2246;
+		if ((((param6_height) > (0)) ? 1 : 0)) {
+			func9_DDgui_set("", "HEIGHT", CAST2STRING(MIN(unref(local3_scy_ref_2269[0]), param6_height)));
+			
+		};
 		
-		};
-		__debugInfo = "1369:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1358:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	};
+	var forEachSaver14333 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0];
+	for(var forEachCounter14333 = 0 ; forEachCounter14333 < forEachSaver14333.values.length ; forEachCounter14333++) {
+		var local3_wdg_ref_2270 = forEachSaver14333.values[forEachCounter14333];
+	{
+			func18_DDgui_handlewidget(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), unref(local3_wdg_ref_2270[0]), -(1), -(1), 0, 0);
+			
+		}
+		forEachSaver14333.values[forEachCounter14333] = local3_wdg_ref_2270;
+	
+	};
+	return 0;
 	
 };
 window['func10_DDgui_hide'] = function(param6_id_Str, param5_bHide) {
-	stackPush("function: DDgui_hide", __debugInfo);
-	try {
-		__debugInfo = "1376:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "HIDE", CAST2STRING(param5_bHide));
-		__debugInfo = "1394:\ddgui.gbas";
-		if ((((func13_DDgui_get_Str(param6_id_Str, "TYPE")) == ("FRAME")) ? 1 : 0)) {
-			var local2_od_2249 = 0, local7_inframe_2250 = 0;
-			__debugInfo = "1380:\ddgui.gbas";
-			{
-				__debugInfo = "1393:\ddgui.gbas";
-				for (local2_od_2249 = 0;toCheck(local2_od_2249, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, 0)) - (1)), 1);local2_od_2249 += 1) {
-					__debugInfo = "1382:\ddgui.gbas";
-					if (((((((local7_inframe_2250) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2249).values[tmpPositionCache].attr6_id_Str_ref[0]) == (param6_id_Str)) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "1382:\ddgui.gbas";
-						local7_inframe_2250+=1;
-						__debugInfo = "1382:\ddgui.gbas";
-					};
-					__debugInfo = "1392:\ddgui.gbas";
-					if (local7_inframe_2250) {
-						var alias3_wdg_ref_2251 = [new type9_DDGUI_WDG()];
-						__debugInfo = "1384:\ddgui.gbas";
-						alias3_wdg_ref_2251 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2249).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
-						__debugInfo = "1388:\ddgui.gbas";
-						if ((((alias3_wdg_ref_2251[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
-							__debugInfo = "1386:\ddgui.gbas";
-							local7_inframe_2250+=-1;
-							__debugInfo = "1387:\ddgui.gbas";
-							if ((((local7_inframe_2250) < (2)) ? 1 : 0)) {
-								__debugInfo = "1387:\ddgui.gbas";
-								break;
-								__debugInfo = "1387:\ddgui.gbas";
-							};
-							__debugInfo = "1386:\ddgui.gbas";
-						};
-						__debugInfo = "1389:\ddgui.gbas";
-						if ((((alias3_wdg_ref_2251[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
-							__debugInfo = "1389:\ddgui.gbas";
-							local7_inframe_2250+=1;
-							__debugInfo = "1389:\ddgui.gbas";
-						};
-						__debugInfo = "1390:\ddgui.gbas";
-						alias3_wdg_ref_2251[0].attr5_whide = param5_bHide;
-						__debugInfo = "1391:\ddgui.gbas";
-						if (param5_bHide) {
-							__debugInfo = "1391:\ddgui.gbas";
-							alias3_wdg_ref_2251[0].attr8_wclicked = 0;
-							__debugInfo = "1391:\ddgui.gbas";
-						};
-						__debugInfo = "1384:\ddgui.gbas";
-					};
-					__debugInfo = "1382:\ddgui.gbas";
+	func9_DDgui_set(param6_id_Str, "HIDE", CAST2STRING(param5_bHide));
+	if ((((func13_DDgui_get_Str(param6_id_Str, "TYPE")) == ("FRAME")) ? 1 : 0)) {
+		var local2_od_2273 = 0, local7_inframe_2274 = 0;
+		{
+			for (local2_od_2273 = 0;toCheck(local2_od_2273, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, 0)) - (1)), 1);local2_od_2273 += 1) {
+				if (((((((local7_inframe_2274) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2273).values[tmpPositionCache].attr6_id_Str_ref[0]) == (param6_id_Str)) ? 1 : 0))) ? 1 : 0)) {
+					local7_inframe_2274+=1;
+					
 				};
-				__debugInfo = "1393:\ddgui.gbas";
+				if (local7_inframe_2274) {
+					var alias3_wdg_ref_2275 = [new type9_DDGUI_WDG()];
+					alias3_wdg_ref_2275 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2273).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
+					if ((((alias3_wdg_ref_2275[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
+						local7_inframe_2274+=-1;
+						if ((((local7_inframe_2274) < (2)) ? 1 : 0)) {
+							break;
+							
+						};
+						
+					};
+					if ((((alias3_wdg_ref_2275[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
+						local7_inframe_2274+=1;
+						
+					};
+					alias3_wdg_ref_2275[0].attr5_whide = param5_bHide;
+					if (param5_bHide) {
+						alias3_wdg_ref_2275[0].attr8_wclicked = 0;
+						
+					};
+					
+				};
+				
 			};
-			__debugInfo = "1380:\ddgui.gbas";
+			
 		};
-		__debugInfo = "1395:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1376:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['__DDgui_Callbacks__'] = function() {
-	stackPush("sub: __DDgui_Callbacks__", __debugInfo);
-	try {
-		
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
 	
 };
+window['__DDgui_Callbacks__'] = __DDgui_Callbacks__;
 window['func15_DDgui_draw_user'] = function(param6_id_Str_ref, param5_width, param6_height, param4_ytop) {
-	stackPush("function: DDgui_draw_user", __debugInfo);
-	try {
-		__debugInfo = "1407:\ddgui.gbas";
-		func13_DDgui_backgnd(RGB(0, 0, 0), RGB(255, 255, 255), 0, 0, param5_width, param6_height);
-		__debugInfo = "1408:\ddgui.gbas";
-		PRINT((("user: id=") + (param6_id_Str_ref[0])), 0, 0, 0);
-		__debugInfo = "1409:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1407:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	func13_DDgui_backgnd(RGB(0, 0, 0), RGB(255, 255, 255), 0, 0, param5_width, param6_height);
+	PRINT((("user: id=") + (param6_id_Str_ref[0])), 0, 0, 0);
+	return 0;
 	
 };
 window['func17_DDgui_handle_user'] = function(param6_id_Str_ref, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handle_user", __debugInfo);
-	try {
-		__debugInfo = "1415:\ddgui.gbas";
-		VIEWPORT(0, 0, 0, 0);
-		__debugInfo = "1416:\ddgui.gbas";
-		DRAWRECT(0, 0, 1024, 1024, RGB(255, 128, 64));
-		__debugInfo = "1417:\ddgui.gbas";
-		PRINT("Must overwrite: ddgui_handle_user", 0, 0, 0);
-		__debugInfo = "1418:\ddgui.gbas";
-		PRINT((("for item: ") + (param6_id_Str_ref[0])), 0, 20, 0);
-		__debugInfo = "1419:\ddgui.gbas";
-		PRINT((("type=") + (func13_DDgui_get_Str(unref(param6_id_Str_ref[0]), "TYPE"))), 0, 40, 0);
-		__debugInfo = "1420:\ddgui.gbas";
-		SHOWSCREEN();
-		__debugInfo = "1423:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1415:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	VIEWPORT(0, 0, 0, 0);
+	DRAWRECT(0, 0, 1024, 1024, RGB(255, 128, 64));
+	PRINT("Must overwrite: ddgui_handle_user", 0, 0, 0);
+	PRINT((("for item: ") + (param6_id_Str_ref[0])), 0, 20, 0);
+	PRINT((("type=") + (func13_DDgui_get_Str(unref(param6_id_Str_ref[0]), "TYPE"))), 0, 40, 0);
+	SHOWSCREEN();
+	return 0;
 	
 };
 window['func14_DDgui_backrect'] = function(param1_x, param1_y, param2_dx, param2_dy, param3_col) {
-	stackPush("function: DDgui_backrect", __debugInfo);
-	try {
-		__debugInfo = "1459:\ddgui.gbas";
-		DRAWRECT(((param1_x) + (1)), param1_y, ((param2_dx) - (2)), 1, param3_col);
-		__debugInfo = "1460:\ddgui.gbas";
-		DRAWRECT(param1_x, ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
-		__debugInfo = "1461:\ddgui.gbas";
-		DRAWRECT(((((param1_x) + (param2_dx))) - (1)), ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
-		__debugInfo = "1462:\ddgui.gbas";
-		DRAWRECT(((param1_x) + (1)), ((((param1_y) + (param2_dy))) - (1)), ((param2_dx) - (2)), 1, param3_col);
-		__debugInfo = "1464:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1459:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	DRAWRECT(((param1_x) + (1)), param1_y, ((param2_dx) - (2)), 1, param3_col);
+	DRAWRECT(param1_x, ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
+	DRAWRECT(((((param1_x) + (param2_dx))) - (1)), ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
+	DRAWRECT(((param1_x) + (1)), ((((param1_y) + (param2_dy))) - (1)), ((param2_dx) - (2)), 1, param3_col);
+	return 0;
 	
 };
 window['func13_DDgui_backgnd'] = function(param4_col1, param4_col2, param1_x, param1_y, param2_dx, param2_dy) {
-	stackPush("function: DDgui_backgnd", __debugInfo);
-	try {
-		__debugInfo = "1493:\ddgui.gbas";
-		if ((((static7_DDgui_backgnd_QuickGL) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "1492:\ddgui.gbas";
-			if ((((INTEGER(FLOAT2STR(PLATFORMINFO_Str("GLEXT:glDrawRangeElements")))) != (0)) ? 1 : 0)) {
-				__debugInfo = "1486:\ddgui.gbas";
-				static7_DDgui_backgnd_QuickGL = 1;
-				__debugInfo = "1486:\ddgui.gbas";
-			} else {
-				__debugInfo = "1488:\ddgui.gbas";
-				static7_DDgui_backgnd_QuickGL = 0;
-				__debugInfo = "1488:\ddgui.gbas";
-			};
-			__debugInfo = "1492:\ddgui.gbas";
-		};
-		__debugInfo = "1499:\ddgui.gbas";
-		if ((((param4_col1) == (param4_col2)) ? 1 : 0)) {
-			__debugInfo = "1497:\ddgui.gbas";
-			DRAWRECT(param1_x, param1_y, param2_dx, param2_dy, param4_col1);
-			__debugInfo = "1498:\ddgui.gbas";
-			return 0;
-			__debugInfo = "1497:\ddgui.gbas";
-		};
-		__debugInfo = "1529:\ddgui.gbas";
-		if (static7_DDgui_backgnd_QuickGL) {
-			var local4_hpos_1735 = 0.0;
-			__debugInfo = "1502:\ddgui.gbas";
-			local4_hpos_1735 = 0.35;
-			__debugInfo = "1503:\ddgui.gbas";
-			STARTPOLY(-(1), 2);
-			__debugInfo = "1518:\ddgui.gbas";
-			if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
-				__debugInfo = "1505:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col1);
-				__debugInfo = "1506:\ddgui.gbas";
-				POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
-				__debugInfo = "1507:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
-				__debugInfo = "1508:\ddgui.gbas";
-				POLYVECTOR(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
-				__debugInfo = "1509:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
-				__debugInfo = "1510:\ddgui.gbas";
-				POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col2);
-				__debugInfo = "1505:\ddgui.gbas";
-			} else {
-				__debugInfo = "1512:\ddgui.gbas";
-				POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
-				__debugInfo = "1513:\ddgui.gbas";
-				POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col1);
-				__debugInfo = "1514:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), param1_y, 0, 0, param4_col2);
-				__debugInfo = "1515:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
-				__debugInfo = "1516:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col2);
-				__debugInfo = "1517:\ddgui.gbas";
-				POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col1);
-				__debugInfo = "1512:\ddgui.gbas";
-			};
-			__debugInfo = "1519:\ddgui.gbas";
-			ENDPOLY();
-			__debugInfo = "1502:\ddgui.gbas";
+	if ((((static7_DDgui_backgnd_QuickGL) == (-(1))) ? 1 : 0)) {
+		if ((((INTEGER(FLOAT2STR(PLATFORMINFO_Str("GLEXT:glDrawRangeElements")))) != (0)) ? 1 : 0)) {
+			static7_DDgui_backgnd_QuickGL = 1;
+			
 		} else {
-			var local4_hpos_1736 = 0.0;
-			__debugInfo = "1521:\ddgui.gbas";
-			local4_hpos_1736 = 0.35;
-			__debugInfo = "1528:\ddgui.gbas";
-			if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
-				__debugInfo = "1523:\ddgui.gbas";
-				DRAWRECT(param1_x, param1_y, param2_dx, ((param2_dy) * (local4_hpos_1736)), param4_col1);
-				__debugInfo = "1524:\ddgui.gbas";
-				DRAWRECT(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1736)))), param2_dx, ((((param2_dy) * (((1) - (local4_hpos_1736))))) + (0.99)), param4_col2);
-				__debugInfo = "1523:\ddgui.gbas";
-			} else {
-				__debugInfo = "1526:\ddgui.gbas";
-				DRAWRECT(param1_x, param1_y, ((param2_dx) * (local4_hpos_1736)), param2_dy, param4_col1);
-				__debugInfo = "1527:\ddgui.gbas";
-				DRAWRECT(((param1_x) + (((param2_dx) * (local4_hpos_1736)))), param1_y, ((((param2_dx) * (((1) - (local4_hpos_1736))))) + (0.99)), param2_dy, param4_col2);
-				__debugInfo = "1526:\ddgui.gbas";
-			};
-			__debugInfo = "1521:\ddgui.gbas";
+			static7_DDgui_backgnd_QuickGL = 0;
+			
 		};
-		__debugInfo = "1530:\ddgui.gbas";
+		
+	};
+	if ((((param4_col1) == (param4_col2)) ? 1 : 0)) {
+		DRAWRECT(param1_x, param1_y, param2_dx, param2_dy, param4_col1);
 		return 0;
-		__debugInfo = "1493:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if (static7_DDgui_backgnd_QuickGL) {
+		var local4_hpos_1735 = 0.0;
+		local4_hpos_1735 = 0.35;
+		STARTPOLY(-(1), 2);
+		if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
+			POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col1);
+			POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
+			POLYVECTOR(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			
+		} else {
+			POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
+			POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col1);
+			POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), param1_y, 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col1);
+			
+		};
+		ENDPOLY();
+		
+	} else {
+		var local4_hpos_1736 = 0.0;
+		local4_hpos_1736 = 0.35;
+		if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
+			DRAWRECT(param1_x, param1_y, param2_dx, ((param2_dy) * (local4_hpos_1736)), param4_col1);
+			DRAWRECT(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1736)))), param2_dx, ((((param2_dy) * (((1) - (local4_hpos_1736))))) + (0.99)), param4_col2);
+			
+		} else {
+			DRAWRECT(param1_x, param1_y, ((param2_dx) * (local4_hpos_1736)), param2_dy, param4_col1);
+			DRAWRECT(((param1_x) + (((param2_dx) * (local4_hpos_1736)))), param1_y, ((((param2_dx) * (((1) - (local4_hpos_1736))))) + (0.99)), param2_dy, param4_col2);
+			
+		};
+		
+	};
+	return 0;
 	
 };
 window['__DDgui_Widgets___'] = function() {
-	stackPush("sub: __DDgui_Widgets___", __debugInfo);
-	try {
-		
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
 	
 };
+window['__DDgui_Widgets___'] = __DDgui_Widgets___;
 window['func12_DDgui_widget'] = function(param6_id_Str, param11_caption_Str, param5_width, param6_height) {
-	stackPush("function: DDgui_widget", __debugInfo);
-	try {
-		var local5_count_1741 = 0, local2_fx_ref_1742 = [0], local2_fy_ref_1743 = [0], local3_wdg_1744 = new type9_DDGUI_WDG(), local1_i_1745 = 0;
-		var local6_id_Str_ref_1737 = [param6_id_Str]; /* NEWCODEHERE */
-		var local11_caption_Str_ref_1738 = [param11_caption_Str]; /* NEWCODEHERE */
-		__debugInfo = "1544:\ddgui.gbas";
-		local5_count_1741 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
-		__debugInfo = "1545:\ddgui.gbas";
-		if ((((local6_id_Str_ref_1737[0]) == ("")) ? 1 : 0)) {
-			__debugInfo = "1545:\ddgui.gbas";
-			local6_id_Str_ref_1737[0] = (("iwdg%") + (CAST2STRING(local5_count_1741)));
-			__debugInfo = "1545:\ddgui.gbas";
-		};
-		__debugInfo = "1547:\ddgui.gbas";
-		GETFONTSIZE(local2_fx_ref_1742, local2_fy_ref_1743);
-		__debugInfo = "1548:\ddgui.gbas";
-		if ((((param5_width) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
-			__debugInfo = "1548:\ddgui.gbas";
-			param5_width = MAX(global25_gDDguiMinControlDimension, MAX(param5_width, ((func21_DDGui_TextWidthIntern(local11_caption_Str_ref_1738)) + (local2_fx_ref_1742[0]))));
-			__debugInfo = "1548:\ddgui.gbas";
-		};
-		__debugInfo = "1549:\ddgui.gbas";
-		if ((((param6_height) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
-			__debugInfo = "1549:\ddgui.gbas";
-			param6_height = MAX(global25_gDDguiMinControlDimension, MAX(param6_height, ((local2_fy_ref_1743[0]) + (6))));
-			__debugInfo = "1549:\ddgui.gbas";
-		};
-		__debugInfo = "1551:\ddgui.gbas";
-		local1_i_1745 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1737, 1);
-		__debugInfo = "1552:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wid_Str = local6_id_Str_ref_1737[0];
-		__debugInfo = "1553:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr6_wwidth = param5_width;
-		__debugInfo = "1554:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wheight = param6_height;
-		__debugInfo = "1555:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtype_Str = "WIDGET";
-		__debugInfo = "1556:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtext_Str_ref[0] = local11_caption_Str_ref_1738[0];
-		__debugInfo = "1557:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1544:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local5_count_1741 = 0, local2_fx_ref_1742 = [0], local2_fy_ref_1743 = [0], local3_wdg_1744 = new type9_DDGUI_WDG(), local1_i_1745 = 0;
+	var local6_id_Str_ref_1737 = [param6_id_Str]; /* NEWCODEHERE */
+	var local11_caption_Str_ref_1738 = [param11_caption_Str]; /* NEWCODEHERE */
+	local5_count_1741 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+	if ((((local6_id_Str_ref_1737[0]) == ("")) ? 1 : 0)) {
+		local6_id_Str_ref_1737[0] = (("iwdg%") + (CAST2STRING(local5_count_1741)));
+		
+	};
+	GETFONTSIZE(local2_fx_ref_1742, local2_fy_ref_1743);
+	if ((((param5_width) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
+		param5_width = MAX(global25_gDDguiMinControlDimension, MAX(param5_width, ((func21_DDGui_TextWidthIntern(local11_caption_Str_ref_1738)) + (local2_fx_ref_1742[0]))));
+		
+	};
+	if ((((param6_height) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
+		param6_height = MAX(global25_gDDguiMinControlDimension, MAX(param6_height, ((local2_fy_ref_1743[0]) + (6))));
+		
+	};
+	local1_i_1745 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1737, 1);
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wid_Str = local6_id_Str_ref_1737[0];
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr6_wwidth = param5_width;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wheight = param6_height;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtype_Str = "WIDGET";
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtext_Str_ref[0] = local11_caption_Str_ref_1738[0];
+	return 0;
 	
 };
 window['func12_DDgui_signal'] = function(param6_id_Str, param8_verb_Str, param8_info_Str_ref) {
-	stackPush("function: DDgui_signal", __debugInfo);
-	try {
-		var local2_id_2264 = 0, alias3_foo_ref_2265 = [DDgui_userfunction];
-		var local6_id_Str_ref_2261 = [param6_id_Str]; /* NEWCODEHERE */
-		__debugInfo = "1574:\ddgui.gbas";
-		local2_id_2264 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2261, 0);
-		__debugInfo = "1575:\ddgui.gbas";
-		if ((((local2_id_2264) < (0)) ? 1 : 0)) {
-			__debugInfo = "1575:\ddgui.gbas";
-			return tryClone(0);
-			__debugInfo = "1575:\ddgui.gbas";
-		};
-		__debugInfo = "1576:\ddgui.gbas";
-		alias3_foo_ref_2265 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_id_2264).values[tmpPositionCache][0].attr8_wuserfoo_ref /* ALIAS */;
-		__debugInfo = "1579:\ddgui.gbas";
-		if (alias3_foo_ref_2265[0]) {
-			__debugInfo = "1578:\ddgui.gbas";
-			alias3_foo_ref_2265[0](local6_id_Str_ref_2261, param8_verb_Str, param8_info_Str_ref);
-			__debugInfo = "1578:\ddgui.gbas";
-		};
-		__debugInfo = "1580:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1574:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local2_id_2288 = 0, alias3_foo_ref_2289 = [DDgui_userfunction];
+	var local6_id_Str_ref_2285 = [param6_id_Str]; /* NEWCODEHERE */
+	local2_id_2288 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2285, 0);
+	if ((((local2_id_2288) < (0)) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	alias3_foo_ref_2289 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_id_2288).values[tmpPositionCache][0].attr8_wuserfoo_ref /* ALIAS */;
+	if (alias3_foo_ref_2289[0]) {
+		alias3_foo_ref_2289[0](local6_id_Str_ref_2285, param8_verb_Str, param8_info_Str_ref);
+		
+	};
+	return 0;
 	
 };
 window['func16_DDgui_drawwidget'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawwidget", __debugInfo);
-	try {
-		__debugInfo = "1600:\ddgui.gbas";
-		{
-			var local16___SelectHelper4__1750 = "";
-			__debugInfo = "1600:\ddgui.gbas";
-			local16___SelectHelper4__1750 = param3_wdg.attr9_wtype_Str;
-			__debugInfo = "1646:\ddgui.gbas";
-			if ((((local16___SelectHelper4__1750) == ("FRAME")) ? 1 : 0)) {
+	{
+		var local16___SelectHelper4__1750 = "";
+		local16___SelectHelper4__1750 = param3_wdg.attr9_wtype_Str;
+		if ((((local16___SelectHelper4__1750) == ("FRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("UNFRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SPACER")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("WIDGET")) ? 1 : 0)) {
+			var local1_w_ref_1751 = [0], local1_h_ref_1752 = [0];
+			ALPHAMODE(-(0.7));
+			GETFONTSIZE(local1_w_ref_1751, local1_h_ref_1752);
+			if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "\ny", 0)) < (0)) ? 1 : 0)) {
+				local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_ref_1752[0]))) / (2))))), param3_wdg.attr6_wwidth, 1, 0);
 				
-			} else if ((((local16___SelectHelper4__1750) == ("UNFRAME")) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper4__1750) == ("SPACER")) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper4__1750) == ("WIDGET")) ? 1 : 0)) {
-				var local1_w_ref_1751 = [0], local1_h_ref_1752 = [0];
-				__debugInfo = "1606:\ddgui.gbas";
-				ALPHAMODE(-(0.7));
-				__debugInfo = "1608:\ddgui.gbas";
-				GETFONTSIZE(local1_w_ref_1751, local1_h_ref_1752);
-				__debugInfo = "1615:\ddgui.gbas";
-				if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "\n", 0)) < (0)) ? 1 : 0)) {
-					__debugInfo = "1612:\ddgui.gbas";
-					local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_ref_1752[0]))) / (2))))), param3_wdg.attr6_wwidth, 1, 0);
-					__debugInfo = "1612:\ddgui.gbas";
-				} else {
-					__debugInfo = "1614:\ddgui.gbas";
-					local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, param4_ytop, param3_wdg.attr6_wwidth, 1, 0);
-					__debugInfo = "1614:\ddgui.gbas";
-				};
-				__debugInfo = "1616:\ddgui.gbas";
-				param3_wdg.attr7_wheight = MAX(global25_gDDguiMinControlDimension, unref(local1_h_ref_1752[0]));
-				__debugInfo = "1617:\ddgui.gbas";
-				ALPHAMODE(0);
-				__debugInfo = "1606:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("BUTTON")) ? 1 : 0)) {
-				__debugInfo = "1619:\ddgui.gbas";
-				func16_DDgui_drawbutton(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1619:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("SLIDER")) ? 1 : 0)) {
-				__debugInfo = "1621:\ddgui.gbas";
-				func16_DDgui_drawslider(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1621:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("RADIO")) ? 1 : 0)) {
-				__debugInfo = "1623:\ddgui.gbas";
-				func15_DDgui_drawradio(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1623:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("CHECKBOX")) ? 1 : 0)) {
-				__debugInfo = "1625:\ddgui.gbas";
-				func18_DDgui_drawcheckbox(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1625:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("TAB")) ? 1 : 0)) {
-				__debugInfo = "1627:\ddgui.gbas";
-				func13_DDgui_drawtab(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1627:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("COMBO")) ? 1 : 0)) {
-				__debugInfo = "1629:\ddgui.gbas";
-				func15_DDgui_drawcombo(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1629:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("LIST")) ? 1 : 0)) {
-				__debugInfo = "1631:\ddgui.gbas";
-				func14_DDgui_drawlist(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1631:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("SINGLETEXT")) ? 1 : 0)) {
-				__debugInfo = "1633:\ddgui.gbas";
-				func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
-				__debugInfo = "1633:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("NUMBERTEXT")) ? 1 : 0)) {
-				__debugInfo = "1635:\ddgui.gbas";
-				func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
-				__debugInfo = "1635:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("TEXT")) ? 1 : 0)) {
-				__debugInfo = "1637:\ddgui.gbas";
-				func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 0);
-				__debugInfo = "1637:\ddgui.gbas";
-			} else if ((((local16___SelectHelper4__1750) == ("FILE")) ? 1 : 0)) {
-				__debugInfo = "1639:\ddgui.gbas";
-				func14_DDgui_drawfile(param10_ddgui_vals, param3_wdg, param4_ytop);
-				__debugInfo = "1639:\ddgui.gbas";
 			} else {
-				__debugInfo = "1645:\ddgui.gbas";
-				if (param3_wdg.attr8_wuserfoo_ref[0]) {
-					__debugInfo = "1642:\ddgui.gbas";
-					param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "DRAW", static9_DDgui_drawwidget_dummy_Str_ref);
-					__debugInfo = "1642:\ddgui.gbas";
-				} else {
-					__debugInfo = "1644:\ddgui.gbas";
-					func15_DDgui_draw_user(param3_wdg.attr7_wid_Str, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param4_ytop);
-					__debugInfo = "1644:\ddgui.gbas";
-				};
-				__debugInfo = "1645:\ddgui.gbas";
+				local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, param4_ytop, param3_wdg.attr6_wwidth, 1, 0);
+				
 			};
-			__debugInfo = "1600:\ddgui.gbas";
+			param3_wdg.attr7_wheight = MAX(global25_gDDguiMinControlDimension, unref(local1_h_ref_1752[0]));
+			ALPHAMODE(0);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("BUTTON")) ? 1 : 0)) {
+			func16_DDgui_drawbutton(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SLIDER")) ? 1 : 0)) {
+			func16_DDgui_drawslider(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("RADIO")) ? 1 : 0)) {
+			func15_DDgui_drawradio(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("CHECKBOX")) ? 1 : 0)) {
+			func18_DDgui_drawcheckbox(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("TAB")) ? 1 : 0)) {
+			func13_DDgui_drawtab(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("COMBO")) ? 1 : 0)) {
+			func15_DDgui_drawcombo(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("LIST")) ? 1 : 0)) {
+			func14_DDgui_drawlist(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SINGLETEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("TEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 0);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("FILE")) ? 1 : 0)) {
+			func14_DDgui_drawfile(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else {
+			if (param3_wdg.attr8_wuserfoo_ref[0]) {
+				param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "DRAW", static9_DDgui_drawwidget_dummy_Str_ref);
+				
+			} else {
+				func15_DDgui_draw_user(param3_wdg.attr7_wid_Str, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param4_ytop);
+				
+			};
+			
 		};
-		__debugInfo = "1647:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1600:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func18_DDgui_handlewidget'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlewidget", __debugInfo);
-	try {
-		__debugInfo = "1665:\ddgui.gbas";
-		if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1661:\ddgui.gbas";
-			param3_wdg.attr6_whover = 1;
-			__debugInfo = "1661:\ddgui.gbas";
-		} else {
-			__debugInfo = "1662:\ddgui.gbas";
-			param2_b1 = 0;
-			__debugInfo = "1663:\ddgui.gbas";
-			param2_b2 = 0;
-			__debugInfo = "1664:\ddgui.gbas";
-			param3_wdg.attr6_whover = 0;
-			__debugInfo = "1662:\ddgui.gbas";
-		};
-		__debugInfo = "1667:\ddgui.gbas";
-		{
-			var local16___SelectHelper5__1760 = "";
-			__debugInfo = "1667:\ddgui.gbas";
-			local16___SelectHelper5__1760 = param3_wdg.attr9_wtype_Str;
-			__debugInfo = "1713:\ddgui.gbas";
-			if ((((local16___SelectHelper5__1760) == ("SPACER")) ? 1 : 0)) {
+	if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
+		param3_wdg.attr6_whover = 1;
+		
+	} else {
+		param2_b1 = 0;
+		param2_b2 = 0;
+		param3_wdg.attr6_whover = 0;
+		
+	};
+	{
+		var local16___SelectHelper5__1760 = "";
+		local16___SelectHelper5__1760 = param3_wdg.attr9_wtype_Str;
+		if ((((local16___SelectHelper5__1760) == ("SPACER")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("FRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("UNFRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("WIDGET")) ? 1 : 0)) {
+			if ((((param2_b1) != (1)) ? 1 : 0)) {
+				param2_b1 = 0;
 				
-			} else if ((((local16___SelectHelper5__1760) == ("FRAME")) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper5__1760) == ("UNFRAME")) ? 1 : 0)) {
-				
-			} else if ((((local16___SelectHelper5__1760) == ("WIDGET")) ? 1 : 0)) {
-				__debugInfo = "1673:\ddgui.gbas";
-				if ((((param2_b1) != (1)) ? 1 : 0)) {
-					__debugInfo = "1673:\ddgui.gbas";
-					param2_b1 = 0;
-					__debugInfo = "1673:\ddgui.gbas";
-				};
-				__debugInfo = "1674:\ddgui.gbas";
-				param3_wdg.attr8_wclicked = param2_b1;
-				__debugInfo = "1673:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("BUTTON")) ? 1 : 0)) {
-				__debugInfo = "1676:\ddgui.gbas";
-				func18_DDgui_handlebutton(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1676:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("SLIDER")) ? 1 : 0)) {
-				__debugInfo = "1679:\ddgui.gbas";
-				func18_DDgui_handleslider(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1679:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("RADIO")) ? 1 : 0)) {
-				__debugInfo = "1681:\ddgui.gbas";
-				func17_DDgui_handleradio(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1681:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("CHECKBOX")) ? 1 : 0)) {
-				__debugInfo = "1683:\ddgui.gbas";
-				func20_DDgui_handlecheckbox(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1683:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("FILE")) ? 1 : 0)) {
-				__debugInfo = "1685:\ddgui.gbas";
-				func16_DDgui_handlefile(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1685:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("LIST")) ? 1 : 0)) {
-				__debugInfo = "1687:\ddgui.gbas";
-				func16_DDgui_handlelist(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1687:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("TAB")) ? 1 : 0)) {
-				__debugInfo = "1689:\ddgui.gbas";
-				func15_DDgui_handletab(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1689:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("COMBO")) ? 1 : 0)) {
-				__debugInfo = "1691:\ddgui.gbas";
-				func17_DDgui_handlecombo(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
-				__debugInfo = "1691:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("SINGLETEXT")) ? 1 : 0)) {
-				__debugInfo = "1693:\ddgui.gbas";
-				func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 0);
-				__debugInfo = "1693:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("NUMBERTEXT")) ? 1 : 0)) {
-				__debugInfo = "1695:\ddgui.gbas";
-				func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 1);
-				__debugInfo = "1695:\ddgui.gbas";
-			} else if ((((local16___SelectHelper5__1760) == ("TEXT")) ? 1 : 0)) {
-				__debugInfo = "1697:\ddgui.gbas";
-				func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 0, 0);
-				__debugInfo = "1697:\ddgui.gbas";
-			} else {
-				__debugInfo = "1712:\ddgui.gbas";
-				if (param3_wdg.attr8_wuserfoo_ref[0]) {
-					__debugInfo = "1701:\ddgui.gbas";
-					static9_DDgui_handlewidget_dummy_Str_ref[0] = "";
-					__debugInfo = "1703:\ddgui.gbas";
-					if ((((param2_b1) != (1)) ? 1 : 0)) {
-						__debugInfo = "1703:\ddgui.gbas";
-						param2_b1 = 0;
-						__debugInfo = "1703:\ddgui.gbas";
-					};
-					__debugInfo = "1704:\ddgui.gbas";
-					param3_wdg.attr8_wclicked = param2_b1;
-					__debugInfo = "1709:\ddgui.gbas";
-					if (param3_wdg.attr8_wclicked) {
-						__debugInfo = "1707:\ddgui.gbas";
-						static9_DDgui_handlewidget_dummy_Str_ref[0] = ((((((((FORMAT_Str(4, 0, param2_mx)) + (","))) + (FORMAT_Str(4, 0, param2_my)))) + (","))) + (FORMAT_Str(2, 0, param2_b1)));
-						__debugInfo = "1708:\ddgui.gbas";
-						param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "CLICKED", static9_DDgui_handlewidget_dummy_Str_ref);
-						__debugInfo = "1707:\ddgui.gbas";
-					};
-					__debugInfo = "1701:\ddgui.gbas";
-				} else {
-					__debugInfo = "1711:\ddgui.gbas";
-					func17_DDgui_handle_user(param3_wdg.attr7_wid_Str, param2_mx, param2_my, param2_b1, param2_b2);
-					__debugInfo = "1711:\ddgui.gbas";
-				};
-				__debugInfo = "1712:\ddgui.gbas";
 			};
-			__debugInfo = "1667:\ddgui.gbas";
+			param3_wdg.attr8_wclicked = param2_b1;
+			
+		} else if ((((local16___SelectHelper5__1760) == ("BUTTON")) ? 1 : 0)) {
+			func18_DDgui_handlebutton(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("SLIDER")) ? 1 : 0)) {
+			func18_DDgui_handleslider(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("RADIO")) ? 1 : 0)) {
+			func17_DDgui_handleradio(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("CHECKBOX")) ? 1 : 0)) {
+			func20_DDgui_handlecheckbox(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("FILE")) ? 1 : 0)) {
+			func16_DDgui_handlefile(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("LIST")) ? 1 : 0)) {
+			func16_DDgui_handlelist(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("TAB")) ? 1 : 0)) {
+			func15_DDgui_handletab(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("COMBO")) ? 1 : 0)) {
+			func17_DDgui_handlecombo(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("SINGLETEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 0);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 1);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("TEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 0, 0);
+			
+		} else {
+			if (param3_wdg.attr8_wuserfoo_ref[0]) {
+				static9_DDgui_handlewidget_dummy_Str_ref[0] = "";
+				if ((((param2_b1) != (1)) ? 1 : 0)) {
+					param2_b1 = 0;
+					
+				};
+				param3_wdg.attr8_wclicked = param2_b1;
+				if (param3_wdg.attr8_wclicked) {
+					static9_DDgui_handlewidget_dummy_Str_ref[0] = ((((((((FORMAT_Str(4, 0, param2_mx)) + (","))) + (FORMAT_Str(4, 0, param2_my)))) + (","))) + (FORMAT_Str(2, 0, param2_b1)));
+					param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "CLICKED", static9_DDgui_handlewidget_dummy_Str_ref);
+					
+				};
+				
+			} else {
+				func17_DDgui_handle_user(param3_wdg.attr7_wid_Str, param2_mx, param2_my, param2_b1, param2_b2);
+				
+			};
+			
 		};
-		__debugInfo = "1714:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1665:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func14_DDgui_boxprint'] = function(param10_ddgui_vals, param3_wdg, param1_x, param1_y, param2_wx, param7_do_draw, param8_find_pos) {
-	stackPush("function: DDgui_boxprint", __debugInfo);
-	try {
-		var local7_str_Str_1768 = "", local2_tx_ref_1769 = [0], local2_ty_ref_1770 = [0], local2_cx_1771 = 0, local2_cy_1772 = 0, local5_s_Str_1773 = "", local5_c_Str_1774 = "", local4_cpos_1775 = 0, local4_spos_1776 = 0, local4_slen_1777 = 0, local8_caretpos_1778 = 0, local9_has_caret_1779 = 0, local5_xseek_1780 = 0, local5_yseek_1781 = 0, local6_selcol_1782 = 0;
-		__debugInfo = "1731:\ddgui.gbas";
-		local6_selcol_1782 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm;
-		__debugInfo = "1733:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1769, local2_ty_ref_1770);
-		__debugInfo = "1735:\ddgui.gbas";
-		if (param8_find_pos) {
-			__debugInfo = "1735:\ddgui.gbas";
-			param7_do_draw = 0;
-			__debugInfo = "1735:\ddgui.gbas";
+	var local7_str_Str_1768 = "", local2_tx_ref_1769 = [0], local2_ty_ref_1770 = [0], local2_cx_1771 = 0, local2_cy_1772 = 0, local5_s_Str_1773 = "", local5_c_Str_1774 = "", local4_cpos_1775 = 0, local4_spos_1776 = 0, local4_slen_1777 = 0, local8_caretpos_1778 = 0, local9_has_caret_1779 = 0, local5_xseek_1780 = 0, local5_yseek_1781 = 0, local6_selcol_1782 = 0;
+	local6_selcol_1782 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm;
+	GETFONTSIZE(local2_tx_ref_1769, local2_ty_ref_1770);
+	if (param8_find_pos) {
+		param7_do_draw = 0;
+		
+	};
+	local7_str_Str_1768 = param3_wdg.attr9_wtext_Str_ref[0];
+	if (param8_find_pos) {
+		local5_xseek_1780 = param1_x;
+		local5_yseek_1781 = param1_y;
+		param1_x = 0;
+		param1_y = 0;
+		
+	} else {
+		var local7_strleng_1783 = 0;
+		local7_strleng_1783 = (local7_str_Str_1768).length;
+		if ((((param3_wdg.attr7_wselend) > (local7_strleng_1783)) ? 1 : 0)) {
+			param3_wdg.attr7_wselend = local7_strleng_1783;
+			
 		};
-		__debugInfo = "1737:\ddgui.gbas";
-		local7_str_Str_1768 = param3_wdg.attr9_wtext_Str_ref[0];
-		__debugInfo = "1761:\ddgui.gbas";
-		if (param8_find_pos) {
-			__debugInfo = "1739:\ddgui.gbas";
-			local5_xseek_1780 = param1_x;
-			__debugInfo = "1740:\ddgui.gbas";
-			local5_yseek_1781 = param1_y;
-			__debugInfo = "1740:\ddgui.gbas";
-			param1_x = 0;
-			__debugInfo = "1741:\ddgui.gbas";
-			param1_y = 0;
-			__debugInfo = "1739:\ddgui.gbas";
+		if ((((param3_wdg.attr9_wselstart) > (local7_strleng_1783)) ? 1 : 0)) {
+			param3_wdg.attr9_wselstart = local7_strleng_1783;
+			
+		};
+		local8_caretpos_1778 = param3_wdg.attr7_wselend;
+		if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+			local9_has_caret_1779 = 1;
+			
 		} else {
-			var local7_strleng_1783 = 0;
-			__debugInfo = "1743:\ddgui.gbas";
-			local7_strleng_1783 = (local7_str_Str_1768).length;
-			__debugInfo = "1744:\ddgui.gbas";
-			if ((((param3_wdg.attr7_wselend) > (local7_strleng_1783)) ? 1 : 0)) {
-				__debugInfo = "1744:\ddgui.gbas";
-				param3_wdg.attr7_wselend = local7_strleng_1783;
-				__debugInfo = "1744:\ddgui.gbas";
-			};
-			__debugInfo = "1745:\ddgui.gbas";
-			if ((((param3_wdg.attr9_wselstart) > (local7_strleng_1783)) ? 1 : 0)) {
-				__debugInfo = "1745:\ddgui.gbas";
-				param3_wdg.attr9_wselstart = local7_strleng_1783;
-				__debugInfo = "1745:\ddgui.gbas";
-			};
-			__debugInfo = "1746:\ddgui.gbas";
-			local8_caretpos_1778 = param3_wdg.attr7_wselend;
-			__debugInfo = "1760:\ddgui.gbas";
-			if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
-				__debugInfo = "1755:\ddgui.gbas";
-				local9_has_caret_1779 = 1;
-				__debugInfo = "1755:\ddgui.gbas";
-			} else {
-				__debugInfo = "1757:\ddgui.gbas";
-				local9_has_caret_1779 = 0;
-				__debugInfo = "1758:\ddgui.gbas";
-				param3_wdg.attr9_wselstart = -(1);
-				__debugInfo = "1759:\ddgui.gbas";
-				param3_wdg.attr7_wselend = -(1);
-				__debugInfo = "1757:\ddgui.gbas";
-			};
-			__debugInfo = "1743:\ddgui.gbas";
+			local9_has_caret_1779 = 0;
+			param3_wdg.attr9_wselstart = -(1);
+			param3_wdg.attr7_wselend = -(1);
+			
 		};
-		__debugInfo = "1762:\ddgui.gbas";
-		local2_cx_1771 = param1_x;
-		__debugInfo = "1763:\ddgui.gbas";
-		local2_cy_1772 = param1_y;
-		__debugInfo = "1764:\ddgui.gbas";
-		local7_str_Str_1768 = ((local7_str_Str_1768) + (" "));
-		__debugInfo = "1765:\ddgui.gbas";
-		local4_slen_1777 = (local7_str_Str_1768).length;
-		__debugInfo = "1821:\ddgui.gbas";
-		while ((((local4_cpos_1775) < (local4_slen_1777)) ? 1 : 0)) {
-			__debugInfo = "1767:\ddgui.gbas";
-			local5_c_Str_1774 = MID_Str(local7_str_Str_1768, local4_cpos_1775, 1);
-			__debugInfo = "1769:\ddgui.gbas";
-			local2_tx_ref_1769[0] = KERNLEN(local5_c_Str_1774, global18_ddgui_font_kerning.attr11_bHasKerning);
-			__debugInfo = "1772:\ddgui.gbas";
-			if (((((((param8_find_pos) && ((((local2_cy_1772) >= (((local5_yseek_1781) - (local2_ty_ref_1770[0])))) ? 1 : 0))) ? 1 : 0)) && (((((((local2_cx_1771) >= (((local5_xseek_1780) - (((local2_tx_ref_1769[0]) * (1.5)))))) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\n")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "1772:\ddgui.gbas";
-				return tryClone(local4_cpos_1775);
-				__debugInfo = "1772:\ddgui.gbas";
+		
+	};
+	local2_cx_1771 = param1_x;
+	local2_cy_1772 = param1_y;
+	local7_str_Str_1768 = ((local7_str_Str_1768) + (" "));
+	local4_slen_1777 = (local7_str_Str_1768).length;
+	while ((((local4_cpos_1775) < (local4_slen_1777)) ? 1 : 0)) {
+		local5_c_Str_1774 = MID_Str(local7_str_Str_1768, local4_cpos_1775, 1);
+		local2_tx_ref_1769[0] = KERNLEN(local5_c_Str_1774, global18_ddgui_font_kerning.attr11_bHasKerning);
+		if (((((((param8_find_pos) && ((((local2_cy_1772) >= (((local5_yseek_1781) - (local2_ty_ref_1770[0])))) ? 1 : 0))) ? 1 : 0)) && (((((((local2_cx_1771) >= (((local5_xseek_1780) - (((local2_tx_ref_1769[0]) * (1.5)))))) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\n")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+			return tryClone(local4_cpos_1775);
+			
+		};
+		if (param7_do_draw) {
+			if ((((((((((param3_wdg.attr9_wselstart) != (param3_wdg.attr7_wselend)) ? 1 : 0)) && (((((((local4_cpos_1775) >= (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) < (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) || (((((((local4_cpos_1775) < (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) >= (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+				DRAWRECT(local2_cx_1771, local2_cy_1772, unref(local2_tx_ref_1769[0]), unref(local2_ty_ref_1770[0]), local6_selcol_1782);
+				
 			};
-			__debugInfo = "1784:\ddgui.gbas";
+			if ((((local5_c_Str_1774) != ("\n")) ? 1 : 0)) {
+				PRINT(local5_c_Str_1774, local2_cx_1771, local2_cy_1772, global18_ddgui_font_kerning.attr11_bHasKerning);
+				
+			};
+			
+		};
+		if ((((local9_has_caret_1779) && ((((local4_cpos_1775) == (local8_caretpos_1778)) ? 1 : 0))) ? 1 : 0)) {
 			if (param7_do_draw) {
-				__debugInfo = "1781:\ddgui.gbas";
-				if ((((((((((param3_wdg.attr9_wselstart) != (param3_wdg.attr7_wselend)) ? 1 : 0)) && (((((((local4_cpos_1775) >= (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) < (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) || (((((((local4_cpos_1775) < (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) >= (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "1779:\ddgui.gbas";
-					DRAWRECT(local2_cx_1771, local2_cy_1772, unref(local2_tx_ref_1769[0]), unref(local2_ty_ref_1770[0]), local6_selcol_1782);
-					__debugInfo = "1779:\ddgui.gbas";
+				var local5_blink_1784 = 0;
+				local5_blink_1784 = (((MOD(GETTIMERALL(), 1024)) > (512)) ? 1 : 0);
+				if (local5_blink_1784) {
+					ALPHAMODE(-(0.5));
+					
 				};
-				__debugInfo = "1783:\ddgui.gbas";
-				if ((((local5_c_Str_1774) != ("\n")) ? 1 : 0)) {
-					__debugInfo = "1783:\ddgui.gbas";
-					PRINT(local5_c_Str_1774, local2_cx_1771, local2_cy_1772, global18_ddgui_font_kerning.attr11_bHasKerning);
-					__debugInfo = "1783:\ddgui.gbas";
+				DRAWRECT(((local2_cx_1771) - (1)), local2_cy_1772, 2, unref(local2_ty_ref_1770[0]), global17_gDDguiCaretColour);
+				if (local5_blink_1784) {
+					ALPHAMODE(0);
+					
 				};
-				__debugInfo = "1781:\ddgui.gbas";
+				param3_wdg.attr7_wcaretx = ((INTEGER(((local2_cx_1771) + (CAST2INT(((local2_tx_ref_1769[0]) / (2))))))) - (param1_x));
+				param3_wdg.attr7_wcarety = ((INTEGER(((local2_cy_1772) + (CAST2INT(((local2_ty_ref_1770[0]) / (2))))))) - (param1_y));
+				
 			};
-			__debugInfo = "1795:\ddgui.gbas";
-			if ((((local9_has_caret_1779) && ((((local4_cpos_1775) == (local8_caretpos_1778)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "1794:\ddgui.gbas";
-				if (param7_do_draw) {
-					var local5_blink_1784 = 0;
-					__debugInfo = "1788:\ddgui.gbas";
-					local5_blink_1784 = (((MOD(GETTIMERALL(), 1024)) > (512)) ? 1 : 0);
-					__debugInfo = "1789:\ddgui.gbas";
-					if (local5_blink_1784) {
-						__debugInfo = "1789:\ddgui.gbas";
-						ALPHAMODE(-(0.5));
-						__debugInfo = "1789:\ddgui.gbas";
-					};
-					__debugInfo = "1790:\ddgui.gbas";
-					DRAWRECT(((local2_cx_1771) - (1)), local2_cy_1772, 2, unref(local2_ty_ref_1770[0]), global17_gDDguiCaretColour);
-					__debugInfo = "1791:\ddgui.gbas";
-					if (local5_blink_1784) {
-						__debugInfo = "1791:\ddgui.gbas";
-						ALPHAMODE(0);
-						__debugInfo = "1791:\ddgui.gbas";
-					};
-					__debugInfo = "1792:\ddgui.gbas";
-					param3_wdg.attr7_wcaretx = ((INTEGER(((local2_cx_1771) + (CAST2INT(((local2_tx_ref_1769[0]) / (2))))))) - (param1_x));
-					__debugInfo = "1793:\ddgui.gbas";
-					param3_wdg.attr7_wcarety = ((INTEGER(((local2_cy_1772) + (CAST2INT(((local2_ty_ref_1770[0]) / (2))))))) - (param1_y));
-					__debugInfo = "1788:\ddgui.gbas";
-				};
-				__debugInfo = "1794:\ddgui.gbas";
-			};
-			__debugInfo = "1798:\ddgui.gbas";
-			if ((((local5_c_Str_1774) == ("\n")) ? 1 : 0)) {
-				__debugInfo = "1797:\ddgui.gbas";
-				local2_cx_1771 = param1_x;
-				__debugInfo = "1797:\ddgui.gbas";
-				local2_cy_1772+=local2_ty_ref_1770[0];
-				__debugInfo = "1797:\ddgui.gbas";
-				local4_cpos_1775+=1;
-				__debugInfo = "1797:\ddgui.gbas";
-				continue;
-				__debugInfo = "1797:\ddgui.gbas";
-			};
-			__debugInfo = "1800:\ddgui.gbas";
-			local2_cx_1771 = ((local2_cx_1771) + (local2_tx_ref_1769[0]));
-			__debugInfo = "1801:\ddgui.gbas";
-			local4_cpos_1775 = ((local4_cpos_1775) + (1));
-			__debugInfo = "1820:\ddgui.gbas";
-			if (((((((local5_c_Str_1774) == (" ")) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\t")) ? 1 : 0))) ? 1 : 0)) {
-				var local10_next_w_len_1785 = 0, local4_code_1786 = 0, local6_co_Str_1787 = "";
-				__debugInfo = "1806:\ddgui.gbas";
-				local10_next_w_len_1785 = 0;
-				__debugInfo = "1808:\ddgui.gbas";
-				{
-					__debugInfo = "1819:\ddgui.gbas";
-					for (local4_spos_1776 = local4_cpos_1775;toCheck(local4_spos_1776, ((local4_slen_1777) - (1)), 1);local4_spos_1776 += 1) {
-						__debugInfo = "1810:\ddgui.gbas";
-						local6_co_Str_1787 = MID_Str(local7_str_Str_1768, local4_spos_1776, 1);
-						__debugInfo = "1811:\ddgui.gbas";
-						local4_code_1786 = ASC(local6_co_Str_1787, 0);
-						__debugInfo = "1817:\ddgui.gbas";
-						if (((((((local4_code_1786) == (ASC(" ", 0))) ? 1 : 0)) || ((((local4_code_1786) == (ASC("\t", 0))) ? 1 : 0))) ? 1 : 0)) {
-							__debugInfo = "1815:\ddgui.gbas";
-							if ((((((((local2_cx_1771) + (local10_next_w_len_1785))) - (param1_x))) > (param2_wx)) ? 1 : 0)) {
-								__debugInfo = "1813:\ddgui.gbas";
-								local2_cx_1771 = param1_x;
-								__debugInfo = "1814:\ddgui.gbas";
-								local2_cy_1772 = ((local2_cy_1772) + (local2_ty_ref_1770[0]));
-								__debugInfo = "1813:\ddgui.gbas";
-							};
-							__debugInfo = "1816:\ddgui.gbas";
-							break;
-							__debugInfo = "1815:\ddgui.gbas";
+			
+		};
+		if ((((local5_c_Str_1774) == ("\n")) ? 1 : 0)) {
+			local2_cx_1771 = param1_x;
+			local2_cy_1772+=local2_ty_ref_1770[0];
+			local4_cpos_1775+=1;
+			continue;
+			
+		};
+		local2_cx_1771 = ((local2_cx_1771) + (local2_tx_ref_1769[0]));
+		local4_cpos_1775 = ((local4_cpos_1775) + (1));
+		if (((((((local5_c_Str_1774) == (" ")) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\t")) ? 1 : 0))) ? 1 : 0)) {
+			var local10_next_w_len_1785 = 0, local4_code_1786 = 0, local6_co_Str_1787 = "";
+			local10_next_w_len_1785 = 0;
+			{
+				for (local4_spos_1776 = local4_cpos_1775;toCheck(local4_spos_1776, ((local4_slen_1777) - (1)), 1);local4_spos_1776 += 1) {
+					local6_co_Str_1787 = MID_Str(local7_str_Str_1768, local4_spos_1776, 1);
+					local4_code_1786 = ASC(local6_co_Str_1787, 0);
+					if (((((((local4_code_1786) == (ASC(" ", 0))) ? 1 : 0)) || ((((local4_code_1786) == (ASC("\t", 0))) ? 1 : 0))) ? 1 : 0)) {
+						if ((((((((local2_cx_1771) + (local10_next_w_len_1785))) - (param1_x))) > (param2_wx)) ? 1 : 0)) {
+							local2_cx_1771 = param1_x;
+							local2_cy_1772 = ((local2_cy_1772) + (local2_ty_ref_1770[0]));
+							
 						};
-						__debugInfo = "1818:\ddgui.gbas";
-						local10_next_w_len_1785+=KERNLEN(local6_co_Str_1787, global18_ddgui_font_kerning.attr11_bHasKerning);
-						__debugInfo = "1810:\ddgui.gbas";
+						break;
+						
 					};
-					__debugInfo = "1819:\ddgui.gbas";
+					local10_next_w_len_1785+=KERNLEN(local6_co_Str_1787, global18_ddgui_font_kerning.attr11_bHasKerning);
+					
 				};
-				__debugInfo = "1806:\ddgui.gbas";
+				
 			};
-			__debugInfo = "1767:\ddgui.gbas";
+			
 		};
-		__debugInfo = "1822:\ddgui.gbas";
-		if (param8_find_pos) {
-			__debugInfo = "1822:\ddgui.gbas";
-			return tryClone(local4_slen_1777);
-			__debugInfo = "1822:\ddgui.gbas";
-		};
-		__debugInfo = "1823:\ddgui.gbas";
-		return tryClone(((((local2_cy_1772) + (local2_ty_ref_1770[0]))) - (param1_y)));
-		__debugInfo = "1824:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1731:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if (param8_find_pos) {
+		return tryClone(local4_slen_1777);
+		
+	};
+	return tryClone(((((local2_cy_1772) + (local2_ty_ref_1770[0]))) - (param1_y)));
+	return 0;
 	
 };
 window['func19_DDgui_drawscrollbar'] = function(param10_ddgui_vals, param3_wdg, param5_width, param6_height, param11_page_height, param4_ytop) {
-	stackPush("function: DDgui_drawscrollbar", __debugInfo);
-	try {
-		var local2_c1_1794 = 0, local2_c2_1795 = 0, local3_c1b_1796 = 0, local3_c2b_1797 = 0, local2_tx_ref_1798 = [0], local2_ty_ref_1799 = [0], local1_x_1800 = 0, local2_up_1801 = 0, local4_down_1802 = 0, local3_pos_1803 = 0, local4_smax_1804 = 0, local3_hsb_1805 = 0;
-		__debugInfo = "1838:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1798, local2_ty_ref_1799);
-		__debugInfo = "1839:\ddgui.gbas";
-		local2_tx_ref_1798[0] = MAX(unref(local2_tx_ref_1798[0]), global20_gDDguiScrollbarWidth);
-		__debugInfo = "1841:\ddgui.gbas";
-		local1_x_1800 = ((((param5_width) - (local2_tx_ref_1798[0]))) - (1));
-		__debugInfo = "1843:\ddgui.gbas";
-		local4_smax_1804 = param3_wdg.attr10_wscrollmax;
-		__debugInfo = "1844:\ddgui.gbas";
-		if ((((local4_smax_1804) <= (0)) ? 1 : 0)) {
-			__debugInfo = "1844:\ddgui.gbas";
-			return 0;
-			__debugInfo = "1844:\ddgui.gbas";
-		};
-		__debugInfo = "1852:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
-			__debugInfo = "1847:\ddgui.gbas";
-			local2_c1_1794 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "1848:\ddgui.gbas";
-			local2_c2_1795 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "1847:\ddgui.gbas";
-		} else {
-			__debugInfo = "1850:\ddgui.gbas";
-			local2_c1_1794 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "1851:\ddgui.gbas";
-			local2_c2_1795 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "1850:\ddgui.gbas";
-		};
-		__debugInfo = "1853:\ddgui.gbas";
-		local3_c1b_1796 = param10_ddgui_vals.attr10_col_bright;
-		__debugInfo = "1854:\ddgui.gbas";
-		local3_c2b_1797 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "1856:\ddgui.gbas";
-		local3_pos_1803 = param3_wdg.attr7_wscroll;
-		__debugInfo = "1857:\ddgui.gbas";
-		if ((((local3_pos_1803) < (0)) ? 1 : 0)) {
-			__debugInfo = "1857:\ddgui.gbas";
-			local3_pos_1803 = 0;
-			__debugInfo = "1857:\ddgui.gbas";
-		};
-		__debugInfo = "1858:\ddgui.gbas";
-		if ((((local3_pos_1803) > (local4_smax_1804)) ? 1 : 0)) {
-			__debugInfo = "1858:\ddgui.gbas";
-			local3_pos_1803 = local4_smax_1804;
-			__debugInfo = "1858:\ddgui.gbas";
-		};
-		__debugInfo = "1859:\ddgui.gbas";
-		local2_up_1801 = (((local3_pos_1803) > (0)) ? 1 : 0);
-		__debugInfo = "1860:\ddgui.gbas";
-		local4_down_1802 = (((local3_pos_1803) < (((local4_smax_1804) + (1)))) ? 1 : 0);
-		__debugInfo = "1863:\ddgui.gbas";
-		DRAWRECT(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c1_1794);
-		__debugInfo = "1864:\ddgui.gbas";
-		func14_DDgui_backrect(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c2_1795);
-		__debugInfo = "1867:\ddgui.gbas";
-		param4_ytop+=1;
-		__debugInfo = "1868:\ddgui.gbas";
-		param6_height+=-(2);
-		__debugInfo = "1869:\ddgui.gbas";
-		local1_x_1800+=1;
-		__debugInfo = "1870:\ddgui.gbas";
-		local2_tx_ref_1798[0]+=-(2);
-		__debugInfo = "1872:\ddgui.gbas";
-		local3_hsb_1805 = MAX(2, CAST2INT(((((param6_height) * (128))) / (CAST2INT(((((((((local4_smax_1804) + (param11_page_height))) - (1))) * (128))) / (param11_page_height)))))));
-		__debugInfo = "1873:\ddgui.gbas";
-		if ((((local3_hsb_1805) > (((param6_height) - (20)))) ? 1 : 0)) {
-			__debugInfo = "1873:\ddgui.gbas";
-			local3_hsb_1805 = ((param6_height) - (20));
-			__debugInfo = "1873:\ddgui.gbas";
-		};
-		__debugInfo = "1875:\ddgui.gbas";
-		local3_pos_1803 = MAX(0, CAST2INT(((((local3_pos_1803) * (((param6_height) - (local3_hsb_1805))))) / (local4_smax_1804))));
-		__debugInfo = "1877:\ddgui.gbas";
-		local1_x_1800+=3;
-		__debugInfo = "1878:\ddgui.gbas";
-		local2_tx_ref_1798[0]+=-(6);
-		__debugInfo = "1881:\ddgui.gbas";
-		func13_DDgui_backgnd(local3_c1b_1796, local3_c2b_1797, local1_x_1800, ((param4_ytop) + (local3_pos_1803)), unref(local2_tx_ref_1798[0]), local3_hsb_1805);
-		__debugInfo = "1882:\ddgui.gbas";
-		func14_DDgui_backrect(((local1_x_1800) - (1)), ((((param4_ytop) + (local3_pos_1803))) - (1)), ((local2_tx_ref_1798[0]) + (2)), ((local3_hsb_1805) + (2)), local2_c2_1795);
-		__debugInfo = "1884:\ddgui.gbas";
+	var local2_c1_1794 = 0, local2_c2_1795 = 0, local3_c1b_1796 = 0, local3_c2b_1797 = 0, local2_tx_ref_1798 = [0], local2_ty_ref_1799 = [0], local1_x_1800 = 0, local2_up_1801 = 0, local4_down_1802 = 0, local3_pos_1803 = 0, local4_smax_1804 = 0, local3_hsb_1805 = 0;
+	GETFONTSIZE(local2_tx_ref_1798, local2_ty_ref_1799);
+	local2_tx_ref_1798[0] = MAX(unref(local2_tx_ref_1798[0]), global20_gDDguiScrollbarWidth);
+	local1_x_1800 = ((((param5_width) - (local2_tx_ref_1798[0]))) - (1));
+	local4_smax_1804 = param3_wdg.attr10_wscrollmax;
+	if ((((local4_smax_1804) <= (0)) ? 1 : 0)) {
 		return 0;
-		__debugInfo = "1838:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
+		local2_c1_1794 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1795 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1794 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1795 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	local3_c1b_1796 = param10_ddgui_vals.attr10_col_bright;
+	local3_c2b_1797 = param10_ddgui_vals.attr8_col_norm;
+	local3_pos_1803 = param3_wdg.attr7_wscroll;
+	if ((((local3_pos_1803) < (0)) ? 1 : 0)) {
+		local3_pos_1803 = 0;
+		
+	};
+	if ((((local3_pos_1803) > (local4_smax_1804)) ? 1 : 0)) {
+		local3_pos_1803 = local4_smax_1804;
+		
+	};
+	local2_up_1801 = (((local3_pos_1803) > (0)) ? 1 : 0);
+	local4_down_1802 = (((local3_pos_1803) < (((local4_smax_1804) + (1)))) ? 1 : 0);
+	DRAWRECT(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c1_1794);
+	func14_DDgui_backrect(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c2_1795);
+	param4_ytop+=1;
+	param6_height+=-(2);
+	local1_x_1800+=1;
+	local2_tx_ref_1798[0]+=-(2);
+	local3_hsb_1805 = MAX(2, CAST2INT(((((param6_height) * (128))) / (CAST2INT(((((((((local4_smax_1804) + (param11_page_height))) - (1))) * (128))) / (param11_page_height)))))));
+	if ((((local3_hsb_1805) > (((param6_height) - (20)))) ? 1 : 0)) {
+		local3_hsb_1805 = ((param6_height) - (20));
+		
+	};
+	local3_pos_1803 = MAX(0, CAST2INT(((((local3_pos_1803) * (((param6_height) - (local3_hsb_1805))))) / (local4_smax_1804))));
+	local1_x_1800+=3;
+	local2_tx_ref_1798[0]+=-(6);
+	func13_DDgui_backgnd(local3_c1b_1796, local3_c2b_1797, local1_x_1800, ((param4_ytop) + (local3_pos_1803)), unref(local2_tx_ref_1798[0]), local3_hsb_1805);
+	func14_DDgui_backrect(((local1_x_1800) - (1)), ((((param4_ytop) + (local3_pos_1803))) - (1)), ((local2_tx_ref_1798[0]) + (2)), ((local3_hsb_1805) + (2)), local2_c2_1795);
+	return 0;
 	
 };
 window['func21_DDgui_handlescrollbar'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, param6_height) {
-	stackPush("function: DDgui_handlescrollbar", __debugInfo);
-	try {
-		var local2_tx_ref_1813 = [0], local2_ty_ref_1814 = [0], local1_x_1815 = 0, local4_smax_1816 = 0, local3_hsb_1817 = 0, local3_pos_1818 = 0, local8_hasfocus_1819 = 0, local5_width_1820 = 0, local3_rmx_ref_1821 = [0], local3_rmy_ref_1822 = [0], local3_rb1_ref_1823 = [0], local3_rb2_ref_1824 = [0];
-		__debugInfo = "1899:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1813, local2_ty_ref_1814);
-		__debugInfo = "1900:\ddgui.gbas";
-		local2_tx_ref_1813[0] = MAX(unref(local2_tx_ref_1813[0]), global20_gDDguiScrollbarWidth);
-		__debugInfo = "1902:\ddgui.gbas";
-		local5_width_1820 = param3_wdg.attr6_wwidth;
-		__debugInfo = "1903:\ddgui.gbas";
-		local1_x_1815 = ((local5_width_1820) - (local2_tx_ref_1813[0]));
-		__debugInfo = "1905:\ddgui.gbas";
-		local4_smax_1816 = param3_wdg.attr10_wscrollmax;
-		__debugInfo = "1910:\ddgui.gbas";
-		if ((((local4_smax_1816) <= (0)) ? 1 : 0)) {
-			__debugInfo = "1907:\ddgui.gbas";
-			param3_wdg.attr10_wscrollmax = 0;
-			__debugInfo = "1908:\ddgui.gbas";
-			param3_wdg.attr7_wscroll = 0;
-			__debugInfo = "1909:\ddgui.gbas";
-			return 0;
-			__debugInfo = "1907:\ddgui.gbas";
-		};
-		__debugInfo = "1916:\ddgui.gbas";
-		if ((((param3_wdg.attr7_wscroll) > (local4_smax_1816)) ? 1 : 0)) {
-			__debugInfo = "1914:\ddgui.gbas";
-			local3_pos_1818 = local4_smax_1816;
-			__debugInfo = "1915:\ddgui.gbas";
-			param3_wdg.attr7_wscroll = param3_wdg.attr10_wscrollmax;
-			__debugInfo = "1914:\ddgui.gbas";
-		};
-		__debugInfo = "1919:\ddgui.gbas";
-		MOUSESTATE(local3_rmx_ref_1821, local3_rmy_ref_1822, local3_rb1_ref_1823, local3_rb2_ref_1824);
-		__debugInfo = "1921:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
-			__debugInfo = "1921:\ddgui.gbas";
-			local8_hasfocus_1819 = 1;
-			__debugInfo = "1921:\ddgui.gbas";
-		};
-		__debugInfo = "1935:\ddgui.gbas";
-		if (((((((local3_rb1_ref_1823[0]) && (BOXCOLL(local1_x_1815, 0, unref(local2_tx_ref_1813[0]), param6_height, param2_mx, param2_my, 1, 1))) ? 1 : 0)) || (local8_hasfocus_1819)) ? 1 : 0)) {
-			var local3_div_1825 = 0;
-			__debugInfo = "1924:\ddgui.gbas";
-			local8_hasfocus_1819 = 1;
-			__debugInfo = "1925:\ddgui.gbas";
-			param10_ddgui_vals.attr9_focus_Str = (("SB") + (param3_wdg.attr7_wid_Str));
-			__debugInfo = "1927:\ddgui.gbas";
-			local3_hsb_1817 = MAX(2, CAST2INT(((CAST2INT(((((param6_height) * (1024))) / (local4_smax_1816)))) / (1024))));
-			__debugInfo = "1929:\ddgui.gbas";
-			local3_div_1825 = ((param6_height) - (local3_hsb_1817));
-			__debugInfo = "1934:\ddgui.gbas";
-			if ((((local3_div_1825) > (0)) ? 1 : 0)) {
-				__debugInfo = "1931:\ddgui.gbas";
-				param3_wdg.attr7_wscroll = MAX(0, MIN(param3_wdg.attr10_wscrollmax, CAST2INT(((CAST2INT(((((((param2_my) * (param3_wdg.attr10_wscrollmax))) * (1024))) / (local3_div_1825)))) / (1024)))));
-				__debugInfo = "1931:\ddgui.gbas";
-			} else {
-				__debugInfo = "1933:\ddgui.gbas";
-				param3_wdg.attr7_wscroll = 0;
-				__debugInfo = "1933:\ddgui.gbas";
-			};
-			__debugInfo = "1924:\ddgui.gbas";
-		};
-		__debugInfo = "1937:\ddgui.gbas";
-		if ((((local8_hasfocus_1819) && ((((local3_rb1_ref_1823[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1937:\ddgui.gbas";
-			param10_ddgui_vals.attr9_focus_Str = "";
-			__debugInfo = "1937:\ddgui.gbas";
-		};
-		__debugInfo = "1939:\ddgui.gbas";
-		return 1;
-		__debugInfo = "1940:\ddgui.gbas";
+	var local2_tx_ref_1813 = [0], local2_ty_ref_1814 = [0], local1_x_1815 = 0, local4_smax_1816 = 0, local3_hsb_1817 = 0, local3_pos_1818 = 0, local8_hasfocus_1819 = 0, local5_width_1820 = 0, local3_rmx_ref_1821 = [0], local3_rmy_ref_1822 = [0], local3_rb1_ref_1823 = [0], local3_rb2_ref_1824 = [0];
+	GETFONTSIZE(local2_tx_ref_1813, local2_ty_ref_1814);
+	local2_tx_ref_1813[0] = MAX(unref(local2_tx_ref_1813[0]), global20_gDDguiScrollbarWidth);
+	local5_width_1820 = param3_wdg.attr6_wwidth;
+	local1_x_1815 = ((local5_width_1820) - (local2_tx_ref_1813[0]));
+	local4_smax_1816 = param3_wdg.attr10_wscrollmax;
+	if ((((local4_smax_1816) <= (0)) ? 1 : 0)) {
+		param3_wdg.attr10_wscrollmax = 0;
+		param3_wdg.attr7_wscroll = 0;
 		return 0;
-		__debugInfo = "1899:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((param3_wdg.attr7_wscroll) > (local4_smax_1816)) ? 1 : 0)) {
+		local3_pos_1818 = local4_smax_1816;
+		param3_wdg.attr7_wscroll = param3_wdg.attr10_wscrollmax;
+		
+	};
+	MOUSESTATE(local3_rmx_ref_1821, local3_rmy_ref_1822, local3_rb1_ref_1823, local3_rb2_ref_1824);
+	if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
+		local8_hasfocus_1819 = 1;
+		
+	};
+	if (((((((local3_rb1_ref_1823[0]) && (BOXCOLL(local1_x_1815, 0, unref(local2_tx_ref_1813[0]), param6_height, param2_mx, param2_my, 1, 1))) ? 1 : 0)) || (local8_hasfocus_1819)) ? 1 : 0)) {
+		var local3_div_1825 = 0;
+		local8_hasfocus_1819 = 1;
+		param10_ddgui_vals.attr9_focus_Str = (("SB") + (param3_wdg.attr7_wid_Str));
+		local3_hsb_1817 = MAX(2, CAST2INT(((CAST2INT(((((param6_height) * (1024))) / (local4_smax_1816)))) / (1024))));
+		local3_div_1825 = ((param6_height) - (local3_hsb_1817));
+		if ((((local3_div_1825) > (0)) ? 1 : 0)) {
+			param3_wdg.attr7_wscroll = MAX(0, MIN(param3_wdg.attr10_wscrollmax, CAST2INT(((CAST2INT(((((((param2_my) * (param3_wdg.attr10_wscrollmax))) * (1024))) / (local3_div_1825)))) / (1024)))));
+			
+		} else {
+			param3_wdg.attr7_wscroll = 0;
+			
+		};
+		
+	};
+	if ((((local8_hasfocus_1819) && ((((local3_rb1_ref_1823[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		param10_ddgui_vals.attr9_focus_Str = "";
+		
+	};
+	return 1;
+	return 0;
 	
 };
 window['func12_DDgui_spacer'] = function(param5_width, param6_height) {
-	stackPush("function: DDgui_spacer", __debugInfo);
-	try {
-		var local6_id_Str_1828 = "";
-		__debugInfo = "1949:\ddgui.gbas";
-		local6_id_Str_1828 = (("ID_SPACER_") + (CAST2STRING(BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))));
-		__debugInfo = "1950:\ddgui.gbas";
-		func12_DDgui_widget(local6_id_Str_1828, "", param5_width, param6_height);
-		__debugInfo = "1952:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_1828, "WIDTH", CAST2STRING(param5_width));
-		__debugInfo = "1953:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_1828, "HEIGHT", CAST2STRING(param6_height));
-		__debugInfo = "1956:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_1828, "TYPE", "SPACER");
-		__debugInfo = "1957:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1949:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local6_id_Str_1828 = "";
+	local6_id_Str_1828 = (("ID_SPACER_") + (CAST2STRING(BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))));
+	func12_DDgui_widget(local6_id_Str_1828, "", param5_width, param6_height);
+	func9_DDgui_set(local6_id_Str_1828, "WIDTH", CAST2STRING(param5_width));
+	func9_DDgui_set(local6_id_Str_1828, "HEIGHT", CAST2STRING(param6_height));
+	func9_DDgui_set(local6_id_Str_1828, "TYPE", "SPACER");
+	return 0;
 	
 };
 window['func12_DDgui_button'] = function(param6_id_Str, param11_caption_Str, param5_width, param6_height) {
-		var __labels = {"__DrawFrames__": 3449, "skip": 14466};
-		
-	stackPush("function: DDgui_button", __debugInfo);
-	try {
-		var local2_sx_ref_2270 = [0], local2_sy_ref_2271 = [0];
-		var __pc = 14365;
-		while(__pc >= 0) {
-			switch(__pc) {
-				case 14365:
-					__debugInfo = "1965:\ddgui.gbas";
-					func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, param6_height);
-					
-				case 14465:
-					__debugInfo = "1980:\ddgui.gbas";
-					if (!(((((((param5_width) == (0)) ? 1 : 0)) || ((((param6_height) == (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 14373; break; }
-					
-					case 14417:
-						__debugInfo = "1972:\ddgui.gbas";
-						if (!((((INSTR(param11_caption_Str, "SPR_B", 0)) == (0)) ? 1 : 0))) { __pc = 14381; break; }
-					
-					case 14391:
-						__debugInfo = "1968:\ddgui.gbas";
-						GETSPRITESIZE(INTEGER(FLOAT2STR(MID_Str(param11_caption_Str, 5, (param11_caption_Str).length))), local2_sx_ref_2270, local2_sy_ref_2271);
-						
-					case 14403:
-						__debugInfo = "1969:\ddgui.gbas";
-						if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14395; break; }
-					
-					case 14402:
-						__debugInfo = "1969:\ddgui.gbas";
-						func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(((local2_sx_ref_2270[0]) + (4))));
-						
-					__debugInfo = "1969:\ddgui.gbas";
-					
-				case 14395: //dummy jumper1
-					;
-						
-					case 14415:
-						__debugInfo = "1970:\ddgui.gbas";
-						if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14407; break; }
-					
-					case 14414:
-						__debugInfo = "1970:\ddgui.gbas";
-						func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(((local2_sy_ref_2271[0]) + (4))));
-						
-					__debugInfo = "1970:\ddgui.gbas";
-					
-				case 14407: //dummy jumper1
-					;
-						
-					case 14416:
-						__debugInfo = "1971:\ddgui.gbas";
-						__pc = __labels["skip"]; break;
-						
-					__debugInfo = "1968:\ddgui.gbas";
-					
-				case 14381: //dummy jumper1
-					;
-						
-					case 14464:
-						__debugInfo = "1979:\ddgui.gbas";
-						if (!((((INSTR(param11_caption_Str, "SPR_C", 0)) == (0)) ? 1 : 0))) { __pc = 14424; break; }
-					
-					case 14435:
-						__debugInfo = "1974:\ddgui.gbas";
-						if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14429; break; }
-					
-					case 14434:
-						__debugInfo = "1974:\ddgui.gbas";
-						func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(32));
-						
-					__debugInfo = "1974:\ddgui.gbas";
-					
-				case 14429: //dummy jumper1
-					;
-						
-					case 14445:
-						__debugInfo = "1975:\ddgui.gbas";
-						if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14439; break; }
-					
-					case 14444:
-						__debugInfo = "1975:\ddgui.gbas";
-						func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(32));
-						
-					__debugInfo = "1975:\ddgui.gbas";
-					
-				case 14439: //dummy jumper1
-					;
-						
-					__debugInfo = "1974:\ddgui.gbas";
-					__pc = 16787;
-					break;
-					
-				case 14424: //dummy jumper1
-					
-					case 14449:
-						__debugInfo = "1977:\ddgui.gbas";
-						GETFONTSIZE(local2_sx_ref_2270, local2_sy_ref_2271);
-						
-					case 14463:
-						__debugInfo = "1978:\ddgui.gbas";
-						if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14453; break; }
-					
-					case 14462:
-						__debugInfo = "1978:\ddgui.gbas";
-						func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(MAX(global25_gDDguiMinControlDimension, ((local2_sy_ref_2271[0]) + (4)))));
-						
-					__debugInfo = "1978:\ddgui.gbas";
-					
-				case 14453: //dummy jumper1
-					;
-						
-					__debugInfo = "1977:\ddgui.gbas";
-					
-				case 16787: //dummy jumper2
-					;
-						
-					__debugInfo = "1972:\ddgui.gbas";
-					
-				case 14373: //dummy jumper1
-					;
-					
-				case 14466:
-					__debugInfo = "1981:\ddgui.gbas";
-					//label: skip;
-					
-				__debugInfo = "1982:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "TYPE", "BUTTON");
-				__debugInfo = "1983:\ddgui.gbas";
-				return 0;
-				__debugInfo = "1965:\ddgui.gbas";__pc = -1; break;
-				default:
-					throwError("Gotocounter exception pc: "+__pc);
-				
-			}
-		}
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var __labels = {"__DrawFrames__": 3476, "skip": 14670};
 	
+	var local2_sx_ref_2294 = [0], local2_sy_ref_2295 = [0];
+	var __pc = 14569;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 14569:
+				func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, param6_height);
+				
+			case 14669:
+				if (!(((((((param5_width) == (0)) ? 1 : 0)) || ((((param6_height) == (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 14577; break; }
+				
+				case 14621:
+					if (!((((INSTR(param11_caption_Str, "SPR_B", 0)) == (0)) ? 1 : 0))) { __pc = 14585; break; }
+				
+				case 14595:
+					GETSPRITESIZE(INTEGER(FLOAT2STR(MID_Str(param11_caption_Str, 5, (param11_caption_Str).length))), local2_sx_ref_2294, local2_sy_ref_2295);
+					
+				case 14607:
+					if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14599; break; }
+				
+				case 14606:
+					func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(((local2_sx_ref_2294[0]) + (4))));
+					
+				
+				
+			case 14599: //dummy jumper1
+				;
+					
+				case 14619:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14611; break; }
+				
+				case 14618:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(((local2_sy_ref_2295[0]) + (4))));
+					
+				
+				
+			case 14611: //dummy jumper1
+				;
+					
+				case 14620:
+					__pc = __labels["skip"]; break;
+					
+				
+				
+			case 14585: //dummy jumper1
+				;
+					
+				case 14668:
+					if (!((((INSTR(param11_caption_Str, "SPR_C", 0)) == (0)) ? 1 : 0))) { __pc = 14628; break; }
+				
+				case 14639:
+					if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14633; break; }
+				
+				case 14638:
+					func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(32));
+					
+				
+				
+			case 14633: //dummy jumper1
+				;
+					
+				case 14649:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14643; break; }
+				
+				case 14648:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(32));
+					
+				
+				
+			case 14643: //dummy jumper1
+				;
+					
+				
+				__pc = 16889;
+				break;
+				
+			case 14628: //dummy jumper1
+				
+				case 14653:
+					GETFONTSIZE(local2_sx_ref_2294, local2_sy_ref_2295);
+					
+				case 14667:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14657; break; }
+				
+				case 14666:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(MAX(global25_gDDguiMinControlDimension, ((local2_sy_ref_2295[0]) + (4)))));
+					
+				
+				
+			case 14657: //dummy jumper1
+				;
+					
+				
+				
+			case 16889: //dummy jumper2
+				;
+					
+				
+				
+			case 14577: //dummy jumper1
+				;
+				
+			case 14670:
+				//label: skip;
+				
+			func9_DDgui_set(param6_id_Str, "TYPE", "BUTTON");
+			return 0;
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
+	}
 };
 window['func16_DDgui_drawbutton'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawbutton", __debugInfo);
-	try {
-		var local2_c1_1832 = 0, local2_c2_1833 = 0, local5_hover_1834 = 0, local1_x_1835 = 0, local1_y_1836 = 0, local1_w_1837 = 0, local1_h_1838 = 0;
-		__debugInfo = "1989:\ddgui.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "1990:\ddgui.gbas";
-		local5_hover_1834 = param3_wdg.attr6_whover;
-		__debugInfo = "1998:\ddgui.gbas";
-		if (((((((local5_hover_1834) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1993:\ddgui.gbas";
-			local2_c1_1832 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "1994:\ddgui.gbas";
-			local2_c2_1833 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "1993:\ddgui.gbas";
+	var local2_c1_1832 = 0, local2_c2_1833 = 0, local5_hover_1834 = 0, local1_x_1835 = 0, local1_y_1836 = 0, local1_w_1837 = 0, local1_h_1838 = 0;
+	ALPHAMODE(0);
+	local5_hover_1834 = param3_wdg.attr6_whover;
+	if (((((((local5_hover_1834) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1832 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1833 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1832 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1833 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1832, local2_c2_1833, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+	local1_x_1835 = 1;
+	local1_y_1836 = ((param4_ytop) + (1));
+	local1_w_1837 = ((param3_wdg.attr6_wwidth) - (2));
+	local1_h_1838 = ((param3_wdg.attr7_wheight) - (2));
+	if (param3_wdg.attr7_wselect) {
+		local1_x_1835+=1;
+		local1_y_1836+=1;
+		local1_w_1837+=-(2);
+		local1_h_1838+=-(2);
+		
+	};
+	if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+		if (param3_wdg.attr9_wreadonly) {
+			ALPHAMODE(-(0.8));
+			
 		} else {
-			__debugInfo = "1996:\ddgui.gbas";
-			local2_c1_1832 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "1997:\ddgui.gbas";
-			local2_c2_1833 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "1996:\ddgui.gbas";
-		};
-		__debugInfo = "1999:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_1832, local2_c2_1833, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
-		__debugInfo = "2000:\ddgui.gbas";
-		local1_x_1835 = 1;
-		__debugInfo = "2000:\ddgui.gbas";
-		local1_y_1836 = ((param4_ytop) + (1));
-		__debugInfo = "2000:\ddgui.gbas";
-		local1_w_1837 = ((param3_wdg.attr6_wwidth) - (2));
-		__debugInfo = "2001:\ddgui.gbas";
-		local1_h_1838 = ((param3_wdg.attr7_wheight) - (2));
-		__debugInfo = "2009:\ddgui.gbas";
-		if (param3_wdg.attr7_wselect) {
-			__debugInfo = "2005:\ddgui.gbas";
-			local1_x_1835+=1;
-			__debugInfo = "2006:\ddgui.gbas";
-			local1_y_1836+=1;
-			__debugInfo = "2007:\ddgui.gbas";
-			local1_w_1837+=-(2);
-			__debugInfo = "2008:\ddgui.gbas";
-			local1_h_1838+=-(2);
-			__debugInfo = "2005:\ddgui.gbas";
-		};
-		__debugInfo = "2045:\ddgui.gbas";
-		if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "2021:\ddgui.gbas";
-			if (param3_wdg.attr9_wreadonly) {
-				__debugInfo = "2014:\ddgui.gbas";
-				ALPHAMODE(-(0.8));
-				__debugInfo = "2014:\ddgui.gbas";
-			} else {
-				__debugInfo = "2020:\ddgui.gbas";
-				if ((((local5_hover_1834) == (0)) ? 1 : 0)) {
-					__debugInfo = "2017:\ddgui.gbas";
-					ALPHAMODE(-(1));
-					__debugInfo = "2017:\ddgui.gbas";
-				} else {
-					__debugInfo = "2019:\ddgui.gbas";
-					ALPHAMODE(-(0.8));
-					__debugInfo = "2019:\ddgui.gbas";
-				};
-				__debugInfo = "2020:\ddgui.gbas";
-			};
-			__debugInfo = "2023:\ddgui.gbas";
-			local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
-			__debugInfo = "2024:\ddgui.gbas";
-			func23_DDgui_fit_sprite_in_box(local2_c1_1832, ((local1_x_1835) + (1)), ((local1_y_1836) + (1)), ((local1_w_1837) - (2)), ((local1_h_1838) - (2)));
-			__debugInfo = "2021:\ddgui.gbas";
-		} else if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "2032:\ddgui.gbas";
 			if ((((local5_hover_1834) == (0)) ? 1 : 0)) {
-				__debugInfo = "2029:\ddgui.gbas";
 				ALPHAMODE(-(1));
-				__debugInfo = "2029:\ddgui.gbas";
+				
 			} else {
-				__debugInfo = "2031:\ddgui.gbas";
 				ALPHAMODE(-(0.8));
-				__debugInfo = "2031:\ddgui.gbas";
+				
 			};
-			__debugInfo = "2033:\ddgui.gbas";
-			local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
-			__debugInfo = "2034:\ddgui.gbas";
-			DRAWRECT(local1_x_1835, local1_y_1836, local1_w_1837, local1_h_1838, local2_c1_1832);
-			__debugInfo = "2032:\ddgui.gbas";
-		} else {
-			var local2_fx_ref_1839 = [0], local2_fy_ref_1840 = [0];
-			__debugInfo = "2041:\ddgui.gbas";
-			if (param3_wdg.attr9_wreadonly) {
-				__debugInfo = "2038:\ddgui.gbas";
-				ALPHAMODE(-(0.5));
-				__debugInfo = "2038:\ddgui.gbas";
-			} else {
-				__debugInfo = "2040:\ddgui.gbas";
-				ALPHAMODE(0);
-				__debugInfo = "2040:\ddgui.gbas";
-			};
-			__debugInfo = "2043:\ddgui.gbas";
-			GETFONTSIZE(local2_fx_ref_1839, local2_fy_ref_1840);
-			__debugInfo = "2044:\ddgui.gbas";
-			func17_DDGui_PrintIntern(param3_wdg.attr9_wtext_Str_ref, CAST2INT(((((param3_wdg.attr6_wwidth) - (func21_DDGui_TextWidthIntern(param3_wdg.attr9_wtext_Str_ref)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1840[0]))) / (2))))), 0);
-			__debugInfo = "2041:\ddgui.gbas";
+			
 		};
-		__debugInfo = "2046:\ddgui.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "2052:\ddgui.gbas";
-		if (param3_wdg.attr7_wselect) {
-			__debugInfo = "2049:\ddgui.gbas";
-			func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param10_ddgui_vals.attr14_col_hover_norm);
-			__debugInfo = "2049:\ddgui.gbas";
+		local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
+		func23_DDgui_fit_sprite_in_box(local2_c1_1832, ((local1_x_1835) + (1)), ((local1_y_1836) + (1)), ((local1_w_1837) - (2)), ((local1_h_1838) - (2)));
+		
+	} else if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
+		if ((((local5_hover_1834) == (0)) ? 1 : 0)) {
+			ALPHAMODE(-(1));
+			
 		} else {
-			__debugInfo = "2051:\ddgui.gbas";
-			func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1833);
-			__debugInfo = "2051:\ddgui.gbas";
+			ALPHAMODE(-(0.8));
+			
 		};
-		__debugInfo = "2053:\ddgui.gbas";
-		return 0;
-		__debugInfo = "1989:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
+		DRAWRECT(local1_x_1835, local1_y_1836, local1_w_1837, local1_h_1838, local2_c1_1832);
+		
+	} else {
+		var local2_fx_ref_1839 = [0], local2_fy_ref_1840 = [0];
+		if (param3_wdg.attr9_wreadonly) {
+			ALPHAMODE(-(0.5));
+			
+		} else {
+			ALPHAMODE(0);
+			
+		};
+		GETFONTSIZE(local2_fx_ref_1839, local2_fy_ref_1840);
+		func17_DDGui_PrintIntern(param3_wdg.attr9_wtext_Str_ref, CAST2INT(((((param3_wdg.attr6_wwidth) - (func21_DDGui_TextWidthIntern(param3_wdg.attr9_wtext_Str_ref)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1840[0]))) / (2))))), 0);
+		
+	};
+	ALPHAMODE(0);
+	if (param3_wdg.attr7_wselect) {
+		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param10_ddgui_vals.attr14_col_hover_norm);
+		
+	} else {
+		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1833);
+		
+	};
+	return 0;
 	
 };
 window['func18_DDgui_handlebutton'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlebutton", __debugInfo);
-	try {
-		__debugInfo = "2056:\ddgui.gbas";
-		if ((((param3_wdg.attr9_wreadonly) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) != (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2056:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2056:\ddgui.gbas";
-		};
-		__debugInfo = "2057:\ddgui.gbas";
-		if ((((param2_b1) != (1)) ? 1 : 0)) {
-			__debugInfo = "2057:\ddgui.gbas";
-			param2_b1 = 0;
-			__debugInfo = "2057:\ddgui.gbas";
-		};
-		__debugInfo = "2058:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = param2_b1;
-		__debugInfo = "2062:\ddgui.gbas";
-		if (((((((param2_b1) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2060:\ddgui.gbas";
-			param10_ddgui_vals.attr15_kick_intern_dlg = 1;
-			__debugInfo = "2061:\ddgui.gbas";
-			param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
-			__debugInfo = "2060:\ddgui.gbas";
-		};
-		__debugInfo = "2063:\ddgui.gbas";
+	if ((((param3_wdg.attr9_wreadonly) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) != (0)) ? 1 : 0))) ? 1 : 0)) {
 		return 0;
-		__debugInfo = "2056:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((param2_b1) != (1)) ? 1 : 0)) {
+		param2_b1 = 0;
+		
+	};
+	param3_wdg.attr8_wclicked = param2_b1;
+	if (((((((param2_b1) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		param10_ddgui_vals.attr15_kick_intern_dlg = 1;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
 	
 };
 window['func12_DDgui_slider'] = function(param6_id_Str, param5_value, param5_width, param6_height) {
-	stackPush("function: DDgui_slider", __debugInfo);
-	try {
-		__debugInfo = "2070:\ddgui.gbas";
-		if ((((param5_width) == (0)) ? 1 : 0)) {
-			__debugInfo = "2070:\ddgui.gbas";
-			param5_width = 100;
-			__debugInfo = "2070:\ddgui.gbas";
-		};
-		__debugInfo = "2071:\ddgui.gbas";
-		if ((((param6_height) == (0)) ? 1 : 0)) {
-			__debugInfo = "2071:\ddgui.gbas";
-			param6_height = 16;
-			__debugInfo = "2071:\ddgui.gbas";
-		};
-		__debugInfo = "2072:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, CAST2STRING(0), param5_width, param6_height);
-		__debugInfo = "2073:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "SLIDER");
-		__debugInfo = "2074:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TEXT", CAST2STRING(param5_value));
-		__debugInfo = "2075:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2070:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		param5_width = 100;
+		
+	};
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = 16;
+		
+	};
+	func12_DDgui_widget(param6_id_Str, CAST2STRING(0), param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "SLIDER");
+	func9_DDgui_set(param6_id_Str, "TEXT", CAST2STRING(param5_value));
+	return 0;
 	
 };
 window['func16_DDgui_drawslider'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawslider", __debugInfo);
-	try {
-		var local2_c1_1850 = 0, local2_c2_1851 = 0, local1_x_1852 = 0.0, local1_w_1853 = 0, local1_h_1854 = 0, local5_t_Str_1855 = "", local5_sltop_1856 = 0;
-		__debugInfo = "2080:\ddgui.gbas";
-		local1_w_1853 = param3_wdg.attr6_wwidth;
-		__debugInfo = "2081:\ddgui.gbas";
-		local1_h_1854 = param3_wdg.attr7_wheight;
-		__debugInfo = "2088:\ddgui.gbas";
-		if ((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) {
-			__debugInfo = "2083:\ddgui.gbas";
-			local2_c1_1850 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "2084:\ddgui.gbas";
-			local2_c2_1851 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "2083:\ddgui.gbas";
-		} else {
-			__debugInfo = "2086:\ddgui.gbas";
-			local2_c1_1850 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "2087:\ddgui.gbas";
-			local2_c2_1851 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2086:\ddgui.gbas";
-		};
-		__debugInfo = "2091:\ddgui.gbas";
-		DRAWRECT(0, ((param4_ytop) + (CAST2INT(((local1_h_1854) / (2))))), local1_w_1853, 3, local2_c2_1851);
-		__debugInfo = "2093:\ddgui.gbas";
-		local1_x_1852 = FLOAT2STR(param3_wdg.attr9_wtext_Str_ref[0]);
-		__debugInfo = "2095:\ddgui.gbas";
-		local1_x_1852+=-(param3_wdg.attr7_wminval);
-		__debugInfo = "2096:\ddgui.gbas";
-		local1_x_1852 = ((local1_x_1852) / (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))));
-		__debugInfo = "2098:\ddgui.gbas";
-		local1_x_1852 = ((((((local1_w_1853) - (12))) * (local1_x_1852))) + (6));
-		__debugInfo = "2099:\ddgui.gbas";
-		local2_c1_1850 = param10_ddgui_vals.attr16_col_hover_bright;
-		__debugInfo = "2100:\ddgui.gbas";
-		local2_c2_1851 = param10_ddgui_vals.attr14_col_hover_norm;
-		__debugInfo = "2102:\ddgui.gbas";
-		local1_h_1854 = MIN(((local1_h_1854) - (2)), 24);
-		__debugInfo = "2103:\ddgui.gbas";
-		local5_sltop_1856 = ((((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_1854))) / (2)))))) + (1));
-		__debugInfo = "2104:\ddgui.gbas";
-		STARTPOLY(-(1), 0);
-		__debugInfo = "2105:\ddgui.gbas";
-		POLYVECTOR(local1_x_1852, local5_sltop_1856, 0, 0, local2_c1_1850);
-		__debugInfo = "2107:\ddgui.gbas";
-		POLYVECTOR(((local1_x_1852) - (5)), ((local5_sltop_1856) + (2)), 0, 0, local2_c2_1851);
-		__debugInfo = "2108:\ddgui.gbas";
-		POLYVECTOR(((local1_x_1852) - (5)), ((((local5_sltop_1856) + (local1_h_1854))) - (2)), 0, 0, local2_c2_1851);
-		__debugInfo = "2109:\ddgui.gbas";
-		POLYVECTOR(local1_x_1852, ((local5_sltop_1856) + (local1_h_1854)), 0, 0, local2_c1_1850);
-		__debugInfo = "2112:\ddgui.gbas";
-		POLYVECTOR(((local1_x_1852) + (5)), ((((local5_sltop_1856) + (local1_h_1854))) - (2)), 0, 0, local2_c2_1851);
-		__debugInfo = "2113:\ddgui.gbas";
-		POLYVECTOR(((local1_x_1852) + (5)), ((local5_sltop_1856) + (2)), 0, 0, local2_c2_1851);
-		__debugInfo = "2114:\ddgui.gbas";
-		ENDPOLY();
-		__debugInfo = "2117:\ddgui.gbas";
-		if ((((param3_wdg.attr6_whover) == (0)) ? 1 : 0)) {
-			__debugInfo = "2117:\ddgui.gbas";
-			local2_c2_1851 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2117:\ddgui.gbas";
-		};
-		__debugInfo = "2118:\ddgui.gbas";
-		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1851);
-		__debugInfo = "2119:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2080:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local2_c1_1854 = 0, local2_c2_1855 = 0, local1_x_1856 = 0.0, local1_w_1857 = 0, local1_h_1858 = 0, local5_t_Str_1859 = "", local5_sltop_1860 = 0;
+	local1_w_1857 = param3_wdg.attr6_wwidth;
+	local1_h_1858 = param3_wdg.attr7_wheight;
+	if ((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) {
+		local2_c1_1854 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1855 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1854 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1855 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	DRAWRECT(0, ((param4_ytop) + (CAST2INT(((local1_h_1858) / (2))))), local1_w_1857, 3, local2_c2_1855);
+	local1_x_1856 = FLOAT2STR(param3_wdg.attr9_wtext_Str_ref[0]);
+	local1_x_1856+=-(param3_wdg.attr7_wminval);
+	local1_x_1856 = ((local1_x_1856) / (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))));
+	local1_x_1856 = ((((((local1_w_1857) - (12))) * (local1_x_1856))) + (6));
+	local2_c1_1854 = param10_ddgui_vals.attr16_col_hover_bright;
+	local2_c2_1855 = param10_ddgui_vals.attr14_col_hover_norm;
+	local1_h_1858 = MIN(((local1_h_1858) - (2)), 24);
+	local5_sltop_1860 = ((((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_1858))) / (2)))))) + (1));
+	STARTPOLY(-(1), 0);
+	POLYVECTOR(local1_x_1856, local5_sltop_1860, 0, 0, local2_c1_1854);
+	POLYVECTOR(((local1_x_1856) - (5)), ((local5_sltop_1860) + (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(((local1_x_1856) - (5)), ((((local5_sltop_1860) + (local1_h_1858))) - (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(local1_x_1856, ((local5_sltop_1860) + (local1_h_1858)), 0, 0, local2_c1_1854);
+	POLYVECTOR(((local1_x_1856) + (5)), ((((local5_sltop_1860) + (local1_h_1858))) - (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(((local1_x_1856) + (5)), ((local5_sltop_1860) + (2)), 0, 0, local2_c2_1855);
+	ENDPOLY();
+	if ((((param3_wdg.attr6_whover) == (0)) ? 1 : 0)) {
+		local2_c2_1855 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1855);
+	return 0;
 	
 };
 window['func18_DDgui_handleslider'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handleslider", __debugInfo);
-	try {
-		__debugInfo = "2122:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2122:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2122:\ddgui.gbas";
-		};
-		__debugInfo = "2128:\ddgui.gbas";
-		if ((((param2_b1) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "2127:\ddgui.gbas";
-			if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) <= (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "2126:\ddgui.gbas";
-				param10_ddgui_vals.attr9_focus_Str = param3_wdg.attr7_wid_Str;
-				__debugInfo = "2126:\ddgui.gbas";
-			};
-			__debugInfo = "2127:\ddgui.gbas";
-		};
-		__debugInfo = "2130:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "2152:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
-			__debugInfo = "2151:\ddgui.gbas";
-			if (MOUSEAXIS(3)) {
-				var local7_old_Str_1863 = "", local3_pos_1864 = 0.0;
-				__debugInfo = "2134:\ddgui.gbas";
-				local7_old_Str_1863 = param3_wdg.attr9_wtext_Str_ref[0];
-				__debugInfo = "2136:\ddgui.gbas";
-				local3_pos_1864 = MIN(1, MAX(0, ((((param2_mx) - (5))) / (((param3_wdg.attr6_wwidth) - (9))))));
-				__debugInfo = "2138:\ddgui.gbas";
-				local3_pos_1864 = ((param3_wdg.attr7_wminval) + (((local3_pos_1864) * (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))))));
-				__debugInfo = "2146:\ddgui.gbas";
-				if ((((param3_wdg.attr5_wstep) > (0)) ? 1 : 0)) {
-					var local6_iSteps_1865 = 0;
-					__debugInfo = "2141:\ddgui.gbas";
-					local6_iSteps_1865 = ~~(((((local3_pos_1864) / (param3_wdg.attr5_wstep))) + (0.4)));
-					__debugInfo = "2142:\ddgui.gbas";
-					local3_pos_1864 = ((param3_wdg.attr5_wstep) * (local6_iSteps_1865));
-					__debugInfo = "2143:\ddgui.gbas";
-					param3_wdg.attr9_wtext_Str_ref[0] = CAST2STRING(local3_pos_1864);
-					__debugInfo = "2141:\ddgui.gbas";
-				} else {
-					__debugInfo = "2145:\ddgui.gbas";
-					param3_wdg.attr9_wtext_Str_ref[0] = FORMAT_Str(0, 2, local3_pos_1864);
-					__debugInfo = "2145:\ddgui.gbas";
-				};
-				__debugInfo = "2148:\ddgui.gbas";
-				if ((((local7_old_Str_1863) != (param3_wdg.attr9_wtext_Str_ref[0])) ? 1 : 0)) {
-					__debugInfo = "2148:\ddgui.gbas";
-					param3_wdg.attr8_wclicked = 1;
-					__debugInfo = "2148:\ddgui.gbas";
-				};
-				__debugInfo = "2134:\ddgui.gbas";
-			} else {
-				__debugInfo = "2150:\ddgui.gbas";
-				param10_ddgui_vals.attr9_focus_Str = "";
-				__debugInfo = "2150:\ddgui.gbas";
-			};
-			__debugInfo = "2151:\ddgui.gbas";
-		};
-		__debugInfo = "2154:\ddgui.gbas";
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "2122:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((param2_b1) == (-(1))) ? 1 : 0)) {
+		if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) <= (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
+			param10_ddgui_vals.attr9_focus_Str = param3_wdg.attr7_wid_Str;
+			
+		};
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+		if (MOUSEAXIS(3)) {
+			var local7_old_Str_1867 = "", local3_pos_1868 = 0.0;
+			local7_old_Str_1867 = param3_wdg.attr9_wtext_Str_ref[0];
+			local3_pos_1868 = MIN(1, MAX(0, ((((param2_mx) - (5))) / (((param3_wdg.attr6_wwidth) - (9))))));
+			local3_pos_1868 = ((param3_wdg.attr7_wminval) + (((local3_pos_1868) * (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))))));
+			if ((((param3_wdg.attr5_wstep) > (0)) ? 1 : 0)) {
+				var local6_iSteps_1869 = 0;
+				local6_iSteps_1869 = ~~(((((local3_pos_1868) / (param3_wdg.attr5_wstep))) + (0.4)));
+				local3_pos_1868 = ((param3_wdg.attr5_wstep) * (local6_iSteps_1869));
+				param3_wdg.attr9_wtext_Str_ref[0] = CAST2STRING(local3_pos_1868);
+				
+			} else {
+				param3_wdg.attr9_wtext_Str_ref[0] = FORMAT_Str(0, 2, local3_pos_1868);
+				
+			};
+			if ((((local7_old_Str_1867) != (param3_wdg.attr9_wtext_Str_ref[0])) ? 1 : 0)) {
+				param3_wdg.attr8_wclicked = 1;
+				
+			};
+			
+		} else {
+			param10_ddgui_vals.attr9_focus_Str = "";
+			
+		};
+		
+	};
+	return 0;
 	
 };
 window['func18_DDgui_drawcheckbox'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawcheckbox", __debugInfo);
-	try {
-		var local2_c1_1869 = 0, local2_c2_1870 = 0, local5_hover_1871 = 0, local5_check_1872 = 0, local1_r_1873 = 0, local2_tx_ref_1874 = [0], local2_ty_ref_1875 = [0], local7_txt_Str_ref_1876 = [""];
-		__debugInfo = "2193:\ddgui.gbas";
-		local7_txt_Str_ref_1876[0] = param3_wdg.attr9_wtext_Str_ref[0];
-		__debugInfo = "2194:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1874, local2_ty_ref_1875);
-		__debugInfo = "2196:\ddgui.gbas";
-		if (param3_wdg.attr7_wselect) {
-			__debugInfo = "2196:\ddgui.gbas";
-			local5_check_1872 = 1;
-			__debugInfo = "2196:\ddgui.gbas";
+	var local2_c1_1873 = 0, local2_c2_1874 = 0, local5_hover_1875 = 0, local5_check_1876 = 0, local1_r_1877 = 0, local2_tx_ref_1878 = [0], local2_ty_ref_1879 = [0], local7_txt_Str_ref_1880 = [""];
+	local7_txt_Str_ref_1880[0] = param3_wdg.attr9_wtext_Str_ref[0];
+	GETFONTSIZE(local2_tx_ref_1878, local2_ty_ref_1879);
+	if (param3_wdg.attr7_wselect) {
+		local5_check_1876 = 1;
+		
+	};
+	if ((((param3_wdg.attr6_whover) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local5_hover_1875 = 1;
+		
+	};
+	if (local5_hover_1875) {
+		local2_c1_1873 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr14_col_hover_norm;
+		if ((((local5_hover_1875) == (0)) ? 1 : 0)) {
+			local1_r_1877 = local2_c1_1873;
+			local2_c1_1873 = local2_c2_1874;
+			local2_c2_1874 = local1_r_1877;
+			
 		};
-		__debugInfo = "2197:\ddgui.gbas";
-		if ((((param3_wdg.attr6_whover) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2197:\ddgui.gbas";
-			local5_hover_1871 = 1;
-			__debugInfo = "2197:\ddgui.gbas";
-		};
-		__debugInfo = "2210:\ddgui.gbas";
-		if (local5_hover_1871) {
-			__debugInfo = "2199:\ddgui.gbas";
-			local2_c1_1869 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "2200:\ddgui.gbas";
-			local2_c2_1870 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "2205:\ddgui.gbas";
-			if ((((local5_hover_1871) == (0)) ? 1 : 0)) {
-				__debugInfo = "2202:\ddgui.gbas";
-				local1_r_1873 = local2_c1_1869;
-				__debugInfo = "2203:\ddgui.gbas";
-				local2_c1_1869 = local2_c2_1870;
-				__debugInfo = "2204:\ddgui.gbas";
-				local2_c2_1870 = local1_r_1873;
-				__debugInfo = "2202:\ddgui.gbas";
-			};
-			__debugInfo = "2206:\ddgui.gbas";
-			func14_DDgui_backrect(1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_1875[0]) - (1)), local2_c1_1869);
-			__debugInfo = "2199:\ddgui.gbas";
-		} else {
-			__debugInfo = "2208:\ddgui.gbas";
-			local2_c1_1869 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "2209:\ddgui.gbas";
-			local2_c2_1870 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2208:\ddgui.gbas";
-		};
-		__debugInfo = "2211:\ddgui.gbas";
-		func17_DDGui_PrintIntern(local7_txt_Str_ref_1876, ~~(((((local2_tx_ref_1874[0]) * (1.7))) + (1))), ((param4_ytop) + (1)), local5_check_1872);
-		__debugInfo = "2217:\ddgui.gbas";
-		if (local5_check_1872) {
-			__debugInfo = "2213:\ddgui.gbas";
-			local2_c1_1869 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "2214:\ddgui.gbas";
-			local2_c2_1870 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "2213:\ddgui.gbas";
-		} else {
-			__debugInfo = "2215:\ddgui.gbas";
-			local2_c1_1869 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "2216:\ddgui.gbas";
-			local2_c2_1870 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2215:\ddgui.gbas";
-		};
-		__debugInfo = "2218:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_1869, local2_c2_1870, 3, ((param4_ytop) + (3)), ((local2_ty_ref_1875[0]) - (4)), ((local2_ty_ref_1875[0]) - (4)));
-		__debugInfo = "2219:\ddgui.gbas";
-		func14_DDgui_backrect(2, ((param4_ytop) + (2)), ((local2_ty_ref_1875[0]) - (2)), ((local2_ty_ref_1875[0]) - (2)), local2_c2_1870);
-		__debugInfo = "2220:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2193:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		func14_DDgui_backrect(1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_1879[0]) - (1)), local2_c1_1873);
+		
+	} else {
+		local2_c1_1873 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func17_DDGui_PrintIntern(local7_txt_Str_ref_1880, ~~(((((local2_tx_ref_1878[0]) * (1.7))) + (1))), ((param4_ytop) + (1)), local5_check_1876);
+	if (local5_check_1876) {
+		local2_c1_1873 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1873 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1873, local2_c2_1874, 3, ((param4_ytop) + (3)), ((local2_ty_ref_1879[0]) - (4)), ((local2_ty_ref_1879[0]) - (4)));
+	func14_DDgui_backrect(2, ((param4_ytop) + (2)), ((local2_ty_ref_1879[0]) - (2)), ((local2_ty_ref_1879[0]) - (2)), local2_c2_1874);
+	return 0;
 	
 };
 window['func20_DDgui_handlecheckbox'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlecheckbox", __debugInfo);
-	try {
-		__debugInfo = "2223:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2223:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2223:\ddgui.gbas";
-		};
-		__debugInfo = "2224:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "2228:\ddgui.gbas";
-		if ((((param2_b1) == (1)) ? 1 : 0)) {
-			__debugInfo = "2226:\ddgui.gbas";
-			param3_wdg.attr7_wselect = ((1) - (param3_wdg.attr7_wselect));
-			__debugInfo = "2227:\ddgui.gbas";
-			param3_wdg.attr8_wclicked = 1;
-			__debugInfo = "2226:\ddgui.gbas";
-		};
-		__debugInfo = "2229:\ddgui.gbas";
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "2223:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		param3_wdg.attr7_wselect = ((1) - (param3_wdg.attr7_wselect));
+		param3_wdg.attr8_wclicked = 1;
+		
+	};
+	return 0;
+	
+};
+window['func11_DDgui_radio'] = function(param6_id_Str, param9_texts_Str, param5_width) {
+	var local2_tx_ref_1890 = [0], local2_ty_ref_1891 = [0], local3_num_1892 = 0, local1_i_1893 = 0;
+	GETFONTSIZE(local2_tx_ref_1890, local2_ty_ref_1891);
+	local3_num_1892 = SPLITSTR(param9_texts_Str, unref(static7_DDgui_radio_opt_Str), "|", 1);
+	if ((((local3_num_1892) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(-(1)));
+		
+	};
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		{
+			for (local1_i_1893 = 0;toCheck(local1_i_1893, ((local3_num_1892) - (1)), 1);local1_i_1893 += 1) {
+				local2_ty_ref_1891[0] = (static7_DDgui_radio_opt_Str.arrAccess(local1_i_1893).values[tmpPositionCache]).length;
+				if ((((local2_ty_ref_1891[0]) > (param5_width)) ? 1 : 0)) {
+					param5_width = local2_ty_ref_1891[0];
+					
+				};
+				
+			};
+			
+		};
+		param5_width = ((((param5_width) + (2))) * (local2_tx_ref_1890[0]));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param9_texts_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "RADIO");
+	return 0;
 	
 };
 window['func15_DDgui_drawradio'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawradio", __debugInfo);
-	try {
-		var local1_i_1886 = 0, local2_tx_ref_1887 = [0], local2_ty_ref_1888 = [0], local1_h_1889 = 0, local5_hover_1890 = 0, local5_check_1891 = 0, local6_bright_1892 = 0, local4_dark_1893 = 0, local8_bright_h_1894 = 0, local6_dark_h_1895 = 0, local3_num_1896 = 0, local7_opt_Str_ref_1897 = [""];
-		__debugInfo = "2261:\ddgui.gbas";
-		local6_bright_1892 = param10_ddgui_vals.attr10_col_bright;
-		__debugInfo = "2262:\ddgui.gbas";
-		local4_dark_1893 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "2263:\ddgui.gbas";
-		local8_bright_h_1894 = param10_ddgui_vals.attr16_col_hover_bright;
-		__debugInfo = "2264:\ddgui.gbas";
-		local6_dark_h_1895 = param10_ddgui_vals.attr14_col_hover_norm;
-		__debugInfo = "2267:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1887, local2_ty_ref_1888);
-		__debugInfo = "2269:\ddgui.gbas";
-		local2_tx_ref_1887[0] = MAX(12, unref(local2_tx_ref_1887[0]));
-		__debugInfo = "2270:\ddgui.gbas";
-		local2_ty_ref_1888[0] = MAX(12, unref(local2_ty_ref_1888[0]));
-		__debugInfo = "2273:\ddgui.gbas";
-		local3_num_1896 = param3_wdg.attr6_wcount;
-		__debugInfo = "2274:\ddgui.gbas";
-		local1_h_1889 = MAX(unref(local2_ty_ref_1888[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2276:\ddgui.gbas";
-		param4_ytop+=CAST2INT(((((local1_h_1889) - (local2_ty_ref_1888[0]))) / (2)));
-		__debugInfo = "2281:\ddgui.gbas";
-		DRAWRECT(((CAST2INT(((local2_ty_ref_1888[0]) / (2)))) - (1)), ((param4_ytop) + (1)), 3, ((((((local3_num_1896) * (local1_h_1889))) - (4))) - (((local1_h_1889) - (local2_ty_ref_1888[0])))), local4_dark_1893);
-		__debugInfo = "2283:\ddgui.gbas";
-		{
-			__debugInfo = "2306:\ddgui.gbas";
-			for (local1_i_1886 = 0;toCheck(local1_i_1886, 9999, 1);local1_i_1886 += 1) {
-				var local5_yitem_1898 = 0;
-				__debugInfo = "2285:\ddgui.gbas";
-				param3_wdg.attr6_wcount = local1_i_1886;
-				__debugInfo = "2286:\ddgui.gbas";
-				local7_opt_Str_ref_1897[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, local1_i_1886);
-				__debugInfo = "2287:\ddgui.gbas";
-				if (((((local7_opt_Str_ref_1897[0]).length) == (0)) ? 1 : 0)) {
-					__debugInfo = "2287:\ddgui.gbas";
-					break;
-					__debugInfo = "2287:\ddgui.gbas";
-				};
-				__debugInfo = "2289:\ddgui.gbas";
-				local5_yitem_1898 = ((param4_ytop) + (((local1_i_1886) * (local1_h_1889))));
-				__debugInfo = "2290:\ddgui.gbas";
-				local5_hover_1890 = 0;
-				__debugInfo = "2291:\ddgui.gbas";
-				local5_check_1891 = 0;
-				__debugInfo = "2292:\ddgui.gbas";
-				if ((((param3_wdg.attr7_wselect) == (local1_i_1886)) ? 1 : 0)) {
-					__debugInfo = "2292:\ddgui.gbas";
-					local5_check_1891 = 1;
-					__debugInfo = "2292:\ddgui.gbas";
-				};
-				__debugInfo = "2293:\ddgui.gbas";
-				if (((((((param3_wdg.attr6_whover) == (local1_i_1886)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "2293:\ddgui.gbas";
-					local5_hover_1890 = 1;
-					__debugInfo = "2293:\ddgui.gbas";
-				};
-				__debugInfo = "2298:\ddgui.gbas";
-				if (local5_check_1891) {
-					__debugInfo = "2296:\ddgui.gbas";
-					func13_DDgui_backgnd(local8_bright_h_1894, local6_dark_h_1895, 3, ((local5_yitem_1898) + (2)), ((local2_ty_ref_1888[0]) - (6)), ((local2_ty_ref_1888[0]) - (6)));
-					__debugInfo = "2297:\ddgui.gbas";
-					func14_DDgui_backrect(2, ((local5_yitem_1898) + (1)), ((local2_ty_ref_1888[0]) - (4)), ((local2_ty_ref_1888[0]) - (4)), local6_dark_h_1895);
-					__debugInfo = "2296:\ddgui.gbas";
-				};
-				__debugInfo = "2303:\ddgui.gbas";
-				if (local5_hover_1890) {
-					__debugInfo = "2302:\ddgui.gbas";
-					if (local5_hover_1890) {
-						__debugInfo = "2301:\ddgui.gbas";
-						func14_DDgui_backrect(0, ((local5_yitem_1898) - (CAST2INT(((((local1_h_1889) - (local2_ty_ref_1888[0]))) / (2))))), ((param3_wdg.attr6_wwidth) - (1)), ((local1_h_1889) - (1)), local8_bright_h_1894);
-						__debugInfo = "2301:\ddgui.gbas";
-					};
-					__debugInfo = "2302:\ddgui.gbas";
-				};
-				__debugInfo = "2305:\ddgui.gbas";
-				func17_DDGui_PrintIntern(local7_opt_Str_ref_1897, ~~(((local2_tx_ref_1887[0]) * (1.7))), local5_yitem_1898, local5_check_1891);
-				__debugInfo = "2285:\ddgui.gbas";
+	var local1_i_1898 = 0, local2_tx_ref_1899 = [0], local2_ty_ref_1900 = [0], local1_h_1901 = 0, local5_hover_1902 = 0, local5_check_1903 = 0, local6_bright_1904 = 0, local4_dark_1905 = 0, local8_bright_h_1906 = 0, local6_dark_h_1907 = 0, local3_num_1908 = 0, local7_opt_Str_ref_1909 = [""];
+	local6_bright_1904 = param10_ddgui_vals.attr10_col_bright;
+	local4_dark_1905 = param10_ddgui_vals.attr8_col_norm;
+	local8_bright_h_1906 = param10_ddgui_vals.attr16_col_hover_bright;
+	local6_dark_h_1907 = param10_ddgui_vals.attr14_col_hover_norm;
+	GETFONTSIZE(local2_tx_ref_1899, local2_ty_ref_1900);
+	local2_tx_ref_1899[0] = MAX(12, unref(local2_tx_ref_1899[0]));
+	local2_ty_ref_1900[0] = MAX(12, unref(local2_ty_ref_1900[0]));
+	local3_num_1908 = param3_wdg.attr6_wcount;
+	local1_h_1901 = MAX(unref(local2_ty_ref_1900[0]), global25_gDDguiMinControlDimension);
+	param4_ytop+=CAST2INT(((((local1_h_1901) - (local2_ty_ref_1900[0]))) / (2)));
+	DRAWRECT(((CAST2INT(((local2_ty_ref_1900[0]) / (2)))) - (1)), ((param4_ytop) + (1)), 3, ((((((local3_num_1908) * (local1_h_1901))) - (4))) - (((local1_h_1901) - (local2_ty_ref_1900[0])))), local4_dark_1905);
+	{
+		for (local1_i_1898 = 0;toCheck(local1_i_1898, 9999, 1);local1_i_1898 += 1) {
+			var local5_yitem_1910 = 0;
+			param3_wdg.attr6_wcount = local1_i_1898;
+			local7_opt_Str_ref_1909[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, local1_i_1898);
+			if (((((local7_opt_Str_ref_1909[0]).length) == (0)) ? 1 : 0)) {
+				break;
+				
 			};
-			__debugInfo = "2306:\ddgui.gbas";
+			local5_yitem_1910 = ((param4_ytop) + (((local1_i_1898) * (local1_h_1901))));
+			local5_hover_1902 = 0;
+			local5_check_1903 = 0;
+			if ((((param3_wdg.attr7_wselect) == (local1_i_1898)) ? 1 : 0)) {
+				local5_check_1903 = 1;
+				
+			};
+			if (((((((param3_wdg.attr6_whover) == (local1_i_1898)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+				local5_hover_1902 = 1;
+				
+			};
+			if (local5_check_1903) {
+				func13_DDgui_backgnd(local8_bright_h_1906, local6_dark_h_1907, 3, ((local5_yitem_1910) + (2)), ((local2_ty_ref_1900[0]) - (6)), ((local2_ty_ref_1900[0]) - (6)));
+				func14_DDgui_backrect(2, ((local5_yitem_1910) + (1)), ((local2_ty_ref_1900[0]) - (4)), ((local2_ty_ref_1900[0]) - (4)), local6_dark_h_1907);
+				
+			};
+			if (local5_hover_1902) {
+				if (local5_hover_1902) {
+					func14_DDgui_backrect(0, ((local5_yitem_1910) - (CAST2INT(((((local1_h_1901) - (local2_ty_ref_1900[0]))) / (2))))), ((param3_wdg.attr6_wwidth) - (1)), ((local1_h_1901) - (1)), local8_bright_h_1906);
+					
+				};
+				
+			};
+			func17_DDGui_PrintIntern(local7_opt_Str_ref_1909, ~~(((local2_tx_ref_1899[0]) * (1.7))), local5_yitem_1910, local5_check_1903);
+			
 		};
-		__debugInfo = "2310:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2261:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func17_DDgui_handleradio'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handleradio", __debugInfo);
-	try {
-		var local2_tx_ref_1905 = [0], local2_ty_ref_1906 = [0], local1_h_1907 = 0, local5_hover_1908 = 0, local6_oldsel_1909 = 0, local3_num_1910 = 0;
-		__debugInfo = "2313:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2313:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2313:\ddgui.gbas";
-		};
-		__debugInfo = "2319:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1905, local2_ty_ref_1906);
-		__debugInfo = "2320:\ddgui.gbas";
-		local3_num_1910 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handleradio_txt_Str), "|", 1);
-		__debugInfo = "2321:\ddgui.gbas";
-		local1_h_1907 = MAX(unref(local2_ty_ref_1906[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2322:\ddgui.gbas";
-		param3_wdg.attr7_wheight = ((local1_h_1907) * (local3_num_1910));
-		__debugInfo = "2323:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "2325:\ddgui.gbas";
-		param3_wdg.attr6_whover = -(1);
-		__debugInfo = "2337:\ddgui.gbas";
-		if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2327:\ddgui.gbas";
-			param2_my = INTEGER(CAST2INT(((param2_my) / (local1_h_1907))));
-			__debugInfo = "2335:\ddgui.gbas";
-			if ((((param2_b1) == (1)) ? 1 : 0)) {
-				__debugInfo = "2329:\ddgui.gbas";
-				local6_oldsel_1909 = param3_wdg.attr7_wselect;
-				__debugInfo = "2334:\ddgui.gbas";
-				if ((((param2_my) != (local6_oldsel_1909)) ? 1 : 0)) {
-					__debugInfo = "2331:\ddgui.gbas";
-					param2_my = MIN(param2_my, ((local3_num_1910) - (1)));
-					__debugInfo = "2332:\ddgui.gbas";
-					param3_wdg.attr7_wselect = param2_my;
-					__debugInfo = "2333:\ddgui.gbas";
-					param3_wdg.attr8_wclicked = 1;
-					__debugInfo = "2331:\ddgui.gbas";
-				};
-				__debugInfo = "2329:\ddgui.gbas";
-			};
-			__debugInfo = "2336:\ddgui.gbas";
-			param3_wdg.attr6_whover = param2_my;
-			__debugInfo = "2327:\ddgui.gbas";
-		};
-		__debugInfo = "2338:\ddgui.gbas";
+	var local2_tx_ref_1917 = [0], local2_ty_ref_1918 = [0], local1_h_1919 = 0, local5_hover_1920 = 0, local6_oldsel_1921 = 0, local3_num_1922 = 0;
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "2313:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	GETFONTSIZE(local2_tx_ref_1917, local2_ty_ref_1918);
+	local3_num_1922 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handleradio_txt_Str), "|", 1);
+	local1_h_1919 = MAX(unref(local2_ty_ref_1918[0]), global25_gDDguiMinControlDimension);
+	param3_wdg.attr7_wheight = ((local1_h_1919) * (local3_num_1922));
+	param3_wdg.attr8_wclicked = 0;
+	param3_wdg.attr6_whover = -(1);
+	if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) {
+		param2_my = INTEGER(CAST2INT(((param2_my) / (local1_h_1919))));
+		if ((((param2_b1) == (1)) ? 1 : 0)) {
+			local6_oldsel_1921 = param3_wdg.attr7_wselect;
+			if ((((param2_my) != (local6_oldsel_1921)) ? 1 : 0)) {
+				param2_my = MIN(param2_my, ((local3_num_1922) - (1)));
+				param3_wdg.attr7_wselect = param2_my;
+				param3_wdg.attr8_wclicked = 1;
+				
+			};
+			
+		};
+		param3_wdg.attr6_whover = param2_my;
+		
+	};
+	return 0;
 	
 };
 window['func14_DDgui_drawfile'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawfile", __debugInfo);
-	try {
-		var local2_c1_1915 = 0, local2_c2_1916 = 0, local2_tx_ref_1917 = [0], local2_ty_ref_1918 = [0], local7_txt_Str_ref_1919 = [""], local7_dheight_1920 = 0;
-		__debugInfo = "2356:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1917, local2_ty_ref_1918);
-		__debugInfo = "2363:\ddgui.gbas";
-		if (((((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2358:\ddgui.gbas";
-			local2_c1_1915 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "2359:\ddgui.gbas";
-			local2_c2_1916 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "2358:\ddgui.gbas";
-		} else {
-			__debugInfo = "2361:\ddgui.gbas";
-			local2_c1_1915 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "2362:\ddgui.gbas";
-			local2_c2_1916 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2361:\ddgui.gbas";
-		};
-		__debugInfo = "2364:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_1915, local2_c2_1916, 0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight);
-		__debugInfo = "2367:\ddgui.gbas";
-		local7_dheight_1920 = ~~(((local2_ty_ref_1918[0]) * (1.2)));
-		__debugInfo = "2370:\ddgui.gbas";
-		DRAWRECT(1, ((param4_ytop) + (1)), local7_dheight_1920, local7_dheight_1920, RGB(71, 107, 254));
-		__debugInfo = "2371:\ddgui.gbas";
-		DRAWRECT(((1) + (((local7_dheight_1920) * (0.2)))), ((param4_ytop) + (1)), ((((local7_dheight_1920) * (0.8))) - (2)), ((((local7_dheight_1920) * (0.6))) - (1)), 16777215);
-		__debugInfo = "2372:\ddgui.gbas";
-		DRAWRECT(((1) + (((local7_dheight_1920) * (0.2)))), ((((param4_ytop) + (1))) + (((local7_dheight_1920) * (0.7)))), ((((local7_dheight_1920) * (0.8))) - (2)), ((((local7_dheight_1920) * (0.3))) + (1)), RGB(204, 204, 204));
-		__debugInfo = "2374:\ddgui.gbas";
-		local7_txt_Str_ref_1919[0] = param3_wdg.attr9_wtext_Str_ref[0];
-		__debugInfo = "2375:\ddgui.gbas";
-		local2_ty_ref_1918[0] = 0;
-		__debugInfo = "2377:\ddgui.gbas";
-		{
-			__debugInfo = "2380:\ddgui.gbas";
-			for (local2_tx_ref_1917[0] = (((local7_txt_Str_ref_1919[0]).length) - (1));toCheck(local2_tx_ref_1917[0], 0, -(1));local2_tx_ref_1917[0] += -(1)) {
-				__debugInfo = "2379:\ddgui.gbas";
-				if ((((MID_Str(unref(local7_txt_Str_ref_1919[0]), unref(local2_tx_ref_1917[0]), 1)) == ("/")) ? 1 : 0)) {
-					__debugInfo = "2378:\ddgui.gbas";
-					local2_ty_ref_1918[0] = ((local2_tx_ref_1917[0]) + (1));
-					__debugInfo = "2378:\ddgui.gbas";
-					break;
-					__debugInfo = "2378:\ddgui.gbas";
-				};
-				__debugInfo = "2379:\ddgui.gbas";
+	var local2_c1_1927 = 0, local2_c2_1928 = 0, local2_tx_ref_1929 = [0], local2_ty_ref_1930 = [0], local7_txt_Str_ref_1931 = [""], local7_dheight_1932 = 0;
+	GETFONTSIZE(local2_tx_ref_1929, local2_ty_ref_1930);
+	if (((((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1927 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1928 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1927 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1928 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1927, local2_c2_1928, 0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight);
+	local7_dheight_1932 = ~~(((local2_ty_ref_1930[0]) * (1.2)));
+	DRAWRECT(1, ((param4_ytop) + (1)), local7_dheight_1932, local7_dheight_1932, RGB(71, 107, 254));
+	DRAWRECT(((1) + (((local7_dheight_1932) * (0.2)))), ((param4_ytop) + (1)), ((((local7_dheight_1932) * (0.8))) - (2)), ((((local7_dheight_1932) * (0.6))) - (1)), 16777215);
+	DRAWRECT(((1) + (((local7_dheight_1932) * (0.2)))), ((((param4_ytop) + (1))) + (((local7_dheight_1932) * (0.7)))), ((((local7_dheight_1932) * (0.8))) - (2)), ((((local7_dheight_1932) * (0.3))) + (1)), RGB(204, 204, 204));
+	local7_txt_Str_ref_1931[0] = param3_wdg.attr9_wtext_Str_ref[0];
+	local2_ty_ref_1930[0] = 0;
+	{
+		for (local2_tx_ref_1929[0] = (((local7_txt_Str_ref_1931[0]).length) - (1));toCheck(local2_tx_ref_1929[0], 0, -(1));local2_tx_ref_1929[0] += -(1)) {
+			if ((((MID_Str(unref(local7_txt_Str_ref_1931[0]), unref(local2_tx_ref_1929[0]), 1)) == ("/")) ? 1 : 0)) {
+				local2_ty_ref_1930[0] = ((local2_tx_ref_1929[0]) + (1));
+				break;
+				
 			};
-			__debugInfo = "2380:\ddgui.gbas";
+			
 		};
-		__debugInfo = "2381:\ddgui.gbas";
-		local7_txt_Str_ref_1919[0] = MID_Str(unref(local7_txt_Str_ref_1919[0]), unref(local2_ty_ref_1918[0]), (local7_txt_Str_ref_1919[0]).length);
-		__debugInfo = "2383:\ddgui.gbas";
-		func17_DDGui_PrintIntern(local7_txt_Str_ref_1919, ((local7_dheight_1920) + (3)), ((param4_ytop) + (3)), 0);
-		__debugInfo = "2386:\ddgui.gbas";
-		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1916);
-		__debugInfo = "2387:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2356:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	local7_txt_Str_ref_1931[0] = MID_Str(unref(local7_txt_Str_ref_1931[0]), unref(local2_ty_ref_1930[0]), (local7_txt_Str_ref_1931[0]).length);
+	func17_DDGui_PrintIntern(local7_txt_Str_ref_1931, ((local7_dheight_1932) + (3)), ((param4_ytop) + (3)), 0);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1928);
+	return 0;
 	
 };
 window['func16_DDgui_handlefile'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlefile", __debugInfo);
-	try {
-		var local5_a_Str_1927 = "";
-		__debugInfo = "2390:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2390:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2390:\ddgui.gbas";
-		};
-		__debugInfo = "2393:\ddgui.gbas";
-		if (((((param3_wdg.attr11_wfilter_Str).length) == (0)) ? 1 : 0)) {
-			__debugInfo = "2393:\ddgui.gbas";
-			param3_wdg.attr11_wfilter_Str = "*.*";
-			__debugInfo = "2393:\ddgui.gbas";
-		};
-		__debugInfo = "2394:\ddgui.gbas";
-		func9_DDgui_set(param3_wdg.attr7_wid_Str, "CLICKED", CAST2STRING(0));
-		__debugInfo = "2408:\ddgui.gbas";
-		if ((((param2_b1) == (1)) ? 1 : 0)) {
-			__debugInfo = "2396:\ddgui.gbas";
-			if (param3_wdg.attr9_wreadonly) {
-				__debugInfo = "2396:\ddgui.gbas";
-				return 0;
-				__debugInfo = "2396:\ddgui.gbas";
-			};
-			__debugInfo = "2398:\ddgui.gbas";
-			param10_ddgui_vals.attr15_kick_intern_dlg = 4;
-			__debugInfo = "2399:\ddgui.gbas";
-			param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
-			__debugInfo = "2396:\ddgui.gbas";
-		};
-		__debugInfo = "2409:\ddgui.gbas";
+	var local5_a_Str_1939 = "";
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "2390:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if (((((param3_wdg.attr11_wfilter_Str).length) == (0)) ? 1 : 0)) {
+		param3_wdg.attr11_wfilter_Str = "*.*";
+		
+	};
+	func9_DDgui_set(param3_wdg.attr7_wid_Str, "CLICKED", CAST2STRING(0));
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		if (param3_wdg.attr9_wreadonly) {
+			return 0;
+			
+		};
+		param10_ddgui_vals.attr15_kick_intern_dlg = 4;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
 	
 };
 window['func23_DDgui_fit_sprite_in_box'] = function(param2_id, param1_x, param1_y, param1_w, param1_h) {
-	stackPush("function: DDgui_fit_sprite_in_box", __debugInfo);
-	try {
-		var local3_spx_ref_1933 = [0], local3_spy_ref_1934 = [0];
-		__debugInfo = "2415:\ddgui.gbas";
-		if (((((((param1_w) < (1)) ? 1 : 0)) || ((((param1_h) < (1)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2415:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2415:\ddgui.gbas";
-		};
-		__debugInfo = "2418:\ddgui.gbas";
-		GETSPRITESIZE(param2_id, local3_spx_ref_1933, local3_spy_ref_1934);
-		__debugInfo = "2419:\ddgui.gbas";
-		if (((((((local3_spx_ref_1933[0]) == (0)) ? 1 : 0)) || ((((local3_spy_ref_1934[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2419:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2419:\ddgui.gbas";
-		};
-		__debugInfo = "2435:\ddgui.gbas";
-		if (((((((local3_spx_ref_1933[0]) <= (param1_w)) ? 1 : 0)) && ((((local3_spy_ref_1934[0]) <= (param1_h)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2422:\ddgui.gbas";
-			DRAWSPRITE(param2_id, ((param1_x) + (CAST2INT(((((param1_w) - (local3_spx_ref_1933[0]))) / (2))))), ((param1_y) + (CAST2INT(((((param1_h) - (local3_spy_ref_1934[0]))) / (2))))));
-			__debugInfo = "2422:\ddgui.gbas";
-		} else {
-			var local4_facx_1935 = 0.0, local4_facy_1936 = 0.0, local2_dw_1937 = 0.0, local2_dh_1938 = 0.0;
-			__debugInfo = "2423:\ddgui.gbas";
-			local4_facx_1935 = param1_w;
-			__debugInfo = "2424:\ddgui.gbas";
-			local4_facx_1935 = ((local4_facx_1935) / (local3_spx_ref_1933[0]));
-			__debugInfo = "2424:\ddgui.gbas";
-			local4_facy_1936 = param1_h;
-			__debugInfo = "2425:\ddgui.gbas";
-			local4_facy_1936 = ((local4_facy_1936) / (local3_spy_ref_1934[0]));
-			__debugInfo = "2433:\ddgui.gbas";
-			if ((((local4_facx_1935) < (local4_facy_1936)) ? 1 : 0)) {
-				__debugInfo = "2428:\ddgui.gbas";
-				local2_dw_1937 = ((local3_spx_ref_1933[0]) * (local4_facx_1935));
-				__debugInfo = "2429:\ddgui.gbas";
-				local2_dh_1938 = ((local3_spy_ref_1934[0]) * (local4_facx_1935));
-				__debugInfo = "2428:\ddgui.gbas";
-			} else {
-				__debugInfo = "2431:\ddgui.gbas";
-				local2_dw_1937 = ((local3_spx_ref_1933[0]) * (local4_facy_1936));
-				__debugInfo = "2432:\ddgui.gbas";
-				local2_dh_1938 = ((local3_spy_ref_1934[0]) * (local4_facy_1936));
-				__debugInfo = "2431:\ddgui.gbas";
-			};
-			__debugInfo = "2434:\ddgui.gbas";
-			STRETCHSPRITE(param2_id, ((param1_x) + (((((param1_w) - (local2_dw_1937))) / (2)))), ((param1_y) + (((((param1_h) - (local2_dh_1938))) / (2)))), local2_dw_1937, local2_dh_1938);
-			__debugInfo = "2423:\ddgui.gbas";
-		};
-		__debugInfo = "2436:\ddgui.gbas";
+	var local3_spx_ref_1945 = [0], local3_spy_ref_1946 = [0];
+	if (((((((param1_w) < (1)) ? 1 : 0)) || ((((param1_h) < (1)) ? 1 : 0))) ? 1 : 0)) {
 		return 0;
-		__debugInfo = "2415:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	GETSPRITESIZE(param2_id, local3_spx_ref_1945, local3_spy_ref_1946);
+	if (((((((local3_spx_ref_1945[0]) == (0)) ? 1 : 0)) || ((((local3_spy_ref_1946[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		return 0;
+		
+	};
+	if (((((((local3_spx_ref_1945[0]) <= (param1_w)) ? 1 : 0)) && ((((local3_spy_ref_1946[0]) <= (param1_h)) ? 1 : 0))) ? 1 : 0)) {
+		DRAWSPRITE(param2_id, ((param1_x) + (CAST2INT(((((param1_w) - (local3_spx_ref_1945[0]))) / (2))))), ((param1_y) + (CAST2INT(((((param1_h) - (local3_spy_ref_1946[0]))) / (2))))));
+		
+	} else {
+		var local4_facx_1947 = 0.0, local4_facy_1948 = 0.0, local2_dw_1949 = 0.0, local2_dh_1950 = 0.0;
+		local4_facx_1947 = param1_w;
+		local4_facx_1947 = ((local4_facx_1947) / (local3_spx_ref_1945[0]));
+		local4_facy_1948 = param1_h;
+		local4_facy_1948 = ((local4_facy_1948) / (local3_spy_ref_1946[0]));
+		if ((((local4_facx_1947) < (local4_facy_1948)) ? 1 : 0)) {
+			local2_dw_1949 = ((local3_spx_ref_1945[0]) * (local4_facx_1947));
+			local2_dh_1950 = ((local3_spy_ref_1946[0]) * (local4_facx_1947));
+			
+		} else {
+			local2_dw_1949 = ((local3_spx_ref_1945[0]) * (local4_facy_1948));
+			local2_dh_1950 = ((local3_spy_ref_1946[0]) * (local4_facy_1948));
+			
+		};
+		STRETCHSPRITE(param2_id, ((param1_x) + (((((param1_w) - (local2_dw_1949))) / (2)))), ((param1_y) + (((((param1_h) - (local2_dh_1950))) / (2)))), local2_dw_1949, local2_dh_1950);
+		
+	};
+	return 0;
 	
 };
 window['func11_DDgui_combo'] = function(param6_id_Str, param9_texts_Str, param5_width, param6_height) {
-	stackPush("function: DDgui_combo", __debugInfo);
-	try {
-		var local2_tx_ref_2280 = [0], local2_ty_ref_2281 = [0];
-		__debugInfo = "2441:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_2280, local2_ty_ref_2281);
-		__debugInfo = "2442:\ddgui.gbas";
-		if ((((param6_height) == (0)) ? 1 : 0)) {
-			__debugInfo = "2442:\ddgui.gbas";
-			param6_height = local2_ty_ref_2281[0];
-			__debugInfo = "2442:\ddgui.gbas";
-		};
-		__debugInfo = "2443:\ddgui.gbas";
-		func10_DDgui_list(param6_id_Str, param9_texts_Str, param5_width, param6_height);
-		__debugInfo = "2444:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "COMBO");
-		__debugInfo = "2445:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2441:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local2_tx_ref_1955 = [0], local2_ty_ref_1956 = [0];
+	GETFONTSIZE(local2_tx_ref_1955, local2_ty_ref_1956);
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = local2_ty_ref_1956[0];
+		
+	};
+	func10_DDgui_list(param6_id_Str, param9_texts_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "COMBO");
+	return 0;
 	
 };
 window['func15_DDgui_drawcombo'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawcombo", __debugInfo);
-	try {
-		var local2_fx_ref_1942 = [0], local2_fy_ref_1943 = [0], local2_c1_1944 = 0, local2_c2_1945 = 0, local5_hover_1946 = 0, local1_x_1947 = 0, local1_y_1948 = 0, local1_w_1949 = 0, local1_h_1950 = 0;
-		__debugInfo = "2453:\ddgui.gbas";
-		GETFONTSIZE(local2_fx_ref_1942, local2_fy_ref_1943);
-		__debugInfo = "2458:\ddgui.gbas";
-		local5_hover_1946 = param3_wdg.attr6_whover;
-		__debugInfo = "2466:\ddgui.gbas";
-		if (((((((local5_hover_1946) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2461:\ddgui.gbas";
-			local2_c1_1944 = param10_ddgui_vals.attr16_col_hover_bright;
-			__debugInfo = "2462:\ddgui.gbas";
-			local2_c2_1945 = param10_ddgui_vals.attr14_col_hover_norm;
-			__debugInfo = "2461:\ddgui.gbas";
-		} else {
-			__debugInfo = "2464:\ddgui.gbas";
-			local2_c1_1944 = param10_ddgui_vals.attr10_col_bright;
-			__debugInfo = "2465:\ddgui.gbas";
-			local2_c2_1945 = param10_ddgui_vals.attr8_col_norm;
-			__debugInfo = "2464:\ddgui.gbas";
-		};
-		__debugInfo = "2467:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_1944, local2_c2_1945, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
-		__debugInfo = "2468:\ddgui.gbas";
-		func13_DDgui_backgnd(param10_ddgui_vals.attr16_col_hover_bright, param10_ddgui_vals.attr14_col_hover_norm, ((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1942[0]) * (2)))), ((param4_ytop) + (1)), ((local2_fx_ref_1942[0]) * (2)), ((param3_wdg.attr7_wheight) - (2)));
-		__debugInfo = "2470:\ddgui.gbas";
-		STARTPOLY(-(1), 0);
-		__debugInfo = "2471:\ddgui.gbas";
-		POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1942[0]) * (1.7)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1944);
-		__debugInfo = "2472:\ddgui.gbas";
-		POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1942[0]) * (1)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.8)))), 0, 0, local2_c1_1944);
-		__debugInfo = "2473:\ddgui.gbas";
-		POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1942[0]) * (0.3)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1944);
-		__debugInfo = "2474:\ddgui.gbas";
-		ENDPOLY();
-		__debugInfo = "2475:\ddgui.gbas";
-		local1_x_1947 = 1;
-		__debugInfo = "2475:\ddgui.gbas";
-		local1_y_1948 = ((param4_ytop) + (1));
-		__debugInfo = "2475:\ddgui.gbas";
-		local1_w_1949 = ((((param3_wdg.attr6_wwidth) - (2))) - (((2) * (local2_fx_ref_1942[0]))));
-		__debugInfo = "2476:\ddgui.gbas";
-		local1_h_1950 = ((param3_wdg.attr7_wheight) - (2));
-		__debugInfo = "2484:\ddgui.gbas";
-		if (param3_wdg.attr7_wselect) {
-			__debugInfo = "2480:\ddgui.gbas";
-			local1_x_1947+=1;
-			__debugInfo = "2481:\ddgui.gbas";
-			local1_y_1948+=1;
-			__debugInfo = "2482:\ddgui.gbas";
-			local1_w_1949+=-(2);
-			__debugInfo = "2483:\ddgui.gbas";
-			local1_h_1950+=-(2);
-			__debugInfo = "2480:\ddgui.gbas";
-		};
-		__debugInfo = "2511:\ddgui.gbas";
-		if ((((param3_wdg.attr7_wselect) >= (0)) ? 1 : 0)) {
-			var local5_a_Str_ref_1951 = [""];
-			__debugInfo = "2487:\ddgui.gbas";
-			local5_a_Str_ref_1951[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, param3_wdg.attr7_wselect);
-			__debugInfo = "2510:\ddgui.gbas";
-			if ((((INSTR(unref(local5_a_Str_ref_1951[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
-				__debugInfo = "2495:\ddgui.gbas";
-				if ((((local5_hover_1946) == (0)) ? 1 : 0)) {
-					__debugInfo = "2492:\ddgui.gbas";
-					ALPHAMODE(-(1));
-					__debugInfo = "2492:\ddgui.gbas";
-				} else {
-					__debugInfo = "2494:\ddgui.gbas";
-					ALPHAMODE(-(0.8));
-					__debugInfo = "2494:\ddgui.gbas";
-				};
-				__debugInfo = "2496:\ddgui.gbas";
-				local2_c1_1944 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1951[0]), 5, -(1))));
-				__debugInfo = "2497:\ddgui.gbas";
-				func23_DDgui_fit_sprite_in_box(local2_c1_1944, ((local1_x_1947) + (1)), ((local1_y_1948) + (1)), ((local1_w_1949) - (2)), ((local1_h_1950) - (2)));
-				__debugInfo = "2495:\ddgui.gbas";
-			} else if ((((INSTR(unref(local5_a_Str_ref_1951[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
-				__debugInfo = "2504:\ddgui.gbas";
-				if ((((local5_hover_1946) == (0)) ? 1 : 0)) {
-					__debugInfo = "2501:\ddgui.gbas";
-					ALPHAMODE(-(1));
-					__debugInfo = "2501:\ddgui.gbas";
-				} else {
-					__debugInfo = "2503:\ddgui.gbas";
-					ALPHAMODE(-(0.8));
-					__debugInfo = "2503:\ddgui.gbas";
-				};
-				__debugInfo = "2505:\ddgui.gbas";
-				local2_c1_1944 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1951[0]), 5, -(1))));
-				__debugInfo = "2506:\ddgui.gbas";
-				DRAWRECT(local1_x_1947, local1_y_1948, local1_w_1949, local1_h_1950, local2_c1_1944);
-				__debugInfo = "2504:\ddgui.gbas";
+	var local2_fx_ref_1960 = [0], local2_fy_ref_1961 = [0], local2_c1_1962 = 0, local2_c2_1963 = 0, local5_hover_1964 = 0, local1_x_1965 = 0, local1_y_1966 = 0, local1_w_1967 = 0, local1_h_1968 = 0;
+	GETFONTSIZE(local2_fx_ref_1960, local2_fy_ref_1961);
+	local5_hover_1964 = param3_wdg.attr6_whover;
+	if (((((((local5_hover_1964) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1962 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1963 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1962 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1963 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1962, local2_c2_1963, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+	func13_DDgui_backgnd(param10_ddgui_vals.attr16_col_hover_bright, param10_ddgui_vals.attr14_col_hover_norm, ((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (2)))), ((param4_ytop) + (1)), ((local2_fx_ref_1960[0]) * (2)), ((param3_wdg.attr7_wheight) - (2)));
+	STARTPOLY(-(1), 0);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (1.7)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1962);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (1)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.8)))), 0, 0, local2_c1_1962);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (0.3)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1962);
+	ENDPOLY();
+	local1_x_1965 = 1;
+	local1_y_1966 = ((param4_ytop) + (1));
+	local1_w_1967 = ((((param3_wdg.attr6_wwidth) - (2))) - (((2) * (local2_fx_ref_1960[0]))));
+	local1_h_1968 = ((param3_wdg.attr7_wheight) - (2));
+	if (param3_wdg.attr7_wselect) {
+		local1_x_1965+=1;
+		local1_y_1966+=1;
+		local1_w_1967+=-(2);
+		local1_h_1968+=-(2);
+		
+	};
+	if ((((param3_wdg.attr7_wselect) >= (0)) ? 1 : 0)) {
+		var local5_a_Str_ref_1969 = [""];
+		local5_a_Str_ref_1969[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, param3_wdg.attr7_wselect);
+		if ((((INSTR(unref(local5_a_Str_ref_1969[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(1));
+				
 			} else {
-				__debugInfo = "2508:\ddgui.gbas";
-				if ((((local5_hover_1946) == (0)) ? 1 : 0)) {
-					__debugInfo = "2508:\ddgui.gbas";
-					ALPHAMODE(-(0.8));
-					__debugInfo = "2508:\ddgui.gbas";
-				};
-				__debugInfo = "2509:\ddgui.gbas";
-				func17_DDGui_PrintIntern(local5_a_Str_ref_1951, CAST2INT(((((local1_w_1949) - (func21_DDGui_TextWidthIntern(local5_a_Str_ref_1951)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1943[0]))) / (2))))), 0);
-				__debugInfo = "2508:\ddgui.gbas";
+				ALPHAMODE(-(0.8));
+				
 			};
-			__debugInfo = "2487:\ddgui.gbas";
+			local2_c1_1962 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1969[0]), 5, -(1))));
+			func23_DDgui_fit_sprite_in_box(local2_c1_1962, ((local1_x_1965) + (1)), ((local1_y_1966) + (1)), ((local1_w_1967) - (2)), ((local1_h_1968) - (2)));
+			
+		} else if ((((INSTR(unref(local5_a_Str_ref_1969[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(1));
+				
+			} else {
+				ALPHAMODE(-(0.8));
+				
+			};
+			local2_c1_1962 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1969[0]), 5, -(1))));
+			DRAWRECT(local1_x_1965, local1_y_1966, local1_w_1967, local1_h_1968, local2_c1_1962);
+			
+		} else {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(0.8));
+				
+			};
+			func17_DDGui_PrintIntern(local5_a_Str_ref_1969, CAST2INT(((((local1_w_1967) - (func21_DDGui_TextWidthIntern(local5_a_Str_ref_1969)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1961[0]))) / (2))))), 0);
+			
 		};
-		__debugInfo = "2514:\ddgui.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "2516:\ddgui.gbas";
-		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1945);
-		__debugInfo = "2517:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2453:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	ALPHAMODE(0);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1963);
+	return 0;
 	
 };
 window['func17_DDgui_handlecombo'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlecombo", __debugInfo);
-	try {
-		__debugInfo = "2521:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "2525:\ddgui.gbas";
-		if ((((param2_b1) == (1)) ? 1 : 0)) {
-			__debugInfo = "2523:\ddgui.gbas";
-			param10_ddgui_vals.attr15_kick_intern_dlg = 3;
-			__debugInfo = "2524:\ddgui.gbas";
-			param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
-			__debugInfo = "2523:\ddgui.gbas";
-		};
-		__debugInfo = "2526:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2521:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		param10_ddgui_vals.attr15_kick_intern_dlg = 3;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
 	
 };
 window['func24_DDgui_button_list_picker'] = function(param1_x, param1_y, param1_w, param1_h, param9_texts_Str, param6_cursel) {
-	stackPush("function: DDgui_button_list_picker", __debugInfo);
-	try {
-		var local2_tx_ref_1964 = [0], local2_ty_ref_1965 = [0], local8_numitems_1966 = 0, local8_vals_Str_1967 = new GLBArray(), local7_screenx_ref_1968 = [0], local7_screeny_ref_1969 = [0], local2_mx_ref_1970 = [0], local2_my_ref_1971 = [0], local2_b1_ref_1972 = [0], local2_b2_ref_1973 = [0], local4_down_1974 = 0, local2_px_1975 = 0, local2_py_1976 = 0;
-		__debugInfo = "2533:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1964, local2_ty_ref_1965);
-		__debugInfo = "2534:\ddgui.gbas";
-		local2_tx_ref_1964[0] = MAX(unref(local2_tx_ref_1964[0]), global20_gDDguiScrollbarWidth);
-		__debugInfo = "2535:\ddgui.gbas";
-		local2_ty_ref_1965[0] = MAX(unref(local2_ty_ref_1965[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2539:\ddgui.gbas";
-		SPLITSTR(param9_texts_Str, unref(local8_vals_Str_1967), "|", 1);
-		__debugInfo = "2540:\ddgui.gbas";
-		local8_numitems_1966 = BOUNDS(local8_vals_Str_1967, 0);
-		__debugInfo = "2541:\ddgui.gbas";
-		if ((((local8_numitems_1966) == (0)) ? 1 : 0)) {
-			__debugInfo = "2541:\ddgui.gbas";
-			return tryClone(-(1));
-			__debugInfo = "2541:\ddgui.gbas";
+	var local2_tx_ref_1982 = [0], local2_ty_ref_1983 = [0], local8_numitems_1984 = 0, local8_vals_Str_1985 = new GLBArray(), local7_screenx_ref_1986 = [0], local7_screeny_ref_1987 = [0], local2_mx_ref_1988 = [0], local2_my_ref_1989 = [0], local2_b1_ref_1990 = [0], local2_b2_ref_1991 = [0], local4_down_1992 = 0, local2_px_1993 = 0, local2_py_1994 = 0;
+	GETFONTSIZE(local2_tx_ref_1982, local2_ty_ref_1983);
+	local2_tx_ref_1982[0] = MAX(unref(local2_tx_ref_1982[0]), global20_gDDguiScrollbarWidth);
+	local2_ty_ref_1983[0] = MAX(unref(local2_ty_ref_1983[0]), global25_gDDguiMinControlDimension);
+	SPLITSTR(param9_texts_Str, unref(local8_vals_Str_1985), "|", 1);
+	local8_numitems_1984 = BOUNDS(local8_vals_Str_1985, 0);
+	if ((((local8_numitems_1984) == (0)) ? 1 : 0)) {
+		return tryClone(-(1));
+		
+	};
+	GETSCREENSIZE(local7_screenx_ref_1986, local7_screeny_ref_1987);
+	if ((((param1_h) > (((((local2_ty_ref_1983[0]) * (local8_numitems_1984))) + (8)))) ? 1 : 0)) {
+		param1_h = ((((local2_ty_ref_1983[0]) * (local8_numitems_1984))) + (8));
+		
+	};
+	if ((((((param1_y) + (param1_h))) >= (local7_screeny_ref_1987[0])) ? 1 : 0)) {
+		param1_h = ((((local7_screeny_ref_1987[0]) - (param1_y))) - (1));
+		
+	};
+	func16_DDgui_pushdialog(((param1_x) - (1)), ((param1_y) - (1)), ((param1_w) + (2)), ((param1_h) + (2)), 0);
+	func10_DDgui_list("lst", param9_texts_Str, ((param1_w) - (4)), param1_h);
+	func9_DDgui_set("lst", "SELECT", CAST2STRING(param6_cursel));
+	func9_DDgui_set("lst", "SCROLL", CAST2STRING(param6_cursel));
+	while (1) {
+		func10_DDgui_show(0);
+		MOUSESTATE(local2_mx_ref_1988, local2_my_ref_1989, local2_b1_ref_1990, local2_b2_ref_1991);
+		if (local2_b1_ref_1990[0]) {
+			local4_down_1992 = 1;
+			local2_px_1993 = local2_mx_ref_1988[0];
+			local2_py_1994 = local2_my_ref_1989[0];
+			
 		};
-		__debugInfo = "2544:\ddgui.gbas";
-		GETSCREENSIZE(local7_screenx_ref_1968, local7_screeny_ref_1969);
-		__debugInfo = "2545:\ddgui.gbas";
-		if ((((param1_h) > (((((local2_ty_ref_1965[0]) * (local8_numitems_1966))) + (8)))) ? 1 : 0)) {
-			__debugInfo = "2545:\ddgui.gbas";
-			param1_h = ((((local2_ty_ref_1965[0]) * (local8_numitems_1966))) + (8));
-			__debugInfo = "2545:\ddgui.gbas";
-		};
-		__debugInfo = "2546:\ddgui.gbas";
-		if ((((((param1_y) + (param1_h))) >= (local7_screeny_ref_1969[0])) ? 1 : 0)) {
-			__debugInfo = "2546:\ddgui.gbas";
-			param1_h = ((((local7_screeny_ref_1969[0]) - (param1_y))) - (1));
-			__debugInfo = "2546:\ddgui.gbas";
-		};
-		__debugInfo = "2548:\ddgui.gbas";
-		func16_DDgui_pushdialog(((param1_x) - (1)), ((param1_y) - (1)), ((param1_w) + (2)), ((param1_h) + (2)), 0);
-		__debugInfo = "2550:\ddgui.gbas";
-		func10_DDgui_list("lst", param9_texts_Str, ((param1_w) - (4)), param1_h);
-		__debugInfo = "2551:\ddgui.gbas";
-		func9_DDgui_set("lst", "SELECT", CAST2STRING(param6_cursel));
-		__debugInfo = "2552:\ddgui.gbas";
-		func9_DDgui_set("lst", "SCROLL", CAST2STRING(param6_cursel));
-		__debugInfo = "2575:\ddgui.gbas";
-		while (1) {
-			__debugInfo = "2556:\ddgui.gbas";
-			func10_DDgui_show(0);
-			__debugInfo = "2557:\ddgui.gbas";
-			MOUSESTATE(local2_mx_ref_1970, local2_my_ref_1971, local2_b1_ref_1972, local2_b2_ref_1973);
-			__debugInfo = "2561:\ddgui.gbas";
-			if (local2_b1_ref_1972[0]) {
-				__debugInfo = "2559:\ddgui.gbas";
-				local4_down_1974 = 1;
-				__debugInfo = "2559:\ddgui.gbas";
-				local2_px_1975 = local2_mx_ref_1970[0];
-				__debugInfo = "2560:\ddgui.gbas";
-				local2_py_1976 = local2_my_ref_1971[0];
-				__debugInfo = "2559:\ddgui.gbas";
-			};
-			__debugInfo = "2567:\ddgui.gbas";
-			if (((((((local2_b1_ref_1972[0]) == (0)) ? 1 : 0)) && (local4_down_1974)) ? 1 : 0)) {
-				__debugInfo = "2566:\ddgui.gbas";
-				if ((((BOXCOLL(~~(func9_DDgui_get("", "XPOS")), ~~(func9_DDgui_get("", "YPOS")), ~~(func9_DDgui_get("", "WIDTH")), ~~(func9_DDgui_get("", "HEIGHT")), local2_px_1975, local2_py_1976, 1, 1)) == (0)) ? 1 : 0)) {
-					__debugInfo = "2564:\ddgui.gbas";
-					func15_DDgui_popdialog();
-					__debugInfo = "2565:\ddgui.gbas";
-					return tryClone(-(1));
-					__debugInfo = "2564:\ddgui.gbas";
-				};
-				__debugInfo = "2566:\ddgui.gbas";
-			};
-			__debugInfo = "2572:\ddgui.gbas";
-			if (func9_DDgui_get("lst", "CLICKED")) {
-				var local4_isel_1977 = 0;
-				__debugInfo = "2569:\ddgui.gbas";
-				local4_isel_1977 = ~~(func9_DDgui_get("lst", "SELECT"));
-				__debugInfo = "2570:\ddgui.gbas";
+		if (((((((local2_b1_ref_1990[0]) == (0)) ? 1 : 0)) && (local4_down_1992)) ? 1 : 0)) {
+			if ((((BOXCOLL(~~(func9_DDgui_get("", "XPOS")), ~~(func9_DDgui_get("", "YPOS")), ~~(func9_DDgui_get("", "WIDTH")), ~~(func9_DDgui_get("", "HEIGHT")), local2_px_1993, local2_py_1994, 1, 1)) == (0)) ? 1 : 0)) {
 				func15_DDgui_popdialog();
-				__debugInfo = "2571:\ddgui.gbas";
-				return tryClone(local4_isel_1977);
-				__debugInfo = "2569:\ddgui.gbas";
+				return tryClone(-(1));
+				
 			};
-			__debugInfo = "2574:\ddgui.gbas";
-			SHOWSCREEN();
-			__debugInfo = "2556:\ddgui.gbas";
+			
 		};
-		__debugInfo = "2576:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2533:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		if (func9_DDgui_get("lst", "CLICKED")) {
+			var local4_isel_1995 = 0;
+			local4_isel_1995 = ~~(func9_DDgui_get("lst", "SELECT"));
+			func15_DDgui_popdialog();
+			return tryClone(local4_isel_1995);
+			
+		};
+		SHOWSCREEN();
+		
+	};
+	return 0;
 	
 };
 window['func10_DDgui_list'] = function(param6_id_Str, param9_texts_Str, param5_width, param6_height) {
-	stackPush("function: DDgui_list", __debugInfo);
-	try {
-		var local2_tx_ref_1982 = [0], local2_ty_ref_1983 = [0], local3_num_1984 = 0, local1_i_1985 = 0;
-		__debugInfo = "2587:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1982, local2_ty_ref_1983);
-		__debugInfo = "2588:\ddgui.gbas";
-		local2_ty_ref_1983[0] = MAX(unref(local2_ty_ref_1983[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2590:\ddgui.gbas";
-		local3_num_1984 = SPLITSTR(param9_texts_Str, unref(static7_DDgui_list_opt_Str), "|", 1);
-		__debugInfo = "2591:\ddgui.gbas";
-		if ((((local3_num_1984) == (0)) ? 1 : 0)) {
-			__debugInfo = "2591:\ddgui.gbas";
-			func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(-(1)));
-			__debugInfo = "2591:\ddgui.gbas";
-		};
-		__debugInfo = "2596:\ddgui.gbas";
-		if ((((param6_height) == (0)) ? 1 : 0)) {
-			__debugInfo = "2593:\ddgui.gbas";
-			param6_height = ((((4) * (local2_ty_ref_1983[0]))) + (4));
-			__debugInfo = "2593:\ddgui.gbas";
-		} else {
-			__debugInfo = "2595:\ddgui.gbas";
-			param6_height = ((((param6_height) - (MOD(param6_height, unref(local2_ty_ref_1983[0]))))) + (4));
-			__debugInfo = "2595:\ddgui.gbas";
-		};
-		__debugInfo = "2603:\ddgui.gbas";
-		if ((((param5_width) == (0)) ? 1 : 0)) {
-			__debugInfo = "2597:\ddgui.gbas";
-			{
-				__debugInfo = "2601:\ddgui.gbas";
-				for (local1_i_1985 = 0;toCheck(local1_i_1985, ((local3_num_1984) - (1)), 1);local1_i_1985 += 1) {
-					__debugInfo = "2599:\ddgui.gbas";
-					local2_ty_ref_1983[0] = (static7_DDgui_list_opt_Str.arrAccess(local1_i_1985).values[tmpPositionCache]).length;
-					__debugInfo = "2600:\ddgui.gbas";
-					if ((((local2_ty_ref_1983[0]) > (param5_width)) ? 1 : 0)) {
-						__debugInfo = "2600:\ddgui.gbas";
-						param5_width = local2_ty_ref_1983[0];
-						__debugInfo = "2600:\ddgui.gbas";
-					};
-					__debugInfo = "2599:\ddgui.gbas";
+	var local2_tx_ref_2000 = [0], local2_ty_ref_2001 = [0], local3_num_2002 = 0, local1_i_2003 = 0;
+	GETFONTSIZE(local2_tx_ref_2000, local2_ty_ref_2001);
+	local2_ty_ref_2001[0] = MAX(unref(local2_ty_ref_2001[0]), global25_gDDguiMinControlDimension);
+	local3_num_2002 = SPLITSTR(param9_texts_Str, unref(static7_DDgui_list_opt_Str), "|", 1);
+	if ((((local3_num_2002) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(-(1)));
+		
+	};
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = ((((4) * (local2_ty_ref_2001[0]))) + (4));
+		
+	} else {
+		param6_height = ((((param6_height) - (MOD(param6_height, unref(local2_ty_ref_2001[0]))))) + (4));
+		
+	};
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		{
+			for (local1_i_2003 = 0;toCheck(local1_i_2003, ((local3_num_2002) - (1)), 1);local1_i_2003 += 1) {
+				local2_ty_ref_2001[0] = (static7_DDgui_list_opt_Str.arrAccess(local1_i_2003).values[tmpPositionCache]).length;
+				if ((((local2_ty_ref_2001[0]) > (param5_width)) ? 1 : 0)) {
+					param5_width = local2_ty_ref_2001[0];
+					
 				};
-				__debugInfo = "2601:\ddgui.gbas";
+				
 			};
-			__debugInfo = "2602:\ddgui.gbas";
-			param5_width = ((((param5_width) + (3))) * (local2_tx_ref_1982[0]));
-			__debugInfo = "2597:\ddgui.gbas";
+			
 		};
-		__debugInfo = "2604:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param9_texts_Str, param5_width, param6_height);
-		__debugInfo = "2605:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "LIST");
-		__debugInfo = "2606:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "COUNT", CAST2STRING(local3_num_1984));
-		__debugInfo = "2607:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_wscrollmax = local3_num_1984;
-		__debugInfo = "2608:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2587:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		param5_width = ((((param5_width) + (3))) * (local2_tx_ref_2000[0]));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param9_texts_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "LIST");
+	func9_DDgui_set(param6_id_Str, "COUNT", CAST2STRING(local3_num_2002));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_wscrollmax = local3_num_2002;
+	return 0;
 	
 };
 window['func14_DDgui_drawlist'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawlist", __debugInfo);
-	try {
-		var local2_c1_1990 = 0, local2_c2_1991 = 0, local7_txt_Str_1992 = "", local1_i_1993 = 0, local3_num_1994 = 0, local2_tx_ref_1995 = [0], local2_ty_ref_1996 = [0], local1_r_1997 = 0, local5_hover_1998 = 0, local5_check_1999 = 0, local6_offset_2000 = 0, local6_twidth_2002 = 0;
-		__debugInfo = "2616:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_1995, local2_ty_ref_1996);
-		__debugInfo = "2617:\ddgui.gbas";
-		local2_ty_ref_1996[0] = MAX(unref(local2_ty_ref_1996[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2618:\ddgui.gbas";
-		local3_num_1994 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawlist_opt_Str_ref[0]), "|", 1);
-		__debugInfo = "2619:\ddgui.gbas";
-		param3_wdg.attr6_wcount = local3_num_1994;
-		__debugInfo = "2621:\ddgui.gbas";
-		local6_twidth_2002 = ((param3_wdg.attr6_wwidth) - (8));
-		__debugInfo = "2622:\ddgui.gbas";
-		if (param3_wdg.attr10_wscrollmax) {
-			__debugInfo = "2622:\ddgui.gbas";
-			local6_twidth_2002+=-(MAX(unref(local2_tx_ref_1995[0]), global20_gDDguiScrollbarWidth));
-			__debugInfo = "2622:\ddgui.gbas";
-		};
-		__debugInfo = "2626:\ddgui.gbas";
-		local6_offset_2000 = param3_wdg.attr7_wscroll;
-		__debugInfo = "2627:\ddgui.gbas";
-		{
-			__debugInfo = "2657:\ddgui.gbas";
-			for (local1_i_1993 = local6_offset_2000;toCheck(local1_i_1993, ((local3_num_1994) - (1)), 1);local1_i_1993 += 1) {
-				__debugInfo = "2629:\ddgui.gbas";
-				local5_hover_1998 = 0;
-				__debugInfo = "2630:\ddgui.gbas";
-				local5_check_1999 = 0;
-				__debugInfo = "2631:\ddgui.gbas";
-				if ((((param3_wdg.attr7_wselect) == (local1_i_1993)) ? 1 : 0)) {
-					__debugInfo = "2631:\ddgui.gbas";
-					local5_check_1999 = 1;
-					__debugInfo = "2631:\ddgui.gbas";
-				};
-				__debugInfo = "2632:\ddgui.gbas";
-				if (((((((param3_wdg.attr6_whover) == (local1_i_1993)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "2632:\ddgui.gbas";
-					local5_hover_1998 = 1;
-					__debugInfo = "2632:\ddgui.gbas";
-				};
-				__debugInfo = "2649:\ddgui.gbas";
-				if ((((local5_hover_1998) || (local5_check_1999)) ? 1 : 0)) {
-					__debugInfo = "2634:\ddgui.gbas";
-					local2_c1_1990 = param10_ddgui_vals.attr16_col_hover_bright;
-					__debugInfo = "2635:\ddgui.gbas";
-					local2_c2_1991 = param10_ddgui_vals.attr14_col_hover_norm;
-					__debugInfo = "2640:\ddgui.gbas";
-					if ((((local5_hover_1998) == (0)) ? 1 : 0)) {
-						__debugInfo = "2637:\ddgui.gbas";
-						local1_r_1997 = local2_c1_1990;
-						__debugInfo = "2638:\ddgui.gbas";
-						local2_c1_1990 = local2_c2_1991;
-						__debugInfo = "2639:\ddgui.gbas";
-						local2_c2_1991 = local1_r_1997;
-						__debugInfo = "2637:\ddgui.gbas";
-					};
-					__debugInfo = "2645:\ddgui.gbas";
-					if (local5_check_1999) {
-						__debugInfo = "2642:\ddgui.gbas";
-						func13_DDgui_backgnd(local2_c1_1990, local2_c2_1991, 0, ((param4_ytop) + (((((local1_i_1993) - (local6_offset_2000))) * (local2_ty_ref_1996[0])))), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_1996[0]) - (1)));
-						__debugInfo = "2642:\ddgui.gbas";
-					} else if (local5_hover_1998) {
-						__debugInfo = "2644:\ddgui.gbas";
-						func14_DDgui_backrect(1, ((param4_ytop) + (((((local1_i_1993) - (local6_offset_2000))) * (local2_ty_ref_1996[0])))), ((param3_wdg.attr6_wwidth) - (2)), ((local2_ty_ref_1996[0]) - (1)), local2_c1_1990);
-						__debugInfo = "2644:\ddgui.gbas";
-					};
-					__debugInfo = "2634:\ddgui.gbas";
-				} else {
-					__debugInfo = "2647:\ddgui.gbas";
-					local2_c1_1990 = param10_ddgui_vals.attr10_col_bright;
-					__debugInfo = "2648:\ddgui.gbas";
-					local2_c2_1991 = param10_ddgui_vals.attr8_col_norm;
-					__debugInfo = "2647:\ddgui.gbas";
-				};
-				__debugInfo = "2656:\ddgui.gbas";
-				if ((((INSTR(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_1993).values[tmpPositionCache][0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
-					__debugInfo = "2652:\ddgui.gbas";
-					local2_c1_1990 = INTEGER(FLOAT2STR(MID_Str(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_1993).values[tmpPositionCache][0]), 5, -(1))));
-					__debugInfo = "2653:\ddgui.gbas";
-					func23_DDgui_fit_sprite_in_box(local2_c1_1990, 5, ((((param4_ytop) + (((((local1_i_1993) - (local6_offset_2000))) * (local2_ty_ref_1996[0]))))) + (1)), ((local6_twidth_2002) - (2)), ((local2_ty_ref_1996[0]) - (2)));
-					__debugInfo = "2652:\ddgui.gbas";
-				} else {
-					__debugInfo = "2655:\ddgui.gbas";
-					func17_DDGui_PrintIntern(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_1993).values[tmpPositionCache], 4, ((param4_ytop) + (((((local1_i_1993) - (local6_offset_2000))) * (local2_ty_ref_1996[0])))), local5_check_1999);
-					__debugInfo = "2655:\ddgui.gbas";
-				};
-				__debugInfo = "2629:\ddgui.gbas";
+	var local2_c1_2008 = 0, local2_c2_2009 = 0, local7_txt_Str_2010 = "", local1_i_2011 = 0, local3_num_2012 = 0, local2_tx_ref_2013 = [0], local2_ty_ref_2014 = [0], local1_r_2015 = 0, local5_hover_2016 = 0, local5_check_2017 = 0, local6_offset_2018 = 0, local6_twidth_2020 = 0;
+	GETFONTSIZE(local2_tx_ref_2013, local2_ty_ref_2014);
+	local2_ty_ref_2014[0] = MAX(unref(local2_ty_ref_2014[0]), global25_gDDguiMinControlDimension);
+	local3_num_2012 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawlist_opt_Str_ref[0]), "|", 1);
+	param3_wdg.attr6_wcount = local3_num_2012;
+	local6_twidth_2020 = ((param3_wdg.attr6_wwidth) - (8));
+	if (param3_wdg.attr10_wscrollmax) {
+		local6_twidth_2020+=-(MAX(unref(local2_tx_ref_2013[0]), global20_gDDguiScrollbarWidth));
+		
+	};
+	local6_offset_2018 = param3_wdg.attr7_wscroll;
+	{
+		for (local1_i_2011 = local6_offset_2018;toCheck(local1_i_2011, ((local3_num_2012) - (1)), 1);local1_i_2011 += 1) {
+			local5_hover_2016 = 0;
+			local5_check_2017 = 0;
+			if ((((param3_wdg.attr7_wselect) == (local1_i_2011)) ? 1 : 0)) {
+				local5_check_2017 = 1;
+				
 			};
-			__debugInfo = "2657:\ddgui.gbas";
+			if (((((((param3_wdg.attr6_whover) == (local1_i_2011)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+				local5_hover_2016 = 1;
+				
+			};
+			if ((((local5_hover_2016) || (local5_check_2017)) ? 1 : 0)) {
+				local2_c1_2008 = param10_ddgui_vals.attr16_col_hover_bright;
+				local2_c2_2009 = param10_ddgui_vals.attr14_col_hover_norm;
+				if ((((local5_hover_2016) == (0)) ? 1 : 0)) {
+					local1_r_2015 = local2_c1_2008;
+					local2_c1_2008 = local2_c2_2009;
+					local2_c2_2009 = local1_r_2015;
+					
+				};
+				if (local5_check_2017) {
+					func13_DDgui_backgnd(local2_c1_2008, local2_c2_2009, 0, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_2014[0]) - (1)));
+					
+				} else if (local5_hover_2016) {
+					func14_DDgui_backrect(1, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), ((param3_wdg.attr6_wwidth) - (2)), ((local2_ty_ref_2014[0]) - (1)), local2_c1_2008);
+					
+				};
+				
+			} else {
+				local2_c1_2008 = param10_ddgui_vals.attr10_col_bright;
+				local2_c2_2009 = param10_ddgui_vals.attr8_col_norm;
+				
+			};
+			if ((((INSTR(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache][0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+				local2_c1_2008 = INTEGER(FLOAT2STR(MID_Str(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache][0]), 5, -(1))));
+				func23_DDgui_fit_sprite_in_box(local2_c1_2008, 5, ((((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0]))))) + (1)), ((local6_twidth_2020) - (2)), ((local2_ty_ref_2014[0]) - (2)));
+				
+			} else {
+				func17_DDGui_PrintIntern(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache], 4, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), local5_check_2017);
+				
+			};
+			
 		};
-		__debugInfo = "2659:\ddgui.gbas";
-		local2_c1_1990 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "2660:\ddgui.gbas";
-		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c1_1990);
-		__debugInfo = "2663:\ddgui.gbas";
-		func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_1996[0]))), param4_ytop);
-		__debugInfo = "2664:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2616:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	local2_c1_2008 = param10_ddgui_vals.attr8_col_norm;
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c1_2008);
+	func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_2014[0]))), param4_ytop);
+	return 0;
 	
 };
 window['func16_DDgui_handlelist'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handlelist", __debugInfo);
-	try {
-		var local2_tx_ref_2009 = [0], local2_ty_ref_2010 = [0], local5_hover_2011 = 0, local5_width_2012 = 0, local6_height_2013 = 0, local2_sb_2014 = 0, local6_offset_2015 = 0, local6_oldsel_2016 = 0, local3_num_2017 = 0;
-		__debugInfo = "2671:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_2009, local2_ty_ref_2010);
-		__debugInfo = "2672:\ddgui.gbas";
-		local2_ty_ref_2010[0] = MAX(unref(local2_ty_ref_2010[0]), global25_gDDguiMinControlDimension);
-		__debugInfo = "2673:\ddgui.gbas";
-		local5_width_2012 = param3_wdg.attr6_wwidth;
-		__debugInfo = "2674:\ddgui.gbas";
-		local6_height_2013 = param3_wdg.attr7_wheight;
-		__debugInfo = "2677:\ddgui.gbas";
-		local3_num_2017 = param3_wdg.attr6_wcount;
-		__debugInfo = "2678:\ddgui.gbas";
-		param3_wdg.attr10_wscrollmax = ((local3_num_2017) - (INTEGER(CAST2INT(((local6_height_2013) / (local2_ty_ref_2010[0]))))));
-		__debugInfo = "2680:\ddgui.gbas";
-		local2_sb_2014 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2013);
-		__debugInfo = "2681:\ddgui.gbas";
-		local6_offset_2015 = param3_wdg.attr7_wscroll;
-		__debugInfo = "2683:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2683:\ddgui.gbas";
-			return 0;
-			__debugInfo = "2683:\ddgui.gbas";
-		};
-		__debugInfo = "2685:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "2687:\ddgui.gbas";
-		param3_wdg.attr6_whover = -(1);
-		__debugInfo = "2701:\ddgui.gbas";
-		if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (local6_height_2013)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2012) - (((local2_sb_2014) * (((local2_tx_ref_2009[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2689:\ddgui.gbas";
-			param2_my = ((INTEGER(CAST2INT(((param2_my) / (local2_ty_ref_2010[0]))))) + (local6_offset_2015));
-			__debugInfo = "2699:\ddgui.gbas";
-			if ((((param2_b1) == (1)) ? 1 : 0)) {
-				__debugInfo = "2695:\ddgui.gbas";
-				if ((((param2_my) >= (param3_wdg.attr6_wcount)) ? 1 : 0)) {
-					__debugInfo = "2695:\ddgui.gbas";
-					param2_my = -(1);
-					__debugInfo = "2695:\ddgui.gbas";
-				};
-				__debugInfo = "2696:\ddgui.gbas";
-				param3_wdg.attr7_wselect = param2_my;
-				__debugInfo = "2697:\ddgui.gbas";
-				param3_wdg.attr8_wclicked = 1;
-				__debugInfo = "2695:\ddgui.gbas";
-			};
-			__debugInfo = "2700:\ddgui.gbas";
-			param3_wdg.attr6_whover = param2_my;
-			__debugInfo = "2689:\ddgui.gbas";
-		};
-		__debugInfo = "2702:\ddgui.gbas";
+	var local2_tx_ref_2027 = [0], local2_ty_ref_2028 = [0], local5_hover_2029 = 0, local5_width_2030 = 0, local6_height_2031 = 0, local2_sb_2032 = 0, local6_offset_2033 = 0, local6_oldsel_2034 = 0, local3_num_2035 = 0;
+	GETFONTSIZE(local2_tx_ref_2027, local2_ty_ref_2028);
+	local2_ty_ref_2028[0] = MAX(unref(local2_ty_ref_2028[0]), global25_gDDguiMinControlDimension);
+	local5_width_2030 = param3_wdg.attr6_wwidth;
+	local6_height_2031 = param3_wdg.attr7_wheight;
+	local3_num_2035 = param3_wdg.attr6_wcount;
+	param3_wdg.attr10_wscrollmax = ((local3_num_2035) - (INTEGER(CAST2INT(((local6_height_2031) / (local2_ty_ref_2028[0]))))));
+	local2_sb_2032 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2031);
+	local6_offset_2033 = param3_wdg.attr7_wscroll;
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "2671:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	param3_wdg.attr6_whover = -(1);
+	if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (local6_height_2031)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2030) - (((local2_sb_2032) * (((local2_tx_ref_2027[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) {
+		param2_my = ((INTEGER(CAST2INT(((param2_my) / (local2_ty_ref_2028[0]))))) + (local6_offset_2033));
+		if ((((param2_b1) == (1)) ? 1 : 0)) {
+			if ((((param2_my) >= (param3_wdg.attr6_wcount)) ? 1 : 0)) {
+				param2_my = -(1);
+				
+			};
+			param3_wdg.attr7_wselect = param2_my;
+			param3_wdg.attr8_wclicked = 1;
+			
+		};
+		param3_wdg.attr6_whover = param2_my;
+		
+	};
+	return 0;
 	
 };
 window['func10_DDgui_text'] = function(param6_id_Str, param8_text_Str, param5_width, param6_height) {
-	stackPush("function: DDgui_text", __debugInfo);
-	try {
-		__debugInfo = "2710:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, param6_height);
-		__debugInfo = "2711:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "TEXT");
-		__debugInfo = "2712:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2710:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "TEXT");
+	return 0;
 	
 };
 window['func16_DDgui_singletext'] = function(param6_id_Str, param8_text_Str, param5_width) {
-	stackPush("function: DDgui_singletext", __debugInfo);
-	try {
-		__debugInfo = "2715:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
-		__debugInfo = "2716:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "SINGLETEXT");
-		__debugInfo = "2717:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2715:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "SINGLETEXT");
+	return 0;
 	
 };
 window['func16_DDgui_numbertext'] = function(param6_id_Str, param8_text_Str, param5_width) {
-	stackPush("function: DDgui_numbertext", __debugInfo);
-	try {
-		__debugInfo = "2720:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
-		__debugInfo = "2721:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "NUMBERTEXT");
-		__debugInfo = "2722:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2720:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "NUMBERTEXT");
+	return 0;
 	
 };
 window['func14_DDgui_drawtext'] = function(param10_ddgui_vals, param3_wdg, param4_ytop, param11_bSingleText) {
-	stackPush("function: DDgui_drawtext", __debugInfo);
-	try {
-		var local2_tx_ref_2022 = [0], local2_ty_ref_2023 = [0], local2_c1_2024 = 0, local2_c2_2025 = 0, local6_twidth_2026 = 0;
-		__debugInfo = "2728:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_2022, local2_ty_ref_2023);
-		__debugInfo = "2729:\ddgui.gbas";
-		local2_c1_2024 = param10_ddgui_vals.attr10_col_bright;
-		__debugInfo = "2730:\ddgui.gbas";
-		local2_c2_2025 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "2732:\ddgui.gbas";
-		local6_twidth_2026 = ((param3_wdg.attr6_wwidth) - (local2_tx_ref_2022[0]));
-		__debugInfo = "2733:\ddgui.gbas";
-		if (param3_wdg.attr10_wscrollmax) {
-			__debugInfo = "2733:\ddgui.gbas";
-			local6_twidth_2026 = ((local6_twidth_2026) - (MAX(unref(local2_tx_ref_2022[0]), global20_gDDguiScrollbarWidth)));
-			__debugInfo = "2733:\ddgui.gbas";
-		};
-		__debugInfo = "2737:\ddgui.gbas";
-		if (param3_wdg.attr9_wreadonly) {
-			__debugInfo = "2736:\ddgui.gbas";
-			func13_DDgui_backgnd(local2_c2_2025, local2_c2_2025, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
-			__debugInfo = "2736:\ddgui.gbas";
-		};
-		__debugInfo = "2743:\ddgui.gbas";
-		if (param11_bSingleText) {
-			__debugInfo = "2740:\ddgui.gbas";
-			func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2022[0]) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_ty_ref_2023[0]))) / (2))))), local6_twidth_2026, 1, 0);
-			__debugInfo = "2740:\ddgui.gbas";
-		} else {
-			__debugInfo = "2742:\ddgui.gbas";
-			func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2022[0]) / (2))), ((param4_ytop) - (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2023[0])))), local6_twidth_2026, 1, 0);
-			__debugInfo = "2742:\ddgui.gbas";
-		};
-		__debugInfo = "2744:\ddgui.gbas";
-		func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_2023[0]))), param4_ytop);
-		__debugInfo = "2745:\ddgui.gbas";
-		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_2025);
-		__debugInfo = "2746:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2728:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local2_tx_ref_2040 = [0], local2_ty_ref_2041 = [0], local2_c1_2042 = 0, local2_c2_2043 = 0, local6_twidth_2044 = 0;
+	GETFONTSIZE(local2_tx_ref_2040, local2_ty_ref_2041);
+	local2_c1_2042 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_2043 = param10_ddgui_vals.attr8_col_norm;
+	local6_twidth_2044 = ((param3_wdg.attr6_wwidth) - (local2_tx_ref_2040[0]));
+	if (param3_wdg.attr10_wscrollmax) {
+		local6_twidth_2044 = ((local6_twidth_2044) - (MAX(unref(local2_tx_ref_2040[0]), global20_gDDguiScrollbarWidth)));
+		
+	};
+	if (param3_wdg.attr9_wreadonly) {
+		func13_DDgui_backgnd(local2_c2_2043, local2_c2_2043, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+		
+	};
+	if (param11_bSingleText) {
+		func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2040[0]) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_ty_ref_2041[0]))) / (2))))), local6_twidth_2044, 1, 0);
+		
+	} else {
+		func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2040[0]) / (2))), ((param4_ytop) - (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2041[0])))), local6_twidth_2044, 1, 0);
+		
+	};
+	func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_2041[0]))), param4_ytop);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_2043);
+	return 0;
 	
 };
 window['func16_ddgui_handletext'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, param11_bSingleText, param9_bIsNumber) {
-	stackPush("function: ddgui_handletext", __debugInfo);
-	try {
-		var local6_height_2035 = 0, local5_width_2036 = 0, local2_tx_ref_2037 = [0], local2_ty_ref_2038 = [0], local8_text_Str_2039 = "", local8_txheight_2040 = 0, local7_txwidth_2041 = 0, local9_has_focus_2042 = 0, local5_a_Str_2043 = "", local5_l_Str_2044 = "", local5_r_Str_2045 = "", local2_sb_2046 = 0, local8_selstart_2047 = 0, local6_selend_2048 = 0, local3_del_2049 = 0, local6_backsp_2050 = 0, local4_xkey_2051 = 0, local4_ykey_2052 = 0, local3_tab_2053 = 0, local7_lastkey_2054 = 0, local5_shift_2055 = 0, local6_offset_2056 = 0, local7_keycopy_2057 = 0, local8_keypaste_2058 = 0, local8_readonly_2059 = 0;
-		__debugInfo = "2755:\ddgui.gbas";
-		local8_readonly_2059 = param3_wdg.attr9_wreadonly;
-		__debugInfo = "2758:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_2037, local2_ty_ref_2038);
-		__debugInfo = "2759:\ddgui.gbas";
-		local8_text_Str_2039 = param3_wdg.attr9_wtext_Str_ref[0];
-		__debugInfo = "2760:\ddgui.gbas";
-		local5_width_2036 = param3_wdg.attr6_wwidth;
-		__debugInfo = "2761:\ddgui.gbas";
-		local6_offset_2056 = ((param3_wdg.attr7_wscroll) * (local2_ty_ref_2038[0]));
-		__debugInfo = "2762:\ddgui.gbas";
-		local7_txwidth_2041 = ((local5_width_2036) - (local2_tx_ref_2037[0]));
-		__debugInfo = "2767:\ddgui.gbas";
+	var local6_height_2053 = 0, local5_width_2054 = 0, local2_tx_ref_2055 = [0], local2_ty_ref_2056 = [0], local8_text_Str_2057 = "", local8_txheight_2058 = 0, local7_txwidth_2059 = 0, local9_has_focus_2060 = 0, local5_a_Str_2061 = "", local5_l_Str_2062 = "", local5_r_Str_2063 = "", local2_sb_2064 = 0, local8_selstart_2065 = 0, local6_selend_2066 = 0, local3_del_2067 = 0, local6_backsp_2068 = 0, local4_xkey_2069 = 0, local4_ykey_2070 = 0, local3_tab_2071 = 0, local7_lastkey_2072 = 0, local5_shift_2073 = 0, local6_offset_2074 = 0, local7_keycopy_2075 = 0, local8_keypaste_2076 = 0, local8_readonly_2077 = 0;
+	local8_readonly_2077 = param3_wdg.attr9_wreadonly;
+	GETFONTSIZE(local2_tx_ref_2055, local2_ty_ref_2056);
+	local8_text_Str_2057 = param3_wdg.attr9_wtext_Str_ref[0];
+	local5_width_2054 = param3_wdg.attr6_wwidth;
+	local6_offset_2074 = ((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0]));
+	local7_txwidth_2059 = ((local5_width_2054) - (local2_tx_ref_2055[0]));
+	if (param11_bSingleText) {
+		if (((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) < (local6_height_2053)) ? 1 : 0))) ? 1 : 0)) {
+			param2_my = 1;
+			
+		};
+		
+	};
+	if (param3_wdg.attr10_wscrollmax) {
+		local7_txwidth_2059 = ((local7_txwidth_2059) - (MAX(unref(local2_tx_ref_2055[0]), global20_gDDguiScrollbarWidth)));
+		
+	};
+	local6_height_2053 = param3_wdg.attr7_wheight;
+	local8_txheight_2058 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, 0, local7_txwidth_2059, 0, 0);
+	param3_wdg.attr10_wscrollmax = MAX(0, CAST2INT(((((local8_txheight_2058) - (local6_height_2053))) / (local2_ty_ref_2056[0]))));
+	if (param3_wdg.attr10_wscrollmax) {
+		param3_wdg.attr10_wscrollmax+=1;
+		
+	};
+	local2_sb_2064 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2053);
+	if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2054) - (((local2_sb_2064) * (((local2_tx_ref_2055[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (local6_height_2053)) ? 1 : 0))) ? 1 : 0)) {
+		if (((((((param2_b1) == (1)) ? 1 : 0)) && ((((param10_ddgui_vals.attr9_focus_Str) != (param3_wdg.attr7_wid_Str)) ? 1 : 0))) ? 1 : 0)) {
+			func14_DDgui_setfocus(param3_wdg.attr7_wid_Str);
+			if (((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((local8_readonly_2077) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((global18_DDGUI_IN_INPUT_DLG) == (0)) ? 1 : 0))) ? 1 : 0)) && (global20_DDGUI_AUTO_INPUT_DLG)) ? 1 : 0)) {
+				param10_ddgui_vals.attr15_kick_intern_dlg = 2;
+				param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+				func14_DDgui_setfocus("");
+				
+			};
+			
+		} else {
+			if (((((((param2_b1) == (0)) ? 1 : 0)) && (MOUSEAXIS(3))) ? 1 : 0)) {
+				param2_b1 = 1;
+				
+			};
+			if ((((param2_b1) != (0)) ? 1 : 0)) {
+				local2_tx_ref_2055[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param2_mx, ((param2_my) + (local6_offset_2074)), local7_txwidth_2059, 0, 1);
+				
+			};
+			if ((((param2_b1) == (-(1))) ? 1 : 0)) {
+				param3_wdg.attr9_wselstart = local2_tx_ref_2055[0];
+				param2_b1 = 1;
+				
+			};
+			if ((((param2_b1) == (1)) ? 1 : 0)) {
+				param3_wdg.attr7_wselend = local2_tx_ref_2055[0];
+				
+			};
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+		local9_has_focus_2060 = 1;
+		
+	};
+	if (local9_has_focus_2060) {
+		local7_lastkey_2072 = static11_ddgui_handletext_st_lasttime;
+		if ((((((GETTIMERALL()) - (local7_lastkey_2072))) > (150)) ? 1 : 0)) {
+			local7_lastkey_2072 = 0;
+			
+		} else {
+			local7_lastkey_2072 = static10_ddgui_handletext_st_lastkey;
+			
+		};
+		local5_a_Str_2061 = param10_ddgui_vals.attr13_dlg_inkey_Str;
+		if ((local5_a_Str_2061).length) {
+			local7_lastkey_2072 = 0;
+			param10_ddgui_vals.attr13_dlg_inkey_Str = "";
+			
+		} else {
+			local5_a_Str_2061 = INKEY_Str();
+			if ((local5_a_Str_2061).length) {
+				
+			};
+			
+		};
+		if ((((local5_a_Str_2061) == ("\t")) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			
+		};
+		if ((((local5_a_Str_2061) == ("\b")) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			local6_backsp_2068 = 1;
+			
+		};
+		if (((((((local7_lastkey_2072) == (0)) ? 1 : 0)) || ((((KEY(local7_lastkey_2072)) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			local7_lastkey_2072 = 0;
+			local4_ykey_2070 = ((KEY(208)) - (KEY(200)));
+			local4_xkey_2069 = ((KEY(205)) - (KEY(203)));
+			local3_del_2067 = KEY(211);
+			local3_tab_2071 = KEY(15);
+			local6_backsp_2068 = (((local6_backsp_2068) || (KEY(14))) ? 1 : 0);
+			local5_shift_2073 = (((KEY(42)) || (KEY(54))) ? 1 : 0);
+			local7_keycopy_2075 = (((KEY(29)) && (KEY(46))) ? 1 : 0);
+			local8_keypaste_2076 = (((KEY(29)) && (KEY(47))) ? 1 : 0);
+			if ((((local4_ykey_2070) > (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 208;
+				
+			};
+			if ((((local4_ykey_2070) < (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 200;
+				
+			};
+			if ((((local4_xkey_2069) < (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 203;
+				
+			};
+			if ((((local4_xkey_2069) > (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 205;
+				
+			};
+			if (local3_del_2067) {
+				local7_lastkey_2072 = 211;
+				
+			};
+			if (local3_tab_2071) {
+				local7_lastkey_2072 = 15;
+				local5_a_Str_2061 = " ";
+				
+			};
+			if (local6_backsp_2068) {
+				local7_lastkey_2072 = 14;
+				
+			};
+			if (local7_keycopy_2075) {
+				local7_lastkey_2072 = 29;
+				
+			};
+			if (local8_keypaste_2076) {
+				local7_lastkey_2072 = 29;
+				
+			};
+			if (KEY(199)) {
+				local7_lastkey_2072 = 199;
+				param3_wdg.attr7_wcaretx = 0;
+				if (((param11_bSingleText) ? 0 : 1)) {
+					param3_wdg.attr7_wcarety+=local2_ty_ref_2056[0];
+					local4_ykey_2070 = -(1);
+					
+				};
+				
+			};
+			if (KEY(207)) {
+				local7_lastkey_2072 = 207;
+				param3_wdg.attr7_wcaretx = param3_wdg.attr6_wwidth;
+				if (((param11_bSingleText) ? 0 : 1)) {
+					param3_wdg.attr7_wcarety+=local2_ty_ref_2056[0];
+					local4_ykey_2070 = -(1);
+					
+				};
+				
+			};
+			static10_ddgui_handletext_st_lastkey = local7_lastkey_2072;
+			static11_ddgui_handletext_st_lasttime = GETTIMERALL();
+			
+		};
+		if ((((local8_readonly_2077) == (1)) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			local3_del_2067 = 0;
+			local3_tab_2071 = 0;
+			local6_backsp_2068 = 0;
+			local8_keypaste_2076 = 0;
+			
+		};
 		if (param11_bSingleText) {
-			__debugInfo = "2766:\ddgui.gbas";
-			if (((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) < (local6_height_2035)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "2766:\ddgui.gbas";
-				param2_my = 1;
-				__debugInfo = "2766:\ddgui.gbas";
+			local4_ykey_2070 = 0;
+			if ((((local5_a_Str_2061) == ("\n")) ? 1 : 0)) {
+				local5_a_Str_2061 = "";
+				
 			};
-			__debugInfo = "2766:\ddgui.gbas";
-		};
-		__debugInfo = "2769:\ddgui.gbas";
-		if (param3_wdg.attr10_wscrollmax) {
-			__debugInfo = "2769:\ddgui.gbas";
-			local7_txwidth_2041 = ((local7_txwidth_2041) - (MAX(unref(local2_tx_ref_2037[0]), global20_gDDguiScrollbarWidth)));
-			__debugInfo = "2769:\ddgui.gbas";
-		};
-		__debugInfo = "2770:\ddgui.gbas";
-		local6_height_2035 = param3_wdg.attr7_wheight;
-		__debugInfo = "2771:\ddgui.gbas";
-		local8_txheight_2040 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, 0, local7_txwidth_2041, 0, 0);
-		__debugInfo = "2774:\ddgui.gbas";
-		param3_wdg.attr10_wscrollmax = MAX(0, CAST2INT(((((local8_txheight_2040) - (local6_height_2035))) / (local2_ty_ref_2038[0]))));
-		__debugInfo = "2775:\ddgui.gbas";
-		if (param3_wdg.attr10_wscrollmax) {
-			__debugInfo = "2775:\ddgui.gbas";
-			param3_wdg.attr10_wscrollmax+=1;
-			__debugInfo = "2775:\ddgui.gbas";
-		};
-		__debugInfo = "2776:\ddgui.gbas";
-		local2_sb_2046 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2035);
-		__debugInfo = "2803:\ddgui.gbas";
-		if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2036) - (((local2_sb_2046) * (((local2_tx_ref_2037[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (local6_height_2035)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "2800:\ddgui.gbas";
-			if (((((((param2_b1) == (1)) ? 1 : 0)) && ((((param10_ddgui_vals.attr9_focus_Str) != (param3_wdg.attr7_wid_Str)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "2782:\ddgui.gbas";
-				func14_DDgui_setfocus(param3_wdg.attr7_wid_Str);
-				__debugInfo = "2789:\ddgui.gbas";
-				if (((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((local8_readonly_2059) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((global18_DDGUI_IN_INPUT_DLG) == (0)) ? 1 : 0))) ? 1 : 0)) && (global20_DDGUI_AUTO_INPUT_DLG)) ? 1 : 0)) {
-					__debugInfo = "2786:\ddgui.gbas";
-					param10_ddgui_vals.attr15_kick_intern_dlg = 2;
-					__debugInfo = "2787:\ddgui.gbas";
-					param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
-					__debugInfo = "2788:\ddgui.gbas";
-					func14_DDgui_setfocus("");
-					__debugInfo = "2786:\ddgui.gbas";
-				};
-				__debugInfo = "2782:\ddgui.gbas";
-			} else {
-				__debugInfo = "2791:\ddgui.gbas";
-				if (((((((param2_b1) == (0)) ? 1 : 0)) && (MOUSEAXIS(3))) ? 1 : 0)) {
-					__debugInfo = "2791:\ddgui.gbas";
-					param2_b1 = 1;
-					__debugInfo = "2791:\ddgui.gbas";
-				};
-				__debugInfo = "2792:\ddgui.gbas";
-				if ((((param2_b1) != (0)) ? 1 : 0)) {
-					__debugInfo = "2792:\ddgui.gbas";
-					local2_tx_ref_2037[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param2_mx, ((param2_my) + (local6_offset_2056)), local7_txwidth_2041, 0, 1);
-					__debugInfo = "2792:\ddgui.gbas";
-				};
-				__debugInfo = "2796:\ddgui.gbas";
-				if ((((param2_b1) == (-(1))) ? 1 : 0)) {
-					__debugInfo = "2794:\ddgui.gbas";
-					param3_wdg.attr9_wselstart = local2_tx_ref_2037[0];
-					__debugInfo = "2795:\ddgui.gbas";
-					param2_b1 = 1;
-					__debugInfo = "2794:\ddgui.gbas";
-				};
-				__debugInfo = "2798:\ddgui.gbas";
-				if ((((param2_b1) == (1)) ? 1 : 0)) {
-					__debugInfo = "2798:\ddgui.gbas";
-					param3_wdg.attr7_wselend = local2_tx_ref_2037[0];
-					__debugInfo = "2798:\ddgui.gbas";
-				};
-				__debugInfo = "2791:\ddgui.gbas";
+			if ((((local5_a_Str_2061) == ("\r")) ? 1 : 0)) {
+				local5_a_Str_2061 = "";
+				
 			};
-			__debugInfo = "2800:\ddgui.gbas";
-		};
-		__debugInfo = "2804:\ddgui.gbas";
-		if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
-			__debugInfo = "2804:\ddgui.gbas";
-			local9_has_focus_2042 = 1;
-			__debugInfo = "2804:\ddgui.gbas";
-		};
-		__debugInfo = "2975:\ddgui.gbas";
-		if (local9_has_focus_2042) {
-			__debugInfo = "2808:\ddgui.gbas";
-			local7_lastkey_2054 = static11_ddgui_handletext_st_lasttime;
-			__debugInfo = "2813:\ddgui.gbas";
-			if ((((((GETTIMERALL()) - (local7_lastkey_2054))) > (150)) ? 1 : 0)) {
-				__debugInfo = "2810:\ddgui.gbas";
-				local7_lastkey_2054 = 0;
-				__debugInfo = "2810:\ddgui.gbas";
-			} else {
-				__debugInfo = "2812:\ddgui.gbas";
-				local7_lastkey_2054 = static10_ddgui_handletext_st_lastkey;
-				__debugInfo = "2812:\ddgui.gbas";
-			};
-			__debugInfo = "2815:\ddgui.gbas";
-			local5_a_Str_2043 = param10_ddgui_vals.attr13_dlg_inkey_Str;
-			__debugInfo = "2823:\ddgui.gbas";
-			if ((local5_a_Str_2043).length) {
-				__debugInfo = "2817:\ddgui.gbas";
-				local7_lastkey_2054 = 0;
-				__debugInfo = "2818:\ddgui.gbas";
-				param10_ddgui_vals.attr13_dlg_inkey_Str = "";
-				__debugInfo = "2819:\ddgui.gbas";
-				DEBUG((((("ddgui_inpkey: ") + (local5_a_Str_2043))) + ("\n")));
-				__debugInfo = "2817:\ddgui.gbas";
-			} else {
-				__debugInfo = "2821:\ddgui.gbas";
-				local5_a_Str_2043 = INKEY_Str();
-				__debugInfo = "2822:\ddgui.gbas";
-				if ((local5_a_Str_2043).length) {
-					__debugInfo = "2822:\ddgui.gbas";
-					DEBUG((((("INKEY: ") + (local5_a_Str_2043))) + ("\n")));
-					__debugInfo = "2822:\ddgui.gbas";
-				};
-				__debugInfo = "2821:\ddgui.gbas";
-			};
-			__debugInfo = "2825:\ddgui.gbas";
-			if ((((local5_a_Str_2043) == ("\t")) ? 1 : 0)) {
-				__debugInfo = "2825:\ddgui.gbas";
-				local5_a_Str_2043 = "";
-				__debugInfo = "2825:\ddgui.gbas";
-			};
-			__debugInfo = "2830:\ddgui.gbas";
-			if ((((local5_a_Str_2043) == ("\b")) ? 1 : 0)) {
-				__debugInfo = "2828:\ddgui.gbas";
-				local5_a_Str_2043 = "";
-				__debugInfo = "2829:\ddgui.gbas";
-				local6_backsp_2050 = 1;
-				__debugInfo = "2828:\ddgui.gbas";
-			};
-			__debugInfo = "2872:\ddgui.gbas";
-			if (((((((local7_lastkey_2054) == (0)) ? 1 : 0)) || ((((KEY(local7_lastkey_2054)) == (0)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "2833:\ddgui.gbas";
-				local7_lastkey_2054 = 0;
-				__debugInfo = "2834:\ddgui.gbas";
-				local4_ykey_2052 = ((KEY(208)) - (KEY(200)));
-				__debugInfo = "2835:\ddgui.gbas";
-				local4_xkey_2051 = ((KEY(205)) - (KEY(203)));
-				__debugInfo = "2836:\ddgui.gbas";
-				local3_del_2049 = KEY(211);
-				__debugInfo = "2837:\ddgui.gbas";
-				local3_tab_2053 = KEY(15);
-				__debugInfo = "2838:\ddgui.gbas";
-				local6_backsp_2050 = (((local6_backsp_2050) || (KEY(14))) ? 1 : 0);
-				__debugInfo = "2839:\ddgui.gbas";
-				local5_shift_2055 = (((KEY(42)) || (KEY(54))) ? 1 : 0);
-				__debugInfo = "2840:\ddgui.gbas";
-				local7_keycopy_2057 = (((KEY(29)) && (KEY(46))) ? 1 : 0);
-				__debugInfo = "2841:\ddgui.gbas";
-				local8_keypaste_2058 = (((KEY(29)) && (KEY(47))) ? 1 : 0);
-				__debugInfo = "2843:\ddgui.gbas";
-				if ((((local4_ykey_2052) > (0)) ? 1 : 0)) {
-					__debugInfo = "2843:\ddgui.gbas";
-					local7_lastkey_2054 = 208;
-					__debugInfo = "2843:\ddgui.gbas";
-				};
-				__debugInfo = "2844:\ddgui.gbas";
-				if ((((local4_ykey_2052) < (0)) ? 1 : 0)) {
-					__debugInfo = "2844:\ddgui.gbas";
-					local7_lastkey_2054 = 200;
-					__debugInfo = "2844:\ddgui.gbas";
-				};
-				__debugInfo = "2845:\ddgui.gbas";
-				if ((((local4_xkey_2051) < (0)) ? 1 : 0)) {
-					__debugInfo = "2845:\ddgui.gbas";
-					local7_lastkey_2054 = 203;
-					__debugInfo = "2845:\ddgui.gbas";
-				};
-				__debugInfo = "2846:\ddgui.gbas";
-				if ((((local4_xkey_2051) > (0)) ? 1 : 0)) {
-					__debugInfo = "2846:\ddgui.gbas";
-					local7_lastkey_2054 = 205;
-					__debugInfo = "2846:\ddgui.gbas";
-				};
-				__debugInfo = "2847:\ddgui.gbas";
-				if (local3_del_2049) {
-					__debugInfo = "2847:\ddgui.gbas";
-					local7_lastkey_2054 = 211;
-					__debugInfo = "2847:\ddgui.gbas";
-				};
-				__debugInfo = "2848:\ddgui.gbas";
-				if (local3_tab_2053) {
-					__debugInfo = "2847:\ddgui.gbas";
-					local7_lastkey_2054 = 15;
-					__debugInfo = "2847:\ddgui.gbas";
-					local5_a_Str_2043 = " ";
-					__debugInfo = "2847:\ddgui.gbas";
-				};
-				__debugInfo = "2849:\ddgui.gbas";
-				if (local6_backsp_2050) {
-					__debugInfo = "2849:\ddgui.gbas";
-					local7_lastkey_2054 = 14;
-					__debugInfo = "2849:\ddgui.gbas";
-				};
-				__debugInfo = "2850:\ddgui.gbas";
-				if (local7_keycopy_2057) {
-					__debugInfo = "2850:\ddgui.gbas";
-					local7_lastkey_2054 = 29;
-					__debugInfo = "2850:\ddgui.gbas";
-				};
-				__debugInfo = "2851:\ddgui.gbas";
-				if (local8_keypaste_2058) {
-					__debugInfo = "2851:\ddgui.gbas";
-					local7_lastkey_2054 = 29;
-					__debugInfo = "2851:\ddgui.gbas";
-				};
-				__debugInfo = "2860:\ddgui.gbas";
-				if (KEY(199)) {
-					__debugInfo = "2854:\ddgui.gbas";
-					local7_lastkey_2054 = 199;
-					__debugInfo = "2855:\ddgui.gbas";
-					param3_wdg.attr7_wcaretx = 0;
-					__debugInfo = "2859:\ddgui.gbas";
-					if (((param11_bSingleText) ? 0 : 1)) {
-						__debugInfo = "2857:\ddgui.gbas";
-						param3_wdg.attr7_wcarety+=local2_ty_ref_2038[0];
-						__debugInfo = "2858:\ddgui.gbas";
-						local4_ykey_2052 = -(1);
-						__debugInfo = "2857:\ddgui.gbas";
-					};
-					__debugInfo = "2854:\ddgui.gbas";
-				};
-				__debugInfo = "2868:\ddgui.gbas";
-				if (KEY(207)) {
-					__debugInfo = "2862:\ddgui.gbas";
-					local7_lastkey_2054 = 207;
-					__debugInfo = "2863:\ddgui.gbas";
-					param3_wdg.attr7_wcaretx = param3_wdg.attr6_wwidth;
-					__debugInfo = "2867:\ddgui.gbas";
-					if (((param11_bSingleText) ? 0 : 1)) {
-						__debugInfo = "2865:\ddgui.gbas";
-						param3_wdg.attr7_wcarety+=local2_ty_ref_2038[0];
-						__debugInfo = "2866:\ddgui.gbas";
-						local4_ykey_2052 = -(1);
-						__debugInfo = "2865:\ddgui.gbas";
-					};
-					__debugInfo = "2862:\ddgui.gbas";
-				};
-				__debugInfo = "2870:\ddgui.gbas";
-				static10_ddgui_handletext_st_lastkey = local7_lastkey_2054;
-				__debugInfo = "2871:\ddgui.gbas";
-				static11_ddgui_handletext_st_lasttime = GETTIMERALL();
-				__debugInfo = "2833:\ddgui.gbas";
-			};
-			__debugInfo = "2882:\ddgui.gbas";
-			if ((((local8_readonly_2059) == (1)) ? 1 : 0)) {
-				__debugInfo = "2877:\ddgui.gbas";
-				local5_a_Str_2043 = "";
-				__debugInfo = "2878:\ddgui.gbas";
-				local3_del_2049 = 0;
-				__debugInfo = "2879:\ddgui.gbas";
-				local3_tab_2053 = 0;
-				__debugInfo = "2880:\ddgui.gbas";
-				local6_backsp_2050 = 0;
-				__debugInfo = "2881:\ddgui.gbas";
-				local8_keypaste_2058 = 0;
-				__debugInfo = "2877:\ddgui.gbas";
-			};
-			__debugInfo = "2896:\ddgui.gbas";
-			if (param11_bSingleText) {
-				__debugInfo = "2885:\ddgui.gbas";
-				local4_ykey_2052 = 0;
-				__debugInfo = "2886:\ddgui.gbas";
-				if ((((local5_a_Str_2043) == ("\n")) ? 1 : 0)) {
-					__debugInfo = "2886:\ddgui.gbas";
-					local5_a_Str_2043 = "";
-					__debugInfo = "2886:\ddgui.gbas";
-				};
-				__debugInfo = "2887:\ddgui.gbas";
-				if ((((local5_a_Str_2043) == ("\r")) ? 1 : 0)) {
-					__debugInfo = "2887:\ddgui.gbas";
-					local5_a_Str_2043 = "";
-					__debugInfo = "2887:\ddgui.gbas";
-				};
-				__debugInfo = "2895:\ddgui.gbas";
-				if (local3_tab_2053) {
-					__debugInfo = "2893:\ddgui.gbas";
-					if (local5_shift_2055) {
-						__debugInfo = "2890:\ddgui.gbas";
-						func18_DDgui_advancefocus(-(1));
-						__debugInfo = "2890:\ddgui.gbas";
-					} else {
-						__debugInfo = "2892:\ddgui.gbas";
-						func18_DDgui_advancefocus(1);
-						__debugInfo = "2892:\ddgui.gbas";
-					};
-					__debugInfo = "2894:\ddgui.gbas";
-					return 0;
-					__debugInfo = "2893:\ddgui.gbas";
-				};
-				__debugInfo = "2885:\ddgui.gbas";
-			};
-			__debugInfo = "2904:\ddgui.gbas";
-			if (param9_bIsNumber) {
-				__debugInfo = "2903:\ddgui.gbas";
-				if ((((((((((((((((local5_a_Str_2043) >= ("0")) ? 1 : 0)) && ((((local5_a_Str_2043) <= ("9")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2043) == (".")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2043) == ("e")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2043) == ("-")) ? 1 : 0))) ? 1 : 0)) {
+			if (local3_tab_2071) {
+				if (local5_shift_2073) {
+					func18_DDgui_advancefocus(-(1));
 					
 				} else {
-					__debugInfo = "2902:\ddgui.gbas";
-					local5_a_Str_2043 = "";
-					__debugInfo = "2902:\ddgui.gbas";
+					func18_DDgui_advancefocus(1);
+					
 				};
-				__debugInfo = "2903:\ddgui.gbas";
+				return 0;
+				
 			};
-			__debugInfo = "2974:\ddgui.gbas";
-			if ((((((((((((((((local5_a_Str_2043) != ("")) ? 1 : 0)) || (local3_del_2049)) ? 1 : 0)) || (local6_backsp_2050)) ? 1 : 0)) || (local4_xkey_2051)) ? 1 : 0)) || (local4_ykey_2052)) ? 1 : 0)) {
-				__debugInfo = "2907:\ddgui.gbas";
-				local8_selstart_2047 = param3_wdg.attr9_wselstart;
-				__debugInfo = "2908:\ddgui.gbas";
-				local6_selend_2048 = param3_wdg.attr7_wselend;
-				__debugInfo = "2968:\ddgui.gbas";
-				if ((((local5_shift_2055) && ((((local4_xkey_2051) || (local4_ykey_2052)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "2911:\ddgui.gbas";
-					local6_selend_2048+=local4_xkey_2051;
-					__debugInfo = "2915:\ddgui.gbas";
-					if (local4_ykey_2052) {
-						__debugInfo = "2914:\ddgui.gbas";
-						local6_selend_2048 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2052) * (local2_ty_ref_2038[0])))), local7_txwidth_2041, 0, 1);
-						__debugInfo = "2914:\ddgui.gbas";
-					};
-					__debugInfo = "2917:\ddgui.gbas";
-					if ((((local6_selend_2048) < (0)) ? 1 : 0)) {
-						__debugInfo = "2917:\ddgui.gbas";
-						local6_selend_2048 = 0;
-						__debugInfo = "2917:\ddgui.gbas";
-					};
-					__debugInfo = "2918:\ddgui.gbas";
-					if ((((local6_selend_2048) > ((local8_text_Str_2039).length)) ? 1 : 0)) {
-						__debugInfo = "2918:\ddgui.gbas";
-						local6_selend_2048 = (local8_text_Str_2039).length;
-						__debugInfo = "2918:\ddgui.gbas";
-					};
-					__debugInfo = "2920:\ddgui.gbas";
-					param3_wdg.attr7_wselend = local6_selend_2048;
-					__debugInfo = "2911:\ddgui.gbas";
-				} else {
-					__debugInfo = "2935:\ddgui.gbas";
-					if (((((((local8_selstart_2047) != (local6_selend_2048)) ? 1 : 0)) && (((((((local3_del_2049) || (local6_backsp_2050)) ? 1 : 0)) || ((((local5_a_Str_2043) != ("")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "2928:\ddgui.gbas";
-						if ((((local8_selstart_2047) > (local6_selend_2048)) ? 1 : 0)) {
-							__debugInfo = "2925:\ddgui.gbas";
-							local2_tx_ref_2037[0] = local8_selstart_2047;
-							__debugInfo = "2926:\ddgui.gbas";
-							local8_selstart_2047 = local6_selend_2048;
-							__debugInfo = "2927:\ddgui.gbas";
-							local6_selend_2048 = local2_tx_ref_2037[0];
-							__debugInfo = "2925:\ddgui.gbas";
-						};
-						__debugInfo = "2929:\ddgui.gbas";
-						local5_l_Str_2044 = MID_Str(local8_text_Str_2039, 0, local8_selstart_2047);
-						__debugInfo = "2930:\ddgui.gbas";
-						local5_r_Str_2045 = MID_Str(local8_text_Str_2039, local6_selend_2048, -(1));
-						__debugInfo = "2931:\ddgui.gbas";
-						local8_text_Str_2039 = ((local5_l_Str_2044) + (local5_r_Str_2045));
-						__debugInfo = "2933:\ddgui.gbas";
-						if (local3_del_2049) {
-							__debugInfo = "2933:\ddgui.gbas";
-							local3_del_2049 = 0;
-							__debugInfo = "2933:\ddgui.gbas";
-						};
-						__debugInfo = "2934:\ddgui.gbas";
-						if (local6_backsp_2050) {
-							__debugInfo = "2934:\ddgui.gbas";
-							local6_backsp_2050 = 0;
-							__debugInfo = "2934:\ddgui.gbas";
-						};
-						__debugInfo = "2928:\ddgui.gbas";
-					};
-					__debugInfo = "2938:\ddgui.gbas";
-					local5_l_Str_2044 = MID_Str(local8_text_Str_2039, 0, local8_selstart_2047);
-					__debugInfo = "2939:\ddgui.gbas";
-					local5_r_Str_2045 = MID_Str(local8_text_Str_2039, local8_selstart_2047, -(1));
-					__debugInfo = "2942:\ddgui.gbas";
-					local8_selstart_2047+=local4_xkey_2051;
-					__debugInfo = "2946:\ddgui.gbas";
-					if (local4_ykey_2052) {
-						__debugInfo = "2945:\ddgui.gbas";
-						local8_selstart_2047 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2052) * (local2_ty_ref_2038[0])))), local7_txwidth_2041, 0, 1);
-						__debugInfo = "2945:\ddgui.gbas";
-					};
-					__debugInfo = "2949:\ddgui.gbas";
-					if (local3_del_2049) {
-						__debugInfo = "2949:\ddgui.gbas";
-						local5_r_Str_2045 = MID_Str(local5_r_Str_2045, 1, -(1));
-						__debugInfo = "2949:\ddgui.gbas";
-					};
-					__debugInfo = "2955:\ddgui.gbas";
-					if (local6_backsp_2050) {
-						__debugInfo = "2953:\ddgui.gbas";
-						local5_l_Str_2044 = LEFT_Str(local5_l_Str_2044, (((local5_l_Str_2044).length) - (1)));
-						__debugInfo = "2954:\ddgui.gbas";
-						local8_selstart_2047+=-(1);
-						__debugInfo = "2953:\ddgui.gbas";
-					};
-					__debugInfo = "2960:\ddgui.gbas";
-					if ((((local5_a_Str_2043) != ("")) ? 1 : 0)) {
-						__debugInfo = "2958:\ddgui.gbas";
-						local5_l_Str_2044 = ((local5_l_Str_2044) + (local5_a_Str_2043));
-						__debugInfo = "2959:\ddgui.gbas";
-						local8_selstart_2047+=1;
-						__debugInfo = "2958:\ddgui.gbas";
-					};
-					__debugInfo = "2961:\ddgui.gbas";
-					local8_text_Str_2039 = ((local5_l_Str_2044) + (local5_r_Str_2045));
-					__debugInfo = "2963:\ddgui.gbas";
-					if ((((local8_selstart_2047) < (0)) ? 1 : 0)) {
-						__debugInfo = "2963:\ddgui.gbas";
-						local8_selstart_2047 = 0;
-						__debugInfo = "2963:\ddgui.gbas";
-					};
-					__debugInfo = "2964:\ddgui.gbas";
-					if ((((local8_selstart_2047) > ((local8_text_Str_2039).length)) ? 1 : 0)) {
-						__debugInfo = "2964:\ddgui.gbas";
-						local8_selstart_2047 = (local8_text_Str_2039).length;
-						__debugInfo = "2964:\ddgui.gbas";
-					};
-					__debugInfo = "2965:\ddgui.gbas";
-					param3_wdg.attr9_wselstart = local8_selstart_2047;
-					__debugInfo = "2966:\ddgui.gbas";
-					param3_wdg.attr7_wselend = local8_selstart_2047;
-					__debugInfo = "2967:\ddgui.gbas";
-					param3_wdg.attr9_wtext_Str_ref[0] = local8_text_Str_2039;
-					__debugInfo = "2935:\ddgui.gbas";
-				};
-				__debugInfo = "2971:\ddgui.gbas";
-				if (((((((((param3_wdg.attr7_wcarety) + (local2_ty_ref_2038[0]))) > (((((param3_wdg.attr7_wscroll) * (local2_ty_ref_2038[0]))) + (param3_wdg.attr7_wheight)))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) < (param3_wdg.attr10_wscrollmax)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "2971:\ddgui.gbas";
-					param3_wdg.attr7_wscroll+=1;
-					__debugInfo = "2971:\ddgui.gbas";
-				};
-				__debugInfo = "2972:\ddgui.gbas";
-				if (((((((((param3_wdg.attr7_wcarety) - (local2_ty_ref_2038[0]))) < (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2038[0])))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) > (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "2972:\ddgui.gbas";
-					param3_wdg.attr7_wscroll+=-1;
-					__debugInfo = "2972:\ddgui.gbas";
-				};
-				__debugInfo = "2907:\ddgui.gbas";
-			};
-			__debugInfo = "2808:\ddgui.gbas";
+			
 		};
-		__debugInfo = "2976:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2755:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		if (param9_bIsNumber) {
+			if ((((((((((((((((local5_a_Str_2061) >= ("0")) ? 1 : 0)) && ((((local5_a_Str_2061) <= ("9")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == (".")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == ("e")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == ("-")) ? 1 : 0))) ? 1 : 0)) {
+				
+			} else {
+				local5_a_Str_2061 = "";
+				
+			};
+			
+		};
+		if ((((((((((((((((local5_a_Str_2061) != ("")) ? 1 : 0)) || (local3_del_2067)) ? 1 : 0)) || (local6_backsp_2068)) ? 1 : 0)) || (local4_xkey_2069)) ? 1 : 0)) || (local4_ykey_2070)) ? 1 : 0)) {
+			local8_selstart_2065 = param3_wdg.attr9_wselstart;
+			local6_selend_2066 = param3_wdg.attr7_wselend;
+			if ((((local5_shift_2073) && ((((local4_xkey_2069) || (local4_ykey_2070)) ? 1 : 0))) ? 1 : 0)) {
+				local6_selend_2066+=local4_xkey_2069;
+				if (local4_ykey_2070) {
+					local6_selend_2066 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2070) * (local2_ty_ref_2056[0])))), local7_txwidth_2059, 0, 1);
+					
+				};
+				if ((((local6_selend_2066) < (0)) ? 1 : 0)) {
+					local6_selend_2066 = 0;
+					
+				};
+				if ((((local6_selend_2066) > ((local8_text_Str_2057).length)) ? 1 : 0)) {
+					local6_selend_2066 = (local8_text_Str_2057).length;
+					
+				};
+				param3_wdg.attr7_wselend = local6_selend_2066;
+				
+			} else {
+				if (((((((local8_selstart_2065) != (local6_selend_2066)) ? 1 : 0)) && (((((((local3_del_2067) || (local6_backsp_2068)) ? 1 : 0)) || ((((local5_a_Str_2061) != ("")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+					if ((((local8_selstart_2065) > (local6_selend_2066)) ? 1 : 0)) {
+						local2_tx_ref_2055[0] = local8_selstart_2065;
+						local8_selstart_2065 = local6_selend_2066;
+						local6_selend_2066 = local2_tx_ref_2055[0];
+						
+					};
+					local5_l_Str_2062 = MID_Str(local8_text_Str_2057, 0, local8_selstart_2065);
+					local5_r_Str_2063 = MID_Str(local8_text_Str_2057, local6_selend_2066, -(1));
+					local8_text_Str_2057 = ((local5_l_Str_2062) + (local5_r_Str_2063));
+					if (local3_del_2067) {
+						local3_del_2067 = 0;
+						
+					};
+					if (local6_backsp_2068) {
+						local6_backsp_2068 = 0;
+						
+					};
+					
+				};
+				local5_l_Str_2062 = MID_Str(local8_text_Str_2057, 0, local8_selstart_2065);
+				local5_r_Str_2063 = MID_Str(local8_text_Str_2057, local8_selstart_2065, -(1));
+				local8_selstart_2065+=local4_xkey_2069;
+				if (local4_ykey_2070) {
+					local8_selstart_2065 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2070) * (local2_ty_ref_2056[0])))), local7_txwidth_2059, 0, 1);
+					
+				};
+				if (local3_del_2067) {
+					local5_r_Str_2063 = MID_Str(local5_r_Str_2063, 1, -(1));
+					
+				};
+				if (local6_backsp_2068) {
+					local5_l_Str_2062 = LEFT_Str(local5_l_Str_2062, (((local5_l_Str_2062).length) - (1)));
+					local8_selstart_2065+=-(1);
+					
+				};
+				if ((((local5_a_Str_2061) != ("")) ? 1 : 0)) {
+					local5_l_Str_2062 = ((local5_l_Str_2062) + (local5_a_Str_2061));
+					local8_selstart_2065+=1;
+					
+				};
+				local8_text_Str_2057 = ((local5_l_Str_2062) + (local5_r_Str_2063));
+				if ((((local8_selstart_2065) < (0)) ? 1 : 0)) {
+					local8_selstart_2065 = 0;
+					
+				};
+				if ((((local8_selstart_2065) > ((local8_text_Str_2057).length)) ? 1 : 0)) {
+					local8_selstart_2065 = (local8_text_Str_2057).length;
+					
+				};
+				param3_wdg.attr9_wselstart = local8_selstart_2065;
+				param3_wdg.attr7_wselend = local8_selstart_2065;
+				param3_wdg.attr9_wtext_Str_ref[0] = local8_text_Str_2057;
+				
+			};
+			if (((((((((param3_wdg.attr7_wcarety) + (local2_ty_ref_2056[0]))) > (((((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0]))) + (param3_wdg.attr7_wheight)))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) < (param3_wdg.attr10_wscrollmax)) ? 1 : 0))) ? 1 : 0)) {
+				param3_wdg.attr7_wscroll+=1;
+				
+			};
+			if (((((((((param3_wdg.attr7_wcarety) - (local2_ty_ref_2056[0]))) < (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0])))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) > (0)) ? 1 : 0))) ? 1 : 0)) {
+				param3_wdg.attr7_wscroll+=-1;
+				
+			};
+			
+		};
+		
+	};
+	return 0;
 	
 };
 window['func9_DDgui_tab'] = function(param6_id_Str, param12_captions_Str, param6_height) {
-	stackPush("function: DDgui_tab", __debugInfo);
-	try {
-		var local3_num_2295 = 0, local2_fx_ref_2296 = [0], local2_fy_ref_2297 = [0];
-		__debugInfo = "2986:\ddgui.gbas";
-		GETFONTSIZE(local2_fx_ref_2296, local2_fy_ref_2297);
-		__debugInfo = "2995:\ddgui.gbas";
-		if ((((param6_height) == (0)) ? 1 : 0)) {
-			__debugInfo = "2995:\ddgui.gbas";
-			param6_height = ((local2_fy_ref_2297[0]) + (7));
-			__debugInfo = "2995:\ddgui.gbas";
-		};
-		__debugInfo = "2997:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param12_captions_Str, 10000, param6_height);
-		__debugInfo = "2999:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "TAB");
-		__debugInfo = "3000:\ddgui.gbas";
-		global11_ddgui_stack_ref[0].arrAccess(0.1).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_wselect = -(1);
-		__debugInfo = "3002:\ddgui.gbas";
-		return 0;
-		__debugInfo = "2986:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local3_num_2083 = 0, local2_fx_ref_2084 = [0], local2_fy_ref_2085 = [0];
+	GETFONTSIZE(local2_fx_ref_2084, local2_fy_ref_2085);
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = ((local2_fy_ref_2085[0]) + (7));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param12_captions_Str, 10000, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "TAB");
+	global11_ddgui_stack_ref[0].arrAccess(0.1).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_wselect = -(1);
+	return 0;
 	
 };
 window['func13_DDgui_drawtab'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
-	stackPush("function: DDgui_drawtab", __debugInfo);
-	try {
-		var local3_num_2065 = 0, local4_num2_2066 = 0, local1_i_2067 = 0, local4_isel_2068 = 0, local2_c1_2069 = 0, local2_c2_2070 = 0, local3_c1b_2071 = 0, local3_c2b_2072 = 0, local2_fx_ref_2073 = [0], local2_fy_ref_2074 = [0], local1_x_2075 = 0, local6_twidth_2076 = 0, local4_selx_2077 = 0, local4_selw_2078 = 0, local6_y_text_2081 = 0;
-		__debugInfo = "3010:\ddgui.gbas";
-		GETFONTSIZE(local2_fx_ref_2073, local2_fy_ref_2074);
-		__debugInfo = "3012:\ddgui.gbas";
-		local2_c1_2069 = param10_ddgui_vals.attr10_col_bright;
-		__debugInfo = "3013:\ddgui.gbas";
-		local2_c2_2070 = param10_ddgui_vals.attr8_col_norm;
-		__debugInfo = "3014:\ddgui.gbas";
-		local3_c1b_2071 = param10_ddgui_vals.attr16_col_hover_bright;
-		__debugInfo = "3015:\ddgui.gbas";
-		local3_c2b_2072 = param10_ddgui_vals.attr14_col_hover_norm;
-		__debugInfo = "3017:\ddgui.gbas";
-		func13_DDgui_backgnd(local2_c1_2069, local2_c1_2069, 0, param4_ytop, param3_wdg.attr6_wwidth, ((param3_wdg.attr7_wheight) - (1)));
-		__debugInfo = "3019:\ddgui.gbas";
-		local4_isel_2068 = param3_wdg.attr7_wselect;
-		__debugInfo = "3021:\ddgui.gbas";
-		local6_y_text_2081 = ((((((param4_ytop) + (param3_wdg.attr7_wheight))) - (2))) - (local2_fy_ref_2074[0]));
-		__debugInfo = "3023:\ddgui.gbas";
-		local1_x_2075 = 2;
-		__debugInfo = "3024:\ddgui.gbas";
-		local3_num_2065 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawtab_str_Str), "|", 1);
-		__debugInfo = "3024:\ddgui.gbas";
-		{
-			__debugInfo = "3038:\ddgui.gbas";
-			for (local1_i_2067 = 0;toCheck(local1_i_2067, ((local3_num_2065) - (1)), 1);local1_i_2067 += 1) {
-				__debugInfo = "3026:\ddgui.gbas";
-				local4_num2_2066 = SPLITSTR(static7_DDgui_drawtab_str_Str.arrAccess(local1_i_2067).values[tmpPositionCache], unref(static8_DDgui_drawtab_str2_Str_ref[0]), ",", 1);
-				__debugInfo = "3027:\ddgui.gbas";
-				local6_twidth_2076 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2073[0])));
-				__debugInfo = "3035:\ddgui.gbas";
-				if ((((local1_i_2067) == (local4_isel_2068)) ? 1 : 0)) {
-					__debugInfo = "3029:\ddgui.gbas";
-					func13_DDgui_backgnd(local3_c1b_2071, local3_c2b_2072, local1_x_2075, ((param4_ytop) + (1)), local6_twidth_2076, param3_wdg.attr7_wheight);
-					__debugInfo = "3030:\ddgui.gbas";
-					local4_selx_2077 = ((local1_x_2075) - (1));
-					__debugInfo = "3031:\ddgui.gbas";
-					local4_selw_2078 = ((local6_twidth_2076) + (2));
-					__debugInfo = "3029:\ddgui.gbas";
-				} else {
-					__debugInfo = "3033:\ddgui.gbas";
-					func13_DDgui_backgnd(local2_c1_2069, local2_c2_2070, ((local1_x_2075) + (1)), ((param4_ytop) + (4)), ((local6_twidth_2076) - (1)), ((param3_wdg.attr7_wheight) - (4)));
-					__debugInfo = "3034:\ddgui.gbas";
-					func14_DDgui_backrect(local1_x_2075, ((param4_ytop) + (3)), ((local6_twidth_2076) + (1)), ((param3_wdg.attr7_wheight) - (2)), local2_c2_2070);
-					__debugInfo = "3033:\ddgui.gbas";
-				};
-				__debugInfo = "3036:\ddgui.gbas";
-				func17_DDGui_PrintIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache], ((local1_x_2075) + (INTEGER(CAST2INT(((local2_fx_ref_2073[0]) / (2)))))), local6_y_text_2081, (((local1_i_2067) == (local4_isel_2068)) ? 1 : 0));
-				__debugInfo = "3037:\ddgui.gbas";
-				local1_x_2075+=local6_twidth_2076;
-				__debugInfo = "3026:\ddgui.gbas";
+	var local3_num_2089 = 0, local4_num2_2090 = 0, local1_i_2091 = 0, local4_isel_2092 = 0, local2_c1_2093 = 0, local2_c2_2094 = 0, local3_c1b_2095 = 0, local3_c2b_2096 = 0, local2_fx_ref_2097 = [0], local2_fy_ref_2098 = [0], local1_x_2099 = 0, local6_twidth_2100 = 0, local4_selx_2101 = 0, local4_selw_2102 = 0, local6_y_text_2105 = 0;
+	GETFONTSIZE(local2_fx_ref_2097, local2_fy_ref_2098);
+	local2_c1_2093 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_2094 = param10_ddgui_vals.attr8_col_norm;
+	local3_c1b_2095 = param10_ddgui_vals.attr16_col_hover_bright;
+	local3_c2b_2096 = param10_ddgui_vals.attr14_col_hover_norm;
+	func13_DDgui_backgnd(local2_c1_2093, local2_c1_2093, 0, param4_ytop, param3_wdg.attr6_wwidth, ((param3_wdg.attr7_wheight) - (1)));
+	local4_isel_2092 = param3_wdg.attr7_wselect;
+	local6_y_text_2105 = ((((((param4_ytop) + (param3_wdg.attr7_wheight))) - (2))) - (local2_fy_ref_2098[0]));
+	local1_x_2099 = 2;
+	local3_num_2089 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawtab_str_Str), "|", 1);
+	{
+		for (local1_i_2091 = 0;toCheck(local1_i_2091, ((local3_num_2089) - (1)), 1);local1_i_2091 += 1) {
+			local4_num2_2090 = SPLITSTR(static7_DDgui_drawtab_str_Str.arrAccess(local1_i_2091).values[tmpPositionCache], unref(static8_DDgui_drawtab_str2_Str_ref[0]), ",", 1);
+			local6_twidth_2100 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2097[0])));
+			if ((((local1_i_2091) == (local4_isel_2092)) ? 1 : 0)) {
+				func13_DDgui_backgnd(local3_c1b_2095, local3_c2b_2096, local1_x_2099, ((param4_ytop) + (1)), local6_twidth_2100, param3_wdg.attr7_wheight);
+				local4_selx_2101 = ((local1_x_2099) - (1));
+				local4_selw_2102 = ((local6_twidth_2100) + (2));
+				
+			} else {
+				func13_DDgui_backgnd(local2_c1_2093, local2_c2_2094, ((local1_x_2099) + (1)), ((param4_ytop) + (4)), ((local6_twidth_2100) - (1)), ((param3_wdg.attr7_wheight) - (4)));
+				func14_DDgui_backrect(local1_x_2099, ((param4_ytop) + (3)), ((local6_twidth_2100) + (1)), ((param3_wdg.attr7_wheight) - (2)), local2_c2_2094);
+				
 			};
-			__debugInfo = "3038:\ddgui.gbas";
+			func17_DDGui_PrintIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache], ((local1_x_2099) + (INTEGER(CAST2INT(((local2_fx_ref_2097[0]) / (2)))))), local6_y_text_2105, (((local1_i_2091) == (local4_isel_2092)) ? 1 : 0));
+			local1_x_2099+=local6_twidth_2100;
+			
 		};
-		__debugInfo = "3042:\ddgui.gbas";
-		if ((((local4_selx_2077) > (0)) ? 1 : 0)) {
-			__debugInfo = "3042:\ddgui.gbas";
-			func14_DDgui_backrect(local4_selx_2077, ((param4_ytop) + (1)), local4_selw_2078, param3_wdg.attr7_wheight, local3_c2b_2072);
-			__debugInfo = "3042:\ddgui.gbas";
-		};
-		__debugInfo = "3045:\ddgui.gbas";
-		DRAWRECT(0, ((param3_wdg.attr7_wheight) - (1)), ((param3_wdg.attr6_wwidth) - (1)), 1, local2_c2_2070);
-		__debugInfo = "3046:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3010:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((local4_selx_2101) > (0)) ? 1 : 0)) {
+		func14_DDgui_backrect(local4_selx_2101, ((param4_ytop) + (1)), local4_selw_2102, param3_wdg.attr7_wheight, local3_c2b_2096);
+		
+	};
+	DRAWRECT(0, ((param3_wdg.attr7_wheight) - (1)), ((param3_wdg.attr6_wwidth) - (1)), 1, local2_c2_2094);
+	return 0;
 	
 };
 window['func15_DDgui_handletab'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
-	stackPush("function: DDgui_handletab", __debugInfo);
-	try {
-		var local5_width_2088 = 0, local3_num_2089 = 0, local4_num2_2090 = 0, local1_i_2091 = 0, local2_fx_ref_2092 = [0], local2_fy_ref_2093 = [0], local1_x_2094 = 0, local6_oldsel_2095 = 0, local11_must_update_2098 = 0;
-		__debugInfo = "3052:\ddgui.gbas";
-		GETFONTSIZE(local2_fx_ref_2092, local2_fy_ref_2093);
-		__debugInfo = "3053:\ddgui.gbas";
-		param3_wdg.attr8_wclicked = 0;
-		__debugInfo = "3055:\ddgui.gbas";
-		local2_fy_ref_2093[0] = param3_wdg.attr7_wheight;
-		__debugInfo = "3057:\ddgui.gbas";
-		local11_must_update_2098 = 0;
-		__debugInfo = "3058:\ddgui.gbas";
-		if (((((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) || ((((((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((param2_my) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (local2_fy_ref_2093[0])) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "3058:\ddgui.gbas";
-			local11_must_update_2098 = 1;
-			__debugInfo = "3058:\ddgui.gbas";
-		};
-		__debugInfo = "3059:\ddgui.gbas";
-		if ((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) {
-			__debugInfo = "3059:\ddgui.gbas";
-			func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, 0);
-			__debugInfo = "3059:\ddgui.gbas";
-		};
-		__debugInfo = "3080:\ddgui.gbas";
-		if (local11_must_update_2098) {
-			__debugInfo = "3063:\ddgui.gbas";
-			local6_oldsel_2095 = param3_wdg.attr7_wselect;
-			__debugInfo = "3064:\ddgui.gbas";
-			local3_num_2089 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handletab_str_Str), "|", 1);
-			__debugInfo = "3065:\ddgui.gbas";
-			{
-				__debugInfo = "3079:\ddgui.gbas";
-				for (local1_i_2091 = 0;toCheck(local1_i_2091, ((local3_num_2089) - (1)), 1);local1_i_2091 += 1) {
-					__debugInfo = "3067:\ddgui.gbas";
-					local4_num2_2090 = SPLITSTR(static7_DDgui_handletab_str_Str.arrAccess(local1_i_2091).values[tmpPositionCache], unref(static8_DDgui_handletab_str2_Str_ref[0]), ",", 1);
-					__debugInfo = "3068:\ddgui.gbas";
-					local5_width_2088 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_handletab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2092[0])));
-					__debugInfo = "3077:\ddgui.gbas";
-					if (BOXCOLL(param2_mx, param2_my, 1, 1, local1_x_2094, 1, local5_width_2088, unref(local2_fy_ref_2093[0]))) {
-						__debugInfo = "3075:\ddgui.gbas";
-						if ((((local1_i_2091) != (local6_oldsel_2095)) ? 1 : 0)) {
-							__debugInfo = "3072:\ddgui.gbas";
-							param3_wdg.attr7_wselect = local1_i_2091;
-							__debugInfo = "3073:\ddgui.gbas";
-							param3_wdg.attr8_wclicked = 1;
-							__debugInfo = "3074:\ddgui.gbas";
-							func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, local1_i_2091);
-							__debugInfo = "3072:\ddgui.gbas";
-						};
-						__debugInfo = "3076:\ddgui.gbas";
-						break;
-						__debugInfo = "3075:\ddgui.gbas";
+	var local5_width_2112 = 0, local3_num_2113 = 0, local4_num2_2114 = 0, local1_i_2115 = 0, local2_fx_ref_2116 = [0], local2_fy_ref_2117 = [0], local1_x_2118 = 0, local6_oldsel_2119 = 0, local11_must_update_2122 = 0;
+	GETFONTSIZE(local2_fx_ref_2116, local2_fy_ref_2117);
+	param3_wdg.attr8_wclicked = 0;
+	local2_fy_ref_2117[0] = param3_wdg.attr7_wheight;
+	local11_must_update_2122 = 0;
+	if (((((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) || ((((((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((param2_my) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (local2_fy_ref_2117[0])) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+		local11_must_update_2122 = 1;
+		
+	};
+	if ((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) {
+		func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, 0);
+		
+	};
+	if (local11_must_update_2122) {
+		local6_oldsel_2119 = param3_wdg.attr7_wselect;
+		local3_num_2113 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handletab_str_Str), "|", 1);
+		{
+			for (local1_i_2115 = 0;toCheck(local1_i_2115, ((local3_num_2113) - (1)), 1);local1_i_2115 += 1) {
+				local4_num2_2114 = SPLITSTR(static7_DDgui_handletab_str_Str.arrAccess(local1_i_2115).values[tmpPositionCache], unref(static8_DDgui_handletab_str2_Str_ref[0]), ",", 1);
+				local5_width_2112 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_handletab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2116[0])));
+				if (BOXCOLL(param2_mx, param2_my, 1, 1, local1_x_2118, 1, local5_width_2112, unref(local2_fy_ref_2117[0]))) {
+					if ((((local1_i_2115) != (local6_oldsel_2119)) ? 1 : 0)) {
+						param3_wdg.attr7_wselect = local1_i_2115;
+						param3_wdg.attr8_wclicked = 1;
+						func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, local1_i_2115);
+						
 					};
-					__debugInfo = "3078:\ddgui.gbas";
-					local1_x_2094+=local5_width_2088;
-					__debugInfo = "3067:\ddgui.gbas";
+					break;
+					
 				};
-				__debugInfo = "3079:\ddgui.gbas";
+				local1_x_2118+=local5_width_2112;
+				
 			};
-			__debugInfo = "3063:\ddgui.gbas";
+			
 		};
-		__debugInfo = "3081:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3052:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func16_DDgui_framestart'] = function(param6_id_Str, param11_caption_Str, param5_width) {
-	stackPush("function: DDgui_framestart", __debugInfo);
-	try {
-		var local5_count_2301 = 0;
-		__debugInfo = "3096:\ddgui.gbas";
-		if (((((param6_id_Str).length) == (0)) ? 1 : 0)) {
-			__debugInfo = "3094:\ddgui.gbas";
-			local5_count_2301 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
-			__debugInfo = "3095:\ddgui.gbas";
-			param6_id_Str = (("frm") + (CAST2STRING(local5_count_2301)));
-			__debugInfo = "3094:\ddgui.gbas";
-		};
-		__debugInfo = "3097:\ddgui.gbas";
-		func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, 100);
-		__debugInfo = "3098:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "TYPE", "FRAME");
-		__debugInfo = "3099:\ddgui.gbas";
-		if ((((param5_width) == (0)) ? 1 : 0)) {
-			__debugInfo = "3099:\ddgui.gbas";
-			func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(10000));
-			__debugInfo = "3099:\ddgui.gbas";
-		};
-		__debugInfo = "3100:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3096:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local5_count_2309 = 0;
+	if (((((param6_id_Str).length) == (0)) ? 1 : 0)) {
+		local5_count_2309 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+		param6_id_Str = (("frm") + (CAST2STRING(local5_count_2309)));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, 100);
+	func9_DDgui_set(param6_id_Str, "TYPE", "FRAME");
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(10000));
+		
+	};
+	return 0;
 	
 };
 window['func14_DDgui_frameend'] = function() {
-	stackPush("function: DDgui_frameend", __debugInfo);
-	try {
-		var local5_count_2302 = 0, local6_id_Str_2303 = "";
-		__debugInfo = "3109:\ddgui.gbas";
-		local5_count_2302 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
-		__debugInfo = "3110:\ddgui.gbas";
-		local6_id_Str_2303 = (("frm") + (CAST2STRING(local5_count_2302)));
-		__debugInfo = "3111:\ddgui.gbas";
-		func12_DDgui_widget(local6_id_Str_2303, "", 1, 1);
-		__debugInfo = "3112:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_2303, "TYPE", "UNFRAME");
-		__debugInfo = "3113:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_2303, "WIDTH", CAST2STRING(0));
-		__debugInfo = "3114:\ddgui.gbas";
-		func9_DDgui_set(local6_id_Str_2303, "HEIGHT", CAST2STRING(0));
-		__debugInfo = "3115:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3109:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local5_count_2310 = 0, local6_id_Str_2311 = "";
+	local5_count_2310 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+	local6_id_Str_2311 = (("frm") + (CAST2STRING(local5_count_2310)));
+	func12_DDgui_widget(local6_id_Str_2311, "", 1, 1);
+	func9_DDgui_set(local6_id_Str_2311, "TYPE", "UNFRAME");
+	func9_DDgui_set(local6_id_Str_2311, "WIDTH", CAST2STRING(0));
+	func9_DDgui_set(local6_id_Str_2311, "HEIGHT", CAST2STRING(0));
+	return 0;
 	
 };
 window['__DDgui_Helpers___'] = function() {
-	stackPush("sub: __DDgui_Helpers___", __debugInfo);
-	try {
-		
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
 	
 };
+window['__DDgui_Helpers___'] = __DDgui_Helpers___;
 window['func18_DDgui_advancefocus'] = function(param10_iDirection) {
-	stackPush("function: DDgui_advancefocus", __debugInfo);
-	try {
-		var local9_focus_Str_2100 = "", local6_ifocus_2101 = 0, local6_iFirst_2102 = 0, local7_iBefore_2103 = 0, local6_iAfter_2104 = 0, local5_iLast_2105 = 0;
-		__debugInfo = "3130:\ddgui.gbas";
-		local9_focus_Str_2100 = func13_DDgui_get_Str("", "FOCUS");
-		__debugInfo = "3131:\ddgui.gbas";
-		local6_ifocus_2101 = -(1);
-		__debugInfo = "3133:\ddgui.gbas";
-		local6_iFirst_2102 = -(1);
-		__debugInfo = "3134:\ddgui.gbas";
-		local7_iBefore_2103 = -(1);
-		__debugInfo = "3135:\ddgui.gbas";
-		local6_iAfter_2104 = -(1);
-		__debugInfo = "3136:\ddgui.gbas";
-		local5_iLast_2105 = -(1);
-		__debugInfo = "3136:\ddgui.gbas";
-		{
-			var local1_i_2106 = 0;
-			__debugInfo = "3152:\ddgui.gbas";
-			for (local1_i_2106 = 0;toCheck(local1_i_2106, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)) - (1)), 1);local1_i_2106 += 1) {
-				var alias3_wdg_ref_2107 = [new type9_DDGUI_WDG()];
-				__debugInfo = "3138:\ddgui.gbas";
-				alias3_wdg_ref_2107 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_2106).values[tmpPositionCache] /* ALIAS */;
-				__debugInfo = "3143:\ddgui.gbas";
-				if ((((alias3_wdg_ref_2107[0].attr7_wid_Str) == (local9_focus_Str_2100)) ? 1 : 0)) {
-					__debugInfo = "3142:\ddgui.gbas";
-					if ((((local6_ifocus_2101) == (-(1))) ? 1 : 0)) {
-						__debugInfo = "3141:\ddgui.gbas";
-						local6_ifocus_2101 = local1_i_2106;
-						__debugInfo = "3141:\ddgui.gbas";
-					};
-					__debugInfo = "3142:\ddgui.gbas";
+	var local9_focus_Str_2124 = "", local6_ifocus_2125 = 0, local6_iFirst_2126 = 0, local7_iBefore_2127 = 0, local6_iAfter_2128 = 0, local5_iLast_2129 = 0;
+	local9_focus_Str_2124 = func13_DDgui_get_Str("", "FOCUS");
+	local6_ifocus_2125 = -(1);
+	local6_iFirst_2126 = -(1);
+	local7_iBefore_2127 = -(1);
+	local6_iAfter_2128 = -(1);
+	local5_iLast_2129 = -(1);
+	{
+		var local1_i_2130 = 0;
+		for (local1_i_2130 = 0;toCheck(local1_i_2130, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)) - (1)), 1);local1_i_2130 += 1) {
+			var alias3_wdg_ref_2131 = [new type9_DDGUI_WDG()];
+			alias3_wdg_ref_2131 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_2130).values[tmpPositionCache] /* ALIAS */;
+			if ((((alias3_wdg_ref_2131[0].attr7_wid_Str) == (local9_focus_Str_2124)) ? 1 : 0)) {
+				if ((((local6_ifocus_2125) == (-(1))) ? 1 : 0)) {
+					local6_ifocus_2125 = local1_i_2130;
+					
 				};
-				__debugInfo = "3151:\ddgui.gbas";
-				if ((((((((((alias3_wdg_ref_2107[0].attr9_wtype_Str) == ("TEXT")) ? 1 : 0)) || ((((alias3_wdg_ref_2107[0].attr9_wtype_Str) == ("SINGLETEXT")) ? 1 : 0))) ? 1 : 0)) || ((((alias3_wdg_ref_2107[0].attr9_wtype_Str) == ("NUMBERTEXT")) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "3147:\ddgui.gbas";
-					if ((((local6_iFirst_2102) == (-(1))) ? 1 : 0)) {
-						__debugInfo = "3147:\ddgui.gbas";
-						local6_iFirst_2102 = local1_i_2106;
-						__debugInfo = "3147:\ddgui.gbas";
-					};
-					__debugInfo = "3148:\ddgui.gbas";
-					if ((((local6_ifocus_2101) == (-(1))) ? 1 : 0)) {
-						__debugInfo = "3148:\ddgui.gbas";
-						local7_iBefore_2103 = local1_i_2106;
-						__debugInfo = "3148:\ddgui.gbas";
-					};
-					__debugInfo = "3149:\ddgui.gbas";
-					if ((((((((((local6_ifocus_2101) >= (0)) ? 1 : 0)) && ((((local6_iAfter_2104) == (-(1))) ? 1 : 0))) ? 1 : 0)) && ((((local6_ifocus_2101) != (local1_i_2106)) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "3149:\ddgui.gbas";
-						local6_iAfter_2104 = local1_i_2106;
-						__debugInfo = "3149:\ddgui.gbas";
-					};
-					__debugInfo = "3150:\ddgui.gbas";
-					local5_iLast_2105 = local1_i_2106;
-					__debugInfo = "3147:\ddgui.gbas";
+				
+			};
+			if ((((((((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("TEXT")) ? 1 : 0)) || ((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("SINGLETEXT")) ? 1 : 0))) ? 1 : 0)) || ((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("NUMBERTEXT")) ? 1 : 0))) ? 1 : 0)) {
+				if ((((local6_iFirst_2126) == (-(1))) ? 1 : 0)) {
+					local6_iFirst_2126 = local1_i_2130;
+					
 				};
-				__debugInfo = "3138:\ddgui.gbas";
+				if ((((local6_ifocus_2125) == (-(1))) ? 1 : 0)) {
+					local7_iBefore_2127 = local1_i_2130;
+					
+				};
+				if ((((((((((local6_ifocus_2125) >= (0)) ? 1 : 0)) && ((((local6_iAfter_2128) == (-(1))) ? 1 : 0))) ? 1 : 0)) && ((((local6_ifocus_2125) != (local1_i_2130)) ? 1 : 0))) ? 1 : 0)) {
+					local6_iAfter_2128 = local1_i_2130;
+					
+				};
+				local5_iLast_2129 = local1_i_2130;
+				
 			};
-			__debugInfo = "3152:\ddgui.gbas";
+			
 		};
-		__debugInfo = "3160:\ddgui.gbas";
-		if ((((param10_iDirection) < (0)) ? 1 : 0)) {
-			__debugInfo = "3155:\ddgui.gbas";
-			if ((((local7_iBefore_2103) >= (0)) ? 1 : 0)) {
-				__debugInfo = "3155:\ddgui.gbas";
-				local6_ifocus_2101 = local7_iBefore_2103;
-				__debugInfo = "3155:\ddgui.gbas";
-			};
-			__debugInfo = "3156:\ddgui.gbas";
-			if (((((((local7_iBefore_2103) < (0)) ? 1 : 0)) && ((((local5_iLast_2105) >= (0)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "3156:\ddgui.gbas";
-				local6_ifocus_2101 = local5_iLast_2105;
-				__debugInfo = "3156:\ddgui.gbas";
-			};
-			__debugInfo = "3155:\ddgui.gbas";
-		} else {
-			__debugInfo = "3158:\ddgui.gbas";
-			if ((((local6_iAfter_2104) >= (0)) ? 1 : 0)) {
-				__debugInfo = "3158:\ddgui.gbas";
-				local6_ifocus_2101 = local6_iAfter_2104;
-				__debugInfo = "3158:\ddgui.gbas";
-			};
-			__debugInfo = "3159:\ddgui.gbas";
-			if (((((((local6_iAfter_2104) < (0)) ? 1 : 0)) && ((((local6_iFirst_2102) >= (0)) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "3159:\ddgui.gbas";
-				local6_ifocus_2101 = local6_iFirst_2102;
-				__debugInfo = "3159:\ddgui.gbas";
-			};
-			__debugInfo = "3158:\ddgui.gbas";
+		
+	};
+	if ((((param10_iDirection) < (0)) ? 1 : 0)) {
+		if ((((local7_iBefore_2127) >= (0)) ? 1 : 0)) {
+			local6_ifocus_2125 = local7_iBefore_2127;
+			
 		};
-		__debugInfo = "3165:\ddgui.gbas";
-		if (((((((local6_ifocus_2101) >= (0)) ? 1 : 0)) && ((((local6_ifocus_2101) < (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "3163:\ddgui.gbas";
-			local9_focus_Str_2100 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local6_ifocus_2101).values[tmpPositionCache][0].attr7_wid_Str;
-			__debugInfo = "3164:\ddgui.gbas";
-			func14_DDgui_setfocus(local9_focus_Str_2100);
-			__debugInfo = "3163:\ddgui.gbas";
+		if (((((((local7_iBefore_2127) < (0)) ? 1 : 0)) && ((((local5_iLast_2129) >= (0)) ? 1 : 0))) ? 1 : 0)) {
+			local6_ifocus_2125 = local5_iLast_2129;
+			
 		};
-		__debugInfo = "3166:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3130:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	} else {
+		if ((((local6_iAfter_2128) >= (0)) ? 1 : 0)) {
+			local6_ifocus_2125 = local6_iAfter_2128;
+			
+		};
+		if (((((((local6_iAfter_2128) < (0)) ? 1 : 0)) && ((((local6_iFirst_2126) >= (0)) ? 1 : 0))) ? 1 : 0)) {
+			local6_ifocus_2125 = local6_iFirst_2126;
+			
+		};
+		
+	};
+	if (((((((local6_ifocus_2125) >= (0)) ? 1 : 0)) && ((((local6_ifocus_2125) < (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))) ? 1 : 0))) ? 1 : 0)) {
+		local9_focus_Str_2124 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local6_ifocus_2125).values[tmpPositionCache][0].attr7_wid_Str;
+		func14_DDgui_setfocus(local9_focus_Str_2124);
+		
+	};
+	return 0;
 	
 };
 window['func14_DDgui_setfocus'] = function(param6_id_Str) {
-	stackPush("function: DDgui_setfocus", __debugInfo);
-	try {
-		__debugInfo = "3172:\ddgui.gbas";
-		func9_DDgui_set("", "FOCUS", param6_id_Str);
-		__debugInfo = "3173:\ddgui.gbas";
-		{
-			var local16___SelectHelper6__2109 = "";
-			__debugInfo = "3173:\ddgui.gbas";
-			local16___SelectHelper6__2109 = func13_DDgui_get_Str(param6_id_Str, "TYPE");
-			__debugInfo = "3183:\ddgui.gbas";
-			if ((((local16___SelectHelper6__2109) == ("TEXT")) ? 1 : 0)) {
-				__debugInfo = "3175:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
-				__debugInfo = "3176:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING(0));
-				__debugInfo = "3175:\ddgui.gbas";
-			} else if ((((local16___SelectHelper6__2109) == ("SINGLETEXT")) ? 1 : 0)) {
-				__debugInfo = "3178:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
-				__debugInfo = "3179:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
-				__debugInfo = "3178:\ddgui.gbas";
-			} else if ((((local16___SelectHelper6__2109) == ("NUMBERTEXT")) ? 1 : 0)) {
-				__debugInfo = "3181:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
-				__debugInfo = "3182:\ddgui.gbas";
-				func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
-				__debugInfo = "3181:\ddgui.gbas";
-			};
-			__debugInfo = "3173:\ddgui.gbas";
+	func9_DDgui_set("", "FOCUS", param6_id_Str);
+	{
+		var local16___SelectHelper6__2133 = "";
+		local16___SelectHelper6__2133 = func13_DDgui_get_Str(param6_id_Str, "TYPE");
+		if ((((local16___SelectHelper6__2133) == ("TEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING(0));
+			
+		} else if ((((local16___SelectHelper6__2133) == ("SINGLETEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
+			
+		} else if ((((local16___SelectHelper6__2133) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
+			
 		};
-		__debugInfo = "3185:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3172:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func15_DDgui_selecttab'] = function(param6_id_Str, param4_isel) {
-	stackPush("function: DDgui_selecttab", __debugInfo);
-	try {
-		var local3_num_2112 = 0, local4_num2_2113 = 0, local1_i_2114 = 0, local1_j_2115 = 0, local9_oldselect_2118 = 0;
-		__debugInfo = "3195:\ddgui.gbas";
-		local9_oldselect_2118 = ~~(func9_DDgui_get(param6_id_Str, "SELECT"));
-		__debugInfo = "3197:\ddgui.gbas";
-		func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(param4_isel));
-		__debugInfo = "3198:\ddgui.gbas";
-		local3_num_2112 = SPLITSTR(func13_DDgui_get_Str(param6_id_Str, "TEXT"), unref(static7_DDgui_selecttab_str_Str), "|", 1);
-		__debugInfo = "3199:\ddgui.gbas";
-		{
-			var local5_iHide_2119 = 0;
-			__debugInfo = "3221:\ddgui.gbas";
-			for (local5_iHide_2119 = 0;toCheck(local5_iHide_2119, 1, 1);local5_iHide_2119 += 1) {
-				__debugInfo = "3200:\ddgui.gbas";
-				{
-					__debugInfo = "3220:\ddgui.gbas";
-					for (local1_i_2114 = 0;toCheck(local1_i_2114, ((local3_num_2112) - (1)), 1);local1_i_2114 += 1) {
-						__debugInfo = "3202:\ddgui.gbas";
-						local4_num2_2113 = SPLITSTR(static7_DDgui_selecttab_str_Str.arrAccess(local1_i_2114).values[tmpPositionCache], unref(static8_DDgui_selecttab_str2_Str_ref[0]), ",", 1);
-						__debugInfo = "3203:\ddgui.gbas";
-						{
-							__debugInfo = "3219:\ddgui.gbas";
-							for (local1_j_2115 = 1;toCheck(local1_j_2115, ((local4_num2_2113) - (1)), 1);local1_j_2115 += 1) {
-								__debugInfo = "3212:\ddgui.gbas";
-								if (((((((local9_oldselect_2118) == (-(1))) ? 1 : 0)) && ((((func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2115).values[tmpPositionCache], 0)) < (0)) ? 1 : 0))) ? 1 : 0)) {
-									__debugInfo = "3210:\ddgui.gbas";
-									DEBUG((((("Invalid widget in Tab: ") + (static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2115).values[tmpPositionCache][0]))) + (" - could crash!\n")));
-									__debugInfo = "3211:\ddgui.gbas";
-									continue;
-									__debugInfo = "3210:\ddgui.gbas";
-								};
-								__debugInfo = "3218:\ddgui.gbas";
-								if (((((((local1_i_2114) == (param4_isel)) ? 1 : 0)) && ((((local5_iHide_2119) == (1)) ? 1 : 0))) ? 1 : 0)) {
-									__debugInfo = "3215:\ddgui.gbas";
-									func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2115).values[tmpPositionCache][0]), 0);
-									__debugInfo = "3215:\ddgui.gbas";
-								} else if ((((local5_iHide_2119) == (0)) ? 1 : 0)) {
-									__debugInfo = "3217:\ddgui.gbas";
-									func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2115).values[tmpPositionCache][0]), 1);
-									__debugInfo = "3217:\ddgui.gbas";
-								};
-								__debugInfo = "3212:\ddgui.gbas";
+	var local3_num_2136 = 0, local4_num2_2137 = 0, local1_i_2138 = 0, local1_j_2139 = 0, local9_oldselect_2142 = 0;
+	local9_oldselect_2142 = ~~(func9_DDgui_get(param6_id_Str, "SELECT"));
+	func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(param4_isel));
+	local3_num_2136 = SPLITSTR(func13_DDgui_get_Str(param6_id_Str, "TEXT"), unref(static7_DDgui_selecttab_str_Str), "|", 1);
+	{
+		var local5_iHide_2143 = 0;
+		for (local5_iHide_2143 = 0;toCheck(local5_iHide_2143, 1, 1);local5_iHide_2143 += 1) {
+			{
+				for (local1_i_2138 = 0;toCheck(local1_i_2138, ((local3_num_2136) - (1)), 1);local1_i_2138 += 1) {
+					local4_num2_2137 = SPLITSTR(static7_DDgui_selecttab_str_Str.arrAccess(local1_i_2138).values[tmpPositionCache], unref(static8_DDgui_selecttab_str2_Str_ref[0]), ",", 1);
+					{
+						for (local1_j_2139 = 1;toCheck(local1_j_2139, ((local4_num2_2137) - (1)), 1);local1_j_2139 += 1) {
+							if (((((((local9_oldselect_2142) == (-(1))) ? 1 : 0)) && ((((func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache], 0)) < (0)) ? 1 : 0))) ? 1 : 0)) {
+								continue;
+								
 							};
-							__debugInfo = "3219:\ddgui.gbas";
+							if (((((((local1_i_2138) == (param4_isel)) ? 1 : 0)) && ((((local5_iHide_2143) == (1)) ? 1 : 0))) ? 1 : 0)) {
+								func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache][0]), 0);
+								
+							} else if ((((local5_iHide_2143) == (0)) ? 1 : 0)) {
+								func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache][0]), 1);
+								
+							};
+							
 						};
-						__debugInfo = "3202:\ddgui.gbas";
+						
 					};
-					__debugInfo = "3220:\ddgui.gbas";
+					
 				};
-				__debugInfo = "3200:\ddgui.gbas";
+				
 			};
-			__debugInfo = "3221:\ddgui.gbas";
+			
 		};
-		__debugInfo = "3222:\ddgui.gbas";
-		return 0;
-		__debugInfo = "3195:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
 window['func31_DDgui_intern_list_item_text_Str'] = function(param7_txt_Str_ref, param5_index) {
-	stackPush("function: DDgui_intern_list_item_text_Str", __debugInfo);
-	try {
-		var local5_start_2122 = 0, local4_fine_2123 = 0;
-		__debugInfo = "3298:\ddgui.gbas";
-		if ((((param5_index) < (0)) ? 1 : 0)) {
-			__debugInfo = "3298:\ddgui.gbas";
-			return "";
-			__debugInfo = "3298:\ddgui.gbas";
-		};
-		__debugInfo = "3300:\ddgui.gbas";
-		local5_start_2122 = -(1);
-		__debugInfo = "3305:\ddgui.gbas";
-		while ((((param5_index) > (0)) ? 1 : 0)) {
-			__debugInfo = "3302:\ddgui.gbas";
-			local5_start_2122 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2122) + (1)));
-			__debugInfo = "3303:\ddgui.gbas";
-			if ((((local5_start_2122) < (0)) ? 1 : 0)) {
-				__debugInfo = "3303:\ddgui.gbas";
-				return "";
-				__debugInfo = "3303:\ddgui.gbas";
-			};
-			__debugInfo = "3304:\ddgui.gbas";
-			param5_index+=-1;
-			__debugInfo = "3302:\ddgui.gbas";
-		};
-		__debugInfo = "3306:\ddgui.gbas";
-		local4_fine_2123 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2122) + (1)));
-		__debugInfo = "3307:\ddgui.gbas";
-		if ((((local4_fine_2123) > (0)) ? 1 : 0)) {
-			__debugInfo = "3307:\ddgui.gbas";
-			local4_fine_2123 = ((((local4_fine_2123) - (local5_start_2122))) - (1));
-			__debugInfo = "3307:\ddgui.gbas";
-		};
-		__debugInfo = "3308:\ddgui.gbas";
-		return tryClone(MID_Str(unref(param7_txt_Str_ref[0]), ((local5_start_2122) + (1)), local4_fine_2123));
-		__debugInfo = "3309:\ddgui.gbas";
+	var local5_start_2146 = 0, local4_fine_2147 = 0;
+	if ((((param5_index) < (0)) ? 1 : 0)) {
 		return "";
-		__debugInfo = "3298:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	local5_start_2146 = -(1);
+	while ((((param5_index) > (0)) ? 1 : 0)) {
+		local5_start_2146 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2146) + (1)));
+		if ((((local5_start_2146) < (0)) ? 1 : 0)) {
+			return "";
+			
+		};
+		param5_index+=-1;
+		
+	};
+	local4_fine_2147 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2146) + (1)));
+	if ((((local4_fine_2147) > (0)) ? 1 : 0)) {
+		local4_fine_2147 = ((((local4_fine_2147) - (local5_start_2146))) - (1));
+		
+	};
+	return tryClone(MID_Str(unref(param7_txt_Str_ref[0]), ((local5_start_2146) + (1)), local4_fine_2147));
+	return "";
 	
 };
 window['func21_DDgui_getitemtext_Str'] = function(param6_id_Str, param5_index) {
-	stackPush("function: DDgui_getitemtext_Str", __debugInfo);
-	try {
-		var local2_iw_2306 = 0;
-		var local6_id_Str_ref_2304 = [param6_id_Str]; /* NEWCODEHERE */
-		__debugInfo = "3322:\ddgui.gbas";
-		if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "3320:\ddgui.gbas";
-			DEBUG("DDgui_get: No active dialog!\n");
-			__debugInfo = "3321:\ddgui.gbas";
-			return "";
-			__debugInfo = "3320:\ddgui.gbas";
-		};
-		__debugInfo = "3324:\ddgui.gbas";
-		local2_iw_2306 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2304, 0);
-		__debugInfo = "3330:\ddgui.gbas";
-		if ((((local2_iw_2306) >= (0)) ? 1 : 0)) {
-			var alias3_wdg_ref_2307 = [new type9_DDGUI_WDG()], alias7_txt_Str_ref_2308 = [""];
-			__debugInfo = "3327:\ddgui.gbas";
-			alias3_wdg_ref_2307 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2306).values[tmpPositionCache] /* ALIAS */;
-			__debugInfo = "3328:\ddgui.gbas";
-			alias7_txt_Str_ref_2308 = alias3_wdg_ref_2307[0].attr9_wtext_Str_ref /* ALIAS */;
-			__debugInfo = "3329:\ddgui.gbas";
-			return tryClone(func31_DDgui_intern_list_item_text_Str(alias7_txt_Str_ref_2308, param5_index));
-			__debugInfo = "3327:\ddgui.gbas";
-		};
-		__debugInfo = "3331:\ddgui.gbas";
-		DEBUG((((("DDgui_get: Widget not found ") + (local6_id_Str_ref_2304[0]))) + ("\n")));
-		__debugInfo = "3332:\ddgui.gbas";
+	var local2_iw_2314 = 0;
+	var local6_id_Str_ref_2312 = [param6_id_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
 		return "";
-		__debugInfo = "3322:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	local2_iw_2314 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2312, 0);
+	if ((((local2_iw_2314) >= (0)) ? 1 : 0)) {
+		var alias3_wdg_ref_2315 = [new type9_DDGUI_WDG()], alias7_txt_Str_ref_2316 = [""];
+		alias3_wdg_ref_2315 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2314).values[tmpPositionCache] /* ALIAS */;
+		alias7_txt_Str_ref_2316 = alias3_wdg_ref_2315[0].attr9_wtext_Str_ref /* ALIAS */;
+		return tryClone(func31_DDgui_intern_list_item_text_Str(alias7_txt_Str_ref_2316, param5_index));
+		
+	};
+	return "";
 	
 };
 window['func15_DDgui_input_Str'] = function(param8_text_Str, param13_bSpecialChars, param11_bFullscreen, param11_bSingleLine, param9_bIsNumber) {
-		var __labels = {"__DrawFrames__": 3449, "refresh": 10723};
-		
-	stackPush("function: DDgui_input_Str", __debugInfo);
-	try {
-		var local2_fx_ref_2129 = [0], local2_fy_ref_2130 = [0], local4_size_2131 = 0, local7_iTabSel_2132 = 0, local12_text_old_Str_2133 = "", local4_ssel_2134 = 0, local4_esel_2135 = 0, local8_widg_Str_2136 = new GLBArray(), local3_scx_ref_2137 = [0], local3_scy_ref_2138 = [0], local12_storeoldsize_2139 = 0, local5_texth_2140 = 0, local10_cancel_Str_2142 = "", local3_chr_2143 = 0;
-		var __pc = 10586;
-		while(__pc >= 0) {
-			switch(__pc) {
-				case 10586:
-					__debugInfo = "3426:\ddgui.gbas";
-					local12_text_old_Str_2133 = param8_text_Str;
-					
-				__debugInfo = "3429:\ddgui.gbas";
-				GETSCREENSIZE(local3_scx_ref_2137, local3_scy_ref_2138);
-				__debugInfo = "3430:\ddgui.gbas";
-				GETFONTSIZE(local2_fx_ref_2129, local2_fy_ref_2130);
-				__debugInfo = "3432:\ddgui.gbas";
-				local12_storeoldsize_2139 = global25_gDDguiMinControlDimension;
-				__debugInfo = "3433:\ddgui.gbas";
-				global25_gDDguiMinControlDimension = 16;
-				__debugInfo = "3435:\ddgui.gbas";
-				local4_size_2131 = MIN(400, MIN(unref(local3_scx_ref_2137[0]), unref(local3_scy_ref_2138[0])));
-				case 10678:
-					__debugInfo = "3449:\ddgui.gbas";
-					if (!(param11_bFullscreen)) { __pc = 10608; break; }
-					
-					case 10615:
-						__debugInfo = "3438:\ddgui.gbas";
-						func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2137[0]), unref(local3_scy_ref_2138[0]), 1);
-						
-					__debugInfo = "3439:\ddgui.gbas";
-					local4_size_2131 = 20;
-					case 10627:
-						__debugInfo = "3440:\ddgui.gbas";
-						if (!((((local3_scx_ref_2137[0]) > (240)) ? 1 : 0))) { __pc = 10622; break; }
-					
-					case 10626:
-						__debugInfo = "3440:\ddgui.gbas";
-						local4_size_2131 = 28;
-						
-					__debugInfo = "3440:\ddgui.gbas";
-					
-				case 10622: //dummy jumper1
-					;
-						
-					case 10636:
-						__debugInfo = "3441:\ddgui.gbas";
-						if (!((((local3_scx_ref_2137[0]) > (320)) ? 1 : 0))) { __pc = 10631; break; }
-					
-					case 10635:
-						__debugInfo = "3441:\ddgui.gbas";
-						local4_size_2131 = 36;
-						
-					__debugInfo = "3441:\ddgui.gbas";
-					
-				case 10631: //dummy jumper1
-					;
-						
-					__debugInfo = "3438:\ddgui.gbas";
-					__pc = 16791;
-					break;
-					
-				case 10608: //dummy jumper1
-					
-					case 10650:
-						__debugInfo = "3443:\ddgui.gbas";
-						func16_DDgui_pushdialog(CAST2INT(((((local3_scx_ref_2137[0]) - (local4_size_2131))) / (2))), CAST2INT(((((local3_scy_ref_2138[0]) - (local4_size_2131))) / (2))), local4_size_2131, local4_size_2131, 0);
-						
-					__debugInfo = "3444:\ddgui.gbas";
-					local3_scy_ref_2138[0] = local4_size_2131;
-					__debugInfo = "3445:\ddgui.gbas";
-					local3_scx_ref_2137[0] = local4_size_2131;
-					__debugInfo = "3446:\ddgui.gbas";
-					local4_size_2131 = 20;
-					case 10668:
-						__debugInfo = "3447:\ddgui.gbas";
-						if (!((((local3_scx_ref_2137[0]) > (240)) ? 1 : 0))) { __pc = 10663; break; }
-					
-					case 10667:
-						__debugInfo = "3447:\ddgui.gbas";
-						local4_size_2131 = 28;
-						
-					__debugInfo = "3447:\ddgui.gbas";
-					
-				case 10663: //dummy jumper1
-					;
-						
-					case 10677:
-						__debugInfo = "3448:\ddgui.gbas";
-						if (!((((local3_scx_ref_2137[0]) > (320)) ? 1 : 0))) { __pc = 10672; break; }
-					
-					case 10676:
-						__debugInfo = "3448:\ddgui.gbas";
-						local4_size_2131 = 36;
-						
-					__debugInfo = "3448:\ddgui.gbas";
-					
-				case 10672: //dummy jumper1
-					;
-						
-					__debugInfo = "3443:\ddgui.gbas";
-					
-				case 16791: //dummy jumper2
-					;
-					
-				__debugInfo = "3452:\ddgui.gbas";
-				global18_DDGUI_IN_INPUT_DLG = 1;
-				__debugInfo = "3454:\ddgui.gbas";
-				func9_DDgui_set("tx_text", "TEXT", param8_text_Str);
-				__debugInfo = "3455:\ddgui.gbas";
-				func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
-				case 10698:
-					__debugInfo = "3456:\ddgui.gbas";
-					if (!(param9_bIsNumber)) { __pc = 10692; break; }
-					
-					case 10697:
-						__debugInfo = "3456:\ddgui.gbas";
-						func9_DDgui_set("tab", "SELECT", CAST2STRING(0));
-						
-					__debugInfo = "3456:\ddgui.gbas";
-					
-				case 10692: //dummy jumper1
-					;
-					
-				case 10722:
-					__debugInfo = "3461:\ddgui.gbas";
-					if (!((((param11_bSingleLine) || (((((((INSTR(param8_text_Str, "\n", 0)) < (0)) ? 1 : 0)) && (((((param8_text_Str).length) < (40)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0))) { __pc = 10711; break; }
-					
-					case 10716:
-						__debugInfo = "3459:\ddgui.gbas";
-						func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(0));
-						
-					__debugInfo = "3460:\ddgui.gbas";
-					func9_DDgui_set("tx_text", "SELEND", CAST2STRING((param8_text_Str).length));
-					__debugInfo = "3459:\ddgui.gbas";
-					
-				case 10711: //dummy jumper1
-					;
-					
-				case 10723:
-					__debugInfo = "3464:\ddgui.gbas";
-					//label: refresh;
-					
-				__debugInfo = "3465:\ddgui.gbas";
-				param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
-				__debugInfo = "3466:\ddgui.gbas";
-				local4_ssel_2134 = ~~(func9_DDgui_get("tx_text", "SELSTART"));
-				__debugInfo = "3467:\ddgui.gbas";
-				local4_esel_2135 = ~~(func9_DDgui_get("tx_text", "SELEND"));
-				__debugInfo = "3468:\ddgui.gbas";
-				local7_iTabSel_2132 = ~~(func9_DDgui_get("tab", "SELECT"));
-				__debugInfo = "3470:\ddgui.gbas";
-				func10_DDgui_init();
-				__debugInfo = "3471:\ddgui.gbas";
-				local5_texth_2140 = ((((local3_scy_ref_2138[0]) - (((6) * (((local4_size_2131) + (2))))))) - (32));
-				case 10797:
-					__debugInfo = "3481:\ddgui.gbas";
-					if (!(param11_bSingleLine)) { __pc = 10761; break; }
-					
-					case 10765:
-						__debugInfo = "3473:\ddgui.gbas";
-						local5_texth_2140 = 0;
-						
-					case 10786:
-						__debugInfo = "3478:\ddgui.gbas";
-						if (!(param9_bIsNumber)) { __pc = 10767; break; }
-					
-					case 10776:
-						__debugInfo = "3475:\ddgui.gbas";
-						func16_DDgui_numbertext("tx_text", param8_text_Str, ((local3_scx_ref_2137[0]) - (MAX(32, unref(local2_fx_ref_2129[0])))));
-						
-					__debugInfo = "3475:\ddgui.gbas";
-					__pc = 16799;
-					break;
-					
-				case 10767: //dummy jumper1
-					
-					case 10785:
-						__debugInfo = "3477:\ddgui.gbas";
-						func16_DDgui_singletext("tx_text", param8_text_Str, ((local3_scx_ref_2137[0]) - (MAX(32, unref(local2_fx_ref_2129[0])))));
-						
-					__debugInfo = "3477:\ddgui.gbas";
-					
-				case 16799: //dummy jumper2
-					;
-						
-					__debugInfo = "3473:\ddgui.gbas";
-					__pc = 16798;
-					break;
-					
-				case 10761: //dummy jumper1
-					
-					case 10796:
-						__debugInfo = "3480:\ddgui.gbas";
-						func10_DDgui_text("tx_text", param8_text_Str, ((local3_scx_ref_2137[0]) - (MAX(32, unref(local2_fx_ref_2129[0])))), local5_texth_2140);
-						
-					__debugInfo = "3480:\ddgui.gbas";
-					
-				case 16798: //dummy jumper2
-					;
-					
-				__debugInfo = "3483:\ddgui.gbas";
-				func9_DDgui_set("tx_text", "ALIGN", CAST2STRING(0));
-				__debugInfo = "3484:\ddgui.gbas";
-				func12_DDgui_spacer(10000, 2);
-				__debugInfo = "3487:\ddgui.gbas";
-				func9_DDgui_set("tab", "SELECT", CAST2STRING(local7_iTabSel_2132));
-				__debugInfo = "3488:\ddgui.gbas";
-				func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(local4_ssel_2134));
-				__debugInfo = "3489:\ddgui.gbas";
-				func9_DDgui_set("tx_text", "SELEND", CAST2STRING(local4_esel_2135));
-				case 10838:
-					__debugInfo = "3499:\ddgui.gbas";
-					if (!(param9_bIsNumber)) { __pc = 10818; break; }
-					
-					case 10823:
-						__debugInfo = "3492:\ddgui.gbas";
-						func9_DDgui_tab("tab", "123", local4_size_2131);
-						
-					__debugInfo = "3492:\ddgui.gbas";
-					__pc = 16800;
-					break;
-					
-				case 10818: //dummy jumper1
-					
-					case 10837:
-						__debugInfo = "3498:\ddgui.gbas";
-						if (!(param13_bSpecialChars)) { __pc = 10826; break; }
-					
-					case 10831:
-						__debugInfo = "3495:\ddgui.gbas";
-						func9_DDgui_tab("tab", "123|ABC|abc|ÄÖÜ", local4_size_2131);
-						
-					__debugInfo = "3495:\ddgui.gbas";
-					__pc = 16801;
-					break;
-					
-				case 10826: //dummy jumper1
-					
-					case 10836:
-						__debugInfo = "3497:\ddgui.gbas";
-						func9_DDgui_tab("tab", "123|ABC|abc", local4_size_2131);
-						
-					__debugInfo = "3497:\ddgui.gbas";
-					
-				case 16801: //dummy jumper2
-					;
-						
-					__debugInfo = "3498:\ddgui.gbas";
-					
-				case 16800: //dummy jumper2
-					;
-					
-				__debugInfo = "3502:\ddgui.gbas";
-				func16_DDgui_framestart("fr_keypad", "", 0);
-				case 11726:
-					__debugInfo = "3677:\ddgui.gbas";
-					if (!(param9_bIsNumber)) { __pc = 10842; break; }
-					
-					case 10848:
-						__debugInfo = "3504:\ddgui.gbas";
-						func12_DDgui_button("b7", "7", local4_size_2131, local4_size_2131);
-						
-					__debugInfo = "3505:\ddgui.gbas";
-					func12_DDgui_button("b8", "8", local4_size_2131, local4_size_2131);
-					__debugInfo = "3506:\ddgui.gbas";
-					func12_DDgui_button("b9", "9", local4_size_2131, local4_size_2131);
-					__debugInfo = "3507:\ddgui.gbas";
-					func12_DDgui_button("b-", "-", local4_size_2131, local4_size_2131);
-					__debugInfo = "3508:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3509:\ddgui.gbas";
-					func12_DDgui_button("b4", "4", local4_size_2131, local4_size_2131);
-					__debugInfo = "3510:\ddgui.gbas";
-					func12_DDgui_button("b5", "5", local4_size_2131, local4_size_2131);
-					__debugInfo = "3511:\ddgui.gbas";
-					func12_DDgui_button("b6", "6", local4_size_2131, local4_size_2131);
-					__debugInfo = "3512:\ddgui.gbas";
-					func12_DDgui_button("be", "e", local4_size_2131, local4_size_2131);
-					__debugInfo = "3513:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3514:\ddgui.gbas";
-					func12_DDgui_button("b1", "1", local4_size_2131, local4_size_2131);
-					__debugInfo = "3515:\ddgui.gbas";
-					func12_DDgui_button("b2", "2", local4_size_2131, local4_size_2131);
-					__debugInfo = "3516:\ddgui.gbas";
-					func12_DDgui_button("b3", "3", local4_size_2131, local4_size_2131);
-					__debugInfo = "3517:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3518:\ddgui.gbas";
-					func12_DDgui_button("b0", "0", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3519:\ddgui.gbas";
-					func12_DDgui_button("b.", ".", local4_size_2131, local4_size_2131);
-					__debugInfo = "3520:\ddgui.gbas";
-					func12_DDgui_button("b\b", "<-", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3504:\ddgui.gbas";
-					__pc = 16802;
-					break;
-					
-				case 10842: //dummy jumper1
-					
-					case 10933:
-						__debugInfo = "3522:\ddgui.gbas";
-						
-					var local16___SelectHelper7__2141 = 0;
-					case 10935:
-						__debugInfo = "3522:\ddgui.gbas";
-						local16___SelectHelper7__2141 = local7_iTabSel_2132;
-						
-					case 11725:
-						__debugInfo = "3676:\ddgui.gbas";
-						if (!((((local16___SelectHelper7__2141) == (0)) ? 1 : 0))) { __pc = 10937; break; }
-					
-					case 10943:
-						__debugInfo = "3524:\ddgui.gbas";
-						func12_DDgui_button("b@", "@", local4_size_2131, local4_size_2131);
-						
-					__debugInfo = "3525:\ddgui.gbas";
-					func12_DDgui_button("b#", "#", local4_size_2131, local4_size_2131);
-					__debugInfo = "3526:\ddgui.gbas";
-					func12_DDgui_button("b[", "[", local4_size_2131, local4_size_2131);
-					__debugInfo = "3527:\ddgui.gbas";
-					func12_DDgui_button("b]", "]", local4_size_2131, local4_size_2131);
-					__debugInfo = "3528:\ddgui.gbas";
-					func12_DDgui_button("b~", "~", local4_size_2131, local4_size_2131);
-					__debugInfo = "3529:\ddgui.gbas";
-					func12_DDgui_button("b7", "7", local4_size_2131, local4_size_2131);
-					__debugInfo = "3530:\ddgui.gbas";
-					func12_DDgui_button("b8", "8", local4_size_2131, local4_size_2131);
-					__debugInfo = "3531:\ddgui.gbas";
-					func12_DDgui_button("b9", "9", local4_size_2131, local4_size_2131);
-					__debugInfo = "3532:\ddgui.gbas";
-					func12_DDgui_button("b/", "/", local4_size_2131, local4_size_2131);
-					__debugInfo = "3533:\ddgui.gbas";
-					func12_DDgui_button("b*", "*", local4_size_2131, local4_size_2131);
-					__debugInfo = "3534:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3535:\ddgui.gbas";
-					func12_DDgui_button("b?", "?", local4_size_2131, local4_size_2131);
-					__debugInfo = "3536:\ddgui.gbas";
-					func12_DDgui_button("b!", "!", local4_size_2131, local4_size_2131);
-					__debugInfo = "3537:\ddgui.gbas";
-					func12_DDgui_button("b{", "{", local4_size_2131, local4_size_2131);
-					__debugInfo = "3538:\ddgui.gbas";
-					func12_DDgui_button("b}", "}", local4_size_2131, local4_size_2131);
-					__debugInfo = "3539:\ddgui.gbas";
-					func12_DDgui_button("b=", "=", local4_size_2131, local4_size_2131);
-					__debugInfo = "3540:\ddgui.gbas";
-					func12_DDgui_button("b4", "4", local4_size_2131, local4_size_2131);
-					__debugInfo = "3541:\ddgui.gbas";
-					func12_DDgui_button("b5", "5", local4_size_2131, local4_size_2131);
-					__debugInfo = "3542:\ddgui.gbas";
-					func12_DDgui_button("b6", "6", local4_size_2131, local4_size_2131);
-					__debugInfo = "3543:\ddgui.gbas";
-					func12_DDgui_button("b-", "-", local4_size_2131, local4_size_2131);
-					__debugInfo = "3544:\ddgui.gbas";
-					func12_DDgui_button("b+", "+", local4_size_2131, local4_size_2131);
-					__debugInfo = "3545:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3546:\ddgui.gbas";
-					func12_DDgui_button("b:", ":", local4_size_2131, local4_size_2131);
-					__debugInfo = "3547:\ddgui.gbas";
-					func12_DDgui_button("b;", ";", local4_size_2131, local4_size_2131);
-					__debugInfo = "3548:\ddgui.gbas";
-					func12_DDgui_button("b(", "(", local4_size_2131, local4_size_2131);
-					__debugInfo = "3549:\ddgui.gbas";
-					func12_DDgui_button("b)", ")", local4_size_2131, local4_size_2131);
-					__debugInfo = "3550:\ddgui.gbas";
-					func12_DDgui_button("b0", "0", local4_size_2131, local4_size_2131);
-					__debugInfo = "3551:\ddgui.gbas";
-					func12_DDgui_button("b1", "1", local4_size_2131, local4_size_2131);
-					__debugInfo = "3552:\ddgui.gbas";
-					func12_DDgui_button("b2", "2", local4_size_2131, local4_size_2131);
-					__debugInfo = "3553:\ddgui.gbas";
-					func12_DDgui_button("b3", "3", local4_size_2131, local4_size_2131);
-					__debugInfo = "3554:\ddgui.gbas";
-					func12_DDgui_button("b\b", "<-", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3555:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3556:\ddgui.gbas";
-					func12_DDgui_button("b,", ",", local4_size_2131, local4_size_2131);
-					__debugInfo = "3557:\ddgui.gbas";
-					func12_DDgui_button("b.", ".", local4_size_2131, local4_size_2131);
-					__debugInfo = "3558:\ddgui.gbas";
-					func12_DDgui_button("b<", "<", local4_size_2131, local4_size_2131);
-					__debugInfo = "3559:\ddgui.gbas";
-					func12_DDgui_button("b>", ">", local4_size_2131, local4_size_2131);
-					__debugInfo = "3560:\ddgui.gbas";
-					func12_DDgui_button("b'", "'", local4_size_2131, local4_size_2131);
-					__debugInfo = "3561:\ddgui.gbas";
-					func12_DDgui_button("b\"", "\"", local4_size_2131, local4_size_2131);
-					__debugInfo = "3562:\ddgui.gbas";
-					func12_DDgui_button("b ", "", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3563:\ddgui.gbas";
-					func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3524:\ddgui.gbas";
-					
-				case 10937: //dummy jumper1
-					if (!((((local16___SelectHelper7__2141) == (1)) ? 1 : 0))) { __pc = 11147; break; }
-					
-					case 11153:
-						__debugInfo = "3565:\ddgui.gbas";
-						func12_DDgui_button("bQ", "Q", local4_size_2131, local4_size_2131);
-						
-					__debugInfo = "3566:\ddgui.gbas";
-					func12_DDgui_button("bW", "W", local4_size_2131, local4_size_2131);
-					__debugInfo = "3567:\ddgui.gbas";
-					func12_DDgui_button("bE", "E", local4_size_2131, local4_size_2131);
-					__debugInfo = "3568:\ddgui.gbas";
-					func12_DDgui_button("bR", "R", local4_size_2131, local4_size_2131);
-					__debugInfo = "3569:\ddgui.gbas";
-					func12_DDgui_button("bT", "T", local4_size_2131, local4_size_2131);
-					__debugInfo = "3570:\ddgui.gbas";
-					func12_DDgui_button("bY", "Y", local4_size_2131, local4_size_2131);
-					__debugInfo = "3571:\ddgui.gbas";
-					func12_DDgui_button("bU", "U", local4_size_2131, local4_size_2131);
-					__debugInfo = "3572:\ddgui.gbas";
-					func12_DDgui_button("bI", "I", local4_size_2131, local4_size_2131);
-					__debugInfo = "3573:\ddgui.gbas";
-					func12_DDgui_button("bO", "O", local4_size_2131, local4_size_2131);
-					__debugInfo = "3574:\ddgui.gbas";
-					func12_DDgui_button("bP", "P", local4_size_2131, local4_size_2131);
-					__debugInfo = "3575:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3576:\ddgui.gbas";
-					func12_DDgui_button("bA", "A", local4_size_2131, local4_size_2131);
-					__debugInfo = "3577:\ddgui.gbas";
-					func12_DDgui_button("bS", "S", local4_size_2131, local4_size_2131);
-					__debugInfo = "3578:\ddgui.gbas";
-					func12_DDgui_button("bD", "D", local4_size_2131, local4_size_2131);
-					__debugInfo = "3579:\ddgui.gbas";
-					func12_DDgui_button("bF", "F", local4_size_2131, local4_size_2131);
-					__debugInfo = "3580:\ddgui.gbas";
-					func12_DDgui_button("bG", "G", local4_size_2131, local4_size_2131);
-					__debugInfo = "3581:\ddgui.gbas";
-					func12_DDgui_button("bH", "H", local4_size_2131, local4_size_2131);
-					__debugInfo = "3582:\ddgui.gbas";
-					func12_DDgui_button("bJ", "J", local4_size_2131, local4_size_2131);
-					__debugInfo = "3583:\ddgui.gbas";
-					func12_DDgui_button("bK", "K", local4_size_2131, local4_size_2131);
-					__debugInfo = "3584:\ddgui.gbas";
-					func12_DDgui_button("bL", "L", local4_size_2131, local4_size_2131);
-					__debugInfo = "3585:\ddgui.gbas";
-					func12_DDgui_button("b,", ",", local4_size_2131, local4_size_2131);
-					__debugInfo = "3586:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3587:\ddgui.gbas";
-					func12_DDgui_button("bShift", "^", local4_size_2131, local4_size_2131);
-					__debugInfo = "3588:\ddgui.gbas";
-					func12_DDgui_button("bZ", "Z", local4_size_2131, local4_size_2131);
-					__debugInfo = "3589:\ddgui.gbas";
-					func12_DDgui_button("bX", "X", local4_size_2131, local4_size_2131);
-					__debugInfo = "3590:\ddgui.gbas";
-					func12_DDgui_button("bC", "C", local4_size_2131, local4_size_2131);
-					__debugInfo = "3591:\ddgui.gbas";
-					func12_DDgui_button("bV", "V", local4_size_2131, local4_size_2131);
-					__debugInfo = "3592:\ddgui.gbas";
-					func12_DDgui_button("bB", "B", local4_size_2131, local4_size_2131);
-					__debugInfo = "3593:\ddgui.gbas";
-					func12_DDgui_button("bN", "N", local4_size_2131, local4_size_2131);
-					__debugInfo = "3594:\ddgui.gbas";
-					func12_DDgui_button("bM", "M", local4_size_2131, local4_size_2131);
-					__debugInfo = "3595:\ddgui.gbas";
-					func12_DDgui_button("b\b", "<-", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3596:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3597:\ddgui.gbas";
-					func12_DDgui_button("b,", ",", local4_size_2131, local4_size_2131);
-					__debugInfo = "3598:\ddgui.gbas";
-					func12_DDgui_button("b.", ".", local4_size_2131, local4_size_2131);
-					__debugInfo = "3599:\ddgui.gbas";
-					func12_DDgui_button("b ", "", ((((local4_size_2131) * (6))) + (10)), local4_size_2131);
-					__debugInfo = "3600:\ddgui.gbas";
-					func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3565:\ddgui.gbas";
-					
-				case 11147: //dummy jumper1
-					if (!((((local16___SelectHelper7__2141) == (2)) ? 1 : 0))) { __pc = 11337; break; }
-					
-					case 11343:
-						__debugInfo = "3602:\ddgui.gbas";
-						func12_DDgui_button("bq", "q", local4_size_2131, local4_size_2131);
-						
-					__debugInfo = "3603:\ddgui.gbas";
-					func12_DDgui_button("bw", "w", local4_size_2131, local4_size_2131);
-					__debugInfo = "3604:\ddgui.gbas";
-					func12_DDgui_button("be", "e", local4_size_2131, local4_size_2131);
-					__debugInfo = "3605:\ddgui.gbas";
-					func12_DDgui_button("br", "r", local4_size_2131, local4_size_2131);
-					__debugInfo = "3606:\ddgui.gbas";
-					func12_DDgui_button("bt", "t", local4_size_2131, local4_size_2131);
-					__debugInfo = "3607:\ddgui.gbas";
-					func12_DDgui_button("by", "y", local4_size_2131, local4_size_2131);
-					__debugInfo = "3608:\ddgui.gbas";
-					func12_DDgui_button("bu", "u", local4_size_2131, local4_size_2131);
-					__debugInfo = "3609:\ddgui.gbas";
-					func12_DDgui_button("bi", "i", local4_size_2131, local4_size_2131);
-					__debugInfo = "3610:\ddgui.gbas";
-					func12_DDgui_button("bo", "o", local4_size_2131, local4_size_2131);
-					__debugInfo = "3611:\ddgui.gbas";
-					func12_DDgui_button("bp", "p", local4_size_2131, local4_size_2131);
-					__debugInfo = "3612:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3613:\ddgui.gbas";
-					func12_DDgui_button("ba", "a", local4_size_2131, local4_size_2131);
-					__debugInfo = "3614:\ddgui.gbas";
-					func12_DDgui_button("bs", "s", local4_size_2131, local4_size_2131);
-					__debugInfo = "3615:\ddgui.gbas";
-					func12_DDgui_button("bd", "d", local4_size_2131, local4_size_2131);
-					__debugInfo = "3616:\ddgui.gbas";
-					func12_DDgui_button("bf", "f", local4_size_2131, local4_size_2131);
-					__debugInfo = "3617:\ddgui.gbas";
-					func12_DDgui_button("bg", "g", local4_size_2131, local4_size_2131);
-					__debugInfo = "3618:\ddgui.gbas";
-					func12_DDgui_button("bh", "h", local4_size_2131, local4_size_2131);
-					__debugInfo = "3619:\ddgui.gbas";
-					func12_DDgui_button("bj", "j", local4_size_2131, local4_size_2131);
-					__debugInfo = "3620:\ddgui.gbas";
-					func12_DDgui_button("bk", "k", local4_size_2131, local4_size_2131);
-					__debugInfo = "3621:\ddgui.gbas";
-					func12_DDgui_button("bl", "l", local4_size_2131, local4_size_2131);
-					__debugInfo = "3622:\ddgui.gbas";
-					func12_DDgui_button("b,", ",", local4_size_2131, local4_size_2131);
-					__debugInfo = "3623:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3624:\ddgui.gbas";
-					func12_DDgui_button("bShift", "^", local4_size_2131, local4_size_2131);
-					__debugInfo = "3625:\ddgui.gbas";
-					func12_DDgui_button("bz", "z", local4_size_2131, local4_size_2131);
-					__debugInfo = "3626:\ddgui.gbas";
-					func12_DDgui_button("bx", "x", local4_size_2131, local4_size_2131);
-					__debugInfo = "3627:\ddgui.gbas";
-					func12_DDgui_button("bc", "c", local4_size_2131, local4_size_2131);
-					__debugInfo = "3628:\ddgui.gbas";
-					func12_DDgui_button("bv", "v", local4_size_2131, local4_size_2131);
-					__debugInfo = "3629:\ddgui.gbas";
-					func12_DDgui_button("bb", "b", local4_size_2131, local4_size_2131);
-					__debugInfo = "3630:\ddgui.gbas";
-					func12_DDgui_button("bn", "n", local4_size_2131, local4_size_2131);
-					__debugInfo = "3631:\ddgui.gbas";
-					func12_DDgui_button("bm", "m", local4_size_2131, local4_size_2131);
-					__debugInfo = "3632:\ddgui.gbas";
-					func12_DDgui_button("b\b", "<-", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3633:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3634:\ddgui.gbas";
-					func12_DDgui_button("b,", ",", local4_size_2131, local4_size_2131);
-					__debugInfo = "3635:\ddgui.gbas";
-					func12_DDgui_button("b.", ".", local4_size_2131, local4_size_2131);
-					__debugInfo = "3636:\ddgui.gbas";
-					func12_DDgui_button("b ", "", ((((local4_size_2131) * (6))) + (10)), local4_size_2131);
-					__debugInfo = "3637:\ddgui.gbas";
-					func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3602:\ddgui.gbas";
-					
-				case 11337: //dummy jumper1
-					if (!((((local16___SelectHelper7__2141) == (3)) ? 1 : 0))) { __pc = 11527; break; }
-					
-					case 11533:
-						__debugInfo = "3639:\ddgui.gbas";
-						func12_DDgui_button("bá", "á", local4_size_2131, local4_size_2131);
-						
-					__debugInfo = "3640:\ddgui.gbas";
-					func12_DDgui_button("bé", "é", local4_size_2131, local4_size_2131);
-					__debugInfo = "3641:\ddgui.gbas";
-					func12_DDgui_button("bí", "í", local4_size_2131, local4_size_2131);
-					__debugInfo = "3642:\ddgui.gbas";
-					func12_DDgui_button("bó", "ó", local4_size_2131, local4_size_2131);
-					__debugInfo = "3643:\ddgui.gbas";
-					func12_DDgui_button("bú", "ú", local4_size_2131, local4_size_2131);
-					__debugInfo = "3644:\ddgui.gbas";
-					func12_DDgui_button("bÁ", "Á", local4_size_2131, local4_size_2131);
-					__debugInfo = "3645:\ddgui.gbas";
-					func12_DDgui_button("bÉ", "É", local4_size_2131, local4_size_2131);
-					__debugInfo = "3646:\ddgui.gbas";
-					func12_DDgui_button("bÍ", "Í", local4_size_2131, local4_size_2131);
-					__debugInfo = "3647:\ddgui.gbas";
-					func12_DDgui_button("bÓ", "Ó", local4_size_2131, local4_size_2131);
-					__debugInfo = "3648:\ddgui.gbas";
-					func12_DDgui_button("bÚ", "Ú", local4_size_2131, local4_size_2131);
-					__debugInfo = "3649:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3650:\ddgui.gbas";
-					func12_DDgui_button("bà", "à", local4_size_2131, local4_size_2131);
-					__debugInfo = "3651:\ddgui.gbas";
-					func12_DDgui_button("bè", "è", local4_size_2131, local4_size_2131);
-					__debugInfo = "3652:\ddgui.gbas";
-					func12_DDgui_button("bì", "ì", local4_size_2131, local4_size_2131);
-					__debugInfo = "3653:\ddgui.gbas";
-					func12_DDgui_button("bò", "ò", local4_size_2131, local4_size_2131);
-					__debugInfo = "3654:\ddgui.gbas";
-					func12_DDgui_button("bù", "ù", local4_size_2131, local4_size_2131);
-					__debugInfo = "3655:\ddgui.gbas";
-					func12_DDgui_button("b2", "À", local4_size_2131, local4_size_2131);
-					__debugInfo = "3656:\ddgui.gbas";
-					func12_DDgui_button("b3", "È", local4_size_2131, local4_size_2131);
-					__debugInfo = "3657:\ddgui.gbas";
-					func12_DDgui_button("b2", "Ì", local4_size_2131, local4_size_2131);
-					__debugInfo = "3658:\ddgui.gbas";
-					func12_DDgui_button("b2", "Ò", local4_size_2131, local4_size_2131);
-					__debugInfo = "3659:\ddgui.gbas";
-					func12_DDgui_button("b3", "Ù", local4_size_2131, local4_size_2131);
-					__debugInfo = "3660:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3661:\ddgui.gbas";
-					func12_DDgui_button("bä", "ä", local4_size_2131, local4_size_2131);
-					__debugInfo = "3662:\ddgui.gbas";
-					func12_DDgui_button("bö", "ö", local4_size_2131, local4_size_2131);
-					__debugInfo = "3663:\ddgui.gbas";
-					func12_DDgui_button("bü", "ü", local4_size_2131, local4_size_2131);
-					__debugInfo = "3664:\ddgui.gbas";
-					func12_DDgui_button("bÄ", "Ä", local4_size_2131, local4_size_2131);
-					__debugInfo = "3665:\ddgui.gbas";
-					func12_DDgui_button("bÖ", "Ö", local4_size_2131, local4_size_2131);
-					__debugInfo = "3666:\ddgui.gbas";
-					func12_DDgui_button("bÜ", "Ü", local4_size_2131, local4_size_2131);
-					__debugInfo = "3667:\ddgui.gbas";
-					func12_DDgui_button("bß", "ß", local4_size_2131, local4_size_2131);
-					__debugInfo = "3668:\ddgui.gbas";
-					func12_DDgui_button("bß", "ß", local4_size_2131, local4_size_2131);
-					__debugInfo = "3669:\ddgui.gbas";
-					func12_DDgui_button("b\b", "<-", ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3670:\ddgui.gbas";
-					func12_DDgui_spacer(10000, 0);
-					__debugInfo = "3671:\ddgui.gbas";
-					func12_DDgui_button("b´", "´", local4_size_2131, local4_size_2131);
-					__debugInfo = "3672:\ddgui.gbas";
-					func12_DDgui_button("b`", "`", local4_size_2131, local4_size_2131);
-					__debugInfo = "3673:\ddgui.gbas";
-					func12_DDgui_button("b° ", "°", local4_size_2131, local4_size_2131);
-					__debugInfo = "3674:\ddgui.gbas";
-					func12_DDgui_button("b ", "", ((((local4_size_2131) * (5))) + (8)), local4_size_2131);
-					__debugInfo = "3674:\ddgui.gbas";
-					func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2131) * (2))) + (2)), local4_size_2131);
-					__debugInfo = "3675:\ddgui.gbas";
-					func9_DDgui_set("b\n", "TEXT", "Enter");
-					__debugInfo = "3639:\ddgui.gbas";
-					
-				case 11527: //dummy jumper1
-					;
-						
-					__debugInfo = "3522:\ddgui.gbas";
-					;
-						
-					__debugInfo = "3522:\ddgui.gbas";
-					
-				case 16802: //dummy jumper2
-					;
-					
-				__debugInfo = "3680:\ddgui.gbas";
-				func14_DDgui_frameend();
-				__debugInfo = "3681:\ddgui.gbas";
-				func9_DDgui_set("fr_keypad", "ALIGN", CAST2STRING(0));
-				__debugInfo = "3683:\ddgui.gbas";
-				local10_cancel_Str_2142 = "Cancel";
-				case 11745:
-					__debugInfo = "3684:\ddgui.gbas";
-					if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 11740; break; }
-					
-					case 11744:
-						__debugInfo = "3684:\ddgui.gbas";
-						local10_cancel_Str_2142 = "Abbrechen";
-						
-					__debugInfo = "3684:\ddgui.gbas";
-					
-				case 11740: //dummy jumper1
-					;
-					
-				__debugInfo = "3686:\ddgui.gbas";
-				func12_DDgui_spacer(10000, 0);
-				__debugInfo = "3687:\ddgui.gbas";
-				func16_DDgui_framestart("fr_okpad", "", 0);
-				__debugInfo = "3688:\ddgui.gbas";
-				func12_DDgui_button("btOK", "OK", 0, local4_size_2131);
-				__debugInfo = "3689:\ddgui.gbas";
-				func12_DDgui_spacer(16, 1);
-				__debugInfo = "3690:\ddgui.gbas";
-				func12_DDgui_button("btCancel", local10_cancel_Str_2142, 0, local4_size_2131);
-				__debugInfo = "3691:\ddgui.gbas";
-				func14_DDgui_frameend();
-				__debugInfo = "3692:\ddgui.gbas";
-				func9_DDgui_set("fr_okpad", "ALIGN", CAST2STRING(0));
-				__debugInfo = "3697:\ddgui.gbas";
-				DIM(local8_widg_Str_2136, [0], "");
-				case 11819:
-					__debugInfo = "3703:\ddgui.gbas";
-					var forEachSaver11819 = global11_ddgui_stack_ref[0].arrAccess(((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1))).values[tmpPositionCache][0].attr7_widgets_ref[0];
-					var forEachCounter11819 = 0
-					
-				case 11786: //dummy for1
-					if (!(forEachCounter11819 < forEachSaver11819.values.length)) {__pc = 11775; break;}
-					var local1_w_ref_2144 = forEachSaver11819.values[forEachCounter11819];
-					
-					
-					case 11818:
-						__debugInfo = "3702:\ddgui.gbas";
-						if (!((((((((local1_w_ref_2144[0].attr7_wid_Str).length) == (2)) ? 1 : 0)) && ((((MID_Str(local1_w_ref_2144[0].attr7_wid_Str, 0, 1)) == ("b")) ? 1 : 0))) ? 1 : 0))) { __pc = 11803; break; }
-					
-					case 11810:
-						__debugInfo = "3700:\ddgui.gbas";
-						DIMPUSH(local8_widg_Str_2136, local1_w_ref_2144[0].attr7_wid_Str);
-						
-					__debugInfo = "3701:\ddgui.gbas";
-					local1_w_ref_2144[0].attr11_tiptext_Str_ref[0] = local1_w_ref_2144[0].attr9_wtext_Str_ref[0];
-					__debugInfo = "3700:\ddgui.gbas";
-					
-				case 11803: //dummy jumper1
-					;
-						
-					__debugInfo = "3702:\ddgui.gbas";
-					forEachSaver11819.values[forEachCounter11819] = local1_w_ref_2144;
-					
-					forEachCounter11819++
-					__pc = 11786; break; //back jump
-					
-				case 11775: //dummy for
-					;
-					
-				__debugInfo = "3705:\ddgui.gbas";
-				func9_DDgui_set("", "FOCUS", "tx_text");
-				__debugInfo = "3706:\ddgui.gbas";
-				func10_DDgui_show(1);
-				case 11954:
-					__debugInfo = "3747:\ddgui.gbas";
-					if (!(1)) {__pc = 16806; break;}
-					
-					var local10_tab_change_2145 = 0;
-					case 11834:
-						__debugInfo = "3709:\ddgui.gbas";
-						local10_tab_change_2145 = ~~(func9_DDgui_get("tab", "CLICKED"));
-						
-					__debugInfo = "3710:\ddgui.gbas";
-					func9_DDgui_set("", "FOCUS", "tx_text");
-					__debugInfo = "3711:\ddgui.gbas";
-					func10_DDgui_show(1);
-					case 11846:
-						__debugInfo = "3713:\ddgui.gbas";
-						if (!(local10_tab_change_2145)) { __pc = 11843; break; }
-					
-					case 11845:
-						__debugInfo = "3713:\ddgui.gbas";
-						__pc = __labels["refresh"]; break;
-						
-					__debugInfo = "3713:\ddgui.gbas";
-					
-				case 11843: //dummy jumper1
-					;
-						
-					case 11882:
-						__debugInfo = "3724:\ddgui.gbas";
-						var forEachSaver11882 = local8_widg_Str_2136;
-					var forEachCounter11882 = 0
-					
-				case 11850: //dummy for1
-					if (!(forEachCounter11882 < forEachSaver11882.values.length)) {__pc = 11848; break;}
-					var local5_w_Str_2146 = forEachSaver11882.values[forEachCounter11882];
-					
-					
-					case 11881:
-						__debugInfo = "3723:\ddgui.gbas";
-						if (!(func9_DDgui_get(local5_w_Str_2146, "CLICKED"))) { __pc = 11854; break; }
-					
-					case 11862:
-						__debugInfo = "3717:\ddgui.gbas";
-						func9_DDgui_set("", "INKEY", MID_Str(local5_w_Str_2146, 1, 1));
-						
-					case 11879:
-						__debugInfo = "3721:\ddgui.gbas";
-						if (!((((func9_DDgui_get("tab", "SELECT")) == (1)) ? 1 : 0))) { __pc = 11869; break; }
-					
-					case 11874:
-						__debugInfo = "3719:\ddgui.gbas";
-						func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
-						
-					__debugInfo = "3720:\ddgui.gbas";
-					func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
-					__debugInfo = "3719:\ddgui.gbas";
-					
-				case 11869: //dummy jumper1
-					;
-						
-					case 11880:
-						__debugInfo = "3722:\ddgui.gbas";
-						__pc = 11848; break;
-						
-					__debugInfo = "3717:\ddgui.gbas";
-					
-				case 11854: //dummy jumper1
-					;
-						
-					__debugInfo = "3723:\ddgui.gbas";
-					forEachSaver11882.values[forEachCounter11882] = local5_w_Str_2146;
-					
-					forEachCounter11882++
-					__pc = 11850; break; //back jump
-					
-				case 11848: //dummy for
-					;
-						
-					case 11932:
-						__debugInfo = "3735:\ddgui.gbas";
-						if (!((((((param9_bIsNumber) ? 0 : 1)) && (func9_DDgui_get("bShift", "CLICKED"))) ? 1 : 0))) { __pc = 11890; break; }
-					
-					var local4_isel_2147 = 0;
-					case 11897:
-						__debugInfo = "3727:\ddgui.gbas";
-						local4_isel_2147 = ~~(func9_DDgui_get("tab", "SELECT"));
-						
-					case 11931:
-						__debugInfo = "3734:\ddgui.gbas";
-						if (!(((((((local4_isel_2147) < (3)) ? 1 : 0)) && ((((local4_isel_2147) > (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 11906; break; }
-					
-					case 11912:
-						__debugInfo = "3729:\ddgui.gbas";
-						local4_isel_2147 = ((local4_isel_2147) - (1));
-						
-					__debugInfo = "3730:\ddgui.gbas";
-					local4_isel_2147 = ((1) - (local4_isel_2147));
-					__debugInfo = "3731:\ddgui.gbas";
-					local4_isel_2147 = ((1) + (local4_isel_2147));
-					__debugInfo = "3732:\ddgui.gbas";
-					func9_DDgui_set("tab", "SELECT", CAST2STRING(local4_isel_2147));
-					__debugInfo = "3733:\ddgui.gbas";
-					func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
-					__debugInfo = "3729:\ddgui.gbas";
-					
-				case 11906: //dummy jumper1
-					;
-						
-					__debugInfo = "3727:\ddgui.gbas";
-					
-				case 11890: //dummy jumper1
-					;
-						
-					case 11943:
-						__debugInfo = "3740:\ddgui.gbas";
-						if (!(func9_DDgui_get("btOK", "CLICKED"))) { __pc = 11935; break; }
-					
-					case 11941:
-						__debugInfo = "3738:\ddgui.gbas";
-						param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
-						
-					case 11942:
-						__debugInfo = "3739:\ddgui.gbas";
-						__pc = 16806; break;
-						
-					__debugInfo = "3738:\ddgui.gbas";
-					
-				case 11935: //dummy jumper1
-					;
-						
-					case 11952:
-						__debugInfo = "3744:\ddgui.gbas";
-						if (!(func9_DDgui_get("btCancel", "CLICKED"))) { __pc = 11946; break; }
-					
-					case 11950:
-						__debugInfo = "3742:\ddgui.gbas";
-						param8_text_Str = local12_text_old_Str_2133;
-						
-					case 11951:
-						__debugInfo = "3743:\ddgui.gbas";
-						__pc = 16806; break;
-						
-					__debugInfo = "3742:\ddgui.gbas";
-					
-				case 11946: //dummy jumper1
-					;
-						
-					__debugInfo = "3746:\ddgui.gbas";
-					SHOWSCREEN();
-					__debugInfo = "3709:\ddgui.gbas";
-					__pc = 11954; break; //back jump
-					
-				case 16806:
-					;
-					
-				__debugInfo = "3749:\ddgui.gbas";
-				func15_DDgui_popdialog();
-				__debugInfo = "3751:\ddgui.gbas";
-				global18_DDGUI_IN_INPUT_DLG = 0;
-				__debugInfo = "3754:\ddgui.gbas";
-				global25_gDDguiMinControlDimension = local12_storeoldsize_2139;
-				__debugInfo = "3756:\ddgui.gbas";
-				return tryClone(param8_text_Str);
-				__debugInfo = "3757:\ddgui.gbas";
-				return "";
-				__debugInfo = "3426:\ddgui.gbas";__pc = -1; break;
-				default:
-					throwError("Gotocounter exception pc: "+__pc);
-				
-			}
-		}
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var __labels = {"__DrawFrames__": 3476, "refresh": 10927};
 	
+	var local2_fx_ref_2153 = [0], local2_fy_ref_2154 = [0], local4_size_2155 = 0, local7_iTabSel_2156 = 0, local12_text_old_Str_2157 = "", local4_ssel_2158 = 0, local4_esel_2159 = 0, local8_widg_Str_2160 = new GLBArray(), local3_scx_ref_2161 = [0], local3_scy_ref_2162 = [0], local12_storeoldsize_2163 = 0, local5_texth_2164 = 0, local10_cancel_Str_2166 = "", local3_chr_2167 = 0;
+	var __pc = 10790;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 10790:
+				local12_text_old_Str_2157 = param8_text_Str;
+				
+			GETSCREENSIZE(local3_scx_ref_2161, local3_scy_ref_2162);
+			GETFONTSIZE(local2_fx_ref_2153, local2_fy_ref_2154);
+			local12_storeoldsize_2163 = global25_gDDguiMinControlDimension;
+			global25_gDDguiMinControlDimension = 16;
+			local4_size_2155 = MIN(400, MIN(unref(local3_scx_ref_2161[0]), unref(local3_scy_ref_2162[0])));
+			case 10882:
+				if (!(param11_bFullscreen)) { __pc = 10812; break; }
+				
+				case 10819:
+					func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2161[0]), unref(local3_scy_ref_2162[0]), 1);
+					
+				local4_size_2155 = 20;
+				case 10831:
+					if (!((((local3_scx_ref_2161[0]) > (240)) ? 1 : 0))) { __pc = 10826; break; }
+				
+				case 10830:
+					local4_size_2155 = 28;
+					
+				
+				
+			case 10826: //dummy jumper1
+				;
+					
+				case 10840:
+					if (!((((local3_scx_ref_2161[0]) > (320)) ? 1 : 0))) { __pc = 10835; break; }
+				
+				case 10839:
+					local4_size_2155 = 36;
+					
+				
+				
+			case 10835: //dummy jumper1
+				;
+					
+				
+				__pc = 16893;
+				break;
+				
+			case 10812: //dummy jumper1
+				
+				case 10854:
+					func16_DDgui_pushdialog(CAST2INT(((((local3_scx_ref_2161[0]) - (local4_size_2155))) / (2))), CAST2INT(((((local3_scy_ref_2162[0]) - (local4_size_2155))) / (2))), local4_size_2155, local4_size_2155, 0);
+					
+				local3_scy_ref_2162[0] = local4_size_2155;
+				local3_scx_ref_2161[0] = local4_size_2155;
+				local4_size_2155 = 20;
+				case 10872:
+					if (!((((local3_scx_ref_2161[0]) > (240)) ? 1 : 0))) { __pc = 10867; break; }
+				
+				case 10871:
+					local4_size_2155 = 28;
+					
+				
+				
+			case 10867: //dummy jumper1
+				;
+					
+				case 10881:
+					if (!((((local3_scx_ref_2161[0]) > (320)) ? 1 : 0))) { __pc = 10876; break; }
+				
+				case 10880:
+					local4_size_2155 = 36;
+					
+				
+				
+			case 10876: //dummy jumper1
+				;
+					
+				
+				
+			case 16893: //dummy jumper2
+				;
+				
+			global18_DDGUI_IN_INPUT_DLG = 1;
+			func9_DDgui_set("tx_text", "TEXT", param8_text_Str);
+			func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
+			case 10902:
+				if (!(param9_bIsNumber)) { __pc = 10896; break; }
+				
+				case 10901:
+					func9_DDgui_set("tab", "SELECT", CAST2STRING(0));
+					
+				
+				
+			case 10896: //dummy jumper1
+				;
+				
+			case 10926:
+				if (!((((param11_bSingleLine) || (((((((INSTR(param8_text_Str, "\n", 0)) < (0)) ? 1 : 0)) && (((((param8_text_Str).length) < (40)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0))) { __pc = 10915; break; }
+				
+				case 10920:
+					func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(0));
+					
+				func9_DDgui_set("tx_text", "SELEND", CAST2STRING((param8_text_Str).length));
+				
+				
+			case 10915: //dummy jumper1
+				;
+				
+			case 10927:
+				//label: refresh;
+				
+			param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
+			local4_ssel_2158 = ~~(func9_DDgui_get("tx_text", "SELSTART"));
+			local4_esel_2159 = ~~(func9_DDgui_get("tx_text", "SELEND"));
+			local7_iTabSel_2156 = ~~(func9_DDgui_get("tab", "SELECT"));
+			func10_DDgui_init();
+			local5_texth_2164 = ((((local3_scy_ref_2162[0]) - (((6) * (((local4_size_2155) + (2))))))) - (32));
+			case 11001:
+				if (!(param11_bSingleLine)) { __pc = 10965; break; }
+				
+				case 10969:
+					local5_texth_2164 = 0;
+					
+				case 10990:
+					if (!(param9_bIsNumber)) { __pc = 10971; break; }
+				
+				case 10980:
+					func16_DDgui_numbertext("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))));
+					
+				
+				__pc = 16901;
+				break;
+				
+			case 10971: //dummy jumper1
+				
+				case 10989:
+					func16_DDgui_singletext("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))));
+					
+				
+				
+			case 16901: //dummy jumper2
+				;
+					
+				
+				__pc = 16900;
+				break;
+				
+			case 10965: //dummy jumper1
+				
+				case 11000:
+					func10_DDgui_text("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))), local5_texth_2164);
+					
+				
+				
+			case 16900: //dummy jumper2
+				;
+				
+			func9_DDgui_set("tx_text", "ALIGN", CAST2STRING(0));
+			func12_DDgui_spacer(10000, 2);
+			func9_DDgui_set("tab", "SELECT", CAST2STRING(local7_iTabSel_2156));
+			func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(local4_ssel_2158));
+			func9_DDgui_set("tx_text", "SELEND", CAST2STRING(local4_esel_2159));
+			case 11042:
+				if (!(param9_bIsNumber)) { __pc = 11022; break; }
+				
+				case 11027:
+					func9_DDgui_tab("tab", "123", local4_size_2155);
+					
+				
+				__pc = 16902;
+				break;
+				
+			case 11022: //dummy jumper1
+				
+				case 11041:
+					if (!(param13_bSpecialChars)) { __pc = 11030; break; }
+				
+				case 11035:
+					func9_DDgui_tab("tab", "123|ABC|abc|ÄÖÜ", local4_size_2155);
+					
+				
+				__pc = 16903;
+				break;
+				
+			case 11030: //dummy jumper1
+				
+				case 11040:
+					func9_DDgui_tab("tab", "123|ABC|abc", local4_size_2155);
+					
+				
+				
+			case 16903: //dummy jumper2
+				;
+					
+				
+				
+			case 16902: //dummy jumper2
+				;
+				
+			func16_DDgui_framestart("fr_keypad", "", 0);
+			case 11930:
+				if (!(param9_bIsNumber)) { __pc = 11046; break; }
+				
+				case 11052:
+					func12_DDgui_button("b7", "7", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("b8", "8", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b9", "9", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b-", "-", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b4", "4", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b5", "5", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b6", "6", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("be", "e", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b1", "1", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "2", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "3", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b0", "0", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				__pc = 16904;
+				break;
+				
+			case 11046: //dummy jumper1
+				
+				case 11137:
+					
+				var local16___SelectHelper7__2165 = 0;
+				case 11139:
+					local16___SelectHelper7__2165 = local7_iTabSel_2156;
+					
+				case 11929:
+					if (!((((local16___SelectHelper7__2165) == (0)) ? 1 : 0))) { __pc = 11141; break; }
+				
+				case 11147:
+					func12_DDgui_button("b@", "@", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("b#", "#", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b[", "[", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b]", "]", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b~", "~", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b7", "7", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b8", "8", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b9", "9", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b/", "/", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b*", "*", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b?", "?", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b!", "!", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b{", "{", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b}", "}", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b=", "=", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b4", "4", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b5", "5", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b6", "6", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b-", "-", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b+", "+", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b:", ":", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b;", ";", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b(", "(", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b)", ")", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b0", "0", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b1", "1", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "2", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "3", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b<", "<", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b>", ">", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b'", "'", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\"", "\"", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11141: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (1)) ? 1 : 0))) { __pc = 11351; break; }
+				
+				case 11357:
+					func12_DDgui_button("bQ", "Q", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bW", "W", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bE", "E", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bR", "R", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bT", "T", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bY", "Y", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bU", "U", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bI", "I", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bO", "O", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bP", "P", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bA", "A", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bS", "S", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bD", "D", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bF", "F", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bG", "G", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bH", "H", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bJ", "J", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bK", "K", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bL", "L", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bShift", "^", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bZ", "Z", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bX", "X", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bC", "C", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bV", "V", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bB", "B", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bN", "N", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bM", "M", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (6))) + (10)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11351: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (2)) ? 1 : 0))) { __pc = 11541; break; }
+				
+				case 11547:
+					func12_DDgui_button("bq", "q", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bw", "w", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("be", "e", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("br", "r", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bt", "t", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("by", "y", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bu", "u", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bi", "i", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bo", "o", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bp", "p", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("ba", "a", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bs", "s", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bd", "d", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bf", "f", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bg", "g", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bh", "h", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bj", "j", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bk", "k", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bl", "l", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bShift", "^", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bz", "z", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bx", "x", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bc", "c", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bv", "v", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bb", "b", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bn", "n", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bm", "m", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (6))) + (10)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11541: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (3)) ? 1 : 0))) { __pc = 11731; break; }
+				
+				case 11737:
+					func12_DDgui_button("bá", "á", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bé", "é", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bí", "í", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bó", "ó", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bú", "ú", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÁ", "Á", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÉ", "É", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÍ", "Í", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÓ", "Ó", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÚ", "Ú", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bà", "à", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bè", "è", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bì", "ì", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bò", "ò", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bù", "ù", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "À", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "È", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "Ì", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "Ò", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "Ù", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bä", "ä", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bö", "ö", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bü", "ü", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÄ", "Ä", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÖ", "Ö", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÜ", "Ü", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bß", "ß", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bß", "ß", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b´", "´", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b`", "`", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b° ", "°", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (5))) + (8)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func9_DDgui_set("b\n", "TEXT", "Enter");
+				
+				
+			case 11731: //dummy jumper1
+				;
+					
+				
+				;
+					
+				
+				
+			case 16904: //dummy jumper2
+				;
+				
+			func14_DDgui_frameend();
+			func9_DDgui_set("fr_keypad", "ALIGN", CAST2STRING(0));
+			local10_cancel_Str_2166 = "Cancel";
+			case 11949:
+				if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 11944; break; }
+				
+				case 11948:
+					local10_cancel_Str_2166 = "Abbrechen";
+					
+				
+				
+			case 11944: //dummy jumper1
+				;
+				
+			func12_DDgui_spacer(10000, 0);
+			func16_DDgui_framestart("fr_okpad", "", 0);
+			func12_DDgui_button("btOK", "OK", 0, local4_size_2155);
+			func12_DDgui_spacer(16, 1);
+			func12_DDgui_button("btCancel", local10_cancel_Str_2166, 0, local4_size_2155);
+			func14_DDgui_frameend();
+			func9_DDgui_set("fr_okpad", "ALIGN", CAST2STRING(0));
+			DIM(local8_widg_Str_2160, [0], "");
+			case 12023:
+				var forEachSaver12023 = global11_ddgui_stack_ref[0].arrAccess(((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1))).values[tmpPositionCache][0].attr7_widgets_ref[0];
+				var forEachCounter12023 = 0
+				
+			case 11990: //dummy for1
+				if (!(forEachCounter12023 < forEachSaver12023.values.length)) {__pc = 11979; break;}
+				var local1_w_ref_2168 = forEachSaver12023.values[forEachCounter12023];
+				
+				
+				case 12022:
+					if (!((((((((local1_w_ref_2168[0].attr7_wid_Str).length) == (2)) ? 1 : 0)) && ((((MID_Str(local1_w_ref_2168[0].attr7_wid_Str, 0, 1)) == ("b")) ? 1 : 0))) ? 1 : 0))) { __pc = 12007; break; }
+				
+				case 12014:
+					DIMPUSH(local8_widg_Str_2160, local1_w_ref_2168[0].attr7_wid_Str);
+					
+				local1_w_ref_2168[0].attr11_tiptext_Str_ref[0] = local1_w_ref_2168[0].attr9_wtext_Str_ref[0];
+				
+				
+			case 12007: //dummy jumper1
+				;
+					
+				
+				forEachSaver12023.values[forEachCounter12023] = local1_w_ref_2168;
+				
+				forEachCounter12023++
+				__pc = 11990; break; //back jump
+				
+			case 11979: //dummy for
+				;
+				
+			func9_DDgui_set("", "FOCUS", "tx_text");
+			func10_DDgui_show(1);
+			case 12158:
+				if (!(1)) {__pc = 16908; break;}
+				
+				var local10_tab_change_2169 = 0;
+				case 12038:
+					local10_tab_change_2169 = ~~(func9_DDgui_get("tab", "CLICKED"));
+					
+				func9_DDgui_set("", "FOCUS", "tx_text");
+				func10_DDgui_show(1);
+				case 12050:
+					if (!(local10_tab_change_2169)) { __pc = 12047; break; }
+				
+				case 12049:
+					__pc = __labels["refresh"]; break;
+					
+				
+				
+			case 12047: //dummy jumper1
+				;
+					
+				case 12086:
+					var forEachSaver12086 = local8_widg_Str_2160;
+				var forEachCounter12086 = 0
+				
+			case 12054: //dummy for1
+				if (!(forEachCounter12086 < forEachSaver12086.values.length)) {__pc = 12052; break;}
+				var local5_w_Str_2170 = forEachSaver12086.values[forEachCounter12086];
+				
+				
+				case 12085:
+					if (!(func9_DDgui_get(local5_w_Str_2170, "CLICKED"))) { __pc = 12058; break; }
+				
+				case 12066:
+					func9_DDgui_set("", "INKEY", MID_Str(local5_w_Str_2170, 1, 1));
+					
+				case 12083:
+					if (!((((func9_DDgui_get("tab", "SELECT")) == (1)) ? 1 : 0))) { __pc = 12073; break; }
+				
+				case 12078:
+					func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
+					
+				func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
+				
+				
+			case 12073: //dummy jumper1
+				;
+					
+				case 12084:
+					__pc = 12052; break;
+					
+				
+				
+			case 12058: //dummy jumper1
+				;
+					
+				
+				forEachSaver12086.values[forEachCounter12086] = local5_w_Str_2170;
+				
+				forEachCounter12086++
+				__pc = 12054; break; //back jump
+				
+			case 12052: //dummy for
+				;
+					
+				case 12136:
+					if (!((((((param9_bIsNumber) ? 0 : 1)) && (func9_DDgui_get("bShift", "CLICKED"))) ? 1 : 0))) { __pc = 12094; break; }
+				
+				var local4_isel_2171 = 0;
+				case 12101:
+					local4_isel_2171 = ~~(func9_DDgui_get("tab", "SELECT"));
+					
+				case 12135:
+					if (!(((((((local4_isel_2171) < (3)) ? 1 : 0)) && ((((local4_isel_2171) > (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 12110; break; }
+				
+				case 12116:
+					local4_isel_2171 = ((local4_isel_2171) - (1));
+					
+				local4_isel_2171 = ((1) - (local4_isel_2171));
+				local4_isel_2171 = ((1) + (local4_isel_2171));
+				func9_DDgui_set("tab", "SELECT", CAST2STRING(local4_isel_2171));
+				func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
+				
+				
+			case 12110: //dummy jumper1
+				;
+					
+				
+				
+			case 12094: //dummy jumper1
+				;
+					
+				case 12147:
+					if (!(func9_DDgui_get("btOK", "CLICKED"))) { __pc = 12139; break; }
+				
+				case 12145:
+					param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
+					
+				case 12146:
+					__pc = 16908; break;
+					
+				
+				
+			case 12139: //dummy jumper1
+				;
+					
+				case 12156:
+					if (!(func9_DDgui_get("btCancel", "CLICKED"))) { __pc = 12150; break; }
+				
+				case 12154:
+					param8_text_Str = local12_text_old_Str_2157;
+					
+				case 12155:
+					__pc = 16908; break;
+					
+				
+				
+			case 12150: //dummy jumper1
+				;
+					
+				SHOWSCREEN();
+				
+				__pc = 12158; break; //back jump
+				
+			case 16908:
+				;
+				
+			func15_DDgui_popdialog();
+			global18_DDGUI_IN_INPUT_DLG = 0;
+			global25_gDDguiMinControlDimension = local12_storeoldsize_2163;
+			return tryClone(param8_text_Str);
+			return "";
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
+	}
 };
 window['func20_DDgui_FileDialog_Str'] = function(param5_bOpen, param13_filterstr_Str, param10_initialise) {
-		var __labels = {"__DrawFrames__": 3449, "refresh_fd": 12018};
-		
-	stackPush("function: DDgui_FileDialog_Str", __debugInfo);
-	try {
-		var local12_startdir_Str_2151 = "", local8_cdir_Str_2152 = "", local9_bread_Str_2153 = new GLBArray(), local7_pre_Str_2154 = "", local9_files_Str_2155 = new GLBArray(), local8_num_file_2156 = 0, local7_num_dir_2157 = 0, local11_outfile_Str_2158 = "", local12_bBreadcrumbs_2159 = 0, local3_scx_ref_2160 = [0], local3_scy_ref_2161 = [0], local11_caption_Str_2162 = "", local7_tmp_Str_2164 = "", local2_ok_2167 = 0;
-		var __pc = 11969;
-		while(__pc >= 0) {
-			switch(__pc) {
-				case 11969:
-					__debugInfo = "3766:\ddgui.gbas";
-					local12_startdir_Str_2151 = GETCURRENTDIR_Str();
-					
-				__debugInfo = "3767:\ddgui.gbas";
-				local8_cdir_Str_2152 = local12_startdir_Str_2151;
-				__debugInfo = "3774:\ddgui.gbas";
-				local12_bBreadcrumbs_2159 = 0;
-				__debugInfo = "3776:\ddgui.gbas";
-				GETSCREENSIZE(local3_scx_ref_2160, local3_scy_ref_2161);
-				__debugInfo = "3779:\ddgui.gbas";
-				local3_scx_ref_2160[0] = MIN(480, unref(local3_scx_ref_2160[0]));
-				__debugInfo = "3780:\ddgui.gbas";
-				local3_scy_ref_2161[0] = MIN(480, unref(local3_scy_ref_2161[0]));
-				case 12011:
-					__debugInfo = "3784:\ddgui.gbas";
-					if (!(((((((local3_scx_ref_2160[0]) > (400)) ? 1 : 0)) && ((((local3_scy_ref_2161[0]) > (400)) ? 1 : 0))) ? 1 : 0))) { __pc = 12006; break; }
-					
-					case 12010:
-						__debugInfo = "3783:\ddgui.gbas";
-						local12_bBreadcrumbs_2159 = 1;
-						
-					__debugInfo = "3783:\ddgui.gbas";
-					
-				case 12006: //dummy jumper1
-					;
-					
-				__debugInfo = "3785:\ddgui.gbas";
-				func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2160[0]), unref(local3_scy_ref_2161[0]), 1);
-				case 12018:
-					__debugInfo = "3787:\ddgui.gbas";
-					//label: refresh_fd;
-					
-				__debugInfo = "3788:\ddgui.gbas";
-				func10_DDgui_init();
-				__debugInfo = "3789:\ddgui.gbas";
-				func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
-				__debugInfo = "3790:\ddgui.gbas";
-				func9_DDgui_set("", "SCALEABLE", CAST2STRING(0));
-				__debugInfo = "3791:\ddgui.gbas";
-				local11_caption_Str_2162 = "Pick a file:";
-				case 12041:
-					__debugInfo = "3792:\ddgui.gbas";
-					if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 12036; break; }
-					
-					case 12040:
-						__debugInfo = "3792:\ddgui.gbas";
-						local11_caption_Str_2162 = "Datei auswählen:";
-						
-					__debugInfo = "3792:\ddgui.gbas";
-					
-				case 12036: //dummy jumper1
-					;
-					
-				__debugInfo = "3793:\ddgui.gbas";
-				func9_DDgui_set("", "TEXT", local11_caption_Str_2162);
-				__debugInfo = "3794:\ddgui.gbas";
-				local8_cdir_Str_2152 = GETCURRENTDIR_Str();
-				case 12055:
-					__debugInfo = "3796:\ddgui.gbas";
-					if (!((((param10_initialise) == (1)) ? 1 : 0))) { __pc = 12052; break; }
-					
-					case 12054:
-						__debugInfo = "3796:\ddgui.gbas";
-						func10_DDgui_init();
-						
-					__debugInfo = "3796:\ddgui.gbas";
-					
-				case 12052: //dummy jumper1
-					;
-					
-				case 12110:
-					__debugInfo = "3812:\ddgui.gbas";
-					if (!((((MID_Str(local8_cdir_Str_2152, 1, 1)) == (":")) ? 1 : 0))) { __pc = 12062; break; }
-					
-					case 12069:
-						__debugInfo = "3801:\ddgui.gbas";
-						local7_pre_Str_2154 = MID_Str(local8_cdir_Str_2152, 0, 2);
-						
-					__debugInfo = "3802:\ddgui.gbas";
-					local8_cdir_Str_2152 = MID_Str(local8_cdir_Str_2152, 2, -(1));
-					__debugInfo = "3801:\ddgui.gbas";
-					__pc = 16817;
-					break;
-					
-				case 12062: //dummy jumper1
-					if (!(((((((MID_Str(local8_cdir_Str_2152, 1, 1)) == ("/")) ? 1 : 0)) || ((((MID_Str(local8_cdir_Str_2152, 0, 1)) == ("~")) ? 1 : 0))) ? 1 : 0))) { __pc = 12088; break; }
-					
-					case 12095:
-						__debugInfo = "3806:\ddgui.gbas";
-						local7_pre_Str_2154 = MID_Str(local8_cdir_Str_2152, 0, 1);
-						
-					__debugInfo = "3807:\ddgui.gbas";
-					local8_cdir_Str_2152 = MID_Str(local8_cdir_Str_2152, 1, -(1));
-					__debugInfo = "3806:\ddgui.gbas";
-					__pc = 16817;
-					break;
-					
-				case 12088: //dummy jumper1
-					
-					case 12104:
-						__debugInfo = "3810:\ddgui.gbas";
-						local7_pre_Str_2154 = "";
-						
-					__debugInfo = "3811:\ddgui.gbas";
-					local8_cdir_Str_2152 = MID_Str(local8_cdir_Str_2152, 1, -(1));
-					__debugInfo = "3810:\ddgui.gbas";
-					
-				case 16817: //dummy jumper2
-					;
-					
-				__debugInfo = "3813:\ddgui.gbas";
-				SPLITSTR(local8_cdir_Str_2152, unref(local9_bread_Str_2153), "/", 1);
-				case 12145:
-					__debugInfo = "3820:\ddgui.gbas";
-					if (!(local12_bBreadcrumbs_2159)) { __pc = 12117; break; }
-					
-					case 12119:
-						__debugInfo = "3815:\ddgui.gbas";
-						
-					var local1_i_2163 = 0;
-					case 12141:
-						__debugInfo = "3818:\ddgui.gbas";
-						local1_i_2163 = 0
-					
-				case 12122: //dummy for1
-					if (!toCheck(local1_i_2163, ((BOUNDS(local9_bread_Str_2153, 0)) - (1)), 1)) {__pc = 12129; break;}
-					
-					case 12140:
-						__debugInfo = "3817:\ddgui.gbas";
-						func12_DDgui_button((("bt_br") + (CAST2STRING(local1_i_2163))), local9_bread_Str_2153.arrAccess(local1_i_2163).values[tmpPositionCache], 0, 0);
-						
-					__debugInfo = "3817:\ddgui.gbas";
-					local1_i_2163 += 1;
-					__pc = 12122; break; //back jump
-					
-				case 12129: //dummy for
-					;
-						
-					__debugInfo = "3818:\ddgui.gbas";
-					;
-						
-					__debugInfo = "3819:\ddgui.gbas";
-					func12_DDgui_spacer(1000, 4);
-					__debugInfo = "3815:\ddgui.gbas";
-					
-				case 12117: //dummy jumper1
-					;
-					
-				__debugInfo = "3822:\ddgui.gbas";
-				local8_num_file_2156 = ~~(GETFILELIST(param13_filterstr_Str, unref(local9_files_Str_2155)));
-				__debugInfo = "3823:\ddgui.gbas";
-				local7_num_dir_2157 = INTEGER(CAST2INT(((local8_num_file_2156) / (65536))));
-				__debugInfo = "3824:\ddgui.gbas";
-				local8_num_file_2156 = MOD(local8_num_file_2156, 65536);
-				__debugInfo = "3826:\ddgui.gbas";
-				
-					var local1_i_2165 = 0;
-					case 12210:
-						__debugInfo = "3838:\ddgui.gbas";
-						local1_i_2165 = 0
-					
-				case 12168: //dummy for1
-					if (!toCheck(local1_i_2165, ((local7_num_dir_2157) - (1)), 1)) {__pc = 12172; break;}
-					
-					case 12196:
-						__debugInfo = "3833:\ddgui.gbas";
-						if (!((((local9_files_Str_2155.arrAccess(local1_i_2165).values[tmpPositionCache]) == (".")) ? 1 : 0))) { __pc = 12179; break; }
-					
-					case 12184:
-						__debugInfo = "3829:\ddgui.gbas";
-						DIMDEL(local9_files_Str_2155, local1_i_2165);
-						
-					__debugInfo = "3830:\ddgui.gbas";
-					local7_num_dir_2157+=-(1);
-					__debugInfo = "3831:\ddgui.gbas";
-					local1_i_2165+=-(1);
-					case 12195:
-						__debugInfo = "3832:\ddgui.gbas";
-						__pc = 12168; break;
-						
-					__debugInfo = "3829:\ddgui.gbas";
-					
-				case 12179: //dummy jumper1
-					;
-						
-					case 12204:
-						__debugInfo = "3836:\ddgui.gbas";
-						if (!((local7_tmp_Str_2164).length)) { __pc = 12199; break; }
-					
-					case 12203:
-						__debugInfo = "3835:\ddgui.gbas";
-						local7_tmp_Str_2164+="|";
-						
-					__debugInfo = "3835:\ddgui.gbas";
-					
-				case 12199: //dummy jumper1
-					;
-						
-					__debugInfo = "3837:\ddgui.gbas";
-					local7_tmp_Str_2164+=local9_files_Str_2155.arrAccess(local1_i_2165).values[tmpPositionCache];
-					__debugInfo = "3833:\ddgui.gbas";
-					local1_i_2165 += 1;
-					__pc = 12168; break; //back jump
-					
-				case 12172: //dummy for
-					;
-						
-					__debugInfo = "3838:\ddgui.gbas";
-					;
-				__debugInfo = "3840:\ddgui.gbas";
-				func11_DDgui_combo("ls_dir", local7_tmp_Str_2164, ((local3_scx_ref_2160[0]) - (20)), 0);
-				__debugInfo = "3841:\ddgui.gbas";
-				func9_DDgui_set("ls_dir", "SELECT", CAST2STRING(-(1)));
-				__debugInfo = "3842:\ddgui.gbas";
-				func12_DDgui_spacer(1000, 4);
-				__debugInfo = "3844:\ddgui.gbas";
-				local7_tmp_Str_2164 = "";
-				__debugInfo = "3844:\ddgui.gbas";
-				
-					var local1_i_2166 = 0;
-					case 12254:
-						__debugInfo = "3848:\ddgui.gbas";
-						local1_i_2166 = 0
-					
-				case 12232: //dummy for1
-					if (!toCheck(local1_i_2166, ((local8_num_file_2156) - (1)), 1)) {__pc = 12236; break;}
-					
-					case 12246:
-						__debugInfo = "3846:\ddgui.gbas";
-						if (!((((local1_i_2166) > (0)) ? 1 : 0))) { __pc = 12241; break; }
-					
-					case 12245:
-						__debugInfo = "3846:\ddgui.gbas";
-						local7_tmp_Str_2164+="|";
-						
-					__debugInfo = "3846:\ddgui.gbas";
-					
-				case 12241: //dummy jumper1
-					;
-						
-					__debugInfo = "3847:\ddgui.gbas";
-					local7_tmp_Str_2164+=local9_files_Str_2155.arrAccess(((local1_i_2166) + (local7_num_dir_2157))).values[tmpPositionCache];
-					__debugInfo = "3846:\ddgui.gbas";
-					local1_i_2166 += 1;
-					__pc = 12232; break; //back jump
-					
-				case 12236: //dummy for
-					;
-						
-					__debugInfo = "3848:\ddgui.gbas";
-					;
-				__debugInfo = "3849:\ddgui.gbas";
-				func10_DDgui_list("ls_file", local7_tmp_Str_2164, ((local3_scx_ref_2160[0]) - (20)), ((((local3_scy_ref_2161[0]) - (120))) - (((local12_bBreadcrumbs_2159) * (64)))));
-				__debugInfo = "3850:\ddgui.gbas";
-				func9_DDgui_set("ls_file", "SELECT", CAST2STRING(-(1)));
-				__debugInfo = "3851:\ddgui.gbas";
-				func12_DDgui_spacer(1000, 4);
-				__debugInfo = "3852:\ddgui.gbas";
-				func16_DDgui_singletext("tx_file", "", ((local3_scx_ref_2160[0]) - (20)));
-				__debugInfo = "3853:\ddgui.gbas";
-				func12_DDgui_spacer(1000, 4);
-				__debugInfo = "3854:\ddgui.gbas";
-				func12_DDgui_button("bt_ok", "OK", 0, 0);
-				__debugInfo = "3855:\ddgui.gbas";
-				func12_DDgui_button("bt_cancel", "Cancel", 0, 0);
-				__debugInfo = "3857:\ddgui.gbas";
-				local2_ok_2167 = 0;
-				case 12603:
-					__debugInfo = "3943:\ddgui.gbas";
-					if (!(1)) {__pc = 16822; break;}
-					
-					case 12305:
-						__debugInfo = "3859:\ddgui.gbas";
-						func10_DDgui_show(0);
-						
-					case 12367:
-						__debugInfo = "3876:\ddgui.gbas";
-						if (!(local12_bBreadcrumbs_2159)) { __pc = 12307; break; }
-					
-					case 12309:
-						__debugInfo = "3861:\ddgui.gbas";
-						
-					var local1_i_2168 = 0;
-					case 12366:
-						__debugInfo = "3875:\ddgui.gbas";
-						local1_i_2168 = 0
-					
-				case 12312: //dummy for1
-					if (!toCheck(local1_i_2168, ((BOUNDS(local9_bread_Str_2153, 0)) - (1)), 1)) {__pc = 12319; break;}
-					
-					case 12365:
-						__debugInfo = "3874:\ddgui.gbas";
-						if (!(func9_DDgui_get((("bt_br") + (CAST2STRING(local1_i_2168))), "CLICKED"))) { __pc = 12326; break; }
-					
-					case 12330:
-						__debugInfo = "3864:\ddgui.gbas";
-						local8_cdir_Str_2152 = local7_pre_Str_2154;
-						
-					__debugInfo = "3864:\ddgui.gbas";
-					
-					var local1_j_2169 = 0;
-					case 12346:
-						__debugInfo = "3868:\ddgui.gbas";
-						local1_j_2169 = 0
-					
-				case 12334: //dummy for1
-					if (!toCheck(local1_j_2169, local1_i_2168, 1)) {__pc = 12336; break;}
-					
-					case 12340:
-						__debugInfo = "3866:\ddgui.gbas";
-						local8_cdir_Str_2152+="/";
-						
-					__debugInfo = "3867:\ddgui.gbas";
-					local8_cdir_Str_2152+=local9_bread_Str_2153.arrAccess(local1_j_2169).values[tmpPositionCache];
-					__debugInfo = "3866:\ddgui.gbas";
-					local1_j_2169 += 1;
-					__pc = 12334; break; //back jump
-					
-				case 12336: //dummy for
-					;
-						
-					__debugInfo = "3868:\ddgui.gbas";
-					;
-					case 12361:
-						__debugInfo = "3870:\ddgui.gbas";
-						if (!((((MID_Str(local8_cdir_Str_2152, (((local8_cdir_Str_2152).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12356; break; }
-					
-					case 12360:
-						__debugInfo = "3870:\ddgui.gbas";
-						local8_cdir_Str_2152+="/";
-						
-					__debugInfo = "3870:\ddgui.gbas";
-					
-				case 12356: //dummy jumper1
-					;
-						
-					__debugInfo = "3871:\ddgui.gbas";
-					SETCURRENTDIR(local8_cdir_Str_2152);
-					case 12364:
-						__debugInfo = "3872:\ddgui.gbas";
-						__pc = __labels["refresh_fd"]; break;
-						
-					__debugInfo = "3864:\ddgui.gbas";
-					
-				case 12326: //dummy jumper1
-					;
-						
-					__debugInfo = "3874:\ddgui.gbas";
-					local1_i_2168 += 1;
-					__pc = 12312; break; //back jump
-					
-				case 12319: //dummy for
-					;
-						
-					__debugInfo = "3875:\ddgui.gbas";
-					;
-						
-					__debugInfo = "3861:\ddgui.gbas";
-					
-				case 12307: //dummy jumper1
-					;
-						
-					case 12465:
-						__debugInfo = "3894:\ddgui.gbas";
-						if (!(func9_DDgui_get("ls_dir", "CLICKED"))) { __pc = 12370; break; }
-					
-					var local3_sel_2170 = 0;
-					case 12377:
-						__debugInfo = "3879:\ddgui.gbas";
-						local3_sel_2170 = ~~(func9_DDgui_get("ls_dir", "SELECT"));
-						
-					__debugInfo = "3880:\ddgui.gbas";
-					local8_cdir_Str_2152 = local7_pre_Str_2154;
-					__debugInfo = "3880:\ddgui.gbas";
-					
-					var local1_i_2171 = 0;
-					case 12402:
-						__debugInfo = "3884:\ddgui.gbas";
-						local1_i_2171 = 0
-					
-				case 12385: //dummy for1
-					if (!toCheck(local1_i_2171, ((BOUNDS(local9_bread_Str_2153, 0)) - (2)), 1)) {__pc = 12392; break;}
-					
-					case 12396:
-						__debugInfo = "3882:\ddgui.gbas";
-						local8_cdir_Str_2152+="/";
-						
-					__debugInfo = "3883:\ddgui.gbas";
-					local8_cdir_Str_2152+=local9_bread_Str_2153.arrAccess(local1_i_2171).values[tmpPositionCache];
-					__debugInfo = "3882:\ddgui.gbas";
-					local1_i_2171 += 1;
-					__pc = 12385; break; //back jump
-					
-				case 12392: //dummy for
-					;
-						
-					__debugInfo = "3884:\ddgui.gbas";
-					;
-					case 12446:
-						__debugInfo = "3889:\ddgui.gbas";
-						if (!((((local9_files_Str_2155.arrAccess(local3_sel_2170).values[tmpPositionCache]) != ("..")) ? 1 : 0))) { __pc = 12408; break; }
-					
-					case 12425:
-						__debugInfo = "3886:\ddgui.gbas";
-						if (!(BOUNDS(local9_bread_Str_2153, 0))) { __pc = 12414; break; }
-					
-					case 12424:
-						__debugInfo = "3886:\ddgui.gbas";
-						local8_cdir_Str_2152+=(("/") + (local9_bread_Str_2153.arrAccess(-(1)).values[tmpPositionCache]));
-						
-					__debugInfo = "3886:\ddgui.gbas";
-					
-				case 12414: //dummy jumper1
-					;
-						
-					__debugInfo = "3887:\ddgui.gbas";
-					DEBUG((((((((("sel: ") + (CAST2STRING(local3_sel_2170)))) + (" = "))) + (func21_DDgui_getitemtext_Str("ls_dir", local3_sel_2170)))) + ("\n")));
-					__debugInfo = "3888:\ddgui.gbas";
-					local8_cdir_Str_2152+=(("/") + (func21_DDgui_getitemtext_Str("ls_dir", local3_sel_2170)));
-					__debugInfo = "3886:\ddgui.gbas";
-					
-				case 12408: //dummy jumper1
-					;
-						
-					case 12461:
-						__debugInfo = "3891:\ddgui.gbas";
-						if (!((((MID_Str(local8_cdir_Str_2152, (((local8_cdir_Str_2152).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12456; break; }
-					
-					case 12460:
-						__debugInfo = "3891:\ddgui.gbas";
-						local8_cdir_Str_2152+="/";
-						
-					__debugInfo = "3891:\ddgui.gbas";
-					
-				case 12456: //dummy jumper1
-					;
-						
-					__debugInfo = "3892:\ddgui.gbas";
-					SETCURRENTDIR(local8_cdir_Str_2152);
-					case 12464:
-						__debugInfo = "3893:\ddgui.gbas";
-						__pc = __labels["refresh_fd"]; break;
-						
-					__debugInfo = "3879:\ddgui.gbas";
-					
-				case 12370: //dummy jumper1
-					;
-						
-					case 12478:
-						__debugInfo = "3898:\ddgui.gbas";
-						if (!(func9_DDgui_get("ls_file", "CLICKED"))) { __pc = 12468; break; }
-					
-					case 12477:
-						__debugInfo = "3897:\ddgui.gbas";
-						func9_DDgui_set("tx_file", "TEXT", func21_DDgui_getitemtext_Str("ls_file", ~~(func9_DDgui_get("ls_file", "SELECT"))));
-						
-					__debugInfo = "3897:\ddgui.gbas";
-					
-				case 12468: //dummy jumper1
-					;
-						
-					case 12595:
-						__debugInfo = "3936:\ddgui.gbas";
-						if (!(func9_DDgui_get("bt_ok", "CLICKED"))) { __pc = 12481; break; }
-					
-					case 12487:
-						__debugInfo = "3903:\ddgui.gbas";
-						local11_outfile_Str_2158 = func13_DDgui_get_Str("tx_file", "TEXT");
-						
-					case 12593:
-						__debugInfo = "3933:\ddgui.gbas";
-						if (!((local11_outfile_Str_2158).length)) { __pc = 12490; break; }
-					
-					case 12494:
-						__debugInfo = "3906:\ddgui.gbas";
-						local8_cdir_Str_2152 = GETCURRENTDIR_Str();
-						
-					case 12519:
-						__debugInfo = "3911:\ddgui.gbas";
-						if (!((((MID_Str(local8_cdir_Str_2152, (((local8_cdir_Str_2152).length) - (1)), 1)) == ("/")) ? 1 : 0))) { __pc = 12504; break; }
-					
-					case 12510:
-						__debugInfo = "3908:\ddgui.gbas";
-						local11_outfile_Str_2158 = ((local8_cdir_Str_2152) + (local11_outfile_Str_2158));
-						
-					__debugInfo = "3908:\ddgui.gbas";
-					__pc = 16833;
-					break;
-					
-				case 12504: //dummy jumper1
-					
-					case 12518:
-						__debugInfo = "3910:\ddgui.gbas";
-						local11_outfile_Str_2158 = ((((local8_cdir_Str_2152) + ("/"))) + (local11_outfile_Str_2158));
-						
-					__debugInfo = "3910:\ddgui.gbas";
-					
-				case 16833: //dummy jumper2
-					;
-						
-					case 12592:
-						__debugInfo = "3932:\ddgui.gbas";
-						if (!(param5_bOpen)) { __pc = 12521; break; }
-					
-					case 12530:
-						__debugInfo = "3914:\ddgui.gbas";
-						if (!(DOESFILEEXIST(local11_outfile_Str_2158))) { __pc = 12525; break; }
-					
-					case 12529:
-						__debugInfo = "3914:\ddgui.gbas";
-						local2_ok_2167 = 1;
-						
-					__debugInfo = "3914:\ddgui.gbas";
-					
-				case 12525: //dummy jumper1
-					;
-						
-					__debugInfo = "3914:\ddgui.gbas";
-					__pc = 16834;
-					break;
-					
-				case 12521: //dummy jumper1
-					
-					var local7_ext_Str_2172 = "", local8_cext_Str_2173 = "";
-					case 12541:
-						__debugInfo = "3918:\ddgui.gbas";
-						local7_ext_Str_2172 = MID_Str(param13_filterstr_Str, ((INSTR(param13_filterstr_Str, ".", 0)) + (1)), -(1));
-						
-					__debugInfo = "3919:\ddgui.gbas";
-					local8_cext_Str_2173 = MID_Str(local11_outfile_Str_2158, (((local11_outfile_Str_2158).length) - ((local7_ext_Str_2172).length)), (local7_ext_Str_2172).length);
-					case 12570:
-						__debugInfo = "3922:\ddgui.gbas";
-						if (!(((((((local7_ext_Str_2172) != ("*")) ? 1 : 0)) && ((((LCASE_Str(local8_cext_Str_2173)) != (LCASE_Str(local7_ext_Str_2172))) ? 1 : 0))) ? 1 : 0))) { __pc = 12563; break; }
-					
-					case 12569:
-						__debugInfo = "3921:\ddgui.gbas";
-						local11_outfile_Str_2158+=((".") + (local7_ext_Str_2172));
-						
-					__debugInfo = "3921:\ddgui.gbas";
-					
-				case 12563: //dummy jumper1
-					;
-						
-					case 12591:
-						__debugInfo = "3931:\ddgui.gbas";
-						if (!(DOESFILEEXIST(local11_outfile_Str_2158))) { __pc = 12573; break; }
-					
-					case 12577:
-						__debugInfo = "3925:\ddgui.gbas";
-						local2_ok_2167 = 1;
-						
-					__debugInfo = "3925:\ddgui.gbas";
-					__pc = 16837;
-					break;
-					
-				case 12573: //dummy jumper1
-					
-					case 12590:
-						__debugInfo = "3930:\ddgui.gbas";
-						if (!(OPENFILE(1, local11_outfile_Str_2158, 0))) { __pc = 12583; break; }
-					
-					case 12586:
-						__debugInfo = "3928:\ddgui.gbas";
-						CLOSEFILE(1);
-						
-					__debugInfo = "3929:\ddgui.gbas";
-					local2_ok_2167 = 1;
-					__debugInfo = "3928:\ddgui.gbas";
-					
-				case 12583: //dummy jumper1
-					;
-						
-					__debugInfo = "3930:\ddgui.gbas";
-					
-				case 16837: //dummy jumper2
-					;
-						
-					__debugInfo = "3918:\ddgui.gbas";
-					
-				case 16834: //dummy jumper2
-					;
-						
-					__debugInfo = "3906:\ddgui.gbas";
-					
-				case 12490: //dummy jumper1
-					;
-						
-					case 12594:
-						__debugInfo = "3935:\ddgui.gbas";
-						__pc = 16822; break;
-						
-					__debugInfo = "3903:\ddgui.gbas";
-					
-				case 12481: //dummy jumper1
-					;
-						
-					case 12601:
-						__debugInfo = "3940:\ddgui.gbas";
-						if (!(func9_DDgui_get("bt_cancel", "CLICKED"))) { __pc = 12598; break; }
-					
-					case 12600:
-						__debugInfo = "3939:\ddgui.gbas";
-						__pc = 16822; break;
-						
-					__debugInfo = "3939:\ddgui.gbas";
-					
-				case 12598: //dummy jumper1
-					;
-						
-					__debugInfo = "3942:\ddgui.gbas";
-					SHOWSCREEN();
-					__debugInfo = "3859:\ddgui.gbas";
-					__pc = 12603; break; //back jump
-					
-				case 16822:
-					;
-					
-				__debugInfo = "3945:\ddgui.gbas";
-				func15_DDgui_popdialog();
-				__debugInfo = "3947:\ddgui.gbas";
-				SETCURRENTDIR(local12_startdir_Str_2151);
-				case 12612:
-					__debugInfo = "3948:\ddgui.gbas";
-					if (!(local2_ok_2167)) { __pc = 12608; break; }
-					
-					case 12611:
-						__debugInfo = "3948:\ddgui.gbas";
-						return tryClone(local11_outfile_Str_2158);
-						
-					__debugInfo = "3948:\ddgui.gbas";
-					
-				case 12608: //dummy jumper1
-					;
-					
-				__debugInfo = "3950:\ddgui.gbas";
-				return "";
-				__debugInfo = "3951:\ddgui.gbas";
-				return "";
-				__debugInfo = "3766:\ddgui.gbas";__pc = -1; break;
-				default:
-					throwError("Gotocounter exception pc: "+__pc);
-				
-			}
-		}
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var __labels = {"__DrawFrames__": 3476, "refresh_fd": 12222};
 	
+	var local12_startdir_Str_2175 = "", local8_cdir_Str_2176 = "", local9_bread_Str_2177 = new GLBArray(), local7_pre_Str_2178 = "", local9_files_Str_2179 = new GLBArray(), local8_num_file_2180 = 0, local7_num_dir_2181 = 0, local11_outfile_Str_2182 = "", local12_bBreadcrumbs_2183 = 0, local3_scx_ref_2184 = [0], local3_scy_ref_2185 = [0], local11_caption_Str_2186 = "", local7_tmp_Str_2188 = "", local2_ok_2191 = 0;
+	var __pc = 12173;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 12173:
+				local12_startdir_Str_2175 = GETCURRENTDIR_Str();
+				
+			local8_cdir_Str_2176 = local12_startdir_Str_2175;
+			local12_bBreadcrumbs_2183 = 0;
+			GETSCREENSIZE(local3_scx_ref_2184, local3_scy_ref_2185);
+			local3_scx_ref_2184[0] = MIN(480, unref(local3_scx_ref_2184[0]));
+			local3_scy_ref_2185[0] = MIN(480, unref(local3_scy_ref_2185[0]));
+			case 12215:
+				if (!(((((((local3_scx_ref_2184[0]) > (400)) ? 1 : 0)) && ((((local3_scy_ref_2185[0]) > (400)) ? 1 : 0))) ? 1 : 0))) { __pc = 12210; break; }
+				
+				case 12214:
+					local12_bBreadcrumbs_2183 = 1;
+					
+				
+				
+			case 12210: //dummy jumper1
+				;
+				
+			func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2184[0]), unref(local3_scy_ref_2185[0]), 1);
+			case 12222:
+				//label: refresh_fd;
+				
+			func10_DDgui_init();
+			func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+			func9_DDgui_set("", "SCALEABLE", CAST2STRING(0));
+			local11_caption_Str_2186 = "Pick a file:";
+			case 12245:
+				if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 12240; break; }
+				
+				case 12244:
+					local11_caption_Str_2186 = "Datei auswählen:";
+					
+				
+				
+			case 12240: //dummy jumper1
+				;
+				
+			func9_DDgui_set("", "TEXT", local11_caption_Str_2186);
+			local8_cdir_Str_2176 = GETCURRENTDIR_Str();
+			case 12259:
+				if (!((((param10_initialise) == (1)) ? 1 : 0))) { __pc = 12256; break; }
+				
+				case 12258:
+					func10_DDgui_init();
+					
+				
+				
+			case 12256: //dummy jumper1
+				;
+				
+			case 12314:
+				if (!((((MID_Str(local8_cdir_Str_2176, 1, 1)) == (":")) ? 1 : 0))) { __pc = 12266; break; }
+				
+				case 12273:
+					local7_pre_Str_2178 = MID_Str(local8_cdir_Str_2176, 0, 2);
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 2, -(1));
+				
+				__pc = 16919;
+				break;
+				
+			case 12266: //dummy jumper1
+				if (!(((((((MID_Str(local8_cdir_Str_2176, 1, 1)) == ("/")) ? 1 : 0)) || ((((MID_Str(local8_cdir_Str_2176, 0, 1)) == ("~")) ? 1 : 0))) ? 1 : 0))) { __pc = 12292; break; }
+				
+				case 12299:
+					local7_pre_Str_2178 = MID_Str(local8_cdir_Str_2176, 0, 1);
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 1, -(1));
+				
+				__pc = 16919;
+				break;
+				
+			case 12292: //dummy jumper1
+				
+				case 12308:
+					local7_pre_Str_2178 = "";
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 1, -(1));
+				
+				
+			case 16919: //dummy jumper2
+				;
+				
+			SPLITSTR(local8_cdir_Str_2176, unref(local9_bread_Str_2177), "/", 1);
+			case 12349:
+				if (!(local12_bBreadcrumbs_2183)) { __pc = 12321; break; }
+				
+				case 12323:
+					
+				var local1_i_2187 = 0;
+				case 12345:
+					local1_i_2187 = 0
+				
+			case 12326: //dummy for1
+				if (!toCheck(local1_i_2187, ((BOUNDS(local9_bread_Str_2177, 0)) - (1)), 1)) {__pc = 12333; break;}
+				
+				case 12344:
+					func12_DDgui_button((("bt_br") + (CAST2STRING(local1_i_2187))), local9_bread_Str_2177.arrAccess(local1_i_2187).values[tmpPositionCache], 0, 0);
+					
+				
+				local1_i_2187 += 1;
+				__pc = 12326; break; //back jump
+				
+			case 12333: //dummy for
+				;
+					
+				
+				;
+					
+				func12_DDgui_spacer(1000, 4);
+				
+				
+			case 12321: //dummy jumper1
+				;
+				
+			local8_num_file_2180 = ~~(GETFILELIST(param13_filterstr_Str, unref(local9_files_Str_2179)));
+			local7_num_dir_2181 = INTEGER(CAST2INT(((local8_num_file_2180) / (65536))));
+			local8_num_file_2180 = MOD(local8_num_file_2180, 65536);
+			
+				var local1_i_2189 = 0;
+				case 12414:
+					local1_i_2189 = 0
+				
+			case 12372: //dummy for1
+				if (!toCheck(local1_i_2189, ((local7_num_dir_2181) - (1)), 1)) {__pc = 12376; break;}
+				
+				case 12400:
+					if (!((((local9_files_Str_2179.arrAccess(local1_i_2189).values[tmpPositionCache]) == (".")) ? 1 : 0))) { __pc = 12383; break; }
+				
+				case 12388:
+					DIMDEL(local9_files_Str_2179, local1_i_2189);
+					
+				local7_num_dir_2181+=-(1);
+				local1_i_2189+=-(1);
+				case 12399:
+					__pc = 12372; break;
+					
+				
+				
+			case 12383: //dummy jumper1
+				;
+					
+				case 12408:
+					if (!((local7_tmp_Str_2188).length)) { __pc = 12403; break; }
+				
+				case 12407:
+					local7_tmp_Str_2188+="|";
+					
+				
+				
+			case 12403: //dummy jumper1
+				;
+					
+				local7_tmp_Str_2188+=local9_files_Str_2179.arrAccess(local1_i_2189).values[tmpPositionCache];
+				
+				local1_i_2189 += 1;
+				__pc = 12372; break; //back jump
+				
+			case 12376: //dummy for
+				;
+					
+				
+				;
+			func11_DDgui_combo("ls_dir", local7_tmp_Str_2188, ((local3_scx_ref_2184[0]) - (20)), 0);
+			func9_DDgui_set("ls_dir", "SELECT", CAST2STRING(-(1)));
+			func12_DDgui_spacer(1000, 4);
+			local7_tmp_Str_2188 = "";
+			
+				var local1_i_2190 = 0;
+				case 12458:
+					local1_i_2190 = 0
+				
+			case 12436: //dummy for1
+				if (!toCheck(local1_i_2190, ((local8_num_file_2180) - (1)), 1)) {__pc = 12440; break;}
+				
+				case 12450:
+					if (!((((local1_i_2190) > (0)) ? 1 : 0))) { __pc = 12445; break; }
+				
+				case 12449:
+					local7_tmp_Str_2188+="|";
+					
+				
+				
+			case 12445: //dummy jumper1
+				;
+					
+				local7_tmp_Str_2188+=local9_files_Str_2179.arrAccess(((local1_i_2190) + (local7_num_dir_2181))).values[tmpPositionCache];
+				
+				local1_i_2190 += 1;
+				__pc = 12436; break; //back jump
+				
+			case 12440: //dummy for
+				;
+					
+				
+				;
+			func10_DDgui_list("ls_file", local7_tmp_Str_2188, ((local3_scx_ref_2184[0]) - (20)), ((((local3_scy_ref_2185[0]) - (120))) - (((local12_bBreadcrumbs_2183) * (64)))));
+			func9_DDgui_set("ls_file", "SELECT", CAST2STRING(-(1)));
+			func12_DDgui_spacer(1000, 4);
+			func16_DDgui_singletext("tx_file", "", ((local3_scx_ref_2184[0]) - (20)));
+			func12_DDgui_spacer(1000, 4);
+			func12_DDgui_button("bt_ok", "OK", 0, 0);
+			func12_DDgui_button("bt_cancel", "Cancel", 0, 0);
+			local2_ok_2191 = 0;
+			case 12807:
+				if (!(1)) {__pc = 16924; break;}
+				
+				case 12509:
+					func10_DDgui_show(0);
+					
+				case 12571:
+					if (!(local12_bBreadcrumbs_2183)) { __pc = 12511; break; }
+				
+				case 12513:
+					
+				var local1_i_2192 = 0;
+				case 12570:
+					local1_i_2192 = 0
+				
+			case 12516: //dummy for1
+				if (!toCheck(local1_i_2192, ((BOUNDS(local9_bread_Str_2177, 0)) - (1)), 1)) {__pc = 12523; break;}
+				
+				case 12569:
+					if (!(func9_DDgui_get((("bt_br") + (CAST2STRING(local1_i_2192))), "CLICKED"))) { __pc = 12530; break; }
+				
+				case 12534:
+					local8_cdir_Str_2176 = local7_pre_Str_2178;
+					
+				
+				var local1_j_2193 = 0;
+				case 12550:
+					local1_j_2193 = 0
+				
+			case 12538: //dummy for1
+				if (!toCheck(local1_j_2193, local1_i_2192, 1)) {__pc = 12540; break;}
+				
+				case 12544:
+					local8_cdir_Str_2176+="/";
+					
+				local8_cdir_Str_2176+=local9_bread_Str_2177.arrAccess(local1_j_2193).values[tmpPositionCache];
+				
+				local1_j_2193 += 1;
+				__pc = 12538; break; //back jump
+				
+			case 12540: //dummy for
+				;
+					
+				
+				;
+				case 12565:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12560; break; }
+				
+				case 12564:
+					local8_cdir_Str_2176+="/";
+					
+				
+				
+			case 12560: //dummy jumper1
+				;
+					
+				SETCURRENTDIR(local8_cdir_Str_2176);
+				case 12568:
+					__pc = __labels["refresh_fd"]; break;
+					
+				
+				
+			case 12530: //dummy jumper1
+				;
+					
+				
+				local1_i_2192 += 1;
+				__pc = 12516; break; //back jump
+				
+			case 12523: //dummy for
+				;
+					
+				
+				;
+					
+				
+				
+			case 12511: //dummy jumper1
+				;
+					
+				case 12669:
+					if (!(func9_DDgui_get("ls_dir", "CLICKED"))) { __pc = 12574; break; }
+				
+				var local3_sel_2194 = 0;
+				case 12581:
+					local3_sel_2194 = ~~(func9_DDgui_get("ls_dir", "SELECT"));
+					
+				local8_cdir_Str_2176 = local7_pre_Str_2178;
+				
+				var local1_i_2195 = 0;
+				case 12606:
+					local1_i_2195 = 0
+				
+			case 12589: //dummy for1
+				if (!toCheck(local1_i_2195, ((BOUNDS(local9_bread_Str_2177, 0)) - (2)), 1)) {__pc = 12596; break;}
+				
+				case 12600:
+					local8_cdir_Str_2176+="/";
+					
+				local8_cdir_Str_2176+=local9_bread_Str_2177.arrAccess(local1_i_2195).values[tmpPositionCache];
+				
+				local1_i_2195 += 1;
+				__pc = 12589; break; //back jump
+				
+			case 12596: //dummy for
+				;
+					
+				
+				;
+				case 12650:
+					if (!((((local9_files_Str_2179.arrAccess(local3_sel_2194).values[tmpPositionCache]) != ("..")) ? 1 : 0))) { __pc = 12612; break; }
+				
+				case 12629:
+					if (!(BOUNDS(local9_bread_Str_2177, 0))) { __pc = 12618; break; }
+				
+				case 12628:
+					local8_cdir_Str_2176+=(("/") + (local9_bread_Str_2177.arrAccess(-(1)).values[tmpPositionCache]));
+					
+				
+				
+			case 12618: //dummy jumper1
+				;
+					
+				local8_cdir_Str_2176+=(("/") + (func21_DDgui_getitemtext_Str("ls_dir", local3_sel_2194)));
+				
+				
+			case 12612: //dummy jumper1
+				;
+					
+				case 12665:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12660; break; }
+				
+				case 12664:
+					local8_cdir_Str_2176+="/";
+					
+				
+				
+			case 12660: //dummy jumper1
+				;
+					
+				SETCURRENTDIR(local8_cdir_Str_2176);
+				case 12668:
+					__pc = __labels["refresh_fd"]; break;
+					
+				
+				
+			case 12574: //dummy jumper1
+				;
+					
+				case 12682:
+					if (!(func9_DDgui_get("ls_file", "CLICKED"))) { __pc = 12672; break; }
+				
+				case 12681:
+					func9_DDgui_set("tx_file", "TEXT", func21_DDgui_getitemtext_Str("ls_file", ~~(func9_DDgui_get("ls_file", "SELECT"))));
+					
+				
+				
+			case 12672: //dummy jumper1
+				;
+					
+				case 12799:
+					if (!(func9_DDgui_get("bt_ok", "CLICKED"))) { __pc = 12685; break; }
+				
+				case 12691:
+					local11_outfile_Str_2182 = func13_DDgui_get_Str("tx_file", "TEXT");
+					
+				case 12797:
+					if (!((local11_outfile_Str_2182).length)) { __pc = 12694; break; }
+				
+				case 12698:
+					local8_cdir_Str_2176 = GETCURRENTDIR_Str();
+					
+				case 12723:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == ("/")) ? 1 : 0))) { __pc = 12708; break; }
+				
+				case 12714:
+					local11_outfile_Str_2182 = ((local8_cdir_Str_2176) + (local11_outfile_Str_2182));
+					
+				
+				__pc = 16935;
+				break;
+				
+			case 12708: //dummy jumper1
+				
+				case 12722:
+					local11_outfile_Str_2182 = ((((local8_cdir_Str_2176) + ("/"))) + (local11_outfile_Str_2182));
+					
+				
+				
+			case 16935: //dummy jumper2
+				;
+					
+				case 12796:
+					if (!(param5_bOpen)) { __pc = 12725; break; }
+				
+				case 12734:
+					if (!(DOESFILEEXIST(local11_outfile_Str_2182))) { __pc = 12729; break; }
+				
+				case 12733:
+					local2_ok_2191 = 1;
+					
+				
+				
+			case 12729: //dummy jumper1
+				;
+					
+				
+				__pc = 16936;
+				break;
+				
+			case 12725: //dummy jumper1
+				
+				var local7_ext_Str_2196 = "", local8_cext_Str_2197 = "";
+				case 12745:
+					local7_ext_Str_2196 = MID_Str(param13_filterstr_Str, ((INSTR(param13_filterstr_Str, ".", 0)) + (1)), -(1));
+					
+				local8_cext_Str_2197 = MID_Str(local11_outfile_Str_2182, (((local11_outfile_Str_2182).length) - ((local7_ext_Str_2196).length)), (local7_ext_Str_2196).length);
+				case 12774:
+					if (!(((((((local7_ext_Str_2196) != ("*")) ? 1 : 0)) && ((((LCASE_Str(local8_cext_Str_2197)) != (LCASE_Str(local7_ext_Str_2196))) ? 1 : 0))) ? 1 : 0))) { __pc = 12767; break; }
+				
+				case 12773:
+					local11_outfile_Str_2182+=((".") + (local7_ext_Str_2196));
+					
+				
+				
+			case 12767: //dummy jumper1
+				;
+					
+				case 12795:
+					if (!(DOESFILEEXIST(local11_outfile_Str_2182))) { __pc = 12777; break; }
+				
+				case 12781:
+					local2_ok_2191 = 1;
+					
+				
+				__pc = 16939;
+				break;
+				
+			case 12777: //dummy jumper1
+				
+				case 12794:
+					if (!(OPENFILE(1, local11_outfile_Str_2182, 0))) { __pc = 12787; break; }
+				
+				case 12790:
+					CLOSEFILE(1);
+					
+				local2_ok_2191 = 1;
+				
+				
+			case 12787: //dummy jumper1
+				;
+					
+				
+				
+			case 16939: //dummy jumper2
+				;
+					
+				
+				
+			case 16936: //dummy jumper2
+				;
+					
+				
+				
+			case 12694: //dummy jumper1
+				;
+					
+				case 12798:
+					__pc = 16924; break;
+					
+				
+				
+			case 12685: //dummy jumper1
+				;
+					
+				case 12805:
+					if (!(func9_DDgui_get("bt_cancel", "CLICKED"))) { __pc = 12802; break; }
+				
+				case 12804:
+					__pc = 16924; break;
+					
+				
+				
+			case 12802: //dummy jumper1
+				;
+					
+				SHOWSCREEN();
+				
+				__pc = 12807; break; //back jump
+				
+			case 16924:
+				;
+				
+			func15_DDgui_popdialog();
+			SETCURRENTDIR(local12_startdir_Str_2175);
+			case 12816:
+				if (!(local2_ok_2191)) { __pc = 12812; break; }
+				
+				case 12815:
+					return tryClone(local11_outfile_Str_2182);
+					
+				
+				
+			case 12812: //dummy jumper1
+				;
+				
+			return "";
+			return "";
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
+	}
 };
 window['func14_DDgui_ColorDlg'] = function(param5_color) {
-	stackPush("function: DDgui_ColorDlg", __debugInfo);
-	try {
-		var local7_screenx_ref_2175 = [0], local7_screeny_ref_2176 = [0], local2_tx_ref_2177 = [0], local2_ty_ref_2178 = [0], local1_x_2179 = 0, local1_y_2180 = 0, local1_w_2181 = 0, local1_r_2182 = 0.0, local1_g_2183 = 0.0, local1_b_2184 = 0.0, local1_h_2185 = 0.0, local8_oldcolor_2186 = 0;
-		__debugInfo = "4012:\ddgui.gbas";
-		local8_oldcolor_2186 = param5_color;
-		__debugInfo = "4014:\ddgui.gbas";
-		local1_r_2182 = ((bAND(param5_color, 255)) / (255));
-		__debugInfo = "4015:\ddgui.gbas";
-		local1_g_2183 = ((bAND(param5_color, 65280)) / (65280));
-		__debugInfo = "4016:\ddgui.gbas";
-		local1_b_2184 = ((bAND(param5_color, 16711680)) / (16711680));
-		__debugInfo = "4017:\ddgui.gbas";
-		local1_h_2185 = 0.5;
-		__debugInfo = "4019:\ddgui.gbas";
-		GETFONTSIZE(local2_tx_ref_2177, local2_ty_ref_2178);
-		__debugInfo = "4020:\ddgui.gbas";
-		GETSCREENSIZE(local7_screenx_ref_2175, local7_screeny_ref_2176);
-		__debugInfo = "4022:\ddgui.gbas";
-		func16_DDgui_pushdialog(0, 0, 240, 240, 0);
-		__debugInfo = "4023:\ddgui.gbas";
-		func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
-		__debugInfo = "4024:\ddgui.gbas";
-		func9_DDgui_set("", "TEXT", "Color Picker");
-		__debugInfo = "4025:\ddgui.gbas";
-		func16_DDgui_framestart("", "", 0);
-		__debugInfo = "4026:\ddgui.gbas";
-		func12_DDgui_widget("", "R", 0, 0);
-		__debugInfo = "4027:\ddgui.gbas";
-		func12_DDgui_slider("sl_R", local1_r_2182, 0, 0);
-		__debugInfo = "4028:\ddgui.gbas";
-		func16_DDgui_numbertext("tx_R", CAST2STRING(INTEGER(((local1_r_2182) * (255.1)))), ((local2_tx_ref_2177[0]) * (3)));
-		__debugInfo = "4029:\ddgui.gbas";
-		func9_DDgui_set("tx_R", "READONLY", CAST2STRING(1));
-		__debugInfo = "4030:\ddgui.gbas";
-		func9_DDgui_set("tx_R", "STEP", CAST2STRING(16));
-		__debugInfo = "4031:\ddgui.gbas";
-		func12_DDgui_spacer(10000, 0);
-		__debugInfo = "4032:\ddgui.gbas";
-		func12_DDgui_widget("", "G", 0, 0);
-		__debugInfo = "4033:\ddgui.gbas";
-		func12_DDgui_slider("sl_G", local1_g_2183, 0, 0);
-		__debugInfo = "4034:\ddgui.gbas";
-		func16_DDgui_numbertext("tx_G", CAST2STRING(INTEGER(((local1_g_2183) * (255.1)))), ((local2_tx_ref_2177[0]) * (3)));
-		__debugInfo = "4035:\ddgui.gbas";
-		func9_DDgui_set("tx_G", "READONLY", CAST2STRING(1));
-		__debugInfo = "4036:\ddgui.gbas";
-		func9_DDgui_set("tx_G", "STEP", CAST2STRING(16));
-		__debugInfo = "4037:\ddgui.gbas";
-		func12_DDgui_spacer(10000, 0);
-		__debugInfo = "4038:\ddgui.gbas";
-		func12_DDgui_widget("", "B", 0, 0);
-		__debugInfo = "4039:\ddgui.gbas";
-		func12_DDgui_slider("sl_B", local1_b_2184, 0, 0);
-		__debugInfo = "4040:\ddgui.gbas";
-		func16_DDgui_numbertext("tx_B", CAST2STRING(INTEGER(((local1_b_2184) * (255.1)))), ((local2_tx_ref_2177[0]) * (3)));
-		__debugInfo = "4041:\ddgui.gbas";
-		func9_DDgui_set("tx_B", "READONLY", CAST2STRING(1));
-		__debugInfo = "4042:\ddgui.gbas";
-		func9_DDgui_set("tx_B", "STEP", CAST2STRING(16));
-		__debugInfo = "4043:\ddgui.gbas";
-		func12_DDgui_spacer(10000, 0);
-		__debugInfo = "4044:\ddgui.gbas";
-		func12_DDgui_widget("", "H", 0, 0);
-		__debugInfo = "4045:\ddgui.gbas";
-		func12_DDgui_slider("sl_H", local1_h_2185, 0, 0);
-		__debugInfo = "4046:\ddgui.gbas";
-		func16_DDgui_numbertext("tx_H", CAST2STRING(INTEGER(((local1_h_2185) * (100.1)))), ((local2_tx_ref_2177[0]) * (3)));
-		__debugInfo = "4047:\ddgui.gbas";
-		func9_DDgui_set("tx_H", "READONLY", CAST2STRING(1));
-		__debugInfo = "4048:\ddgui.gbas";
-		func9_DDgui_set("tx_H", "STEP", CAST2STRING(6.25));
-		__debugInfo = "4049:\ddgui.gbas";
-		func14_DDgui_frameend();
-		__debugInfo = "4051:\ddgui.gbas";
-		func12_DDgui_button("bt_col", (("SPR_C") + (CAST2STRING(param5_color))), 32, 128);
-		__debugInfo = "4052:\ddgui.gbas";
-		func9_DDgui_set("bt_col", "WIDTH", CAST2STRING(32));
-		__debugInfo = "4053:\ddgui.gbas";
-		func9_DDgui_set("bt_col", "READONLY", CAST2STRING(1));
-		__debugInfo = "4055:\ddgui.gbas";
-		func12_DDgui_spacer(10000, 0);
-		__debugInfo = "4057:\ddgui.gbas";
-		func16_DDgui_framestart("fr_center", "", 0);
-		__debugInfo = "4058:\ddgui.gbas";
-		func12_DDgui_button("bt_ok", "OK", 64, 32);
-		__debugInfo = "4059:\ddgui.gbas";
-		func12_DDgui_button("bt_cancel", "Cancel", 128, 32);
-		__debugInfo = "4060:\ddgui.gbas";
-		func14_DDgui_frameend();
-		__debugInfo = "4061:\ddgui.gbas";
-		func9_DDgui_set("fr_center", "ALIGN", CAST2STRING(0));
-		__debugInfo = "4106:\ddgui.gbas";
-		while (1) {
-			__debugInfo = "4064:\ddgui.gbas";
-			func10_DDgui_show(0);
-			__debugInfo = "4087:\ddgui.gbas";
-			if ((((((((((func9_DDgui_get("sl_R", "CLICKED")) || (func9_DDgui_get("sl_G", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_B", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_H", "CLICKED"))) ? 1 : 0)) {
-				__debugInfo = "4066:\ddgui.gbas";
-				local1_r_2182 = func9_DDgui_get("sl_R", "TEXT");
-				__debugInfo = "4067:\ddgui.gbas";
-				local1_g_2183 = func9_DDgui_get("sl_G", "TEXT");
-				__debugInfo = "4068:\ddgui.gbas";
-				local1_b_2184 = func9_DDgui_get("sl_B", "TEXT");
-				__debugInfo = "4069:\ddgui.gbas";
-				local1_h_2185 = ((2) * (func9_DDgui_get("sl_H", "TEXT")));
-				__debugInfo = "4080:\ddgui.gbas";
-				if ((((local1_h_2185) <= (1)) ? 1 : 0)) {
-					__debugInfo = "4072:\ddgui.gbas";
-					local1_r_2182 = ((local1_h_2185) * (local1_r_2182));
-					__debugInfo = "4073:\ddgui.gbas";
-					local1_g_2183 = ((local1_h_2185) * (local1_g_2183));
-					__debugInfo = "4074:\ddgui.gbas";
-					local1_b_2184 = ((local1_h_2185) * (local1_b_2184));
-					__debugInfo = "4072:\ddgui.gbas";
-				} else {
-					__debugInfo = "4076:\ddgui.gbas";
-					local1_h_2185 = ((local1_h_2185) - (1));
-					__debugInfo = "4077:\ddgui.gbas";
-					local1_r_2182 = MIN(1, MAX(0, ((((local1_h_2185) * (((1) - (local1_r_2182))))) + (local1_r_2182))));
-					__debugInfo = "4078:\ddgui.gbas";
-					local1_g_2183 = MIN(1, MAX(0, ((((local1_h_2185) * (((1) - (local1_g_2183))))) + (local1_g_2183))));
-					__debugInfo = "4079:\ddgui.gbas";
-					local1_b_2184 = MIN(1, MAX(0, ((((local1_h_2185) * (((1) - (local1_b_2184))))) + (local1_b_2184))));
-					__debugInfo = "4076:\ddgui.gbas";
-				};
-				__debugInfo = "4081:\ddgui.gbas";
-				param5_color = RGB(~~(((local1_r_2182) * (255))), ~~(((local1_g_2183) * (255))), ~~(((local1_b_2184) * (255))));
-				__debugInfo = "4082:\ddgui.gbas";
-				func9_DDgui_set("tx_R", "TEXT", CAST2STRING(INTEGER(((local1_r_2182) * (255.1)))));
-				__debugInfo = "4083:\ddgui.gbas";
-				func9_DDgui_set("tx_G", "TEXT", CAST2STRING(INTEGER(((local1_g_2183) * (255.1)))));
-				__debugInfo = "4084:\ddgui.gbas";
-				func9_DDgui_set("tx_B", "TEXT", CAST2STRING(INTEGER(((local1_b_2184) * (255.1)))));
-				__debugInfo = "4085:\ddgui.gbas";
-				func9_DDgui_set("tx_H", "TEXT", CAST2STRING(INTEGER(((local1_h_2185) * (100.1)))));
-				__debugInfo = "4086:\ddgui.gbas";
-				func9_DDgui_set("bt_col", "TEXT", (("SPR_C") + (CAST2STRING(param5_color))));
-				__debugInfo = "4066:\ddgui.gbas";
+	var local7_screenx_ref_2199 = [0], local7_screeny_ref_2200 = [0], local2_tx_ref_2201 = [0], local2_ty_ref_2202 = [0], local1_x_2203 = 0, local1_y_2204 = 0, local1_w_2205 = 0, local1_r_2206 = 0.0, local1_g_2207 = 0.0, local1_b_2208 = 0.0, local1_h_2209 = 0.0, local8_oldcolor_2210 = 0;
+	local8_oldcolor_2210 = param5_color;
+	local1_r_2206 = ((bAND(param5_color, 255)) / (255));
+	local1_g_2207 = ((bAND(param5_color, 65280)) / (65280));
+	local1_b_2208 = ((bAND(param5_color, 16711680)) / (16711680));
+	local1_h_2209 = 0.5;
+	GETFONTSIZE(local2_tx_ref_2201, local2_ty_ref_2202);
+	GETSCREENSIZE(local7_screenx_ref_2199, local7_screeny_ref_2200);
+	func16_DDgui_pushdialog(0, 0, 240, 240, 0);
+	func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+	func9_DDgui_set("", "TEXT", "Color Picker");
+	func16_DDgui_framestart("", "", 0);
+	func12_DDgui_widget("", "R", 0, 0);
+	func12_DDgui_slider("sl_R", local1_r_2206, 0, 0);
+	func16_DDgui_numbertext("tx_R", CAST2STRING(INTEGER(((local1_r_2206) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_R", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_R", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "G", 0, 0);
+	func12_DDgui_slider("sl_G", local1_g_2207, 0, 0);
+	func16_DDgui_numbertext("tx_G", CAST2STRING(INTEGER(((local1_g_2207) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_G", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_G", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "B", 0, 0);
+	func12_DDgui_slider("sl_B", local1_b_2208, 0, 0);
+	func16_DDgui_numbertext("tx_B", CAST2STRING(INTEGER(((local1_b_2208) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_B", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_B", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "H", 0, 0);
+	func12_DDgui_slider("sl_H", local1_h_2209, 0, 0);
+	func16_DDgui_numbertext("tx_H", CAST2STRING(INTEGER(((local1_h_2209) * (100.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_H", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_H", "STEP", CAST2STRING(6.25));
+	func14_DDgui_frameend();
+	func12_DDgui_button("bt_col", (("SPR_C") + (CAST2STRING(param5_color))), 32, 128);
+	func9_DDgui_set("bt_col", "WIDTH", CAST2STRING(32));
+	func9_DDgui_set("bt_col", "READONLY", CAST2STRING(1));
+	func12_DDgui_spacer(10000, 0);
+	func16_DDgui_framestart("fr_center", "", 0);
+	func12_DDgui_button("bt_ok", "OK", 64, 32);
+	func12_DDgui_button("bt_cancel", "Cancel", 128, 32);
+	func14_DDgui_frameend();
+	func9_DDgui_set("fr_center", "ALIGN", CAST2STRING(0));
+	while (1) {
+		func10_DDgui_show(0);
+		if ((((((((((func9_DDgui_get("sl_R", "CLICKED")) || (func9_DDgui_get("sl_G", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_B", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_H", "CLICKED"))) ? 1 : 0)) {
+			local1_r_2206 = func9_DDgui_get("sl_R", "TEXT");
+			local1_g_2207 = func9_DDgui_get("sl_G", "TEXT");
+			local1_b_2208 = func9_DDgui_get("sl_B", "TEXT");
+			local1_h_2209 = ((2) * (func9_DDgui_get("sl_H", "TEXT")));
+			if ((((local1_h_2209) <= (1)) ? 1 : 0)) {
+				local1_r_2206 = ((local1_h_2209) * (local1_r_2206));
+				local1_g_2207 = ((local1_h_2209) * (local1_g_2207));
+				local1_b_2208 = ((local1_h_2209) * (local1_b_2208));
+				
+			} else {
+				local1_h_2209 = ((local1_h_2209) - (1));
+				local1_r_2206 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_r_2206))))) + (local1_r_2206))));
+				local1_g_2207 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_g_2207))))) + (local1_g_2207))));
+				local1_b_2208 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_b_2208))))) + (local1_b_2208))));
+				
 			};
-			__debugInfo = "4089:\ddgui.gbas";
-			local1_x_2179 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos) + (((local2_tx_ref_2177[0]) * (2))));
-			__debugInfo = "4090:\ddgui.gbas";
-			local1_y_2180 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos) + (((local2_ty_ref_2178[0]) * (2))));
-			__debugInfo = "4091:\ddgui.gbas";
-			local1_w_2181 = 128;
-			__debugInfo = "4092:\ddgui.gbas";
-			local1_h_2185 = 48;
-			__debugInfo = "4097:\ddgui.gbas";
-			SHOWSCREEN();
-			__debugInfo = "4099:\ddgui.gbas";
-			if (func9_DDgui_get("bt_ok", "CLICKED")) {
-				__debugInfo = "4099:\ddgui.gbas";
-				break;
-				__debugInfo = "4099:\ddgui.gbas";
-			};
-			__debugInfo = "4103:\ddgui.gbas";
-			if (func9_DDgui_get("bt_cancel", "CLICKED")) {
-				__debugInfo = "4101:\ddgui.gbas";
-				param5_color = local8_oldcolor_2186;
-				__debugInfo = "4102:\ddgui.gbas";
-				break;
-				__debugInfo = "4101:\ddgui.gbas";
-			};
-			__debugInfo = "4105:\ddgui.gbas";
-			HIBERNATE();
-			__debugInfo = "4064:\ddgui.gbas";
+			param5_color = RGB(~~(((local1_r_2206) * (255))), ~~(((local1_g_2207) * (255))), ~~(((local1_b_2208) * (255))));
+			func9_DDgui_set("tx_R", "TEXT", CAST2STRING(INTEGER(((local1_r_2206) * (255.1)))));
+			func9_DDgui_set("tx_G", "TEXT", CAST2STRING(INTEGER(((local1_g_2207) * (255.1)))));
+			func9_DDgui_set("tx_B", "TEXT", CAST2STRING(INTEGER(((local1_b_2208) * (255.1)))));
+			func9_DDgui_set("tx_H", "TEXT", CAST2STRING(INTEGER(((local1_h_2209) * (100.1)))));
+			func9_DDgui_set("bt_col", "TEXT", (("SPR_C") + (CAST2STRING(param5_color))));
+			
 		};
-		__debugInfo = "4108:\ddgui.gbas";
-		func15_DDgui_popdialog();
-		__debugInfo = "4109:\ddgui.gbas";
-		return tryClone(param5_color);
-		__debugInfo = "4110:\ddgui.gbas";
-		return 0;
-		__debugInfo = "4012:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		local1_x_2203 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos) + (((local2_tx_ref_2201[0]) * (2))));
+		local1_y_2204 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos) + (((local2_ty_ref_2202[0]) * (2))));
+		local1_w_2205 = 128;
+		local1_h_2209 = 48;
+		SHOWSCREEN();
+		if (func9_DDgui_get("bt_ok", "CLICKED")) {
+			break;
+			
+		};
+		if (func9_DDgui_get("bt_cancel", "CLICKED")) {
+			param5_color = local8_oldcolor_2210;
+			break;
+			
+		};
+		HIBERNATE();
+		
+	};
+	func15_DDgui_popdialog();
+	return tryClone(param5_color);
+	return 0;
 	
 };
 window['func18_DDgui_CenterDialog'] = function() {
-	stackPush("function: DDgui_CenterDialog", __debugInfo);
-	try {
-		var local3_scx_ref_2187 = [0], local3_scy_ref_2188 = [0], local1_w_2189 = 0, local1_h_2190 = 0;
-		__debugInfo = "4114:\ddgui.gbas";
-		GETSCREENSIZE(local3_scx_ref_2187, local3_scy_ref_2188);
-		__debugInfo = "4116:\ddgui.gbas";
-		local1_w_2189 = ~~(func9_DDgui_get("", "WIDTH"));
-		__debugInfo = "4117:\ddgui.gbas";
-		local1_h_2190 = ~~(func9_DDgui_get("", "HEIGHT"));
-		__debugInfo = "4118:\ddgui.gbas";
-		func9_DDgui_set("", "XPOS", CAST2STRING(CAST2INT(((((local3_scx_ref_2187[0]) - (local1_w_2189))) / (2)))));
-		__debugInfo = "4119:\ddgui.gbas";
-		func9_DDgui_set("", "YPOS", CAST2STRING(CAST2INT(((((local3_scy_ref_2188[0]) - (local1_h_2190))) / (2)))));
-		__debugInfo = "4120:\ddgui.gbas";
-		return 0;
-		__debugInfo = "4114:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	var local3_scx_ref_2211 = [0], local3_scy_ref_2212 = [0], local1_w_2213 = 0, local1_h_2214 = 0;
+	GETSCREENSIZE(local3_scx_ref_2211, local3_scy_ref_2212);
+	local1_w_2213 = ~~(func9_DDgui_get("", "WIDTH"));
+	local1_h_2214 = ~~(func9_DDgui_get("", "HEIGHT"));
+	func9_DDgui_set("", "XPOS", CAST2STRING(CAST2INT(((((local3_scx_ref_2211[0]) - (local1_w_2213))) / (2)))));
+	func9_DDgui_set("", "YPOS", CAST2STRING(CAST2INT(((((local3_scy_ref_2212[0]) - (local1_h_2214))) / (2)))));
+	return 0;
 	
 };
 window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
-	stackPush("method: ToString_Str", __debugInfo);
-	try {
-		__debugInfo = "4132:\ddgui.gbas";
-		return "Object";
-		__debugInfo = "4133:\ddgui.gbas";
-		return "";
-		__debugInfo = "4132:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	return "Object";
+	return "";
 	
 };
 window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
-	stackPush("method: Equals", __debugInfo);
-	try {
-		__debugInfo = "4139:\ddgui.gbas";
-		if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
-			__debugInfo = "4136:\ddgui.gbas";
-			return 1;
-			__debugInfo = "4136:\ddgui.gbas";
-		} else {
-			__debugInfo = "4138:\ddgui.gbas";
-			return tryClone(0);
-			__debugInfo = "4138:\ddgui.gbas";
-		};
-		__debugInfo = "4140:\ddgui.gbas";
-		return 0;
-		__debugInfo = "4139:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
+		return 1;
+		
+	} else {
+		return tryClone(0);
+		
+	};
+	return 0;
 	
 };
 window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
-	stackPush("method: ToHashCode", __debugInfo);
-	try {
-		__debugInfo = "4142:\ddgui.gbas";
-		return 0;
-		__debugInfo = "4143:\ddgui.gbas";
-		return 0;
-		__debugInfo = "4142:\ddgui.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	return 0;
+	return 0;
 	
 };
 window['DDgui_userfunction'] = function() {
@@ -11783,6 +8993,9 @@ var vtbl_type11_DDGUI_ENTRY = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type11_DDGUI_ENTRY'] = function() {
 	this.attr7_key_Str = "";
 	this.attr7_val_Str = "";
@@ -11811,6 +9024,9 @@ var vtbl_type9_DDGUI_WDG = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type9_DDGUI_WDG'] = function() {
 	this.attr7_wid_Str = "";
 	this.attr9_wtype_Str = "";
@@ -11895,6 +9111,9 @@ var vtbl_type11_DDGUI_ORDER = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type11_DDGUI_ORDER'] = function() {
 	this.attr6_id_Str_ref = [""];
 	this.attr5_index = 0;
@@ -11923,6 +9142,9 @@ var vtbl_type10_DDGUI_AUTO = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type10_DDGUI_AUTO'] = function() {
 	this.attr10_idfrom_Str = "";
 	this.attr8_idto_Str = "";
@@ -11955,6 +9177,9 @@ var vtbl_type9_DDGUI_DLG = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type9_DDGUI_DLG'] = function() {
 	this.attr9_focus_Str = "";
 	this.attr8_moveable = 0;
@@ -12025,6 +9250,9 @@ var vtbl_type10_DDGUI_FONT = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type10_DDGUI_FONT'] = function() {
 	this.attr4_left = new GLBArray();
 	this.attr5_width = new GLBArray();
@@ -12056,6 +9284,9 @@ var vtbl_type7_TObject = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type7_TObject'] = function() {
 	this.vtbl = vtbl_type7_TObject;
 	return this;
@@ -12080,6 +9311,9 @@ var vtbl_type6_TObj3D = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type6_TObj3D'] = function() {
 	this.vtbl = vtbl_type6_TObj3D;
 	return this;
@@ -12104,6 +9338,9 @@ var vtbl_type10_DataBuffer = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type10_DataBuffer'] = function() {
 	this.vtbl = vtbl_type10_DataBuffer;
 	return this;
@@ -12131,6 +9368,7 @@ static9_DDgui_draw_widget_intern_lines_Str = new GLBArray();
 static7_DDgui_backgnd_QuickGL = -(1);
 static9_DDgui_drawwidget_dummy_Str_ref = [""];
 static9_DDgui_handlewidget_dummy_Str_ref = [""];
+static7_DDgui_radio_opt_Str = new GLBArray();
 static7_DDgui_handleradio_txt_Str = new GLBArray();
 static7_DDgui_list_opt_Str = new GLBArray();
 static7_DDgui_drawlist_opt_Str_ref = [new GLBArray()];

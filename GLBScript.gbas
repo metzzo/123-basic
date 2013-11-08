@@ -10,7 +10,7 @@
 
 // ?DEFINE TEST_BEFORE
 
-?DEFINE PRE_FOR_IDE
+// ?DEFINE PRE_FOR_IDE
 
 ?IF DEFINED(GLBSCRIPT) AND DEFINED(PRE_FOR_IDE)
 	?DEFINE FOR_IDE //Kompiliere für die IDE
@@ -25,6 +25,7 @@ CONSTANT XMLNAME$ 	= "WIN32"
 	//Es ist natives GLBasic oder C#
 	?DEFINE CSCOMPILER
 	?DEFINE JSCOMPILER
+	?DEFINE VMCOMPILER
 ?ELSE
 	?DEFINE JSCOMPILER
 ?ENDIF
@@ -45,6 +46,12 @@ DIM Generators[0]
 	DIMPUSH Generators[], G
 ?ENDIF
 
+?IFDEF VMCOMPILER
+	G.Name$ = "VM"
+	G.genProto = VM_Generator$
+	DIMPUSH Generators[], G
+?ENDIF
+
 ?IFDEF FOR_IDE
 	?DEFINE HTML5_WEBWORKER
 ?ENDIF
@@ -56,15 +63,6 @@ DIM Generators[0]
 GbapPath$ = "./"
 
 //LoadFile$("file.glbs")
-//ReadGBAP$("../Tests/Blocks/", "Blocks.gbap")
-//ReadGBAP$("../Tests/", "GLBScript.gbap")
-//ReadGBAP$("../Tests/JumpIt/", "JumpIt.gbap")
-//ReadGBAP$("../Tests/Arkanoid/", "Arkanoid.gbap")
-//ReadGBAP$("../Tests/FourInARow/", "FourInARow.gbap")
-//ReadGBAP$("../Tests/Pong/", "Pong.gbap")
-//ReadGBAP$("../Tests/JumpFrog/", "JumpFrog.gbap")
-//ReadGBAP$("../Tests/Memory/", "Memory.gbap")
-
 //LoadFile$("../Tests/Plain/GOTOTest.txt")
 //LoadFile$("../Tests/Plain/AllTest")
 //LoadFile$("../Tests/Plain/BYREF-ALIAS")
@@ -90,7 +88,6 @@ GbapPath$ = "./"
 	LOCAL Target$	 = ""
 	LOCAL Input$	 = ""
 
-	//?IFNDEF GLB_DEBUG
 	LOCAL c$ = GETCOMMANDLINE$()
 	IF INSTR(c$, "-N") <> -1
 		LOCAL StartPos% = INSTR(c$, "-N")+3
@@ -115,11 +112,7 @@ GbapPath$ = "./"
 	ELSE
 		ArgumentError("Missing option -G")
 	ENDIF
-	//?ENDIF
 
-	//STDOUT "Path "+ProjPath$+"\n"
-	//STDOUT "Name:"+ProjName$+"\n"
-	//STDOUT "Target:"+Target$+"\n"
 
 
 
@@ -143,9 +136,22 @@ GbapPath$ = "./"
 		KEYWAIT
 
 	ELSE
+
 		STDOUT "\n\nFunctions: "+LEN(Compiler.Funcs[])+" Variables: "+LEN(Compiler.Varis[])+" AST Nodes: "+LastExprID+" Types: "+LEN(Compiler.Types[])+"\n"
 		STDOUT "Successful compile! Duration: "+(GETTIMERALL()-Time)/1000+" S, time per token: "+(GETTIMERALL()-Time)/Compiler.LastMaxTokens+"MS, tokens: "+Compiler.LastMaxTokens+" \n"
 
+		?IFDEF VMCOMPILER
+			IF Target$ = "VM"
+				InitFuncs()
+	
+	
+				LOCAL e AS Executor
+				e.Init()
+				e.Execute()
+				KEYWAIT
+			ENDIF
+		?ENDIF
+		
 		?IFNDEF HTML5
 			?IFDEF MEASURETIME
 				KEYWAIT

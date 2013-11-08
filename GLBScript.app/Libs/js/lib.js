@@ -324,7 +324,7 @@ function updateConsole() {
 			window.requestAnimFrame(updateConsole, 100);
 		}
 	} catch(ex) {
-		if (ex instanceof GLBExitException) alert(formatError(ex));
+		if (ex instanceof GLBExitException) throw(formatError(ex));
 	}
 }
 

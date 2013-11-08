@@ -447,16 +447,16 @@ function GETTIMER() {
 }
 
 function ALPHAMODE(mode) {
-	/*if (mode < 0) {
-		context.globalCompositeOperation = 'lighter';
-		mode = (1 - mode) - 1;
+	if (mode < 0) {
+		context.globalCompositeOperation = 'darker';
+		mode = ABS((1 - mode) - 1);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'lighter';
 	} else {
 		context.globalCompositeOperation = 'source-over';
 		mode = 1;
 	}
-	canvas.globalAlpha = mode;*/
+	canvas.globalAlpha = mode;
 }
 
 function SETPIXEL(x, y, col) {
@@ -517,7 +517,7 @@ function VIEWPORT(x, y, width, height) {
 		context.rect( x,y,width,height );
 		context.clip();
 		
-		
+		context.translate(x, y);
 		inViewport = true;
 	}
 }

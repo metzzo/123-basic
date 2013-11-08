@@ -319,9 +319,13 @@
 			?DEFINE OGLES2
 		?ELSE
 			?IFDEF XNA
-				?DEFINE XNA
+				?DEFINE XNA3D
 			?ELSE
-				?ERROR "Unimplemented 3D for Target"
+				?IFDEF VM
+					?DEFINE NATIVE3D
+				?ELSE
+					?ERROR "Unimplemented 3D for Target"
+				?ENDIF
 			?ENDIF
 		?ENDIF
 

@@ -14,6 +14,9 @@ Fixed: SETSCREEN does not ignore Fullscreen parameter anymore and the width/heig
 Fixed: TYPE Foo; Bar; FUNCTION Asdf: Bar; RETURN Bar; ENDFUNCTION // this returned the value of self.Bar instead of the value of the parameter
 Fixed: TYPE asdf; Foo; FUNCTION Bar: FOR Foo = 0 TO 10; NEXT; STDOUT Foo; ENDFUNCTION; ENDTYPE // Implicit self in For should create new local variable to maintain compatibility
 Fixed: ZOOMSPRITE 0,0,0,-1,1 // position of image was not correct
+Fixed: "settings.xml" with more than 1 target didnt function properly
+Fixed: VIEWPORT sets origin properly
+Changed: Began to work on VM - does not run yet
 
 0.35
 Fixed: LOCAL E; FOREACH E IN Arr[]; NEXT <- reused variable "E" instead of declaring a new one.

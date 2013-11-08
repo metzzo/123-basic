@@ -324,7 +324,7 @@ function updateConsole() {
 			window.requestAnimFrame(updateConsole, 100);
 		}
 	} catch(ex) {
-		if (ex instanceof GLBExitException) alert(formatError(ex));
+		if (ex instanceof GLBExitException) throw(formatError(ex));
 	}
 }
 
@@ -2670,16 +2670,16 @@ function GETTIMER() {
 }
 
 function ALPHAMODE(mode) {
-	/*if (mode < 0) {
-		context.globalCompositeOperation = 'lighter';
-		mode = (1 - mode) - 1;
+	if (mode < 0) {
+		context.globalCompositeOperation = 'darker';
+		mode = ABS((1 - mode) - 1);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'lighter';
 	} else {
 		context.globalCompositeOperation = 'source-over';
 		mode = 1;
 	}
-	canvas.globalAlpha = mode;*/
+	canvas.globalAlpha = mode;
 }
 
 function SETPIXEL(x, y, col) {
@@ -2740,7 +2740,7 @@ function VIEWPORT(x, y, width, height) {
 		context.rect( x,y,width,height );
 		context.clip();
 		
-		
+		context.translate(x, y);
 		inViewport = true;
 	}
 }
@@ -4580,2995 +4580,4703 @@ function LOADBMP(path) {
 	image.src = loadAsset(fileSystem.getCurrentDir() + path);
 	
 }
-var __debugInfo = "";
-var debugMode = true;
+var static10_DDgui_show_intern_mouse_down = 0, static10_DDgui_show_intern_movemousex = 0, static10_DDgui_show_intern_movemousey = 0, static12_DDgui_show_intern_ToolTipDelay = 0, static9_DDgui_show_intern_ToolTipMx = 0, static9_DDgui_show_intern_ToolTipMy = 0;
+var static9_DDgui_draw_widget_intern_lines_Str = new GLBArray();
+var static7_DDgui_backgnd_QuickGL = 0;
+var static9_DDgui_drawwidget_dummy_Str_ref = [""];
+var static9_DDgui_handlewidget_dummy_Str_ref = [""];
+var static7_DDgui_radio_opt_Str = new GLBArray();
+var static7_DDgui_handleradio_txt_Str = new GLBArray();
+var static7_DDgui_list_opt_Str = new GLBArray();
+var static7_DDgui_drawlist_opt_Str_ref = [new GLBArray()];
+var static11_ddgui_handletext_st_lasttime = 0, static10_ddgui_handletext_st_lastkey = 0;
+var static7_DDgui_drawtab_str_Str = new GLBArray(), static8_DDgui_drawtab_str2_Str_ref = [new GLBArray()];
+var static7_DDgui_handletab_str_Str = new GLBArray(), static8_DDgui_handletab_str2_Str_ref = [new GLBArray()];
+var static7_DDgui_selecttab_str_Str = new GLBArray(), static8_DDgui_selecttab_str2_Str_ref = [new GLBArray()];
+var debugMode = false;
 window['main'] = function(){
-	stackPush("main", __debugInfo);
-	try {
-		var local2_dx_ref_1391 = [0], local2_dy_ref_1392 = [0];
-		__debugInfo = "28:\JumpIt.gbas";
-		LIMITFPS(30);
-		__debugInfo = "29:\JumpIt.gbas";
-		global12_Hardware_Str = PLATFORMINFO_Str("DEVICE");
-		__debugInfo = "31:\JumpIt.gbas";
-		GETDESKTOPSIZE(local2_dx_ref_1391, local2_dy_ref_1392);
-		__debugInfo = "33:\JumpIt.gbas";
-		SYSTEMPOINTER(1);
-		__debugInfo = "38:\JumpIt.gbas";
-		if ((((global12_Hardware_Str) == ("DESKTOP")) ? 1 : 0)) {
-			__debugInfo = "36:\JumpIt.gbas";
-			local2_dx_ref_1391[0] = 800;
-			__debugInfo = "37:\JumpIt.gbas";
-			local2_dy_ref_1392[0] = 600;
-			__debugInfo = "36:\JumpIt.gbas";
-		};
-		__debugInfo = "40:\JumpIt.gbas";
-		SETSCREEN(unref(local2_dx_ref_1391[0]), unref(local2_dy_ref_1392[0]), 0);
-		__debugInfo = "45:\JumpIt.gbas";
-		if ((((local2_dx_ref_1391[0]) < (local2_dy_ref_1392[0])) ? 1 : 0)) {
-			__debugInfo = "44:\JumpIt.gbas";
-			if (((((((global12_Hardware_Str) != ("DESKTOP")) ? 1 : 0)) || ((((global12_Hardware_Str) == ("WIZ")) ? 1 : 0))) ? 1 : 0)) {
-				__debugInfo = "43:\JumpIt.gbas";
-				SETORIENTATION(1);
-				__debugInfo = "43:\JumpIt.gbas";
-			};
-			__debugInfo = "44:\JumpIt.gbas";
-		};
-		__debugInfo = "47:\JumpIt.gbas";
-		SETCURRENTDIR("Media");
-		__debugInfo = "51:\JumpIt.gbas";
-		global9_Gamestate = ~~(0);
-		__debugInfo = "53:\JumpIt.gbas";
-		global10_SelectTile = 0;
-		__debugInfo = "61:\JumpIt.gbas";
-		global11_PlayerImage = GENSPRITE();
-		__debugInfo = "62:\JumpIt.gbas";
-		LOADANIM("spieler.png", global11_PlayerImage, 16, 32);
-		__debugInfo = "69:\JumpIt.gbas";
-		global11_LadderImage = GENSPRITE();
-		__debugInfo = "70:\JumpIt.gbas";
-		LOADSPRITE("leiter.png", global11_LadderImage);
-		__debugInfo = "73:\JumpIt.gbas";
-		global10_SpikeImage = GENSPRITE();
-		__debugInfo = "74:\JumpIt.gbas";
-		LOADSPRITE("stachel.png", global10_SpikeImage);
-		__debugInfo = "77:\JumpIt.gbas";
-		global15_TrampolineImage = GENSPRITE();
-		__debugInfo = "78:\JumpIt.gbas";
-		LOADSPRITE("trampolin.png", global15_TrampolineImage);
-		__debugInfo = "81:\JumpIt.gbas";
-		global8_PigImage = GENSPRITE();
-		__debugInfo = "82:\JumpIt.gbas";
-		LOADANIM("schwein.png", global8_PigImage, 32, 32);
-		__debugInfo = "85:\JumpIt.gbas";
-		global10_HumanImage = GENSPRITE();
-		__debugInfo = "86:\JumpIt.gbas";
-		LOADSPRITE("fettmonster.png", global10_HumanImage);
-		__debugInfo = "89:\JumpIt.gbas";
-		global9_BirdImage = GENSPRITE();
-		__debugInfo = "90:\JumpIt.gbas";
-		LOADANIM("vogel.png", global9_BirdImage, 32, 16);
-		__debugInfo = "93:\JumpIt.gbas";
-		global9_ShitImage = GENSPRITE();
-		__debugInfo = "94:\JumpIt.gbas";
-		LOADSPRITE("exkrement.png", global9_ShitImage);
-		__debugInfo = "97:\JumpIt.gbas";
-		global10_LlamaImage = GENSPRITE();
-		__debugInfo = "98:\JumpIt.gbas";
-		LOADANIM("llama.png", global10_LlamaImage, 46, 64);
-		__debugInfo = "101:\JumpIt.gbas";
-		global9_SpitImage = GENSPRITE();
-		__debugInfo = "102:\JumpIt.gbas";
-		LOADSPRITE("spucke.png", global9_SpitImage);
-		__debugInfo = "105:\JumpIt.gbas";
-		global9_DoorImage = GENSPRITE();
-		__debugInfo = "106:\JumpIt.gbas";
-		LOADSPRITE("tuer.png", global9_DoorImage);
-		__debugInfo = "109:\JumpIt.gbas";
-		global12_TriggerImage = GENSPRITE();
-		__debugInfo = "110:\JumpIt.gbas";
-		LOADANIM("schalter.png", global12_TriggerImage, 32, 16);
-		__debugInfo = "113:\JumpIt.gbas";
-		global12_DynamitImage = GENSPRITE();
-		__debugInfo = "114:\JumpIt.gbas";
-		LOADSPRITE("dynamit.png", global12_DynamitImage);
-		__debugInfo = "117:\JumpIt.gbas";
-		global14_ExplosionImage = GENSPRITE();
-		__debugInfo = "118:\JumpIt.gbas";
-		LOADANIM("explosion.png", global14_ExplosionImage, 32, 32);
-		__debugInfo = "121:\JumpIt.gbas";
-		global9_MenuImage = GENSPRITE();
-		__debugInfo = "122:\JumpIt.gbas";
-		LOADSPRITE("menu.png", global9_MenuImage);
-		__debugInfo = "125:\JumpIt.gbas";
-		global11_ButtonImage = GENSPRITE();
-		__debugInfo = "126:\JumpIt.gbas";
-		LOADSPRITE("button.png", global11_ButtonImage);
-		__debugInfo = "129:\JumpIt.gbas";
-		global10_ArrowImage = GENSPRITE();
-		__debugInfo = "130:\JumpIt.gbas";
-		LOADSPRITE("pfeil.png", global10_ArrowImage);
-		__debugInfo = "133:\JumpIt.gbas";
-		global9_JumpImage = GENSPRITE();
-		__debugInfo = "134:\JumpIt.gbas";
-		LOADSPRITE("springen.png", global9_JumpImage);
-		__debugInfo = "140:\JumpIt.gbas";
-		CLEARSCREEN(RGB(63, 156, 255));
-		__debugInfo = "142:\JumpIt.gbas";
-		Init();
-		__debugInfo = "143:\JumpIt.gbas";
-		global9_Title_Str = "JumpIt Spielmenue";
-		__debugInfo = "144:\JumpIt.gbas";
-		global9_Menu1_Str = "Spielen";
-		__debugInfo = "145:\JumpIt.gbas";
-		global9_Menu2_Str = "Mapeditor";
-		__debugInfo = "146:\JumpIt.gbas";
-		global9_Menu3_Str = "Beenden";
-		__debugInfo = "147:\JumpIt.gbas";
-		PUSHLOOP("MENU_LOOP");
-		__debugInfo = "257:\JumpIt.gbas";
-		global9_Menu3_Str = "";
-		__debugInfo = "28:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	global25_gDDguiMinControlDimension = 32;
+	global20_DDGUI_AUTO_INPUT_DLG = 1;
+	GLB_ON_INIT();
+	global17_gDDguiCaretColour = 0;
 	
 }
 window['GLB_ON_LOOP'] = function() {
-	stackPush("sub: GLB_ON_LOOP", __debugInfo);
-	try {
-		__debugInfo = "158:\JumpIt.gbas";
+	var local3_now_1608 = 0;
+	global3_old = GETTIMERALL();
+	func10_DDgui_show(0);
+	local3_now_1608 = GETTIMERALL();
+	global5_delta+=((local3_now_1608) - (global3_old));
+	global5_flips+=1;
+	if ((((global5_flips) > (300)) ? 1 : 0)) {
+		global2_nt = 1000;
+		global3_fps = ~~(global5_delta);
+		global5_delta = 0;
+		global5_flips = 0;
+		
+	};
+	PRINT((("fps:") + (CAST2STRING(INTEGER(global3_fps)))), 0, 0, 0);
+	SHOWSCREEN();
+	
+};
+window['GLB_ON_LOOP'] = GLB_ON_LOOP;
+window['GLB_ON_INIT'] = function() {
+	func16_DDgui_pushdialog(0, 0, 300, 300, 0);
+	func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+	func12_DDgui_widget("", "Static Text", 0, 0);
+	func12_DDgui_spacer(10000, 20);
+	func9_DDgui_tab("tab1", (((("Lig_sts,ls_test,ra_test|") + ("Buttons,fr_buttons|"))) + ("Texts,st_text,tx_test")), 0);
+	func11_DDgui_combo("ls_test", "one|two|three", 0, 0);
+	func12_DDgui_spacer(10000, 0);
+	func11_DDgui_radio("ra_test", "red|green|blue", 0);
+	func12_DDgui_slider("sl_test", 0.5, 0, 0);
+	func12_DDgui_spacer(10000, 0);
+	
+};
+window['GLB_ON_INIT'] = GLB_ON_INIT;
+window['func11_DDgui_index'] = function(param10_ddgui_vals, param8_name_Str_ref, param6_create) {
+	var local2_up_2225 = 0, local2_dn_2226 = 0, local3_mid_2227 = 0;
+	local2_up_2225 = 0;
+	local2_dn_2226 = ((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) - (1));
+	while ((((local2_up_2225) < (local2_dn_2226)) ? 1 : 0)) {
+		local3_mid_2227 = CAST2INT(((((local2_up_2225) + (local2_dn_2226))) / (2)));
+		if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0].attr7_wid_Str) > (param8_name_Str_ref[0])) ? 1 : 0)) {
+			local2_dn_2226 = MAX(((local3_mid_2227) - (1)), local2_up_2225);
+			
+		} else {
+			if ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0)) {
+				local2_up_2225 = MIN(local2_dn_2226, ((local3_mid_2227) + (1)));
+				
+			} else {
+				return tryClone(local3_mid_2227);
+				
+			};
+			
+		};
+		
+	};
+	if ((((BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0].attr7_wid_Str) == (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
+		return tryClone(local2_up_2225);
+		
+	};
+	if (param6_create) {
+		var local4_widg_2228 = new type9_DDGUI_WDG(), local5_order_2229 = new type11_DDGUI_ORDER();
+		local2_dn_2226 = BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0);
+		REDIM(unref(param10_ddgui_vals.attr7_widgets_ref[0]), [((local2_dn_2226) + (1))], [new type9_DDGUI_WDG()] );
 		{
-			var ex_Str = "";
-			__debugInfo = "159:\JumpIt.gbas";
-			try {
-				__debugInfo = "155:\JumpIt.gbas";
-				Update();
-				__debugInfo = "156:\JumpIt.gbas";
-				Update();
-				__debugInfo = "157:\JumpIt.gbas";
-				Render();
-				__debugInfo = "155:\JumpIt.gbas";
-			} catch (ex_Str) {
-				if (ex_Str instanceof GLBException) ex_Str = ex_Str.getText(); else throwError(ex_Str);{
+			for (local3_mid_2227 = local2_dn_2226;toCheck(local3_mid_2227, ((local2_up_2225) + (1)), -(1));local3_mid_2227 += -(1)) {
+				param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local3_mid_2227).values[tmpPositionCache][0] = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(((local3_mid_2227) - (1))).values[tmpPositionCache][0].clone(/* In Assign */);
+				
+			};
+			
+		};
+		if (((((((local2_dn_2226) > (0)) ? 1 : 0)) && ((((param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0].attr7_wid_Str) < (param8_name_Str_ref[0])) ? 1 : 0))) ? 1 : 0)) {
+			local2_up_2225 = ((local2_up_2225) + (1));
+			
+		};
+		local4_widg_2228.attr7_wid_Str = param8_name_Str_ref[0];
+		param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(local2_up_2225).values[tmpPositionCache][0] = local4_widg_2228.clone(/* In Assign */);
+		local5_order_2229.attr6_id_Str_ref[0] = param8_name_Str_ref[0];
+		DIMPUSH(param10_ddgui_vals.attr9_draworder, local5_order_2229);
+		var forEachSaver13510 = param10_ddgui_vals.attr9_draworder;
+		for(var forEachCounter13510 = 0 ; forEachCounter13510 < forEachSaver13510.values.length ; forEachCounter13510++) {
+			var local2_od_2230 = forEachSaver13510.values[forEachCounter13510];
+		{
+				local2_od_2230.attr5_index = func11_DDgui_index(param10_ddgui_vals, local2_od_2230.attr6_id_Str_ref, 0);
+				
+			}
+			forEachSaver13510.values[forEachCounter13510] = local2_od_2230;
+		
+		};
+		return tryClone(local2_up_2225);
+		
+	};
+	return tryClone(-(1));
+	return 0;
+	
+};
+window['func20_DDgui_get_intern_Str'] = function(param3_wdg, param8_name_Str_ref) {
+	{
+		var local17___SelectHelper10__2319 = "";
+		local17___SelectHelper10__2319 = param8_name_Str_ref[0];
+		if ((((local17___SelectHelper10__2319) == ("CLICKED")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr8_wclicked));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TEXT")) ? 1 : 0)) {
+			return tryClone(unref(param3_wdg.attr9_wtext_Str_ref[0]));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("WIDTH")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_wwidth));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HEIGHT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wheight));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELECT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wselect));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("COUNT")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_wcount));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HOVER")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_whover));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("READONLY")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr9_wreadonly));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELSTART")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr9_wselstart));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SELEND")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wselend));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("HIDE")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_whide));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TYPE")) ? 1 : 0)) {
+			return tryClone(param3_wdg.attr9_wtype_Str);
+			
+		} else if ((((local17___SelectHelper10__2319) == ("FILTER")) ? 1 : 0)) {
+			return tryClone(param3_wdg.attr11_wfilter_Str);
+			
+		} else if ((((local17___SelectHelper10__2319) == ("TIPTEXT")) ? 1 : 0)) {
+			return tryClone(unref(param3_wdg.attr11_tiptext_Str_ref[0]));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("MINVAL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wminval));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("MAXVAL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wmaxval));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("STEP")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wstep));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("SCROLL")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr7_wscroll));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("ALIGN")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr6_walign));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("XPOS")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wxpos));
+			
+		} else if ((((local17___SelectHelper10__2319) == ("YPOS")) ? 1 : 0)) {
+			return tryClone(CAST2STRING(param3_wdg.attr5_wypos));
+			
+		} else {
+			
+		};
+		
+	};
+	return "";
+	
+};
+window['func13_DDgui_get_Str'] = function(param6_id_Str, param8_name_Str) {
+	var local6_id_Str_ref_2231 = [param6_id_Str]; /* NEWCODEHERE */
+	var local8_name_Str_ref_2232 = [param8_name_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return "";
+		
+	};
+	if (((((local6_id_Str_ref_2231[0]).length) == (0)) ? 1 : 0)) {
+		{
+			var local16___SelectHelper8__2233 = "";
+			local16___SelectHelper8__2233 = local8_name_Str_ref_2232[0];
+			if ((((local16___SelectHelper8__2233) == ("FOCUS")) ? 1 : 0)) {
+				return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str);
+				
+			} else if ((((local16___SelectHelper8__2233) == ("INKEY")) ? 1 : 0)) {
+				return tryClone(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str);
+				
+			} else if ((((local16___SelectHelper8__2233) == ("TEXT")) ? 1 : 0)) {
+				return tryClone(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0]));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_BRIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_NORM")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("COL_HOVER_NORM")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("XPOS")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("YPOS")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("WIDTH")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("HEIGHT")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("MOVEABLE")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("SCALEABLE")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("MOVING")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr6_moving));
+				
+			} else if ((((local16___SelectHelper8__2233) == ("SCALEING")) ? 1 : 0)) {
+				return tryClone(CAST2STRING(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_scaleing));
+				
+			};
+			
+		};
+		
+	} else {
+		var local2_iw_2234 = 0;
+		local2_iw_2234 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2231, 0);
+		if ((((local2_iw_2234) >= (0)) ? 1 : 0)) {
+			return tryClone(func20_DDgui_get_intern_Str(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2234).values[tmpPositionCache][0]), local8_name_Str_ref_2232));
+			
+		};
+		
+	};
+	return "";
+	return "";
+	
+};
+window['func9_DDgui_get'] = function(param6_id_Str, param8_name_Str) {
+	var local6_id_Str_ref_2235 = [param6_id_Str]; /* NEWCODEHERE */
+	var local8_name_Str_ref_2236 = [param8_name_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	if (((((local6_id_Str_ref_2235[0]).length) == (0)) ? 1 : 0)) {
+		return tryClone(FLOAT2STR(func13_DDgui_get_Str(unref(local6_id_Str_ref_2235[0]), unref(local8_name_Str_ref_2236[0]))));
+		
+	} else {
+		var local2_iw_2237 = 0;
+		local2_iw_2237 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2235, 0);
+		if ((((local2_iw_2237) >= (0)) ? 1 : 0)) {
+			var alias3_wdg_ref_2238 = [new type9_DDGUI_WDG()];
+			alias3_wdg_ref_2238 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2237).values[tmpPositionCache] /* ALIAS */;
+			{
+				var local16___SelectHelper9__2239 = "";
+				local16___SelectHelper9__2239 = local8_name_Str_ref_2236[0];
+				if ((((local16___SelectHelper9__2239) == ("CLICKED")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr8_wclicked);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELECT")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr7_wselect);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("COUNT")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr6_wcount);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELSTART")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr9_wselstart);
+					
+				} else if ((((local16___SelectHelper9__2239) == ("SELEND")) ? 1 : 0)) {
+					return tryClone(alias3_wdg_ref_2238[0].attr7_wselend);
+					
+				};
+				
+			};
+			return tryClone(FLOAT2STR(func20_DDgui_get_intern_Str(unref(alias3_wdg_ref_2238[0]), local8_name_Str_ref_2236)));
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func9_DDgui_set'] = function(param6_id_Str, param8_name_Str, param7_val_Str) {
+	var local6_id_Str_ref_1609 = [param6_id_Str]; /* NEWCODEHERE */
+	if (((((local6_id_Str_ref_1609[0]).length) == (0)) ? 1 : 0)) {
+		{
+			var local16___SelectHelper1__1612 = "";
+			local16___SelectHelper1__1612 = param8_name_Str;
+			if ((((local16___SelectHelper1__1612) == ("FOCUS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_focus_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("INKEY")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr13_dlg_inkey_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_BRIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_NORM")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_BRIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("COL_HOVER_NORM")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("TEXT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr9_wtext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper1__1612) == ("XPOS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("YPOS")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("WIDTH")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("HEIGHT")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("MOVEABLE")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_moveable = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper1__1612) == ("SCALEABLE")) ? 1 : 0)) {
+				global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_scaleable = INT2STR(param7_val_Str);
+				
+			} else {
+				
+			};
+			
+		};
+		
+	} else {
+		var local2_iw_1613 = 0.0, alias3_wdg_ref_1614 = [new type9_DDGUI_WDG()];
+		local2_iw_1613 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1609, 1);
+		alias3_wdg_ref_1614 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(~~(local2_iw_1613)).values[tmpPositionCache] /* ALIAS */;
+		{
+			var local16___SelectHelper2__1615 = "";
+			local16___SelectHelper2__1615 = param8_name_Str;
+			if ((((local16___SelectHelper2__1615) == ("TEXT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wtext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("CLICKED")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr8_wclicked = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("WIDTH")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_wwidth = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HEIGHT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wheight = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELECT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wselect = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("COUNT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_wcount = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HOVER")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_whover = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("READONLY")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wreadonly = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELSTART")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wselstart = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SELEND")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wselend = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("HIDE")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr5_whide = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("TYPE")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr9_wtype_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("FILTER")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr11_wfilter_Str = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("TIPTEXT")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr11_tiptext_Str_ref[0] = param7_val_Str;
+				
+			} else if ((((local16___SelectHelper2__1615) == ("MINVAL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wminval = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("MAXVAL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wmaxval = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("STEP")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr5_wstep = FLOAT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("SCROLL")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr7_wscroll = INT2STR(param7_val_Str);
+				
+			} else if ((((local16___SelectHelper2__1615) == ("ALIGN")) ? 1 : 0)) {
+				alias3_wdg_ref_1614[0].attr6_walign = INT2STR(param7_val_Str);
+				
+			} else {
+				
+			};
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func17_DDGui_PrintIntern'] = function(param5_t_Str_ref, param1_x, param1_y, param5_bBold) {
+	if (param5_bBold) {
+		ALPHAMODE(-(0.5));
+		func17_DDGui_PrintIntern(param5_t_Str_ref, ((param1_x) + (1)), param1_y, 0);
+		ALPHAMODE(0);
+		
+	};
+	PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, global18_ddgui_font_kerning.attr11_bHasKerning);
+	return 0;
+	if (global18_ddgui_font_kerning.attr11_bHasKerning) {
+		var local2_fx_2244 = 0, local2_lt_2245 = 0, local5_c_Str_2246 = "", local4_kern_2247 = 0, local2_ac_2248 = 0;
+		local2_lt_2245 = (((param5_t_Str_ref[0]).length) - (1));
+		{
+			var local1_c_2249 = 0;
+			for (local1_c_2249 = 0;toCheck(local1_c_2249, local2_lt_2245, 1);local1_c_2249 += 1) {
+				local5_c_Str_2246 = MID_Str(unref(param5_t_Str_ref[0]), local1_c_2249, 1);
+				local2_ac_2248 = ASC(local5_c_Str_2246, 0);
+				local4_kern_2247 = global18_ddgui_font_kerning.attr4_left.arrAccess(local2_ac_2248).values[tmpPositionCache];
+				PRINT(local5_c_Str_2246, ((param1_x) - (local4_kern_2247)), param1_y, 0);
+				param1_x+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2248).values[tmpPositionCache];
+				
+			};
+			
+		};
+		
+	} else {
+		PRINT(unref(param5_t_Str_ref[0]), param1_x, param1_y, 0);
+		
+	};
+	return 0;
+	
+};
+window['func21_DDGui_TextWidthIntern'] = function(param5_t_Str_ref) {
+	return tryClone(KERNLEN(param5_t_Str_ref[0], global18_ddgui_font_kerning.attr11_bHasKerning));
+	if (global18_ddgui_font_kerning.attr11_bHasKerning) {
+		var local2_fx_2251 = 0, local2_lt_2252 = 0, local5_c_Str_2253 = "", local1_x_2254 = 0, local2_ac_2255 = 0;
+		local2_lt_2252 = (((param5_t_Str_ref[0]).length) - (1));
+		{
+			var local1_c_2256 = 0;
+			for (local1_c_2256 = 0;toCheck(local1_c_2256, local2_lt_2252, 1);local1_c_2256 += 1) {
+				local2_ac_2255 = ASC(MID_Str(unref(param5_t_Str_ref[0]), local1_c_2256, 1), 0);
+				local1_x_2254+=global18_ddgui_font_kerning.attr5_width.arrAccess(local2_ac_2255).values[tmpPositionCache];
+				
+			};
+			
+		};
+		return tryClone(local1_x_2254);
+		
+	} else {
+		var local2_fx_ref_2257 = [0], local2_fy_ref_2258 = [0];
+		GETFONTSIZE(local2_fx_ref_2257, local2_fy_ref_2258);
+		return tryClone((((param5_t_Str_ref[0]).length) * (local2_fx_ref_2257[0])));
+		
+	};
+	return 0;
+	
+};
+window['func10_DDgui_init'] = function() {
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		DIM(unref(global11_ddgui_stack_ref[0]), [1], [new type9_DDGUI_DLG()]);
+		
+	};
+	if (((((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = RGB(192, 192, 192);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = RGB(255, 255, 255);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = RGB(64, 144, 255);
+		global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = RGB(160, 240, 255);
+		
+	};
+	DIM(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0]), [0], [new type9_DDGUI_WDG()]);
+	DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, [0], new type11_DDGUI_ORDER());
+	DIM(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos, [0], new type10_DDGUI_AUTO());
+	if ((((((((((((((((((((((PLATFORMINFO_Str("")) == ("WINCE")) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("GP2X")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("ANDROID")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("IPHONE")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PANDORA")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("WEBOS")) ? 1 : 0))) ? 1 : 0)) || ((((PLATFORMINFO_Str("")) == ("PALM_PIXI")) ? 1 : 0))) ? 1 : 0)) {
+		global20_DDGUI_AUTO_INPUT_DLG = 1;
+		if ((((global20_gDDguiScrollbarWidth) == (0)) ? 1 : 0)) {
+			global20_gDDguiScrollbarWidth = 30;
+			
+		};
+		
+	};
+	if ((((global20_gDDguiScrollbarWidth) == (0)) ? 1 : 0)) {
+		global20_gDDguiScrollbarWidth = 20;
+		
+	};
+	return 0;
+	
+};
+window['func16_DDgui_pushdialog'] = function(param1_x, param1_y, param5_width, param6_height, param16_center_to_screen) {
+	var local2_sx_ref_1621 = [0], local2_sy_ref_1622 = [0], local3_dlg_ref_1623 = [new type9_DDGUI_DLG()];
+	if ((((global25_gDDguiMinControlDimension) <= (0)) ? 1 : 0)) {
+		global25_gDDguiMinControlDimension = 16;
+		
+	};
+	DIMPUSH(global11_ddgui_stack_ref[0], local3_dlg_ref_1623);
+	GETSCREENSIZE(local2_sx_ref_1621, local2_sy_ref_1622);
+	func10_DDgui_init();
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos = MIN(param1_x, ((local2_sx_ref_1621[0]) - (1)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos = MIN(param1_y, ((local2_sy_ref_1622[0]) - (1)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr6_wwidth = MIN(param5_width, ((local2_sx_ref_1621[0]) - (param1_x)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_main.attr7_wheight = MIN(param6_height, ((local2_sy_ref_1622[0]) - (param1_y)));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr8_col_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr8_col_norm;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_col_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr10_col_bright;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr14_col_hover_norm;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr16_col_hover_bright = global11_ddgui_stack_ref[0].arrAccess(0).values[tmpPositionCache][0].attr16_col_hover_bright;
+	if (param16_center_to_screen) {
+		func18_DDgui_CenterDialog();
+		
+	};
+	return 0;
+	
+};
+window['func15_DDgui_popdialog'] = function() {
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) > (0)) ? 1 : 0)) {
+		var local1_n_2259 = 0, local9_dummy_Str_ref_2260 = [""];
+		local1_n_2259 = ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1));
+		var forEachSaver14239 = global11_ddgui_stack_ref[0].arrAccess(local1_n_2259).values[tmpPositionCache][0].attr7_widgets_ref[0];
+		for(var forEachCounter14239 = 0 ; forEachCounter14239 < forEachSaver14239.values.length ; forEachCounter14239++) {
+			var local3_wdg_ref_2261 = forEachSaver14239.values[forEachCounter14239];
+		{
+				if (local3_wdg_ref_2261[0].attr8_wuserfoo_ref[0]) {
+					func12_DDgui_signal(local3_wdg_ref_2261[0].attr7_wid_Str, "DESTROY", local9_dummy_Str_ref_2260);
+					
+				};
+				
+			}
+			forEachSaver14239.values[forEachCounter14239] = local3_wdg_ref_2261;
+		
+		};
+		DIMDEL(global11_ddgui_stack_ref[0], local1_n_2259);
+		
+	};
+	if (BOUNDS(global11_ddgui_stack_ref[0], 0)) {
+		func18_DDgui_resizedialog(0, 0, 0, 0);
+		
+	};
+	return 0;
+	
+};
+window['func10_DDgui_show'] = function(param17_only_show_current) {
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	if ((((param17_only_show_current) == (0)) ? 1 : 0)) {
+		var local1_i_1625 = 0;
+		{
+			for (local1_i_1625 = 0;toCheck(local1_i_1625, ((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (2)), 1);local1_i_1625 += 1) {
+				var alias3_dlg_ref_1626 = [new type9_DDGUI_DLG()];
+				alias3_dlg_ref_1626 = global11_ddgui_stack_ref[0].arrAccess(local1_i_1625).values[tmpPositionCache] /* ALIAS */;
+				func17_DDgui_show_intern(unref(alias3_dlg_ref_1626[0]), 0);
+				
+			};
+			
+		};
+		
+	};
+	func17_DDgui_show_intern(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), 1);
+	var forEachSaver2243 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr5_autos;
+	for(var forEachCounter2243 = 0 ; forEachCounter2243 < forEachSaver2243.values.length ; forEachCounter2243++) {
+		var local5_autom_1627 = forEachSaver2243.values[forEachCounter2243];
+	{
+			func9_DDgui_set(local5_autom_1627.attr8_idto_Str, local5_autom_1627.attr9_objto_Str, func13_DDgui_get_Str(local5_autom_1627.attr10_idfrom_Str, local5_autom_1627.attr11_objfrom_Str));
+			
+		}
+		forEachSaver2243.values[forEachCounter2243] = local5_autom_1627;
+	
+	};
+	return 0;
+	
+};
+window['func17_DDgui_show_intern'] = function(param10_ddgui_vals, param10_is_current) {
+	var local1_x_1630 = 0, local1_y_1631 = 0, local5_width_1632 = 0, local6_height_1633 = 0, local2_c1_1634 = 0, local2_c2_1635 = 0, local1_i_1636 = 0, local6_id_Str_1637 = "", local7_dy_line_ref_1638 = [0], local4_xpos_ref_1639 = [0], local4_ypos_ref_1640 = [0], local4_ytop_1641 = 0, local5_yclip_1642 = 0, local2_mx_ref_1643 = [0], local2_my_ref_1644 = [0], local2_b1_1645 = 0, local2_b2_1646 = 0, local6_realb1_ref_1647 = [0], local6_realb2_ref_1648 = [0], local2_tx_ref_1649 = [0], local2_ty_ref_1650 = [0], local7_spacing_1651 = 0, local7_movable_1652 = 0, local3_col_1653 = 0, local14_caption_height_1660 = 0, local10_sizer_size_1661 = 0, local9_show_tips_1663 = 0, local5_xclip_1664 = 0, local6_ybclip_1665 = 0, local6_retval_1667 = 0, local10_KickId_Str_1668 = "";
+	local7_spacing_1651 = 2;
+	MOUSESTATE(local2_mx_ref_1643, local2_my_ref_1644, local6_realb1_ref_1647, local6_realb2_ref_1648);
+	GETFONTSIZE(local2_tx_ref_1649, local2_ty_ref_1650);
+	local14_caption_height_1660 = MAX(unref(local2_ty_ref_1650[0]), global25_gDDguiMinControlDimension);
+	if (((((((ABS(((local2_mx_ref_1643[0]) - (static9_DDgui_show_intern_ToolTipMx)))) > (4)) ? 1 : 0)) || ((((ABS(((local2_my_ref_1644[0]) - (static9_DDgui_show_intern_ToolTipMy)))) > (4)) ? 1 : 0))) ? 1 : 0)) {
+		static12_DDgui_show_intern_ToolTipDelay = GETTIMERALL();
+		static9_DDgui_show_intern_ToolTipMx = local2_mx_ref_1643[0];
+		static9_DDgui_show_intern_ToolTipMy = local2_my_ref_1644[0];
+		
+	};
+	if (param10_is_current) {
+		local2_b1_1645 = 0;
+		if ((((local6_realb1_ref_1647[0]) && ((((static10_DDgui_show_intern_mouse_down) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			local2_b1_1645 = -(1);
+			static10_DDgui_show_intern_mouse_down = 1;
+			static10_DDgui_show_intern_movemousex = local2_mx_ref_1643[0];
+			static10_DDgui_show_intern_movemousey = local2_my_ref_1644[0];
+			
+		};
+		if (((((((local6_realb1_ref_1647[0]) == (0)) ? 1 : 0)) && ((((static10_DDgui_show_intern_mouse_down) > (0)) ? 1 : 0))) ? 1 : 0)) {
+			local2_b1_1645 = 1;
+			static10_DDgui_show_intern_mouse_down = 0;
+			
+		};
+		
+	};
+	VIEWPORT(0, 0, 0, 0);
+	local2_c1_1634 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
+	local1_x_1630 = param10_ddgui_vals.attr4_xpos;
+	local1_y_1631 = param10_ddgui_vals.attr4_ypos;
+	local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
+	local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
+	if (param10_is_current) {
+		if (param10_ddgui_vals.attr8_moveable) {
+			if (local6_realb1_ref_1647[0]) {
+				local1_i_1636 = BOXCOLL(local1_x_1630, local1_y_1631, local5_width_1632, local14_caption_height_1660, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+				if (((((((local1_i_1636) || (param10_ddgui_vals.attr6_moving)) ? 1 : 0)) && (((((param10_ddgui_vals.attr9_focus_Str).length) == (0)) ? 1 : 0))) ? 1 : 0)) {
+					param10_ddgui_vals.attr6_moving = 1;
+					local1_x_1630 = MAX(0, ((((local1_x_1630) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
+					local1_y_1631 = MAX(0, ((((local1_y_1631) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
+					param10_ddgui_vals.attr4_xpos = local1_x_1630;
+					param10_ddgui_vals.attr4_ypos = local1_y_1631;
+					
+				} else if (local1_i_1636) {
+					param10_ddgui_vals.attr9_focus_Str = "";
+					
+				};
+				
+			} else {
+				param10_ddgui_vals.attr6_moving = 0;
+				
+			};
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr8_moveable) || ((param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref[0]).length)) ? 1 : 0)) {
+		local7_movable_1652 = 1;
+		local1_y_1631 = ((((local1_y_1631) + (local14_caption_height_1660))) + (4));
+		func13_DDgui_backgnd(local2_c1_1634, local2_c2_1635, ((local1_x_1630) + (1)), ((((local1_y_1631) - (local14_caption_height_1660))) - (3)), ((local5_width_1632) - (2)), ((local14_caption_height_1660) + (4)));
+		func17_DDGui_PrintIntern(param10_ddgui_vals.attr4_main.attr9_wtext_Str_ref, ((local1_x_1630) + (3)), ((((local1_y_1631) - (local14_caption_height_1660))) - (2)), 1);
+		func14_DDgui_backrect(local1_x_1630, ((((local1_y_1631) - (local14_caption_height_1660))) - (4)), local5_width_1632, ((((local6_height_1633) + (local14_caption_height_1660))) + (4)), local2_c2_1635);
+		param10_ddgui_vals.attr5_rectx = local1_x_1630;
+		param10_ddgui_vals.attr5_recty = ((((local1_y_1631) - (local14_caption_height_1660))) - (4));
+		param10_ddgui_vals.attr5_rectw = local5_width_1632;
+		param10_ddgui_vals.attr5_recth = ((((local6_height_1633) + (local14_caption_height_1660))) + (4));
+		
+	} else {
+		func14_DDgui_backrect(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, local2_c2_1635);
+		param10_ddgui_vals.attr5_rectx = local1_x_1630;
+		param10_ddgui_vals.attr5_recty = local1_y_1631;
+		param10_ddgui_vals.attr5_rectw = local5_width_1632;
+		param10_ddgui_vals.attr5_recth = local6_height_1633;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1634, local2_c1_1634, ((local1_x_1630) + (1)), ((local1_y_1631) + (1)), ((local5_width_1632) - (2)), ((local6_height_1633) - (2)));
+	local4_ytop_1641 = local1_y_1631;
+	local5_yclip_1642 = local4_ytop_1641;
+	local10_sizer_size_1661 = MAX(((local2_tx_ref_1649[0]) * (2)), global20_gDDguiScrollbarWidth);
+	if (param10_is_current) {
+		if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+			if (local6_realb1_ref_1647[0]) {
+				local1_i_1636 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+				if ((((local1_i_1636) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+					param10_ddgui_vals.attr8_scaleing = 1;
+					local5_width_1632 = MAX(0, ((((local5_width_1632) + (local2_mx_ref_1643[0]))) - (static10_DDgui_show_intern_movemousex)));
+					local6_height_1633 = MAX(0, ((((local6_height_1633) + (local2_my_ref_1644[0]))) - (static10_DDgui_show_intern_movemousey)));
+					param10_ddgui_vals.attr4_main.attr6_wwidth = local5_width_1632;
+					param10_ddgui_vals.attr4_main.attr7_wheight = local6_height_1633;
+					
+				};
+				
+			} else {
+				param10_ddgui_vals.attr8_scaleing = 0;
+				
+			};
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr9_scaleable) || (param10_ddgui_vals.attr8_scaleing)) ? 1 : 0)) {
+		local3_col_1653 = BOXCOLL(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (4)), ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (4)), ((local10_sizer_size_1661) + (4)), ((local10_sizer_size_1661) + (4)), unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), 1, 1);
+		if (local3_col_1653) {
+			local2_c2_1635 = param10_ddgui_vals.attr14_col_hover_norm;
+			
+		};
+		local1_i_1636 = ((((((local1_y_1631) + (local6_height_1633))) - (local10_sizer_size_1661))) - (3));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((local10_sizer_size_1661) / (3)))))) - (5)), local1_i_1636, CAST2INT(((local10_sizer_size_1661) / (3))), 2, local2_c2_1635);
+		local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (CAST2INT(((((2) * (local10_sizer_size_1661))) / (3)))))) - (5)), local1_i_1636, CAST2INT(((((2) * (local10_sizer_size_1661))) / (3))), 2, local2_c2_1635);
+		local1_i_1636+=CAST2INT(((local10_sizer_size_1661) / (3)));
+		DRAWRECT(((((((local1_x_1630) + (local5_width_1632))) - (local10_sizer_size_1661))) - (5)), local1_i_1636, local10_sizer_size_1661, 2, local2_c2_1635);
+		if (local3_col_1653) {
+			local2_c2_1635 = param10_ddgui_vals.attr8_col_norm;
+			
+		};
+		
+	};
+	if (param10_is_current) {
+		static10_DDgui_show_intern_movemousex = local2_mx_ref_1643[0];
+		static10_DDgui_show_intern_movemousey = local2_my_ref_1644[0];
+		
+	};
+	local1_x_1630+=3;
+	local1_y_1631+=3;
+	local4_ytop_1641+=3;
+	local5_yclip_1642+=3;
+	local5_width_1632+=-(6);
+	local6_height_1633+=-(6);
+	local4_ypos_ref_1640[0] = local1_y_1631;
+	local4_xpos_ref_1639[0] = local1_x_1630;
+	if (param10_is_current) {
+		var local4_hgrp_1662 = 0;
+		param10_ddgui_vals.attr4_main.attr10_wscrollmax = MAX(0, ((((param10_ddgui_vals.attr10_realheight) - (local6_height_1633))) - (12)));
+		if (param10_ddgui_vals.attr4_main.attr10_wscrollmax) {
+			param10_ddgui_vals.attr4_main.attr10_wscrollmax+=24;
+			
+		};
+		if (param10_ddgui_vals.attr9_scaleable) {
+			local4_hgrp_1662 = MAX(32, local10_sizer_size_1661);
+			
+		};
+		if ((((param10_is_current) && (func21_DDgui_handlescrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, ((((local2_mx_ref_1643[0]) - (local1_x_1630))) + (10)), ((local2_my_ref_1644[0]) - (local1_y_1631)), local2_b1_1645, local2_b2_1646, ((local6_height_1633) - (local4_hgrp_1662))))) ? 1 : 0)) {
+			VIEWPORT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633);
+			func19_DDgui_drawscrollbar(param10_ddgui_vals, param10_ddgui_vals.attr4_main, local5_width_1632, ((local6_height_1633) - (local4_hgrp_1662)), local6_height_1633, 0);
+			VIEWPORT(0, 0, 0, 0);
+			local5_width_1632+=-(local10_sizer_size_1661);
+			local1_i_1636 = param10_ddgui_vals.attr4_main.attr7_wscroll;
+			local4_ypos_ref_1640[0] = ((local4_ypos_ref_1640[0]) - (local1_i_1636));
+			local4_ytop_1641 = ((local4_ytop_1641) - (local1_i_1636));
+			
+		};
+		
+	};
+	local7_dy_line_ref_1638[0] = 0;
+	if ((((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) != (BOUNDS(param10_ddgui_vals.attr7_widgets_ref[0], 0))) ? 1 : 0)) {
+		
+	};
+	if ((((((GETTIMERALL()) - (static12_DDgui_show_intern_ToolTipDelay))) > (500)) ? 1 : 0)) {
+		local9_show_tips_1663 = 1;
+		
+	};
+	local5_xclip_1664 = ((local4_xpos_ref_1639[0]) + (local5_width_1632));
+	local6_ybclip_1665 = ((local5_yclip_1642) + (local6_height_1633));
+	{
+		var local2_od_ref_1666 = [0];
+		for (local2_od_ref_1666[0] = 0;toCheck(local2_od_ref_1666[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local2_od_ref_1666[0] += 1) {
+			func24_DDgui_draw_widget_intern(param10_ddgui_vals, local2_od_ref_1666, local4_xpos_ref_1639, local4_ypos_ref_1640, local7_dy_line_ref_1638, local5_width_1632, param10_is_current, local7_spacing_1651, local5_xclip_1664, local5_yclip_1642, local6_ybclip_1665, unref(local2_mx_ref_1643[0]), unref(local2_my_ref_1644[0]), local2_b1_1645, local2_b2_1646, local1_x_1630, local1_y_1631, local9_show_tips_1663);
+			
+		};
+		
+	};
+	VIEWPORT(0, 0, 0, 0);
+	if ((((param10_is_current) == (0)) ? 1 : 0)) {
+		ALPHAMODE(-(0.5));
+		local1_x_1630 = param10_ddgui_vals.attr4_xpos;
+		local1_y_1631 = param10_ddgui_vals.attr4_ypos;
+		local5_width_1632 = param10_ddgui_vals.attr4_main.attr6_wwidth;
+		local6_height_1633 = param10_ddgui_vals.attr4_main.attr7_wheight;
+		if (local7_movable_1652) {
+			local6_height_1633+=((local14_caption_height_1660) + (4));
+			
+		};
+		DRAWRECT(local1_x_1630, local1_y_1631, local5_width_1632, local6_height_1633, RGB(0, 0, 0));
+		ALPHAMODE(0);
+		
+	};
+	SYSTEMPOINTER(1);
+	local6_height_1633 = ((((((local4_ypos_ref_1640[0]) + (local7_spacing_1651))) + (local7_dy_line_ref_1638[0]))) - (local4_ytop_1641));
+	if (param10_is_current) {
+		param10_ddgui_vals.attr10_realheight = local6_height_1633;
+		
+	};
+	local6_retval_1667 = MAX(local6_height_1633, param10_ddgui_vals.attr4_main.attr7_wheight);
+	local1_x_1630 = param10_ddgui_vals.attr15_kick_intern_dlg;
+	param10_ddgui_vals.attr15_kick_intern_dlg = 0;
+	local10_KickId_Str_1668 = param10_ddgui_vals.attr18_kick_intern_id_Str;
+	{
+		var local16___SelectHelper3__1669 = 0;
+		local16___SelectHelper3__1669 = local1_x_1630;
+		if ((((local16___SelectHelper3__1669) == (1)) ? 1 : 0)) {
+			local3_col_1653;
+			local3_col_1653 = func14_DDgui_ColorDlg(INT2STR(MID_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 5, 64)));
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", (("SPR_C") + (CAST2STRING(local3_col_1653))));
+			func9_DDgui_set(local10_KickId_Str_1668, "CLICKED", CAST2STRING(1));
+			
+		} else if ((((local16___SelectHelper3__1669) == (2)) ? 1 : 0)) {
+			var local11_bSingleText_1670 = 0, local9_bIsNumber_1671 = 0, local8_text_Str_1672 = "";
+			local11_bSingleText_1670 = 0;
+			local9_bIsNumber_1671 = 0;
+			if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("SINGLETEXT")) ? 1 : 0)) {
+				local11_bSingleText_1670 = 1;
+				
+			};
+			if ((((func13_DDgui_get_Str(local10_KickId_Str_1668, "TYPE")) == ("NUMBERTEXT")) ? 1 : 0)) {
+				local11_bSingleText_1670 = 1;
+				local9_bIsNumber_1671 = 1;
+				
+			};
+			local8_text_Str_1672 = func15_DDgui_input_Str(func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), 0, 0, local11_bSingleText_1670, local9_bIsNumber_1671);
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local8_text_Str_1672);
+			
+		} else if ((((local16___SelectHelper3__1669) == (3)) ? 1 : 0)) {
+			var local3_scx_ref_1673 = [0], local3_scy_ref_1674 = [0], local4_isel_1675 = 0;
+			GETSCREENSIZE(local3_scx_ref_1673, local3_scy_ref_1674);
+			local4_isel_1675 = func24_DDgui_button_list_picker(MIN(((local3_scy_ref_1674[0]) - (16)), func9_DDgui_get(local10_KickId_Str_1668, "XPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "YPOS")), ~~(func9_DDgui_get(local10_KickId_Str_1668, "WIDTH")), MAX(16, ((local3_scy_ref_1674[0]) - (func9_DDgui_get(local10_KickId_Str_1668, "YPOS")))), func13_DDgui_get_Str(local10_KickId_Str_1668, "TEXT"), ~~(func9_DDgui_get(local10_KickId_Str_1668, "SELECT")));
+			if ((((local4_isel_1675) >= (0)) ? 1 : 0)) {
+				func9_DDgui_set(local10_KickId_Str_1668, "SELECT", CAST2STRING(local4_isel_1675));
+				func9_DDgui_set(local10_KickId_Str_1668, "CLICKED", CAST2STRING(1));
+				
+			};
+			
+		} else if ((((local16___SelectHelper3__1669) == (4)) ? 1 : 0)) {
+			var local7_ret_Str_1676 = "";
+			local7_ret_Str_1676 = func20_DDgui_FileDialog_Str(1, "*.*", 0);
+			func9_DDgui_set(local10_KickId_Str_1668, "TEXT", local7_ret_Str_1676);
+			
+		};
+		
+	};
+	return tryClone(local6_retval_1667);
+	return 0;
+	
+};
+window['func24_DDgui_draw_widget_intern'] = function(param10_ddgui_vals, param11_order_index_ref, param4_xpos_ref, param4_ypos_ref, param7_dy_line_ref, param5_width, param10_is_current, param7_spacing, param5_xclip, param5_yclip, param6_ybclip, param2_mx, param2_my, param2_b1, param2_b2, param1_x, param1_y, param9_show_tips) {
+	var local3_vpx_1695 = 0, local3_vpy_1696 = 0, local2_dx_1697 = 0, local2_dy_1698 = 0, local5_vptop_1700 = 0, local4_ytop_1701 = 0, alias3_wdg_ref_1702 = [new type9_DDGUI_WDG()];
+	alias3_wdg_ref_1702 = param10_ddgui_vals.attr7_widgets_ref[0].arrAccess(param10_ddgui_vals.attr9_draworder.arrAccess(param11_order_index_ref[0]).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
+	if (alias3_wdg_ref_1702[0].attr5_whide) {
+		return 1;
+		
+	};
+	local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
+	local2_dy_1698 = alias3_wdg_ref_1702[0].attr7_wheight;
+	if ((((((param4_xpos_ref[0]) + (local2_dx_1697))) > (((param5_width) + (param1_x)))) ? 1 : 0)) {
+		param4_xpos_ref[0] = param1_x;
+		param4_ypos_ref[0] = ((((param4_ypos_ref[0]) + (param7_dy_line_ref[0]))) + (param7_spacing));
+		param7_dy_line_ref[0] = local2_dy_1698;
+		if (((((((local2_dx_1697) >= (param5_width)) ? 1 : 0)) && ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("SPACER")) ? 1 : 0))) ? 1 : 0)) {
+			return 1;
+			
+		};
+		
+	};
+	if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) == (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
+		param4_xpos_ref[0] = ((param4_xpos_ref[0]) + (CAST2INT(((((((((param5_width) + (param1_x))) - (param4_xpos_ref[0]))) - (local2_dx_1697))) / (2)))));
+		
+	};
+	if ((((((((((alias3_wdg_ref_1702[0].attr6_walign) > (0)) ? 1 : 0)) && ((((local2_dx_1697) < (param5_width)) ? 1 : 0))) ? 1 : 0)) && ((((param5_width) < (10000)) ? 1 : 0))) ? 1 : 0)) {
+		param4_xpos_ref[0] = ((((param1_x) + (param5_width))) - (local2_dx_1697));
+		
+	};
+	//label: __DrawFrames__;
+	if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
+		var local6_border_1703 = 0, local13_dy_line_frame_ref_1704 = [0], local6_xstart_1705 = 0, local6_ystart_1706 = 0, local4_iord_ref_1709 = [0], local8_fr_width_1710 = 0, local6_wwidth_1711 = 0;
+		local6_border_1703 = 0;
+		if ((((local2_dx_1697) == (10000)) ? 1 : 0)) {
+			local6_border_1703 = 1;
+			
+		};
+		local13_dy_line_frame_ref_1704[0] = 0;
+		local6_xstart_1705 = param4_xpos_ref[0];
+		local6_ystart_1706 = param4_ypos_ref[0];
+		if ((alias3_wdg_ref_1702[0].attr9_wtext_Str_ref[0]).length) {
+			var local2_fx_ref_1707 = [0], local2_fy_ref_1708 = [0];
+			local6_border_1703 = 4;
+			GETFONTSIZE(local2_fx_ref_1707, local2_fy_ref_1708);
+			local3_vpx_1695 = alias3_wdg_ref_1702[0].attr6_wwidth;
+			local3_vpy_1696 = alias3_wdg_ref_1702[0].attr7_wheight;
+			local5_vptop_1700 = param4_ypos_ref[0];
+			local4_ytop_1701 = 0;
+			if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
+				local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
+				local5_vptop_1700+=-(local4_ytop_1701);
+				local3_vpy_1696+=local4_ytop_1701;
+				
+			};
+			if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
+				local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
+				
+			};
+			if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
+				local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
+				
+			};
+			if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
+				VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
+				ALPHAMODE(-(0.5));
+				func14_DDgui_backrect(1, ((((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) + (1)), ((alias3_wdg_ref_1702[0].attr6_wwidth) - (2)), ((((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2)))))) - (2)), param10_ddgui_vals.attr8_col_norm);
+				ALPHAMODE(0);
+				func14_DDgui_backrect(0, ((local4_ytop_1701) + (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), alias3_wdg_ref_1702[0].attr6_wwidth, ((alias3_wdg_ref_1702[0].attr7_wheight) - (CAST2INT(((local2_fy_ref_1708[0]) / (2))))), param10_ddgui_vals.attr8_col_norm);
+				DRAWRECT(local6_border_1703, local4_ytop_1701, ((((local6_border_1703) * (4))) + (func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref))), unref(local2_fy_ref_1708[0]), param10_ddgui_vals.attr10_col_bright);
+				func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr9_wtext_Str_ref, ((local6_border_1703) * (2)), local4_ytop_1701, 0);
+				
+			};
+			param4_ypos_ref[0]+=((local2_fy_ref_1708[0]) + (local6_border_1703));
+			param4_xpos_ref[0]+=local6_border_1703;
+			param4_ypos_ref[0]+=local6_border_1703;
+			local6_xstart_1705+=local6_border_1703;
+			
+		};
+		local8_fr_width_1710 = 0;
+		local6_wwidth_1711 = alias3_wdg_ref_1702[0].attr6_wwidth;
+		if ((((local6_wwidth_1711) < (10000)) ? 1 : 0)) {
+			local6_wwidth_1711+=-(((2) * (local6_border_1703)));
+			
+		};
+		{
+			for (local4_iord_ref_1709[0] = ((param11_order_index_ref[0]) + (1));toCheck(local4_iord_ref_1709[0], ((BOUNDS(param10_ddgui_vals.attr9_draworder, 0)) - (1)), 1);local4_iord_ref_1709[0] += 1) {
+				var local9_simplewdg_1712 = 0, local4_icur_1713 = 0;
+				local4_icur_1713 = local4_iord_ref_1709[0];
+				local9_simplewdg_1712 = func24_DDgui_draw_widget_intern(param10_ddgui_vals, local4_iord_ref_1709, param4_xpos_ref, param4_ypos_ref, local13_dy_line_frame_ref_1704, local6_wwidth_1711, param10_is_current, param7_spacing, param5_xclip, param5_yclip, param6_ybclip, param2_mx, param2_my, param2_b1, param2_b2, local6_xstart_1705, local6_ystart_1706, param9_show_tips);
+				local8_fr_width_1710 = MAX(local8_fr_width_1710, ((param4_xpos_ref[0]) - (local6_xstart_1705)));
+				if ((((local9_simplewdg_1712) == (0)) ? 1 : 0)) {
+					param11_order_index_ref[0] = local4_iord_ref_1709[0];
+					break;
+					
+				};
+				
+			};
+			
+		};
+		if ((((alias3_wdg_ref_1702[0].attr6_wwidth) == (10000)) ? 1 : 0)) {
+			alias3_wdg_ref_1702[0].attr6_wwidth = ((local8_fr_width_1710) + (((2) * (local6_border_1703))));
+			local2_dx_1697 = alias3_wdg_ref_1702[0].attr6_wwidth;
+			
+		};
+		alias3_wdg_ref_1702[0].attr7_wheight = ((((((param4_ypos_ref[0]) - (local6_ystart_1706))) + (local13_dy_line_frame_ref_1704[0]))) + (((local6_border_1703) * (2))));
+		param4_xpos_ref[0] = local6_xstart_1705;
+		param4_ypos_ref[0] = local6_ystart_1706;
+		
+	} else if ((((alias3_wdg_ref_1702[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	if (param10_is_current) {
+		func18_DDgui_handlewidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), ((param2_mx) - (param4_xpos_ref[0])), ((param2_my) - (param4_ypos_ref[0])), param2_b1, param2_b2);
+		
+	};
+	local3_vpx_1695 = local2_dx_1697;
+	local3_vpy_1696 = local2_dy_1698;
+	local5_vptop_1700 = param4_ypos_ref[0];
+	local4_ytop_1701 = 0;
+	if ((((param4_ypos_ref[0]) < (param5_yclip)) ? 1 : 0)) {
+		local4_ytop_1701 = ((param4_ypos_ref[0]) - (param5_yclip));
+		local5_vptop_1700+=-(local4_ytop_1701);
+		local3_vpy_1696+=local4_ytop_1701;
+		
+	};
+	if ((((((local3_vpx_1695) + (param4_xpos_ref[0]))) > (param5_xclip)) ? 1 : 0)) {
+		local3_vpx_1695 = ((param5_xclip) - (param4_xpos_ref[0]));
+		
+	};
+	if ((((((local3_vpy_1696) + (local5_vptop_1700))) > (param6_ybclip)) ? 1 : 0)) {
+		local3_vpy_1696 = ((param6_ybclip) - (local5_vptop_1700));
+		
+	};
+	alias3_wdg_ref_1702[0].attr5_wxpos = param4_xpos_ref[0];
+	alias3_wdg_ref_1702[0].attr5_wypos = local5_vptop_1700;
+	if (((((((local3_vpx_1695) > (0)) ? 1 : 0)) && ((((local3_vpy_1696) > (0)) ? 1 : 0))) ? 1 : 0)) {
+		VIEWPORT(unref(param4_xpos_ref[0]), local5_vptop_1700, local3_vpx_1695, local3_vpy_1696);
+		func16_DDgui_drawwidget(param10_ddgui_vals, unref(alias3_wdg_ref_1702[0]), local4_ytop_1701);
+		
+	};
+	if (((((((param9_show_tips) && (alias3_wdg_ref_1702[0].attr6_whover)) ? 1 : 0)) && ((alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]).length)) ? 1 : 0)) {
+		var local4_boxx_ref_1714 = [0.0], local4_boxy_ref_1715 = [0.0], local5_frame_1716 = 0, local5_truew_1717 = 0, local12_is_multiline_1718 = 0;
+		local5_frame_1716 = 1;
+		VIEWPORT(0, 0, 0, 0);
+		GETFONTSIZE(local4_boxx_ref_1714, local4_boxy_ref_1715);
+		local12_is_multiline_1718 = INSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), "\n", 0);
+		if ((((local12_is_multiline_1718) != (-(1))) ? 1 : 0)) {
+			SPLITSTR(unref(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0]), unref(static9_DDgui_draw_widget_intern_lines_Str), "\n", 1);
+			local4_boxy_ref_1715[0] = ((local4_boxy_ref_1715[0]) * (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)));
+			local5_truew_1717 = 0;
+			var forEachSaver3997 = static9_DDgui_draw_widget_intern_lines_Str;
+			for(var forEachCounter3997 = 0 ; forEachCounter3997 < forEachSaver3997.values.length ; forEachCounter3997++) {
+				var local5_l_Str_1719 = forEachSaver3997.values[forEachCounter3997];
+			{
+					local5_truew_1717 = MAX(local5_truew_1717, func21_DDGui_TextWidthIntern(local5_l_Str_1719));
 					
 				}
-			};
-			__debugInfo = "159:\JumpIt.gbas";
-		};
-		__debugInfo = "161:\JumpIt.gbas";
-		SHOWSCREEN();
-		__debugInfo = "158:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['Update'] = function() {
-	stackPush("sub: Update", __debugInfo);
-	try {
-		__debugInfo = "167:\JumpIt.gbas";
-		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
-		__debugInfo = "169:\JumpIt.gbas";
-		{
-			var local16___SelectHelper1__1394 = 0;
-			__debugInfo = "169:\JumpIt.gbas";
-			local16___SelectHelper1__1394 = global9_Gamestate;
-			__debugInfo = "189:\JumpIt.gbas";
-			if ((((local16___SelectHelper1__1394) == (~~(0))) ? 1 : 0)) {
-				__debugInfo = "171:\JumpIt.gbas";
-				(global3_Map).Update();
-				__debugInfo = "174:\JumpIt.gbas";
-				var forEachSaver1673 = global6_Enemys;
-				for(var forEachCounter1673 = 0 ; forEachCounter1673 < forEachSaver1673.values.length ; forEachCounter1673++) {
-					var local5_Enemy_1395 = forEachSaver1673.values[forEachCounter1673];
-				{
-						__debugInfo = "173:\JumpIt.gbas";
-						(local5_Enemy_1395).Update();
-						__debugInfo = "173:\JumpIt.gbas";
-					}
-					forEachSaver1673.values[forEachCounter1673] = local5_Enemy_1395;
-				
-				};
-				__debugInfo = "178:\JumpIt.gbas";
-				var forEachSaver1688 = global5_Shits;
-				for(var forEachCounter1688 = 0 ; forEachCounter1688 < forEachSaver1688.values.length ; forEachCounter1688++) {
-					var local4_Shit_1396 = forEachSaver1688.values[forEachCounter1688];
-				{
-						__debugInfo = "176:\JumpIt.gbas";
-						(local4_Shit_1396).Update();
-						__debugInfo = "177:\JumpIt.gbas";
-						if (local4_Shit_1396.attr3_Del) {
-							__debugInfo = "177:\JumpIt.gbas";
-							//DELETE!!111
-							forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
-							DIMDEL(forEachSaver1688, forEachCounter1688);
-							forEachCounter1688--;
-							continue;
-							__debugInfo = "177:\JumpIt.gbas";
-						};
-						__debugInfo = "176:\JumpIt.gbas";
-					}
-					forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
-				
-				};
-				__debugInfo = "182:\JumpIt.gbas";
-				var forEachSaver1703 = global5_Spits;
-				for(var forEachCounter1703 = 0 ; forEachCounter1703 < forEachSaver1703.values.length ; forEachCounter1703++) {
-					var local4_Spit_1397 = forEachSaver1703.values[forEachCounter1703];
-				{
-						__debugInfo = "180:\JumpIt.gbas";
-						(local4_Spit_1397).Update();
-						__debugInfo = "181:\JumpIt.gbas";
-						if (local4_Spit_1397.attr3_Del) {
-							__debugInfo = "181:\JumpIt.gbas";
-							//DELETE!!111
-							forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
-							DIMDEL(forEachSaver1703, forEachCounter1703);
-							forEachCounter1703--;
-							continue;
-							__debugInfo = "181:\JumpIt.gbas";
-						};
-						__debugInfo = "180:\JumpIt.gbas";
-					}
-					forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
-				
-				};
-				__debugInfo = "186:\JumpIt.gbas";
-				var forEachSaver1718 = global10_Explosions;
-				for(var forEachCounter1718 = 0 ; forEachCounter1718 < forEachSaver1718.values.length ; forEachCounter1718++) {
-					var local9_Explosion_1398 = forEachSaver1718.values[forEachCounter1718];
-				{
-						__debugInfo = "184:\JumpIt.gbas";
-						(local9_Explosion_1398).Update();
-						__debugInfo = "185:\JumpIt.gbas";
-						if (local9_Explosion_1398.attr3_Del) {
-							__debugInfo = "185:\JumpIt.gbas";
-							//DELETE!!111
-							forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
-							DIMDEL(forEachSaver1718, forEachCounter1718);
-							forEachCounter1718--;
-							continue;
-							__debugInfo = "185:\JumpIt.gbas";
-						};
-						__debugInfo = "184:\JumpIt.gbas";
-					}
-					forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
-				
-				};
-				__debugInfo = "187:\JumpIt.gbas";
-				(global6_Player).Update();
-				__debugInfo = "171:\JumpIt.gbas";
-			};
-			__debugInfo = "169:\JumpIt.gbas";
-		};
-		__debugInfo = "167:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['Render'] = function() {
-	stackPush("sub: Render", __debugInfo);
-	try {
-		var local5_Width_ref_1399 = [0.0], local6_Height_ref_1400 = [0.0];
-		__debugInfo = "195:\JumpIt.gbas";
-		GETSCREENSIZE(local5_Width_ref_1399, local6_Height_ref_1400);
-		__debugInfo = "205:\JumpIt.gbas";
-		{
-			var local16___SelectHelper2__1401 = 0;
-			__debugInfo = "205:\JumpIt.gbas";
-			local16___SelectHelper2__1401 = global9_Gamestate;
-			__debugInfo = "233:\JumpIt.gbas";
-			if ((((local16___SelectHelper2__1401) == (~~(0))) ? 1 : 0)) {
-				__debugInfo = "209:\JumpIt.gbas";
-				var forEachSaver1741 = global5_Shits;
-				for(var forEachCounter1741 = 0 ; forEachCounter1741 < forEachSaver1741.values.length ; forEachCounter1741++) {
-					var local4_Shit_1402 = forEachSaver1741.values[forEachCounter1741];
-				{
-						__debugInfo = "208:\JumpIt.gbas";
-						(local4_Shit_1402).Render();
-						__debugInfo = "208:\JumpIt.gbas";
-					}
-					forEachSaver1741.values[forEachCounter1741] = local4_Shit_1402;
-				
-				};
-				__debugInfo = "211:\JumpIt.gbas";
-				(global3_Map).Render();
-				__debugInfo = "215:\JumpIt.gbas";
-				var forEachSaver1751 = global5_Spits;
-				for(var forEachCounter1751 = 0 ; forEachCounter1751 < forEachSaver1751.values.length ; forEachCounter1751++) {
-					var local4_Spit_1403 = forEachSaver1751.values[forEachCounter1751];
-				{
-						__debugInfo = "214:\JumpIt.gbas";
-						(local4_Spit_1403).Render();
-						__debugInfo = "214:\JumpIt.gbas";
-					}
-					forEachSaver1751.values[forEachCounter1751] = local4_Spit_1403;
-				
-				};
-				__debugInfo = "219:\JumpIt.gbas";
-				var forEachSaver1759 = global6_Enemys;
-				for(var forEachCounter1759 = 0 ; forEachCounter1759 < forEachSaver1759.values.length ; forEachCounter1759++) {
-					var local5_Enemy_1404 = forEachSaver1759.values[forEachCounter1759];
-				{
-						__debugInfo = "218:\JumpIt.gbas";
-						(local5_Enemy_1404).Render();
-						__debugInfo = "218:\JumpIt.gbas";
-					}
-					forEachSaver1759.values[forEachCounter1759] = local5_Enemy_1404;
-				
-				};
-				__debugInfo = "223:\JumpIt.gbas";
-				var forEachSaver1767 = global10_Explosions;
-				for(var forEachCounter1767 = 0 ; forEachCounter1767 < forEachSaver1767.values.length ; forEachCounter1767++) {
-					var local9_Explosion_1405 = forEachSaver1767.values[forEachCounter1767];
-				{
-						__debugInfo = "222:\JumpIt.gbas";
-						(local9_Explosion_1405).Render();
-						__debugInfo = "222:\JumpIt.gbas";
-					}
-					forEachSaver1767.values[forEachCounter1767] = local9_Explosion_1405;
-				
-				};
-				__debugInfo = "225:\JumpIt.gbas";
-				(global6_Player).Render();
-				__debugInfo = "232:\JumpIt.gbas";
-				if (global12_Hardware_Str) {
-					__debugInfo = "228:\JumpIt.gbas";
-					func10_GameButton(42, ((local6_Height_ref_1400[0]) - (42)), "<");
-					__debugInfo = "229:\JumpIt.gbas";
-					func10_GameButton(((local5_Width_ref_1399[0]) - (42)), ((local6_Height_ref_1400[0]) - (42)), ">");
-					__debugInfo = "230:\JumpIt.gbas";
-					func10_GameButton(42, ((local6_Height_ref_1400[0]) - (125)), "jump");
-					__debugInfo = "231:\JumpIt.gbas";
-					func10_GameButton(((local5_Width_ref_1399[0]) - (42)), ((local6_Height_ref_1400[0]) - (125)), "jump");
-					__debugInfo = "228:\JumpIt.gbas";
-				};
-				__debugInfo = "209:\JumpIt.gbas";
-			};
-			__debugInfo = "205:\JumpIt.gbas";
-		};
-		__debugInfo = "195:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['Init'] = function() {
-	stackPush("sub: Init", __debugInfo);
-	try {
-		var local5_Width_ref_1406 = [0.0], local6_Height_ref_1407 = [0.0];
-		__debugInfo = "239:\JumpIt.gbas";
-		GETSCREENSIZE(local5_Width_ref_1406, local6_Height_ref_1407);
-		__debugInfo = "240:\JumpIt.gbas";
-		{
-			var local16___SelectHelper3__1408 = 0;
-			__debugInfo = "240:\JumpIt.gbas";
-			local16___SelectHelper3__1408 = global9_Gamestate;
-			__debugInfo = "244:\JumpIt.gbas";
-			if ((((local16___SelectHelper3__1408) == (~~(0))) ? 1 : 0)) {
-				__debugInfo = "242:\JumpIt.gbas";
-				(global6_Player).Init(100, 100, 16, 32);
-				__debugInfo = "243:\JumpIt.gbas";
-				(global3_Map).Init("map3.map");
-				__debugInfo = "242:\JumpIt.gbas";
-			};
-			__debugInfo = "240:\JumpIt.gbas";
-		};
-		__debugInfo = "246:\JumpIt.gbas";
-		DIM(global17_LastMousePosition, [0], 0);
-		__debugInfo = "239:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['MENU_LOOP'] = function() {
-	stackPush("sub: MENU_LOOP", __debugInfo);
-	try {
-		var local1_x_ref_1409 = [0.0], local1_y_ref_1410 = [0.0], local1_w_ref_1411 = [0.0], local1_h_ref_1412 = [0.0], local2_iw_ref_1413 = [0.0], local2_ih_ref_1414 = [0.0], local2_hh_1415 = 0.0;
-		__debugInfo = "262:\JumpIt.gbas";
-		GETFONTSIZE(local1_x_ref_1409, local1_y_ref_1410);
-		__debugInfo = "264:\JumpIt.gbas";
-		GETSCREENSIZE(local1_w_ref_1411, local1_h_ref_1412);
-		__debugInfo = "266:\JumpIt.gbas";
-		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1413, local2_ih_ref_1414);
-		__debugInfo = "269:\JumpIt.gbas";
-		local2_hh_1415 = ((local1_h_ref_1412[0]) - (150));
-		__debugInfo = "271:\JumpIt.gbas";
-		global6_Action = 0;
-		__debugInfo = "273:\JumpIt.gbas";
-		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
-		__debugInfo = "274:\JumpIt.gbas";
-		Render();
-		__debugInfo = "276:\JumpIt.gbas";
-		STRETCHSPRITE(global9_MenuImage, ((local1_w_ref_1411[0]) - (KERNLEN(global9_Title_Str, 1))), 8, ((-(local1_w_ref_1411[0])) - (KERNLEN(global9_Title_Str, 1))), unref(local2_ih_ref_1414[0]));
-		__debugInfo = "277:\JumpIt.gbas";
-		PRINT(global9_Title_Str, 20, ((40) - (((local1_y_ref_1410[0]) / (2)))), 0);
-		__debugInfo = "279:\JumpIt.gbas";
-		if (func6_Button(global9_Menu1_Str, ((((local2_hh_1415) / (3))) + (100)))) {
-			__debugInfo = "279:\JumpIt.gbas";
-			global6_Action = 1;
-			__debugInfo = "279:\JumpIt.gbas";
-		};
-		__debugInfo = "280:\JumpIt.gbas";
-		if (func6_Button(global9_Menu2_Str, ((((((local2_hh_1415) / (3))) * (2))) + (100)))) {
-			__debugInfo = "280:\JumpIt.gbas";
-			global6_Action = 2;
-			__debugInfo = "280:\JumpIt.gbas";
-		};
-		__debugInfo = "281:\JumpIt.gbas";
-		if ((((global9_Menu3_Str) != ("")) ? 1 : 0)) {
-			__debugInfo = "281:\JumpIt.gbas";
-			if (func6_Button(global9_Menu3_Str, ((local2_hh_1415) + (100)))) {
-				__debugInfo = "281:\JumpIt.gbas";
-				global6_Action = 3;
-				__debugInfo = "281:\JumpIt.gbas";
-			};
-			__debugInfo = "281:\JumpIt.gbas";
-		};
-		__debugInfo = "283:\JumpIt.gbas";
-		{
-			var local16___SelectHelper4__1416 = 0;
-			__debugInfo = "283:\JumpIt.gbas";
-			local16___SelectHelper4__1416 = global6_Action;
-			__debugInfo = "289:\JumpIt.gbas";
-			if ((((local16___SelectHelper4__1416) == (1)) ? 1 : 0)) {
-				__debugInfo = "285:\JumpIt.gbas";
-				global9_Gamestate = ~~(0);
-				__debugInfo = "286:\JumpIt.gbas";
-				POPLOOP();
-				__debugInfo = "285:\JumpIt.gbas";
-			} else if ((((local16___SelectHelper4__1416) == (3)) ? 1 : 0)) {
-				__debugInfo = "288:\JumpIt.gbas";
-				END();
-				__debugInfo = "288:\JumpIt.gbas";
-			};
-			__debugInfo = "283:\JumpIt.gbas";
-		};
-		__debugInfo = "290:\JumpIt.gbas";
-		if (global6_Action) {
-			__debugInfo = "290:\JumpIt.gbas";
-			Init();
-			__debugInfo = "290:\JumpIt.gbas";
-		};
-		__debugInfo = "292:\JumpIt.gbas";
-		SHOWSCREEN();
-		__debugInfo = "262:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func6_Button'] = function(param8_Text_Str, param1_Y) {
-	stackPush("function: Button", __debugInfo);
-	try {
-		var local1_x_ref_1419 = [0.0], local1_y_ref_1420 = [0.0], local1_w_ref_1421 = [0.0], local1_h_ref_1422 = [0.0], local2_iw_ref_1423 = [0.0], local2_ih_ref_1424 = [0.0];
-		__debugInfo = "297:\JumpIt.gbas";
-		GETFONTSIZE(local1_x_ref_1419, local1_y_ref_1420);
-		__debugInfo = "299:\JumpIt.gbas";
-		GETSCREENSIZE(local1_w_ref_1421, local1_h_ref_1422);
-		__debugInfo = "301:\JumpIt.gbas";
-		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1423, local2_ih_ref_1424);
-		__debugInfo = "310:\JumpIt.gbas";
-		if (BOXCOLL(0, ~~(((param1_Y) - (32))), unref(~~(local1_w_ref_1421[0])), unref(~~(local2_ih_ref_1424[0])), unref(~~(global6_MouseX_ref[0])), unref(~~(global6_MouseY_ref[0])), 1, 1)) {
-			__debugInfo = "304:\JumpIt.gbas";
-			ALPHAMODE(0);
-			__debugInfo = "307:\JumpIt.gbas";
-			if (global2_ML_ref[0]) {
-				__debugInfo = "306:\JumpIt.gbas";
-				return 1;
-				__debugInfo = "306:\JumpIt.gbas";
-			};
-			__debugInfo = "304:\JumpIt.gbas";
-		} else {
-			__debugInfo = "309:\JumpIt.gbas";
-			ALPHAMODE(-(0.75));
-			__debugInfo = "309:\JumpIt.gbas";
-		};
-		__debugInfo = "311:\JumpIt.gbas";
-		STRETCHSPRITE(global9_MenuImage, 0, ((param1_Y) - (32)), unref(local1_w_ref_1421[0]), unref(local2_ih_ref_1424[0]));
-		__debugInfo = "312:\JumpIt.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "314:\JumpIt.gbas";
-		PRINT(param8_Text_Str, 40, ((param1_Y) - (((local1_y_ref_1420[0]) / (2)))), 0);
-		__debugInfo = "316:\JumpIt.gbas";
-		return tryClone(0);
-		__debugInfo = "317:\JumpIt.gbas";
-		return 0;
-		__debugInfo = "297:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func10_GameButton'] = function(param1_X, param1_Y, param8_Text_Str) {
-	stackPush("function: GameButton", __debugInfo);
-	try {
-		__debugInfo = "325:\JumpIt.gbas";
-		if (func16_UpdateGameButton(param1_X, param1_Y)) {
-			__debugInfo = "322:\JumpIt.gbas";
-			ALPHAMODE(0.5);
-			__debugInfo = "322:\JumpIt.gbas";
-		} else {
-			__debugInfo = "324:\JumpIt.gbas";
-			ALPHAMODE(-(0.5));
-			__debugInfo = "324:\JumpIt.gbas";
-		};
-		__debugInfo = "327:\JumpIt.gbas";
-		DRAWSPRITE(global11_ButtonImage, ((param1_X) - (32)), ((param1_Y) - (32)));
-		__debugInfo = "328:\JumpIt.gbas";
-		{
-			var local16___SelectHelper5__1428 = "";
-			__debugInfo = "328:\JumpIt.gbas";
-			local16___SelectHelper5__1428 = param8_Text_Str;
-			__debugInfo = "335:\JumpIt.gbas";
-			if ((((local16___SelectHelper5__1428) == ("<")) ? 1 : 0)) {
-				__debugInfo = "330:\JumpIt.gbas";
-				DRAWSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)));
-				__debugInfo = "330:\JumpIt.gbas";
-			} else if ((((local16___SelectHelper5__1428) == (">")) ? 1 : 0)) {
-				__debugInfo = "332:\JumpIt.gbas";
-				ZOOMSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)), -(1), 1);
-				__debugInfo = "332:\JumpIt.gbas";
-			} else if ((((local16___SelectHelper5__1428) == ("jump")) ? 1 : 0)) {
-				__debugInfo = "334:\JumpIt.gbas";
-				DRAWSPRITE(global9_JumpImage, ((param1_X) - (32)), ((param1_Y) - (32)));
-				__debugInfo = "334:\JumpIt.gbas";
-			};
-			__debugInfo = "328:\JumpIt.gbas";
-		};
-		__debugInfo = "337:\JumpIt.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "338:\JumpIt.gbas";
-		return 0;
-		__debugInfo = "325:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func16_UpdateGameButton'] = function(param1_X, param1_Y) {
-	stackPush("function: UpdateGameButton", __debugInfo);
-	try {
-		var local2_MX_ref_1431 = [0.0], local2_MY_ref_1432 = [0.0], local2_ML_ref_1433 = [0.0], local2_MR_ref_1434 = [0.0];
-		__debugInfo = "341:\JumpIt.gbas";
-		{
-			var local1_i_1435 = 0.0;
-			__debugInfo = "349:\JumpIt.gbas";
-			for (local1_i_1435 = 0;toCheck(local1_i_1435, ((GETMOUSECOUNT()) - (1)), 1);local1_i_1435 += 1) {
-				__debugInfo = "343:\JumpIt.gbas";
-				SETACTIVEMOUSE(~~(local1_i_1435));
-				__debugInfo = "344:\JumpIt.gbas";
-				MOUSESTATE(local2_MX_ref_1431, local2_MY_ref_1432, local2_ML_ref_1433, local2_MR_ref_1434);
-				__debugInfo = "348:\JumpIt.gbas";
-				if ((((BOXCOLL(~~(((param1_X) - (32))), ~~(((param1_Y) - (32))), 64, 64, unref(~~(local2_MX_ref_1431[0])), unref(~~(local2_MY_ref_1432[0])), 1, 1)) && (local2_ML_ref_1433[0])) ? 1 : 0)) {
-					__debugInfo = "346:\JumpIt.gbas";
-					SETACTIVEMOUSE(0);
-					__debugInfo = "347:\JumpIt.gbas";
-					return tryClone(1);
-					__debugInfo = "346:\JumpIt.gbas";
-				};
-				__debugInfo = "343:\JumpIt.gbas";
-			};
-			__debugInfo = "349:\JumpIt.gbas";
-		};
-		__debugInfo = "350:\JumpIt.gbas";
-		SETACTIVEMOUSE(0);
-		__debugInfo = "351:\JumpIt.gbas";
-		return 0;
-		__debugInfo = "352:\JumpIt.gbas";
-		return 0;
-		__debugInfo = "341:\JumpIt.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method12_type6_TEnemy_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "80:\Enemy.gbas";
-		if (param4_self.attr4_Fall) {
-			__debugInfo = "27:\Enemy.gbas";
-			param4_self.attr2_VY = ((param4_self.attr2_VY) + (0.2));
-			__debugInfo = "29:\Enemy.gbas";
-			param4_self.attr1_Y+=param4_self.attr2_VY;
-			__debugInfo = "27:\Enemy.gbas";
-		} else {
-			__debugInfo = "31:\Enemy.gbas";
-			param4_self.attr4_Anim+=1;
-			__debugInfo = "32:\Enemy.gbas";
-			{
-				var local16___SelectHelper6__1438 = 0;
-				__debugInfo = "32:\Enemy.gbas";
-				local16___SelectHelper6__1438 = param4_self.attr3_Typ;
-				__debugInfo = "79:\Enemy.gbas";
-				if ((((local16___SelectHelper6__1438) == (~~(1))) ? 1 : 0)) {
-					__debugInfo = "36:\Enemy.gbas";
-					if (((((((((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "35:\Enemy.gbas";
-						param4_self.attr2_VX = -(param4_self.attr2_VX);
-						__debugInfo = "35:\Enemy.gbas";
-					};
-					__debugInfo = "37:\Enemy.gbas";
-					param4_self.attr1_X+=param4_self.attr2_VX;
-					__debugInfo = "38:\Enemy.gbas";
-					param4_self.attr2_VY = func4_QCOS(CAST2INT(((GETTIMERALL()) / (10))));
-					__debugInfo = "41:\Enemy.gbas";
-					if ((global3_Map).Collision(((param4_self.attr1_X) + (4)), ((param4_self.attr1_Y) + (param4_self.attr2_VY)), ((param4_self.attr5_Width) - (8)), param4_self.attr6_Height)) {
-						__debugInfo = "40:\Enemy.gbas";
-						param4_self.attr2_VY = 0;
-						__debugInfo = "40:\Enemy.gbas";
-					};
-					__debugInfo = "43:\Enemy.gbas";
-					param4_self.attr12_EventCounter+=1;
-					__debugInfo = "47:\Enemy.gbas";
-					if ((((MOD(param4_self.attr12_EventCounter, ~~(RND(500)))) == (5)) ? 1 : 0)) {
-						var local1_S_1439 = new type5_TShit();
-						__debugInfo = "46:\Enemy.gbas";
-						(local1_S_1439).Init(param4_self.attr1_X, param4_self.attr1_Y);
-						__debugInfo = "46:\Enemy.gbas";
-					};
-					__debugInfo = "49:\Enemy.gbas";
-					param4_self.attr1_Y+=param4_self.attr2_VY;
-					__debugInfo = "51:\Enemy.gbas";
-					param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 30);
-					__debugInfo = "36:\Enemy.gbas";
-				} else if (((((((local16___SelectHelper6__1438) >= (~~(2))) ? 1 : 0)) && ((((local16___SelectHelper6__1438) <= (~~(4))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "53:\Enemy.gbas";
-					{
-						var local16___SelectHelper7__1440 = 0;
-						__debugInfo = "53:\Enemy.gbas";
-						local16___SelectHelper7__1440 = param4_self.attr3_Typ;
-						__debugInfo = "73:\Enemy.gbas";
-						if ((((local16___SelectHelper7__1440) == (~~(4))) ? 1 : 0)) {
-							var local4_Look_1441 = 0.0;
-							__debugInfo = "55:\Enemy.gbas";
-							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
-							__debugInfo = "56:\Enemy.gbas";
-							param4_self.attr12_EventCounter+=1;
-							__debugInfo = "63:\Enemy.gbas";
-							if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
-								__debugInfo = "60:\Enemy.gbas";
-								local4_Look_1441 = 0;
-								__debugInfo = "60:\Enemy.gbas";
-							} else {
-								__debugInfo = "62:\Enemy.gbas";
-								local4_Look_1441 = ((param4_self.attr5_Width) / (2));
-								__debugInfo = "62:\Enemy.gbas";
-							};
-							__debugInfo = "70:\Enemy.gbas";
-							if (((((((MOD(param4_self.attr12_EventCounter, 55)) == (5)) ? 1 : 0)) && (((((global3_Map).RayCollision(((param4_self.attr1_X) + (local4_Look_1441)), ((param4_self.attr1_Y) + (4)), global6_Player.attr1_X, global6_Player.attr1_Y)) == (0)) ? 1 : 0))) ? 1 : 0)) {
-								var local1_S_1442 = new type5_TSpit();
-								__debugInfo = "69:\Enemy.gbas";
-								(local1_S_1442).Init(((param4_self.attr1_X) + (local4_Look_1441)), ((param4_self.attr1_Y) + (4)), ((param4_self.attr2_VX) * (4)), ((param4_self.attr2_VY) - (RND(2))));
-								__debugInfo = "69:\Enemy.gbas";
-							};
-							__debugInfo = "55:\Enemy.gbas";
-						} else if ((((local16___SelectHelper7__1440) == (~~(2))) ? 1 : 0)) {
-							__debugInfo = "72:\Enemy.gbas";
-							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 10);
-							__debugInfo = "72:\Enemy.gbas";
-						};
-						__debugInfo = "53:\Enemy.gbas";
-					};
-					__debugInfo = "77:\Enemy.gbas";
-					if (((((((((((((((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0))) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "76:\Enemy.gbas";
-						param4_self.attr2_VX = -(param4_self.attr2_VX);
-						__debugInfo = "76:\Enemy.gbas";
-					};
-					__debugInfo = "78:\Enemy.gbas";
-					param4_self.attr1_X+=param4_self.attr2_VX;
-					__debugInfo = "53:\Enemy.gbas";
-				};
-				__debugInfo = "32:\Enemy.gbas";
-			};
-			__debugInfo = "31:\Enemy.gbas";
-		};
-		__debugInfo = "81:\Enemy.gbas";
-		return 0;
-		__debugInfo = "80:\Enemy.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method12_type6_TEnemy_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		var local5_Frame_1445 = 0;
-		__debugInfo = "84:\Enemy.gbas";
-		local5_Frame_1445 = 0;
-		__debugInfo = "86:\Enemy.gbas";
-		{
-			var local16___SelectHelper8__1446 = 0;
-			__debugInfo = "86:\Enemy.gbas";
-			local16___SelectHelper8__1446 = param4_self.attr3_Typ;
-			__debugInfo = "139:\Enemy.gbas";
-			if ((((local16___SelectHelper8__1446) == (~~(1))) ? 1 : 0)) {
-				var local3_Dir_1447 = 0;
-				__debugInfo = "93:\Enemy.gbas";
-				if ((((param4_self.attr2_VX) > (0)) ? 1 : 0)) {
-					__debugInfo = "90:\Enemy.gbas";
-					local3_Dir_1447 = 1;
-					__debugInfo = "90:\Enemy.gbas";
-				} else {
-					__debugInfo = "92:\Enemy.gbas";
-					local3_Dir_1447 = 0;
-					__debugInfo = "92:\Enemy.gbas";
-				};
-				__debugInfo = "100:\Enemy.gbas";
-				if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
-					__debugInfo = "95:\Enemy.gbas";
-					local5_Frame_1445 = 2;
-					__debugInfo = "95:\Enemy.gbas";
-				} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
-					__debugInfo = "97:\Enemy.gbas";
-					local5_Frame_1445 = 1;
-					__debugInfo = "97:\Enemy.gbas";
-				} else {
-					__debugInfo = "99:\Enemy.gbas";
-					local5_Frame_1445 = 0;
-					__debugInfo = "99:\Enemy.gbas";
-				};
-				__debugInfo = "102:\Enemy.gbas";
-				func9_TurnImage(global9_BirdImage, local5_Frame_1445, local3_Dir_1447, param4_self.attr1_X, param4_self.attr1_Y, 6);
-				__debugInfo = "93:\Enemy.gbas";
-			} else if ((((local16___SelectHelper8__1446) == (~~(2))) ? 1 : 0)) {
-				var local3_Dir_1448 = 0;
-				__debugInfo = "109:\Enemy.gbas";
-				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
-					__debugInfo = "106:\Enemy.gbas";
-					local3_Dir_1448 = 0;
-					__debugInfo = "106:\Enemy.gbas";
-				} else {
-					__debugInfo = "108:\Enemy.gbas";
-					local3_Dir_1448 = 1;
-					__debugInfo = "108:\Enemy.gbas";
-				};
-				__debugInfo = "115:\Enemy.gbas";
-				if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
-					__debugInfo = "112:\Enemy.gbas";
-					local5_Frame_1445 = 1;
-					__debugInfo = "112:\Enemy.gbas";
-				} else {
-					__debugInfo = "114:\Enemy.gbas";
-					local5_Frame_1445 = 0;
-					__debugInfo = "114:\Enemy.gbas";
-				};
-				__debugInfo = "118:\Enemy.gbas";
-				func9_TurnImage(global8_PigImage, local5_Frame_1445, local3_Dir_1448, param4_self.attr1_X, param4_self.attr1_Y, 4);
-				__debugInfo = "109:\Enemy.gbas";
-			} else if ((((local16___SelectHelper8__1446) == (~~(3))) ? 1 : 0)) {
-				__debugInfo = "120:\Enemy.gbas";
-				ROTOSPRITE(global10_HumanImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)), -(MOD(~~(param4_self.attr1_X), 360)));
-				__debugInfo = "120:\Enemy.gbas";
-			} else if ((((local16___SelectHelper8__1446) == (~~(4))) ? 1 : 0)) {
-				var local3_Dir_1449 = 0;
-				__debugInfo = "127:\Enemy.gbas";
-				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
-					__debugInfo = "124:\Enemy.gbas";
-					local3_Dir_1449 = 1;
-					__debugInfo = "124:\Enemy.gbas";
-				} else {
-					__debugInfo = "126:\Enemy.gbas";
-					local3_Dir_1449 = 0;
-					__debugInfo = "126:\Enemy.gbas";
-				};
-				__debugInfo = "135:\Enemy.gbas";
-				if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
-					__debugInfo = "130:\Enemy.gbas";
-					local5_Frame_1445 = 2;
-					__debugInfo = "130:\Enemy.gbas";
-				} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
-					__debugInfo = "132:\Enemy.gbas";
-					local5_Frame_1445 = 1;
-					__debugInfo = "132:\Enemy.gbas";
-				} else {
-					__debugInfo = "134:\Enemy.gbas";
-					local5_Frame_1445 = 0;
-					__debugInfo = "134:\Enemy.gbas";
-				};
-				__debugInfo = "138:\Enemy.gbas";
-				func9_TurnImage(global10_LlamaImage, local5_Frame_1445, local3_Dir_1449, param4_self.attr1_X, param4_self.attr1_Y, 6);
-				__debugInfo = "127:\Enemy.gbas";
-			};
-			__debugInfo = "86:\Enemy.gbas";
-		};
-		__debugInfo = "140:\Enemy.gbas";
-		return 0;
-		__debugInfo = "84:\Enemy.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method12_type6_TEnemy_4_Init'] = function(param3_Typ, param1_X, param1_Y, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		__debugInfo = "143:\Enemy.gbas";
-		param4_self.attr3_Typ = param3_Typ;
-		__debugInfo = "144:\Enemy.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "145:\Enemy.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "146:\Enemy.gbas";
-		param4_self.attr5_Width = 32;
-		__debugInfo = "147:\Enemy.gbas";
-		param4_self.attr6_Height = 32;
-		__debugInfo = "149:\Enemy.gbas";
-		{
-			var local16___SelectHelper9__1455 = 0;
-			__debugInfo = "149:\Enemy.gbas";
-			local16___SelectHelper9__1455 = param4_self.attr3_Typ;
-			__debugInfo = "181:\Enemy.gbas";
-			if ((((local16___SelectHelper9__1455) == (~~(1))) ? 1 : 0)) {
-				__debugInfo = "151:\Enemy.gbas";
-				param4_self.attr6_Height = 16;
-				__debugInfo = "156:\Enemy.gbas";
-				if (INTEGER(RND(2))) {
-					__debugInfo = "153:\Enemy.gbas";
-					param4_self.attr2_VX = 1;
-					__debugInfo = "153:\Enemy.gbas";
-				} else {
-					__debugInfo = "155:\Enemy.gbas";
-					param4_self.attr2_VX = -(1);
-					__debugInfo = "155:\Enemy.gbas";
-				};
-				__debugInfo = "151:\Enemy.gbas";
-			} else if ((((local16___SelectHelper9__1455) == (~~(2))) ? 1 : 0)) {
-				__debugInfo = "162:\Enemy.gbas";
-				if (INTEGER(RND(2))) {
-					__debugInfo = "159:\Enemy.gbas";
-					param4_self.attr2_VX = 2;
-					__debugInfo = "159:\Enemy.gbas";
-				} else {
-					__debugInfo = "161:\Enemy.gbas";
-					param4_self.attr2_VX = -(2);
-					__debugInfo = "161:\Enemy.gbas";
-				};
-				__debugInfo = "162:\Enemy.gbas";
-			} else if ((((local16___SelectHelper9__1455) == (~~(3))) ? 1 : 0)) {
-				__debugInfo = "164:\Enemy.gbas";
-				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
-				__debugInfo = "165:\Enemy.gbas";
-				param4_self.attr6_Height = 64;
-				__debugInfo = "166:\Enemy.gbas";
-				param4_self.attr5_Width = 64;
-				__debugInfo = "171:\Enemy.gbas";
-				if (INTEGER(RND(2))) {
-					__debugInfo = "168:\Enemy.gbas";
-					param4_self.attr2_VX = 1;
-					__debugInfo = "168:\Enemy.gbas";
-				} else {
-					__debugInfo = "170:\Enemy.gbas";
-					param4_self.attr2_VX = -(1);
-					__debugInfo = "170:\Enemy.gbas";
-				};
-				__debugInfo = "164:\Enemy.gbas";
-			} else if ((((local16___SelectHelper9__1455) == (~~(4))) ? 1 : 0)) {
-				__debugInfo = "173:\Enemy.gbas";
-				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
-				__debugInfo = "174:\Enemy.gbas";
-				param4_self.attr6_Height = 64;
-				__debugInfo = "175:\Enemy.gbas";
-				param4_self.attr5_Width = 64;
-				__debugInfo = "180:\Enemy.gbas";
-				if (INTEGER(RND(2))) {
-					__debugInfo = "177:\Enemy.gbas";
-					param4_self.attr2_VX = 1;
-					__debugInfo = "177:\Enemy.gbas";
-				} else {
-					__debugInfo = "179:\Enemy.gbas";
-					param4_self.attr2_VX = -(1);
-					__debugInfo = "179:\Enemy.gbas";
-				};
-				__debugInfo = "173:\Enemy.gbas";
-			};
-			__debugInfo = "149:\Enemy.gbas";
-		};
-		__debugInfo = "183:\Enemy.gbas";
-		DIMPUSH(global6_Enemys, param4_self);
-		__debugInfo = "184:\Enemy.gbas";
-		return 0;
-		__debugInfo = "143:\Enemy.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method12_type6_TEnemy_13_IsDestroyable'] = function(param4_self) {
-	stackPush("method: IsDestroyable", __debugInfo);
-	try {
-		__debugInfo = "191:\Enemy.gbas";
-		if ((((param4_self.attr3_Typ) == (3)) ? 1 : 0)) {
-			__debugInfo = "188:\Enemy.gbas";
-			return 0;
-			__debugInfo = "188:\Enemy.gbas";
-		} else {
-			__debugInfo = "190:\Enemy.gbas";
-			return tryClone(1);
-			__debugInfo = "190:\Enemy.gbas";
-		};
-		__debugInfo = "192:\Enemy.gbas";
-		return 0;
-		__debugInfo = "191:\Enemy.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method17_type10_TExplosion_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "16:\Explosion.gbas";
-		param4_self.attr4_Anim+=1;
-		__debugInfo = "17:\Explosion.gbas";
-		if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
-			__debugInfo = "17:\Explosion.gbas";
-			param4_self.attr3_Del = 1;
-			__debugInfo = "17:\Explosion.gbas";
-		};
-		__debugInfo = "18:\Explosion.gbas";
-		return 0;
-		__debugInfo = "16:\Explosion.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method17_type10_TExplosion_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		var local5_Frame_1462 = 0;
-		__debugInfo = "30:\Explosion.gbas";
-		if ((((param4_self.attr4_Anim) > (15)) ? 1 : 0)) {
-			__debugInfo = "23:\Explosion.gbas";
-			local5_Frame_1462 = 3;
-			__debugInfo = "23:\Explosion.gbas";
-		} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
-			__debugInfo = "25:\Explosion.gbas";
-			local5_Frame_1462 = 2;
-			__debugInfo = "25:\Explosion.gbas";
-		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
-			__debugInfo = "27:\Explosion.gbas";
-			local5_Frame_1462 = 1;
-			__debugInfo = "27:\Explosion.gbas";
-		} else {
-			__debugInfo = "29:\Explosion.gbas";
-			local5_Frame_1462 = 0;
-			__debugInfo = "29:\Explosion.gbas";
-		};
-		__debugInfo = "32:\Explosion.gbas";
-		DRAWANIM(global14_ExplosionImage, local5_Frame_1462, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
-		__debugInfo = "33:\Explosion.gbas";
-		return 0;
-		__debugInfo = "30:\Explosion.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method17_type10_TExplosion_4_Init'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		__debugInfo = "36:\Explosion.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "37:\Explosion.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "39:\Explosion.gbas";
-		DIMPUSH(global10_Explosions, param4_self);
-		__debugInfo = "40:\Explosion.gbas";
-		return 0;
-		__debugInfo = "36:\Explosion.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_9_InitEmpty'] = function(param5_Width, param6_Height, param11_Tileset_Str, param4_self) {
-	stackPush("method: InitEmpty", __debugInfo);
-	try {
-		__debugInfo = "25:\Map.gbas";
-		param4_self.attr6_IsSnow = 0;
-		__debugInfo = "26:\Map.gbas";
-		param4_self.attr5_Width = param5_Width;
-		__debugInfo = "27:\Map.gbas";
-		param4_self.attr6_Height = param6_Height;
-		__debugInfo = "29:\Map.gbas";
-		param4_self.attr7_ScrollX = 0;
-		__debugInfo = "30:\Map.gbas";
-		param4_self.attr7_ScrollY = 0;
-		__debugInfo = "32:\Map.gbas";
-		DIM(global5_Spits, [0], new type5_TSpit());
-		__debugInfo = "33:\Map.gbas";
-		DIM(global5_Shits, [0], new type5_TShit());
-		__debugInfo = "34:\Map.gbas";
-		DIM(global6_Enemys, [0], new type6_TEnemy());
-		__debugInfo = "35:\Map.gbas";
-		(global6_Player).Init(100, 100, 16, 32);
-		__debugInfo = "37:\Map.gbas";
-		param4_self.attr7_Tileset = GENSPRITE();
-		__debugInfo = "38:\Map.gbas";
-		param4_self.attr15_TilesetPath_Str = param11_Tileset_Str;
-		__debugInfo = "39:\Map.gbas";
-		LOADANIM(param11_Tileset_Str, param4_self.attr7_Tileset, 32, 32);
-		__debugInfo = "40:\Map.gbas";
-		if ((((INSTR(param11_Tileset_Str, "snowtileset", 0)) != (-(1))) ? 1 : 0)) {
-			__debugInfo = "40:\Map.gbas";
-			param4_self.attr6_IsSnow = 1;
-			__debugInfo = "40:\Map.gbas";
-		};
-		__debugInfo = "44:\Map.gbas";
-		DIM(param4_self.attr5_Datas, [param4_self.attr5_Width, param4_self.attr6_Height], 0);
-		__debugInfo = "46:\Map.gbas";
-		param4_self.attr6_HasFBO = INT2STR(PLATFORMINFO_Str("GLEX:glBindFramebufferEXT"));
-		__debugInfo = "53:\Map.gbas";
-		if (param4_self.attr6_HasFBO) {
-			__debugInfo = "48:\Map.gbas";
-			param4_self.attr5_SprID = GENSPRITE();
-			__debugInfo = "49:\Map.gbas";
-			param4_self.attr13_IsRenderedFBO = 0;
-			__debugInfo = "50:\Map.gbas";
-			param4_self.attr8_ScreenID = 0;
-			__debugInfo = "51:\Map.gbas";
-			LOADSPRITE("", param4_self.attr5_SprID);
-			__debugInfo = "52:\Map.gbas";
-			CREATESCREEN(param4_self.attr8_ScreenID, param4_self.attr5_SprID, ~~(((param4_self.attr5_Width) * (32))), ~~(((param4_self.attr6_Height) * (32))));
-			__debugInfo = "48:\Map.gbas";
-		};
-		__debugInfo = "54:\Map.gbas";
-		return 0;
-		__debugInfo = "25:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_4_Save'] = function(param8_File_Str, param4_self) {
-	stackPush("method: Save", __debugInfo);
-	try {
-		var local3_Chn_1475 = 0;
-		__debugInfo = "57:\Map.gbas";
-		local3_Chn_1475 = GENFILE();
-		__debugInfo = "58:\Map.gbas";
-		if (DOESFILEEXIST(param8_File_Str)) {
-			__debugInfo = "58:\Map.gbas";
-			KILLFILE(param8_File_Str);
-			__debugInfo = "58:\Map.gbas";
-		};
-		__debugInfo = "59:\Map.gbas";
-		if ((((OPENFILE(local3_Chn_1475, param8_File_Str, 0)) == (0)) ? 1 : 0)) {
-			__debugInfo = "59:\Map.gbas";
-			END();
-			__debugInfo = "59:\Map.gbas";
-		};
-		__debugInfo = "62:\Map.gbas";
-		WRITELINE(local3_Chn_1475, CAST2STRING(param4_self.attr5_Width));
-		__debugInfo = "63:\Map.gbas";
-		WRITELINE(local3_Chn_1475, CAST2STRING(param4_self.attr6_Height));
-		__debugInfo = "64:\Map.gbas";
-		WRITELINE(local3_Chn_1475, param4_self.attr15_TilesetPath_Str);
-		__debugInfo = "65:\Map.gbas";
-		WRITELINE(local3_Chn_1475, param4_self.attr11_NextMap_Str);
-		__debugInfo = "65:\Map.gbas";
-		{
-			var local1_y_1476 = 0.0;
-			__debugInfo = "90:\Map.gbas";
-			for (local1_y_1476 = 0;toCheck(local1_y_1476, ((param4_self.attr6_Height) - (1)), 1);local1_y_1476 += 1) {
-				var local8_Line_Str_1477 = "";
-				__debugInfo = "67:\Map.gbas";
-				local8_Line_Str_1477 = "";
-				__debugInfo = "67:\Map.gbas";
-				{
-					var local1_x_1478 = 0.0;
-					__debugInfo = "88:\Map.gbas";
-					for (local1_x_1478 = 0;toCheck(local1_x_1478, ((param4_self.attr5_Width) - (1)), 1);local1_x_1478 += 1) {
-						var local12_PositionData_1479 = 0;
-						__debugInfo = "69:\Map.gbas";
-						if ((((local1_x_1478) > (0)) ? 1 : 0)) {
-							__debugInfo = "69:\Map.gbas";
-							local8_Line_Str_1477 = ((local8_Line_Str_1477) + (","));
-							__debugInfo = "69:\Map.gbas";
-						};
-						__debugInfo = "70:\Map.gbas";
-						local12_PositionData_1479 = param4_self.attr5_Datas.arrAccess(~~(local1_x_1478), ~~(local1_y_1476)).values[tmpPositionCache];
-						__debugInfo = "85:\Map.gbas";
-						var forEachSaver3458 = global6_Enemys;
-						for(var forEachCounter3458 = 0 ; forEachCounter3458 < forEachSaver3458.values.length ; forEachCounter3458++) {
-							var local4_Enem_1480 = forEachSaver3458.values[forEachCounter3458];
-						{
-								__debugInfo = "84:\Map.gbas";
-								if (((((((INTEGER(((local4_Enem_1480.attr1_X) / (32)))) == (local1_x_1478)) ? 1 : 0)) && ((((INTEGER(((((((local4_Enem_1480.attr1_Y) + (local4_Enem_1480.attr6_Height))) - (1))) / (32)))) == (local1_y_1476)) ? 1 : 0))) ? 1 : 0)) {
-									__debugInfo = "73:\Map.gbas";
-									{
-										var local17___SelectHelper10__1481 = 0;
-										__debugInfo = "73:\Map.gbas";
-										local17___SelectHelper10__1481 = local4_Enem_1480.attr3_Typ;
-										__debugInfo = "82:\Map.gbas";
-										if ((((local17___SelectHelper10__1481) == (~~(1))) ? 1 : 0)) {
-											__debugInfo = "75:\Map.gbas";
-											local12_PositionData_1479 = 8;
-											__debugInfo = "75:\Map.gbas";
-										} else if ((((local17___SelectHelper10__1481) == (~~(2))) ? 1 : 0)) {
-											__debugInfo = "77:\Map.gbas";
-											local12_PositionData_1479 = 6;
-											__debugInfo = "77:\Map.gbas";
-										} else if ((((local17___SelectHelper10__1481) == (~~(4))) ? 1 : 0)) {
-											__debugInfo = "79:\Map.gbas";
-											local12_PositionData_1479 = 9;
-											__debugInfo = "79:\Map.gbas";
-										} else if ((((local17___SelectHelper10__1481) == (~~(3))) ? 1 : 0)) {
-											__debugInfo = "81:\Map.gbas";
-											local12_PositionData_1479 = 7;
-											__debugInfo = "81:\Map.gbas";
-										};
-										__debugInfo = "73:\Map.gbas";
-									};
-									__debugInfo = "83:\Map.gbas";
-									break;
-									__debugInfo = "73:\Map.gbas";
-								};
-								__debugInfo = "84:\Map.gbas";
-							}
-							forEachSaver3458.values[forEachCounter3458] = local4_Enem_1480;
-						
-						};
-						__debugInfo = "87:\Map.gbas";
-						local8_Line_Str_1477 = ((local8_Line_Str_1477) + (CAST2STRING(local12_PositionData_1479)));
-						__debugInfo = "69:\Map.gbas";
-					};
-					__debugInfo = "88:\Map.gbas";
-				};
-				__debugInfo = "89:\Map.gbas";
-				WRITELINE(local3_Chn_1475, local8_Line_Str_1477);
-				__debugInfo = "67:\Map.gbas";
-			};
-			__debugInfo = "90:\Map.gbas";
-		};
-		__debugInfo = "92:\Map.gbas";
-		CLOSEFILE(local3_Chn_1475);
-		__debugInfo = "93:\Map.gbas";
-		return 0;
-		__debugInfo = "57:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_4_Init'] = function(param8_Name_Str, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		var local3_Chn_1485 = 0, local8_Line_Str_ref_1486 = [""], local11_Tileset_Str_1487 = "", local1_x_1488 = 0, local1_y_1489 = 0;
-		__debugInfo = "96:\Map.gbas";
-		local3_Chn_1485 = GENFILE();
-		__debugInfo = "99:\Map.gbas";
-		if ((((OPENFILE(local3_Chn_1485, param8_Name_Str, 1)) == (0)) ? 1 : 0)) {
-			__debugInfo = "99:\Map.gbas";
-			END();
-			__debugInfo = "99:\Map.gbas";
-		};
-		__debugInfo = "101:\Map.gbas";
-		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
-		__debugInfo = "102:\Map.gbas";
-		param4_self.attr5_Width = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1486[0])));
-		__debugInfo = "104:\Map.gbas";
-		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
-		__debugInfo = "105:\Map.gbas";
-		param4_self.attr6_Height = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1486[0])));
-		__debugInfo = "107:\Map.gbas";
-		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
-		__debugInfo = "108:\Map.gbas";
-		local11_Tileset_Str_1487 = local8_Line_Str_ref_1486[0];
-		__debugInfo = "110:\Map.gbas";
-		READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
-		__debugInfo = "111:\Map.gbas";
-		param4_self.attr11_NextMap_Str = local8_Line_Str_ref_1486[0];
-		__debugInfo = "113:\Map.gbas";
-		(param4_self).InitEmpty(param4_self.attr5_Width, param4_self.attr6_Height, local11_Tileset_Str_1487);
-		__debugInfo = "153:\Map.gbas";
-		while ((((ENDOFFILE(local3_Chn_1485)) == (0)) ? 1 : 0)) {
-			var local9_Tiles_Str_1490 = new GLBArray();
-			__debugInfo = "117:\Map.gbas";
-			READLINE(local3_Chn_1485, local8_Line_Str_ref_1486);
-			__debugInfo = "120:\Map.gbas";
-			SPLITSTR(unref(local8_Line_Str_ref_1486[0]), unref(local9_Tiles_Str_1490), ",", 1);
-			__debugInfo = "123:\Map.gbas";
-			local1_x_1488 = 0;
-			__debugInfo = "150:\Map.gbas";
-			var forEachSaver3675 = local9_Tiles_Str_1490;
-			for(var forEachCounter3675 = 0 ; forEachCounter3675 < forEachSaver3675.values.length ; forEachCounter3675++) {
-				var local4_tile_1491 = forEachSaver3675.values[forEachCounter3675];
-			{
-					__debugInfo = "125:\Map.gbas";
-					param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = func7_Convert(local4_tile_1491);
-					__debugInfo = "126:\Map.gbas";
-					{
-						var local17___SelectHelper11__1492 = 0;
-						__debugInfo = "126:\Map.gbas";
-						local17___SelectHelper11__1492 = param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache];
-						__debugInfo = "148:\Map.gbas";
-						if ((((local17___SelectHelper11__1492) == (4)) ? 1 : 0)) {
-							__debugInfo = "128:\Map.gbas";
-							global6_Player.attr1_X = ((local1_x_1488) * (32));
-							__debugInfo = "129:\Map.gbas";
-							global6_Player.attr1_Y = ((local1_y_1489) * (32));
-							__debugInfo = "130:\Map.gbas";
-							param4_self.attr6_SpawnX = ~~(global6_Player.attr1_X);
-							__debugInfo = "131:\Map.gbas";
-							param4_self.attr6_SpawnY = ~~(global6_Player.attr1_Y);
-							__debugInfo = "132:\Map.gbas";
-							param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = 0;
-							__debugInfo = "128:\Map.gbas";
-						} else if (((((((local17___SelectHelper11__1492) >= (6)) ? 1 : 0)) && ((((local17___SelectHelper11__1492) <= (9)) ? 1 : 0))) ? 1 : 0)) {
-							var local3_Typ_1493 = 0.0, local5_Enemy_1495 = new type6_TEnemy();
-							__debugInfo = "135:\Map.gbas";
-							{
-								var local17___SelectHelper12__1494 = 0;
-								__debugInfo = "135:\Map.gbas";
-								local17___SelectHelper12__1494 = param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache];
-								__debugInfo = "144:\Map.gbas";
-								if ((((local17___SelectHelper12__1494) == (6)) ? 1 : 0)) {
-									__debugInfo = "137:\Map.gbas";
-									local3_Typ_1493 = 2;
-									__debugInfo = "137:\Map.gbas";
-								} else if ((((local17___SelectHelper12__1494) == (7)) ? 1 : 0)) {
-									__debugInfo = "139:\Map.gbas";
-									local3_Typ_1493 = 3;
-									__debugInfo = "139:\Map.gbas";
-								} else if ((((local17___SelectHelper12__1494) == (8)) ? 1 : 0)) {
-									__debugInfo = "141:\Map.gbas";
-									local3_Typ_1493 = 1;
-									__debugInfo = "141:\Map.gbas";
-								} else if ((((local17___SelectHelper12__1494) == (9)) ? 1 : 0)) {
-									__debugInfo = "143:\Map.gbas";
-									local3_Typ_1493 = 4;
-									__debugInfo = "143:\Map.gbas";
-								};
-								__debugInfo = "135:\Map.gbas";
-							};
-							__debugInfo = "146:\Map.gbas";
-							(local5_Enemy_1495).Init(~~(local3_Typ_1493), ((local1_x_1488) * (32)), ((local1_y_1489) * (32)));
-							__debugInfo = "147:\Map.gbas";
-							param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = 0;
-							__debugInfo = "135:\Map.gbas";
-						};
-						__debugInfo = "126:\Map.gbas";
-					};
-					__debugInfo = "149:\Map.gbas";
-					local1_x_1488+=1;
-					__debugInfo = "125:\Map.gbas";
-				}
-				forEachSaver3675.values[forEachCounter3675] = local4_tile_1491;
+				forEachSaver3997.values[forEachCounter3997] = local5_l_Str_1719;
 			
 			};
-			__debugInfo = "152:\Map.gbas";
-			local1_y_1489+=1;
-			__debugInfo = "117:\Map.gbas";
-		};
-		__debugInfo = "155:\Map.gbas";
-		CLOSEFILE(local3_Chn_1485);
-		__debugInfo = "156:\Map.gbas";
-		return 0;
-		__debugInfo = "96:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "171:\Map.gbas";
-		if (param4_self.attr8_SpikeDir) {
-			__debugInfo = "160:\Map.gbas";
-			param4_self.attr13_SpikePosition+=-(0.5);
-			__debugInfo = "164:\Map.gbas";
-			if ((((param4_self.attr13_SpikePosition) <= (0)) ? 1 : 0)) {
-				__debugInfo = "162:\Map.gbas";
-				param4_self.attr13_SpikePosition = 0;
-				__debugInfo = "163:\Map.gbas";
-				param4_self.attr8_SpikeDir = 0;
-				__debugInfo = "162:\Map.gbas";
-			};
-			__debugInfo = "160:\Map.gbas";
+			local4_boxx_ref_1714[0] = local5_truew_1717;
+			
 		} else {
-			__debugInfo = "166:\Map.gbas";
-			param4_self.attr13_SpikePosition+=0.5;
-			__debugInfo = "170:\Map.gbas";
-			if ((((param4_self.attr13_SpikePosition) >= (32)) ? 1 : 0)) {
-				__debugInfo = "168:\Map.gbas";
-				param4_self.attr8_SpikeDir = 1;
-				__debugInfo = "169:\Map.gbas";
-				param4_self.attr13_SpikePosition = 32;
-				__debugInfo = "168:\Map.gbas";
-			};
-			__debugInfo = "166:\Map.gbas";
+			local5_truew_1717 = func21_DDGui_TextWidthIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref);
+			local4_boxx_ref_1714[0] = MAX(local3_vpx_1695, local5_truew_1717);
+			DIM(static9_DDgui_draw_widget_intern_lines_Str, [1], "");
+			static9_DDgui_draw_widget_intern_lines_Str.arrAccess(0).values[tmpPositionCache] = alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref[0];
+			
 		};
-		__debugInfo = "172:\Map.gbas";
-		return 0;
-		__debugInfo = "171:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		param1_x;
+		param1_y;
+		param1_x = MAX(0, ((((param4_xpos_ref[0]) + (((((local3_vpx_1695) - (local4_boxx_ref_1714[0]))) / (2))))) - (local5_frame_1716)));
+		param1_y = MAX(0, ((((param4_ypos_ref[0]) - (local4_boxy_ref_1715[0]))) - (((local5_frame_1716) * (2)))));
+		param1_y+=-(global25_gDDguiMinControlDimension);
+		if ((((param1_y) < (0)) ? 1 : 0)) {
+			param1_y = 0;
+			
+		};
+		ALPHAMODE(-(0.8));
+		DRAWRECT(param1_x, param1_y, ((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2)))), ((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2)))), param10_ddgui_vals.attr16_col_hover_bright);
+		ALPHAMODE(0);
+		func14_DDgui_backrect(param1_x, param1_y, ~~(((local4_boxx_ref_1714[0]) + (((local5_frame_1716) * (2))))), ~~(((local4_boxy_ref_1715[0]) + (((local5_frame_1716) * (2))))), param10_ddgui_vals.attr8_col_norm);
+		param1_x+=local5_frame_1716;
+		param1_y+=local5_frame_1716;
+		if (BOUNDS(static9_DDgui_draw_widget_intern_lines_Str, 0)) {
+			var local1_w_ref_1720 = [0], local1_h_ref_1721 = [0];
+			GETFONTSIZE(local1_w_ref_1720, local1_h_ref_1721);
+			var forEachSaver4154 = static9_DDgui_draw_widget_intern_lines_Str;
+			for(var forEachCounter4154 = 0 ; forEachCounter4154 < forEachSaver4154.values.length ; forEachCounter4154++) {
+				var local5_l_Str_1722 = forEachSaver4154.values[forEachCounter4154];
+			{
+					func17_DDGui_PrintIntern(local5_l_Str_1722, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (func21_DDGui_TextWidthIntern(local5_l_Str_1722)))) / (2))))), param1_y, 0);
+					param1_y+=local1_h_ref_1721[0];
+					
+				}
+				forEachSaver4154.values[forEachCounter4154] = local5_l_Str_1722;
+			
+			};
+			
+		} else {
+			func17_DDGui_PrintIntern(alias3_wdg_ref_1702[0].attr11_tiptext_Str_ref, ~~(((param1_x) + (((((local4_boxx_ref_1714[0]) - (local5_truew_1717))) / (2))))), param1_y, 0);
+			
+		};
+		
+	};
+	param4_xpos_ref[0] = ((((param4_xpos_ref[0]) + (local3_vpx_1695))) + (param7_spacing));
+	if ((((param7_dy_line_ref[0]) < (local2_dy_1698)) ? 1 : 0)) {
+		param7_dy_line_ref[0] = local2_dy_1698;
+		
+	};
+	return 1;
+	return 0;
 	
 };
-window['method10_type4_TMap_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		var local10_TmpScrollX_1500 = 0.0, local10_TmpScrollY_1501 = 0.0;
-		__debugInfo = "175:\Map.gbas";
-		local10_TmpScrollX_1500 = param4_self.attr7_ScrollX;
-		__debugInfo = "176:\Map.gbas";
-		local10_TmpScrollY_1501 = param4_self.attr7_ScrollY;
-		__debugInfo = "183:\Map.gbas";
-		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
-			__debugInfo = "179:\Map.gbas";
-			USESCREEN(param4_self.attr8_ScreenID);
-			__debugInfo = "180:\Map.gbas";
-			DRAWRECT(0, 0, ((param4_self.attr5_Width) * (32)), ((param4_self.attr6_Height) * (32)), RGB(255, 0, 128));
-			__debugInfo = "181:\Map.gbas";
-			param4_self.attr7_ScrollX = 0;
-			__debugInfo = "182:\Map.gbas";
-			param4_self.attr7_ScrollY = 0;
-			__debugInfo = "179:\Map.gbas";
+window['func18_DDgui_resizedialog'] = function(param1_x, param1_y, param5_width, param6_height) {
+	var local1_i_2266 = 0, local6_id_Str_2267 = "", local3_scx_ref_2268 = [0], local3_scy_ref_2269 = [0];
+	GETSCREENSIZE(local3_scx_ref_2268, local3_scy_ref_2269);
+	if (((((((param5_width) > (0)) ? 1 : 0)) && ((((param6_height) > (0)) ? 1 : 0))) ? 1 : 0)) {
+		func9_DDgui_set("", "XPOS", CAST2STRING(param1_x));
+		func9_DDgui_set("", "YPOS", CAST2STRING(param1_y));
+		if ((((param5_width) > (0)) ? 1 : 0)) {
+			func9_DDgui_set("", "WIDTH", CAST2STRING(MIN(unref(local3_scx_ref_2268[0]), param5_width)));
+			
 		};
-		__debugInfo = "215:\Map.gbas";
-		if (((((((param4_self.attr6_HasFBO) == (0)) ? 1 : 0)) || ((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0))) ? 1 : 0)) {
-			var local5_width_ref_1502 = [0.0], local6_height_ref_1503 = [0.0], local2_sx_1504 = 0.0, local2_sy_1505 = 0.0;
-			__debugInfo = "187:\Map.gbas";
-			GETSCREENSIZE(local5_width_ref_1502, local6_height_ref_1503);
-			__debugInfo = "188:\Map.gbas";
-			local5_width_ref_1502[0] = ((INTEGER(((local5_width_ref_1502[0]) / (32)))) + (1));
-			__debugInfo = "189:\Map.gbas";
-			local6_height_ref_1503[0] = ((INTEGER(((local6_height_ref_1503[0]) / (32)))) + (1));
-			__debugInfo = "190:\Map.gbas";
-			local2_sx_1504 = ((-(INTEGER(((param4_self.attr7_ScrollX) / (32))))) - (1));
-			__debugInfo = "191:\Map.gbas";
-			local2_sy_1505 = ((-(INTEGER(((param4_self.attr7_ScrollY) / (32))))) - (1));
-			__debugInfo = "194:\Map.gbas";
-			{
-				var local1_x_1506 = 0.0;
-				__debugInfo = "201:\Map.gbas";
-				for (local1_x_1506 = local2_sx_1504;toCheck(local1_x_1506, ((local2_sx_1504) + (local5_width_ref_1502[0])), 1);local1_x_1506 += 1) {
-					__debugInfo = "195:\Map.gbas";
-					{
-						var local1_y_1507 = 0.0;
-						__debugInfo = "200:\Map.gbas";
-						for (local1_y_1507 = local2_sy_1505;toCheck(local1_y_1507, ((local2_sy_1505) + (local6_height_ref_1503[0])), 1);local1_y_1507 += 1) {
-							__debugInfo = "199:\Map.gbas";
-							if (((((((((((((local1_x_1506) >= (0)) ? 1 : 0)) && ((((local1_y_1507) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1506) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1507) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
-								__debugInfo = "198:\Map.gbas";
-								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1506), ~~(local1_y_1507)).values[tmpPositionCache]) != (1)) ? 1 : 0)) {
-									__debugInfo = "198:\Map.gbas";
-									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1506), ~~(local1_y_1507)).values[tmpPositionCache], local1_x_1506, local1_y_1507, 0);
-									__debugInfo = "198:\Map.gbas";
-								};
-								__debugInfo = "198:\Map.gbas";
-							};
-							__debugInfo = "199:\Map.gbas";
-						};
-						__debugInfo = "200:\Map.gbas";
-					};
-					__debugInfo = "195:\Map.gbas";
-				};
-				__debugInfo = "201:\Map.gbas";
-			};
-			__debugInfo = "205:\Map.gbas";
-			STARTPOLY(param4_self.attr7_Tileset, 2);
-			__debugInfo = "205:\Map.gbas";
-			{
-				var local1_x_1508 = 0.0;
-				__debugInfo = "212:\Map.gbas";
-				for (local1_x_1508 = local2_sx_1504;toCheck(local1_x_1508, ((local2_sx_1504) + (local5_width_ref_1502[0])), 1);local1_x_1508 += 1) {
-					__debugInfo = "206:\Map.gbas";
-					{
-						var local1_y_1509 = 0.0;
-						__debugInfo = "211:\Map.gbas";
-						for (local1_y_1509 = local2_sy_1505;toCheck(local1_y_1509, ((local2_sy_1505) + (local6_height_ref_1503[0])), 1);local1_y_1509 += 1) {
-							__debugInfo = "210:\Map.gbas";
-							if (((((((((((((local1_x_1508) >= (0)) ? 1 : 0)) && ((((local1_y_1509) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1508) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1509) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
-								__debugInfo = "209:\Map.gbas";
-								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache]) == (1)) ? 1 : 0)) {
-									__debugInfo = "209:\Map.gbas";
-									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache], local1_x_1508, local1_y_1509, 1);
-									__debugInfo = "209:\Map.gbas";
-								};
-								__debugInfo = "209:\Map.gbas";
-							};
-							__debugInfo = "210:\Map.gbas";
-						};
-						__debugInfo = "211:\Map.gbas";
-					};
-					__debugInfo = "206:\Map.gbas";
-				};
-				__debugInfo = "212:\Map.gbas";
-			};
-			__debugInfo = "213:\Map.gbas";
-			ENDPOLY();
-			__debugInfo = "187:\Map.gbas";
+		if ((((param6_height) > (0)) ? 1 : 0)) {
+			func9_DDgui_set("", "HEIGHT", CAST2STRING(MIN(unref(local3_scy_ref_2269[0]), param6_height)));
+			
 		};
-		__debugInfo = "222:\Map.gbas";
-		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
-			__debugInfo = "218:\Map.gbas";
-			USESCREEN(-(1));
-			__debugInfo = "219:\Map.gbas";
-			param4_self.attr13_IsRenderedFBO = 1;
-			__debugInfo = "220:\Map.gbas";
-			param4_self.attr7_ScrollX = local10_TmpScrollX_1500;
-			__debugInfo = "221:\Map.gbas";
-			param4_self.attr7_ScrollY = local10_TmpScrollY_1501;
-			__debugInfo = "218:\Map.gbas";
-		};
-		__debugInfo = "225:\Map.gbas";
-		if (param4_self.attr13_IsRenderedFBO) {
-			__debugInfo = "224:\Map.gbas";
-			DRAWSPRITE(param4_self.attr5_SprID, param4_self.attr7_ScrollX, param4_self.attr7_ScrollY);
-			__debugInfo = "224:\Map.gbas";
-		};
-		__debugInfo = "226:\Map.gbas";
-		return 0;
-		__debugInfo = "175:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	var forEachSaver14333 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0];
+	for(var forEachCounter14333 = 0 ; forEachCounter14333 < forEachSaver14333.values.length ; forEachCounter14333++) {
+		var local3_wdg_ref_2270 = forEachSaver14333.values[forEachCounter14333];
+	{
+			func18_DDgui_handlewidget(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), unref(local3_wdg_ref_2270[0]), -(1), -(1), 0, 0);
+			
+		}
+		forEachSaver14333.values[forEachCounter14333] = local3_wdg_ref_2270;
+	
+	};
+	return 0;
 	
 };
-window['method10_type4_TMap_10_RenderTile'] = function(param4_Tile, param1_x, param1_y, param6_IsPoly, param4_self) {
-	stackPush("method: RenderTile", __debugInfo);
-	try {
-		__debugInfo = "229:\Map.gbas";
-		if (((((((((((((((param1_x) >= (0)) ? 1 : 0)) && ((((param1_y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_x) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1)) {
-			__debugInfo = "229:\Map.gbas";
-			return 0;
-			__debugInfo = "229:\Map.gbas";
-		};
-		__debugInfo = "231:\Map.gbas";
+window['func10_DDgui_hide'] = function(param6_id_Str, param5_bHide) {
+	func9_DDgui_set(param6_id_Str, "HIDE", CAST2STRING(param5_bHide));
+	if ((((func13_DDgui_get_Str(param6_id_Str, "TYPE")) == ("FRAME")) ? 1 : 0)) {
+		var local2_od_2273 = 0, local7_inframe_2274 = 0;
 		{
-			var local17___SelectHelper13__1516 = 0;
-			__debugInfo = "231:\Map.gbas";
-			local17___SelectHelper13__1516 = param4_Tile;
-			__debugInfo = "274:\Map.gbas";
-			if ((((local17___SelectHelper13__1516) == (1)) ? 1 : 0)) {
-				__debugInfo = "233:\Map.gbas";
-				param4_Tile;
-				__debugInfo = "246:\Map.gbas";
-				if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) - (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "239:\Map.gbas";
-					if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "236:\Map.gbas";
-						param4_Tile = 1;
-						__debugInfo = "236:\Map.gbas";
-					} else {
-						__debugInfo = "238:\Map.gbas";
-						param4_Tile = 2;
-						__debugInfo = "238:\Map.gbas";
+			for (local2_od_2273 = 0;toCheck(local2_od_2273, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder, 0)) - (1)), 1);local2_od_2273 += 1) {
+				if (((((((local7_inframe_2274) == (0)) ? 1 : 0)) && ((((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2273).values[tmpPositionCache].attr6_id_Str_ref[0]) == (param6_id_Str)) ? 1 : 0))) ? 1 : 0)) {
+					local7_inframe_2274+=1;
+					
+				};
+				if (local7_inframe_2274) {
+					var alias3_wdg_ref_2275 = [new type9_DDGUI_WDG()];
+					alias3_wdg_ref_2275 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr9_draworder.arrAccess(local2_od_2273).values[tmpPositionCache].attr5_index).values[tmpPositionCache] /* ALIAS */;
+					if ((((alias3_wdg_ref_2275[0].attr9_wtype_Str) == ("UNFRAME")) ? 1 : 0)) {
+						local7_inframe_2274+=-1;
+						if ((((local7_inframe_2274) < (2)) ? 1 : 0)) {
+							break;
+							
+						};
+						
 					};
-					__debugInfo = "239:\Map.gbas";
-				} else if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]) == (0)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "241:\Map.gbas";
-					param4_Tile = 3;
-					__debugInfo = "241:\Map.gbas";
-				} else if (((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) {
-					__debugInfo = "243:\Map.gbas";
-					param4_Tile = 1;
-					__debugInfo = "243:\Map.gbas";
-				} else {
-					__debugInfo = "245:\Map.gbas";
-					param4_Tile = 0;
-					__debugInfo = "245:\Map.gbas";
+					if ((((alias3_wdg_ref_2275[0].attr9_wtype_Str) == ("FRAME")) ? 1 : 0)) {
+						local7_inframe_2274+=1;
+						
+					};
+					alias3_wdg_ref_2275[0].attr5_whide = param5_bHide;
+					if (param5_bHide) {
+						alias3_wdg_ref_2275[0].attr8_wclicked = 0;
+						
+					};
+					
 				};
-				__debugInfo = "257:\Map.gbas";
-				if ((((param6_IsPoly) == (0)) ? 1 : 0)) {
-					__debugInfo = "249:\Map.gbas";
-					DRAWANIM(param4_self.attr7_Tileset, param4_Tile, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
-					__debugInfo = "249:\Map.gbas";
-				} else {
-					__debugInfo = "251:\Map.gbas";
-					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((param4_Tile) * (32)), 0, RGB(255, 255, 255));
-					__debugInfo = "252:\Map.gbas";
-					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((((param4_Tile) + (1))) * (32)), 0, RGB(255, 255, 255));
-					__debugInfo = "253:\Map.gbas";
-					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((param4_Tile) * (32)), 31, RGB(255, 255, 255));
-					__debugInfo = "254:\Map.gbas";
-					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((((param4_Tile) + (1))) * (32)), 31, RGB(255, 255, 255));
-					__debugInfo = "256:\Map.gbas";
-					POLYNEWSTRIP();
-					__debugInfo = "251:\Map.gbas";
-				};
-				__debugInfo = "233:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (2)) ? 1 : 0)) {
-				__debugInfo = "259:\Map.gbas";
-				DRAWSPRITE(global11_LadderImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
-				__debugInfo = "259:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (3)) ? 1 : 0)) {
-				__debugInfo = "261:\Map.gbas";
-				DRAWSPRITE(global10_SpikeImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (param4_self.attr13_SpikePosition)));
-				__debugInfo = "261:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (4)) ? 1 : 0)) {
 				
-			} else if ((((local17___SelectHelper13__1516) == (5)) ? 1 : 0)) {
-				__debugInfo = "265:\Map.gbas";
-				DRAWSPRITE(global15_TrampolineImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
-				__debugInfo = "265:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (10)) ? 1 : 0)) {
-				__debugInfo = "267:\Map.gbas";
-				DRAWSPRITE(global9_DoorImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
-				__debugInfo = "267:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (11)) ? 1 : 0)) {
-				__debugInfo = "269:\Map.gbas";
-				DRAWSPRITE(global12_DynamitImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
-				__debugInfo = "269:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (12)) ? 1 : 0)) {
-				__debugInfo = "271:\Map.gbas";
-				DRAWANIM(global12_TriggerImage, 0, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
-				__debugInfo = "271:\Map.gbas";
-			} else if ((((local17___SelectHelper13__1516) == (13)) ? 1 : 0)) {
-				__debugInfo = "273:\Map.gbas";
-				DRAWANIM(global12_TriggerImage, 1, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
-				__debugInfo = "273:\Map.gbas";
 			};
-			__debugInfo = "231:\Map.gbas";
+			
 		};
-		__debugInfo = "275:\Map.gbas";
-		return 0;
-		__debugInfo = "229:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
-window['method10_type4_TMap_8_PickTile'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: PickTile", __debugInfo);
-	try {
-		__debugInfo = "288:\Map.gbas";
-		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "281:\Map.gbas";
-			param1_X = INTEGER(((param1_X) / (32)));
-			__debugInfo = "282:\Map.gbas";
-			param1_Y = INTEGER(((param1_Y) / (32)));
-			__debugInfo = "283:\Map.gbas";
-			param4_self.attr9_LastPickX = ~~(param1_X);
-			__debugInfo = "284:\Map.gbas";
-			param4_self.attr9_LastPickY = ~~(param1_Y);
-			__debugInfo = "285:\Map.gbas";
-			return tryClone(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]);
-			__debugInfo = "281:\Map.gbas";
+window['__DDgui_Callbacks__'] = function() {
+	
+};
+window['__DDgui_Callbacks__'] = __DDgui_Callbacks__;
+window['func15_DDgui_draw_user'] = function(param6_id_Str_ref, param5_width, param6_height, param4_ytop) {
+	func13_DDgui_backgnd(RGB(0, 0, 0), RGB(255, 255, 255), 0, 0, param5_width, param6_height);
+	PRINT((("user: id=") + (param6_id_Str_ref[0])), 0, 0, 0);
+	return 0;
+	
+};
+window['func17_DDgui_handle_user'] = function(param6_id_Str_ref, param2_mx, param2_my, param2_b1, param2_b2) {
+	VIEWPORT(0, 0, 0, 0);
+	DRAWRECT(0, 0, 1024, 1024, RGB(255, 128, 64));
+	PRINT("Must overwrite: ddgui_handle_user", 0, 0, 0);
+	PRINT((("for item: ") + (param6_id_Str_ref[0])), 0, 20, 0);
+	PRINT((("type=") + (func13_DDgui_get_Str(unref(param6_id_Str_ref[0]), "TYPE"))), 0, 40, 0);
+	SHOWSCREEN();
+	return 0;
+	
+};
+window['func14_DDgui_backrect'] = function(param1_x, param1_y, param2_dx, param2_dy, param3_col) {
+	DRAWRECT(((param1_x) + (1)), param1_y, ((param2_dx) - (2)), 1, param3_col);
+	DRAWRECT(param1_x, ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
+	DRAWRECT(((((param1_x) + (param2_dx))) - (1)), ((param1_y) + (1)), 1, ((param2_dy) - (2)), param3_col);
+	DRAWRECT(((param1_x) + (1)), ((((param1_y) + (param2_dy))) - (1)), ((param2_dx) - (2)), 1, param3_col);
+	return 0;
+	
+};
+window['func13_DDgui_backgnd'] = function(param4_col1, param4_col2, param1_x, param1_y, param2_dx, param2_dy) {
+	if ((((static7_DDgui_backgnd_QuickGL) == (-(1))) ? 1 : 0)) {
+		if ((((INTEGER(FLOAT2STR(PLATFORMINFO_Str("GLEXT:glDrawRangeElements")))) != (0)) ? 1 : 0)) {
+			static7_DDgui_backgnd_QuickGL = 1;
+			
 		} else {
-			__debugInfo = "287:\Map.gbas";
-			return tryClone(0);
-			__debugInfo = "287:\Map.gbas";
+			static7_DDgui_backgnd_QuickGL = 0;
+			
 		};
-		__debugInfo = "289:\Map.gbas";
+		
+	};
+	if ((((param4_col1) == (param4_col2)) ? 1 : 0)) {
+		DRAWRECT(param1_x, param1_y, param2_dx, param2_dy, param4_col1);
 		return 0;
-		__debugInfo = "288:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_10_RemoveTile'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: RemoveTile", __debugInfo);
-	try {
-		__debugInfo = "296:\Map.gbas";
-		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "294:\Map.gbas";
-			param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache] = 0;
-			__debugInfo = "295:\Map.gbas";
-			param4_self.attr13_IsRenderedFBO = 0;
-			__debugInfo = "294:\Map.gbas";
-		};
-		__debugInfo = "297:\Map.gbas";
-		return 0;
-		__debugInfo = "296:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_14_CollisionPoint'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: CollisionPoint", __debugInfo);
-	try {
-		var local4_TmpY_1529 = 0.0;
-		__debugInfo = "301:\Map.gbas";
-		local4_TmpY_1529 = param1_Y;
-		__debugInfo = "322:\Map.gbas";
-		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "304:\Map.gbas";
-			param1_X = INTEGER(((param1_X) / (32)));
-			__debugInfo = "305:\Map.gbas";
-			param1_Y = INTEGER(((param1_Y) / (32)));
-			__debugInfo = "319:\Map.gbas";
-			if ((((func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache])) == (0)) ? 1 : 0)) {
-				__debugInfo = "315:\Map.gbas";
-				if ((((((((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (5)) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (12)) ? 1 : 0))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (13)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "314:\Map.gbas";
-					if ((((MOD(~~(local4_TmpY_1529), 32)) > (16)) ? 1 : 0)) {
-						__debugInfo = "311:\Map.gbas";
-						return 1;
-						__debugInfo = "311:\Map.gbas";
-					} else {
-						__debugInfo = "313:\Map.gbas";
-						return tryClone(0);
-						__debugInfo = "313:\Map.gbas";
-					};
-					__debugInfo = "314:\Map.gbas";
-				};
-				__debugInfo = "316:\Map.gbas";
-				return 1;
-				__debugInfo = "315:\Map.gbas";
-			} else {
-				__debugInfo = "318:\Map.gbas";
-				return tryClone(0);
-				__debugInfo = "318:\Map.gbas";
-			};
-			__debugInfo = "304:\Map.gbas";
+		
+	};
+	if (static7_DDgui_backgnd_QuickGL) {
+		var local4_hpos_1735 = 0.0;
+		local4_hpos_1735 = 0.35;
+		STARTPOLY(-(1), 2);
+		if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
+			POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col1);
+			POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
+			POLYVECTOR(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1735)))), 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			
 		} else {
-			__debugInfo = "321:\Map.gbas";
-			return tryClone(0);
-			__debugInfo = "321:\Map.gbas";
+			POLYVECTOR(param1_x, param1_y, 0, 0, param4_col1);
+			POLYVECTOR(param1_x, ((param1_y) + (param2_dy)), 0, 0, param4_col1);
+			POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), param1_y, 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (((param2_dx) * (local4_hpos_1735)))), ((param1_y) + (param2_dy)), 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), param1_y, 0, 0, param4_col2);
+			POLYVECTOR(((param1_x) + (param2_dx)), ((param1_y) + (param2_dy)), 0, 0, param4_col1);
+			
 		};
-		__debugInfo = "323:\Map.gbas";
-		return 0;
-		__debugInfo = "301:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_12_RayCollision'] = function(param2_X1, param2_Y1, param2_X2, param2_Y2, param4_self) {
-	stackPush("method: RayCollision", __debugInfo);
-	try {
-		var local6_Length_1536 = 0.0, local6_DeltaX_1537 = 0.0, local6_DeltaY_1538 = 0.0;
-		__debugInfo = "327:\Map.gbas";
-		local6_Length_1536 = SQR(((((((((param2_X1) * (param2_X1))) + (((param2_Y1) * (param2_Y1))))) + (((param2_X2) * (param2_X2))))) + (((param2_Y2) * (param2_Y2)))));
-		__debugInfo = "328:\Map.gbas";
-		local6_DeltaX_1537 = ((((param2_X1) - (param2_X2))) / (local6_Length_1536));
-		__debugInfo = "329:\Map.gbas";
-		local6_DeltaY_1538 = ((((param2_Y1) - (param2_Y2))) / (local6_Length_1536));
-		__debugInfo = "329:\Map.gbas";
-		{
-			var local1_i_1539 = 0.0;
-			__debugInfo = "334:\Map.gbas";
-			for (local1_i_1539 = 0;toCheck(local1_i_1539, local6_Length_1536, 1);local1_i_1539 += 1) {
-				__debugInfo = "333:\Map.gbas";
-				if ((param4_self).CollisionPoint(((param2_X1) - (((local6_DeltaX_1537) * (local1_i_1539)))), ((param2_Y1) - (((local6_DeltaY_1538) * (local1_i_1539)))))) {
-					__debugInfo = "332:\Map.gbas";
-					return tryClone(1);
-					__debugInfo = "332:\Map.gbas";
-				};
-				__debugInfo = "333:\Map.gbas";
-			};
-			__debugInfo = "334:\Map.gbas";
-		};
-		__debugInfo = "335:\Map.gbas";
-		return 0;
-		__debugInfo = "336:\Map.gbas";
-		return 0;
-		__debugInfo = "327:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method10_type4_TMap_9_Collision'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
-	stackPush("method: Collision", __debugInfo);
-	try {
-		__debugInfo = "339:\Map.gbas";
-		{
-			var local2_XX_1546 = 0.0;
-			__debugInfo = "344:\Map.gbas";
-			for (local2_XX_1546 = param1_X;toCheck(local2_XX_1546, ((param1_X) + (param5_Width)), 4);local2_XX_1546 += 4) {
-				__debugInfo = "340:\Map.gbas";
-				{
-					var local2_YY_1547 = 0.0;
-					__debugInfo = "343:\Map.gbas";
-					for (local2_YY_1547 = param1_Y;toCheck(local2_YY_1547, ((param1_Y) + (param6_Height)), 4);local2_YY_1547 += 4) {
-						__debugInfo = "342:\Map.gbas";
-						if ((param4_self).CollisionPoint(local2_XX_1546, local2_YY_1547)) {
-							__debugInfo = "342:\Map.gbas";
-							return 1;
-							__debugInfo = "342:\Map.gbas";
-						};
-						__debugInfo = "342:\Map.gbas";
-					};
-					__debugInfo = "343:\Map.gbas";
-				};
-				__debugInfo = "340:\Map.gbas";
-			};
-			__debugInfo = "344:\Map.gbas";
-		};
-		__debugInfo = "351:\Map.gbas";
-		if (((((((((((param4_self).CollisionPoint(param1_X, param1_Y)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), param1_Y))) ? 1 : 0)) || ((param4_self).CollisionPoint(param1_X, ((param1_Y) + (param6_Height))))) ? 1 : 0)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), ((param1_Y) + (param6_Height))))) ? 1 : 0)) {
-			__debugInfo = "348:\Map.gbas";
-			return 1;
-			__debugInfo = "348:\Map.gbas";
+		ENDPOLY();
+		
+	} else {
+		var local4_hpos_1736 = 0.0;
+		local4_hpos_1736 = 0.35;
+		if ((((param2_dx) >= (((param2_dy) * (0.65)))) ? 1 : 0)) {
+			DRAWRECT(param1_x, param1_y, param2_dx, ((param2_dy) * (local4_hpos_1736)), param4_col1);
+			DRAWRECT(param1_x, ((param1_y) + (((param2_dy) * (local4_hpos_1736)))), param2_dx, ((((param2_dy) * (((1) - (local4_hpos_1736))))) + (0.99)), param4_col2);
+			
 		} else {
-			__debugInfo = "350:\Map.gbas";
-			return tryClone(0);
-			__debugInfo = "350:\Map.gbas";
+			DRAWRECT(param1_x, param1_y, ((param2_dx) * (local4_hpos_1736)), param2_dy, param4_col1);
+			DRAWRECT(((param1_x) + (((param2_dx) * (local4_hpos_1736)))), param1_y, ((((param2_dx) * (((1) - (local4_hpos_1736))))) + (0.99)), param2_dy, param4_col2);
+			
 		};
-		__debugInfo = "352:\Map.gbas";
-		return 0;
-		__debugInfo = "339:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	return 0;
 	
 };
-window['func15_IsCollisionTile'] = function(param3_Typ) {
-	stackPush("function: IsCollisionTile", __debugInfo);
-	try {
-		__debugInfo = "360:\Map.gbas";
-		if (((((((((((((param3_Typ) == (0)) ? 1 : 0)) || ((((param3_Typ) == (2)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (3)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (10)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "357:\Map.gbas";
-			return 1;
-			__debugInfo = "357:\Map.gbas";
-		} else {
-			__debugInfo = "359:\Map.gbas";
-			return tryClone(0);
-			__debugInfo = "359:\Map.gbas";
-		};
-		__debugInfo = "361:\Map.gbas";
-		return 0;
-		__debugInfo = "360:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+window['__DDgui_Widgets___'] = function() {
 	
 };
-window['func7_Convert'] = function(param8_Text_Str) {
-	stackPush("function: Convert", __debugInfo);
-	try {
-		__debugInfo = "364:\Map.gbas";
-		{
-			var local17___SelectHelper14__1550 = "";
-			__debugInfo = "364:\Map.gbas";
-			local17___SelectHelper14__1550 = param8_Text_Str;
-			__debugInfo = "373:\Map.gbas";
-			if ((((local17___SelectHelper14__1550) == ("A")) ? 1 : 0)) {
-				__debugInfo = "366:\Map.gbas";
-				return 10;
-				__debugInfo = "366:\Map.gbas";
-			} else if ((((local17___SelectHelper14__1550) == ("B")) ? 1 : 0)) {
-				__debugInfo = "368:\Map.gbas";
-				return 11;
-				__debugInfo = "368:\Map.gbas";
-			} else if ((((local17___SelectHelper14__1550) == ("C")) ? 1 : 0)) {
-				__debugInfo = "370:\Map.gbas";
-				return 12;
-				__debugInfo = "370:\Map.gbas";
-			} else {
-				__debugInfo = "372:\Map.gbas";
-				return tryClone(INTEGER(FLOAT2STR(param8_Text_Str)));
-				__debugInfo = "372:\Map.gbas";
-			};
-			__debugInfo = "364:\Map.gbas";
-		};
-		__debugInfo = "374:\Map.gbas";
-		return 0;
-		__debugInfo = "364:\Map.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+window['__DDgui_Widgets___'] = __DDgui_Widgets___;
+window['func12_DDgui_widget'] = function(param6_id_Str, param11_caption_Str, param5_width, param6_height) {
+	var local5_count_1741 = 0, local2_fx_ref_1742 = [0], local2_fy_ref_1743 = [0], local3_wdg_1744 = new type9_DDGUI_WDG(), local1_i_1745 = 0;
+	var local6_id_Str_ref_1737 = [param6_id_Str]; /* NEWCODEHERE */
+	var local11_caption_Str_ref_1738 = [param11_caption_Str]; /* NEWCODEHERE */
+	local5_count_1741 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+	if ((((local6_id_Str_ref_1737[0]) == ("")) ? 1 : 0)) {
+		local6_id_Str_ref_1737[0] = (("iwdg%") + (CAST2STRING(local5_count_1741)));
+		
+	};
+	GETFONTSIZE(local2_fx_ref_1742, local2_fy_ref_1743);
+	if ((((param5_width) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
+		param5_width = MAX(global25_gDDguiMinControlDimension, MAX(param5_width, ((func21_DDGui_TextWidthIntern(local11_caption_Str_ref_1738)) + (local2_fx_ref_1742[0]))));
+		
+	};
+	if ((((param6_height) <= (global25_gDDguiMinControlDimension)) ? 1 : 0)) {
+		param6_height = MAX(global25_gDDguiMinControlDimension, MAX(param6_height, ((local2_fy_ref_1743[0]) + (6))));
+		
+	};
+	local1_i_1745 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_1737, 1);
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wid_Str = local6_id_Str_ref_1737[0];
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr6_wwidth = param5_width;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr7_wheight = param6_height;
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtype_Str = "WIDGET";
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_1745).values[tmpPositionCache][0].attr9_wtext_Str_ref[0] = local11_caption_Str_ref_1738[0];
+	return 0;
 	
 };
-window['method13_type7_TPlayer_4_Init'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		__debugInfo = "16:\Player.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "17:\Player.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "18:\Player.gbas";
-		param4_self.attr2_VX = 0;
-		__debugInfo = "19:\Player.gbas";
-		param4_self.attr2_VY = 0;
-		__debugInfo = "21:\Player.gbas";
-		param4_self.attr5_Width = param5_Width;
-		__debugInfo = "22:\Player.gbas";
-		param4_self.attr6_Height = param6_Height;
-		__debugInfo = "23:\Player.gbas";
-		return 0;
-		__debugInfo = "16:\Player.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+window['func12_DDgui_signal'] = function(param6_id_Str, param8_verb_Str, param8_info_Str_ref) {
+	var local2_id_2288 = 0, alias3_foo_ref_2289 = [DDgui_userfunction];
+	var local6_id_Str_ref_2285 = [param6_id_Str]; /* NEWCODEHERE */
+	local2_id_2288 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2285, 0);
+	if ((((local2_id_2288) < (0)) ? 1 : 0)) {
+		return tryClone(0);
+		
+	};
+	alias3_foo_ref_2289 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_id_2288).values[tmpPositionCache][0].attr8_wuserfoo_ref /* ALIAS */;
+	if (alias3_foo_ref_2289[0]) {
+		alias3_foo_ref_2289[0](local6_id_Str_ref_2285, param8_verb_Str, param8_info_Str_ref);
+		
+	};
+	return 0;
 	
 };
-window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		var local8_ScrWidth_ref_1559 = [0.0], local9_ScrHeight_ref_1560 = [0.0], local4_OldX_1561 = 0.0, local4_OldY_1562 = 0.0;
-		__debugInfo = "27:\Player.gbas";
-		GETSCREENSIZE(local8_ScrWidth_ref_1559, local9_ScrHeight_ref_1560);
-		__debugInfo = "30:\Player.gbas";
-		param4_self.attr2_VY+=0.5;
-		__debugInfo = "33:\Player.gbas";
-		if ((((KEY(203)) || (func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1560[0]) - (42))))) ? 1 : 0)) {
-			__debugInfo = "33:\Player.gbas";
-			param4_self.attr2_VX+=-(1);
-			__debugInfo = "33:\Player.gbas";
-		};
-		__debugInfo = "34:\Player.gbas";
-		if ((((KEY(205)) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1559[0]) - (42)), ((local9_ScrHeight_ref_1560[0]) - (42))))) ? 1 : 0)) {
-			__debugInfo = "34:\Player.gbas";
-			param4_self.attr2_VX+=1;
-			__debugInfo = "34:\Player.gbas";
-		};
-		__debugInfo = "47:\Player.gbas";
-		if ((((KEY(57)) || ((((func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1560[0]) - (125)))) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1559[0]) - (42)), ((local9_ScrHeight_ref_1560[0]) - (125))))) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "46:\Player.gbas";
-			if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) == (2)) ? 1 : 0)) {
-				__debugInfo = "37:\Player.gbas";
-				param4_self.attr2_VY = 0;
-				__debugInfo = "38:\Player.gbas";
-				param4_self.attr1_Y+=-(4);
-				__debugInfo = "42:\Player.gbas";
-				while (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) != (2)) ? 1 : 0)) {
-					__debugInfo = "41:\Player.gbas";
-					param4_self.attr1_Y+=1;
-					__debugInfo = "41:\Player.gbas";
-				};
-				__debugInfo = "37:\Player.gbas";
-			} else if (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) || ((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1))))) ? 1 : 0)) {
-				__debugInfo = "45:\Player.gbas";
-				param4_self.attr2_VY = -(8);
-				__debugInfo = "45:\Player.gbas";
-			};
-			__debugInfo = "46:\Player.gbas";
-		};
-		__debugInfo = "58:\Player.gbas";
-		if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2))))))) == (10)) ? 1 : 0)) {
-			__debugInfo = "57:\Player.gbas";
-			if ((((global3_Map.attr11_NextMap_Str) == ("")) ? 1 : 0)) {
-				__debugInfo = "53:\Player.gbas";
-				END();
-				__debugInfo = "53:\Player.gbas";
-			} else {
-				__debugInfo = "55:\Player.gbas";
-				(global3_Map).Init(global3_Map.attr11_NextMap_Str);
-				__debugInfo = "56:\Player.gbas";
-				throw new GLBException("Exit", "\Player.gbas", 56);
-				__debugInfo = "55:\Player.gbas";
-			};
-			__debugInfo = "57:\Player.gbas";
-		};
-		__debugInfo = "61:\Player.gbas";
-		param4_self.attr2_VX = ((param4_self.attr2_VX) * (((0.77) + (((global3_Map.attr6_IsSnow) * (0.1))))));
-		__debugInfo = "64:\Player.gbas";
-		if ((((param4_self.attr2_VY) > (31)) ? 1 : 0)) {
-			__debugInfo = "64:\Player.gbas";
-			param4_self.attr2_VY = 31;
-			__debugInfo = "64:\Player.gbas";
-		};
-		__debugInfo = "65:\Player.gbas";
-		if ((((param4_self.attr2_VY) < (-33)) ? 1 : 0)) {
-			__debugInfo = "65:\Player.gbas";
-			param4_self.attr2_VY = -33;
-			__debugInfo = "65:\Player.gbas";
-		};
-		__debugInfo = "69:\Player.gbas";
-		local4_OldX_1561 = param4_self.attr1_X;
-		__debugInfo = "70:\Player.gbas";
-		local4_OldY_1562 = param4_self.attr1_Y;
-		__debugInfo = "73:\Player.gbas";
-		param4_self.attr1_X+=param4_self.attr2_VX;
-		__debugInfo = "76:\Player.gbas";
-		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
-			__debugInfo = "75:\Player.gbas";
-			param4_self.attr1_X = local4_OldX_1561;
-			__debugInfo = "75:\Player.gbas";
-		};
-		__debugInfo = "78:\Player.gbas";
-		param4_self.attr1_Y+=param4_self.attr2_VY;
-		__debugInfo = "82:\Player.gbas";
-		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
-			__debugInfo = "80:\Player.gbas";
-			param4_self.attr1_Y = local4_OldY_1562;
-			__debugInfo = "81:\Player.gbas";
-			param4_self.attr2_VY = 0;
-			__debugInfo = "80:\Player.gbas";
-		};
-		__debugInfo = "90:\Player.gbas";
-		if ((((ABS(param4_self.attr2_VX)) > (0.1)) ? 1 : 0)) {
-			__debugInfo = "86:\Player.gbas";
-			param4_self.attr4_Anim+=1;
-			__debugInfo = "87:\Player.gbas";
-			param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
-			__debugInfo = "86:\Player.gbas";
-		} else {
-			__debugInfo = "89:\Player.gbas";
-			param4_self.attr4_Anim = 13;
-			__debugInfo = "89:\Player.gbas";
-		};
-		__debugInfo = "95:\Player.gbas";
-		if ((((((((global3_Map).PickTile(((param4_self.attr1_X) + (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "94:\Player.gbas";
-			(param4_self).Reset();
-			__debugInfo = "94:\Player.gbas";
-		};
-		__debugInfo = "100:\Player.gbas";
-		if (((((((((((global3_Map).PickTile(((param4_self.attr1_X) + (2)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0))) ? 1 : 0)) && ((((ABS(param4_self.attr2_VY)) > (0.25)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "99:\Player.gbas";
-			param4_self.attr2_VY = ((-(param4_self.attr2_VY)) * (1.1));
-			__debugInfo = "99:\Player.gbas";
-		};
-		__debugInfo = "160:\Player.gbas";
-		if ((((((((global3_Map).PickTile(param4_self.attr1_X, ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0))) ? 1 : 0)) {
-			var local8_LastPosX_1563 = 0.0, local8_LastPosY_1564 = 0.0, local4_Dist_1565 = 0.0;
-			__debugInfo = "105:\Player.gbas";
-			global3_Map.attr5_Datas.arrAccess(global3_Map.attr9_LastPickX, global3_Map.attr9_LastPickY).values[tmpPositionCache] = 13;
-			__debugInfo = "106:\Player.gbas";
-			global3_Map.attr13_IsRenderedFBO = 0;
-			__debugInfo = "109:\Player.gbas";
-			local4_Dist_1565 = -(1);
-			__debugInfo = "109:\Player.gbas";
-			{
-				var local1_x_1566 = 0.0;
-				__debugInfo = "121:\Player.gbas";
-				for (local1_x_1566 = 0;toCheck(local1_x_1566, ((global3_Map.attr5_Width) - (1)), 1);local1_x_1566 += 1) {
-					__debugInfo = "110:\Player.gbas";
-					{
-						var local1_y_1567 = 0.0;
-						__debugInfo = "120:\Player.gbas";
-						for (local1_y_1567 = 0;toCheck(local1_y_1567, ((global3_Map.attr6_Height) - (1)), 1);local1_y_1567 += 1) {
-							__debugInfo = "119:\Player.gbas";
-							if ((((global3_Map.attr5_Datas.arrAccess(~~(local1_x_1566), ~~(local1_y_1567)).values[tmpPositionCache]) == (11)) ? 1 : 0)) {
-								var local7_TmpDist_1568 = 0.0;
-								__debugInfo = "113:\Player.gbas";
-								local7_TmpDist_1568 = SQR(((((((local1_x_1566) - (global3_Map.attr9_LastPickX))) * (((local1_x_1566) - (global3_Map.attr9_LastPickX))))) + (((((local1_y_1567) - (global3_Map.attr9_LastPickY))) * (((local1_y_1567) - (global3_Map.attr9_LastPickY)))))));
-								__debugInfo = "118:\Player.gbas";
-								if (((((((local4_Dist_1565) == (-(1))) ? 1 : 0)) || ((((local7_TmpDist_1568) < (local4_Dist_1565)) ? 1 : 0))) ? 1 : 0)) {
-									__debugInfo = "115:\Player.gbas";
-									local4_Dist_1565 = local7_TmpDist_1568;
-									__debugInfo = "116:\Player.gbas";
-									local8_LastPosX_1563 = local1_x_1566;
-									__debugInfo = "117:\Player.gbas";
-									local8_LastPosY_1564 = local1_y_1567;
-									__debugInfo = "115:\Player.gbas";
-								};
-								__debugInfo = "113:\Player.gbas";
-							};
-							__debugInfo = "119:\Player.gbas";
-						};
-						__debugInfo = "120:\Player.gbas";
-					};
-					__debugInfo = "110:\Player.gbas";
-				};
-				__debugInfo = "121:\Player.gbas";
-			};
-			__debugInfo = "159:\Player.gbas";
-			if ((((local4_Dist_1565) != (-(1))) ? 1 : 0)) {
-				var local2_X1_1569 = 0.0, local2_Y1_1570 = 0.0, local2_X2_1571 = 0.0, local2_Y2_1572 = 0.0, local5_Angle_1573 = 0.0;
-				__debugInfo = "126:\Player.gbas";
-				local2_Y1_1570 = ((((local8_LastPosY_1564) * (32))) + (16));
-				__debugInfo = "127:\Player.gbas";
-				local2_Y2_1572 = ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
-				__debugInfo = "127:\Player.gbas";
-				local2_X1_1569 = ((((local8_LastPosX_1563) * (32))) + (16));
-				__debugInfo = "128:\Player.gbas";
-				local2_X2_1571 = ((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
-				__debugInfo = "129:\Player.gbas";
-				local5_Angle_1573 = -(MOD(~~(((ATAN(((local2_Y1_1570) - (local2_Y2_1572)), ((local2_X1_1569) - (local2_X2_1571)))) + (180))), 360));
-				__debugInfo = "130:\Player.gbas";
-				local4_Dist_1565 = SQR(((((((local2_X1_1569) - (local2_X2_1571))) * (((local2_X1_1569) - (local2_X2_1571))))) + (((((local2_Y1_1570) - (local2_Y2_1572))) * (((local2_Y1_1570) - (local2_Y2_1572)))))));
-				__debugInfo = "136:\Player.gbas";
-				if ((((local4_Dist_1565) < (512)) ? 1 : 0)) {
-					var local8_Strength_1574 = 0.0;
-					__debugInfo = "133:\Player.gbas";
-					local8_Strength_1574 = ((((256) / (((local4_Dist_1565) + (1))))) * (16));
-					__debugInfo = "134:\Player.gbas";
-					param4_self.attr2_VX+=((func4_QCOS(local5_Angle_1573)) * (local8_Strength_1574));
-					__debugInfo = "135:\Player.gbas";
-					param4_self.attr2_VY+=((func4_QSIN(local5_Angle_1573)) * (local8_Strength_1574));
-					__debugInfo = "133:\Player.gbas";
-				};
-				__debugInfo = "138:\Player.gbas";
-				{
-					var local1_X_1575 = 0.0;
-					__debugInfo = "151:\Player.gbas";
-					for (local1_X_1575 = -(1);toCheck(local1_X_1575, 1, 1);local1_X_1575 += 1) {
-						__debugInfo = "139:\Player.gbas";
-						{
-							var local1_Y_1576 = 0.0;
-							__debugInfo = "150:\Player.gbas";
-							for (local1_Y_1576 = -(1);toCheck(local1_Y_1576, 1, 1);local1_Y_1576 += 1) {
-								__debugInfo = "141:\Player.gbas";
-								(global3_Map).RemoveTile(((local8_LastPosX_1563) + (local1_X_1575)), ((local8_LastPosY_1564) + (local1_Y_1576)));
-								__debugInfo = "141:\Player.gbas";
-								{
-									var local2_XX_1577 = 0.0;
-									__debugInfo = "149:\Player.gbas";
-									for (local2_XX_1577 = -(0.5);toCheck(local2_XX_1577, 0.5, 0.5);local2_XX_1577 += 0.5) {
-										__debugInfo = "142:\Player.gbas";
-										{
-											var local2_YY_1578 = 0.0;
-											__debugInfo = "148:\Player.gbas";
-											for (local2_YY_1578 = -(0.5);toCheck(local2_YY_1578, 0.5, 0.5);local2_YY_1578 += 0.5) {
-												__debugInfo = "147:\Player.gbas";
-												if ((((INTEGER(RND(2))) > (1)) ? 1 : 0)) {
-													var local3_Exp_1579 = new type10_TExplosion();
-													__debugInfo = "146:\Player.gbas";
-													(local3_Exp_1579).Init(((((((local8_LastPosX_1563) + (local1_X_1575))) + (local2_XX_1577))) * (32)), ((((((local8_LastPosY_1564) + (local1_Y_1576))) + (local2_YY_1578))) * (32)));
-													__debugInfo = "146:\Player.gbas";
-												};
-												__debugInfo = "147:\Player.gbas";
-											};
-											__debugInfo = "148:\Player.gbas";
-										};
-										__debugInfo = "142:\Player.gbas";
-									};
-									__debugInfo = "149:\Player.gbas";
-								};
-								__debugInfo = "141:\Player.gbas";
-							};
-							__debugInfo = "150:\Player.gbas";
-						};
-						__debugInfo = "139:\Player.gbas";
-					};
-					__debugInfo = "151:\Player.gbas";
-				};
-				__debugInfo = "158:\Player.gbas";
-				var forEachSaver5982 = global6_Enemys;
-				for(var forEachCounter5982 = 0 ; forEachCounter5982 < forEachSaver5982.values.length ; forEachCounter5982++) {
-					var local5_Enemy_1580 = forEachSaver5982.values[forEachCounter5982];
-				{
-						__debugInfo = "157:\Player.gbas";
-						if ((((SQR(((((((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))) * (((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))))) + (((local5_Enemy_1580.attr1_Y) - (((local8_LastPosY_1564) * (32)))))))) < (32)) ? 1 : 0)) {
-							__debugInfo = "156:\Player.gbas";
-							local5_Enemy_1580.attr4_Fall = 1;
-							__debugInfo = "156:\Player.gbas";
-						};
-						__debugInfo = "157:\Player.gbas";
-					}
-					forEachSaver5982.values[forEachCounter5982] = local5_Enemy_1580;
+window['func16_DDgui_drawwidget'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	{
+		var local16___SelectHelper4__1750 = "";
+		local16___SelectHelper4__1750 = param3_wdg.attr9_wtype_Str;
+		if ((((local16___SelectHelper4__1750) == ("FRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("UNFRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SPACER")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper4__1750) == ("WIDGET")) ? 1 : 0)) {
+			var local1_w_ref_1751 = [0], local1_h_ref_1752 = [0];
+			ALPHAMODE(-(0.7));
+			GETFONTSIZE(local1_w_ref_1751, local1_h_ref_1752);
+			if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "\ny", 0)) < (0)) ? 1 : 0)) {
+				local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_ref_1752[0]))) / (2))))), param3_wdg.attr6_wwidth, 1, 0);
 				
-				};
-				__debugInfo = "126:\Player.gbas";
+			} else {
+				local1_h_ref_1752[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, param4_ytop, param3_wdg.attr6_wwidth, 1, 0);
+				
 			};
-			__debugInfo = "105:\Player.gbas";
+			param3_wdg.attr7_wheight = MAX(global25_gDDguiMinControlDimension, unref(local1_h_ref_1752[0]));
+			ALPHAMODE(0);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("BUTTON")) ? 1 : 0)) {
+			func16_DDgui_drawbutton(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SLIDER")) ? 1 : 0)) {
+			func16_DDgui_drawslider(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("RADIO")) ? 1 : 0)) {
+			func15_DDgui_drawradio(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("CHECKBOX")) ? 1 : 0)) {
+			func18_DDgui_drawcheckbox(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("TAB")) ? 1 : 0)) {
+			func13_DDgui_drawtab(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("COMBO")) ? 1 : 0)) {
+			func15_DDgui_drawcombo(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("LIST")) ? 1 : 0)) {
+			func14_DDgui_drawlist(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("SINGLETEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 1);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("TEXT")) ? 1 : 0)) {
+			func14_DDgui_drawtext(param10_ddgui_vals, param3_wdg, param4_ytop, 0);
+			
+		} else if ((((local16___SelectHelper4__1750) == ("FILE")) ? 1 : 0)) {
+			func14_DDgui_drawfile(param10_ddgui_vals, param3_wdg, param4_ytop);
+			
+		} else {
+			if (param3_wdg.attr8_wuserfoo_ref[0]) {
+				param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "DRAW", static9_DDgui_drawwidget_dummy_Str_ref);
+				
+			} else {
+				func15_DDgui_draw_user(param3_wdg.attr7_wid_Str, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param4_ytop);
+				
+			};
+			
 		};
-		__debugInfo = "173:\Player.gbas";
-		var forEachSaver6112 = global6_Enemys;
-		for(var forEachCounter6112 = 0 ; forEachCounter6112 < forEachSaver6112.values.length ; forEachCounter6112++) {
-			var local5_Enemy_1581 = forEachSaver6112.values[forEachCounter6112];
-		{
-				__debugInfo = "172:\Player.gbas";
-				if ((((local5_Enemy_1581.attr4_Fall) == (0)) ? 1 : 0)) {
-					__debugInfo = "171:\Player.gbas";
-					if (((((((BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) + (4)), ~~(((local5_Enemy_1581.attr1_X) + (4))), ~~(((local5_Enemy_1581.attr1_Y) - (8))), ~~(((local5_Enemy_1581.attr5_Width) - (8))), 16)) && ((local5_Enemy_1581).IsDestroyable())) ? 1 : 0)) && ((((param4_self.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
-						__debugInfo = "167:\Player.gbas";
-						local5_Enemy_1581.attr4_Fall = 1;
-						__debugInfo = "167:\Player.gbas";
-					} else if (BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) - (4)), ~~(((local5_Enemy_1581.attr1_X) + (2))), ~~(((local5_Enemy_1581.attr1_Y) + (2))), ~~(((local5_Enemy_1581.attr5_Width) - (4))), ~~(((local5_Enemy_1581.attr6_Height) - (4))))) {
-						__debugInfo = "169:\Player.gbas";
-						(param4_self).Reset();
-						__debugInfo = "170:\Player.gbas";
+		
+	};
+	return 0;
+	
+};
+window['func18_DDgui_handlewidget'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
+		param3_wdg.attr6_whover = 1;
+		
+	} else {
+		param2_b1 = 0;
+		param2_b2 = 0;
+		param3_wdg.attr6_whover = 0;
+		
+	};
+	{
+		var local16___SelectHelper5__1760 = "";
+		local16___SelectHelper5__1760 = param3_wdg.attr9_wtype_Str;
+		if ((((local16___SelectHelper5__1760) == ("SPACER")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("FRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("UNFRAME")) ? 1 : 0)) {
+			
+		} else if ((((local16___SelectHelper5__1760) == ("WIDGET")) ? 1 : 0)) {
+			if ((((param2_b1) != (1)) ? 1 : 0)) {
+				param2_b1 = 0;
+				
+			};
+			param3_wdg.attr8_wclicked = param2_b1;
+			
+		} else if ((((local16___SelectHelper5__1760) == ("BUTTON")) ? 1 : 0)) {
+			func18_DDgui_handlebutton(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("SLIDER")) ? 1 : 0)) {
+			func18_DDgui_handleslider(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("RADIO")) ? 1 : 0)) {
+			func17_DDgui_handleradio(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("CHECKBOX")) ? 1 : 0)) {
+			func20_DDgui_handlecheckbox(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("FILE")) ? 1 : 0)) {
+			func16_DDgui_handlefile(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("LIST")) ? 1 : 0)) {
+			func16_DDgui_handlelist(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("TAB")) ? 1 : 0)) {
+			func15_DDgui_handletab(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("COMBO")) ? 1 : 0)) {
+			func17_DDgui_handlecombo(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("SINGLETEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 0);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 1, 1);
+			
+		} else if ((((local16___SelectHelper5__1760) == ("TEXT")) ? 1 : 0)) {
+			func16_ddgui_handletext(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, 0, 0);
+			
+		} else {
+			if (param3_wdg.attr8_wuserfoo_ref[0]) {
+				static9_DDgui_handlewidget_dummy_Str_ref[0] = "";
+				if ((((param2_b1) != (1)) ? 1 : 0)) {
+					param2_b1 = 0;
+					
+				};
+				param3_wdg.attr8_wclicked = param2_b1;
+				if (param3_wdg.attr8_wclicked) {
+					static9_DDgui_handlewidget_dummy_Str_ref[0] = ((((((((FORMAT_Str(4, 0, param2_mx)) + (","))) + (FORMAT_Str(4, 0, param2_my)))) + (","))) + (FORMAT_Str(2, 0, param2_b1)));
+					param3_wdg.attr8_wuserfoo_ref[0](param3_wdg.attr7_wid_Str, "CLICKED", static9_DDgui_handlewidget_dummy_Str_ref);
+					
+				};
+				
+			} else {
+				func17_DDgui_handle_user(param3_wdg.attr7_wid_Str, param2_mx, param2_my, param2_b1, param2_b2);
+				
+			};
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func14_DDgui_boxprint'] = function(param10_ddgui_vals, param3_wdg, param1_x, param1_y, param2_wx, param7_do_draw, param8_find_pos) {
+	var local7_str_Str_1768 = "", local2_tx_ref_1769 = [0], local2_ty_ref_1770 = [0], local2_cx_1771 = 0, local2_cy_1772 = 0, local5_s_Str_1773 = "", local5_c_Str_1774 = "", local4_cpos_1775 = 0, local4_spos_1776 = 0, local4_slen_1777 = 0, local8_caretpos_1778 = 0, local9_has_caret_1779 = 0, local5_xseek_1780 = 0, local5_yseek_1781 = 0, local6_selcol_1782 = 0;
+	local6_selcol_1782 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr14_col_hover_norm;
+	GETFONTSIZE(local2_tx_ref_1769, local2_ty_ref_1770);
+	if (param8_find_pos) {
+		param7_do_draw = 0;
+		
+	};
+	local7_str_Str_1768 = param3_wdg.attr9_wtext_Str_ref[0];
+	if (param8_find_pos) {
+		local5_xseek_1780 = param1_x;
+		local5_yseek_1781 = param1_y;
+		param1_x = 0;
+		param1_y = 0;
+		
+	} else {
+		var local7_strleng_1783 = 0;
+		local7_strleng_1783 = (local7_str_Str_1768).length;
+		if ((((param3_wdg.attr7_wselend) > (local7_strleng_1783)) ? 1 : 0)) {
+			param3_wdg.attr7_wselend = local7_strleng_1783;
+			
+		};
+		if ((((param3_wdg.attr9_wselstart) > (local7_strleng_1783)) ? 1 : 0)) {
+			param3_wdg.attr9_wselstart = local7_strleng_1783;
+			
+		};
+		local8_caretpos_1778 = param3_wdg.attr7_wselend;
+		if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+			local9_has_caret_1779 = 1;
+			
+		} else {
+			local9_has_caret_1779 = 0;
+			param3_wdg.attr9_wselstart = -(1);
+			param3_wdg.attr7_wselend = -(1);
+			
+		};
+		
+	};
+	local2_cx_1771 = param1_x;
+	local2_cy_1772 = param1_y;
+	local7_str_Str_1768 = ((local7_str_Str_1768) + (" "));
+	local4_slen_1777 = (local7_str_Str_1768).length;
+	while ((((local4_cpos_1775) < (local4_slen_1777)) ? 1 : 0)) {
+		local5_c_Str_1774 = MID_Str(local7_str_Str_1768, local4_cpos_1775, 1);
+		local2_tx_ref_1769[0] = KERNLEN(local5_c_Str_1774, global18_ddgui_font_kerning.attr11_bHasKerning);
+		if (((((((param8_find_pos) && ((((local2_cy_1772) >= (((local5_yseek_1781) - (local2_ty_ref_1770[0])))) ? 1 : 0))) ? 1 : 0)) && (((((((local2_cx_1771) >= (((local5_xseek_1780) - (((local2_tx_ref_1769[0]) * (1.5)))))) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\n")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+			return tryClone(local4_cpos_1775);
+			
+		};
+		if (param7_do_draw) {
+			if ((((((((((param3_wdg.attr9_wselstart) != (param3_wdg.attr7_wselend)) ? 1 : 0)) && (((((((local4_cpos_1775) >= (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) < (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) || (((((((local4_cpos_1775) < (param3_wdg.attr9_wselstart)) ? 1 : 0)) && ((((local4_cpos_1775) >= (param3_wdg.attr7_wselend)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+				DRAWRECT(local2_cx_1771, local2_cy_1772, unref(local2_tx_ref_1769[0]), unref(local2_ty_ref_1770[0]), local6_selcol_1782);
+				
+			};
+			if ((((local5_c_Str_1774) != ("\n")) ? 1 : 0)) {
+				PRINT(local5_c_Str_1774, local2_cx_1771, local2_cy_1772, global18_ddgui_font_kerning.attr11_bHasKerning);
+				
+			};
+			
+		};
+		if ((((local9_has_caret_1779) && ((((local4_cpos_1775) == (local8_caretpos_1778)) ? 1 : 0))) ? 1 : 0)) {
+			if (param7_do_draw) {
+				var local5_blink_1784 = 0;
+				local5_blink_1784 = (((MOD(GETTIMERALL(), 1024)) > (512)) ? 1 : 0);
+				if (local5_blink_1784) {
+					ALPHAMODE(-(0.5));
+					
+				};
+				DRAWRECT(((local2_cx_1771) - (1)), local2_cy_1772, 2, unref(local2_ty_ref_1770[0]), global17_gDDguiCaretColour);
+				if (local5_blink_1784) {
+					ALPHAMODE(0);
+					
+				};
+				param3_wdg.attr7_wcaretx = ((INTEGER(((local2_cx_1771) + (CAST2INT(((local2_tx_ref_1769[0]) / (2))))))) - (param1_x));
+				param3_wdg.attr7_wcarety = ((INTEGER(((local2_cy_1772) + (CAST2INT(((local2_ty_ref_1770[0]) / (2))))))) - (param1_y));
+				
+			};
+			
+		};
+		if ((((local5_c_Str_1774) == ("\n")) ? 1 : 0)) {
+			local2_cx_1771 = param1_x;
+			local2_cy_1772+=local2_ty_ref_1770[0];
+			local4_cpos_1775+=1;
+			continue;
+			
+		};
+		local2_cx_1771 = ((local2_cx_1771) + (local2_tx_ref_1769[0]));
+		local4_cpos_1775 = ((local4_cpos_1775) + (1));
+		if (((((((local5_c_Str_1774) == (" ")) ? 1 : 0)) || ((((local5_c_Str_1774) == ("\t")) ? 1 : 0))) ? 1 : 0)) {
+			var local10_next_w_len_1785 = 0, local4_code_1786 = 0, local6_co_Str_1787 = "";
+			local10_next_w_len_1785 = 0;
+			{
+				for (local4_spos_1776 = local4_cpos_1775;toCheck(local4_spos_1776, ((local4_slen_1777) - (1)), 1);local4_spos_1776 += 1) {
+					local6_co_Str_1787 = MID_Str(local7_str_Str_1768, local4_spos_1776, 1);
+					local4_code_1786 = ASC(local6_co_Str_1787, 0);
+					if (((((((local4_code_1786) == (ASC(" ", 0))) ? 1 : 0)) || ((((local4_code_1786) == (ASC("\t", 0))) ? 1 : 0))) ? 1 : 0)) {
+						if ((((((((local2_cx_1771) + (local10_next_w_len_1785))) - (param1_x))) > (param2_wx)) ? 1 : 0)) {
+							local2_cx_1771 = param1_x;
+							local2_cy_1772 = ((local2_cy_1772) + (local2_ty_ref_1770[0]));
+							
+						};
 						break;
-						__debugInfo = "169:\Player.gbas";
+						
 					};
-					__debugInfo = "171:\Player.gbas";
+					local10_next_w_len_1785+=KERNLEN(local6_co_Str_1787, global18_ddgui_font_kerning.attr11_bHasKerning);
+					
 				};
-				__debugInfo = "172:\Player.gbas";
-			}
-			forEachSaver6112.values[forEachCounter6112] = local5_Enemy_1581;
-		
-		};
-		__debugInfo = "181:\Player.gbas";
-		var forEachSaver6152 = global5_Shits;
-		for(var forEachCounter6152 = 0 ; forEachCounter6152 < forEachSaver6152.values.length ; forEachCounter6152++) {
-			var local1_S_1582 = forEachSaver6152.values[forEachCounter6152];
-		{
-				__debugInfo = "180:\Player.gbas";
-				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1582.attr1_X), ~~(local1_S_1582.attr1_Y), 16, 16)) && ((((local1_S_1582.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "178:\Player.gbas";
-					(param4_self).Reset();
-					__debugInfo = "179:\Player.gbas";
-					//DELETE!!111
-					forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
-					DIMDEL(forEachSaver6152, forEachCounter6152);
-					forEachCounter6152--;
-					continue;
-					__debugInfo = "178:\Player.gbas";
-				};
-				__debugInfo = "180:\Player.gbas";
-			}
-			forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
-		
-		};
-		__debugInfo = "189:\Player.gbas";
-		var forEachSaver6192 = global5_Spits;
-		for(var forEachCounter6192 = 0 ; forEachCounter6192 < forEachSaver6192.values.length ; forEachCounter6192++) {
-			var local1_S_1583 = forEachSaver6192.values[forEachCounter6192];
-		{
-				__debugInfo = "188:\Player.gbas";
-				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1583.attr1_X), ~~(local1_S_1583.attr1_Y), 8, 8)) && ((((local1_S_1583.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "186:\Player.gbas";
-					(param4_self).Reset();
-					__debugInfo = "187:\Player.gbas";
-					//DELETE!!111
-					forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
-					DIMDEL(forEachSaver6192, forEachCounter6192);
-					forEachCounter6192--;
-					continue;
-					__debugInfo = "186:\Player.gbas";
-				};
-				__debugInfo = "188:\Player.gbas";
-			}
-			forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
-		
-		};
-		__debugInfo = "195:\Player.gbas";
-		if ((((((param4_self.attr1_Y) - (((param4_self.attr6_Height) * (2))))) > (((global3_Map.attr6_Height) * (32)))) ? 1 : 0)) {
-			__debugInfo = "194:\Player.gbas";
-			(param4_self).Reset();
-			__debugInfo = "194:\Player.gbas";
-		};
-		__debugInfo = "198:\Player.gbas";
-		global3_Map.attr7_ScrollX = ((((-(param4_self.attr1_X)) + (((local8_ScrWidth_ref_1559[0]) / (2))))) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
-		__debugInfo = "199:\Player.gbas";
-		global3_Map.attr7_ScrollY = ((((-(param4_self.attr1_Y)) + (((local9_ScrHeight_ref_1560[0]) / (2))))) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
-		__debugInfo = "200:\Player.gbas";
-		return 0;
-		__debugInfo = "27:\Player.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method13_type7_TPlayer_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		var local7_CurAnim_1586 = 0, local3_Dir_1587 = 0;
-		__debugInfo = "210:\Player.gbas";
-		if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
-			__debugInfo = "205:\Player.gbas";
-			local7_CurAnim_1586 = 0;
-			__debugInfo = "205:\Player.gbas";
-		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
-			__debugInfo = "207:\Player.gbas";
-			local7_CurAnim_1586 = 1;
-			__debugInfo = "207:\Player.gbas";
-		} else {
-			__debugInfo = "209:\Player.gbas";
-			local7_CurAnim_1586 = 2;
-			__debugInfo = "209:\Player.gbas";
-		};
-		__debugInfo = "217:\Player.gbas";
-		if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
-			__debugInfo = "214:\Player.gbas";
-			local3_Dir_1587 = 1;
-			__debugInfo = "214:\Player.gbas";
-		} else {
-			__debugInfo = "216:\Player.gbas";
-			local3_Dir_1587 = 0;
-			__debugInfo = "216:\Player.gbas";
-		};
-		__debugInfo = "220:\Player.gbas";
-		func9_TurnImage(global11_PlayerImage, local7_CurAnim_1586, local3_Dir_1587, ((param4_self.attr1_X) + (1)), param4_self.attr1_Y, 6);
-		__debugInfo = "221:\Player.gbas";
-		return 0;
-		__debugInfo = "210:\Player.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method13_type7_TPlayer_5_Reset'] = function(param4_self) {
-	stackPush("method: Reset", __debugInfo);
-	try {
-		__debugInfo = "224:\Player.gbas";
-		param4_self.attr1_X = global3_Map.attr6_SpawnX;
-		__debugInfo = "225:\Player.gbas";
-		param4_self.attr1_Y = global3_Map.attr6_SpawnY;
-		__debugInfo = "226:\Player.gbas";
-		param4_self.attr2_VX = 0;
-		__debugInfo = "227:\Player.gbas";
-		param4_self.attr2_VY = 0;
-		__debugInfo = "228:\Player.gbas";
-		return 0;
-		__debugInfo = "224:\Player.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func9_TurnImage'] = function(param3_Img, param5_Frame, param3_Dir, param1_X, param1_Y, param8_MaxFrame) {
-	stackPush("function: TurnImage", __debugInfo);
-	try {
-		__debugInfo = "235:\Player.gbas";
-		if (param3_Dir) {
-			__debugInfo = "234:\Player.gbas";
-			param5_Frame = ((((param8_MaxFrame) - (1))) - (param5_Frame));
-			__debugInfo = "234:\Player.gbas";
-		};
-		__debugInfo = "237:\Player.gbas";
-		DRAWANIM(param3_Img, param5_Frame, ((param1_X) + (global3_Map.attr7_ScrollX)), ((param1_Y) + (global3_Map.attr7_ScrollY)));
-		__debugInfo = "238:\Player.gbas";
-		return 0;
-		__debugInfo = "235:\Player.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func4_QSIN'] = function(param1_x) {
-	stackPush("function: QSIN", __debugInfo);
-	try {
-		__debugInfo = "13:\qmath.gbas";
-		return tryClone(SIN(param1_x));
-		__debugInfo = "29:\qmath.gbas";
-		return 0;
-		__debugInfo = "13:\qmath.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['func4_QCOS'] = function(param1_x) {
-	stackPush("function: QCOS", __debugInfo);
-	try {
-		__debugInfo = "35:\qmath.gbas";
-		return tryClone(COS(param1_x));
-		__debugInfo = "39:\qmath.gbas";
-		return 0;
-		__debugInfo = "35:\qmath.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TShit_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		__debugInfo = "17:\Shit.gbas";
-		DRAWSPRITE(global9_ShitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
-		__debugInfo = "18:\Shit.gbas";
-		return 0;
-		__debugInfo = "17:\Shit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['method11_type5_TShit_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		__debugInfo = "23:\Shit.gbas";
-		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
-			__debugInfo = "22:\Shit.gbas";
-			param4_self.attr3_Del = 1;
-			__debugInfo = "22:\Shit.gbas";
-		};
-		__debugInfo = "25:\Shit.gbas";
-		if ((((param4_self.attr1_Y) > (((((global3_Map.attr6_Height) * (32))) + (640)))) ? 1 : 0)) {
-			__debugInfo = "25:\Shit.gbas";
-			param4_self.attr3_Del = 1;
-			__debugInfo = "25:\Shit.gbas";
-		};
-		__debugInfo = "36:\Shit.gbas";
-		if ((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((((param4_self.attr1_Y) + (param4_self.attr2_VY))) + (16)))) {
-			__debugInfo = "31:\Shit.gbas";
-			while (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((param4_self.attr1_Y) + (16)))) == (0)) ? 1 : 0)) {
-				__debugInfo = "30:\Shit.gbas";
-				param4_self.attr1_Y+=1;
-				__debugInfo = "30:\Shit.gbas";
+				
 			};
-			__debugInfo = "32:\Shit.gbas";
-			param4_self.attr2_VY = 0;
-			__debugInfo = "33:\Shit.gbas";
-			param4_self.attr3_Age+=1;
-			__debugInfo = "31:\Shit.gbas";
+			
+		};
+		
+	};
+	if (param8_find_pos) {
+		return tryClone(local4_slen_1777);
+		
+	};
+	return tryClone(((((local2_cy_1772) + (local2_ty_ref_1770[0]))) - (param1_y)));
+	return 0;
+	
+};
+window['func19_DDgui_drawscrollbar'] = function(param10_ddgui_vals, param3_wdg, param5_width, param6_height, param11_page_height, param4_ytop) {
+	var local2_c1_1794 = 0, local2_c2_1795 = 0, local3_c1b_1796 = 0, local3_c2b_1797 = 0, local2_tx_ref_1798 = [0], local2_ty_ref_1799 = [0], local1_x_1800 = 0, local2_up_1801 = 0, local4_down_1802 = 0, local3_pos_1803 = 0, local4_smax_1804 = 0, local3_hsb_1805 = 0;
+	GETFONTSIZE(local2_tx_ref_1798, local2_ty_ref_1799);
+	local2_tx_ref_1798[0] = MAX(unref(local2_tx_ref_1798[0]), global20_gDDguiScrollbarWidth);
+	local1_x_1800 = ((((param5_width) - (local2_tx_ref_1798[0]))) - (1));
+	local4_smax_1804 = param3_wdg.attr10_wscrollmax;
+	if ((((local4_smax_1804) <= (0)) ? 1 : 0)) {
+		return 0;
+		
+	};
+	if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
+		local2_c1_1794 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1795 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1794 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1795 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	local3_c1b_1796 = param10_ddgui_vals.attr10_col_bright;
+	local3_c2b_1797 = param10_ddgui_vals.attr8_col_norm;
+	local3_pos_1803 = param3_wdg.attr7_wscroll;
+	if ((((local3_pos_1803) < (0)) ? 1 : 0)) {
+		local3_pos_1803 = 0;
+		
+	};
+	if ((((local3_pos_1803) > (local4_smax_1804)) ? 1 : 0)) {
+		local3_pos_1803 = local4_smax_1804;
+		
+	};
+	local2_up_1801 = (((local3_pos_1803) > (0)) ? 1 : 0);
+	local4_down_1802 = (((local3_pos_1803) < (((local4_smax_1804) + (1)))) ? 1 : 0);
+	DRAWRECT(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c1_1794);
+	func14_DDgui_backrect(local1_x_1800, param4_ytop, unref(local2_tx_ref_1798[0]), param6_height, local2_c2_1795);
+	param4_ytop+=1;
+	param6_height+=-(2);
+	local1_x_1800+=1;
+	local2_tx_ref_1798[0]+=-(2);
+	local3_hsb_1805 = MAX(2, CAST2INT(((((param6_height) * (128))) / (CAST2INT(((((((((local4_smax_1804) + (param11_page_height))) - (1))) * (128))) / (param11_page_height)))))));
+	if ((((local3_hsb_1805) > (((param6_height) - (20)))) ? 1 : 0)) {
+		local3_hsb_1805 = ((param6_height) - (20));
+		
+	};
+	local3_pos_1803 = MAX(0, CAST2INT(((((local3_pos_1803) * (((param6_height) - (local3_hsb_1805))))) / (local4_smax_1804))));
+	local1_x_1800+=3;
+	local2_tx_ref_1798[0]+=-(6);
+	func13_DDgui_backgnd(local3_c1b_1796, local3_c2b_1797, local1_x_1800, ((param4_ytop) + (local3_pos_1803)), unref(local2_tx_ref_1798[0]), local3_hsb_1805);
+	func14_DDgui_backrect(((local1_x_1800) - (1)), ((((param4_ytop) + (local3_pos_1803))) - (1)), ((local2_tx_ref_1798[0]) + (2)), ((local3_hsb_1805) + (2)), local2_c2_1795);
+	return 0;
+	
+};
+window['func21_DDgui_handlescrollbar'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, param6_height) {
+	var local2_tx_ref_1813 = [0], local2_ty_ref_1814 = [0], local1_x_1815 = 0, local4_smax_1816 = 0, local3_hsb_1817 = 0, local3_pos_1818 = 0, local8_hasfocus_1819 = 0, local5_width_1820 = 0, local3_rmx_ref_1821 = [0], local3_rmy_ref_1822 = [0], local3_rb1_ref_1823 = [0], local3_rb2_ref_1824 = [0];
+	GETFONTSIZE(local2_tx_ref_1813, local2_ty_ref_1814);
+	local2_tx_ref_1813[0] = MAX(unref(local2_tx_ref_1813[0]), global20_gDDguiScrollbarWidth);
+	local5_width_1820 = param3_wdg.attr6_wwidth;
+	local1_x_1815 = ((local5_width_1820) - (local2_tx_ref_1813[0]));
+	local4_smax_1816 = param3_wdg.attr10_wscrollmax;
+	if ((((local4_smax_1816) <= (0)) ? 1 : 0)) {
+		param3_wdg.attr10_wscrollmax = 0;
+		param3_wdg.attr7_wscroll = 0;
+		return 0;
+		
+	};
+	if ((((param3_wdg.attr7_wscroll) > (local4_smax_1816)) ? 1 : 0)) {
+		local3_pos_1818 = local4_smax_1816;
+		param3_wdg.attr7_wscroll = param3_wdg.attr10_wscrollmax;
+		
+	};
+	MOUSESTATE(local3_rmx_ref_1821, local3_rmy_ref_1822, local3_rb1_ref_1823, local3_rb2_ref_1824);
+	if ((((param10_ddgui_vals.attr9_focus_Str) == ((("SB") + (param3_wdg.attr7_wid_Str)))) ? 1 : 0)) {
+		local8_hasfocus_1819 = 1;
+		
+	};
+	if (((((((local3_rb1_ref_1823[0]) && (BOXCOLL(local1_x_1815, 0, unref(local2_tx_ref_1813[0]), param6_height, param2_mx, param2_my, 1, 1))) ? 1 : 0)) || (local8_hasfocus_1819)) ? 1 : 0)) {
+		var local3_div_1825 = 0;
+		local8_hasfocus_1819 = 1;
+		param10_ddgui_vals.attr9_focus_Str = (("SB") + (param3_wdg.attr7_wid_Str));
+		local3_hsb_1817 = MAX(2, CAST2INT(((CAST2INT(((((param6_height) * (1024))) / (local4_smax_1816)))) / (1024))));
+		local3_div_1825 = ((param6_height) - (local3_hsb_1817));
+		if ((((local3_div_1825) > (0)) ? 1 : 0)) {
+			param3_wdg.attr7_wscroll = MAX(0, MIN(param3_wdg.attr10_wscrollmax, CAST2INT(((CAST2INT(((((((param2_my) * (param3_wdg.attr10_wscrollmax))) * (1024))) / (local3_div_1825)))) / (1024)))));
+			
 		} else {
-			__debugInfo = "35:\Shit.gbas";
-			param4_self.attr2_VY+=1;
-			__debugInfo = "35:\Shit.gbas";
+			param3_wdg.attr7_wscroll = 0;
+			
 		};
-		__debugInfo = "37:\Shit.gbas";
-		param4_self.attr2_VY = MIN(param4_self.attr2_VY, 8);
-		__debugInfo = "40:\Shit.gbas";
-		param4_self.attr1_Y+=param4_self.attr2_VY;
-		__debugInfo = "41:\Shit.gbas";
-		return 0;
-		__debugInfo = "23:\Shit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((local8_hasfocus_1819) && ((((local3_rb1_ref_1823[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		param10_ddgui_vals.attr9_focus_Str = "";
+		
+	};
+	return 1;
+	return 0;
 	
 };
-window['method11_type5_TShit_4_Init'] = function(param1_X, param1_Y, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		__debugInfo = "44:\Shit.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "45:\Shit.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "46:\Shit.gbas";
-		param4_self.attr2_VY = 1;
-		__debugInfo = "48:\Shit.gbas";
-		DIMPUSH(global5_Shits, param4_self);
-		__debugInfo = "49:\Shit.gbas";
-		return 0;
-		__debugInfo = "44:\Shit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+window['func12_DDgui_spacer'] = function(param5_width, param6_height) {
+	var local6_id_Str_1828 = "";
+	local6_id_Str_1828 = (("ID_SPACER_") + (CAST2STRING(BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))));
+	func12_DDgui_widget(local6_id_Str_1828, "", param5_width, param6_height);
+	func9_DDgui_set(local6_id_Str_1828, "WIDTH", CAST2STRING(param5_width));
+	func9_DDgui_set(local6_id_Str_1828, "HEIGHT", CAST2STRING(param6_height));
+	func9_DDgui_set(local6_id_Str_1828, "TYPE", "SPACER");
+	return 0;
 	
 };
-window['method11_type5_TSpit_6_Update'] = function(param4_self) {
-	stackPush("method: Update", __debugInfo);
-	try {
-		var local4_OldX_1608 = 0.0, local4_OldY_1609 = 0.0;
-		__debugInfo = "16:\Spit.gbas";
-		param4_self.attr2_VX = ((param4_self.attr2_VX) * (0.99));
-		__debugInfo = "17:\Spit.gbas";
-		param4_self.attr2_VY+=0.1;
-		__debugInfo = "18:\Spit.gbas";
-		param4_self.attr3_Age+=1;
-		__debugInfo = "22:\Spit.gbas";
-		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
-			__debugInfo = "21:\Spit.gbas";
-			param4_self.attr3_Del = 1;
-			__debugInfo = "21:\Spit.gbas";
-		};
-		__debugInfo = "25:\Spit.gbas";
-		local4_OldX_1608 = param4_self.attr1_X;
-		__debugInfo = "26:\Spit.gbas";
-		local4_OldY_1609 = param4_self.attr1_Y;
-		__debugInfo = "28:\Spit.gbas";
-		param4_self.attr1_X+=param4_self.attr2_VX;
-		__debugInfo = "32:\Spit.gbas";
-		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
-			__debugInfo = "30:\Spit.gbas";
-			param4_self.attr2_VX = -(param4_self.attr2_VX);
-			__debugInfo = "31:\Spit.gbas";
-			param4_self.attr1_X = local4_OldX_1608;
-			__debugInfo = "30:\Spit.gbas";
-		};
-		__debugInfo = "33:\Spit.gbas";
-		param4_self.attr1_Y+=param4_self.attr2_VY;
-		__debugInfo = "37:\Spit.gbas";
-		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
-			__debugInfo = "35:\Spit.gbas";
-			param4_self.attr2_VY = -(param4_self.attr2_VY);
-			__debugInfo = "36:\Spit.gbas";
-			param4_self.attr1_Y = local4_OldY_1609;
-			__debugInfo = "35:\Spit.gbas";
-		};
-		__debugInfo = "38:\Spit.gbas";
-		return 0;
-		__debugInfo = "16:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
+window['func12_DDgui_button'] = function(param6_id_Str, param11_caption_Str, param5_width, param6_height) {
+	var __labels = {"__DrawFrames__": 3476, "skip": 14670};
+	
+	var local2_sx_ref_2294 = [0], local2_sy_ref_2295 = [0];
+	var __pc = 14569;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 14569:
+				func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, param6_height);
+				
+			case 14669:
+				if (!(((((((param5_width) == (0)) ? 1 : 0)) || ((((param6_height) == (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 14577; break; }
+				
+				case 14621:
+					if (!((((INSTR(param11_caption_Str, "SPR_B", 0)) == (0)) ? 1 : 0))) { __pc = 14585; break; }
+				
+				case 14595:
+					GETSPRITESIZE(INTEGER(FLOAT2STR(MID_Str(param11_caption_Str, 5, (param11_caption_Str).length))), local2_sx_ref_2294, local2_sy_ref_2295);
+					
+				case 14607:
+					if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14599; break; }
+				
+				case 14606:
+					func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(((local2_sx_ref_2294[0]) + (4))));
+					
+				
+				
+			case 14599: //dummy jumper1
+				;
+					
+				case 14619:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14611; break; }
+				
+				case 14618:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(((local2_sy_ref_2295[0]) + (4))));
+					
+				
+				
+			case 14611: //dummy jumper1
+				;
+					
+				case 14620:
+					__pc = __labels["skip"]; break;
+					
+				
+				
+			case 14585: //dummy jumper1
+				;
+					
+				case 14668:
+					if (!((((INSTR(param11_caption_Str, "SPR_C", 0)) == (0)) ? 1 : 0))) { __pc = 14628; break; }
+				
+				case 14639:
+					if (!((((param5_width) == (0)) ? 1 : 0))) { __pc = 14633; break; }
+				
+				case 14638:
+					func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(32));
+					
+				
+				
+			case 14633: //dummy jumper1
+				;
+					
+				case 14649:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14643; break; }
+				
+				case 14648:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(32));
+					
+				
+				
+			case 14643: //dummy jumper1
+				;
+					
+				
+				__pc = 16889;
+				break;
+				
+			case 14628: //dummy jumper1
+				
+				case 14653:
+					GETFONTSIZE(local2_sx_ref_2294, local2_sy_ref_2295);
+					
+				case 14667:
+					if (!((((param6_height) == (0)) ? 1 : 0))) { __pc = 14657; break; }
+				
+				case 14666:
+					func9_DDgui_set(param6_id_Str, "HEIGHT", CAST2STRING(MAX(global25_gDDguiMinControlDimension, ((local2_sy_ref_2295[0]) + (4)))));
+					
+				
+				
+			case 14657: //dummy jumper1
+				;
+					
+				
+				
+			case 16889: //dummy jumper2
+				;
+					
+				
+				
+			case 14577: //dummy jumper1
+				;
+				
+			case 14670:
+				//label: skip;
+				
+			func9_DDgui_set(param6_id_Str, "TYPE", "BUTTON");
+			return 0;
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
 	}
+};
+window['func16_DDgui_drawbutton'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_c1_1832 = 0, local2_c2_1833 = 0, local5_hover_1834 = 0, local1_x_1835 = 0, local1_y_1836 = 0, local1_w_1837 = 0, local1_h_1838 = 0;
+	ALPHAMODE(0);
+	local5_hover_1834 = param3_wdg.attr6_whover;
+	if (((((((local5_hover_1834) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1832 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1833 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1832 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1833 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1832, local2_c2_1833, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+	local1_x_1835 = 1;
+	local1_y_1836 = ((param4_ytop) + (1));
+	local1_w_1837 = ((param3_wdg.attr6_wwidth) - (2));
+	local1_h_1838 = ((param3_wdg.attr7_wheight) - (2));
+	if (param3_wdg.attr7_wselect) {
+		local1_x_1835+=1;
+		local1_y_1836+=1;
+		local1_w_1837+=-(2);
+		local1_h_1838+=-(2);
+		
+	};
+	if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+		if (param3_wdg.attr9_wreadonly) {
+			ALPHAMODE(-(0.8));
+			
+		} else {
+			if ((((local5_hover_1834) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(1));
+				
+			} else {
+				ALPHAMODE(-(0.8));
+				
+			};
+			
+		};
+		local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
+		func23_DDgui_fit_sprite_in_box(local2_c1_1832, ((local1_x_1835) + (1)), ((local1_y_1836) + (1)), ((local1_w_1837) - (2)), ((local1_h_1838) - (2)));
+		
+	} else if ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
+		if ((((local5_hover_1834) == (0)) ? 1 : 0)) {
+			ALPHAMODE(-(1));
+			
+		} else {
+			ALPHAMODE(-(0.8));
+			
+		};
+		local2_c1_1832 = INTEGER(FLOAT2STR(MID_Str(unref(param3_wdg.attr9_wtext_Str_ref[0]), 5, (param3_wdg.attr9_wtext_Str_ref[0]).length)));
+		DRAWRECT(local1_x_1835, local1_y_1836, local1_w_1837, local1_h_1838, local2_c1_1832);
+		
+	} else {
+		var local2_fx_ref_1839 = [0], local2_fy_ref_1840 = [0];
+		if (param3_wdg.attr9_wreadonly) {
+			ALPHAMODE(-(0.5));
+			
+		} else {
+			ALPHAMODE(0);
+			
+		};
+		GETFONTSIZE(local2_fx_ref_1839, local2_fy_ref_1840);
+		func17_DDGui_PrintIntern(param3_wdg.attr9_wtext_Str_ref, CAST2INT(((((param3_wdg.attr6_wwidth) - (func21_DDGui_TextWidthIntern(param3_wdg.attr9_wtext_Str_ref)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1840[0]))) / (2))))), 0);
+		
+	};
+	ALPHAMODE(0);
+	if (param3_wdg.attr7_wselect) {
+		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, param10_ddgui_vals.attr14_col_hover_norm);
+		
+	} else {
+		func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1833);
+		
+	};
+	return 0;
 	
 };
-window['method11_type5_TSpit_6_Render'] = function(param4_self) {
-	stackPush("method: Render", __debugInfo);
-	try {
-		__debugInfo = "41:\Spit.gbas";
-		DRAWSPRITE(global9_SpitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
-		__debugInfo = "42:\Spit.gbas";
+window['func18_DDgui_handlebutton'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	if ((((param3_wdg.attr9_wreadonly) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) != (0)) ? 1 : 0))) ? 1 : 0)) {
 		return 0;
-		__debugInfo = "41:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+		
+	};
+	if ((((param2_b1) != (1)) ? 1 : 0)) {
+		param2_b1 = 0;
+		
+	};
+	param3_wdg.attr8_wclicked = param2_b1;
+	if (((((((param2_b1) && ((((INSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), "SPR_C", 0)) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		param10_ddgui_vals.attr15_kick_intern_dlg = 1;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
 	
 };
-window['method11_type5_TSpit_4_Init'] = function(param1_X, param1_Y, param4_DirX, param4_DirY, param4_self) {
-	stackPush("method: Init", __debugInfo);
-	try {
-		__debugInfo = "45:\Spit.gbas";
-		param4_self.attr1_X = param1_X;
-		__debugInfo = "46:\Spit.gbas";
-		param4_self.attr1_Y = param1_Y;
-		__debugInfo = "47:\Spit.gbas";
-		param4_self.attr2_VX = param4_DirX;
-		__debugInfo = "48:\Spit.gbas";
-		param4_self.attr2_VY = param4_DirY;
-		__debugInfo = "50:\Spit.gbas";
-		DIMPUSH(global5_Spits, param4_self);
-		__debugInfo = "51:\Spit.gbas";
+window['func12_DDgui_slider'] = function(param6_id_Str, param5_value, param5_width, param6_height) {
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		param5_width = 100;
+		
+	};
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = 16;
+		
+	};
+	func12_DDgui_widget(param6_id_Str, CAST2STRING(0), param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "SLIDER");
+	func9_DDgui_set(param6_id_Str, "TEXT", CAST2STRING(param5_value));
+	return 0;
+	
+};
+window['func16_DDgui_drawslider'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_c1_1854 = 0, local2_c2_1855 = 0, local1_x_1856 = 0.0, local1_w_1857 = 0, local1_h_1858 = 0, local5_t_Str_1859 = "", local5_sltop_1860 = 0;
+	local1_w_1857 = param3_wdg.attr6_wwidth;
+	local1_h_1858 = param3_wdg.attr7_wheight;
+	if ((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) {
+		local2_c1_1854 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1855 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1854 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1855 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	DRAWRECT(0, ((param4_ytop) + (CAST2INT(((local1_h_1858) / (2))))), local1_w_1857, 3, local2_c2_1855);
+	local1_x_1856 = FLOAT2STR(param3_wdg.attr9_wtext_Str_ref[0]);
+	local1_x_1856+=-(param3_wdg.attr7_wminval);
+	local1_x_1856 = ((local1_x_1856) / (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))));
+	local1_x_1856 = ((((((local1_w_1857) - (12))) * (local1_x_1856))) + (6));
+	local2_c1_1854 = param10_ddgui_vals.attr16_col_hover_bright;
+	local2_c2_1855 = param10_ddgui_vals.attr14_col_hover_norm;
+	local1_h_1858 = MIN(((local1_h_1858) - (2)), 24);
+	local5_sltop_1860 = ((((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local1_h_1858))) / (2)))))) + (1));
+	STARTPOLY(-(1), 0);
+	POLYVECTOR(local1_x_1856, local5_sltop_1860, 0, 0, local2_c1_1854);
+	POLYVECTOR(((local1_x_1856) - (5)), ((local5_sltop_1860) + (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(((local1_x_1856) - (5)), ((((local5_sltop_1860) + (local1_h_1858))) - (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(local1_x_1856, ((local5_sltop_1860) + (local1_h_1858)), 0, 0, local2_c1_1854);
+	POLYVECTOR(((local1_x_1856) + (5)), ((((local5_sltop_1860) + (local1_h_1858))) - (2)), 0, 0, local2_c2_1855);
+	POLYVECTOR(((local1_x_1856) + (5)), ((local5_sltop_1860) + (2)), 0, 0, local2_c2_1855);
+	ENDPOLY();
+	if ((((param3_wdg.attr6_whover) == (0)) ? 1 : 0)) {
+		local2_c2_1855 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1855);
+	return 0;
+	
+};
+window['func18_DDgui_handleslider'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	if (param3_wdg.attr9_wreadonly) {
 		return 0;
-		__debugInfo = "45:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
+		
+	};
+	if ((((param2_b1) == (-(1))) ? 1 : 0)) {
+		if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) <= (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) {
+			param10_ddgui_vals.attr9_focus_Str = param3_wdg.attr7_wid_Str;
+			
+		};
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+		if (MOUSEAXIS(3)) {
+			var local7_old_Str_1867 = "", local3_pos_1868 = 0.0;
+			local7_old_Str_1867 = param3_wdg.attr9_wtext_Str_ref[0];
+			local3_pos_1868 = MIN(1, MAX(0, ((((param2_mx) - (5))) / (((param3_wdg.attr6_wwidth) - (9))))));
+			local3_pos_1868 = ((param3_wdg.attr7_wminval) + (((local3_pos_1868) * (((param3_wdg.attr7_wmaxval) - (param3_wdg.attr7_wminval))))));
+			if ((((param3_wdg.attr5_wstep) > (0)) ? 1 : 0)) {
+				var local6_iSteps_1869 = 0;
+				local6_iSteps_1869 = ~~(((((local3_pos_1868) / (param3_wdg.attr5_wstep))) + (0.4)));
+				local3_pos_1868 = ((param3_wdg.attr5_wstep) * (local6_iSteps_1869));
+				param3_wdg.attr9_wtext_Str_ref[0] = CAST2STRING(local3_pos_1868);
+				
+			} else {
+				param3_wdg.attr9_wtext_Str_ref[0] = FORMAT_Str(0, 2, local3_pos_1868);
+				
+			};
+			if ((((local7_old_Str_1867) != (param3_wdg.attr9_wtext_Str_ref[0])) ? 1 : 0)) {
+				param3_wdg.attr8_wclicked = 1;
+				
+			};
+			
+		} else {
+			param10_ddgui_vals.attr9_focus_Str = "";
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func18_DDgui_drawcheckbox'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_c1_1873 = 0, local2_c2_1874 = 0, local5_hover_1875 = 0, local5_check_1876 = 0, local1_r_1877 = 0, local2_tx_ref_1878 = [0], local2_ty_ref_1879 = [0], local7_txt_Str_ref_1880 = [""];
+	local7_txt_Str_ref_1880[0] = param3_wdg.attr9_wtext_Str_ref[0];
+	GETFONTSIZE(local2_tx_ref_1878, local2_ty_ref_1879);
+	if (param3_wdg.attr7_wselect) {
+		local5_check_1876 = 1;
+		
+	};
+	if ((((param3_wdg.attr6_whover) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local5_hover_1875 = 1;
+		
+	};
+	if (local5_hover_1875) {
+		local2_c1_1873 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr14_col_hover_norm;
+		if ((((local5_hover_1875) == (0)) ? 1 : 0)) {
+			local1_r_1877 = local2_c1_1873;
+			local2_c1_1873 = local2_c2_1874;
+			local2_c2_1874 = local1_r_1877;
+			
+		};
+		func14_DDgui_backrect(1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_1879[0]) - (1)), local2_c1_1873);
+		
+	} else {
+		local2_c1_1873 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func17_DDGui_PrintIntern(local7_txt_Str_ref_1880, ~~(((((local2_tx_ref_1878[0]) * (1.7))) + (1))), ((param4_ytop) + (1)), local5_check_1876);
+	if (local5_check_1876) {
+		local2_c1_1873 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1873 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1874 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1873, local2_c2_1874, 3, ((param4_ytop) + (3)), ((local2_ty_ref_1879[0]) - (4)), ((local2_ty_ref_1879[0]) - (4)));
+	func14_DDgui_backrect(2, ((param4_ytop) + (2)), ((local2_ty_ref_1879[0]) - (2)), ((local2_ty_ref_1879[0]) - (2)), local2_c2_1874);
+	return 0;
+	
+};
+window['func20_DDgui_handlecheckbox'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	if (param3_wdg.attr9_wreadonly) {
+		return 0;
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		param3_wdg.attr7_wselect = ((1) - (param3_wdg.attr7_wselect));
+		param3_wdg.attr8_wclicked = 1;
+		
+	};
+	return 0;
+	
+};
+window['func11_DDgui_radio'] = function(param6_id_Str, param9_texts_Str, param5_width) {
+	var local2_tx_ref_1890 = [0], local2_ty_ref_1891 = [0], local3_num_1892 = 0, local1_i_1893 = 0;
+	GETFONTSIZE(local2_tx_ref_1890, local2_ty_ref_1891);
+	local3_num_1892 = SPLITSTR(param9_texts_Str, unref(static7_DDgui_radio_opt_Str), "|", 1);
+	if ((((local3_num_1892) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(-(1)));
+		
+	};
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		{
+			for (local1_i_1893 = 0;toCheck(local1_i_1893, ((local3_num_1892) - (1)), 1);local1_i_1893 += 1) {
+				local2_ty_ref_1891[0] = (static7_DDgui_radio_opt_Str.arrAccess(local1_i_1893).values[tmpPositionCache]).length;
+				if ((((local2_ty_ref_1891[0]) > (param5_width)) ? 1 : 0)) {
+					param5_width = local2_ty_ref_1891[0];
+					
+				};
+				
+			};
+			
+		};
+		param5_width = ((((param5_width) + (2))) * (local2_tx_ref_1890[0]));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param9_texts_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "RADIO");
+	return 0;
+	
+};
+window['func15_DDgui_drawradio'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local1_i_1898 = 0, local2_tx_ref_1899 = [0], local2_ty_ref_1900 = [0], local1_h_1901 = 0, local5_hover_1902 = 0, local5_check_1903 = 0, local6_bright_1904 = 0, local4_dark_1905 = 0, local8_bright_h_1906 = 0, local6_dark_h_1907 = 0, local3_num_1908 = 0, local7_opt_Str_ref_1909 = [""];
+	local6_bright_1904 = param10_ddgui_vals.attr10_col_bright;
+	local4_dark_1905 = param10_ddgui_vals.attr8_col_norm;
+	local8_bright_h_1906 = param10_ddgui_vals.attr16_col_hover_bright;
+	local6_dark_h_1907 = param10_ddgui_vals.attr14_col_hover_norm;
+	GETFONTSIZE(local2_tx_ref_1899, local2_ty_ref_1900);
+	local2_tx_ref_1899[0] = MAX(12, unref(local2_tx_ref_1899[0]));
+	local2_ty_ref_1900[0] = MAX(12, unref(local2_ty_ref_1900[0]));
+	local3_num_1908 = param3_wdg.attr6_wcount;
+	local1_h_1901 = MAX(unref(local2_ty_ref_1900[0]), global25_gDDguiMinControlDimension);
+	param4_ytop+=CAST2INT(((((local1_h_1901) - (local2_ty_ref_1900[0]))) / (2)));
+	DRAWRECT(((CAST2INT(((local2_ty_ref_1900[0]) / (2)))) - (1)), ((param4_ytop) + (1)), 3, ((((((local3_num_1908) * (local1_h_1901))) - (4))) - (((local1_h_1901) - (local2_ty_ref_1900[0])))), local4_dark_1905);
+	{
+		for (local1_i_1898 = 0;toCheck(local1_i_1898, 9999, 1);local1_i_1898 += 1) {
+			var local5_yitem_1910 = 0;
+			param3_wdg.attr6_wcount = local1_i_1898;
+			local7_opt_Str_ref_1909[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, local1_i_1898);
+			if (((((local7_opt_Str_ref_1909[0]).length) == (0)) ? 1 : 0)) {
+				break;
+				
+			};
+			local5_yitem_1910 = ((param4_ytop) + (((local1_i_1898) * (local1_h_1901))));
+			local5_hover_1902 = 0;
+			local5_check_1903 = 0;
+			if ((((param3_wdg.attr7_wselect) == (local1_i_1898)) ? 1 : 0)) {
+				local5_check_1903 = 1;
+				
+			};
+			if (((((((param3_wdg.attr6_whover) == (local1_i_1898)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+				local5_hover_1902 = 1;
+				
+			};
+			if (local5_check_1903) {
+				func13_DDgui_backgnd(local8_bright_h_1906, local6_dark_h_1907, 3, ((local5_yitem_1910) + (2)), ((local2_ty_ref_1900[0]) - (6)), ((local2_ty_ref_1900[0]) - (6)));
+				func14_DDgui_backrect(2, ((local5_yitem_1910) + (1)), ((local2_ty_ref_1900[0]) - (4)), ((local2_ty_ref_1900[0]) - (4)), local6_dark_h_1907);
+				
+			};
+			if (local5_hover_1902) {
+				if (local5_hover_1902) {
+					func14_DDgui_backrect(0, ((local5_yitem_1910) - (CAST2INT(((((local1_h_1901) - (local2_ty_ref_1900[0]))) / (2))))), ((param3_wdg.attr6_wwidth) - (1)), ((local1_h_1901) - (1)), local8_bright_h_1906);
+					
+				};
+				
+			};
+			func17_DDGui_PrintIntern(local7_opt_Str_ref_1909, ~~(((local2_tx_ref_1899[0]) * (1.7))), local5_yitem_1910, local5_check_1903);
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func17_DDgui_handleradio'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	var local2_tx_ref_1917 = [0], local2_ty_ref_1918 = [0], local1_h_1919 = 0, local5_hover_1920 = 0, local6_oldsel_1921 = 0, local3_num_1922 = 0;
+	if (param3_wdg.attr9_wreadonly) {
+		return 0;
+		
+	};
+	GETFONTSIZE(local2_tx_ref_1917, local2_ty_ref_1918);
+	local3_num_1922 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handleradio_txt_Str), "|", 1);
+	local1_h_1919 = MAX(unref(local2_ty_ref_1918[0]), global25_gDDguiMinControlDimension);
+	param3_wdg.attr7_wheight = ((local1_h_1919) * (local3_num_1922));
+	param3_wdg.attr8_wclicked = 0;
+	param3_wdg.attr6_whover = -(1);
+	if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (param3_wdg.attr7_wheight)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0)) {
+		param2_my = INTEGER(CAST2INT(((param2_my) / (local1_h_1919))));
+		if ((((param2_b1) == (1)) ? 1 : 0)) {
+			local6_oldsel_1921 = param3_wdg.attr7_wselect;
+			if ((((param2_my) != (local6_oldsel_1921)) ? 1 : 0)) {
+				param2_my = MIN(param2_my, ((local3_num_1922) - (1)));
+				param3_wdg.attr7_wselect = param2_my;
+				param3_wdg.attr8_wclicked = 1;
+				
+			};
+			
+		};
+		param3_wdg.attr6_whover = param2_my;
+		
+	};
+	return 0;
+	
+};
+window['func14_DDgui_drawfile'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_c1_1927 = 0, local2_c2_1928 = 0, local2_tx_ref_1929 = [0], local2_ty_ref_1930 = [0], local7_txt_Str_ref_1931 = [""], local7_dheight_1932 = 0;
+	GETFONTSIZE(local2_tx_ref_1929, local2_ty_ref_1930);
+	if (((((((param3_wdg.attr6_whover) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1927 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1928 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1927 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1928 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1927, local2_c2_1928, 0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight);
+	local7_dheight_1932 = ~~(((local2_ty_ref_1930[0]) * (1.2)));
+	DRAWRECT(1, ((param4_ytop) + (1)), local7_dheight_1932, local7_dheight_1932, RGB(71, 107, 254));
+	DRAWRECT(((1) + (((local7_dheight_1932) * (0.2)))), ((param4_ytop) + (1)), ((((local7_dheight_1932) * (0.8))) - (2)), ((((local7_dheight_1932) * (0.6))) - (1)), 16777215);
+	DRAWRECT(((1) + (((local7_dheight_1932) * (0.2)))), ((((param4_ytop) + (1))) + (((local7_dheight_1932) * (0.7)))), ((((local7_dheight_1932) * (0.8))) - (2)), ((((local7_dheight_1932) * (0.3))) + (1)), RGB(204, 204, 204));
+	local7_txt_Str_ref_1931[0] = param3_wdg.attr9_wtext_Str_ref[0];
+	local2_ty_ref_1930[0] = 0;
+	{
+		for (local2_tx_ref_1929[0] = (((local7_txt_Str_ref_1931[0]).length) - (1));toCheck(local2_tx_ref_1929[0], 0, -(1));local2_tx_ref_1929[0] += -(1)) {
+			if ((((MID_Str(unref(local7_txt_Str_ref_1931[0]), unref(local2_tx_ref_1929[0]), 1)) == ("/")) ? 1 : 0)) {
+				local2_ty_ref_1930[0] = ((local2_tx_ref_1929[0]) + (1));
+				break;
+				
+			};
+			
+		};
+		
+	};
+	local7_txt_Str_ref_1931[0] = MID_Str(unref(local7_txt_Str_ref_1931[0]), unref(local2_ty_ref_1930[0]), (local7_txt_Str_ref_1931[0]).length);
+	func17_DDGui_PrintIntern(local7_txt_Str_ref_1931, ((local7_dheight_1932) + (3)), ((param4_ytop) + (3)), 0);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1928);
+	return 0;
+	
+};
+window['func16_DDgui_handlefile'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	var local5_a_Str_1939 = "";
+	if (param3_wdg.attr9_wreadonly) {
+		return 0;
+		
+	};
+	if (((((param3_wdg.attr11_wfilter_Str).length) == (0)) ? 1 : 0)) {
+		param3_wdg.attr11_wfilter_Str = "*.*";
+		
+	};
+	func9_DDgui_set(param3_wdg.attr7_wid_Str, "CLICKED", CAST2STRING(0));
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		if (param3_wdg.attr9_wreadonly) {
+			return 0;
+			
+		};
+		param10_ddgui_vals.attr15_kick_intern_dlg = 4;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
+	
+};
+window['func23_DDgui_fit_sprite_in_box'] = function(param2_id, param1_x, param1_y, param1_w, param1_h) {
+	var local3_spx_ref_1945 = [0], local3_spy_ref_1946 = [0];
+	if (((((((param1_w) < (1)) ? 1 : 0)) || ((((param1_h) < (1)) ? 1 : 0))) ? 1 : 0)) {
+		return 0;
+		
+	};
+	GETSPRITESIZE(param2_id, local3_spx_ref_1945, local3_spy_ref_1946);
+	if (((((((local3_spx_ref_1945[0]) == (0)) ? 1 : 0)) || ((((local3_spy_ref_1946[0]) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		return 0;
+		
+	};
+	if (((((((local3_spx_ref_1945[0]) <= (param1_w)) ? 1 : 0)) && ((((local3_spy_ref_1946[0]) <= (param1_h)) ? 1 : 0))) ? 1 : 0)) {
+		DRAWSPRITE(param2_id, ((param1_x) + (CAST2INT(((((param1_w) - (local3_spx_ref_1945[0]))) / (2))))), ((param1_y) + (CAST2INT(((((param1_h) - (local3_spy_ref_1946[0]))) / (2))))));
+		
+	} else {
+		var local4_facx_1947 = 0.0, local4_facy_1948 = 0.0, local2_dw_1949 = 0.0, local2_dh_1950 = 0.0;
+		local4_facx_1947 = param1_w;
+		local4_facx_1947 = ((local4_facx_1947) / (local3_spx_ref_1945[0]));
+		local4_facy_1948 = param1_h;
+		local4_facy_1948 = ((local4_facy_1948) / (local3_spy_ref_1946[0]));
+		if ((((local4_facx_1947) < (local4_facy_1948)) ? 1 : 0)) {
+			local2_dw_1949 = ((local3_spx_ref_1945[0]) * (local4_facx_1947));
+			local2_dh_1950 = ((local3_spy_ref_1946[0]) * (local4_facx_1947));
+			
+		} else {
+			local2_dw_1949 = ((local3_spx_ref_1945[0]) * (local4_facy_1948));
+			local2_dh_1950 = ((local3_spy_ref_1946[0]) * (local4_facy_1948));
+			
+		};
+		STRETCHSPRITE(param2_id, ((param1_x) + (((((param1_w) - (local2_dw_1949))) / (2)))), ((param1_y) + (((((param1_h) - (local2_dh_1950))) / (2)))), local2_dw_1949, local2_dh_1950);
+		
+	};
+	return 0;
+	
+};
+window['func11_DDgui_combo'] = function(param6_id_Str, param9_texts_Str, param5_width, param6_height) {
+	var local2_tx_ref_1955 = [0], local2_ty_ref_1956 = [0];
+	GETFONTSIZE(local2_tx_ref_1955, local2_ty_ref_1956);
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = local2_ty_ref_1956[0];
+		
+	};
+	func10_DDgui_list(param6_id_Str, param9_texts_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "COMBO");
+	return 0;
+	
+};
+window['func15_DDgui_drawcombo'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_fx_ref_1960 = [0], local2_fy_ref_1961 = [0], local2_c1_1962 = 0, local2_c2_1963 = 0, local5_hover_1964 = 0, local1_x_1965 = 0, local1_y_1966 = 0, local1_w_1967 = 0, local1_h_1968 = 0;
+	GETFONTSIZE(local2_fx_ref_1960, local2_fy_ref_1961);
+	local5_hover_1964 = param3_wdg.attr6_whover;
+	if (((((((local5_hover_1964) > (0)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+		local2_c1_1962 = param10_ddgui_vals.attr16_col_hover_bright;
+		local2_c2_1963 = param10_ddgui_vals.attr14_col_hover_norm;
+		
+	} else {
+		local2_c1_1962 = param10_ddgui_vals.attr10_col_bright;
+		local2_c2_1963 = param10_ddgui_vals.attr8_col_norm;
+		
+	};
+	func13_DDgui_backgnd(local2_c1_1962, local2_c2_1963, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+	func13_DDgui_backgnd(param10_ddgui_vals.attr16_col_hover_bright, param10_ddgui_vals.attr14_col_hover_norm, ((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (2)))), ((param4_ytop) + (1)), ((local2_fx_ref_1960[0]) * (2)), ((param3_wdg.attr7_wheight) - (2)));
+	STARTPOLY(-(1), 0);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (1.7)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1962);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (1)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.8)))), 0, 0, local2_c1_1962);
+	POLYVECTOR(((param3_wdg.attr6_wwidth) - (((local2_fx_ref_1960[0]) * (0.3)))), ((param4_ytop) + (((param3_wdg.attr7_wheight) * (0.2)))), 0, 0, local2_c1_1962);
+	ENDPOLY();
+	local1_x_1965 = 1;
+	local1_y_1966 = ((param4_ytop) + (1));
+	local1_w_1967 = ((((param3_wdg.attr6_wwidth) - (2))) - (((2) * (local2_fx_ref_1960[0]))));
+	local1_h_1968 = ((param3_wdg.attr7_wheight) - (2));
+	if (param3_wdg.attr7_wselect) {
+		local1_x_1965+=1;
+		local1_y_1966+=1;
+		local1_w_1967+=-(2);
+		local1_h_1968+=-(2);
+		
+	};
+	if ((((param3_wdg.attr7_wselect) >= (0)) ? 1 : 0)) {
+		var local5_a_Str_ref_1969 = [""];
+		local5_a_Str_ref_1969[0] = func31_DDgui_intern_list_item_text_Str(param3_wdg.attr9_wtext_Str_ref, param3_wdg.attr7_wselect);
+		if ((((INSTR(unref(local5_a_Str_ref_1969[0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(1));
+				
+			} else {
+				ALPHAMODE(-(0.8));
+				
+			};
+			local2_c1_1962 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1969[0]), 5, -(1))));
+			func23_DDgui_fit_sprite_in_box(local2_c1_1962, ((local1_x_1965) + (1)), ((local1_y_1966) + (1)), ((local1_w_1967) - (2)), ((local1_h_1968) - (2)));
+			
+		} else if ((((INSTR(unref(local5_a_Str_ref_1969[0]), "SPR_C", 0)) == (0)) ? 1 : 0)) {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(1));
+				
+			} else {
+				ALPHAMODE(-(0.8));
+				
+			};
+			local2_c1_1962 = INTEGER(FLOAT2STR(MID_Str(unref(local5_a_Str_ref_1969[0]), 5, -(1))));
+			DRAWRECT(local1_x_1965, local1_y_1966, local1_w_1967, local1_h_1968, local2_c1_1962);
+			
+		} else {
+			if ((((local5_hover_1964) == (0)) ? 1 : 0)) {
+				ALPHAMODE(-(0.8));
+				
+			};
+			func17_DDGui_PrintIntern(local5_a_Str_ref_1969, CAST2INT(((((local1_w_1967) - (func21_DDGui_TextWidthIntern(local5_a_Str_ref_1969)))) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_fy_ref_1961[0]))) / (2))))), 0);
+			
+		};
+		
+	};
+	ALPHAMODE(0);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_1963);
+	return 0;
+	
+};
+window['func17_DDgui_handlecombo'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	param3_wdg.attr8_wclicked = 0;
+	if ((((param2_b1) == (1)) ? 1 : 0)) {
+		param10_ddgui_vals.attr15_kick_intern_dlg = 3;
+		param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+		
+	};
+	return 0;
+	
+};
+window['func24_DDgui_button_list_picker'] = function(param1_x, param1_y, param1_w, param1_h, param9_texts_Str, param6_cursel) {
+	var local2_tx_ref_1982 = [0], local2_ty_ref_1983 = [0], local8_numitems_1984 = 0, local8_vals_Str_1985 = new GLBArray(), local7_screenx_ref_1986 = [0], local7_screeny_ref_1987 = [0], local2_mx_ref_1988 = [0], local2_my_ref_1989 = [0], local2_b1_ref_1990 = [0], local2_b2_ref_1991 = [0], local4_down_1992 = 0, local2_px_1993 = 0, local2_py_1994 = 0;
+	GETFONTSIZE(local2_tx_ref_1982, local2_ty_ref_1983);
+	local2_tx_ref_1982[0] = MAX(unref(local2_tx_ref_1982[0]), global20_gDDguiScrollbarWidth);
+	local2_ty_ref_1983[0] = MAX(unref(local2_ty_ref_1983[0]), global25_gDDguiMinControlDimension);
+	SPLITSTR(param9_texts_Str, unref(local8_vals_Str_1985), "|", 1);
+	local8_numitems_1984 = BOUNDS(local8_vals_Str_1985, 0);
+	if ((((local8_numitems_1984) == (0)) ? 1 : 0)) {
+		return tryClone(-(1));
+		
+	};
+	GETSCREENSIZE(local7_screenx_ref_1986, local7_screeny_ref_1987);
+	if ((((param1_h) > (((((local2_ty_ref_1983[0]) * (local8_numitems_1984))) + (8)))) ? 1 : 0)) {
+		param1_h = ((((local2_ty_ref_1983[0]) * (local8_numitems_1984))) + (8));
+		
+	};
+	if ((((((param1_y) + (param1_h))) >= (local7_screeny_ref_1987[0])) ? 1 : 0)) {
+		param1_h = ((((local7_screeny_ref_1987[0]) - (param1_y))) - (1));
+		
+	};
+	func16_DDgui_pushdialog(((param1_x) - (1)), ((param1_y) - (1)), ((param1_w) + (2)), ((param1_h) + (2)), 0);
+	func10_DDgui_list("lst", param9_texts_Str, ((param1_w) - (4)), param1_h);
+	func9_DDgui_set("lst", "SELECT", CAST2STRING(param6_cursel));
+	func9_DDgui_set("lst", "SCROLL", CAST2STRING(param6_cursel));
+	while (1) {
+		func10_DDgui_show(0);
+		MOUSESTATE(local2_mx_ref_1988, local2_my_ref_1989, local2_b1_ref_1990, local2_b2_ref_1991);
+		if (local2_b1_ref_1990[0]) {
+			local4_down_1992 = 1;
+			local2_px_1993 = local2_mx_ref_1988[0];
+			local2_py_1994 = local2_my_ref_1989[0];
+			
+		};
+		if (((((((local2_b1_ref_1990[0]) == (0)) ? 1 : 0)) && (local4_down_1992)) ? 1 : 0)) {
+			if ((((BOXCOLL(~~(func9_DDgui_get("", "XPOS")), ~~(func9_DDgui_get("", "YPOS")), ~~(func9_DDgui_get("", "WIDTH")), ~~(func9_DDgui_get("", "HEIGHT")), local2_px_1993, local2_py_1994, 1, 1)) == (0)) ? 1 : 0)) {
+				func15_DDgui_popdialog();
+				return tryClone(-(1));
+				
+			};
+			
+		};
+		if (func9_DDgui_get("lst", "CLICKED")) {
+			var local4_isel_1995 = 0;
+			local4_isel_1995 = ~~(func9_DDgui_get("lst", "SELECT"));
+			func15_DDgui_popdialog();
+			return tryClone(local4_isel_1995);
+			
+		};
+		SHOWSCREEN();
+		
+	};
+	return 0;
+	
+};
+window['func10_DDgui_list'] = function(param6_id_Str, param9_texts_Str, param5_width, param6_height) {
+	var local2_tx_ref_2000 = [0], local2_ty_ref_2001 = [0], local3_num_2002 = 0, local1_i_2003 = 0;
+	GETFONTSIZE(local2_tx_ref_2000, local2_ty_ref_2001);
+	local2_ty_ref_2001[0] = MAX(unref(local2_ty_ref_2001[0]), global25_gDDguiMinControlDimension);
+	local3_num_2002 = SPLITSTR(param9_texts_Str, unref(static7_DDgui_list_opt_Str), "|", 1);
+	if ((((local3_num_2002) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(-(1)));
+		
+	};
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = ((((4) * (local2_ty_ref_2001[0]))) + (4));
+		
+	} else {
+		param6_height = ((((param6_height) - (MOD(param6_height, unref(local2_ty_ref_2001[0]))))) + (4));
+		
+	};
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		{
+			for (local1_i_2003 = 0;toCheck(local1_i_2003, ((local3_num_2002) - (1)), 1);local1_i_2003 += 1) {
+				local2_ty_ref_2001[0] = (static7_DDgui_list_opt_Str.arrAccess(local1_i_2003).values[tmpPositionCache]).length;
+				if ((((local2_ty_ref_2001[0]) > (param5_width)) ? 1 : 0)) {
+					param5_width = local2_ty_ref_2001[0];
+					
+				};
+				
+			};
+			
+		};
+		param5_width = ((((param5_width) + (3))) * (local2_tx_ref_2000[0]));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param9_texts_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "LIST");
+	func9_DDgui_set(param6_id_Str, "COUNT", CAST2STRING(local3_num_2002));
+	global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr10_wscrollmax = local3_num_2002;
+	return 0;
+	
+};
+window['func14_DDgui_drawlist'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local2_c1_2008 = 0, local2_c2_2009 = 0, local7_txt_Str_2010 = "", local1_i_2011 = 0, local3_num_2012 = 0, local2_tx_ref_2013 = [0], local2_ty_ref_2014 = [0], local1_r_2015 = 0, local5_hover_2016 = 0, local5_check_2017 = 0, local6_offset_2018 = 0, local6_twidth_2020 = 0;
+	GETFONTSIZE(local2_tx_ref_2013, local2_ty_ref_2014);
+	local2_ty_ref_2014[0] = MAX(unref(local2_ty_ref_2014[0]), global25_gDDguiMinControlDimension);
+	local3_num_2012 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawlist_opt_Str_ref[0]), "|", 1);
+	param3_wdg.attr6_wcount = local3_num_2012;
+	local6_twidth_2020 = ((param3_wdg.attr6_wwidth) - (8));
+	if (param3_wdg.attr10_wscrollmax) {
+		local6_twidth_2020+=-(MAX(unref(local2_tx_ref_2013[0]), global20_gDDguiScrollbarWidth));
+		
+	};
+	local6_offset_2018 = param3_wdg.attr7_wscroll;
+	{
+		for (local1_i_2011 = local6_offset_2018;toCheck(local1_i_2011, ((local3_num_2012) - (1)), 1);local1_i_2011 += 1) {
+			local5_hover_2016 = 0;
+			local5_check_2017 = 0;
+			if ((((param3_wdg.attr7_wselect) == (local1_i_2011)) ? 1 : 0)) {
+				local5_check_2017 = 1;
+				
+			};
+			if (((((((param3_wdg.attr6_whover) == (local1_i_2011)) ? 1 : 0)) && ((((param3_wdg.attr9_wreadonly) == (0)) ? 1 : 0))) ? 1 : 0)) {
+				local5_hover_2016 = 1;
+				
+			};
+			if ((((local5_hover_2016) || (local5_check_2017)) ? 1 : 0)) {
+				local2_c1_2008 = param10_ddgui_vals.attr16_col_hover_bright;
+				local2_c2_2009 = param10_ddgui_vals.attr14_col_hover_norm;
+				if ((((local5_hover_2016) == (0)) ? 1 : 0)) {
+					local1_r_2015 = local2_c1_2008;
+					local2_c1_2008 = local2_c2_2009;
+					local2_c2_2009 = local1_r_2015;
+					
+				};
+				if (local5_check_2017) {
+					func13_DDgui_backgnd(local2_c1_2008, local2_c2_2009, 0, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), ((param3_wdg.attr6_wwidth) - (1)), ((local2_ty_ref_2014[0]) - (1)));
+					
+				} else if (local5_hover_2016) {
+					func14_DDgui_backrect(1, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), ((param3_wdg.attr6_wwidth) - (2)), ((local2_ty_ref_2014[0]) - (1)), local2_c1_2008);
+					
+				};
+				
+			} else {
+				local2_c1_2008 = param10_ddgui_vals.attr10_col_bright;
+				local2_c2_2009 = param10_ddgui_vals.attr8_col_norm;
+				
+			};
+			if ((((INSTR(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache][0]), "SPR_B", 0)) == (0)) ? 1 : 0)) {
+				local2_c1_2008 = INTEGER(FLOAT2STR(MID_Str(unref(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache][0]), 5, -(1))));
+				func23_DDgui_fit_sprite_in_box(local2_c1_2008, 5, ((((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0]))))) + (1)), ((local6_twidth_2020) - (2)), ((local2_ty_ref_2014[0]) - (2)));
+				
+			} else {
+				func17_DDGui_PrintIntern(static7_DDgui_drawlist_opt_Str_ref[0].arrAccess(local1_i_2011).values[tmpPositionCache], 4, ((param4_ytop) + (((((local1_i_2011) - (local6_offset_2018))) * (local2_ty_ref_2014[0])))), local5_check_2017);
+				
+			};
+			
+		};
+		
+	};
+	local2_c1_2008 = param10_ddgui_vals.attr8_col_norm;
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c1_2008);
+	func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_2014[0]))), param4_ytop);
+	return 0;
+	
+};
+window['func16_DDgui_handlelist'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	var local2_tx_ref_2027 = [0], local2_ty_ref_2028 = [0], local5_hover_2029 = 0, local5_width_2030 = 0, local6_height_2031 = 0, local2_sb_2032 = 0, local6_offset_2033 = 0, local6_oldsel_2034 = 0, local3_num_2035 = 0;
+	GETFONTSIZE(local2_tx_ref_2027, local2_ty_ref_2028);
+	local2_ty_ref_2028[0] = MAX(unref(local2_ty_ref_2028[0]), global25_gDDguiMinControlDimension);
+	local5_width_2030 = param3_wdg.attr6_wwidth;
+	local6_height_2031 = param3_wdg.attr7_wheight;
+	local3_num_2035 = param3_wdg.attr6_wcount;
+	param3_wdg.attr10_wscrollmax = ((local3_num_2035) - (INTEGER(CAST2INT(((local6_height_2031) / (local2_ty_ref_2028[0]))))));
+	local2_sb_2032 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2031);
+	local6_offset_2033 = param3_wdg.attr7_wscroll;
+	if (param3_wdg.attr9_wreadonly) {
+		return 0;
+		
+	};
+	param3_wdg.attr8_wclicked = 0;
+	param3_wdg.attr6_whover = -(1);
+	if (((((((((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) <= (local6_height_2031)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2030) - (((local2_sb_2032) * (((local2_tx_ref_2027[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) {
+		param2_my = ((INTEGER(CAST2INT(((param2_my) / (local2_ty_ref_2028[0]))))) + (local6_offset_2033));
+		if ((((param2_b1) == (1)) ? 1 : 0)) {
+			if ((((param2_my) >= (param3_wdg.attr6_wcount)) ? 1 : 0)) {
+				param2_my = -(1);
+				
+			};
+			param3_wdg.attr7_wselect = param2_my;
+			param3_wdg.attr8_wclicked = 1;
+			
+		};
+		param3_wdg.attr6_whover = param2_my;
+		
+	};
+	return 0;
+	
+};
+window['func10_DDgui_text'] = function(param6_id_Str, param8_text_Str, param5_width, param6_height) {
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "TEXT");
+	return 0;
+	
+};
+window['func16_DDgui_singletext'] = function(param6_id_Str, param8_text_Str, param5_width) {
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "SINGLETEXT");
+	return 0;
+	
+};
+window['func16_DDgui_numbertext'] = function(param6_id_Str, param8_text_Str, param5_width) {
+	func12_DDgui_widget(param6_id_Str, param8_text_Str, param5_width, 0);
+	func9_DDgui_set(param6_id_Str, "TYPE", "NUMBERTEXT");
+	return 0;
+	
+};
+window['func14_DDgui_drawtext'] = function(param10_ddgui_vals, param3_wdg, param4_ytop, param11_bSingleText) {
+	var local2_tx_ref_2040 = [0], local2_ty_ref_2041 = [0], local2_c1_2042 = 0, local2_c2_2043 = 0, local6_twidth_2044 = 0;
+	GETFONTSIZE(local2_tx_ref_2040, local2_ty_ref_2041);
+	local2_c1_2042 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_2043 = param10_ddgui_vals.attr8_col_norm;
+	local6_twidth_2044 = ((param3_wdg.attr6_wwidth) - (local2_tx_ref_2040[0]));
+	if (param3_wdg.attr10_wscrollmax) {
+		local6_twidth_2044 = ((local6_twidth_2044) - (MAX(unref(local2_tx_ref_2040[0]), global20_gDDguiScrollbarWidth)));
+		
+	};
+	if (param3_wdg.attr9_wreadonly) {
+		func13_DDgui_backgnd(local2_c2_2043, local2_c2_2043, 1, ((param4_ytop) + (1)), ((param3_wdg.attr6_wwidth) - (2)), ((param3_wdg.attr7_wheight) - (2)));
+		
+	};
+	if (param11_bSingleText) {
+		func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2040[0]) / (2))), ((param4_ytop) + (CAST2INT(((((param3_wdg.attr7_wheight) - (local2_ty_ref_2041[0]))) / (2))))), local6_twidth_2044, 1, 0);
+		
+	} else {
+		func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, CAST2INT(((local2_tx_ref_2040[0]) / (2))), ((param4_ytop) - (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2041[0])))), local6_twidth_2044, 1, 0);
+		
+	};
+	func19_DDgui_drawscrollbar(param10_ddgui_vals, param3_wdg, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, CAST2INT(((param3_wdg.attr7_wheight) / (local2_ty_ref_2041[0]))), param4_ytop);
+	func14_DDgui_backrect(0, param4_ytop, param3_wdg.attr6_wwidth, param3_wdg.attr7_wheight, local2_c2_2043);
+	return 0;
+	
+};
+window['func16_ddgui_handletext'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, param11_bSingleText, param9_bIsNumber) {
+	var local6_height_2053 = 0, local5_width_2054 = 0, local2_tx_ref_2055 = [0], local2_ty_ref_2056 = [0], local8_text_Str_2057 = "", local8_txheight_2058 = 0, local7_txwidth_2059 = 0, local9_has_focus_2060 = 0, local5_a_Str_2061 = "", local5_l_Str_2062 = "", local5_r_Str_2063 = "", local2_sb_2064 = 0, local8_selstart_2065 = 0, local6_selend_2066 = 0, local3_del_2067 = 0, local6_backsp_2068 = 0, local4_xkey_2069 = 0, local4_ykey_2070 = 0, local3_tab_2071 = 0, local7_lastkey_2072 = 0, local5_shift_2073 = 0, local6_offset_2074 = 0, local7_keycopy_2075 = 0, local8_keypaste_2076 = 0, local8_readonly_2077 = 0;
+	local8_readonly_2077 = param3_wdg.attr9_wreadonly;
+	GETFONTSIZE(local2_tx_ref_2055, local2_ty_ref_2056);
+	local8_text_Str_2057 = param3_wdg.attr9_wtext_Str_ref[0];
+	local5_width_2054 = param3_wdg.attr6_wwidth;
+	local6_offset_2074 = ((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0]));
+	local7_txwidth_2059 = ((local5_width_2054) - (local2_tx_ref_2055[0]));
+	if (param11_bSingleText) {
+		if (((((((param2_my) > (0)) ? 1 : 0)) && ((((param2_my) < (local6_height_2053)) ? 1 : 0))) ? 1 : 0)) {
+			param2_my = 1;
+			
+		};
+		
+	};
+	if (param3_wdg.attr10_wscrollmax) {
+		local7_txwidth_2059 = ((local7_txwidth_2059) - (MAX(unref(local2_tx_ref_2055[0]), global20_gDDguiScrollbarWidth)));
+		
+	};
+	local6_height_2053 = param3_wdg.attr7_wheight;
+	local8_txheight_2058 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, 0, 0, local7_txwidth_2059, 0, 0);
+	param3_wdg.attr10_wscrollmax = MAX(0, CAST2INT(((((local8_txheight_2058) - (local6_height_2053))) / (local2_ty_ref_2056[0]))));
+	if (param3_wdg.attr10_wscrollmax) {
+		param3_wdg.attr10_wscrollmax+=1;
+		
+	};
+	local2_sb_2064 = func21_DDgui_handlescrollbar(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2, local6_height_2053);
+	if (((((((((((((param2_mx) >= (0)) ? 1 : 0)) && ((((param2_mx) < (((local5_width_2054) - (((local2_sb_2064) * (((local2_tx_ref_2055[0]) * (1.5)))))))) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) < (local6_height_2053)) ? 1 : 0))) ? 1 : 0)) {
+		if (((((((param2_b1) == (1)) ? 1 : 0)) && ((((param10_ddgui_vals.attr9_focus_Str) != (param3_wdg.attr7_wid_Str)) ? 1 : 0))) ? 1 : 0)) {
+			func14_DDgui_setfocus(param3_wdg.attr7_wid_Str);
+			if (((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((local8_readonly_2077) == (0)) ? 1 : 0))) ? 1 : 0)) && ((((global18_DDGUI_IN_INPUT_DLG) == (0)) ? 1 : 0))) ? 1 : 0)) && (global20_DDGUI_AUTO_INPUT_DLG)) ? 1 : 0)) {
+				param10_ddgui_vals.attr15_kick_intern_dlg = 2;
+				param10_ddgui_vals.attr18_kick_intern_id_Str = param3_wdg.attr7_wid_Str;
+				func14_DDgui_setfocus("");
+				
+			};
+			
+		} else {
+			if (((((((param2_b1) == (0)) ? 1 : 0)) && (MOUSEAXIS(3))) ? 1 : 0)) {
+				param2_b1 = 1;
+				
+			};
+			if ((((param2_b1) != (0)) ? 1 : 0)) {
+				local2_tx_ref_2055[0] = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param2_mx, ((param2_my) + (local6_offset_2074)), local7_txwidth_2059, 0, 1);
+				
+			};
+			if ((((param2_b1) == (-(1))) ? 1 : 0)) {
+				param3_wdg.attr9_wselstart = local2_tx_ref_2055[0];
+				param2_b1 = 1;
+				
+			};
+			if ((((param2_b1) == (1)) ? 1 : 0)) {
+				param3_wdg.attr7_wselend = local2_tx_ref_2055[0];
+				
+			};
+			
+		};
+		
+	};
+	if ((((param10_ddgui_vals.attr9_focus_Str) == (param3_wdg.attr7_wid_Str)) ? 1 : 0)) {
+		local9_has_focus_2060 = 1;
+		
+	};
+	if (local9_has_focus_2060) {
+		local7_lastkey_2072 = static11_ddgui_handletext_st_lasttime;
+		if ((((((GETTIMERALL()) - (local7_lastkey_2072))) > (150)) ? 1 : 0)) {
+			local7_lastkey_2072 = 0;
+			
+		} else {
+			local7_lastkey_2072 = static10_ddgui_handletext_st_lastkey;
+			
+		};
+		local5_a_Str_2061 = param10_ddgui_vals.attr13_dlg_inkey_Str;
+		if ((local5_a_Str_2061).length) {
+			local7_lastkey_2072 = 0;
+			param10_ddgui_vals.attr13_dlg_inkey_Str = "";
+			
+		} else {
+			local5_a_Str_2061 = INKEY_Str();
+			if ((local5_a_Str_2061).length) {
+				
+			};
+			
+		};
+		if ((((local5_a_Str_2061) == ("\t")) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			
+		};
+		if ((((local5_a_Str_2061) == ("\b")) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			local6_backsp_2068 = 1;
+			
+		};
+		if (((((((local7_lastkey_2072) == (0)) ? 1 : 0)) || ((((KEY(local7_lastkey_2072)) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			local7_lastkey_2072 = 0;
+			local4_ykey_2070 = ((KEY(208)) - (KEY(200)));
+			local4_xkey_2069 = ((KEY(205)) - (KEY(203)));
+			local3_del_2067 = KEY(211);
+			local3_tab_2071 = KEY(15);
+			local6_backsp_2068 = (((local6_backsp_2068) || (KEY(14))) ? 1 : 0);
+			local5_shift_2073 = (((KEY(42)) || (KEY(54))) ? 1 : 0);
+			local7_keycopy_2075 = (((KEY(29)) && (KEY(46))) ? 1 : 0);
+			local8_keypaste_2076 = (((KEY(29)) && (KEY(47))) ? 1 : 0);
+			if ((((local4_ykey_2070) > (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 208;
+				
+			};
+			if ((((local4_ykey_2070) < (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 200;
+				
+			};
+			if ((((local4_xkey_2069) < (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 203;
+				
+			};
+			if ((((local4_xkey_2069) > (0)) ? 1 : 0)) {
+				local7_lastkey_2072 = 205;
+				
+			};
+			if (local3_del_2067) {
+				local7_lastkey_2072 = 211;
+				
+			};
+			if (local3_tab_2071) {
+				local7_lastkey_2072 = 15;
+				local5_a_Str_2061 = " ";
+				
+			};
+			if (local6_backsp_2068) {
+				local7_lastkey_2072 = 14;
+				
+			};
+			if (local7_keycopy_2075) {
+				local7_lastkey_2072 = 29;
+				
+			};
+			if (local8_keypaste_2076) {
+				local7_lastkey_2072 = 29;
+				
+			};
+			if (KEY(199)) {
+				local7_lastkey_2072 = 199;
+				param3_wdg.attr7_wcaretx = 0;
+				if (((param11_bSingleText) ? 0 : 1)) {
+					param3_wdg.attr7_wcarety+=local2_ty_ref_2056[0];
+					local4_ykey_2070 = -(1);
+					
+				};
+				
+			};
+			if (KEY(207)) {
+				local7_lastkey_2072 = 207;
+				param3_wdg.attr7_wcaretx = param3_wdg.attr6_wwidth;
+				if (((param11_bSingleText) ? 0 : 1)) {
+					param3_wdg.attr7_wcarety+=local2_ty_ref_2056[0];
+					local4_ykey_2070 = -(1);
+					
+				};
+				
+			};
+			static10_ddgui_handletext_st_lastkey = local7_lastkey_2072;
+			static11_ddgui_handletext_st_lasttime = GETTIMERALL();
+			
+		};
+		if ((((local8_readonly_2077) == (1)) ? 1 : 0)) {
+			local5_a_Str_2061 = "";
+			local3_del_2067 = 0;
+			local3_tab_2071 = 0;
+			local6_backsp_2068 = 0;
+			local8_keypaste_2076 = 0;
+			
+		};
+		if (param11_bSingleText) {
+			local4_ykey_2070 = 0;
+			if ((((local5_a_Str_2061) == ("\n")) ? 1 : 0)) {
+				local5_a_Str_2061 = "";
+				
+			};
+			if ((((local5_a_Str_2061) == ("\r")) ? 1 : 0)) {
+				local5_a_Str_2061 = "";
+				
+			};
+			if (local3_tab_2071) {
+				if (local5_shift_2073) {
+					func18_DDgui_advancefocus(-(1));
+					
+				} else {
+					func18_DDgui_advancefocus(1);
+					
+				};
+				return 0;
+				
+			};
+			
+		};
+		if (param9_bIsNumber) {
+			if ((((((((((((((((local5_a_Str_2061) >= ("0")) ? 1 : 0)) && ((((local5_a_Str_2061) <= ("9")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == (".")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == ("e")) ? 1 : 0))) ? 1 : 0)) || ((((local5_a_Str_2061) == ("-")) ? 1 : 0))) ? 1 : 0)) {
+				
+			} else {
+				local5_a_Str_2061 = "";
+				
+			};
+			
+		};
+		if ((((((((((((((((local5_a_Str_2061) != ("")) ? 1 : 0)) || (local3_del_2067)) ? 1 : 0)) || (local6_backsp_2068)) ? 1 : 0)) || (local4_xkey_2069)) ? 1 : 0)) || (local4_ykey_2070)) ? 1 : 0)) {
+			local8_selstart_2065 = param3_wdg.attr9_wselstart;
+			local6_selend_2066 = param3_wdg.attr7_wselend;
+			if ((((local5_shift_2073) && ((((local4_xkey_2069) || (local4_ykey_2070)) ? 1 : 0))) ? 1 : 0)) {
+				local6_selend_2066+=local4_xkey_2069;
+				if (local4_ykey_2070) {
+					local6_selend_2066 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2070) * (local2_ty_ref_2056[0])))), local7_txwidth_2059, 0, 1);
+					
+				};
+				if ((((local6_selend_2066) < (0)) ? 1 : 0)) {
+					local6_selend_2066 = 0;
+					
+				};
+				if ((((local6_selend_2066) > ((local8_text_Str_2057).length)) ? 1 : 0)) {
+					local6_selend_2066 = (local8_text_Str_2057).length;
+					
+				};
+				param3_wdg.attr7_wselend = local6_selend_2066;
+				
+			} else {
+				if (((((((local8_selstart_2065) != (local6_selend_2066)) ? 1 : 0)) && (((((((local3_del_2067) || (local6_backsp_2068)) ? 1 : 0)) || ((((local5_a_Str_2061) != ("")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+					if ((((local8_selstart_2065) > (local6_selend_2066)) ? 1 : 0)) {
+						local2_tx_ref_2055[0] = local8_selstart_2065;
+						local8_selstart_2065 = local6_selend_2066;
+						local6_selend_2066 = local2_tx_ref_2055[0];
+						
+					};
+					local5_l_Str_2062 = MID_Str(local8_text_Str_2057, 0, local8_selstart_2065);
+					local5_r_Str_2063 = MID_Str(local8_text_Str_2057, local6_selend_2066, -(1));
+					local8_text_Str_2057 = ((local5_l_Str_2062) + (local5_r_Str_2063));
+					if (local3_del_2067) {
+						local3_del_2067 = 0;
+						
+					};
+					if (local6_backsp_2068) {
+						local6_backsp_2068 = 0;
+						
+					};
+					
+				};
+				local5_l_Str_2062 = MID_Str(local8_text_Str_2057, 0, local8_selstart_2065);
+				local5_r_Str_2063 = MID_Str(local8_text_Str_2057, local8_selstart_2065, -(1));
+				local8_selstart_2065+=local4_xkey_2069;
+				if (local4_ykey_2070) {
+					local8_selstart_2065 = func14_DDgui_boxprint(param10_ddgui_vals, param3_wdg, param3_wdg.attr7_wcaretx, ((param3_wdg.attr7_wcarety) + (((local4_ykey_2070) * (local2_ty_ref_2056[0])))), local7_txwidth_2059, 0, 1);
+					
+				};
+				if (local3_del_2067) {
+					local5_r_Str_2063 = MID_Str(local5_r_Str_2063, 1, -(1));
+					
+				};
+				if (local6_backsp_2068) {
+					local5_l_Str_2062 = LEFT_Str(local5_l_Str_2062, (((local5_l_Str_2062).length) - (1)));
+					local8_selstart_2065+=-(1);
+					
+				};
+				if ((((local5_a_Str_2061) != ("")) ? 1 : 0)) {
+					local5_l_Str_2062 = ((local5_l_Str_2062) + (local5_a_Str_2061));
+					local8_selstart_2065+=1;
+					
+				};
+				local8_text_Str_2057 = ((local5_l_Str_2062) + (local5_r_Str_2063));
+				if ((((local8_selstart_2065) < (0)) ? 1 : 0)) {
+					local8_selstart_2065 = 0;
+					
+				};
+				if ((((local8_selstart_2065) > ((local8_text_Str_2057).length)) ? 1 : 0)) {
+					local8_selstart_2065 = (local8_text_Str_2057).length;
+					
+				};
+				param3_wdg.attr9_wselstart = local8_selstart_2065;
+				param3_wdg.attr7_wselend = local8_selstart_2065;
+				param3_wdg.attr9_wtext_Str_ref[0] = local8_text_Str_2057;
+				
+			};
+			if (((((((((param3_wdg.attr7_wcarety) + (local2_ty_ref_2056[0]))) > (((((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0]))) + (param3_wdg.attr7_wheight)))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) < (param3_wdg.attr10_wscrollmax)) ? 1 : 0))) ? 1 : 0)) {
+				param3_wdg.attr7_wscroll+=1;
+				
+			};
+			if (((((((((param3_wdg.attr7_wcarety) - (local2_ty_ref_2056[0]))) < (((param3_wdg.attr7_wscroll) * (local2_ty_ref_2056[0])))) ? 1 : 0)) && ((((param3_wdg.attr7_wscroll) > (0)) ? 1 : 0))) ? 1 : 0)) {
+				param3_wdg.attr7_wscroll+=-1;
+				
+			};
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func9_DDgui_tab'] = function(param6_id_Str, param12_captions_Str, param6_height) {
+	var local3_num_2083 = 0, local2_fx_ref_2084 = [0], local2_fy_ref_2085 = [0];
+	GETFONTSIZE(local2_fx_ref_2084, local2_fy_ref_2085);
+	if ((((param6_height) == (0)) ? 1 : 0)) {
+		param6_height = ((local2_fy_ref_2085[0]) + (7));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param12_captions_Str, 10000, param6_height);
+	func9_DDgui_set(param6_id_Str, "TYPE", "TAB");
+	global11_ddgui_stack_ref[0].arrAccess(0.1).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_wselect = -(1);
+	return 0;
+	
+};
+window['func13_DDgui_drawtab'] = function(param10_ddgui_vals, param3_wdg, param4_ytop) {
+	var local3_num_2089 = 0, local4_num2_2090 = 0, local1_i_2091 = 0, local4_isel_2092 = 0, local2_c1_2093 = 0, local2_c2_2094 = 0, local3_c1b_2095 = 0, local3_c2b_2096 = 0, local2_fx_ref_2097 = [0], local2_fy_ref_2098 = [0], local1_x_2099 = 0, local6_twidth_2100 = 0, local4_selx_2101 = 0, local4_selw_2102 = 0, local6_y_text_2105 = 0;
+	GETFONTSIZE(local2_fx_ref_2097, local2_fy_ref_2098);
+	local2_c1_2093 = param10_ddgui_vals.attr10_col_bright;
+	local2_c2_2094 = param10_ddgui_vals.attr8_col_norm;
+	local3_c1b_2095 = param10_ddgui_vals.attr16_col_hover_bright;
+	local3_c2b_2096 = param10_ddgui_vals.attr14_col_hover_norm;
+	func13_DDgui_backgnd(local2_c1_2093, local2_c1_2093, 0, param4_ytop, param3_wdg.attr6_wwidth, ((param3_wdg.attr7_wheight) - (1)));
+	local4_isel_2092 = param3_wdg.attr7_wselect;
+	local6_y_text_2105 = ((((((param4_ytop) + (param3_wdg.attr7_wheight))) - (2))) - (local2_fy_ref_2098[0]));
+	local1_x_2099 = 2;
+	local3_num_2089 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_drawtab_str_Str), "|", 1);
+	{
+		for (local1_i_2091 = 0;toCheck(local1_i_2091, ((local3_num_2089) - (1)), 1);local1_i_2091 += 1) {
+			local4_num2_2090 = SPLITSTR(static7_DDgui_drawtab_str_Str.arrAccess(local1_i_2091).values[tmpPositionCache], unref(static8_DDgui_drawtab_str2_Str_ref[0]), ",", 1);
+			local6_twidth_2100 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2097[0])));
+			if ((((local1_i_2091) == (local4_isel_2092)) ? 1 : 0)) {
+				func13_DDgui_backgnd(local3_c1b_2095, local3_c2b_2096, local1_x_2099, ((param4_ytop) + (1)), local6_twidth_2100, param3_wdg.attr7_wheight);
+				local4_selx_2101 = ((local1_x_2099) - (1));
+				local4_selw_2102 = ((local6_twidth_2100) + (2));
+				
+			} else {
+				func13_DDgui_backgnd(local2_c1_2093, local2_c2_2094, ((local1_x_2099) + (1)), ((param4_ytop) + (4)), ((local6_twidth_2100) - (1)), ((param3_wdg.attr7_wheight) - (4)));
+				func14_DDgui_backrect(local1_x_2099, ((param4_ytop) + (3)), ((local6_twidth_2100) + (1)), ((param3_wdg.attr7_wheight) - (2)), local2_c2_2094);
+				
+			};
+			func17_DDGui_PrintIntern(static8_DDgui_drawtab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache], ((local1_x_2099) + (INTEGER(CAST2INT(((local2_fx_ref_2097[0]) / (2)))))), local6_y_text_2105, (((local1_i_2091) == (local4_isel_2092)) ? 1 : 0));
+			local1_x_2099+=local6_twidth_2100;
+			
+		};
+		
+	};
+	if ((((local4_selx_2101) > (0)) ? 1 : 0)) {
+		func14_DDgui_backrect(local4_selx_2101, ((param4_ytop) + (1)), local4_selw_2102, param3_wdg.attr7_wheight, local3_c2b_2096);
+		
+	};
+	DRAWRECT(0, ((param3_wdg.attr7_wheight) - (1)), ((param3_wdg.attr6_wwidth) - (1)), 1, local2_c2_2094);
+	return 0;
+	
+};
+window['func15_DDgui_handletab'] = function(param10_ddgui_vals, param3_wdg, param2_mx, param2_my, param2_b1, param2_b2) {
+	var local5_width_2112 = 0, local3_num_2113 = 0, local4_num2_2114 = 0, local1_i_2115 = 0, local2_fx_ref_2116 = [0], local2_fy_ref_2117 = [0], local1_x_2118 = 0, local6_oldsel_2119 = 0, local11_must_update_2122 = 0;
+	GETFONTSIZE(local2_fx_ref_2116, local2_fy_ref_2117);
+	param3_wdg.attr8_wclicked = 0;
+	local2_fy_ref_2117[0] = param3_wdg.attr7_wheight;
+	local11_must_update_2122 = 0;
+	if (((((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) || ((((((((((((((((param2_b1) == (1)) ? 1 : 0)) && ((((param2_my) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) > (0)) ? 1 : 0))) ? 1 : 0)) && ((((param2_my) <= (local2_fy_ref_2117[0])) ? 1 : 0))) ? 1 : 0)) && ((((param2_mx) < (param3_wdg.attr6_wwidth)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+		local11_must_update_2122 = 1;
+		
+	};
+	if ((((param3_wdg.attr7_wselect) == (-(1))) ? 1 : 0)) {
+		func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, 0);
+		
+	};
+	if (local11_must_update_2122) {
+		local6_oldsel_2119 = param3_wdg.attr7_wselect;
+		local3_num_2113 = SPLITSTR(unref(param3_wdg.attr9_wtext_Str_ref[0]), unref(static7_DDgui_handletab_str_Str), "|", 1);
+		{
+			for (local1_i_2115 = 0;toCheck(local1_i_2115, ((local3_num_2113) - (1)), 1);local1_i_2115 += 1) {
+				local4_num2_2114 = SPLITSTR(static7_DDgui_handletab_str_Str.arrAccess(local1_i_2115).values[tmpPositionCache], unref(static8_DDgui_handletab_str2_Str_ref[0]), ",", 1);
+				local5_width_2112 = MAX(global25_gDDguiMinControlDimension, ((func21_DDGui_TextWidthIntern(static8_DDgui_handletab_str2_Str_ref[0].arrAccess(0).values[tmpPositionCache])) + (local2_fx_ref_2116[0])));
+				if (BOXCOLL(param2_mx, param2_my, 1, 1, local1_x_2118, 1, local5_width_2112, unref(local2_fy_ref_2117[0]))) {
+					if ((((local1_i_2115) != (local6_oldsel_2119)) ? 1 : 0)) {
+						param3_wdg.attr7_wselect = local1_i_2115;
+						param3_wdg.attr8_wclicked = 1;
+						func15_DDgui_selecttab(param3_wdg.attr7_wid_Str, local1_i_2115);
+						
+					};
+					break;
+					
+				};
+				local1_x_2118+=local5_width_2112;
+				
+			};
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func16_DDgui_framestart'] = function(param6_id_Str, param11_caption_Str, param5_width) {
+	var local5_count_2309 = 0;
+	if (((((param6_id_Str).length) == (0)) ? 1 : 0)) {
+		local5_count_2309 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+		param6_id_Str = (("frm") + (CAST2STRING(local5_count_2309)));
+		
+	};
+	func12_DDgui_widget(param6_id_Str, param11_caption_Str, param5_width, 100);
+	func9_DDgui_set(param6_id_Str, "TYPE", "FRAME");
+	if ((((param5_width) == (0)) ? 1 : 0)) {
+		func9_DDgui_set(param6_id_Str, "WIDTH", CAST2STRING(10000));
+		
+	};
+	return 0;
+	
+};
+window['func14_DDgui_frameend'] = function() {
+	var local5_count_2310 = 0, local6_id_Str_2311 = "";
+	local5_count_2310 = ((1) + (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)));
+	local6_id_Str_2311 = (("frm") + (CAST2STRING(local5_count_2310)));
+	func12_DDgui_widget(local6_id_Str_2311, "", 1, 1);
+	func9_DDgui_set(local6_id_Str_2311, "TYPE", "UNFRAME");
+	func9_DDgui_set(local6_id_Str_2311, "WIDTH", CAST2STRING(0));
+	func9_DDgui_set(local6_id_Str_2311, "HEIGHT", CAST2STRING(0));
+	return 0;
+	
+};
+window['__DDgui_Helpers___'] = function() {
+	
+};
+window['__DDgui_Helpers___'] = __DDgui_Helpers___;
+window['func18_DDgui_advancefocus'] = function(param10_iDirection) {
+	var local9_focus_Str_2124 = "", local6_ifocus_2125 = 0, local6_iFirst_2126 = 0, local7_iBefore_2127 = 0, local6_iAfter_2128 = 0, local5_iLast_2129 = 0;
+	local9_focus_Str_2124 = func13_DDgui_get_Str("", "FOCUS");
+	local6_ifocus_2125 = -(1);
+	local6_iFirst_2126 = -(1);
+	local7_iBefore_2127 = -(1);
+	local6_iAfter_2128 = -(1);
+	local5_iLast_2129 = -(1);
+	{
+		var local1_i_2130 = 0;
+		for (local1_i_2130 = 0;toCheck(local1_i_2130, ((BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0)) - (1)), 1);local1_i_2130 += 1) {
+			var alias3_wdg_ref_2131 = [new type9_DDGUI_WDG()];
+			alias3_wdg_ref_2131 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local1_i_2130).values[tmpPositionCache] /* ALIAS */;
+			if ((((alias3_wdg_ref_2131[0].attr7_wid_Str) == (local9_focus_Str_2124)) ? 1 : 0)) {
+				if ((((local6_ifocus_2125) == (-(1))) ? 1 : 0)) {
+					local6_ifocus_2125 = local1_i_2130;
+					
+				};
+				
+			};
+			if ((((((((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("TEXT")) ? 1 : 0)) || ((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("SINGLETEXT")) ? 1 : 0))) ? 1 : 0)) || ((((alias3_wdg_ref_2131[0].attr9_wtype_Str) == ("NUMBERTEXT")) ? 1 : 0))) ? 1 : 0)) {
+				if ((((local6_iFirst_2126) == (-(1))) ? 1 : 0)) {
+					local6_iFirst_2126 = local1_i_2130;
+					
+				};
+				if ((((local6_ifocus_2125) == (-(1))) ? 1 : 0)) {
+					local7_iBefore_2127 = local1_i_2130;
+					
+				};
+				if ((((((((((local6_ifocus_2125) >= (0)) ? 1 : 0)) && ((((local6_iAfter_2128) == (-(1))) ? 1 : 0))) ? 1 : 0)) && ((((local6_ifocus_2125) != (local1_i_2130)) ? 1 : 0))) ? 1 : 0)) {
+					local6_iAfter_2128 = local1_i_2130;
+					
+				};
+				local5_iLast_2129 = local1_i_2130;
+				
+			};
+			
+		};
+		
+	};
+	if ((((param10_iDirection) < (0)) ? 1 : 0)) {
+		if ((((local7_iBefore_2127) >= (0)) ? 1 : 0)) {
+			local6_ifocus_2125 = local7_iBefore_2127;
+			
+		};
+		if (((((((local7_iBefore_2127) < (0)) ? 1 : 0)) && ((((local5_iLast_2129) >= (0)) ? 1 : 0))) ? 1 : 0)) {
+			local6_ifocus_2125 = local5_iLast_2129;
+			
+		};
+		
+	} else {
+		if ((((local6_iAfter_2128) >= (0)) ? 1 : 0)) {
+			local6_ifocus_2125 = local6_iAfter_2128;
+			
+		};
+		if (((((((local6_iAfter_2128) < (0)) ? 1 : 0)) && ((((local6_iFirst_2126) >= (0)) ? 1 : 0))) ? 1 : 0)) {
+			local6_ifocus_2125 = local6_iFirst_2126;
+			
+		};
+		
+	};
+	if (((((((local6_ifocus_2125) >= (0)) ? 1 : 0)) && ((((local6_ifocus_2125) < (BOUNDS(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0], 0))) ? 1 : 0))) ? 1 : 0)) {
+		local9_focus_Str_2124 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local6_ifocus_2125).values[tmpPositionCache][0].attr7_wid_Str;
+		func14_DDgui_setfocus(local9_focus_Str_2124);
+		
+	};
+	return 0;
+	
+};
+window['func14_DDgui_setfocus'] = function(param6_id_Str) {
+	func9_DDgui_set("", "FOCUS", param6_id_Str);
+	{
+		var local16___SelectHelper6__2133 = "";
+		local16___SelectHelper6__2133 = func13_DDgui_get_Str(param6_id_Str, "TYPE");
+		if ((((local16___SelectHelper6__2133) == ("TEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING(0));
+			
+		} else if ((((local16___SelectHelper6__2133) == ("SINGLETEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
+			
+		} else if ((((local16___SelectHelper6__2133) == ("NUMBERTEXT")) ? 1 : 0)) {
+			func9_DDgui_set(param6_id_Str, "SELSTART", CAST2STRING(0));
+			func9_DDgui_set(param6_id_Str, "SELEND", CAST2STRING((func13_DDgui_get_Str(param6_id_Str, "TEXT")).length));
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func15_DDgui_selecttab'] = function(param6_id_Str, param4_isel) {
+	var local3_num_2136 = 0, local4_num2_2137 = 0, local1_i_2138 = 0, local1_j_2139 = 0, local9_oldselect_2142 = 0;
+	local9_oldselect_2142 = ~~(func9_DDgui_get(param6_id_Str, "SELECT"));
+	func9_DDgui_set(param6_id_Str, "SELECT", CAST2STRING(param4_isel));
+	local3_num_2136 = SPLITSTR(func13_DDgui_get_Str(param6_id_Str, "TEXT"), unref(static7_DDgui_selecttab_str_Str), "|", 1);
+	{
+		var local5_iHide_2143 = 0;
+		for (local5_iHide_2143 = 0;toCheck(local5_iHide_2143, 1, 1);local5_iHide_2143 += 1) {
+			{
+				for (local1_i_2138 = 0;toCheck(local1_i_2138, ((local3_num_2136) - (1)), 1);local1_i_2138 += 1) {
+					local4_num2_2137 = SPLITSTR(static7_DDgui_selecttab_str_Str.arrAccess(local1_i_2138).values[tmpPositionCache], unref(static8_DDgui_selecttab_str2_Str_ref[0]), ",", 1);
+					{
+						for (local1_j_2139 = 1;toCheck(local1_j_2139, ((local4_num2_2137) - (1)), 1);local1_j_2139 += 1) {
+							if (((((((local9_oldselect_2142) == (-(1))) ? 1 : 0)) && ((((func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache], 0)) < (0)) ? 1 : 0))) ? 1 : 0)) {
+								continue;
+								
+							};
+							if (((((((local1_i_2138) == (param4_isel)) ? 1 : 0)) && ((((local5_iHide_2143) == (1)) ? 1 : 0))) ? 1 : 0)) {
+								func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache][0]), 0);
+								
+							} else if ((((local5_iHide_2143) == (0)) ? 1 : 0)) {
+								func10_DDgui_hide(unref(static8_DDgui_selecttab_str2_Str_ref[0].arrAccess(local1_j_2139).values[tmpPositionCache][0]), 1);
+								
+							};
+							
+						};
+						
+					};
+					
+				};
+				
+			};
+			
+		};
+		
+	};
+	return 0;
+	
+};
+window['func31_DDgui_intern_list_item_text_Str'] = function(param7_txt_Str_ref, param5_index) {
+	var local5_start_2146 = 0, local4_fine_2147 = 0;
+	if ((((param5_index) < (0)) ? 1 : 0)) {
+		return "";
+		
+	};
+	local5_start_2146 = -(1);
+	while ((((param5_index) > (0)) ? 1 : 0)) {
+		local5_start_2146 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2146) + (1)));
+		if ((((local5_start_2146) < (0)) ? 1 : 0)) {
+			return "";
+			
+		};
+		param5_index+=-1;
+		
+	};
+	local4_fine_2147 = INSTR(unref(param7_txt_Str_ref[0]), "|", ((local5_start_2146) + (1)));
+	if ((((local4_fine_2147) > (0)) ? 1 : 0)) {
+		local4_fine_2147 = ((((local4_fine_2147) - (local5_start_2146))) - (1));
+		
+	};
+	return tryClone(MID_Str(unref(param7_txt_Str_ref[0]), ((local5_start_2146) + (1)), local4_fine_2147));
+	return "";
+	
+};
+window['func21_DDgui_getitemtext_Str'] = function(param6_id_Str, param5_index) {
+	var local2_iw_2314 = 0;
+	var local6_id_Str_ref_2312 = [param6_id_Str]; /* NEWCODEHERE */
+	if ((((BOUNDS(global11_ddgui_stack_ref[0], 0)) == (0)) ? 1 : 0)) {
+		return "";
+		
+	};
+	local2_iw_2314 = func11_DDgui_index(unref(global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0]), local6_id_Str_ref_2312, 0);
+	if ((((local2_iw_2314) >= (0)) ? 1 : 0)) {
+		var alias3_wdg_ref_2315 = [new type9_DDGUI_WDG()], alias7_txt_Str_ref_2316 = [""];
+		alias3_wdg_ref_2315 = global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr7_widgets_ref[0].arrAccess(local2_iw_2314).values[tmpPositionCache] /* ALIAS */;
+		alias7_txt_Str_ref_2316 = alias3_wdg_ref_2315[0].attr9_wtext_Str_ref /* ALIAS */;
+		return tryClone(func31_DDgui_intern_list_item_text_Str(alias7_txt_Str_ref_2316, param5_index));
+		
+	};
+	return "";
+	
+};
+window['func15_DDgui_input_Str'] = function(param8_text_Str, param13_bSpecialChars, param11_bFullscreen, param11_bSingleLine, param9_bIsNumber) {
+	var __labels = {"__DrawFrames__": 3476, "refresh": 10927};
+	
+	var local2_fx_ref_2153 = [0], local2_fy_ref_2154 = [0], local4_size_2155 = 0, local7_iTabSel_2156 = 0, local12_text_old_Str_2157 = "", local4_ssel_2158 = 0, local4_esel_2159 = 0, local8_widg_Str_2160 = new GLBArray(), local3_scx_ref_2161 = [0], local3_scy_ref_2162 = [0], local12_storeoldsize_2163 = 0, local5_texth_2164 = 0, local10_cancel_Str_2166 = "", local3_chr_2167 = 0;
+	var __pc = 10790;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 10790:
+				local12_text_old_Str_2157 = param8_text_Str;
+				
+			GETSCREENSIZE(local3_scx_ref_2161, local3_scy_ref_2162);
+			GETFONTSIZE(local2_fx_ref_2153, local2_fy_ref_2154);
+			local12_storeoldsize_2163 = global25_gDDguiMinControlDimension;
+			global25_gDDguiMinControlDimension = 16;
+			local4_size_2155 = MIN(400, MIN(unref(local3_scx_ref_2161[0]), unref(local3_scy_ref_2162[0])));
+			case 10882:
+				if (!(param11_bFullscreen)) { __pc = 10812; break; }
+				
+				case 10819:
+					func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2161[0]), unref(local3_scy_ref_2162[0]), 1);
+					
+				local4_size_2155 = 20;
+				case 10831:
+					if (!((((local3_scx_ref_2161[0]) > (240)) ? 1 : 0))) { __pc = 10826; break; }
+				
+				case 10830:
+					local4_size_2155 = 28;
+					
+				
+				
+			case 10826: //dummy jumper1
+				;
+					
+				case 10840:
+					if (!((((local3_scx_ref_2161[0]) > (320)) ? 1 : 0))) { __pc = 10835; break; }
+				
+				case 10839:
+					local4_size_2155 = 36;
+					
+				
+				
+			case 10835: //dummy jumper1
+				;
+					
+				
+				__pc = 16893;
+				break;
+				
+			case 10812: //dummy jumper1
+				
+				case 10854:
+					func16_DDgui_pushdialog(CAST2INT(((((local3_scx_ref_2161[0]) - (local4_size_2155))) / (2))), CAST2INT(((((local3_scy_ref_2162[0]) - (local4_size_2155))) / (2))), local4_size_2155, local4_size_2155, 0);
+					
+				local3_scy_ref_2162[0] = local4_size_2155;
+				local3_scx_ref_2161[0] = local4_size_2155;
+				local4_size_2155 = 20;
+				case 10872:
+					if (!((((local3_scx_ref_2161[0]) > (240)) ? 1 : 0))) { __pc = 10867; break; }
+				
+				case 10871:
+					local4_size_2155 = 28;
+					
+				
+				
+			case 10867: //dummy jumper1
+				;
+					
+				case 10881:
+					if (!((((local3_scx_ref_2161[0]) > (320)) ? 1 : 0))) { __pc = 10876; break; }
+				
+				case 10880:
+					local4_size_2155 = 36;
+					
+				
+				
+			case 10876: //dummy jumper1
+				;
+					
+				
+				
+			case 16893: //dummy jumper2
+				;
+				
+			global18_DDGUI_IN_INPUT_DLG = 1;
+			func9_DDgui_set("tx_text", "TEXT", param8_text_Str);
+			func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
+			case 10902:
+				if (!(param9_bIsNumber)) { __pc = 10896; break; }
+				
+				case 10901:
+					func9_DDgui_set("tab", "SELECT", CAST2STRING(0));
+					
+				
+				
+			case 10896: //dummy jumper1
+				;
+				
+			case 10926:
+				if (!((((param11_bSingleLine) || (((((((INSTR(param8_text_Str, "\n", 0)) < (0)) ? 1 : 0)) && (((((param8_text_Str).length) < (40)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0))) { __pc = 10915; break; }
+				
+				case 10920:
+					func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(0));
+					
+				func9_DDgui_set("tx_text", "SELEND", CAST2STRING((param8_text_Str).length));
+				
+				
+			case 10915: //dummy jumper1
+				;
+				
+			case 10927:
+				//label: refresh;
+				
+			param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
+			local4_ssel_2158 = ~~(func9_DDgui_get("tx_text", "SELSTART"));
+			local4_esel_2159 = ~~(func9_DDgui_get("tx_text", "SELEND"));
+			local7_iTabSel_2156 = ~~(func9_DDgui_get("tab", "SELECT"));
+			func10_DDgui_init();
+			local5_texth_2164 = ((((local3_scy_ref_2162[0]) - (((6) * (((local4_size_2155) + (2))))))) - (32));
+			case 11001:
+				if (!(param11_bSingleLine)) { __pc = 10965; break; }
+				
+				case 10969:
+					local5_texth_2164 = 0;
+					
+				case 10990:
+					if (!(param9_bIsNumber)) { __pc = 10971; break; }
+				
+				case 10980:
+					func16_DDgui_numbertext("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))));
+					
+				
+				__pc = 16901;
+				break;
+				
+			case 10971: //dummy jumper1
+				
+				case 10989:
+					func16_DDgui_singletext("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))));
+					
+				
+				
+			case 16901: //dummy jumper2
+				;
+					
+				
+				__pc = 16900;
+				break;
+				
+			case 10965: //dummy jumper1
+				
+				case 11000:
+					func10_DDgui_text("tx_text", param8_text_Str, ((local3_scx_ref_2161[0]) - (MAX(32, unref(local2_fx_ref_2153[0])))), local5_texth_2164);
+					
+				
+				
+			case 16900: //dummy jumper2
+				;
+				
+			func9_DDgui_set("tx_text", "ALIGN", CAST2STRING(0));
+			func12_DDgui_spacer(10000, 2);
+			func9_DDgui_set("tab", "SELECT", CAST2STRING(local7_iTabSel_2156));
+			func9_DDgui_set("tx_text", "SELSTART", CAST2STRING(local4_ssel_2158));
+			func9_DDgui_set("tx_text", "SELEND", CAST2STRING(local4_esel_2159));
+			case 11042:
+				if (!(param9_bIsNumber)) { __pc = 11022; break; }
+				
+				case 11027:
+					func9_DDgui_tab("tab", "123", local4_size_2155);
+					
+				
+				__pc = 16902;
+				break;
+				
+			case 11022: //dummy jumper1
+				
+				case 11041:
+					if (!(param13_bSpecialChars)) { __pc = 11030; break; }
+				
+				case 11035:
+					func9_DDgui_tab("tab", "123|ABC|abc|ÄÖÜ", local4_size_2155);
+					
+				
+				__pc = 16903;
+				break;
+				
+			case 11030: //dummy jumper1
+				
+				case 11040:
+					func9_DDgui_tab("tab", "123|ABC|abc", local4_size_2155);
+					
+				
+				
+			case 16903: //dummy jumper2
+				;
+					
+				
+				
+			case 16902: //dummy jumper2
+				;
+				
+			func16_DDgui_framestart("fr_keypad", "", 0);
+			case 11930:
+				if (!(param9_bIsNumber)) { __pc = 11046; break; }
+				
+				case 11052:
+					func12_DDgui_button("b7", "7", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("b8", "8", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b9", "9", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b-", "-", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b4", "4", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b5", "5", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b6", "6", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("be", "e", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b1", "1", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "2", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "3", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b0", "0", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				__pc = 16904;
+				break;
+				
+			case 11046: //dummy jumper1
+				
+				case 11137:
+					
+				var local16___SelectHelper7__2165 = 0;
+				case 11139:
+					local16___SelectHelper7__2165 = local7_iTabSel_2156;
+					
+				case 11929:
+					if (!((((local16___SelectHelper7__2165) == (0)) ? 1 : 0))) { __pc = 11141; break; }
+				
+				case 11147:
+					func12_DDgui_button("b@", "@", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("b#", "#", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b[", "[", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b]", "]", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b~", "~", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b7", "7", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b8", "8", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b9", "9", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b/", "/", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b*", "*", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b?", "?", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b!", "!", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b{", "{", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b}", "}", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b=", "=", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b4", "4", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b5", "5", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b6", "6", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b-", "-", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b+", "+", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b:", ":", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b;", ";", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b(", "(", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b)", ")", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b0", "0", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b1", "1", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "2", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "3", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b<", "<", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b>", ">", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b'", "'", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\"", "\"", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11141: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (1)) ? 1 : 0))) { __pc = 11351; break; }
+				
+				case 11357:
+					func12_DDgui_button("bQ", "Q", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bW", "W", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bE", "E", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bR", "R", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bT", "T", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bY", "Y", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bU", "U", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bI", "I", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bO", "O", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bP", "P", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bA", "A", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bS", "S", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bD", "D", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bF", "F", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bG", "G", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bH", "H", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bJ", "J", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bK", "K", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bL", "L", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bShift", "^", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bZ", "Z", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bX", "X", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bC", "C", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bV", "V", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bB", "B", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bN", "N", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bM", "M", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (6))) + (10)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11351: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (2)) ? 1 : 0))) { __pc = 11541; break; }
+				
+				case 11547:
+					func12_DDgui_button("bq", "q", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bw", "w", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("be", "e", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("br", "r", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bt", "t", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("by", "y", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bu", "u", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bi", "i", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bo", "o", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bp", "p", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("ba", "a", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bs", "s", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bd", "d", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bf", "f", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bg", "g", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bh", "h", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bj", "j", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bk", "k", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bl", "l", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bShift", "^", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bz", "z", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bx", "x", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bc", "c", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bv", "v", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bb", "b", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bn", "n", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bm", "m", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b,", ",", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b.", ".", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (6))) + (10)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				
+				
+			case 11541: //dummy jumper1
+				if (!((((local16___SelectHelper7__2165) == (3)) ? 1 : 0))) { __pc = 11731; break; }
+				
+				case 11737:
+					func12_DDgui_button("bá", "á", local4_size_2155, local4_size_2155);
+					
+				func12_DDgui_button("bé", "é", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bí", "í", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bó", "ó", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bú", "ú", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÁ", "Á", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÉ", "É", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÍ", "Í", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÓ", "Ó", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÚ", "Ú", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bà", "à", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bè", "è", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bì", "ì", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bò", "ò", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bù", "ù", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "À", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "È", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "Ì", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b2", "Ò", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b3", "Ù", local4_size_2155, local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("bä", "ä", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bö", "ö", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bü", "ü", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÄ", "Ä", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÖ", "Ö", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bÜ", "Ü", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bß", "ß", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("bß", "ß", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b\b", "<-", ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func12_DDgui_spacer(10000, 0);
+				func12_DDgui_button("b´", "´", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b`", "`", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b° ", "°", local4_size_2155, local4_size_2155);
+				func12_DDgui_button("b ", "", ((((local4_size_2155) * (5))) + (8)), local4_size_2155);
+				func12_DDgui_button("b\n", CHR_Str(182), ((((local4_size_2155) * (2))) + (2)), local4_size_2155);
+				func9_DDgui_set("b\n", "TEXT", "Enter");
+				
+				
+			case 11731: //dummy jumper1
+				;
+					
+				
+				;
+					
+				
+				
+			case 16904: //dummy jumper2
+				;
+				
+			func14_DDgui_frameend();
+			func9_DDgui_set("fr_keypad", "ALIGN", CAST2STRING(0));
+			local10_cancel_Str_2166 = "Cancel";
+			case 11949:
+				if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 11944; break; }
+				
+				case 11948:
+					local10_cancel_Str_2166 = "Abbrechen";
+					
+				
+				
+			case 11944: //dummy jumper1
+				;
+				
+			func12_DDgui_spacer(10000, 0);
+			func16_DDgui_framestart("fr_okpad", "", 0);
+			func12_DDgui_button("btOK", "OK", 0, local4_size_2155);
+			func12_DDgui_spacer(16, 1);
+			func12_DDgui_button("btCancel", local10_cancel_Str_2166, 0, local4_size_2155);
+			func14_DDgui_frameend();
+			func9_DDgui_set("fr_okpad", "ALIGN", CAST2STRING(0));
+			DIM(local8_widg_Str_2160, [0], "");
+			case 12023:
+				var forEachSaver12023 = global11_ddgui_stack_ref[0].arrAccess(((BOUNDS(global11_ddgui_stack_ref[0], 0)) - (1))).values[tmpPositionCache][0].attr7_widgets_ref[0];
+				var forEachCounter12023 = 0
+				
+			case 11990: //dummy for1
+				if (!(forEachCounter12023 < forEachSaver12023.values.length)) {__pc = 11979; break;}
+				var local1_w_ref_2168 = forEachSaver12023.values[forEachCounter12023];
+				
+				
+				case 12022:
+					if (!((((((((local1_w_ref_2168[0].attr7_wid_Str).length) == (2)) ? 1 : 0)) && ((((MID_Str(local1_w_ref_2168[0].attr7_wid_Str, 0, 1)) == ("b")) ? 1 : 0))) ? 1 : 0))) { __pc = 12007; break; }
+				
+				case 12014:
+					DIMPUSH(local8_widg_Str_2160, local1_w_ref_2168[0].attr7_wid_Str);
+					
+				local1_w_ref_2168[0].attr11_tiptext_Str_ref[0] = local1_w_ref_2168[0].attr9_wtext_Str_ref[0];
+				
+				
+			case 12007: //dummy jumper1
+				;
+					
+				
+				forEachSaver12023.values[forEachCounter12023] = local1_w_ref_2168;
+				
+				forEachCounter12023++
+				__pc = 11990; break; //back jump
+				
+			case 11979: //dummy for
+				;
+				
+			func9_DDgui_set("", "FOCUS", "tx_text");
+			func10_DDgui_show(1);
+			case 12158:
+				if (!(1)) {__pc = 16908; break;}
+				
+				var local10_tab_change_2169 = 0;
+				case 12038:
+					local10_tab_change_2169 = ~~(func9_DDgui_get("tab", "CLICKED"));
+					
+				func9_DDgui_set("", "FOCUS", "tx_text");
+				func10_DDgui_show(1);
+				case 12050:
+					if (!(local10_tab_change_2169)) { __pc = 12047; break; }
+				
+				case 12049:
+					__pc = __labels["refresh"]; break;
+					
+				
+				
+			case 12047: //dummy jumper1
+				;
+					
+				case 12086:
+					var forEachSaver12086 = local8_widg_Str_2160;
+				var forEachCounter12086 = 0
+				
+			case 12054: //dummy for1
+				if (!(forEachCounter12086 < forEachSaver12086.values.length)) {__pc = 12052; break;}
+				var local5_w_Str_2170 = forEachSaver12086.values[forEachCounter12086];
+				
+				
+				case 12085:
+					if (!(func9_DDgui_get(local5_w_Str_2170, "CLICKED"))) { __pc = 12058; break; }
+				
+				case 12066:
+					func9_DDgui_set("", "INKEY", MID_Str(local5_w_Str_2170, 1, 1));
+					
+				case 12083:
+					if (!((((func9_DDgui_get("tab", "SELECT")) == (1)) ? 1 : 0))) { __pc = 12073; break; }
+				
+				case 12078:
+					func9_DDgui_set("tab", "SELECT", CAST2STRING(2));
+					
+				func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
+				
+				
+			case 12073: //dummy jumper1
+				;
+					
+				case 12084:
+					__pc = 12052; break;
+					
+				
+				
+			case 12058: //dummy jumper1
+				;
+					
+				
+				forEachSaver12086.values[forEachCounter12086] = local5_w_Str_2170;
+				
+				forEachCounter12086++
+				__pc = 12054; break; //back jump
+				
+			case 12052: //dummy for
+				;
+					
+				case 12136:
+					if (!((((((param9_bIsNumber) ? 0 : 1)) && (func9_DDgui_get("bShift", "CLICKED"))) ? 1 : 0))) { __pc = 12094; break; }
+				
+				var local4_isel_2171 = 0;
+				case 12101:
+					local4_isel_2171 = ~~(func9_DDgui_get("tab", "SELECT"));
+					
+				case 12135:
+					if (!(((((((local4_isel_2171) < (3)) ? 1 : 0)) && ((((local4_isel_2171) > (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 12110; break; }
+				
+				case 12116:
+					local4_isel_2171 = ((local4_isel_2171) - (1));
+					
+				local4_isel_2171 = ((1) - (local4_isel_2171));
+				local4_isel_2171 = ((1) + (local4_isel_2171));
+				func9_DDgui_set("tab", "SELECT", CAST2STRING(local4_isel_2171));
+				func9_DDgui_set("tab", "CLICKED", CAST2STRING(1));
+				
+				
+			case 12110: //dummy jumper1
+				;
+					
+				
+				
+			case 12094: //dummy jumper1
+				;
+					
+				case 12147:
+					if (!(func9_DDgui_get("btOK", "CLICKED"))) { __pc = 12139; break; }
+				
+				case 12145:
+					param8_text_Str = func13_DDgui_get_Str("tx_text", "TEXT");
+					
+				case 12146:
+					__pc = 16908; break;
+					
+				
+				
+			case 12139: //dummy jumper1
+				;
+					
+				case 12156:
+					if (!(func9_DDgui_get("btCancel", "CLICKED"))) { __pc = 12150; break; }
+				
+				case 12154:
+					param8_text_Str = local12_text_old_Str_2157;
+					
+				case 12155:
+					__pc = 16908; break;
+					
+				
+				
+			case 12150: //dummy jumper1
+				;
+					
+				SHOWSCREEN();
+				
+				__pc = 12158; break; //back jump
+				
+			case 16908:
+				;
+				
+			func15_DDgui_popdialog();
+			global18_DDGUI_IN_INPUT_DLG = 0;
+			global25_gDDguiMinControlDimension = local12_storeoldsize_2163;
+			return tryClone(param8_text_Str);
+			return "";
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
 	}
+};
+window['func20_DDgui_FileDialog_Str'] = function(param5_bOpen, param13_filterstr_Str, param10_initialise) {
+	var __labels = {"__DrawFrames__": 3476, "refresh_fd": 12222};
+	
+	var local12_startdir_Str_2175 = "", local8_cdir_Str_2176 = "", local9_bread_Str_2177 = new GLBArray(), local7_pre_Str_2178 = "", local9_files_Str_2179 = new GLBArray(), local8_num_file_2180 = 0, local7_num_dir_2181 = 0, local11_outfile_Str_2182 = "", local12_bBreadcrumbs_2183 = 0, local3_scx_ref_2184 = [0], local3_scy_ref_2185 = [0], local11_caption_Str_2186 = "", local7_tmp_Str_2188 = "", local2_ok_2191 = 0;
+	var __pc = 12173;
+	while(__pc >= 0) {
+		switch(__pc) {
+			case 12173:
+				local12_startdir_Str_2175 = GETCURRENTDIR_Str();
+				
+			local8_cdir_Str_2176 = local12_startdir_Str_2175;
+			local12_bBreadcrumbs_2183 = 0;
+			GETSCREENSIZE(local3_scx_ref_2184, local3_scy_ref_2185);
+			local3_scx_ref_2184[0] = MIN(480, unref(local3_scx_ref_2184[0]));
+			local3_scy_ref_2185[0] = MIN(480, unref(local3_scy_ref_2185[0]));
+			case 12215:
+				if (!(((((((local3_scx_ref_2184[0]) > (400)) ? 1 : 0)) && ((((local3_scy_ref_2185[0]) > (400)) ? 1 : 0))) ? 1 : 0))) { __pc = 12210; break; }
+				
+				case 12214:
+					local12_bBreadcrumbs_2183 = 1;
+					
+				
+				
+			case 12210: //dummy jumper1
+				;
+				
+			func16_DDgui_pushdialog(0, 0, unref(local3_scx_ref_2184[0]), unref(local3_scy_ref_2185[0]), 1);
+			case 12222:
+				//label: refresh_fd;
+				
+			func10_DDgui_init();
+			func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+			func9_DDgui_set("", "SCALEABLE", CAST2STRING(0));
+			local11_caption_Str_2186 = "Pick a file:";
+			case 12245:
+				if (!((((PLATFORMINFO_Str("LOCALE")) == ("de")) ? 1 : 0))) { __pc = 12240; break; }
+				
+				case 12244:
+					local11_caption_Str_2186 = "Datei auswählen:";
+					
+				
+				
+			case 12240: //dummy jumper1
+				;
+				
+			func9_DDgui_set("", "TEXT", local11_caption_Str_2186);
+			local8_cdir_Str_2176 = GETCURRENTDIR_Str();
+			case 12259:
+				if (!((((param10_initialise) == (1)) ? 1 : 0))) { __pc = 12256; break; }
+				
+				case 12258:
+					func10_DDgui_init();
+					
+				
+				
+			case 12256: //dummy jumper1
+				;
+				
+			case 12314:
+				if (!((((MID_Str(local8_cdir_Str_2176, 1, 1)) == (":")) ? 1 : 0))) { __pc = 12266; break; }
+				
+				case 12273:
+					local7_pre_Str_2178 = MID_Str(local8_cdir_Str_2176, 0, 2);
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 2, -(1));
+				
+				__pc = 16919;
+				break;
+				
+			case 12266: //dummy jumper1
+				if (!(((((((MID_Str(local8_cdir_Str_2176, 1, 1)) == ("/")) ? 1 : 0)) || ((((MID_Str(local8_cdir_Str_2176, 0, 1)) == ("~")) ? 1 : 0))) ? 1 : 0))) { __pc = 12292; break; }
+				
+				case 12299:
+					local7_pre_Str_2178 = MID_Str(local8_cdir_Str_2176, 0, 1);
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 1, -(1));
+				
+				__pc = 16919;
+				break;
+				
+			case 12292: //dummy jumper1
+				
+				case 12308:
+					local7_pre_Str_2178 = "";
+					
+				local8_cdir_Str_2176 = MID_Str(local8_cdir_Str_2176, 1, -(1));
+				
+				
+			case 16919: //dummy jumper2
+				;
+				
+			SPLITSTR(local8_cdir_Str_2176, unref(local9_bread_Str_2177), "/", 1);
+			case 12349:
+				if (!(local12_bBreadcrumbs_2183)) { __pc = 12321; break; }
+				
+				case 12323:
+					
+				var local1_i_2187 = 0;
+				case 12345:
+					local1_i_2187 = 0
+				
+			case 12326: //dummy for1
+				if (!toCheck(local1_i_2187, ((BOUNDS(local9_bread_Str_2177, 0)) - (1)), 1)) {__pc = 12333; break;}
+				
+				case 12344:
+					func12_DDgui_button((("bt_br") + (CAST2STRING(local1_i_2187))), local9_bread_Str_2177.arrAccess(local1_i_2187).values[tmpPositionCache], 0, 0);
+					
+				
+				local1_i_2187 += 1;
+				__pc = 12326; break; //back jump
+				
+			case 12333: //dummy for
+				;
+					
+				
+				;
+					
+				func12_DDgui_spacer(1000, 4);
+				
+				
+			case 12321: //dummy jumper1
+				;
+				
+			local8_num_file_2180 = ~~(GETFILELIST(param13_filterstr_Str, unref(local9_files_Str_2179)));
+			local7_num_dir_2181 = INTEGER(CAST2INT(((local8_num_file_2180) / (65536))));
+			local8_num_file_2180 = MOD(local8_num_file_2180, 65536);
+			
+				var local1_i_2189 = 0;
+				case 12414:
+					local1_i_2189 = 0
+				
+			case 12372: //dummy for1
+				if (!toCheck(local1_i_2189, ((local7_num_dir_2181) - (1)), 1)) {__pc = 12376; break;}
+				
+				case 12400:
+					if (!((((local9_files_Str_2179.arrAccess(local1_i_2189).values[tmpPositionCache]) == (".")) ? 1 : 0))) { __pc = 12383; break; }
+				
+				case 12388:
+					DIMDEL(local9_files_Str_2179, local1_i_2189);
+					
+				local7_num_dir_2181+=-(1);
+				local1_i_2189+=-(1);
+				case 12399:
+					__pc = 12372; break;
+					
+				
+				
+			case 12383: //dummy jumper1
+				;
+					
+				case 12408:
+					if (!((local7_tmp_Str_2188).length)) { __pc = 12403; break; }
+				
+				case 12407:
+					local7_tmp_Str_2188+="|";
+					
+				
+				
+			case 12403: //dummy jumper1
+				;
+					
+				local7_tmp_Str_2188+=local9_files_Str_2179.arrAccess(local1_i_2189).values[tmpPositionCache];
+				
+				local1_i_2189 += 1;
+				__pc = 12372; break; //back jump
+				
+			case 12376: //dummy for
+				;
+					
+				
+				;
+			func11_DDgui_combo("ls_dir", local7_tmp_Str_2188, ((local3_scx_ref_2184[0]) - (20)), 0);
+			func9_DDgui_set("ls_dir", "SELECT", CAST2STRING(-(1)));
+			func12_DDgui_spacer(1000, 4);
+			local7_tmp_Str_2188 = "";
+			
+				var local1_i_2190 = 0;
+				case 12458:
+					local1_i_2190 = 0
+				
+			case 12436: //dummy for1
+				if (!toCheck(local1_i_2190, ((local8_num_file_2180) - (1)), 1)) {__pc = 12440; break;}
+				
+				case 12450:
+					if (!((((local1_i_2190) > (0)) ? 1 : 0))) { __pc = 12445; break; }
+				
+				case 12449:
+					local7_tmp_Str_2188+="|";
+					
+				
+				
+			case 12445: //dummy jumper1
+				;
+					
+				local7_tmp_Str_2188+=local9_files_Str_2179.arrAccess(((local1_i_2190) + (local7_num_dir_2181))).values[tmpPositionCache];
+				
+				local1_i_2190 += 1;
+				__pc = 12436; break; //back jump
+				
+			case 12440: //dummy for
+				;
+					
+				
+				;
+			func10_DDgui_list("ls_file", local7_tmp_Str_2188, ((local3_scx_ref_2184[0]) - (20)), ((((local3_scy_ref_2185[0]) - (120))) - (((local12_bBreadcrumbs_2183) * (64)))));
+			func9_DDgui_set("ls_file", "SELECT", CAST2STRING(-(1)));
+			func12_DDgui_spacer(1000, 4);
+			func16_DDgui_singletext("tx_file", "", ((local3_scx_ref_2184[0]) - (20)));
+			func12_DDgui_spacer(1000, 4);
+			func12_DDgui_button("bt_ok", "OK", 0, 0);
+			func12_DDgui_button("bt_cancel", "Cancel", 0, 0);
+			local2_ok_2191 = 0;
+			case 12807:
+				if (!(1)) {__pc = 16924; break;}
+				
+				case 12509:
+					func10_DDgui_show(0);
+					
+				case 12571:
+					if (!(local12_bBreadcrumbs_2183)) { __pc = 12511; break; }
+				
+				case 12513:
+					
+				var local1_i_2192 = 0;
+				case 12570:
+					local1_i_2192 = 0
+				
+			case 12516: //dummy for1
+				if (!toCheck(local1_i_2192, ((BOUNDS(local9_bread_Str_2177, 0)) - (1)), 1)) {__pc = 12523; break;}
+				
+				case 12569:
+					if (!(func9_DDgui_get((("bt_br") + (CAST2STRING(local1_i_2192))), "CLICKED"))) { __pc = 12530; break; }
+				
+				case 12534:
+					local8_cdir_Str_2176 = local7_pre_Str_2178;
+					
+				
+				var local1_j_2193 = 0;
+				case 12550:
+					local1_j_2193 = 0
+				
+			case 12538: //dummy for1
+				if (!toCheck(local1_j_2193, local1_i_2192, 1)) {__pc = 12540; break;}
+				
+				case 12544:
+					local8_cdir_Str_2176+="/";
+					
+				local8_cdir_Str_2176+=local9_bread_Str_2177.arrAccess(local1_j_2193).values[tmpPositionCache];
+				
+				local1_j_2193 += 1;
+				__pc = 12538; break; //back jump
+				
+			case 12540: //dummy for
+				;
+					
+				
+				;
+				case 12565:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12560; break; }
+				
+				case 12564:
+					local8_cdir_Str_2176+="/";
+					
+				
+				
+			case 12560: //dummy jumper1
+				;
+					
+				SETCURRENTDIR(local8_cdir_Str_2176);
+				case 12568:
+					__pc = __labels["refresh_fd"]; break;
+					
+				
+				
+			case 12530: //dummy jumper1
+				;
+					
+				
+				local1_i_2192 += 1;
+				__pc = 12516; break; //back jump
+				
+			case 12523: //dummy for
+				;
+					
+				
+				;
+					
+				
+				
+			case 12511: //dummy jumper1
+				;
+					
+				case 12669:
+					if (!(func9_DDgui_get("ls_dir", "CLICKED"))) { __pc = 12574; break; }
+				
+				var local3_sel_2194 = 0;
+				case 12581:
+					local3_sel_2194 = ~~(func9_DDgui_get("ls_dir", "SELECT"));
+					
+				local8_cdir_Str_2176 = local7_pre_Str_2178;
+				
+				var local1_i_2195 = 0;
+				case 12606:
+					local1_i_2195 = 0
+				
+			case 12589: //dummy for1
+				if (!toCheck(local1_i_2195, ((BOUNDS(local9_bread_Str_2177, 0)) - (2)), 1)) {__pc = 12596; break;}
+				
+				case 12600:
+					local8_cdir_Str_2176+="/";
+					
+				local8_cdir_Str_2176+=local9_bread_Str_2177.arrAccess(local1_i_2195).values[tmpPositionCache];
+				
+				local1_i_2195 += 1;
+				__pc = 12589; break; //back jump
+				
+			case 12596: //dummy for
+				;
+					
+				
+				;
+				case 12650:
+					if (!((((local9_files_Str_2179.arrAccess(local3_sel_2194).values[tmpPositionCache]) != ("..")) ? 1 : 0))) { __pc = 12612; break; }
+				
+				case 12629:
+					if (!(BOUNDS(local9_bread_Str_2177, 0))) { __pc = 12618; break; }
+				
+				case 12628:
+					local8_cdir_Str_2176+=(("/") + (local9_bread_Str_2177.arrAccess(-(1)).values[tmpPositionCache]));
+					
+				
+				
+			case 12618: //dummy jumper1
+				;
+					
+				local8_cdir_Str_2176+=(("/") + (func21_DDgui_getitemtext_Str("ls_dir", local3_sel_2194)));
+				
+				
+			case 12612: //dummy jumper1
+				;
+					
+				case 12665:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == (":")) ? 1 : 0))) { __pc = 12660; break; }
+				
+				case 12664:
+					local8_cdir_Str_2176+="/";
+					
+				
+				
+			case 12660: //dummy jumper1
+				;
+					
+				SETCURRENTDIR(local8_cdir_Str_2176);
+				case 12668:
+					__pc = __labels["refresh_fd"]; break;
+					
+				
+				
+			case 12574: //dummy jumper1
+				;
+					
+				case 12682:
+					if (!(func9_DDgui_get("ls_file", "CLICKED"))) { __pc = 12672; break; }
+				
+				case 12681:
+					func9_DDgui_set("tx_file", "TEXT", func21_DDgui_getitemtext_Str("ls_file", ~~(func9_DDgui_get("ls_file", "SELECT"))));
+					
+				
+				
+			case 12672: //dummy jumper1
+				;
+					
+				case 12799:
+					if (!(func9_DDgui_get("bt_ok", "CLICKED"))) { __pc = 12685; break; }
+				
+				case 12691:
+					local11_outfile_Str_2182 = func13_DDgui_get_Str("tx_file", "TEXT");
+					
+				case 12797:
+					if (!((local11_outfile_Str_2182).length)) { __pc = 12694; break; }
+				
+				case 12698:
+					local8_cdir_Str_2176 = GETCURRENTDIR_Str();
+					
+				case 12723:
+					if (!((((MID_Str(local8_cdir_Str_2176, (((local8_cdir_Str_2176).length) - (1)), 1)) == ("/")) ? 1 : 0))) { __pc = 12708; break; }
+				
+				case 12714:
+					local11_outfile_Str_2182 = ((local8_cdir_Str_2176) + (local11_outfile_Str_2182));
+					
+				
+				__pc = 16935;
+				break;
+				
+			case 12708: //dummy jumper1
+				
+				case 12722:
+					local11_outfile_Str_2182 = ((((local8_cdir_Str_2176) + ("/"))) + (local11_outfile_Str_2182));
+					
+				
+				
+			case 16935: //dummy jumper2
+				;
+					
+				case 12796:
+					if (!(param5_bOpen)) { __pc = 12725; break; }
+				
+				case 12734:
+					if (!(DOESFILEEXIST(local11_outfile_Str_2182))) { __pc = 12729; break; }
+				
+				case 12733:
+					local2_ok_2191 = 1;
+					
+				
+				
+			case 12729: //dummy jumper1
+				;
+					
+				
+				__pc = 16936;
+				break;
+				
+			case 12725: //dummy jumper1
+				
+				var local7_ext_Str_2196 = "", local8_cext_Str_2197 = "";
+				case 12745:
+					local7_ext_Str_2196 = MID_Str(param13_filterstr_Str, ((INSTR(param13_filterstr_Str, ".", 0)) + (1)), -(1));
+					
+				local8_cext_Str_2197 = MID_Str(local11_outfile_Str_2182, (((local11_outfile_Str_2182).length) - ((local7_ext_Str_2196).length)), (local7_ext_Str_2196).length);
+				case 12774:
+					if (!(((((((local7_ext_Str_2196) != ("*")) ? 1 : 0)) && ((((LCASE_Str(local8_cext_Str_2197)) != (LCASE_Str(local7_ext_Str_2196))) ? 1 : 0))) ? 1 : 0))) { __pc = 12767; break; }
+				
+				case 12773:
+					local11_outfile_Str_2182+=((".") + (local7_ext_Str_2196));
+					
+				
+				
+			case 12767: //dummy jumper1
+				;
+					
+				case 12795:
+					if (!(DOESFILEEXIST(local11_outfile_Str_2182))) { __pc = 12777; break; }
+				
+				case 12781:
+					local2_ok_2191 = 1;
+					
+				
+				__pc = 16939;
+				break;
+				
+			case 12777: //dummy jumper1
+				
+				case 12794:
+					if (!(OPENFILE(1, local11_outfile_Str_2182, 0))) { __pc = 12787; break; }
+				
+				case 12790:
+					CLOSEFILE(1);
+					
+				local2_ok_2191 = 1;
+				
+				
+			case 12787: //dummy jumper1
+				;
+					
+				
+				
+			case 16939: //dummy jumper2
+				;
+					
+				
+				
+			case 16936: //dummy jumper2
+				;
+					
+				
+				
+			case 12694: //dummy jumper1
+				;
+					
+				case 12798:
+					__pc = 16924; break;
+					
+				
+				
+			case 12685: //dummy jumper1
+				;
+					
+				case 12805:
+					if (!(func9_DDgui_get("bt_cancel", "CLICKED"))) { __pc = 12802; break; }
+				
+				case 12804:
+					__pc = 16924; break;
+					
+				
+				
+			case 12802: //dummy jumper1
+				;
+					
+				SHOWSCREEN();
+				
+				__pc = 12807; break; //back jump
+				
+			case 16924:
+				;
+				
+			func15_DDgui_popdialog();
+			SETCURRENTDIR(local12_startdir_Str_2175);
+			case 12816:
+				if (!(local2_ok_2191)) { __pc = 12812; break; }
+				
+				case 12815:
+					return tryClone(local11_outfile_Str_2182);
+					
+				
+				
+			case 12812: //dummy jumper1
+				;
+				
+			return "";
+			return "";
+			__pc = -1; break;
+			default:
+				throwError("Gotocounter exception pc: "+__pc);
+			
+		}
+	}
+};
+window['func14_DDgui_ColorDlg'] = function(param5_color) {
+	var local7_screenx_ref_2199 = [0], local7_screeny_ref_2200 = [0], local2_tx_ref_2201 = [0], local2_ty_ref_2202 = [0], local1_x_2203 = 0, local1_y_2204 = 0, local1_w_2205 = 0, local1_r_2206 = 0.0, local1_g_2207 = 0.0, local1_b_2208 = 0.0, local1_h_2209 = 0.0, local8_oldcolor_2210 = 0;
+	local8_oldcolor_2210 = param5_color;
+	local1_r_2206 = ((bAND(param5_color, 255)) / (255));
+	local1_g_2207 = ((bAND(param5_color, 65280)) / (65280));
+	local1_b_2208 = ((bAND(param5_color, 16711680)) / (16711680));
+	local1_h_2209 = 0.5;
+	GETFONTSIZE(local2_tx_ref_2201, local2_ty_ref_2202);
+	GETSCREENSIZE(local7_screenx_ref_2199, local7_screeny_ref_2200);
+	func16_DDgui_pushdialog(0, 0, 240, 240, 0);
+	func9_DDgui_set("", "MOVEABLE", CAST2STRING(1));
+	func9_DDgui_set("", "TEXT", "Color Picker");
+	func16_DDgui_framestart("", "", 0);
+	func12_DDgui_widget("", "R", 0, 0);
+	func12_DDgui_slider("sl_R", local1_r_2206, 0, 0);
+	func16_DDgui_numbertext("tx_R", CAST2STRING(INTEGER(((local1_r_2206) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_R", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_R", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "G", 0, 0);
+	func12_DDgui_slider("sl_G", local1_g_2207, 0, 0);
+	func16_DDgui_numbertext("tx_G", CAST2STRING(INTEGER(((local1_g_2207) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_G", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_G", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "B", 0, 0);
+	func12_DDgui_slider("sl_B", local1_b_2208, 0, 0);
+	func16_DDgui_numbertext("tx_B", CAST2STRING(INTEGER(((local1_b_2208) * (255.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_B", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_B", "STEP", CAST2STRING(16));
+	func12_DDgui_spacer(10000, 0);
+	func12_DDgui_widget("", "H", 0, 0);
+	func12_DDgui_slider("sl_H", local1_h_2209, 0, 0);
+	func16_DDgui_numbertext("tx_H", CAST2STRING(INTEGER(((local1_h_2209) * (100.1)))), ((local2_tx_ref_2201[0]) * (3)));
+	func9_DDgui_set("tx_H", "READONLY", CAST2STRING(1));
+	func9_DDgui_set("tx_H", "STEP", CAST2STRING(6.25));
+	func14_DDgui_frameend();
+	func12_DDgui_button("bt_col", (("SPR_C") + (CAST2STRING(param5_color))), 32, 128);
+	func9_DDgui_set("bt_col", "WIDTH", CAST2STRING(32));
+	func9_DDgui_set("bt_col", "READONLY", CAST2STRING(1));
+	func12_DDgui_spacer(10000, 0);
+	func16_DDgui_framestart("fr_center", "", 0);
+	func12_DDgui_button("bt_ok", "OK", 64, 32);
+	func12_DDgui_button("bt_cancel", "Cancel", 128, 32);
+	func14_DDgui_frameend();
+	func9_DDgui_set("fr_center", "ALIGN", CAST2STRING(0));
+	while (1) {
+		func10_DDgui_show(0);
+		if ((((((((((func9_DDgui_get("sl_R", "CLICKED")) || (func9_DDgui_get("sl_G", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_B", "CLICKED"))) ? 1 : 0)) || (func9_DDgui_get("sl_H", "CLICKED"))) ? 1 : 0)) {
+			local1_r_2206 = func9_DDgui_get("sl_R", "TEXT");
+			local1_g_2207 = func9_DDgui_get("sl_G", "TEXT");
+			local1_b_2208 = func9_DDgui_get("sl_B", "TEXT");
+			local1_h_2209 = ((2) * (func9_DDgui_get("sl_H", "TEXT")));
+			if ((((local1_h_2209) <= (1)) ? 1 : 0)) {
+				local1_r_2206 = ((local1_h_2209) * (local1_r_2206));
+				local1_g_2207 = ((local1_h_2209) * (local1_g_2207));
+				local1_b_2208 = ((local1_h_2209) * (local1_b_2208));
+				
+			} else {
+				local1_h_2209 = ((local1_h_2209) - (1));
+				local1_r_2206 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_r_2206))))) + (local1_r_2206))));
+				local1_g_2207 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_g_2207))))) + (local1_g_2207))));
+				local1_b_2208 = MIN(1, MAX(0, ((((local1_h_2209) * (((1) - (local1_b_2208))))) + (local1_b_2208))));
+				
+			};
+			param5_color = RGB(~~(((local1_r_2206) * (255))), ~~(((local1_g_2207) * (255))), ~~(((local1_b_2208) * (255))));
+			func9_DDgui_set("tx_R", "TEXT", CAST2STRING(INTEGER(((local1_r_2206) * (255.1)))));
+			func9_DDgui_set("tx_G", "TEXT", CAST2STRING(INTEGER(((local1_g_2207) * (255.1)))));
+			func9_DDgui_set("tx_B", "TEXT", CAST2STRING(INTEGER(((local1_b_2208) * (255.1)))));
+			func9_DDgui_set("tx_H", "TEXT", CAST2STRING(INTEGER(((local1_h_2209) * (100.1)))));
+			func9_DDgui_set("bt_col", "TEXT", (("SPR_C") + (CAST2STRING(param5_color))));
+			
+		};
+		local1_x_2203 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_xpos) + (((local2_tx_ref_2201[0]) * (2))));
+		local1_y_2204 = ((global11_ddgui_stack_ref[0].arrAccess(-(1)).values[tmpPositionCache][0].attr4_ypos) + (((local2_ty_ref_2202[0]) * (2))));
+		local1_w_2205 = 128;
+		local1_h_2209 = 48;
+		SHOWSCREEN();
+		if (func9_DDgui_get("bt_ok", "CLICKED")) {
+			break;
+			
+		};
+		if (func9_DDgui_get("bt_cancel", "CLICKED")) {
+			param5_color = local8_oldcolor_2210;
+			break;
+			
+		};
+		HIBERNATE();
+		
+	};
+	func15_DDgui_popdialog();
+	return tryClone(param5_color);
+	return 0;
+	
+};
+window['func18_DDgui_CenterDialog'] = function() {
+	var local3_scx_ref_2211 = [0], local3_scy_ref_2212 = [0], local1_w_2213 = 0, local1_h_2214 = 0;
+	GETSCREENSIZE(local3_scx_ref_2211, local3_scy_ref_2212);
+	local1_w_2213 = ~~(func9_DDgui_get("", "WIDTH"));
+	local1_h_2214 = ~~(func9_DDgui_get("", "HEIGHT"));
+	func9_DDgui_set("", "XPOS", CAST2STRING(CAST2INT(((((local3_scx_ref_2211[0]) - (local1_w_2213))) / (2)))));
+	func9_DDgui_set("", "YPOS", CAST2STRING(CAST2INT(((((local3_scy_ref_2212[0]) - (local1_h_2214))) / (2)))));
+	return 0;
 	
 };
 window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
-	stackPush("method: ToString_Str", __debugInfo);
-	try {
-		__debugInfo = "59:\Spit.gbas";
-		return "Object";
-		__debugInfo = "60:\Spit.gbas";
-		return "";
-		__debugInfo = "59:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	return "Object";
+	return "";
 	
 };
 window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
-	stackPush("method: Equals", __debugInfo);
-	try {
-		__debugInfo = "66:\Spit.gbas";
-		if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
-			__debugInfo = "63:\Spit.gbas";
-			return 1;
-			__debugInfo = "63:\Spit.gbas";
-		} else {
-			__debugInfo = "65:\Spit.gbas";
-			return tryClone(0);
-			__debugInfo = "65:\Spit.gbas";
-		};
-		__debugInfo = "67:\Spit.gbas";
-		return 0;
-		__debugInfo = "66:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
+		return 1;
+		
+	} else {
+		return tryClone(0);
+		
+	};
+	return 0;
 	
 };
 window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
-	stackPush("method: ToHashCode", __debugInfo);
-	try {
-		__debugInfo = "69:\Spit.gbas";
-		return 0;
-		__debugInfo = "70:\Spit.gbas";
-		return 0;
-		__debugInfo = "69:\Spit.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
+	return 0;
+	return 0;
 	
 };
-var vtbl_type6_TEnemy = {
-	Update: method12_type6_TEnemy_6_Update, 
-	Render: method12_type6_TEnemy_6_Render, 
-	Init: method12_type6_TEnemy_4_Init, 
-	IsDestroyable: method12_type6_TEnemy_13_IsDestroyable, 
+window['DDgui_userfunction'] = function() {
+	return function() { throwError("NullPrototypeException"); };
+};
+var vtbl_type11_DDGUI_ENTRY = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type6_TEnemy'] = function() {
-	this.attr3_Typ = 0;
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr2_VX = 0.0;
-	this.attr2_VY = 0.0;
-	this.attr5_Width = 0.0;
-	this.attr6_Height = 0.0;
-	this.attr4_Anim = 0;
-	this.attr4_Fall = 0;
-	this.attr12_EventCounter = 0;
-	this.vtbl = vtbl_type6_TEnemy;
+/**
+* @constructor
+*/
+window ['type11_DDGUI_ENTRY'] = function() {
+	this.attr7_key_Str = "";
+	this.attr7_val_Str = "";
+	this.vtbl = vtbl_type11_DDGUI_ENTRY;
 	return this;
 	
 };
-window['type6_TEnemy'].prototype.clone = function() {
-	var other = new type6_TEnemy();
-	other.attr3_Typ = this.attr3_Typ;
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr2_VX = this.attr2_VX;
-	other.attr2_VY = this.attr2_VY;
-	other.attr5_Width = this.attr5_Width;
-	other.attr6_Height = this.attr6_Height;
-	other.attr4_Anim = this.attr4_Anim;
-	other.attr4_Fall = this.attr4_Fall;
-	other.attr12_EventCounter = this.attr12_EventCounter;
+window['type11_DDGUI_ENTRY'].prototype.clone = function() {
+	var other = new type11_DDGUI_ENTRY();
+	other.attr7_key_Str = this.attr7_key_Str;
+	other.attr7_val_Str = this.attr7_val_Str;
 	other.vtbl = this.vtbl;
 	return other;
 };
-type6_TEnemy.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type6_TEnemy.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type6_TEnemy.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], this);
-};
-type6_TEnemy.prototype.IsDestroyable = function() {
-	 return this.vtbl.IsDestroyable(this);
-};
-type6_TEnemy.prototype.ToString_Str = function() {
+type11_DDGUI_ENTRY.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type6_TEnemy.prototype.Equals = function() {
+type11_DDGUI_ENTRY.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type6_TEnemy.prototype.ToHashCode = function() {
+type11_DDGUI_ENTRY.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var vtbl_type10_TExplosion = {
-	Update: method17_type10_TExplosion_6_Update, 
-	Render: method17_type10_TExplosion_6_Render, 
-	Init: method17_type10_TExplosion_4_Init, 
+var vtbl_type9_DDGUI_WDG = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type10_TExplosion'] = function() {
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr4_Anim = 0;
-	this.attr3_Del = 0;
-	this.vtbl = vtbl_type10_TExplosion;
+/**
+* @constructor
+*/
+window ['type9_DDGUI_WDG'] = function() {
+	this.attr7_wid_Str = "";
+	this.attr9_wtype_Str = "";
+	this.attr9_wtext_Str_ref = [""];
+	this.attr5_wxpos = 0;
+	this.attr5_wypos = 0;
+	this.attr6_wwidth = 0;
+	this.attr7_wheight = 0;
+	this.attr6_whover = 0;
+	this.attr5_whide = 0;
+	this.attr11_wfilter_Str = "";
+	this.attr11_tiptext_Str_ref = [""];
+	this.attr8_wclicked = 0;
+	this.attr7_wselect = 0;
+	this.attr6_wcount = 0;
+	this.attr9_wreadonly = 0;
+	this.attr9_wselstart = 0;
+	this.attr7_wselend = 0;
+	this.attr7_wminval = 0.0;
+	this.attr7_wmaxval = 0.0;
+	this.attr5_wstep = 0.0;
+	this.attr7_wscroll = 0;
+	this.attr10_wscrollmax = 0;
+	this.attr7_wcaretx = 0;
+	this.attr7_wcarety = 0;
+	this.attr6_wframe = 0;
+	this.attr6_walign = 0;
+	this.attr8_wuserfoo_ref = [DDgui_userfunction];
+	this.vtbl = vtbl_type9_DDGUI_WDG;
+	this.attr5_whide = 0;
+	this.attr7_wminval = 0;
+	this.attr7_wmaxval = 1;
+	this.attr5_wstep = 0.1;
+	this.attr6_wframe = 0;
+	this.attr6_walign = -(1);
 	return this;
 	
 };
-window['type10_TExplosion'].prototype.clone = function() {
-	var other = new type10_TExplosion();
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr4_Anim = this.attr4_Anim;
-	other.attr3_Del = this.attr3_Del;
+window['type9_DDGUI_WDG'].prototype.clone = function() {
+	var other = new type9_DDGUI_WDG();
+	other.attr7_wid_Str = this.attr7_wid_Str;
+	other.attr9_wtype_Str = this.attr9_wtype_Str;
+	other.attr9_wtext_Str_ref = tryClone(this.attr9_wtext_Str_ref);
+	other.attr5_wxpos = this.attr5_wxpos;
+	other.attr5_wypos = this.attr5_wypos;
+	other.attr6_wwidth = this.attr6_wwidth;
+	other.attr7_wheight = this.attr7_wheight;
+	other.attr6_whover = this.attr6_whover;
+	other.attr5_whide = this.attr5_whide;
+	other.attr11_wfilter_Str = this.attr11_wfilter_Str;
+	other.attr11_tiptext_Str_ref = tryClone(this.attr11_tiptext_Str_ref);
+	other.attr8_wclicked = this.attr8_wclicked;
+	other.attr7_wselect = this.attr7_wselect;
+	other.attr6_wcount = this.attr6_wcount;
+	other.attr9_wreadonly = this.attr9_wreadonly;
+	other.attr9_wselstart = this.attr9_wselstart;
+	other.attr7_wselend = this.attr7_wselend;
+	other.attr7_wminval = this.attr7_wminval;
+	other.attr7_wmaxval = this.attr7_wmaxval;
+	other.attr5_wstep = this.attr5_wstep;
+	other.attr7_wscroll = this.attr7_wscroll;
+	other.attr10_wscrollmax = this.attr10_wscrollmax;
+	other.attr7_wcaretx = this.attr7_wcaretx;
+	other.attr7_wcarety = this.attr7_wcarety;
+	other.attr6_wframe = this.attr6_wframe;
+	other.attr6_walign = this.attr6_walign;
+	other.attr8_wuserfoo_ref = tryClone(this.attr8_wuserfoo_ref);
 	other.vtbl = this.vtbl;
 	return other;
 };
-type10_TExplosion.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type10_TExplosion.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type10_TExplosion.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], arguments[1], this);
-};
-type10_TExplosion.prototype.ToString_Str = function() {
+type9_DDGUI_WDG.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type10_TExplosion.prototype.Equals = function() {
+type9_DDGUI_WDG.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type10_TExplosion.prototype.ToHashCode = function() {
+type9_DDGUI_WDG.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var vtbl_type4_TMap = {
-	InitEmpty: method10_type4_TMap_9_InitEmpty, 
-	Save: method10_type4_TMap_4_Save, 
-	Init: method10_type4_TMap_4_Init, 
-	Update: method10_type4_TMap_6_Update, 
-	Render: method10_type4_TMap_6_Render, 
-	RenderTile: method10_type4_TMap_10_RenderTile, 
-	PickTile: method10_type4_TMap_8_PickTile, 
-	RemoveTile: method10_type4_TMap_10_RemoveTile, 
-	CollisionPoint: method10_type4_TMap_14_CollisionPoint, 
-	RayCollision: method10_type4_TMap_12_RayCollision, 
-	Collision: method10_type4_TMap_9_Collision, 
+var vtbl_type11_DDGUI_ORDER = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type4_TMap'] = function() {
-	this.attr6_IsSnow = 0;
-	this.attr5_Datas = new GLBArray();
-	this.attr5_Width = 0;
-	this.attr6_Height = 0;
-	this.attr7_ScrollX = 0.0;
-	this.attr7_ScrollY = 0.0;
-	this.attr7_Tileset = 0;
-	this.attr15_TilesetPath_Str = "";
-	this.attr13_SpikePosition = 0.0;
-	this.attr8_SpikeDir = 0;
-	this.attr6_SpawnX = 0;
-	this.attr6_SpawnY = 0;
-	this.attr11_NextMap_Str = "";
-	this.attr9_LastPickX = 0;
-	this.attr9_LastPickY = 0;
-	this.attr6_HasFBO = 0;
-	this.attr13_IsRenderedFBO = 0;
-	this.attr8_ScreenID = 0;
-	this.attr5_SprID = 0;
-	this.vtbl = vtbl_type4_TMap;
-	this.attr11_NextMap_Str = "";
+/**
+* @constructor
+*/
+window ['type11_DDGUI_ORDER'] = function() {
+	this.attr6_id_Str_ref = [""];
+	this.attr5_index = 0;
+	this.vtbl = vtbl_type11_DDGUI_ORDER;
 	return this;
 	
 };
-window['type4_TMap'].prototype.clone = function() {
-	var other = new type4_TMap();
-	other.attr6_IsSnow = this.attr6_IsSnow;
-	other.attr5_Datas = tryClone(this.attr5_Datas);
-	other.attr5_Width = this.attr5_Width;
-	other.attr6_Height = this.attr6_Height;
-	other.attr7_ScrollX = this.attr7_ScrollX;
-	other.attr7_ScrollY = this.attr7_ScrollY;
-	other.attr7_Tileset = this.attr7_Tileset;
-	other.attr15_TilesetPath_Str = this.attr15_TilesetPath_Str;
-	other.attr13_SpikePosition = this.attr13_SpikePosition;
-	other.attr8_SpikeDir = this.attr8_SpikeDir;
-	other.attr6_SpawnX = this.attr6_SpawnX;
-	other.attr6_SpawnY = this.attr6_SpawnY;
-	other.attr11_NextMap_Str = this.attr11_NextMap_Str;
-	other.attr9_LastPickX = this.attr9_LastPickX;
-	other.attr9_LastPickY = this.attr9_LastPickY;
-	other.attr6_HasFBO = this.attr6_HasFBO;
-	other.attr13_IsRenderedFBO = this.attr13_IsRenderedFBO;
-	other.attr8_ScreenID = this.attr8_ScreenID;
-	other.attr5_SprID = this.attr5_SprID;
+window['type11_DDGUI_ORDER'].prototype.clone = function() {
+	var other = new type11_DDGUI_ORDER();
+	other.attr6_id_Str_ref = tryClone(this.attr6_id_Str_ref);
+	other.attr5_index = this.attr5_index;
 	other.vtbl = this.vtbl;
 	return other;
 };
-type4_TMap.prototype.InitEmpty = function() {
-	 return this.vtbl.InitEmpty(arguments[0], arguments[1], arguments[2], this);
-};
-type4_TMap.prototype.Save = function() {
-	 return this.vtbl.Save(arguments[0], this);
-};
-type4_TMap.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], this);
-};
-type4_TMap.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type4_TMap.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type4_TMap.prototype.RenderTile = function() {
-	 return this.vtbl.RenderTile(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type4_TMap.prototype.PickTile = function() {
-	 return this.vtbl.PickTile(arguments[0], arguments[1], this);
-};
-type4_TMap.prototype.RemoveTile = function() {
-	 return this.vtbl.RemoveTile(arguments[0], arguments[1], this);
-};
-type4_TMap.prototype.CollisionPoint = function() {
-	 return this.vtbl.CollisionPoint(arguments[0], arguments[1], this);
-};
-type4_TMap.prototype.RayCollision = function() {
-	 return this.vtbl.RayCollision(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type4_TMap.prototype.Collision = function() {
-	 return this.vtbl.Collision(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type4_TMap.prototype.ToString_Str = function() {
+type11_DDGUI_ORDER.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type4_TMap.prototype.Equals = function() {
+type11_DDGUI_ORDER.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type4_TMap.prototype.ToHashCode = function() {
+type11_DDGUI_ORDER.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var vtbl_type7_TPlayer = {
-	Init: method13_type7_TPlayer_4_Init, 
-	Update: method13_type7_TPlayer_6_Update, 
-	Render: method13_type7_TPlayer_6_Render, 
-	Reset: method13_type7_TPlayer_5_Reset, 
+var vtbl_type10_DDGUI_AUTO = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type7_TPlayer'] = function() {
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr2_VX = 0.0;
-	this.attr2_VY = 0.0;
-	this.attr5_Width = 0;
-	this.attr6_Height = 0;
-	this.attr4_Anim = 0;
-	this.vtbl = vtbl_type7_TPlayer;
+/**
+* @constructor
+*/
+window ['type10_DDGUI_AUTO'] = function() {
+	this.attr10_idfrom_Str = "";
+	this.attr8_idto_Str = "";
+	this.attr11_objfrom_Str = "";
+	this.attr9_objto_Str = "";
+	this.vtbl = vtbl_type10_DDGUI_AUTO;
 	return this;
 	
 };
-window['type7_TPlayer'].prototype.clone = function() {
-	var other = new type7_TPlayer();
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr2_VX = this.attr2_VX;
-	other.attr2_VY = this.attr2_VY;
-	other.attr5_Width = this.attr5_Width;
-	other.attr6_Height = this.attr6_Height;
-	other.attr4_Anim = this.attr4_Anim;
+window['type10_DDGUI_AUTO'].prototype.clone = function() {
+	var other = new type10_DDGUI_AUTO();
+	other.attr10_idfrom_Str = this.attr10_idfrom_Str;
+	other.attr8_idto_Str = this.attr8_idto_Str;
+	other.attr11_objfrom_Str = this.attr11_objfrom_Str;
+	other.attr9_objto_Str = this.attr9_objto_Str;
 	other.vtbl = this.vtbl;
 	return other;
 };
-type7_TPlayer.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type7_TPlayer.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type7_TPlayer.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type7_TPlayer.prototype.Reset = function() {
-	 return this.vtbl.Reset(this);
-};
-type7_TPlayer.prototype.ToString_Str = function() {
+type10_DDGUI_AUTO.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type7_TPlayer.prototype.Equals = function() {
+type10_DDGUI_AUTO.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type7_TPlayer.prototype.ToHashCode = function() {
+type10_DDGUI_AUTO.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var vtbl_type5_TShit = {
-	Render: method11_type5_TShit_6_Render, 
-	Update: method11_type5_TShit_6_Update, 
-	Init: method11_type5_TShit_4_Init, 
+var vtbl_type9_DDGUI_DLG = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type5_TShit'] = function() {
-	this.attr3_Del = 0;
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr2_VY = 0.0;
-	this.attr3_Age = 0;
-	this.attr2_Al = 0.0;
-	this.vtbl = vtbl_type5_TShit;
+/**
+* @constructor
+*/
+window ['type9_DDGUI_DLG'] = function() {
+	this.attr9_focus_Str = "";
+	this.attr8_moveable = 0;
+	this.attr6_moving = 0;
+	this.attr9_scaleable = 0;
+	this.attr8_scaleing = 0;
+	this.attr10_col_bright = 0;
+	this.attr8_col_norm = 0;
+	this.attr16_col_hover_bright = 0;
+	this.attr14_col_hover_norm = 0;
+	this.attr13_dlg_inkey_Str = "";
+	this.attr4_xpos = 0;
+	this.attr4_ypos = 0;
+	this.attr5_rectx = 0;
+	this.attr5_recty = 0;
+	this.attr5_rectw = 0;
+	this.attr5_recth = 0;
+	this.attr10_realheight = 0;
+	this.attr15_kick_intern_dlg = 0;
+	this.attr18_kick_intern_id_Str = "";
+	this.attr4_main = new type9_DDGUI_WDG();
+	this.attr5_autos = new GLBArray();
+	this.attr7_widgets_ref = [new GLBArray()];
+	this.attr9_draworder = new GLBArray();
+	this.vtbl = vtbl_type9_DDGUI_DLG;
 	return this;
 	
 };
-window['type5_TShit'].prototype.clone = function() {
-	var other = new type5_TShit();
-	other.attr3_Del = this.attr3_Del;
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr2_VY = this.attr2_VY;
-	other.attr3_Age = this.attr3_Age;
-	other.attr2_Al = this.attr2_Al;
+window['type9_DDGUI_DLG'].prototype.clone = function() {
+	var other = new type9_DDGUI_DLG();
+	other.attr9_focus_Str = this.attr9_focus_Str;
+	other.attr8_moveable = this.attr8_moveable;
+	other.attr6_moving = this.attr6_moving;
+	other.attr9_scaleable = this.attr9_scaleable;
+	other.attr8_scaleing = this.attr8_scaleing;
+	other.attr10_col_bright = this.attr10_col_bright;
+	other.attr8_col_norm = this.attr8_col_norm;
+	other.attr16_col_hover_bright = this.attr16_col_hover_bright;
+	other.attr14_col_hover_norm = this.attr14_col_hover_norm;
+	other.attr13_dlg_inkey_Str = this.attr13_dlg_inkey_Str;
+	other.attr4_xpos = this.attr4_xpos;
+	other.attr4_ypos = this.attr4_ypos;
+	other.attr5_rectx = this.attr5_rectx;
+	other.attr5_recty = this.attr5_recty;
+	other.attr5_rectw = this.attr5_rectw;
+	other.attr5_recth = this.attr5_recth;
+	other.attr10_realheight = this.attr10_realheight;
+	other.attr15_kick_intern_dlg = this.attr15_kick_intern_dlg;
+	other.attr18_kick_intern_id_Str = this.attr18_kick_intern_id_Str;
+	other.attr4_main = tryClone(this.attr4_main);
+	other.attr5_autos = tryClone(this.attr5_autos);
+	other.attr7_widgets_ref = tryClone(this.attr7_widgets_ref);
+	other.attr9_draworder = tryClone(this.attr9_draworder);
 	other.vtbl = this.vtbl;
 	return other;
 };
-type5_TShit.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type5_TShit.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type5_TShit.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], arguments[1], this);
-};
-type5_TShit.prototype.ToString_Str = function() {
+type9_DDGUI_DLG.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type5_TShit.prototype.Equals = function() {
+type9_DDGUI_DLG.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type5_TShit.prototype.ToHashCode = function() {
+type9_DDGUI_DLG.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var vtbl_type5_TSpit = {
-	Update: method11_type5_TSpit_6_Update, 
-	Render: method11_type5_TSpit_6_Render, 
-	Init: method11_type5_TSpit_4_Init, 
+var vtbl_type10_DDGUI_FONT = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
-window ['type5_TSpit'] = function() {
-	this.attr1_X = 0.0;
-	this.attr1_Y = 0.0;
-	this.attr2_VX = 0.0;
-	this.attr2_VY = 0.0;
-	this.attr3_Age = 0;
-	this.attr2_Al = 0.0;
-	this.attr3_Del = 0;
-	this.vtbl = vtbl_type5_TSpit;
+/**
+* @constructor
+*/
+window ['type10_DDGUI_FONT'] = function() {
+	this.attr4_left = new GLBArray();
+	this.attr5_width = new GLBArray();
+	this.attr11_bHasKerning = 0;
+	this.vtbl = vtbl_type10_DDGUI_FONT;
+	this.attr11_bHasKerning = 1;
 	return this;
 	
 };
-window['type5_TSpit'].prototype.clone = function() {
-	var other = new type5_TSpit();
-	other.attr1_X = this.attr1_X;
-	other.attr1_Y = this.attr1_Y;
-	other.attr2_VX = this.attr2_VX;
-	other.attr2_VY = this.attr2_VY;
-	other.attr3_Age = this.attr3_Age;
-	other.attr2_Al = this.attr2_Al;
-	other.attr3_Del = this.attr3_Del;
+window['type10_DDGUI_FONT'].prototype.clone = function() {
+	var other = new type10_DDGUI_FONT();
+	other.attr4_left = tryClone(this.attr4_left);
+	other.attr5_width = tryClone(this.attr5_width);
+	other.attr11_bHasKerning = this.attr11_bHasKerning;
 	other.vtbl = this.vtbl;
 	return other;
 };
-type5_TSpit.prototype.Update = function() {
-	 return this.vtbl.Update(this);
-};
-type5_TSpit.prototype.Render = function() {
-	 return this.vtbl.Render(this);
-};
-type5_TSpit.prototype.Init = function() {
-	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
-};
-type5_TSpit.prototype.ToString_Str = function() {
+type10_DDGUI_FONT.prototype.ToString_Str = function() {
 	 return this.vtbl.ToString_Str(this);
 };
-type5_TSpit.prototype.Equals = function() {
+type10_DDGUI_FONT.prototype.Equals = function() {
 	 return this.vtbl.Equals(arguments[0], this);
 };
-type5_TSpit.prototype.ToHashCode = function() {
+type10_DDGUI_FONT.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
 var vtbl_type7_TObject = {
@@ -7576,6 +9284,9 @@ var vtbl_type7_TObject = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type7_TObject'] = function() {
 	this.vtbl = vtbl_type7_TObject;
 	return this;
@@ -7600,6 +9311,9 @@ var vtbl_type6_TObj3D = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type6_TObj3D'] = function() {
 	this.vtbl = vtbl_type6_TObj3D;
 	return this;
@@ -7624,6 +9338,9 @@ var vtbl_type10_DataBuffer = {
 	Equals: method13_type7_TObject_6_Equals, 
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
+/**
+* @constructor
+*/
 window ['type10_DataBuffer'] = function() {
 	this.vtbl = vtbl_type10_DataBuffer;
 	return this;
@@ -7643,6 +9360,22 @@ type10_DataBuffer.prototype.Equals = function() {
 type10_DataBuffer.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var const13_STATE_IS_GAME = 0, const7_IS_BIRD = 1, const6_IS_PIG = 2, const8_IS_HUMAN = 3, const8_IS_LLAMA = 4, const8_Tilesize = 32, const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global12_Hardware_Str = "", global9_Gamestate = 0, global11_EditorEnemy = new type6_TEnemy(), global10_SelectTile = 0, global6_MouseX_ref = [0.0], global6_MouseY_ref = [0.0], global2_ML_ref = [0.0], global2_MR_ref = [0.0], global11_PlayerImage = 0, global11_LadderImage = 0, global10_SpikeImage = 0, global15_TrampolineImage = 0, global8_PigImage = 0, global10_HumanImage = 0, global9_BirdImage = 0, global9_ShitImage = 0, global10_LlamaImage = 0, global9_SpitImage = 0, global9_DoorImage = 0, global12_TriggerImage = 0, global12_DynamitImage = 0, global14_ExplosionImage = 0, global9_MenuImage = 0, global11_ButtonImage = 0, global10_ArrowImage = 0, global9_JumpImage = 0, global6_Player = new type7_TPlayer(), global3_Map = new type4_TMap(), global17_LastMousePosition = new GLBArray(), global9_Title_Str = "", global9_Menu1_Str = "", global9_Menu2_Str = "", global9_Menu3_Str = "", global6_Action = 0, global6_Enemys = new GLBArray(), global10_Explosions = new GLBArray(), global5_Shits = new GLBArray(), global5_Spits = new GLBArray(), global6_Objs3D = new GLBArray();
-window['initStatics'] = function() {}
+var const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global5_delta = 0.0, global2_nt = 0, global3_old = 0, global3_fps = 0, global5_flips = 0, global17_gDDguiCaretColour = 0, global25_gDDguiMinControlDimension = 0, global20_gDDguiScrollbarWidth = 0, global11_ddgui_stack_ref = [new GLBArray()], global18_ddgui_font_kerning = new type10_DDGUI_FONT(), global20_DDGUI_AUTO_INPUT_DLG = 0.0, global18_DDGUI_IN_INPUT_DLG = 0.0, global6_Objs3D = new GLBArray();
+// set default statics:
+window['initStatics'] = function() {
+	static10_DDgui_show_intern_mouse_down = 0, static10_DDgui_show_intern_movemousex = 0, static10_DDgui_show_intern_movemousey = 0, static12_DDgui_show_intern_ToolTipDelay = 0, static9_DDgui_show_intern_ToolTipMx = 0, static9_DDgui_show_intern_ToolTipMy = 0;
+static9_DDgui_draw_widget_intern_lines_Str = new GLBArray();
+static7_DDgui_backgnd_QuickGL = -(1);
+static9_DDgui_drawwidget_dummy_Str_ref = [""];
+static9_DDgui_handlewidget_dummy_Str_ref = [""];
+static7_DDgui_radio_opt_Str = new GLBArray();
+static7_DDgui_handleradio_txt_Str = new GLBArray();
+static7_DDgui_list_opt_Str = new GLBArray();
+static7_DDgui_drawlist_opt_Str_ref = [new GLBArray()];
+static11_ddgui_handletext_st_lasttime = 0, static10_ddgui_handletext_st_lastkey = 0;
+static7_DDgui_drawtab_str_Str = new GLBArray(), static8_DDgui_drawtab_str2_Str_ref = [new GLBArray()];
+static7_DDgui_handletab_str_Str = new GLBArray(), static8_DDgui_handletab_str2_Str_ref = [new GLBArray()];
+static7_DDgui_selecttab_str_Str = new GLBArray(), static8_DDgui_selecttab_str2_Str_ref = [new GLBArray()];
+
+}
 for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();

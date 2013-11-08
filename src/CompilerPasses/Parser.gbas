@@ -1290,7 +1290,7 @@ FUNCTION Identifier%: IsCommand%
 		ENDIF
 
 		LOCAL Found% = FALSE
-		
+
 		FOREACH Vari% IN Varis[]
 			IF Name$ = Compiler.Varis[Vari].Name$
 				IF Compiler.currentFunc <> -1 AND Compiler.Funcs[Compiler.currentFunc].MyType <> -1 AND Expr = -1
@@ -1303,7 +1303,7 @@ FUNCTION Identifier%: IsCommand%
 							BREAK
 						ENDIF
 					NEXT
-					
+
 					IF NOT IsNotImplicit
 						ALIAS Typ AS Compiler.Types[Compiler.Funcs[Compiler.currentFunc].MyType]
 						FOREACH A IN Typ.Attributes[]

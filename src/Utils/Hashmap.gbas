@@ -4,35 +4,6 @@
 // IDE Version: 10.283
 
 
-//HAshmaptest
-
-//LOCAL Map AS HashMap
-//FOR i = 0 TO 10000
-//	Map.Put("Key"+i, i)
-//NEXT
-//
-//FOR i = 0 TO 10000
-//	LOCAL Value%
-//	Map.GetValue("Key"+i, Value)
-//	STDOUT "Key"+i+": "+Value+"\n"
-//	IF Value <> i THEN END
-//NEXT
-//FOR i = 0 TO 10000
-//	Map.Remove("Key"+i)
-//NEXT
-//FOR i = 0 TO 10000
-//	LOCAL Value%
-//	IF Map.GetValue("Key"+i, Value)
-//		STDOUT "wtf\n"
-//		KEYWAIT
-//		END
-//	ELSE
-//		STDOUT "okay\n"
-//	ENDIF
-//NEXT
-//KEYWAIT
-
-
 //! Ein Behälter für Elemente
 TYPE Bucket
 	Set% = FALSE

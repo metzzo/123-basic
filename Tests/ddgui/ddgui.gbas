@@ -76,24 +76,24 @@ SUB GLB_ON_INIT:
 
 	DDgui_widget("", "Static Text", 0,0)                  // static text
 	DDgui_spacer(10000,20)                                // spacer
-//
-//	// at this position we're entering a TAB widget
-//	// although the "child" widgets do not exist, yet
-//	// this is perfectly OK!
-//
-//	DDgui_tab("tab1",	"Lig_sts,ls_test,ra_test|"+ _
-//						"Buttons,fr_buttons|" + _
-//						"Texts,st_text,tx_test"	)
-//
-//	// now the items for the tab
-//	// watch out: the spacers get drawn even if the
-//	// widgets are not! Make the spacers vertical size = 0!
-//	DDgui_combo("ls_test", "one|two|three", 0, 0)          // list box
-//	DDgui_spacer(10000,0)                                 // spacer
-//	DDgui_radio("ra_test", "red|green|blue", 0)           // radio buttons
-//	DDgui_slider("sl_test", 0.5, 0,0)					  // slider
-//	DDgui_spacer(10000,0)                                 // spacer
-//
+
+	// at this position we're entering a TAB widget
+	// although the "child" widgets do not exist, yet
+	// this is perfectly OK!
+
+	DDgui_tab("tab1",	"Lig_sts,ls_test,ra_test|"+ _
+						"Buttons,fr_buttons|" + _
+						"Texts,st_text,tx_test"	)
+
+	// now the items for the tab
+	// watch out: the spacers get drawn even if the
+	// widgets are not! Make the spacers vertical size = 0!
+	DDgui_combo("ls_test", "one|two|three", 0, 0)          // list box
+	DDgui_spacer(10000,0)                                 // spacer
+	DDgui_radio("ra_test", "red|green|blue", 0)           // radio buttons
+	DDgui_slider("sl_test", 0.5, 0,0)					  // slider
+	DDgui_spacer(10000,0)                                 // spacer
+
 //	DDgui_framestart("fr_buttons")
 //		DDgui_button("bt_complex", "complex dialog", 0,0)     // button
 //		DDgui_button("bt_col", "SPR_C"+RGB(255,0,255), 0,0)   // color-button
@@ -1605,9 +1605,9 @@ ENDFUNCTION
 			ALPHAMODE -.7
 			LOCAL w%, h%
 			GETFONTSIZE w%, h%
-
+			
 			// singleline -> vcenter
-			IF INSTR(wdg.wtext$, "\n")<0
+			IF INSTR(wdg.wtext$, "\ny")<0
 				h = DDgui_boxprint(ddgui_vals, wdg, 0, ytop% + (wdg.wheight-h%)/2, wdg.wwidth, TRUE, FALSE)
 			ELSE
 				h = DDgui_boxprint(ddgui_vals, wdg, 0, ytop%, wdg.wwidth, TRUE, FALSE)

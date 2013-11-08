@@ -1,0 +1,40 @@
+// --------------------------------- //
+// Project: GLBScript
+// Start: Sunday, June 30, 2013
+// IDE Version: 10.283
+
+
+?IFDEF VMCOMPILER
+
+FUNCTION VM_DRAWSPRITE: exec AS Executor
+
+ENDFUNCTION
+
+
+
+
+// CONSOLE
+FUNCTION VM_STDOUT: exec AS Executor
+	STDOUT REPLACE$(exec.PopStr$(),"\\n","\n")
+ENDFUNCTION
+
+FUNCTION VM_KEYWAIT: exec AS Executor
+	KEYWAIT
+ENDFUNCTION
+
+
+
+FUNCTION InitFuncs:
+	LOCAL p AS ScriptFunc
+	p = VM_DRAWSPRITE
+	RegisterFunc("DRAWSPRITE", p)
+
+	p = VM_KEYWAIT
+	RegisterFunc("KEYWAIT", p)
+
+	p = VM_STDOUT
+	RegisterFunc("STDOUT", p)
+ENDFUNCTION
+
+
+?ENDIF

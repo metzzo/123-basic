@@ -72,7 +72,7 @@ FUNCTION DoTarget$: Name$
 	FOREACH G IN Generators[]
 		IF UCASE$(G.Name$) = UCASE$(Lang$)
 			Compiler.errorState$ = " (generate error)"
-			Output$ = G.genProto()
+			Output$ = ""+G.genProto()
 			Compiler.errorState$ = " (target '"+Name$+"' error)"
 			BREAK
 		ENDIF

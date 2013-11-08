@@ -2670,16 +2670,16 @@ function GETTIMER() {
 }
 
 function ALPHAMODE(mode) {
-	/*if (mode < 0) {
-		context.globalCompositeOperation = 'lighter';
-		mode = (1 - mode) - 1;
+	if (mode < 0) {
+		context.globalCompositeOperation = 'darker';
+		mode = ABS((1 - mode) - 1);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'lighter';
 	} else {
 		context.globalCompositeOperation = 'source-over';
 		mode = 1;
 	}
-	canvas.globalAlpha = mode;*/
+	canvas.globalAlpha = mode;
 }
 
 function SETPIXEL(x, y, col) {
@@ -4706,8 +4706,6 @@ window['main'] = function(){
 		global9_Menu3_Str = "Beenden";
 		__debugInfo = "147:\JumpIt.gbas";
 		PUSHLOOP("MENU_LOOP");
-		__debugInfo = "257:\JumpIt.gbas";
-		global9_Menu3_Str = "";
 		__debugInfo = "28:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
@@ -4767,21 +4765,21 @@ window['Update'] = function() {
 				__debugInfo = "171:\JumpIt.gbas";
 				(global3_Map).Update();
 				__debugInfo = "174:\JumpIt.gbas";
-				var forEachSaver1673 = global6_Enemys;
-				for(var forEachCounter1673 = 0 ; forEachCounter1673 < forEachSaver1673.values.length ; forEachCounter1673++) {
-					var local5_Enemy_1395 = forEachSaver1673.values[forEachCounter1673];
+				var forEachSaver1669 = global6_Enemys;
+				for(var forEachCounter1669 = 0 ; forEachCounter1669 < forEachSaver1669.values.length ; forEachCounter1669++) {
+					var local5_Enemy_1395 = forEachSaver1669.values[forEachCounter1669];
 				{
 						__debugInfo = "173:\JumpIt.gbas";
 						(local5_Enemy_1395).Update();
 						__debugInfo = "173:\JumpIt.gbas";
 					}
-					forEachSaver1673.values[forEachCounter1673] = local5_Enemy_1395;
+					forEachSaver1669.values[forEachCounter1669] = local5_Enemy_1395;
 				
 				};
 				__debugInfo = "178:\JumpIt.gbas";
-				var forEachSaver1688 = global5_Shits;
-				for(var forEachCounter1688 = 0 ; forEachCounter1688 < forEachSaver1688.values.length ; forEachCounter1688++) {
-					var local4_Shit_1396 = forEachSaver1688.values[forEachCounter1688];
+				var forEachSaver1684 = global5_Shits;
+				for(var forEachCounter1684 = 0 ; forEachCounter1684 < forEachSaver1684.values.length ; forEachCounter1684++) {
+					var local4_Shit_1396 = forEachSaver1684.values[forEachCounter1684];
 				{
 						__debugInfo = "176:\JumpIt.gbas";
 						(local4_Shit_1396).Update();
@@ -4789,21 +4787,21 @@ window['Update'] = function() {
 						if (local4_Shit_1396.attr3_Del) {
 							__debugInfo = "177:\JumpIt.gbas";
 							//DELETE!!111
-							forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
-							DIMDEL(forEachSaver1688, forEachCounter1688);
-							forEachCounter1688--;
+							forEachSaver1684.values[forEachCounter1684] = local4_Shit_1396;
+							DIMDEL(forEachSaver1684, forEachCounter1684);
+							forEachCounter1684--;
 							continue;
 							__debugInfo = "177:\JumpIt.gbas";
 						};
 						__debugInfo = "176:\JumpIt.gbas";
 					}
-					forEachSaver1688.values[forEachCounter1688] = local4_Shit_1396;
+					forEachSaver1684.values[forEachCounter1684] = local4_Shit_1396;
 				
 				};
 				__debugInfo = "182:\JumpIt.gbas";
-				var forEachSaver1703 = global5_Spits;
-				for(var forEachCounter1703 = 0 ; forEachCounter1703 < forEachSaver1703.values.length ; forEachCounter1703++) {
-					var local4_Spit_1397 = forEachSaver1703.values[forEachCounter1703];
+				var forEachSaver1699 = global5_Spits;
+				for(var forEachCounter1699 = 0 ; forEachCounter1699 < forEachSaver1699.values.length ; forEachCounter1699++) {
+					var local4_Spit_1397 = forEachSaver1699.values[forEachCounter1699];
 				{
 						__debugInfo = "180:\JumpIt.gbas";
 						(local4_Spit_1397).Update();
@@ -4811,21 +4809,21 @@ window['Update'] = function() {
 						if (local4_Spit_1397.attr3_Del) {
 							__debugInfo = "181:\JumpIt.gbas";
 							//DELETE!!111
-							forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
-							DIMDEL(forEachSaver1703, forEachCounter1703);
-							forEachCounter1703--;
+							forEachSaver1699.values[forEachCounter1699] = local4_Spit_1397;
+							DIMDEL(forEachSaver1699, forEachCounter1699);
+							forEachCounter1699--;
 							continue;
 							__debugInfo = "181:\JumpIt.gbas";
 						};
 						__debugInfo = "180:\JumpIt.gbas";
 					}
-					forEachSaver1703.values[forEachCounter1703] = local4_Spit_1397;
+					forEachSaver1699.values[forEachCounter1699] = local4_Spit_1397;
 				
 				};
 				__debugInfo = "186:\JumpIt.gbas";
-				var forEachSaver1718 = global10_Explosions;
-				for(var forEachCounter1718 = 0 ; forEachCounter1718 < forEachSaver1718.values.length ; forEachCounter1718++) {
-					var local9_Explosion_1398 = forEachSaver1718.values[forEachCounter1718];
+				var forEachSaver1714 = global10_Explosions;
+				for(var forEachCounter1714 = 0 ; forEachCounter1714 < forEachSaver1714.values.length ; forEachCounter1714++) {
+					var local9_Explosion_1398 = forEachSaver1714.values[forEachCounter1714];
 				{
 						__debugInfo = "184:\JumpIt.gbas";
 						(local9_Explosion_1398).Update();
@@ -4833,15 +4831,15 @@ window['Update'] = function() {
 						if (local9_Explosion_1398.attr3_Del) {
 							__debugInfo = "185:\JumpIt.gbas";
 							//DELETE!!111
-							forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
-							DIMDEL(forEachSaver1718, forEachCounter1718);
-							forEachCounter1718--;
+							forEachSaver1714.values[forEachCounter1714] = local9_Explosion_1398;
+							DIMDEL(forEachSaver1714, forEachCounter1714);
+							forEachCounter1714--;
 							continue;
 							__debugInfo = "185:\JumpIt.gbas";
 						};
 						__debugInfo = "184:\JumpIt.gbas";
 					}
-					forEachSaver1718.values[forEachCounter1718] = local9_Explosion_1398;
+					forEachSaver1714.values[forEachCounter1714] = local9_Explosion_1398;
 				
 				};
 				__debugInfo = "187:\JumpIt.gbas";
@@ -4874,53 +4872,53 @@ window['Render'] = function() {
 			__debugInfo = "233:\JumpIt.gbas";
 			if ((((local16___SelectHelper2__1401) == (~~(0))) ? 1 : 0)) {
 				__debugInfo = "209:\JumpIt.gbas";
-				var forEachSaver1741 = global5_Shits;
-				for(var forEachCounter1741 = 0 ; forEachCounter1741 < forEachSaver1741.values.length ; forEachCounter1741++) {
-					var local4_Shit_1402 = forEachSaver1741.values[forEachCounter1741];
+				var forEachSaver1737 = global5_Shits;
+				for(var forEachCounter1737 = 0 ; forEachCounter1737 < forEachSaver1737.values.length ; forEachCounter1737++) {
+					var local4_Shit_1402 = forEachSaver1737.values[forEachCounter1737];
 				{
 						__debugInfo = "208:\JumpIt.gbas";
 						(local4_Shit_1402).Render();
 						__debugInfo = "208:\JumpIt.gbas";
 					}
-					forEachSaver1741.values[forEachCounter1741] = local4_Shit_1402;
+					forEachSaver1737.values[forEachCounter1737] = local4_Shit_1402;
 				
 				};
 				__debugInfo = "211:\JumpIt.gbas";
 				(global3_Map).Render();
 				__debugInfo = "215:\JumpIt.gbas";
-				var forEachSaver1751 = global5_Spits;
-				for(var forEachCounter1751 = 0 ; forEachCounter1751 < forEachSaver1751.values.length ; forEachCounter1751++) {
-					var local4_Spit_1403 = forEachSaver1751.values[forEachCounter1751];
+				var forEachSaver1747 = global5_Spits;
+				for(var forEachCounter1747 = 0 ; forEachCounter1747 < forEachSaver1747.values.length ; forEachCounter1747++) {
+					var local4_Spit_1403 = forEachSaver1747.values[forEachCounter1747];
 				{
 						__debugInfo = "214:\JumpIt.gbas";
 						(local4_Spit_1403).Render();
 						__debugInfo = "214:\JumpIt.gbas";
 					}
-					forEachSaver1751.values[forEachCounter1751] = local4_Spit_1403;
+					forEachSaver1747.values[forEachCounter1747] = local4_Spit_1403;
 				
 				};
 				__debugInfo = "219:\JumpIt.gbas";
-				var forEachSaver1759 = global6_Enemys;
-				for(var forEachCounter1759 = 0 ; forEachCounter1759 < forEachSaver1759.values.length ; forEachCounter1759++) {
-					var local5_Enemy_1404 = forEachSaver1759.values[forEachCounter1759];
+				var forEachSaver1755 = global6_Enemys;
+				for(var forEachCounter1755 = 0 ; forEachCounter1755 < forEachSaver1755.values.length ; forEachCounter1755++) {
+					var local5_Enemy_1404 = forEachSaver1755.values[forEachCounter1755];
 				{
 						__debugInfo = "218:\JumpIt.gbas";
 						(local5_Enemy_1404).Render();
 						__debugInfo = "218:\JumpIt.gbas";
 					}
-					forEachSaver1759.values[forEachCounter1759] = local5_Enemy_1404;
+					forEachSaver1755.values[forEachCounter1755] = local5_Enemy_1404;
 				
 				};
 				__debugInfo = "223:\JumpIt.gbas";
-				var forEachSaver1767 = global10_Explosions;
-				for(var forEachCounter1767 = 0 ; forEachCounter1767 < forEachSaver1767.values.length ; forEachCounter1767++) {
-					var local9_Explosion_1405 = forEachSaver1767.values[forEachCounter1767];
+				var forEachSaver1763 = global10_Explosions;
+				for(var forEachCounter1763 = 0 ; forEachCounter1763 < forEachSaver1763.values.length ; forEachCounter1763++) {
+					var local9_Explosion_1405 = forEachSaver1763.values[forEachCounter1763];
 				{
 						__debugInfo = "222:\JumpIt.gbas";
 						(local9_Explosion_1405).Render();
 						__debugInfo = "222:\JumpIt.gbas";
 					}
-					forEachSaver1767.values[forEachCounter1767] = local9_Explosion_1405;
+					forEachSaver1763.values[forEachCounter1763] = local9_Explosion_1405;
 				
 				};
 				__debugInfo = "225:\JumpIt.gbas";
@@ -5745,9 +5743,9 @@ window['method10_type4_TMap_4_Save'] = function(param8_File_Str, param4_self) {
 						__debugInfo = "70:\Map.gbas";
 						local12_PositionData_1479 = param4_self.attr5_Datas.arrAccess(~~(local1_x_1478), ~~(local1_y_1476)).values[tmpPositionCache];
 						__debugInfo = "85:\Map.gbas";
-						var forEachSaver3458 = global6_Enemys;
-						for(var forEachCounter3458 = 0 ; forEachCounter3458 < forEachSaver3458.values.length ; forEachCounter3458++) {
-							var local4_Enem_1480 = forEachSaver3458.values[forEachCounter3458];
+						var forEachSaver3454 = global6_Enemys;
+						for(var forEachCounter3454 = 0 ; forEachCounter3454 < forEachSaver3454.values.length ; forEachCounter3454++) {
+							var local4_Enem_1480 = forEachSaver3454.values[forEachCounter3454];
 						{
 								__debugInfo = "84:\Map.gbas";
 								if (((((((INTEGER(((local4_Enem_1480.attr1_X) / (32)))) == (local1_x_1478)) ? 1 : 0)) && ((((INTEGER(((((((local4_Enem_1480.attr1_Y) + (local4_Enem_1480.attr6_Height))) - (1))) / (32)))) == (local1_y_1476)) ? 1 : 0))) ? 1 : 0)) {
@@ -5782,7 +5780,7 @@ window['method10_type4_TMap_4_Save'] = function(param8_File_Str, param4_self) {
 								};
 								__debugInfo = "84:\Map.gbas";
 							}
-							forEachSaver3458.values[forEachCounter3458] = local4_Enem_1480;
+							forEachSaver3454.values[forEachCounter3454] = local4_Enem_1480;
 						
 						};
 						__debugInfo = "87:\Map.gbas";
@@ -5851,9 +5849,9 @@ window['method10_type4_TMap_4_Init'] = function(param8_Name_Str, param4_self) {
 			__debugInfo = "123:\Map.gbas";
 			local1_x_1488 = 0;
 			__debugInfo = "150:\Map.gbas";
-			var forEachSaver3675 = local9_Tiles_Str_1490;
-			for(var forEachCounter3675 = 0 ; forEachCounter3675 < forEachSaver3675.values.length ; forEachCounter3675++) {
-				var local4_tile_1491 = forEachSaver3675.values[forEachCounter3675];
+			var forEachSaver3671 = local9_Tiles_Str_1490;
+			for(var forEachCounter3671 = 0 ; forEachCounter3671 < forEachSaver3671.values.length ; forEachCounter3671++) {
+				var local4_tile_1491 = forEachSaver3671.values[forEachCounter3671];
 			{
 					__debugInfo = "125:\Map.gbas";
 					param4_self.attr5_Datas.arrAccess(local1_x_1488, local1_y_1489).values[tmpPositionCache] = func7_Convert(local4_tile_1491);
@@ -5914,7 +5912,7 @@ window['method10_type4_TMap_4_Init'] = function(param8_Name_Str, param4_self) {
 					local1_x_1488+=1;
 					__debugInfo = "125:\Map.gbas";
 				}
-				forEachSaver3675.values[forEachCounter3675] = local4_tile_1491;
+				forEachSaver3671.values[forEachCounter3671] = local4_tile_1491;
 			
 			};
 			__debugInfo = "152:\Map.gbas";
@@ -6733,9 +6731,9 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 					__debugInfo = "151:\Player.gbas";
 				};
 				__debugInfo = "158:\Player.gbas";
-				var forEachSaver5982 = global6_Enemys;
-				for(var forEachCounter5982 = 0 ; forEachCounter5982 < forEachSaver5982.values.length ; forEachCounter5982++) {
-					var local5_Enemy_1580 = forEachSaver5982.values[forEachCounter5982];
+				var forEachSaver5978 = global6_Enemys;
+				for(var forEachCounter5978 = 0 ; forEachCounter5978 < forEachSaver5978.values.length ; forEachCounter5978++) {
+					var local5_Enemy_1580 = forEachSaver5978.values[forEachCounter5978];
 				{
 						__debugInfo = "157:\Player.gbas";
 						if ((((SQR(((((((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))) * (((local5_Enemy_1580.attr1_X) - (((local8_LastPosX_1563) * (32))))))) + (((local5_Enemy_1580.attr1_Y) - (((local8_LastPosY_1564) * (32)))))))) < (32)) ? 1 : 0)) {
@@ -6745,7 +6743,7 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 						};
 						__debugInfo = "157:\Player.gbas";
 					}
-					forEachSaver5982.values[forEachCounter5982] = local5_Enemy_1580;
+					forEachSaver5978.values[forEachCounter5978] = local5_Enemy_1580;
 				
 				};
 				__debugInfo = "126:\Player.gbas";
@@ -6753,9 +6751,9 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 			__debugInfo = "105:\Player.gbas";
 		};
 		__debugInfo = "173:\Player.gbas";
-		var forEachSaver6112 = global6_Enemys;
-		for(var forEachCounter6112 = 0 ; forEachCounter6112 < forEachSaver6112.values.length ; forEachCounter6112++) {
-			var local5_Enemy_1581 = forEachSaver6112.values[forEachCounter6112];
+		var forEachSaver6108 = global6_Enemys;
+		for(var forEachCounter6108 = 0 ; forEachCounter6108 < forEachSaver6108.values.length ; forEachCounter6108++) {
+			var local5_Enemy_1581 = forEachSaver6108.values[forEachCounter6108];
 		{
 				__debugInfo = "172:\Player.gbas";
 				if ((((local5_Enemy_1581.attr4_Fall) == (0)) ? 1 : 0)) {
@@ -6775,13 +6773,13 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 				};
 				__debugInfo = "172:\Player.gbas";
 			}
-			forEachSaver6112.values[forEachCounter6112] = local5_Enemy_1581;
+			forEachSaver6108.values[forEachCounter6108] = local5_Enemy_1581;
 		
 		};
 		__debugInfo = "181:\Player.gbas";
-		var forEachSaver6152 = global5_Shits;
-		for(var forEachCounter6152 = 0 ; forEachCounter6152 < forEachSaver6152.values.length ; forEachCounter6152++) {
-			var local1_S_1582 = forEachSaver6152.values[forEachCounter6152];
+		var forEachSaver6148 = global5_Shits;
+		for(var forEachCounter6148 = 0 ; forEachCounter6148 < forEachSaver6148.values.length ; forEachCounter6148++) {
+			var local1_S_1582 = forEachSaver6148.values[forEachCounter6148];
 		{
 				__debugInfo = "180:\Player.gbas";
 				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1582.attr1_X), ~~(local1_S_1582.attr1_Y), 16, 16)) && ((((local1_S_1582.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
@@ -6789,21 +6787,21 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 					(param4_self).Reset();
 					__debugInfo = "179:\Player.gbas";
 					//DELETE!!111
-					forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
-					DIMDEL(forEachSaver6152, forEachCounter6152);
-					forEachCounter6152--;
+					forEachSaver6148.values[forEachCounter6148] = local1_S_1582;
+					DIMDEL(forEachSaver6148, forEachCounter6148);
+					forEachCounter6148--;
 					continue;
 					__debugInfo = "178:\Player.gbas";
 				};
 				__debugInfo = "180:\Player.gbas";
 			}
-			forEachSaver6152.values[forEachCounter6152] = local1_S_1582;
+			forEachSaver6148.values[forEachCounter6148] = local1_S_1582;
 		
 		};
 		__debugInfo = "189:\Player.gbas";
-		var forEachSaver6192 = global5_Spits;
-		for(var forEachCounter6192 = 0 ; forEachCounter6192 < forEachSaver6192.values.length ; forEachCounter6192++) {
-			var local1_S_1583 = forEachSaver6192.values[forEachCounter6192];
+		var forEachSaver6188 = global5_Spits;
+		for(var forEachCounter6188 = 0 ; forEachCounter6188 < forEachSaver6188.values.length ; forEachCounter6188++) {
+			var local1_S_1583 = forEachSaver6188.values[forEachCounter6188];
 		{
 				__debugInfo = "188:\Player.gbas";
 				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1583.attr1_X), ~~(local1_S_1583.attr1_Y), 8, 8)) && ((((local1_S_1583.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
@@ -6811,15 +6809,15 @@ window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
 					(param4_self).Reset();
 					__debugInfo = "187:\Player.gbas";
 					//DELETE!!111
-					forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
-					DIMDEL(forEachSaver6192, forEachCounter6192);
-					forEachCounter6192--;
+					forEachSaver6188.values[forEachCounter6188] = local1_S_1583;
+					DIMDEL(forEachSaver6188, forEachCounter6188);
+					forEachCounter6188--;
 					continue;
 					__debugInfo = "186:\Player.gbas";
 				};
 				__debugInfo = "188:\Player.gbas";
 			}
-			forEachSaver6192.values[forEachCounter6192] = local1_S_1583;
+			forEachSaver6188.values[forEachCounter6188] = local1_S_1583;
 		
 		};
 		__debugInfo = "195:\Player.gbas";

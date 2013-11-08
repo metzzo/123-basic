@@ -254,7 +254,7 @@ FUNCTION IsEnemy%:
 	ENDIF
 ENDFUNCTION
 
-GLOBAL Title$, Menu1$, Menu2$, Menu3$ = "", Action%
+GLOBAL Title$, Menu1$, Menu2$, Menu3$, Action%
 
 SUB MENU_LOOP:
 	LOCAL x,y
