@@ -27,8 +27,7 @@ FUNCTION JS_Generator$:
 		LOCAL InWebWorker% = IsDefine("HTML5_WEBWORKER")
 
 		ManageFuncParamOverlaps()
-
-
+		
 		StaticText$ = ""
 
 		LOCAL Text$ = ""
@@ -468,7 +467,7 @@ FUNCTION JSGenerate$: expr AS Expr
 			ENDIF
 		CASE EXPR_IS_OPERATOR
 			LOCAL Sym$ = Operators[expr.Op].Sym$
-			LOCAL HasToBeInt = FALSE
+			LOCAL HasToBeInt = FALSE, MightBeInt% = FALSE
 			SELECT Sym$
 				CASE "="
 					Sym$ = "=="
@@ -483,17 +482,33 @@ FUNCTION JSGenerate$: expr AS Expr
 					Sym$ = "&&"
 					HasToBeInt = TRUE
 				CASE "<"
-					HasToBeInt = TRUE
+					MightBeInt = TRUE
 				CASE ">"
-					HasToBeInt = TRUE
+					MightBeInt = TRUE
 				CASE ">="
-					HasToBeInt = TRUE
+					MightBeInt = TRUE
 				CASE "<="
-					HasToBeInt = TRUE
+					MightBeInt = TRUE
 				//...
 			ENDSELECT
-			IF HasToBeInt
-				Text$ = Text$ + "(((" + JSGenerate$(Exprs[expr.Left]) + ") " + Sym$ + " (" + JSGenerate$(Exprs[expr.Right]) + ")) ? 1 : 0)"
+			IF HasToBeInt OR MightBeInt
+				// wenn beide strings sind und <,>,<=,>= dann gehe auf compareTo
+				IF MightBeInt AND Exprs[expr.Left].datatype.Name$ = "string" AND Exprs[expr.Right].datatype.Name$ = "string"
+					LOCAL Res$
+					SELECT Sym$
+						CASE "<"
+							Res$ = " == -1"
+						CASE ">"
+							Res$ = " == 1"
+						CASE "<="
+							Res$ = " <= 0"
+						CASE ">="
+							Res$ = " >= 0"
+					ENDSELECT
+					Text$ = Text$ + "((strcmp((" + JSGenerate$(Exprs[expr.Left]) + "), (" + JSGenerate$(Exprs[expr.Right]) + ")) " + Res$ + " ) ? 1 : 0)"
+				ELSE
+					Text$ = Text$ + "(((" + JSGenerate$(Exprs[expr.Left]) + ") " + Sym$ + " (" + JSGenerate$(Exprs[expr.Right]) + ")) ? 1 : 0)"
+				ENDIF
 			ELSE
 				LOCAL l$ = JSGenerate$(Exprs[expr.Left])
 				IF Sym$ = "-" AND l$ = "0"
@@ -508,9 +523,9 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = "CAST2INT("+Text$+")"
 			ENDIF
 		CASE EXPR_IS_INT
-			Text$ = INTEGER(expr.intval) + "/* intval */"
+			Text$ = INTEGER(expr.intval)
 		CASE EXPR_IS_FLOAT
-			Text$ = expr.floatval + "/* floatval */"
+			Text$ = expr.floatval
 		CASE EXPR_IS_STR
 			Text$ = expr.strval$
 		CASE EXPR_IS_FUNCCALL
@@ -1175,7 +1190,7 @@ ENDFUNCTION
 FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
-		RetVal$ = "new GLBArray()"
+		RetVal$ = "new GLBArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")" // previously just "new GLBArray()"
 	ELSE
 		SELECT datatype.Name$
 			CASE "int"

@@ -41,8 +41,6 @@ WHILE TRUE
 //		DDgui_set("tx_test", "TEXT", text$)
 //	ENDIF
 
-
-
 	now = GETTIMERALL()
 	INC delta, now-old
 	INC flips
@@ -1603,7 +1601,7 @@ ENDFUNCTION
 			ALPHAMODE -.7
 			LOCAL w%, h%
 			GETFONTSIZE w%, h%
-			
+
 			// singleline -> vcenter
 			IF INSTR(wdg.wtext$, "\ny")<0
 				h = DDgui_boxprint(ddgui_vals, wdg, 0, ytop% + (wdg.wheight-h%)/2, wdg.wwidth, TRUE, FALSE)
@@ -1685,7 +1683,7 @@ ENDFUNCTION
 		CASE "TAB"
 			DDgui_handletab(ddgui_vals, wdg, mx, my, b1, b2)
 		CASE "COMBO"
-			DDgui_handlecombo(ddgui_vals, wdg, mx, my, b1, b2)
+			DDgui_handlecombo(ddgui_vals, wdg, mx, my, b1, b2) 
 		CASE "SINGLETEXT"
 			ddgui_handletext(ddgui_vals, wdg, mx, my, b1, b2, TRUE, FALSE)
 		CASE "NUMBERTEXT"
@@ -3206,6 +3204,8 @@ STATIC str$[], str2$[]
 				IF oldselect% = -1 AND DDgui_index(ddgui_stack[-1], str2$[j], FALSE)<0
 					DEBUG "Invalid widget in Tab: "+str2$[j]+" - could crash!\n"
 					CONTINUE
+				ELSE
+					DEBUG "Valid widget "+str2$[j]+"\n"
 				ENDIF
 
 				IF i=isel AND iHide=1

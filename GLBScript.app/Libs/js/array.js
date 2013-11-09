@@ -8,10 +8,10 @@
 * Ein GLBArray ist ein Array, welches versucht die GLBArrays unter GLBasic so gut wie möglich zu simulieren.
 * @constructor
 */
-function GLBArray() {
+function GLBArray(def) {
 	this.values = [];
 	this.dimensions = [0];
-	this.defval = 0;
+	this.defval = !!def ? def : 0;
 	return this;
 }
 

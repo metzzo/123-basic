@@ -20,12 +20,16 @@ function Sprite(img, num) {
 	this.frameHeight = -1;
 }
 
-function getSprite(num) {
+function getSprite(num, notstrict) {
 	if (!!sprites[num]) {
 		if (!sprites[num].loaded) throwError("Image not yet loaded '"+num+"'");
 		return sprites[num];
 	} else {
-		throwError("Image not available '"+num+"'");
+		if (!notstrict) {
+			throwError("Image not available '"+num+"'");
+		} else {
+			return null;
+		}
 	}
 }
 
@@ -220,33 +224,59 @@ function ENDPOLY() {
 		if (polyStack.length == 4) {
 			POLYNEWSTRIP();
 		} else {
+			context.save();
 			//Zeichnen
 			if (mode == 1) {
-				//context.save();
-				//context.fillStyle = '#FF0000';
 				if ((polyStack.length % 3) != 0) throwError("Polyvector cannot draw non power of 3 triangles");
-				var spr = getSprite(num);
+				var spr = getSprite(num, true);
 				for (var i = 0; i < polyStack.length; i+=3) {
-					/*context.beginPath()
-					context.moveTo(polyStack[i].x, polyStack[i].y)
-					context.lineTo(polyStack[i+1].x, polyStack[i+1].y)
-					context.lineTo(polyStack[i+2].x, polyStack[i+2].y)
-					context.closePath()
-					context.fill()*/
-					tmpPolyStack[0] = polyStack[i];
-					tmpPolyStack[1] = polyStack[i+1];
-					tmpPolyStack[2] = polyStack[i+2];
-					drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
+					if (!spr) {
+						context.beginPath();
+						context.moveTo(polyStack[i].x, polyStack[i].y);
+						context.lineTo(polyStack[i+1].x, polyStack[i+1].y);
+						context.lineTo(polyStack[i+2].x, polyStack[i+2].y);
+						context.closePath();
+						context.fillStyle	= formatColor(polyStack[0].col);
+						context.fill();
+					} else {
+						tmpPolyStack[0] = polyStack[i];
+						tmpPolyStack[1] = polyStack[i+1];
+						tmpPolyStack[2] = polyStack[i+2];
+						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
+					}
 				}
-				context.restore();
-			}else {
-				// throwError("Missing ENDPOLY function.");
+			} else if (mode == 0) {
+				if ((polyStack.length % 3) != 0) throwError("Polyvector cannot draw non power of 3 triangles");
+				var spr = getSprite(num, true);
+				for (var i = 0; i < polyStack.length-1; i++) {
+					if (!spr) {
+						context.beginPath();
+						context.moveTo(polyStack[0].x, polyStack[0].y);
+						context.lineTo(polyStack[i].x, polyStack[i].y);
+						context.lineTo(polyStack[i+1].x, polyStack[i+1].y);
+						context.closePath();
+						context.fillStyle	= formatColor(polyStack[0].col);
+						context.fill();
+					} else {
+						tmpPolyStack[0] = polyStack[0];
+						tmpPolyStack[1] = polyStack[i];
+						tmpPolyStack[2] = polyStack[i+1];
+						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
+					}
+				}
+			} else if (mode == 2) {
+				throwError("Unimplemented ENDPOLY drawing mode: 2");
+			} else {
+				throwError("Unknown draw mode.");
 			}
+			context.restore();
 		}
 		polyStack.length = 0;
 	}
 	
 	inPoly = false;
+	
+	context.restore();
 }
 
 var simpletris = [[0, 1, 2]];
@@ -256,6 +286,7 @@ var tris1 = [[0, 1, 2], [2, 3, 0]];
 function POLYNEWSTRIP() {
 	if (!inPoly) throwError("POLYNEWSTRIP has to be in STARTPOLY - ENDPOLY ");
 	
+	context.save();
 	if (num == -1) {
 		//use pure html5!
 		context.fillStyle = formatColor(polyStack[0].col);
@@ -301,6 +332,7 @@ function POLYNEWSTRIP() {
 		context.globalAlpha = tmpAlpha;
 		context.globalCompositeOperation = tmpOperation;
 	}
+	context.restore();
 	
 	polyStack.length = 0; //anstatt = []
 }
@@ -412,6 +444,8 @@ function STARTPOLY(n, m) {
 	polyStack.length = 0;
 	num = n;
 	mode = m;
+	
+	context.save();
 }
 
 //------------------------------------------------------------

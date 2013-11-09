@@ -3,6 +3,10 @@
 //String:
 //------------------------------------------------------------
 
+function strcmp(a, b) {
+	return ( a < b ? -1 : ( a > b ? 1 : 0)); 
+}
+
 function FORMAT_Str(numLetter, numKommas, Number) {
 	var str = CAST2STRING(Number);
 	var l = INSTR(str, ".");
@@ -179,7 +183,7 @@ function SPLITSTR(text, array, split, dropEmpty) {
 			}
 		}
 		
-		return split.length;
+		return BOUNDS(array, 0);
 	} catch(ex) {
 		throwError("string error (SPLITSTR): '"+str+"' split: '"+split+"' dropEmpty: "+dropEmpty);
 	}

@@ -19,6 +19,11 @@ Fixed: VIEWPORT sets origin properly
 Changed: Began to work on VM - does not run yet
 Fixed: Float in array access bug
 Fixed: LEN("\n", TRUE) crashed
+Fixed: SPLIT returned wrong array length
+Fixed: POLYVECTOR with mode == 1 and no POLYNEWSTRIP crashed
+Fixed: POLYVECTOR messed up VIEWPORT
+Fixed: "Hugo" < "Manfred" evaluates as expected (<,>,>=,<= are overloaded properly)
+Fixed: Arrays with ref that were not initialized with DIM/REDIM had wrong defaultval (caused to problems with strings for example)
 
 0.35
 Fixed: LOCAL E; FOREACH E IN Arr[]; NEXT <- reused variable "E" instead of declaring a new one.

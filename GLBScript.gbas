@@ -12,6 +12,7 @@
 
 // ?DEFINE PRE_FOR_IDE
 
+
 ?IF DEFINED(GLBSCRIPT) AND DEFINED(PRE_FOR_IDE)
 	?DEFINE FOR_IDE //Kompiliere für die IDE
 ?ENDIF
@@ -143,15 +144,15 @@ GbapPath$ = "./"
 		?IFDEF VMCOMPILER
 			IF Target$ = "VM"
 				InitFuncs()
-	
-	
+
+
 				LOCAL e AS Executor
 				e.Init()
 				e.Execute()
 				KEYWAIT
 			ENDIF
 		?ENDIF
-		
+
 		?IFNDEF HTML5
 			?IFDEF MEASURETIME
 				KEYWAIT
