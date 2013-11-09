@@ -7,6 +7,9 @@
 
 *.GLBSCRIPT_DATA
 DIR_STRUCTURE
-GLBScript.app/GLBScript.exe
-GLBScript.app/GLBFile.html
-GLBScript.app/GLBScript.js
+GLBScript.exe
+GLBFile.html
+GLBScript.app/Tmp/closure.js
+GLBScript.app/Tmp/Header.js
+GLBScript.app/Tmp/remdata.txt
+GLBScript.app/Tmp/tmp.txt
