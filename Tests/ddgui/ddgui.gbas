@@ -15,8 +15,6 @@ DDGUI_AUTO_INPUT_DLG = TRUE
 
 GOSUB GLB_ON_INIT
 
-
-
 GLOBAL delta
 GLOBAL nt%, old%, fps%, flips%
 
@@ -94,22 +92,22 @@ SUB GLB_ON_INIT:
 	DDgui_slider("sl_test", 0.5, 0,0)					  // slider
 	DDgui_spacer(10000,0)                                 // spacer
 
-//	DDgui_framestart("fr_buttons")
-//		DDgui_button("bt_complex", "complex dialog", 0,0)     // button
-//		DDgui_button("bt_col", "SPR_C"+RGB(255,0,255), 0,0)   // color-button
-//		DDgui_button("bt_disable", "readonly", 0,0)   // color-button
-//		DDgui_set("bt_disable", "READONLY", TRUE)
-//
-//		// make color button "readonly" -> click does not allow to change the color
-//		// DDgui_set("bt_col", "READONLY", TRUE)
-//	DDgui_frameend()
-//
-//	DDgui_widget("st_text", "Write text here:", 0,0)      // static text
-//	DDgui_spacer(10000,0)                                 // spacer
-//	DDgui_text("tx_test", "Some text\nnext line", 150,75) // text box
-//	DDgui_spacer(10000,20)                                // spacer
-//	DDgui_singletext("tx_sin", "SingleText",150) // single line text
-//	DDgui_numbertext("tx_num", "123.1233", 150) // number only
+	DDgui_framestart("fr_buttons")
+		DDgui_button("bt_complex", "complex dialog", 0,0)     // button
+		DDgui_button("bt_col", "SPR_C"+RGB(255,0,255), 0,0)   // color-button
+		DDgui_button("bt_disable", "readonly", 0,0)   // color-button
+		DDgui_set("bt_disable", "READONLY", TRUE)
+
+		// make color button "readonly" -> click does not allow to change the color
+		// DDgui_set("bt_col", "READONLY", TRUE)
+	DDgui_frameend()
+
+	DDgui_widget("st_text", "Write text here:", 0,0)      // static text
+	DDgui_spacer(10000,0)                                 // spacer
+	DDgui_text("tx_test", "Some text\nnext line", 150,75) // text box
+	DDgui_spacer(10000,20)                                // spacer
+	DDgui_singletext("tx_sin", "SingleText",150) // single line text
+	DDgui_numbertext("tx_num", "123.1233", 150) // number only
 
 ENDSUB
 

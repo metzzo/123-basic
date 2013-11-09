@@ -508,9 +508,9 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = "CAST2INT("+Text$+")"
 			ENDIF
 		CASE EXPR_IS_INT
-			Text$ = expr.intval
+			Text$ = INTEGER(expr.intval) + "/* intval */"
 		CASE EXPR_IS_FLOAT
-			Text$ = expr.floatval
+			Text$ = expr.floatval + "/* floatval */"
 		CASE EXPR_IS_STR
 			Text$ = expr.strval$
 		CASE EXPR_IS_FUNCCALL
@@ -619,7 +619,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				//ist da drinnen wirklich eine float?
 				LOCAL f$ = Exprs[expr.expr].floatval+""
 				FOR i = 0 TO LEN(f$)-1
-					IF ASC(f$, i) = CHR$(".")
+					IF ASC(f$, i) = ASC(".")
 						//da ist ein . drinnen
 						cast = TRUE
 						BREAK

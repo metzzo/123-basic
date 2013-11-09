@@ -240,7 +240,7 @@ function ENDPOLY() {
 				}
 				context.restore();
 			}else {
-				throwError("Missing ENDPOLY function.");
+				// throwError("Missing ENDPOLY function.");
 			}
 		}
 		polyStack.length = 0;

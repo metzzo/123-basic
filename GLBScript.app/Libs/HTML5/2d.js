@@ -130,7 +130,7 @@ function update2D() {
 		}
 		window.requestAnimFrame(update2D, frontbuffer.canvas);
 	} catch(ex) {
-		if (!(ex instanceof GLBExitException)) alert(formatError(ex));
+		if (!(ex instanceof GLBExitException)) throw(formatError(ex));
 	}
 }
 

@@ -17,6 +17,8 @@ Fixed: ZOOMSPRITE 0,0,0,-1,1 // position of image was not correct
 Fixed: "settings.xml" with more than 1 target didnt function properly
 Fixed: VIEWPORT sets origin properly
 Changed: Began to work on VM - does not run yet
+Fixed: Float in array access bug
+Fixed: LEN("\n", TRUE) crashed
 
 0.35
 Fixed: LOCAL E; FOREACH E IN Arr[]; NEXT <- reused variable "E" instead of declaring a new one.

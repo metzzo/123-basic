@@ -231,10 +231,12 @@ function KERNLEN(text, len) {
 			}
 			var c = font.chars[pos];
 			
-			if (len) {
-				w+=c.width;
-			} else {
-				w+=font.charwidth;
+			if (!!c) {
+				if (len) {
+					w+=c.width;
+				} else {
+					w+=font.charwidth;
+				}
 			}
 		}
 		return w;
