@@ -146,7 +146,7 @@ NEXT
 KEYWAIT
 ?ENDIF
 
-//NETWEBEND "http://www.google.com"
+NETWEBEND "http://www.google.com"
 
 FUNCTION MyGETFILESIZE: channel%
 	LOCAL pos% = FILEPOSITION(channel)

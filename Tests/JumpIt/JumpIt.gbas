@@ -239,7 +239,7 @@ SUB Init:
 	SELECT Gamestate
 		CASE STATE_IS_GAME
 			Player.Init(100,100)
-			Map.Init("map3.map")
+			Map.Init("map0.map")
 	ENDSELECT
 
 	DIM LastMousePosition[0]

@@ -27,7 +27,7 @@ FUNCTION JS_Generator$:
 		LOCAL InWebWorker% = IsDefine("HTML5_WEBWORKER")
 
 		ManageFuncParamOverlaps()
-		
+
 		StaticText$ = ""
 
 		LOCAL Text$ = ""

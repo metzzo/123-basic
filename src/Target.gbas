@@ -379,7 +379,7 @@ FUNCTION DoEmbed: Path$
 							CREATEDIR(".html5_convertedsounds_"+File$)
 							IF INSTR(B.Action$, "mp3") <> -1 THEN ConvertSound(File$, "mp3")
 							IF INSTR(B.Action$, "ogg") <> -1 THEN ConvertSound(File$, "ogg")
-							COPYFILE File$, ".html5_convertedsounds_"+File$+"/sound."+postfix$
+							COPYFILE GETCURRENTDIR$() + File$, ".html5_convertedsounds_"+File$+"/sound."+postfix$
 						ENDIF
 					ENDIF
 					BREAK

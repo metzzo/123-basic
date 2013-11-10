@@ -133,7 +133,8 @@ function MEM2SPRITE(pixels, num, width, height) {
 	var scrn = new Screen(buf, -42);
 	try {
 		var isref = pixels.deval instanceof Array;
-		var data = scrn.context.getImageData(0,0,width, height);
+		var imageData = scrn.context.getImageData(0,0,width, height);
+		var data = imageData.data;
 		for (var x = 0; x < width; x++) {
 			for (var y = 0; y < height; y++) {
 				var pos = x + y*width;
@@ -144,16 +145,17 @@ function MEM2SPRITE(pixels, num, width, height) {
 				var b = (p & 0xFF0000)/0x10000;
 				var g = (p & 0xFF00)/0x100;
 				var r =  p & 0xFF;
+				
 				if (a == -1) a = 255;
 				
 				pos *= 4;
-				data[pos]   = r
-				data[pos+1] = g
-				data[pos+2] = b
-				data[pos+3] = a
+				data[pos]   = r; 
+				data[pos+1] = g;
+				data[pos+2] = b;
+				data[pos+3] = a;
 			}
 		}
-		scrn.context.putImageData(data, 0, 0);
+		scrn.context.putImageData(imageData, 0, 0);
 	} catch(ex) {
 		//kann keine imagedata holen
 		return 0;
@@ -242,6 +244,7 @@ function ENDPOLY() {
 						tmpPolyStack[0] = polyStack[i];
 						tmpPolyStack[1] = polyStack[i+1];
 						tmpPolyStack[2] = polyStack[i+2];
+						
 						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
 					}
 				}
@@ -285,7 +288,7 @@ var tris1 = [[0, 1, 2], [2, 3, 0]];
 
 function POLYNEWSTRIP() {
 	if (!inPoly) throwError("POLYNEWSTRIP has to be in STARTPOLY - ENDPOLY ");
-	
+		
 	context.save();
 	if (num == -1) {
 		//use pure html5!
@@ -321,23 +324,22 @@ function POLYNEWSTRIP() {
 		} else {
 			plzTint = false;
 		}
-		var tmpAlpha = context.globalAlpha;
-		var tmpOperation = context.globalCompositeOperation;
+		
 		
 		drawPolygon(plzTint, tris, polyStack, spr);
 	}
 	
-	if (plzTint) {
-		//Drawing mode wieder zurücksetzen
-		context.globalAlpha = tmpAlpha;
-		context.globalCompositeOperation = tmpOperation;
-	}
 	context.restore();
 	
 	polyStack.length = 0; //anstatt = []
 }
 
 function drawPolygon(plzTint, tris, polyStack, spr) {
+	if (plzTint) {
+		var tmpAlpha = context.globalAlpha;
+		var tmpOperation = context.globalCompositeOperation;
+	}
+	
 	var pts = polyStack
 	for (var t=0; t<tris.length; t++) {
 		var pp = tris[t];
@@ -416,6 +418,10 @@ function drawPolygon(plzTint, tris, polyStack, spr) {
 			context.drawImage(spr.img, 0, 0);
 		}
 		context.restore();
+	}
+	if (plzTint) {
+		context.globalAlpha = tmpAlpha;
+		context.globalCompositeOperation = tmpOperation;
 	}
 }
 

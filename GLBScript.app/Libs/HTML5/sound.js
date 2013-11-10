@@ -21,9 +21,12 @@ function Sound(file, num, buffer) {
 	this.loaded = false;
 	this.buffers = [];
 	this.buffers.length = buffer;
+	this.music = false;
+	this.loop = false;
 	
 	this.sound = new Audio(file);
 	this.sound.load();
+	
 	// Add the audio element to the DOM, because otherwise a certain 
 	// retarded Browser from Redmond will refuse to properly clone it
 	
@@ -44,7 +47,7 @@ function Sound(file, num, buffer) {
 			
 			//buffer erstellen
 			for (var i = 0; i < snd.buffers.length; i++) { 
-				snd.buffers[i] = new SoundChannel(this);
+				snd.buffers[i] = new SoundChannel(this, snd);
 			}
 		}
 		snd.loaded = true;
@@ -54,9 +57,11 @@ function Sound(file, num, buffer) {
 /**
 * @constructor
 */
-function SoundChannel(sound) {
+function SoundChannel(sound, snd) {
 	this.sound = sound.cloneNode(true);
 	this.sound.load();
+	
+	this.snd = snd;
 	
 	this.num = genSoundChannel();
 	this.loaded = false;
@@ -79,15 +84,36 @@ function SoundChannel(sound) {
 		this.playTime = 0;
 	}
 	
+	this.pause = function() {
+		this.sound.pause();
+		this.playing = false;
+	}
+	
+	this.resume = function() {
+		this.sound.play();
+		this.playing = true;
+	}
+	
+	this.volume = function(vol) {
+		this.sound.volume = vol;
+	}
+	
 	var sndchn = this;
 	this.sound.addEventListener( 'canplaythrough', function() {
 		if (!sndchn.loaded) {
 			waitload--;
 		}
 		sndchn.loaded = true;
+		if (sndchn.snd.music) {
+			sndchn.play();
+		}
 	}, false );
 	this.sound.addEventListener("ended", function() {
 		sndchn.stop();
+		
+		if (sndchn.snd.loop) {
+			sndchn.play();
+		}
 	}, false);
 	
 	waitload++;
@@ -151,13 +177,12 @@ function HUSH() {
 }
 
 function SOUNDPLAYING(chn) {
-	if (noSound) return false;
+	if (noSound) return 0;
 	
 	return (!!soundChannels[chn] && soundChannels[chn].playing ) ? 0 : 1;
 }
 function PLAYMUSIC(file, loop) {
 	if (noSound) return;
-	return;
 	
 	var s = LOADSOUND(file, 0, 1);
 	s.loop = loop;
@@ -173,7 +198,21 @@ function STOPMUSIC() {
 }
 
 function ISMUSICPLAYING() {
-	if (noSound) return false;
+	if (noSound) return 0;
 	
 	return SOUNDPLAYING(0);
+}
+
+function PAUSEMUSIC(pause) {
+	if (!!soundChannels[0]) {
+		if (pause) {
+			soundChannels[0].pause();
+		} else {
+			soundChannels[0].resume();
+		}
+	}
+}
+
+function MUSICVOLUME(vol) {
+	if (!!soundChannels[0]) soundChannels[0].volume(vol);
 }

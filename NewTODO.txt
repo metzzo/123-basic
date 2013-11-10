@@ -1,15 +1,8 @@
 
 First Release
 	DFolgende Tests müssen ohne Probleme auf Chrome und FF gehen:
-		- ddgui
-			- Keine Schrift 
-		- KeydefMenu
-			- GETNUMJOYSTICKS not defined fehlermeldung
-		- Mem2Sprite
-			- Nichts zu sehen.
-		- Pong
-			- Keine Hintergrundmusik (pongtune.mp3)
 		- Scramble
 			- wtf
-		
+	
+	Schreibe Joystick Tests	
 	Tutorial für die Installation schreiben

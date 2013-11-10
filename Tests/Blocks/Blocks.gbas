@@ -27,6 +27,26 @@ GOSUB NewLevel
 
 CLEARSCREEN 0 //ist sonst gelb?
 
+?IFNDEF HTML5
+GLOBAL games$[]
+
+PUSHLOOP("GLB_ON_LOOP")
+WHILE TRUE
+	CALLBYNAME(games$[-1])
+WEND
+
+FUNCTION PUSHLOOP: n$
+	DIMPUSH games$[], n$
+ENDSUB
+FUNCTION POPLOOP:
+	DIMDEL games$[], -1
+ENDFUNCTION
+FUNCTION ANYKEY:
+	RETURN KEY(57)
+ENDFUNCTION
+
+?ENDIF
+
 SUB GLB_ON_LOOP:
 	GOSUB MoveStone
 	GOSUB ShowAll
@@ -323,7 +343,7 @@ SUB NewLevel:
 
 	NeedLines=0 // Ganzes Bild zeigen / Show whole image
 
-	PUSHLOOP "NewLevel_Loop"
+	PUSHLOOP("NewLevel_Loop")
 ENDSUB // NEWLEVEL
 
 
@@ -340,7 +360,7 @@ SUB NewLevel_Loop:
 
 		USEASBMP
 
-		POPLOOP
+		POPLOOP()
 	ENDIF
 ENDSUB
 
@@ -357,3 +377,4 @@ FUNCTION GetFPS:
 
 	RETURN fps
 ENDFUNCTION
+

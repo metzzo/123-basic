@@ -140,11 +140,12 @@ function INICat(name) {
 				break;
 			}
 		}
+		
 		if (!kv) {
-			kv = new INIKeyValue(key, "");
-			this.keys.push(kv);
+			return "NO_DATA"
+		} else {
+			return kv.value;
 		}
-		return kv.value;
 	}
 	
 	this.save = function() {

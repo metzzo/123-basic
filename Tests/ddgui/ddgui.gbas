@@ -2522,6 +2522,7 @@ ENDFUNCTION
 
 
 // that's the combo-box when it's clicked
+GLOBAL buttonlist_retval
 @FUNCTION DDgui_button_list_picker%: x%, y%, w%, h%, texts$, cursel%
 
 LOCAL tx%, ty%
@@ -2546,29 +2547,41 @@ LOCAL screenx%, screeny%
 	DDgui_set("lst", "SELECT", cursel%)
 	DDgui_set("lst", "SCROLL", cursel%)
 
-	LOCAL mx%, my%, b1%, b2%, down%, px%, py%
+	buttonlist_retval = 0
+	
+	?IFDEF HTML5
+	PUSHLOOP DDGUI_ON_BUTTONLIST
+	?ELSE
 	WHILE TRUE
-		DDgui_show(FALSE)
-		MOUSESTATE mx%, my%, b1%, b2%
-		IF b1
-			down=TRUE
-			px=mx; py=my // iPhone moves finger off when not touching
-		ENDIF
-		IF b1=FALSE AND down
-			IF BOXCOLL(DDgui_get("", "XPOS"), DDgui_get("", "YPOS"), DDgui_get("", "WIDTH"), DDgui_get("", "HEIGHT"), px, py, 1, 1)=0
-				DDgui_popdialog()
-				RETURN -1
-			ENDIF
-		ENDIF
-		IF DDgui_get("lst", "CLICKED")
-			LOCAL isel% = DDgui_get("lst", "SELECT")
-			DDgui_popdialog()
-			RETURN isel%
-		ENDIF
-
-		SHOWSCREEN
+		GOSUB DDGUI_ON_BUTTONLIST
 	WEND
+	?ENDIF
 ENDFUNCTION
+
+
+SUB DDGUI_ON_BUTTONLIST:
+	LOCAL mx%, my%, b1%, b2%, down%, px%, py%
+	
+	DDgui_show(FALSE)
+	MOUSESTATE mx%, my%, b1%, b2%
+	IF b1
+		down=TRUE
+		px=mx; py=my // iPhone moves finger off when not touching
+	ENDIF
+	IF b1=FALSE AND down
+		IF BOXCOLL(DDgui_get("", "XPOS"), DDgui_get("", "YPOS"), DDgui_get("", "WIDTH"), DDgui_get("", "HEIGHT"), px, py, 1, 1)=0
+			DDgui_popdialog()
+			RETURN -1
+		ENDIF
+	ENDIF
+	IF DDgui_get("lst", "CLICKED")
+		LOCAL isel% = DDgui_get("lst", "SELECT")
+		DDgui_popdialog()
+		RETURN isel%
+	ENDIF
+
+	SHOWSCREEN
+ENDSUB
 
 
 

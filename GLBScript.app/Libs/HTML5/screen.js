@@ -53,11 +53,20 @@ function BLENDSCREEN(file, duration) {
 }
 
 function CLEARSCREEN(col) {
+	var tmpAlpha = context.globalAlpha;
+	var tmpOperation = context.globalCompositeOperation;
+	
+	context.globalCompositeOperation = '';
+	context.globalAlpha = 1;
+	
 	context.save();
 	context.fillStyle = formatColor(col);
 	context.fillRect(0,0,canvas.width, canvas.height);
 	clrColor = col;
 	context.restore();
+	
+	context.globalAlpha = tmpAlpha;
+	context.globalCompositeOperation = tmpOperation;
 }
 
 function BLACKSCREEN() {

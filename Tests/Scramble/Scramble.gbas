@@ -138,7 +138,7 @@ restart:
 	LoadLevel()
 	scale = 20; mscale = 30
 
-	WideScroller("readme-REALLY-DO!.txt")
+	// WideScroller("readme-REALLY-DO!.txt")
 
 	// Prepare Game
 	// -----------------------------------
@@ -160,10 +160,14 @@ restart:
 	newshot = GETTIMERALL()
 	newbomb = GETTIMERALL()
 	gameon  = GETTIMERALL()
-
+	?IFNDEF HTML5
+		WHILE TRUE
+		GOSUB GLB_ON_LOOP
+		WEND
+	?ENDIF
 	// MAINGAME
 	// -----------------------------------
-	WHILE TRUE
+	SUB GLB_ON_LOOP:
 		// game won
 		IF scrn>=1200
 			LoadLevel()
@@ -226,7 +230,7 @@ restart:
 					PRINT "GAME OVER", screenx/2 - plx*4.5,100
 					SHOWSCREEN
 					WHILE UserInput(3) = 0; HIBERNATE; WEND
-					GOTO restart
+					//GOTO restart
 				ENDIF
 			ENDIF
 		ELSE
@@ -257,9 +261,9 @@ restart:
 		FOR i=1 TO life
 			thing(0, i*32+32, screeny*.15, RGB(0x00, 0x80, 0xff), 16,0)
 		NEXT
-
+		
 		SHOWSCREEN
-	WEND
+	ENDSUB
 
 
 
@@ -267,11 +271,11 @@ FUNCTION UserInput: tp
 LOCAL speedlim, rv
 	speedlim = 12 // max movement of mouse
 	SELECT tp
-		CASE 0; rv = MOUSEAXIS(0)/speedlim + KEY(205)-KEY(203)+GETJOYX(0)
-		CASE 1; rv = MOUSEAXIS(1)/speedlim + KEY(200)-KEY(208)+GETJOYY(0)
-		CASE 2; rv = MOUSEAXIS(2)          + KEY(52)-KEY(51)+GETJOYZ(0)
-		CASE 3; rv = MOUSEAXIS(3) + KEY(42)+GETJOYBUTTON(0,0)
-		CASE 4; rv = MOUSEAXIS(4) + KEY(29)+GETJOYBUTTON(0,1)
+		CASE 0; rv = MOUSEAXIS(0)/speedlim + KEY(205)-KEY(203)//+GETJOYX(0)
+		CASE 1; rv = MOUSEAXIS(1)/speedlim + KEY(200)-KEY(208)//+GETJOYY(0)
+		CASE 2; rv = MOUSEAXIS(2)          + KEY(52)-KEY(51)//+GETJOYZ(0)
+		CASE 3; rv = MOUSEAXIS(3) + KEY(42)//+GETJOYBUTTON(0,0)
+		CASE 4; rv = MOUSEAXIS(4) + KEY(29)//+GETJOYBUTTON(0,1)
 	ENDSELECT
 	IF rv>1  THEN rv=1
 	IF rv<-1 THEN rv=-1
@@ -584,7 +588,7 @@ GLOBAL colormode
 	// up vector
 	ux=dy
 	uy=-dx
-
+	
 	// cap1
 	STARTPOLY 0
 		POLYVECTOR x1+ux-dx, y1+uy-dy,  0.5, 0.5,col
@@ -706,7 +710,7 @@ GLOBAL score, name$, flicker
 	INC maxline, 1
 	// The firewall might want a mouse pointer
 	SYSTEMPOINTER TRUE
-	ReadHighScores(hi$[], hi[], name$, score)
+	// ReadHighScores(hi$[], hi[], name$, score)
 	SYSTEMPOINTER FALSE
 
 	FOR i=0 TO BOUNDS(hi[], 0)-1

@@ -188,11 +188,14 @@ function X_MAKE2D() {
 }
 
 function SHOWSCREEN() {
+	
 	lastShwscrn = GETTIMERALL();
 	if (initCalled) {
 		USESCREEN(-2);
+		ALPHAMODE(0);
 		CLEARSCREEN(clrColor);
 		USESCREEN(-1);
+		ALPHAMODE(0);
 		frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
 		CLEARSCREEN(clrColor);
 		//nun noch falls vorhanden den bg zeichnen
@@ -447,16 +450,19 @@ function GETTIMER() {
 }
 
 function ALPHAMODE(mode) {
+	var val;
 	if (mode < 0) {
-		context.globalCompositeOperation = 'darker';
-		mode = ABS((1 - mode) - 1);
+		context.globalCompositeOperation = 'source-atop'; // TODO
+		val = 1 - (1 + mode);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'lighter';
+		val = mode;
 	} else {
-		context.globalCompositeOperation = 'source-over';
-		mode = 1;
+		context.globalCompositeOperation = '';
+		val = 1;
 	}
-	canvas.globalAlpha = mode;
+	
+	context.globalAlpha = val;
 }
 
 function SETPIXEL(x, y, col) {
@@ -481,7 +487,7 @@ function SETTRANSPARENCY(rgb) {
 }
 
 function SMOOTHSHADING(mode) {
-	// Do nothing...
+	context.imageSmoothingEnabled = mode ? true : false;
 }
 
 function SETSCREEN(width, height, fullscreen) {

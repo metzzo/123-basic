@@ -1,3 +1,17 @@
+0.5
+Fixed: INIGET$ returns "NO_DATA" if data does not exist
+Fixed: NETWEBEND redirects properly
+Fixed: ALPHAMODE behaves more like GLB (but not quite the same)
+Fixed: PRINT with unknown characters does not crash - ignores them
+Fixed: SMOOTHSHADING works properly
+Fixed: MEM2SPRITE works again on newer browsers
+Fixed: SOX with libmad
+Fixed: MUSIC playback & looping
+Added: MUSICVOLUME
+Added: PAUSEMUSIC
+Fixed: ALPHAMODE 0.5; SHOWSCREEN did not cause weird graphical gliches
+
+
 0.4
 Fixed: NOT fixed.
 Fixed: ROTOSPRITE/ROTOANIM/ROTOZOOMSPRITE/ROTOZOOMANIM use correct image handle when rotating

@@ -558,7 +558,7 @@ if (!window.localStorage) {
 //-----------------------------------------------------------
 
 function NETWEBEND(url) {
-	window.location = url;
+	window.location.href = url;
 	END();
 }
 

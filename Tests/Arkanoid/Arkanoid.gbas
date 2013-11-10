@@ -47,6 +47,11 @@ FOR x=0 TO 19
 	NEXT
 NEXT
 
+?IFNDEF HTML5
+WHILE TRUE
+GOSUB GLB_ON_LOOP
+WEND
+?ENDIF
 
 // ------------------------------------------------------------- //
 // -=#  MAINGAME  #=-

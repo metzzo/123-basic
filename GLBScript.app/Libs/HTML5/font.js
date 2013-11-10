@@ -192,19 +192,22 @@ function PRINT(text, x, y, kerning) {
 				throwError("Unicode unsupported! "+pos);
 			}
 			var c = font.chars[pos];
-			
-			var pos;
-			if (kerning) {
-				pos = x-font.charwidth/2+c.width/2;
-			} else {
-				pos = x;
-			}
-			
-			context.drawImage(font.img, c.x, c.y, font.charwidth, font.charheight, pos, y, font.charwidth, font.charheight);
-			
-			
-			if (kerning) {
-				x += c.width;
+			if (!!c) {
+				var pos;
+				if (kerning) {
+					pos = x-font.charwidth/2+c.width/2;
+				} else {
+					pos = x;
+				}
+				
+				context.drawImage(font.img, c.x, c.y, font.charwidth, font.charheight, pos, y, font.charwidth, font.charheight);
+				
+				
+				if (kerning) {
+					x += c.width;
+				} else {
+					x += font.charwidth;
+				}
 			} else {
 				x += font.charwidth;
 			}
