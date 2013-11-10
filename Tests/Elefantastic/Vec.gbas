@@ -1,0 +1,117 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+TYPE TVec
+	X; Y
+	vlen
+
+	FUNCTION MulVec: Val
+		self.X = self.X * Val
+		self.Y = self.Y * Val
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION DivVec: Val
+		self.X = self.X / Val
+		self.Y = self.Y / Val
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION AddVec: V AS TVec
+		INC self.X, V.X
+		INC self.Y, V.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SubVec: V AS TVec
+		DEC self.X, V.X
+		DEC self.Y, V.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SetXY: X, Y
+		self.X = X
+		self.Y = Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION SetVec: V AS TVec
+		self.X = V.X
+		self.Y = V.Y
+		self.vlen = V.vlen
+	ENDFUNCTION
+
+	FUNCTION Reverse:
+		self.MulVec(-1)
+	ENDFUNCTION
+
+	FUNCTION Length:
+		IF self.vlen = -1
+			self.vlen = SQR(self.X*self.X + self.Y*self.Y)
+		ENDIF
+		RETURN self.vlen
+	ENDFUNCTION
+
+	FUNCTION Normalize:
+		IF self.vlen = -1
+			self.Length()
+		ENDIF
+		IF self.vlen > 0
+			self.X = self.X / self.vlen
+			self.Y = self.Y / self.vlen
+			self.vlen = 1
+		ELSE
+			self.X = 0
+			self.Y = 0
+			self.vlen = 0
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION NormalVec:
+		LOCAL tmp = self.Y
+		self.Y = self.X
+		self.X = -tmp
+	ENDFUNCTION
+
+	FUNCTION Bounce: NormalizedVec AS TVec, NormVec AS TVec
+		LOCAL Proj1 AS TVec, Proj2 AS TVec
+		Proj1 = self
+		Proj2 = self
+		Proj1.Project(NormalizedVec)
+		Proj2.Project(NormVec)
+		LOCAL tmp AS TVec
+		tmp = NormVec
+		tmp.MulVec(Proj2.Length())
+
+		self.X = Proj1.X + tmp.X
+		self.Y = Proj1.Y + tmp.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION Project: V AS TVec
+		LOCAL T AS TVec
+		T = V
+		T.Normalize()
+		T.MulVec(self.DotProd(T))
+		self.X = T.X
+		self.Y = T.Y
+		self.vlen = -1
+	ENDFUNCTION
+
+	FUNCTION DotProd: V AS TVec
+		RETURN self.X*V.X + self.Y*V.Y
+	ENDFUNCTION
+
+	FUNCTION Angle:
+		RETURN ATAN(self.Y, self.X)
+	ENDFUNCTION
+ENDTYPE
+
+FUNCTION CreateVec AS TVec: X, Y
+	LOCAL V AS TVec
+	V.SetXY(X, Y)
+	RETURN V
+ENDFUNCTION

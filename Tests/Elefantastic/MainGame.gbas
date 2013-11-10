@@ -1,0 +1,100 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+GLOBAL CurrentMap AS TGameMap
+
+GLOBAL FallingObjects[] AS TFallingObject
+GLOBAL CollisionObjects[] AS TCollisionObject
+
+GLOBAL CreateObjDelay%, MaxObj%, LastCreateObj%
+GLOBAL SpawnPos AS TVec
+GLOBAL TargetPos AS TVec
+
+CONSTANT TOOL_IS_LINE = 1
+
+GLOBAL SelectedTool% = TOOL_IS_LINE
+GLOBAL Line_Picked%, Line_PickedPos AS TVec
+
+SUB UpdateMainGame:
+	IF GETTIMERALL() - LastCreateObj >= CreateObjDelay OR LastCreateObj = 0
+		IF LEN(FallingObjects[]) <= MaxObj
+			LOCAL FO AS TFallingObject
+			FO.Create(FALLING_IS_PLANET, 12, SpawnPos.X, SpawnPos.Y)
+			LastCreateObj = GETTIMERALL()
+		ENDIF
+	ENDIF
+
+	IF NOT IsFixTool()
+		IF ml
+			CurrentMap.Scroll.AddVec(MouseSpeed)
+			CurrentMap.ScrollSpeed = MouseSpeed
+		ELSE
+			CurrentMap.ScrollSpeed.MulVec(.9)
+			CurrentMap.Scroll.AddVec(CurrentMap.ScrollSpeed)
+		ENDIF
+	ENDIF
+
+	SELECT SelectedTool
+		CASE TOOL_IS_LINE
+			IF ml AND NOT Line_Picked
+				Line_Picked = TRUE
+				Line_PickedPos = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
+			ELSEIF Line_Picked AND NOT ml
+				Line_Picked = FALSE
+				//SelectedTool = 0
+
+				LOCAL l AS TCollisionObject
+				LOCAL b AS TVec
+				b = CreateVec(mx+CurrentMap.Scroll.X, my+CurrentMap.Scroll.Y)
+				l.CreateLine(Line_PickedPos, b, TRUE)
+			ENDIF
+	ENDSELECT
+
+
+	CurrentMap.Update()
+
+	FOREACH Obj IN FallingObjects[]
+		IF Obj.Update() THEN DELETE Obj
+	NEXT
+
+	FOREACH Obj IN CollisionObjects[]
+		IF Obj.Update() THEN DELETE Obj
+	NEXT
+
+ENDSUB
+
+SUB RenderMainGame:
+	FOREACH Obj IN FallingObjects[]
+		Obj.Render()
+	NEXT
+
+	CurrentMap.Render()
+
+	FOREACH Obj IN CollisionObjects[]
+		Obj.Render()
+	NEXT
+
+	SELECT SelectedTool
+		CASE TOOL_IS_LINE
+			IF Line_Picked
+				DRAWLINE Line_PickedPos.X - CurrentMap.Scroll.X, Line_PickedPos.Y - CurrentMap.Scroll.Y, mx, my, RGB(255,0,0)
+			ENDIF
+	ENDSELECT
+ENDSUB
+
+SUB InitMainGame:
+	CurrentMap.Create("map0")
+
+ENDSUB
+
+FUNCTION IsFixTool%:
+	IF SelectedTool <> TOOL_IS_LINE
+		RETURN FALSE
+	ELSE
+		RETURN TRUE
+	ENDIF
+ENDFUNCTION
+
+

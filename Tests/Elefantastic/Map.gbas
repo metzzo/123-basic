@@ -1,0 +1,324 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+CONSTANT TILESIZE% = 32
+
+TYPE TGameMap
+	Tiles[] AS TTile
+	Width%; Height%
+	Scroll AS TVec
+	ScrollSpeed AS TVec
+
+	FUNCTION Update:
+		IF self.Scroll.X > ScreenWidth/4
+			self.Scroll.X = ScreenWidth/4
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.X <  -(self.Width*TILESIZE - ScreenWidth/4*3)
+			self.Scroll.X = -(self.Width*TILESIZE - ScreenWidth/4*3)
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.Y > ScreenHeight/4
+			self.Scroll.Y = ScreenHeight/4
+			self.ScrollSpeed.Reverse()
+		ENDIF
+		IF self.Scroll.Y <  -(self.Height*TILESIZE - ScreenHeight/4*3)
+			self.Scroll.Y = -(self.Height*TILESIZE - ScreenHeight/4*3)
+			self.ScrollSpeed.Reverse()
+		ENDIF
+
+
+		FOR x = 0 TO self.Width - 1
+			FOR y = 0 TO self.Height - 1
+				ALIAS T AS self.Tiles[x][y]
+				T.Update()
+			NEXT
+		NEXT
+	ENDFUNCTION
+
+	FUNCTION Render:
+		FOR x = 0 TO self.Width - 1
+			FOR y = 0 TO self.Height - 1
+				ALIAS T AS self.Tiles[x][y]
+				T.Render()
+			NEXT
+		NEXT
+	ENDFUNCTION
+
+
+	FUNCTION Create: File$
+		LOCAL file% = GENFILE()
+		IF NOT OPENFILE(file, "map/"+File$+".map", TRUE) THEN DEBUG "Map loading failed\n"
+		LOCAL r%
+		READUBYTE file, r
+		IF r <> 42
+			DEBUG "Unsupported file format"
+			RETURN
+		ENDIF
+
+		READLONG file, self.Width
+		READLONG file, self.Height
+		DEBUG "Map size: "+self.Width+", "+self.Height+"\n"
+
+		LOCAL Foo% = 42
+		READLONG file, Foo // Elephant lifes
+		READLONG file, CreateObjDelay% // Elephant delay
+		READLONG file, MaxObj% // Max Elephants
+		READLONG file, Foo // Max Anti Materie
+		READLONG file, Foo // Max Matter
+
+		IF MaxObj = -1
+			MaxObj = 25
+		ENDIF
+
+		DIM self.Tiles[self.Width][self.Height]
+
+
+
+		LOCAL myr%
+		READUBYTE file, myr
+		WHILE myr <> 42
+			FOR x% = 0 TO self.Width - 1
+				FOR y = 0 TO self.Height - 1
+					SELECT myr
+						CASE 0
+							READUBYTE file, r
+							LOCAL Typ% = 0
+							IF r
+								LOCAL l%, data$
+								READLONG file, l
+								READSTR file, data$, l
+								Typ = data$
+							ENDIF
+
+							ALIAS T AS self.Tiles[x][y]
+							T.Create(Typ, x, y)
+						CASE 1
+							READUBYTE file, r
+							IF r
+								LOCAL l%, data$
+								READLONG file, l
+								DEBUG "l: "+l+"\n"
+								READSTR file, data$, l
+								LOCAL Params$[]
+								IF SPLITSTR(data$, Params$[], "\n")
+									SELECT Params$[0]
+										CASE "mirror"
+
+										CASE "roundmirror"
+
+										CASE "blackhole"
+
+										CASE "airstream"
+
+										DEFAULT
+											DEBUG "Unknown Parameter "+Params$[0]+" "+data$+"\n"
+									ENDSELECT
+								ENDIF
+							ENDIF
+					ENDSELECT
+				NEXT
+			NEXT
+			READUBYTE file, myr
+		WEND
+
+		?IFDEF GLB_DEBUG
+		// map
+		FOR y = 0 TO self.Height - 1
+			FOR x = 0 TO self.Width - 1
+				ALIAS t AS self.Tiles[x][y]
+				DEBUG t.Typ+ ", "
+			NEXT
+			DEBUG "\n"
+		NEXT
+		?ENDIF
+
+		// create collision lines
+		FOR x% = 0 TO self.Width - 1
+			FOR y% = 0 TO self.Height - 1
+				ALIAS t AS self.Tiles[x][y]
+				IF t.IsSolid()
+					LOCAL dirl%, dirr%, dirt%, dirb%
+					self.Empty(x, y, dirl, dirr, dirt, dirb)
+
+
+					LOCAL l AS TCollisionObject
+					LOCAL a AS TVec, b AS TVec
+
+
+					IF dirt
+						a = CreateVec(x*TILESIZE,y*TILESIZE)
+						b = CreateVec((x+1)*TILESIZE,y*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirr
+						a = CreateVec((x+1)*TILESIZE,y*TILESIZE)
+						b = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirb
+						a = CreateVec((x+1)*TILESIZE,(y+1)*TILESIZE)
+						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+
+					IF dirl
+						a = CreateVec(x*TILESIZE,y*TILESIZE)
+						b = CreateVec(x*TILESIZE,(y+1)*TILESIZE)
+						l.CreateLine(a, b)
+						DIMPUSH t.RelatedLines[], LEN(CollisionObjects[])-1
+					ENDIF
+				ENDIF
+			NEXT
+		NEXT
+
+		CLOSEFILE file
+	ENDFUNCTION
+
+	FUNCTION Empty: x%, y%, BYREF l%, BYREF r%, BYREF t%, BYREF b%
+		IF y = 0
+			t = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x][y-1]
+			IF t1.IsSolid()
+				t = FALSE
+			ELSE
+				t = TRUE
+			ENDIF
+		ENDIF
+
+		IF x = self.Width - 1
+			r = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x+1][y]
+			IF t1.IsSolid()
+				r = FALSE
+			ELSE
+				r = TRUE
+			ENDIF
+		ENDIF
+
+		IF y = self.Height - 1
+			b = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x][y+1]
+			IF t1.IsSolid()
+				b = FALSE
+			ELSE
+				b = TRUE
+			ENDIF
+		ENDIF
+
+		IF x = 0
+			l = TRUE
+		ELSE
+			ALIAS t1 AS self.Tiles[x-1][y]
+			IF t1.IsSolid()
+				l = FALSE
+			ELSE
+				l = TRUE
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+ENDTYPE
+
+
+
+CONSTANT TILE_IS_EMPTY%  = 0
+CONSTANT TILE_IS_SPAWN%	 = 1
+CONSTANT TILE_IS_SOLID%  = 2
+CONSTANT TILE_IS_TARGET% = 3
+CONSTANT TILE_IS_DESTR%  = 4
+CONSTANT TILE_IS_KILLER  = 5
+
+CONSTANT INFO_DESTR_STATE = 0
+
+TYPE TTile
+	Typ%
+	X%; Y%
+	PosVec AS TVec
+	Info[]
+	RelatedLines%[]
+
+	FUNCTION Update:
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+
+			CASE TILE_IS_SOLID
+				DRAWSPRITE SolidTile, self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
+			CASE TILE_IS_TARGET
+
+			CASE TILE_IS_DESTR
+				//DRAWRECT self.PosVec.X, self.PosVec.Y, 32, 32, RGB(255,0,0)
+				DRAWANIM DestrTile, self.Info[INFO_DESTR_STATE], self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Render:
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+				DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
+			CASE TILE_IS_SOLID
+
+			CASE TILE_IS_TARGET
+
+			CASE TILE_IS_DESTR
+
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Create: Typ%, X%, Y%
+		self.Typ = Typ
+		self.X = X
+		self.Y = Y
+
+		self.PosVec.SetXY(X*TILESIZE, Y*TILESIZE)
+
+		SELECT self.Typ
+			CASE TILE_IS_EMPTY
+			CASE TILE_IS_SPAWN
+				SpawnPos = self.PosVec
+			CASE TILE_IS_SOLID
+
+			CASE TILE_IS_TARGET
+				TargetPos = self.PosVec
+			CASE TILE_IS_DESTR
+				DIM self.Info[1]
+				self.Info[INFO_DESTR_STATE] = 0
+			CASE TILE_IS_KILLER
+
+			DEFAULT
+				DEBUG "Unknown tile type "+self.Typ+"\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION IsSolid%:
+		SELECT self.Typ
+			CASE TILE_IS_SOLID
+				RETURN TRUE
+			CASE TILE_IS_DESTR
+				RETURN TRUE
+			CASE TILE_IS_KILLER
+				RETURN TRUE
+		ENDSELECT
+		RETURN FALSE
+	ENDFUNCTION
+ENDTYPE
+

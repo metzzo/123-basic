@@ -9,7 +9,7 @@ Fixed: SOX with libmad
 Fixed: MUSIC playback & looping
 Added: MUSICVOLUME
 Added: PAUSEMUSIC
-Fixed: ALPHAMODE 0.5; SHOWSCREEN did not cause weird graphical gliches
+Fixed: ALPHAMODE 0.5; SHOWSCREEN did cause weird graphical gliches
 
 
 0.4

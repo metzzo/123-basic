@@ -1,0 +1,170 @@
+// --------------------------------- //
+// Project: isometricdemo
+// Start: Thursday, May 24, 2012
+// IDE Version: 10.283
+
+SYSTEMPOINTER TRUE
+SETCURRENTDIR("Media") // go to media files
+LIMITFPS -1
+
+TYPE iso		// type of isometric block
+	top%		// top image (as TP image)
+	side1%		// side1 image (as TP image) has to be something
+	side2%		// side2 image (as TP image) if 0 then same as 1
+	side3%		// side3 image (as TP image) if 0 then same as 1
+	side4%		// side3 image (as TP image) if 0 then same as 2
+	height#		// height of block - 32 is default, 0 is floor
+ENDTYPE
+
+GLOBAL isob[] AS iso
+
+TYPE bkind		// kind of block and its qualities
+	kind%		// 0 = nothing, 1 = floor, 2 = water (translucent), 3 = object (also see through), 127 = half block, 128 = block
+	ind%		// index to isob or whatever
+ENDTYPE
+
+GLOBAL block[] AS bkind
+
+TYPE texturemap
+	x#		// x pos on sheet
+	y#		// y pos on sheet
+	w#		// width
+	h#		// height
+ENDTYPE
+
+GLOBAL sprites#[] AS texturemap		// Texture map for sprites
+
+
+GLOBAL map[]	// for holding map data in
+
+// Texture variables
+
+GLOBAL adirt%
+GLOBAL astone%
+GLOBAL frock%
+GLOBAL sgrass%
+GLOBAL sslab%
+GLOBAL stree%
+GLOBAL swater%
+GLOBAL tgrass%
+GLOBAL tslab%
+GLOBAL ttree%
+GLOBAL twater%
+
+GLOBAL blocksheet% = GENSPRITE()
+LoadSprites("textures", blocksheet)
+
+GLOBAL layers% = 5
+GLOBAL xmapd% = 12
+GLOBAL ymapd% = 8
+
+GLOBAL scrxp# = 320, scryp# = 240		// screen position offset
+GLOBAL quality% = 1		// 1 = high, 0 = low
+GLOBAL textured% = 1	// 1 = textured, 0 = untextured
+GLOBAL shaded% = 1		// 1 = shaded (Ambient occlusion), 0 = normal
+GLOBAL tilesize = 32
+GLOBAL tl = 32			//zoom
+GLOBAL maxzoom = 128
+GLOBAL minzoom = 8
+GLOBAL zoom = 1.0
+GLOBAL htl = tilesize/2
+GLOBAL tsize = 32	// texture size
+GLOBAL smang = 30
+GLOBAL bgang = 60
+
+GLOBAL bo_x = SIN(bgang)*tilesize		// half x size of isometric surface box
+GLOBAL bo_y = SIN(smang)*tilesize		// half y size of isometric surface box
+GLOBAL xfact = (SIN(45)/bo_x)*tilesize	// x factor to zoom
+GLOBAL yfact = (SIN(45)/bo_y)*tilesize	// y factor to zoom
+
+GLOBAL offx1#, offx2#, offy1#, offy2#, offx3#, offx4#, offy3#, offy4#
+
+GLOBAL xstep1#, ystep1#, xstep2#, ystep2#
+
+GLOBAL cenx# = xmapd/2 - 0.5
+GLOBAL ceny# = ymapd/2 - 0.5		// for 12 x 8 it is 5.5 and 3.5 - midpoint -0.5
+GLOBAL abx# = xmapd/2
+GLOBAL aby# = ymapd/2
+GLOBAL changex
+GLOBAL changey
+
+GLOBAL chx, chy
+
+TYPE co
+	x#		// x value
+	y#		// y value
+ENDTYPE
+
+TYPE TE
+	tl		// tl
+	tr		// tr
+	bl		// bl
+	br		// br
+	FUNCTION set: num
+	 self.tl=num
+	 self.tr=num
+	 self.bl=num
+	 self.br=num
+	ENDFUNCTION
+
+	FUNCTION mult: num
+	 self.tl=self.tl*num
+	 self.tr=self.tr*num
+	 self.bl=self.bl*num
+	 self.br=self.br*num
+	ENDFUNCTION
+
+	FUNCTION multleft: num
+	 self.tl=self.tl*num
+	 self.bl=self.bl*num
+	ENDFUNCTION
+	FUNCTION multright: num
+	 self.tr=self.tr*num
+	 self.br=self.br*num
+	ENDFUNCTION
+
+	FUNCTION multtop: num
+	 self.tl=self.tl*num
+	 self.tr=self.tr*num
+	ENDFUNCTION
+
+	FUNCTION multbottom: num
+	 self.bl=self.bl*num
+	 self.br=self.br*num
+	ENDFUNCTION
+
+	FUNCTION set4: tl, tr, bl, br
+	 self.tl=tl
+	 self.tr=tr
+	 self.bl=bl
+	 self.br=br
+	ENDFUNCTION
+ENDTYPE
+
+SetTestBlocks()
+
+DIM map[layers][xmapd][ymapd]
+
+FOR i = 1 TO layers //-1
+
+	LoadLayer("layer"+i+".smp", i-1)
+
+NEXT
+
+
+//	LoadLayer("layer3.smp", layers-1)
+
+GLOBAL angle# = 40
+GLOBAL bhead% = 0
+GLOBAL layt% = layers-1
+GLOBAL press1% = FALSE, press2% = FALSE
+
+GLOBAL mx, my, ma, mb
+GLOBAL oldx, oldy
+GLOBAL oldxs, oldys
+GLOBAL accx, accy
+GLOBAL wheel
+GLOBAL ix, iy
+GLOBAL cx, cy
+
+GLOBAL p1x, p1y

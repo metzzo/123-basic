@@ -1,0 +1,33 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Tuesday, August 07, 2012
+// IDE Version: 10.283
+
+
+TYPE TRect
+	StartVec AS TVec
+	Width; Height
+
+	FUNCTION SetPos: V AS TVec
+		self.StartVec.SetVec(V)
+	ENDFUNCTION
+
+	FUNCTION SetXY: X, Y
+		self.StartVec.SetXY(X, Y)
+	ENDFUNCTION
+
+	FUNCTION SetSize: W, H
+		self.Width = W
+		self.Height = H
+	ENDFUNCTION
+
+	FUNCTION Collision: R AS TRect
+		RETURN BOXCOLL(R.StartVec.X, R.StartVec.Y, R.Width, R.Height, self.StartVec.X, self.StartVec.Y, self.Width, self.Height)
+	ENDFUNCTION
+
+	FUNCTION Draw:
+		DRAWRECT self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.Width, self.Height, RGB(0,0,255)
+		DRAWLINE self.StartVec.X + CurrentMap.Scroll.X, self.StartVec.Y + CurrentMap.Scroll.Y, self.StartVec.X+self.Width + CurrentMap.Scroll.X, self.StartVec.Y+self.Height + CurrentMap.Scroll.Y, RGB(255,0,0)
+	ENDFUNCTION
+ENDTYPE
+

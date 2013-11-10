@@ -135,9 +135,7 @@ GbapPath$ = "./"
 		STDOUT "\n\nCompiling failed :(\n"
 
 		KEYWAIT
-
 	ELSE
-
 		STDOUT "\n\nFunctions: "+LEN(Compiler.Funcs[])+" Variables: "+LEN(Compiler.Varis[])+" AST Nodes: "+LastExprID+" Types: "+LEN(Compiler.Types[])+"\n"
 		STDOUT "Successful compile! Duration: "+(GETTIMERALL()-Time)/1000+" S, time per token: "+(GETTIMERALL()-Time)/Compiler.LastMaxTokens+"MS, tokens: "+Compiler.LastMaxTokens+" \n"
 

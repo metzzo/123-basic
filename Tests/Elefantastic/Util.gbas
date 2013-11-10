@@ -1,0 +1,18 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+FUNCTION LoadSpr%: Path$
+	LOCAL ID% = GENSPRITE()
+	LOADSPRITE "gfx/"+Path$+".png", ID
+	RETURN ID
+ENDFUNCTION
+
+FUNCTION LoadAni%: Path$, w%, h%
+	LOCAL ID% = GENSPRITE()
+	LOADANIM "gfx/"+Path$+".png", ID, w, h
+	RETURN ID
+ENDFUNCTION
+

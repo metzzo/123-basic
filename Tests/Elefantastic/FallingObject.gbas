@@ -1,0 +1,121 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+CONSTANT FALLING_IS_PLANET% = 1
+
+CONSTANT INFO_PLANET_ROTATION% = 0
+CONSTANT INFO_PLANET_ZOOM% = 1
+
+TYPE TFallingObject
+	Typ%
+
+	PosVec AS TVec
+	SpeedVec AS TVec
+	MassVec AS TVec
+	CollisionRect AS TRect
+
+	Radius%; RealRadius%
+	Info[]
+
+	FUNCTION Update:
+		self.SpeedVec.AddVec(self.MassVec)
+		IF self.SpeedVec.Length() > 12
+		//	self.SpeedVec.Normalize()
+		//	self.SpeedVec.MulVec(12)
+		ENDIF
+		//self.PosVec.AddVec(self.SpeedVec)
+
+		CONSTANT STEPSIZE = 3.0
+		LOCAL SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
+		LOCAL SubSpeed AS TVec
+		SubSpeed = self.SpeedVec
+		SubSpeed.DivVec(SubT)
+
+		FOR i = 1 TO SubT
+			self.PosVec.AddVec(SubSpeed)
+			self.CollisionRect.SetXY(self.PosVec.X - self.Radius*2, self.PosVec.Y - self.Radius*2)
+
+			LOCAL Pen = -1, V AS TVec, Obj% = -1
+			FOR j = 0 TO LEN(CollisionObjects[])-1
+				ALIAS O AS CollisionObjects[j]
+				LOCAL TmpPen, TmpV AS TVec
+				IF self.CollisionRect.Collision(O.CollisionRect)
+					O.GetPen(self, TmpPen, TmpV)
+					// DEBUG TmpPen+"\n"
+					IF TmpPen >= Pen AND TmpPen >= 0
+						Pen = TmpPen
+						V = TmpV
+						Obj = j
+					ENDIF
+				ENDIF
+			NEXT
+
+			IF Pen >= 0 AND Obj <> -1
+				// DEBUG "lol "+V.X+" "+V.Y+"\n"
+				CollisionObjects[Obj].DoCollision(self, INTEGER(Pen-1), V)
+				SubT = INTEGER(MAX(ABS(self.SpeedVec.X), ABS(self.SpeedVec.Y))/STEPSIZE+1)
+				SubSpeed = self.SpeedVec
+				SubSpeed.DivVec(SubT)
+				i = 1
+			ENDIF
+		NEXT
+
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				INC self.Info[INFO_PLANET_ROTATION], self.SpeedVec.Length()
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+
+		IF self.PosVec.Y > (CurrentMap.Height+32)*TILESIZE
+			RETURN TRUE
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION Render:
+		//self.CollisionRect.Draw()
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				LOCAL z = self.Info[INFO_PLANET_ZOOM]
+				//DRAWRECT self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, 32, 32, RGB(255,0,0)
+				LOCAL a = self.Radius * (z*4) + self.RealRadius*z
+				ROTOZOOMSPRITE PlanetSpr, self.PosVec.X + CurrentMap.Scroll.X-a, self.PosVec.Y + CurrentMap.Scroll.Y-a, self.Info[INFO_PLANET_ROTATION], z
+
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION Create: Typ%, Radius, X, Y
+		self.Typ = Typ
+		self.PosVec.SetXY(X, Y)
+		self.Radius = Radius
+		self.MassVec = Gravity
+		self.MassVec.MulVec(Radius/50)
+
+		SELECT self.Typ
+			CASE FALLING_IS_PLANET
+				DIM self.Info[2]
+				LOCAL sx%, sy%
+				GETSPRITESIZE PlanetSpr, sx%, sy%
+				LOCAL m = MAX(sx, sy)
+				self.RealRadius = m/2
+				self.Info[INFO_PLANET_ZOOM] = Radius / m * 2
+
+				LOCAL z = self.Info[INFO_PLANET_ZOOM]
+				LOCAL tmp AS TVec
+				tmp.SetXY(Radius*z*2,  Radius*z*2)
+				self.PosVec.SubVec(tmp)
+
+				self.CollisionRect.SetSize(Radius*4, Radius*4)
+			DEFAULT
+				DEBUG "Unknown falling object\n"
+		ENDSELECT
+
+		DIMPUSH FallingObjects[], self
+	ENDFUNCTION
+ENDTYPE
+
+

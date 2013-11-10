@@ -1,0 +1,325 @@
+// --------------------------------- //
+// Project: isometricdemo
+// Start: Thursday, May 24, 2012
+// IDE Version: 10.283
+
+
+FUNCTION LoadLayer: name$, layer
+
+LOCAL xmap, ymap, xtile, ytile
+LOCAL sbyte%
+LOCAL xnow%, ynow%
+LOCAL solid% = 10	// from this tile number upwards the way is unpassable
+LOCAL kind%
+
+OPENFILE(1, name$, 1)
+
+FILESEEK 1, 8, 0
+
+
+READWORD 1, sbyte	// bad integer type for direct read so put into sbyte first
+xmap = sbyte		// x dimension of map
+READWORD 1, sbyte
+ymap = sbyte		// y dimension of map
+READBYTE 1, sbyte
+xtile = sbyte		// x size for tile
+READBYTE 1, sbyte
+ytile = sbyte		// y size for tile
+
+FOR i = 0 TO (xmap*ymap)-1
+
+	READBYTE 1, sbyte
+
+	map[layer][xnow][ynow] = sbyte
+
+	INC xnow
+
+	IF xnow = xmap
+
+		xnow = 0
+		INC ynow
+
+	ENDIF
+
+NEXT
+
+CLOSEFILE 1
+
+ENDFUNCTION
+
+
+
+
+
+
+
+
+FUNCTION LoadSprites: filename$, sprsheet%
+
+LOCAL sprnum%	// number of sprites successfully added
+LOCAL tempspr# AS texturemap
+LOCAL chr%	// for reading back character
+LOCAL sprname$	// sprite name
+LOCAL num$	// to convert to number
+
+// load new texture map into a sprite sheet
+LOADSPRITE filename$+".png", sprsheet
+
+IF OPENFILE(1, filename$+".txt", 1) = FALSE
+	PRINT "Damned odd!! Texture Packer file not found", 0, 0
+	PRINT filename$+".txt", 0, 10
+	PRINT GETCURRENTDIR$(), 0, 20
+ELSE	// load sprites
+
+	WHILE ENDOFFILE(1) = FALSE
+
+		// read sprite name
+		chr = 0
+		sprname$ = ""
+		WHILE chr <> 44
+
+			READUBYTE 1, chr
+
+			IF chr <> 44 THEN INC sprname$, CHR$(chr)
+
+		WEND
+
+		// move beyond space
+		FILESEEK 1, 1, 1
+
+		// read x position
+		chr = 0
+		num$ = ""
+		WHILE chr <> 44
+
+			READUBYTE 1, chr
+
+			IF chr <> 44 THEN INC num$, CHR$(chr)
+
+		WEND
+
+		tempspr.x = num$
+
+		// move beyond space
+		FILESEEK 1, 1, 1
+
+		// read y position
+		chr = 0
+		num$ = ""
+		WHILE chr <> 44
+
+			READUBYTE 1, chr
+
+			IF chr <> 44 THEN INC num$, CHR$(chr)
+
+		WEND
+
+		tempspr.y = num$
+
+		// move beyond space
+		FILESEEK 1, 1, 1
+
+		// read width
+		chr = 0
+		num$ = ""
+		WHILE chr <> 44
+
+			READUBYTE 1, chr
+
+			IF chr <> 44 THEN INC num$, CHR$(chr)
+
+		WEND
+
+		tempspr.w = num$
+
+		// move beyond space
+		FILESEEK 1, 1, 1
+
+		// read height
+		chr = 0
+		num$ = ""
+		WHILE chr <> 44
+
+			READUBYTE 1, chr
+
+			IF chr <> 44 THEN INC num$, CHR$(chr)
+
+		WEND
+
+		tempspr.h = num$
+
+		FILESEEK 1, 12, 1	// move on 14 bytes
+
+		// add new sprite to array
+
+		DIMPUSH sprites[], tempspr
+
+		sprname$=LEFT$(sprname$, LEN(sprname$)-4)
+
+		// assign an index number to new sprite
+		SpriteAdd(sprname$, sprnum)
+
+		// Testing
+//		DRAWSPRITE sprsheet, 0, 0
+//		PRINT "File position: "+FILEPOSITION (1), 0, 0
+//		PRINT "Sprite name: "+sprname$, 0, 10
+//		PRINT "Sprite number: "+sprnum, 0, 20
+//		PRINT "Sprite x: " +tempspr.x, 0, 30
+//		PRINT "Sprite y: " +tempspr.x, 0, 40
+//		PRINT "Sprite width: " +tempspr.w, 0, 50
+//		PRINT "Sprite height: " +tempspr.h, 0, 60
+//		SHOWSCREEN
+//		MOUSEWAIT
+		// End of testing
+
+		INC sprnum
+
+	WEND	// end of end of file check
+
+ENDIF	// end of opening file
+
+RETURN sprnum
+
+ENDFUNCTION
+
+
+
+FUNCTION SpriteAdd: idname$, index
+
+SELECT idname$
+
+	CASE "adirt"
+
+		adirt = index
+
+	CASE "astone"
+
+		astone = index
+
+	CASE "frock"
+
+		frock = index
+
+	CASE "sgrass"
+
+		sgrass = index
+
+	CASE "sslab"
+
+		sslab = index
+
+	CASE "stree"
+
+		stree = index
+
+	CASE "swater"
+
+		swater = index
+
+	CASE "tgrass"
+
+		tgrass = index
+
+	CASE "tslab"
+
+		tslab = index
+
+	CASE "ttree"
+
+		ttree = index
+
+	CASE "twater"
+
+		twater = index
+
+	DEFAULT
+
+		// do nout
+
+ENDSELECT
+
+ENDFUNCTION
+
+
+
+FUNCTION SetTestBlocks:
+
+LOCAL nib AS iso
+
+DIM isob[1]		// first block is nothing
+
+// floor 1
+nib.top = frock
+nib.height = 0
+
+DIMPUSH isob[], nib
+
+// water 2
+nib.top = twater
+nib.side1 = swater
+nib.height = 0.5
+
+DIMPUSH isob[], nib
+
+// dirt 3
+nib.top = adirt
+nib.side1 = adirt
+nib.height = 1
+
+DIMPUSH isob[], nib
+
+// grass 4
+nib.top = tgrass
+nib.side1 = sgrass
+nib.height = 1
+
+DIMPUSH isob[], nib
+
+// rock 5
+nib.top = astone
+nib.side1 = astone
+nib.height = 1
+
+DIMPUSH isob[], nib
+
+// tree 6
+nib.top = ttree
+nib.side1 = stree
+nib.height = 1
+
+DIMPUSH isob[], nib
+
+// slab 7
+nib.top = tslab
+nib.side1 = sslab
+nib.height = 0.5
+
+DIMPUSH isob[], nib
+
+
+LOCAL luk AS bkind
+
+DIM block[1]	// 0 = nothing
+
+luk.kind = 1; 	luk.ind = 1
+DIMPUSH block[], luk
+
+luk.kind = 2; 	luk.ind = 2
+DIMPUSH block[], luk
+
+luk.kind = 128; 	luk.ind = 3
+DIMPUSH block[], luk
+
+luk.kind = 128; 	luk.ind = 4
+DIMPUSH block[], luk
+
+luk.kind = 128; 	luk.ind = 5
+DIMPUSH block[], luk
+
+luk.kind = 128; 	luk.ind = 6
+DIMPUSH block[], luk
+
+luk.kind = 127; 	luk.ind = 7
+DIMPUSH block[], luk
+
+ENDFUNCTION

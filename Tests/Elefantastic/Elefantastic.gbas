@@ -1,0 +1,72 @@
+// --------------------------------- //
+// Project: Elefantastic
+// Start: Saturday, August 04, 2012
+// IDE Version: 10.283
+
+
+SETCURRENTDIR("Media") // go to media files
+SYSTEMPOINTER TRUE
+
+CONSTANT MAIN_GAME = 0
+
+GLOBAL SolidTile% = LoadSpr("solidtile")
+GLOBAL BGSpr% = LoadSpr("bg")
+GLOBAL DestrTile% = LoadAni("destrtile", 32, 32)
+GLOBAL PlanetSpr% = LoadSpr("planet1")
+GLOBAL LineImg% = LoadSpr("line")
+
+
+GLOBAL GameState% = MAIN_GAME
+
+GLOBAL mx, my, ml, mr
+GLOBAL MouseSpeed AS TVec
+
+GLOBAL ScreenWidth%, ScreenHeight%
+GLOBAL FirstStart% = TRUE
+GETSCREENSIZE ScreenWidth, ScreenHeight
+
+
+GLOBAL Gravity AS TVec
+Gravity = CreateVec(0, .75)
+
+
+?IFNDEF HTML5
+WHILE TRUE
+	GOSUB GLB_ON_LOOP
+WEND
+?ENDIF
+SUB GLB_ON_LOOP:
+	ALPHAMODE -1
+	LOCAL ox = mx, oy = my
+	MOUSESTATE mx, my, ml, mr
+	MouseSpeed.X = mx - ox
+	MouseSpeed.Y = my - oy
+
+	STRETCHSPRITE BGSpr, 0, 0, ScreenWidth, ScreenHeight
+
+	IF FirstStart
+		SELECT GameState
+			CASE MAIN_GAME
+				GOSUB InitMainGame
+			DEFAULT
+				DEBUG "Unknown Gamestate "+GameState+"\n"
+		ENDSELECT
+		FirstStart = FALSE
+	ELSE
+		SELECT GameState
+			CASE MAIN_GAME
+				GOSUB UpdateMainGame
+				GOSUB RenderMainGame
+			DEFAULT
+				DEBUG "Unknown Gamestate "+GameState+"\n"
+		ENDSELECT
+	ENDIF
+
+	SHOWSCREEN
+ENDSUB
+
+SUB GLB_ON_LOADING:
+	PRINT "Game is loading...", 10, 10
+	SHOWSCREEN
+ENDSUB
+

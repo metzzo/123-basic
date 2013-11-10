@@ -1,0 +1,1013 @@
+// --------------------------------- //
+// Project: isometricdemo
+// Start: Thursday, May 24, 2012
+// IDE Version: 10.283
+
+
+
+SUB GLB_ON_LOOP:
+
+	CalcAngle(angle)
+
+	IF quality = 1
+		ALPHAMODE -0.99
+		SMOOTHSHADING TRUE
+	ELSE
+		ALPHAMODE -1.00
+		SMOOTHSHADING FALSE
+	ENDIF
+
+	IF textured
+		STARTPOLY blocksheet, 1
+	ELSE
+		STARTPOLY 0, 1
+	ENDIF
+		IF angle < 90	// if in first side
+
+			FOR l = 0 TO layt	//	 from bottom layer up
+				FOR x = 0 TO xmapd-1
+					FOR y = 0 TO ymapd-1
+						bhead = map[l][x][y]
+						DrawBlock(bhead, l, x, y, angle)
+					NEXT
+				NEXT
+			NEXT
+
+		ELSEIF angle < 180	// if in second side
+
+			FOR l = 0 TO layt	//	 from bottom layer up
+				FOR y = ymapd-1 TO 0 STEP -1
+					FOR x = 0 TO xmapd-1
+						bhead = map[l][x][y]
+						DrawBlock(bhead, l, x, y, angle)
+					NEXT
+				NEXT
+			NEXT
+
+		ELSEIF angle < 270	// if in second side
+
+			FOR l = 0 TO layt	//	 from bottom layer up
+				FOR x = xmapd-1 TO 0 STEP -1
+					FOR y = ymapd-1 TO 0 STEP -1
+						bhead = map[l][x][y]
+						DrawBlock(bhead, l, x, y, angle)
+					NEXT
+				NEXT
+			NEXT
+
+		ELSEIF angle < 360	// if in second side
+
+			FOR l = 0 TO layt	//	 from bottom layer up
+				FOR y = 0 TO ymapd-1
+					FOR x = xmapd-1 TO 0 STEP -1
+						bhead = map[l][x][y]
+						DrawBlock(bhead, l, x, y, angle)
+					NEXT
+				NEXT
+			NEXT
+
+		ENDIF
+
+	ENDPOLY
+
+
+	wheel = MOUSEAXIS(2)
+	MOUSESTATE mx, my, ma, mb
+
+	// Center of tile 0, 0, because cenx, ceny are that number away from center
+
+//	abx = xmapd/2
+//	aby = ymapd/2
+//
+//	ix = scrxp - abx*xstep1
+//	DEC ix, aby*xstep2
+//
+//	iy = scryp - abx*ystep1
+//	DEC iy, aby*ystep2
+//
+//	cx = mx - scrxp
+//	cy = my - scryp
+//
+//	p1x = (cx / xstep1)
+//	p1y = (cy / ystep2)
+//
+//	DRAWLINE ix, iy, ix+10, iy, RGB(255,0,0)
+//
+//
+//	PRINT "Angle: "+angle, 0, 0
+//	PRINT "ix: "+ix, 0, 20
+//	PRINT "iy: "+iy, 0, 30
+//	PRINT "p1x: "+p1x, 0, 50
+//	PRINT "p1y: "+p1y, 0, 60
+//
+//	PRINT "xstep1: "+xstep1, 0, 80
+//	PRINT "xstep2: "+xstep2, 0, 90
+//
+//	PRINT "ystep1: "+ystep1, 0, 110
+//	PRINT "ystep2: "+ystep2, 0, 120
+
+	SHOWSCREEN
+
+// Controls
+
+IF ma		// if mouse button 1 is pressed
+
+	press2 = FALSE
+
+	IF press1 > 0	// if the mouse button was previously pressed
+
+		changex = (mx-oldx)
+		changey = (my-oldy)
+
+		INC scrxp, changex
+		INC scryp, changey
+
+		oldx = mx
+		oldy = my
+
+	ELSE	// mouse button wasn't previously pressed
+
+		oldx = mx
+		oldy = my
+		changex = 0
+		changey = 0
+
+	ENDIF	// end of checking if mouse button was previously pressed
+
+	INC press1	// button press register
+
+ELSE		// no left mouse button
+
+	press1 = FALSE
+	changex = 0
+	changey = 0
+
+	IF mb		// if mouse button 2 is pressed
+
+		IF press2 > 0	// if mouse argh
+
+//			IF ABS(mx-oldxs) > ABS(my-oldys)
+				DEC angle, (mx-oldxs)
+//			ELSE
+				INC bo_y, (my-oldys)/4
+//			ENDIF
+
+			accx = (accx + (mx-oldxs))/2
+			accy = (accy + (my-oldys))/2
+
+			oldxs = mx
+			oldys = my
+
+		ELSE
+
+			oldxs = mx
+			oldys = my
+
+		ENDIF
+
+		INC press2
+
+	ELSE		// no right button pressed
+		IF press2 > 0
+			press2 = FALSE
+		ENDIF
+		DEC angle, accx
+		INC bo_y, accy
+		accx = accx*0.997
+		accy = accy*0.997
+		IF (ABS(accx)<0.01) THEN accx=0
+		IF (ABS(accy)<0.01) THEN accy=0
+	ENDIF	// end of mouse button 2 check
+
+ENDIF		// end of mouse button 1 check
+
+	IF angle >= 360 THEN DEC angle, 360
+	IF angle < 0 THEN INC angle, 360
+
+	IF bo_y<0 THEN bo_y=0
+	IF bo_y>tl/2 THEN bo_y=tl/2
+
+		IF wheel = 1
+
+			IF tl < maxzoom
+
+				INC tl, 5
+
+				IF tl > maxzoom
+
+					tl = maxzoom
+
+				ENDIF
+
+			ENDIF
+
+
+		ELSEIF wheel = -1
+
+			IF tl > minzoom
+
+				DEC tl, 5
+
+				IF tl < minzoom
+
+					tl = minzoom
+
+				ENDIF
+
+			ENDIF
+
+
+		ENDIF	// end wheel zoom changes
+
+		IF KEY(57)
+			shaded = 1- shaded
+		ENDIF
+
+//INC angle, 1
+//IF angle >= 360 THEN DEC angle, 360
+
+ENDSUB
+
+
+
+FUNCTION CalcAngle: ang
+
+GLOBAL xfact = (SIN(45)/bo_x)*tilesize	// x factor to zoom
+GLOBAL yfact = (SIN(45)/bo_y)*tilesize	// y factor to zoom
+
+offx1 = ( (COS(ang)*(0-htl/xfact)) - (SIN(ang)*(0-htl/xfact)) )
+offy1 = ( (SIN(ang)*(0-htl/yfact)) + (COS(ang)*(0-htl/yfact)) )
+
+offx2 = ( (COS(ang)*(tl/xfact-htl/xfact)) - (SIN(ang)*(0-htl/xfact)) )
+offy2 = ( (SIN(ang)*(tl/yfact-htl/yfact)) + (COS(ang)*(0-htl/yfact)) )
+
+offx3 = ( (COS(ang)*(0-htl/xfact)) - (SIN(ang)*(tl/xfact-htl/xfact)) )
+offy3 = ( (SIN(ang)*(0-htl/yfact)) + (COS(ang)*(tl/yfact-htl/yfact)) )
+
+offx4 = ( (COS(ang)*(tl/xfact-htl/xfact)) - (SIN(ang)*(tl/xfact-htl/xfact)) )
+offy4 = ( (SIN(ang)*(tl/yfact-htl/yfact)) + (COS(ang)*(tl/yfact-htl/yfact)) )
+
+xstep1 = offx2-offx1
+ystep1 = offy2-offy1
+
+xstep2 = offx3-offx1
+ystep2 = offy3-offy1
+
+ENDFUNCTION
+
+
+FUNCTION DrawBlock: typ, lay, xpos, ypos, angle
+
+LOCAL bri1%, bri2%, mang#
+LOCAL p1 AS co, p2 AS co, p3 AS co, p4 AS co
+LOCAL f1 AS co, f2 AS co, f3 AS co, f4 AS co
+LOCAL b1 AS co, b2 AS co, b3 AS co, b4 AS co
+
+LOCAL tx#
+LOCAL ty#
+
+LOCAL bit%, hei#, bhei#
+LOCAL top%, side1%, side2%
+LOCAL tmx1#, tmy1#, tmx2#, tmy2#
+LOCAL fmx1#, fmy1#, fmx2#, fmy2#
+LOCAL bmx1#, bmy1#, bmx2#, bmy2#
+
+bit = block[typ].ind	// index for sprite type
+
+IF bit > 0		// if not empty space
+
+	hei = isob[bit].height	//
+	bhei = hei*tl	// block height as overall
+
+	top = isob[bit].top		// texture for top
+
+	tmx1 = sprites[top].x
+	tmy1 = sprites[top].y
+	tmx2 = sprites[top].x+sprites[top].w
+	tmy2 = sprites[top].y+sprites[top].h
+
+	IF angle < 90
+
+		side1 = isob[bit].side1		// texture for side 1
+
+		bmx1 = sprites[side1].x
+		bmy1 = sprites[side1].y
+		bmx2 = sprites[side1].x+sprites[top].w
+		bmy2 = sprites[side1].y+sprites[top].h*hei
+
+		side2 = isob[bit].side2		// texture for side 2
+		IF side2 = 0 THEN side2 = side1
+
+		fmx1 = sprites[side2].x
+		fmy1 = sprites[side2].y
+		fmx2 = sprites[side2].x+sprites[top].w
+		fmy2 = sprites[side2].y+sprites[top].h*hei
+
+	ELSEIF angle < 180
+
+		side2 = isob[bit].side1		// texture for side 4
+		IF side2 = 0 THEN side2 = isob[bit].side1
+
+		fmx1 = sprites[side2].x
+		fmy1 = sprites[side2].y
+		fmx2 = sprites[side2].x+sprites[top].w
+		fmy2 = sprites[side2].y+sprites[top].h*hei
+
+		side1 = isob[bit].side4		// texture for side 1
+		IF side1 = 0 THEN side1 = isob[bit].side1
+
+		bmx1 = sprites[side1].x
+		bmy1 = sprites[side1].y
+		bmx2 = sprites[side1].x+sprites[top].w
+		bmy2 = sprites[side1].y+sprites[top].h*hei
+
+	ELSEIF angle < 270
+
+		side2 = isob[bit].side4		// texture for side 4
+		IF side2 = 0 THEN side2 = isob[bit].side1
+
+		fmx1 = sprites[side2].x
+		fmy1 = sprites[side2].y
+		fmx2 = sprites[side2].x+sprites[top].w
+		fmy2 = sprites[side2].y+sprites[top].h*hei
+
+		side1 = isob[bit].side3		// texture for side 1
+		IF side1 = 0 THEN side1 = isob[bit].side1
+
+		bmx1 = sprites[side1].x
+		bmy1 = sprites[side1].y
+		bmx2 = sprites[side1].x+sprites[top].w
+		bmy2 = sprites[side1].y+sprites[top].h*hei
+
+	ELSEIF angle < 360
+
+		side2 = isob[bit].side3		// texture for side 4
+		IF side2 = 0 THEN side2 = isob[bit].side1
+
+		fmx1 = sprites[side2].x
+		fmy1 = sprites[side2].y
+		fmx2 = sprites[side2].x+sprites[top].w
+		fmy2 = sprites[side2].y+sprites[top].h*hei
+
+		side1 = isob[bit].side2		// texture for side 1
+		IF side1 = 0 THEN side1 = isob[bit].side1
+
+		bmx1 = sprites[side1].x
+		bmy1 = sprites[side1].y
+		bmx2 = sprites[side1].x+sprites[top].w
+		bmy2 = sprites[side1].y+sprites[top].h*hei
+
+
+	ENDIF
+
+	LOCAL anga = angle
+
+	IF angle < 90
+		// do nothing
+	ELSEIF angle < 180
+		DEC anga, 90
+	ELSEIF angle < 270
+		DEC anga, 180
+	ELSEIF angle < 360
+		DEC anga, 270
+	ENDIF
+		IF quality = 1
+			bri1 = 128+((90-anga)/90)*64
+			bri2 = bri2 = 128+((anga)/90)*64
+		ELSE
+			bri1 = 255
+			bri2 = 255
+		ENDIF
+
+	tx = xpos*xstep1 + scrxp
+	ty = xpos*ystep1 + scryp
+
+	INC tx, ypos*xstep2
+	INC ty, ypos*ystep2
+
+	DEC tx, cenx*xstep1
+	DEC ty, cenx*ystep1
+
+	DEC tx, ceny*xstep2
+	DEC ty, ceny*ystep2
+
+
+
+	IF lay > 0
+		DEC ty, (lay-1)*tl
+		DEC ty, bhei
+	ENDIF
+
+	p1.x = tx + offx1// * zoom
+	p1.y = ty + offy1// * zoom
+
+	p2.x = tx + offx2// * zoom
+	p2.y = ty + offy2// * zoom
+
+	p3.x = tx + offx3// * zoom
+	p3.y = ty + offy3// * zoom
+
+	p4.x = tx + offx4// * zoom
+	p4.y = ty + offy4// * zoom
+
+	// first quad
+
+	IF angle < 90
+
+		f1.x = p3.x
+		f1.y = p3.y
+
+		f2.x = p4.x
+		f2.y = p4.y
+
+		f3.x = f1.x
+		f3.y = f1.y + bhei
+
+		f4.x = f2.x
+		f4.y = f2.y + bhei
+
+		b1.x = p4.x
+		b1.y = p4.y
+
+		b2.x = p2.x
+		b2.y = p2.y
+
+		b3.x = b1.x
+		b3.y = b1.y + bhei
+
+		b4.x = b2.x
+		b4.y = b2.y + bhei
+
+	ELSEIF angle < 180
+
+		f1.x = p4.x
+		f1.y = p4.y
+
+		f2.x = p2.x
+		f2.y = p2.y
+
+		f3.x = f1.x
+		f3.y = f1.y + bhei
+
+		f4.x = f2.x
+		f4.y = f2.y + bhei
+
+		b1.x = p2.x
+		b1.y = p2.y
+
+		b2.x = p1.x
+		b2.y = p1.y
+
+		b3.x = b1.x
+		b3.y = b1.y + bhei
+
+		b4.x = b2.x
+		b4.y = b2.y + bhei
+
+	ELSEIF angle < 270
+
+		f1.x = p2.x
+		f1.y = p2.y
+
+		f2.x = p1.x
+		f2.y = p1.y
+
+		f3.x = f1.x
+		f3.y = f1.y + bhei
+
+		f4.x = f2.x
+		f4.y = f2.y + bhei
+
+		b1.x = p1.x
+		b1.y = p1.y
+
+		b2.x = p3.x
+		b2.y = p3.y
+
+		b3.x = b1.x
+		b3.y = b1.y + bhei
+
+		b4.x = b2.x
+		b4.y = b2.y + bhei
+
+	ELSEIF angle < 360
+
+		f1.x = p1.x
+		f1.y = p1.y
+
+		f2.x = p3.x
+		f2.y = p3.y
+
+		f3.x = f1.x
+		f3.y = f1.y + bhei
+
+		f4.x = f2.x
+		f4.y = f2.y + bhei
+
+		b1.x = p3.x
+		b1.y = p3.y
+
+		b2.x = p4.x
+		b2.y = p4.y
+
+		b3.x = b1.x
+		b3.y = b1.y + bhei
+
+		b4.x = b2.x
+		b4.y = b2.y + bhei
+
+	ENDIF
+
+	STATIC shademult=1.0
+	STATIC topshadeedge = 0.5 * shademult
+	STATIC topshadecorner = 0.5 * shademult
+	STATIC sideshadeedge = 0.7 * shademult
+	STATIC sideshadecorner = 0.7 * shademult
+
+	IF typ<128 OR checktop(xpos,ypos,lay)
+		LOCAL b AS TE
+		b.set(255)
+		IF (shaded)
+			IF NOT checkside(xpos, ypos, lay+1, typ, TRUE) THEN b.mult(0.6)
+			IF NOT checkside(xpos, ypos, lay+2, typ, TRUE) THEN b.mult(0.8)
+
+			IF NOT checkside(xpos-1, ypos-1, lay+1, typ, TRUE) THEN b.tl=b.tl*topshadecorner
+			IF NOT checkside(xpos+1, ypos-1, lay+1, typ, TRUE) THEN b.tr=b.tr*topshadecorner
+			IF NOT checkside(xpos+1, ypos+1, lay+1, typ, TRUE) THEN b.br=b.br*topshadecorner
+			IF NOT checkside(xpos-1, ypos+1, lay+1, typ, TRUE) THEN b.bl=b.bl*topshadecorner
+
+			IF NOT checkside(xpos-1, ypos, lay+1, typ, TRUE) THEN b.multleft(topshadeedge)
+			IF NOT checkside(xpos+1, ypos, lay+1, typ, TRUE) THEN b.multright(topshadeedge)
+			IF NOT checkside(xpos, ypos-1, lay+1, typ, TRUE) THEN b.multtop(topshadeedge)
+			IF NOT checkside(xpos, ypos+1, lay+1, typ, TRUE) THEN b.multbottom(topshadeedge)
+		ENDIF
+		drawSideShade( p1, p2, p3, p4, tmx1, tmy1, tmx2, tmy2, b)
+	ENDIF
+
+	IF angle < 90
+		IF lay > 0 AND checkside1(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri2)
+			IF (shaded)
+				IF NOT checkside(xpos+1, ypos+1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos+1, ypos, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos-1, lay, typ) THEN b.multright(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos+1, lay, typ) THEN b.multleft(sideshadeedge)
+			ENDIF
+			drawSideShade( b1, b2, b3, b4, bmx1, bmy1, bmx2, bmy2, b)
+
+		ENDIF
+
+		IF lay > 0 AND checkside2(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri1)
+			IF (shaded)
+				IF NOT checkside(xpos-1, ypos+1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos, ypos+1, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos, ypos+1, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos+1, lay, typ) THEN b.multleft(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos+1, lay, typ) THEN b.multright(sideshadeedge)
+			ENDIF
+			drawSideShade( f1, f2, f3, f4, fmx1, fmy1, fmx2, fmy2, b)
+
+		ENDIF
+
+	ELSEIF angle < 180
+
+		IF lay > 0 AND checkside4(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri2)
+			IF (shaded)
+				IF NOT checkside(xpos+1, ypos-1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos, ypos-1, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos, ypos-1, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos-1, lay, typ) THEN b.multleft(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos-1, lay, typ) THEN b.multright(sideshadeedge)
+			ENDIF
+			drawSideShade( b1, b2, b3, b4, bmx1, bmy1, bmx2, bmy2, b)
+
+		ENDIF
+
+		IF lay > 0 AND checkside1(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri1)
+			IF (shaded)
+				IF NOT checkside(xpos+1, ypos+1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos+1, ypos, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos-1, lay, typ) THEN b.multright(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos+1, lay, typ) THEN b.multleft(sideshadeedge)
+			ENDIF
+			drawSideShade( f1, f2, f3, f4, fmx1, fmy1, fmx2, fmy2, b)
+
+		ENDIF
+
+	ELSEIF angle < 270
+
+		IF lay > 0 AND checkside3(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri2)
+			IF (shaded)
+				IF NOT checkside(xpos-1, ypos-1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos-1, ypos, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos+1, lay, typ) THEN b.multright(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos-1, lay, typ) THEN b.multleft(sideshadeedge)
+			ENDIF
+			drawSideShade( b1, b2, b3, b4, bmx1, bmy1, bmx2, bmy2, b)
+
+		ENDIF
+
+		IF lay > 0 AND checkside4(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri1)
+			IF (shaded)
+				IF NOT checkside(xpos+1, ypos-1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos+1, ypos-1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos, ypos-1, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos, ypos-1, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos-1, lay, typ) THEN b.multleft(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos-1, lay, typ) THEN b.multright(sideshadeedge)
+			ENDIF
+			drawSideShade( f1, f2, f3, f4, fmx1, fmy1, fmx2, fmy2, b)
+
+		ENDIF
+
+	ELSEIF angle < 360
+
+		IF lay > 0 AND checkside2(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri2)
+			IF (shaded)
+				IF NOT checkside(xpos-1, ypos+1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos+1, ypos+1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos, ypos+1, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos, ypos+1, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos+1, lay, typ) THEN b.multleft(sideshadeedge)
+				IF NOT checkside(xpos+1, ypos+1, lay, typ) THEN b.multright(sideshadeedge)
+			ENDIF
+			drawSideShade( b1, b2, b3, b4, bmx1, bmy1, bmx2, bmy2, b)
+
+		ENDIF
+
+		IF lay > 0 AND checkside3(xpos, ypos, lay)
+			LOCAL b AS TE
+			b.set(bri1)
+			IF (shaded)
+				IF NOT checkside(xpos-1, ypos-1, lay+1, typ, TRUE) THEN b.tl=b.tl*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay+1, typ, TRUE) THEN b.tr=b.tr*sideshadecorner
+				IF NOT checkside(xpos-1, ypos+1, lay-1, typ, TRUE) THEN b.br=b.br*sideshadecorner
+				IF NOT checkside(xpos-1, ypos-1, lay-1, typ, TRUE) THEN b.bl=b.bl*sideshadecorner
+
+				IF NOT checkside(xpos-1, ypos, lay+1, typ) THEN b.multtop(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos, lay-1, typ) THEN b.multbottom(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos+1, lay, typ) THEN b.multright(sideshadeedge)
+				IF NOT checkside(xpos-1, ypos-1, lay, typ) THEN b.multleft(sideshadeedge)
+			ENDIF
+			drawSideShade( f1, f2, f3, f4, fmx1, fmy1, fmx2, fmy2, b)
+		ENDIF
+
+	ENDIF
+
+ENDIF
+
+ENDFUNCTION
+
+FUNCTION drawSide: b1 AS co, b2 AS co, b3 AS co, b4 AS co, mx1, my1, mx2, my2, bri
+	POLYVECTOR b1.x, b1.y, mx1, my1, RGB(bri,bri,bri)
+	POLYVECTOR b3.x, b3.y, mx1, my2, RGB(bri,bri,bri)
+	POLYVECTOR b4.x, b4.y, mx2, my2, RGB(bri,bri,bri)
+
+	POLYVECTOR b4.x, b4.y, mx2, my2, RGB(bri,bri,bri)
+	POLYVECTOR b2.x, b2.y, mx2, my1, RGB(bri,bri,bri)
+	POLYVECTOR b1.x, b1.y, mx1, my1, RGB(bri,bri,bri)
+ENDFUNCTION
+
+FUNCTION drawSideShade: b1 AS co, b2 AS co, b3 AS co, b4 AS co, mx1, my1, mx2, my2, b AS TE
+	POLYVECTOR b1.x, b1.y, mx1, my1, RGB(b.tl,b.tl,b.tl)
+	POLYVECTOR b3.x, b3.y, mx1, my2, RGB(b.bl,b.bl,b.bl)
+	POLYVECTOR b4.x, b4.y, mx2, my2, RGB(b.br,b.br,b.br)
+
+	POLYVECTOR b4.x, b4.y, mx2, my2, RGB(b.br,b.br,b.br)
+	POLYVECTOR b2.x, b2.y, mx2, my1, RGB(b.tr,b.tr,b.tr)
+	POLYVECTOR b1.x, b1.y, mx1, my1, RGB(b.tl,b.tl,b.tl)
+ENDFUNCTION
+
+FUNCTION coordvalid: x,y,l
+	IF x<0 THEN RETURN FALSE
+	IF x>xmapd-1 THEN RETURN FALSE
+	IF y<0 THEN RETURN FALSE
+	IF y>ymapd-1 THEN RETURN FALSE
+	IF l<0 THEN RETURN FALSE
+	IF l>layers-1 THEN RETURN FALSE
+	RETURN TRUE
+ENDFUNCTION
+
+FUNCTION checktop: x, y, l
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+IF l = layers-1	// if top layer
+
+	good = TRUE
+
+ELSE
+
+	LOCAL cop = block[map[l+1][x][y]].kind	// kind of block
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			good = TRUE		// water is transparent
+
+		CASE 3	// object
+
+			good = TRUE
+
+		CASE > 126		// Full half block or bigger
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+ENDIF
+
+RETURN good
+
+ENDFUNCTION
+
+
+FUNCTION checkside1: x, y, l
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+IF x = xmapd-1	// if right-most place
+
+	good = TRUE
+
+ELSE
+
+	LOCAL cop = block[map[l][x+1][y]].kind	// kind of block
+	LOCAL yop = block[map[l][x][y]].kind
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			IF yop <> 2		// if not water itself
+
+				good = TRUE		// water is transparent
+
+			ENDIF
+
+		CASE 3	// object
+
+			good = TRUE
+
+		CASE > 127		// Full block
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+ENDIF
+
+RETURN good
+
+ENDFUNCTION
+
+
+
+
+FUNCTION checkside2: x, y, l
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+IF y = ymapd-1	// if right-most place
+
+	good = TRUE
+
+ELSE
+
+	LOCAL cop = block[map[l][x][y+1]].kind	// kind of block
+	LOCAL yop = block[map[l][x][y]].kind
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			IF yop <> 2		// if not water itself
+
+				good = TRUE		// water is transparent
+
+			ENDIF
+
+		CASE 3	// object
+
+			good = TRUE
+
+		CASE > 127		// Full block
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+ENDIF
+
+RETURN good
+
+ENDFUNCTION
+
+
+FUNCTION checkside3: x, y, l
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+IF x = 0	// if right-most place
+
+	good = TRUE
+
+ELSE
+
+	LOCAL cop = block[map[l][x-1][y]].kind	// kind of block
+	LOCAL yop = block[map[l][x][y]].kind
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			IF yop <> 2		// if not water itself
+
+				good = TRUE		// water is transparent
+
+			ENDIF
+
+		CASE 3	// object
+
+			good = TRUE
+
+		CASE > 127		// Full block
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+ENDIF
+
+RETURN good
+
+ENDFUNCTION
+
+
+FUNCTION checkside4: x, y, l
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+IF y = 0	// if right-most place
+
+	good = TRUE
+
+ELSE
+
+	LOCAL cop = block[map[l][x][y-1]].kind	// kind of block
+	LOCAL yop = block[map[l][x][y]].kind
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			IF yop <> 2		// if not water itself
+
+				good = TRUE		// water is transparent
+
+			ENDIF
+
+		CASE 3	// object
+
+			good = TRUE
+
+		CASE > 127		// Full block
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+ENDIF
+
+RETURN good
+
+ENDFUNCTION
+
+FUNCTION checkside: x, y, l, typ, half=FALSE
+IF NOT coordvalid(x,y,l) THEN RETURN TRUE
+LOCAL good = FALSE
+
+
+	LOCAL cop = block[map[l][x][y]].kind
+
+	SELECT cop
+
+		CASE 0	// empty space
+
+			good = TRUE
+
+		CASE 2	// water
+
+			IF typ <> 2		// if not water itself
+
+				good = TRUE		// water is transparent
+
+			ENDIF
+
+		CASE 3	// object
+
+			good = TRUE
+		CASE 127		// half block
+			IF (half)
+				good = FALSE
+			ELSE
+				good = TRUE
+			ENDIF
+		CASE > 127		// Full block
+
+			good = FALSE
+
+		DEFAULT
+
+			good = TRUE
+
+	ENDSELECT
+
+
+
+RETURN good
+
+ENDFUNCTION
