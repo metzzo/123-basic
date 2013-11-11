@@ -1683,7 +1683,7 @@ ENDFUNCTION
 		CASE "TAB"
 			DDgui_handletab(ddgui_vals, wdg, mx, my, b1, b2)
 		CASE "COMBO"
-			DDgui_handlecombo(ddgui_vals, wdg, mx, my, b1, b2) 
+			DDgui_handlecombo(ddgui_vals, wdg, mx, my, b1, b2)
 		CASE "SINGLETEXT"
 			ddgui_handletext(ddgui_vals, wdg, mx, my, b1, b2, TRUE, FALSE)
 		CASE "NUMBERTEXT"
@@ -2548,41 +2548,31 @@ LOCAL screenx%, screeny%
 	DDgui_set("lst", "SCROLL", cursel%)
 
 	buttonlist_retval = 0
-	
-	?IFDEF HTML5
-	PUSHLOOP DDGUI_ON_BUTTONLIST
-	?ELSE
+
 	WHILE TRUE
-		GOSUB DDGUI_ON_BUTTONLIST
-	WEND
-	?ENDIF
-ENDFUNCTION
+		LOCAL mx%, my%, b1%, b2%, down%, px%, py%
 
-
-SUB DDGUI_ON_BUTTONLIST:
-	LOCAL mx%, my%, b1%, b2%, down%, px%, py%
-	
-	DDgui_show(FALSE)
-	MOUSESTATE mx%, my%, b1%, b2%
-	IF b1
-		down=TRUE
-		px=mx; py=my // iPhone moves finger off when not touching
-	ENDIF
-	IF b1=FALSE AND down
-		IF BOXCOLL(DDgui_get("", "XPOS"), DDgui_get("", "YPOS"), DDgui_get("", "WIDTH"), DDgui_get("", "HEIGHT"), px, py, 1, 1)=0
-			DDgui_popdialog()
-			RETURN -1
+		DDgui_show(FALSE)
+		MOUSESTATE mx%, my%, b1%, b2%
+		IF b1
+			down=TRUE
+			px=mx; py=my // iPhone moves finger off when not touching
 		ENDIF
-	ENDIF
-	IF DDgui_get("lst", "CLICKED")
-		LOCAL isel% = DDgui_get("lst", "SELECT")
-		DDgui_popdialog()
-		RETURN isel%
-	ENDIF
-
-	SHOWSCREEN
-ENDSUB
-
+		IF b1=FALSE AND down
+			IF BOXCOLL(DDgui_get("", "XPOS"), DDgui_get("", "YPOS"), DDgui_get("", "WIDTH"), DDgui_get("", "HEIGHT"), px, py, 1, 1)=0
+				DDgui_popdialog()
+				RETURN -1
+			ENDIF
+		ENDIF
+		IF DDgui_get("lst", "CLICKED")
+			LOCAL isel% = DDgui_get("lst", "SELECT")
+			DDgui_popdialog()
+			RETURN isel%
+		ENDIF
+	
+		SHOWSCREEN
+	WEND
+ENDFUNCTION
 
 
 

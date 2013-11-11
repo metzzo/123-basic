@@ -10,6 +10,9 @@ Fixed: MUSIC playback & looping
 Added: MUSICVOLUME
 Added: PAUSEMUSIC
 Fixed: ALPHAMODE 0.5; SHOWSCREEN did cause weird graphical gliches
+Changed: All "GLBasicScript" / "GLBScript" / "GLB" renamed to 123basic/OTT
+Changed: Tested all samples in Firefox/Chrome/Opera/Safari (latest versions) and created issues for stuff that didnt work
+
 
 
 0.4

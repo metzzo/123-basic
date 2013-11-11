@@ -360,7 +360,7 @@ SUB NewLevel_Loop:
 
 		USEASBMP
 
-		POPLOOP()
+		POPLOOP
 	ENDIF
 ENDSUB
 

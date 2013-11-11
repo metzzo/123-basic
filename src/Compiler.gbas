@@ -1,5 +1,5 @@
 // --------------------------------- //
-// Project: GLBasicScript
+// Project: 123basic
 // Start: Monday, July 18, 2011
 // IDE Version: 9.040
 
@@ -674,7 +674,7 @@ FUNCTION CreateToken AS Token: Text$, LineContent$, Line%, Character%, Path$
 		LOCAL pos = Compiler.LastTokenID
 		Compiler.LastTokenID = Compiler.LastTokenID + 1
 		IF Compiler.LastTokenID >= LEN(Compiler.Tokens[])-10
-			?IFNDEF GLBSCRIPT
+			?IFNDEF OTTBASIC
 			REDIM Compiler.Tokens[Compiler.LastTokenID + 10000]
 			?ELSE
 			REDIM Compiler.Tokens[Compiler.LastTokenID + 50]
@@ -837,7 +837,8 @@ FUNCTION InitCompiler:
 
 
 	RegisterDefine("GLB_VERSION", VERSION$)
-	RegisterDefine("GLBSCRIPT", TRUE)
+	RegisterDefine("oTT_VERSION", VERSION$)
+	RegisterDefine("OTTBASIC", TRUE)
 
 
 	//ADDONs
@@ -853,7 +854,7 @@ FUNCTION InitCompiler:
 ENDFUNCTION
 
 
-?IFDEF GLBSCRIPT
+?IFDEF OTTBASIC
 GLOBAL MaxPasses% = 6
 EXPORT MaxPasses
 NATIVE FUNCTION PassSuccessfull:

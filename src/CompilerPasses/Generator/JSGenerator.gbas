@@ -1,5 +1,5 @@
 // --------------------------------- //
-// Project: GLBasicScript
+// Project: 123basic
 // Start: Thursday, July 28, 2011
 // IDE Version: 9.033
 
@@ -954,7 +954,7 @@ FUNCTION JSGenerate$: expr AS Expr
 			Text$ = Text$ + JSGenerate$(Exprs[expr.Scp])
 			IndentUp()
 			Text$ = Text$ + " catch ("+Compiler.Varis[expr.vari].Name$+") {"+NewLine$()
-			Text$ = Text$ + "if ("+Compiler.Varis[expr.vari].Name$+" instanceof GLBException) "+Compiler.Varis[expr.vari].Name$+" = "+Compiler.Varis[expr.vari].Name$+".getText(); else throwError("+Compiler.Varis[expr.vari].Name$+");"
+			Text$ = Text$ + "if ("+Compiler.Varis[expr.vari].Name$+" instanceof OTTException) "+Compiler.Varis[expr.vari].Name$+" = "+Compiler.Varis[expr.vari].Name$+".getText(); else throwError("+Compiler.Varis[expr.vari].Name$+");"
 			Text$ = Text$ + JSGenerate$(Exprs[expr.catchScp])
 			IndentDown()
 			Text$ = Text$ + NewLine$() + "}"
@@ -962,7 +962,7 @@ FUNCTION JSGenerate$: expr AS Expr
 
 			IsInGoto = oIsInGoto
 		CASE EXPR_IS_THROW
-			Text$ = Text$ + "throw new GLBException("+JSGenerate$(Exprs[expr.expr])+", \""+Compiler.Tokens[expr.tokID].Path$+"\", "+Compiler.Tokens[expr.tokID].Line+")";
+			Text$ = Text$ + "throw new OTTException("+JSGenerate$(Exprs[expr.expr])+", \""+Compiler.Tokens[expr.tokID].Path$+"\", "+Compiler.Tokens[expr.tokID].Line+")";
 		CASE EXPR_IS_RESTORE
 			Text$ = Text$ + "RESTORE(datablock_"+expr.Name$+")"
 		CASE EXPR_IS_READ
@@ -975,7 +975,7 @@ FUNCTION JSGenerate$: expr AS Expr
 		CASE EXPR_IS_DEFVAL
 			Text$ = Text$ + JSGetDefaultValue$(expr.datatype,FALSE,FALSE)
 		CASE EXPR_IS_DIMASEXPR
-			Text$ = Text$ + "DIM(new GLBArray(), ["
+			Text$ = Text$ + "DIM(new OTTArray(), ["
 			LOCAL Find% = FALSE
 			FOREACH D IN expr.dims[]
 				IF Find = TRUE THEN Text$ = Text$ + ", "
@@ -1190,7 +1190,7 @@ ENDFUNCTION
 FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
-		RetVal$ = "new GLBArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")" // previously just "new GLBArray()"
+		RetVal$ = "new OTTArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")" // previously just "new OTTArray()"
 	ELSE
 		SELECT datatype.Name$
 			CASE "int"

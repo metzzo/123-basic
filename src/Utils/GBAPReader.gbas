@@ -1,5 +1,5 @@
 // --------------------------------- //
-// Project: GLBScript
+// Project: 123basic
 // Start: Tuesday, November 15, 2011
 // IDE Version: 10.159
 GLOBAL GFX_WIDTH	= 640
@@ -7,7 +7,7 @@ GLOBAL GFX_HEIGHT	= 480
 GLOBAL FULLSCREEN%	= FALSE
 GLOBAL FRAMERATE%	= 60
 
-GLOBAL APPNAME$ 	= "GLBasic Program"
+GLOBAL APPNAME$ 	= "123basic Program"
 GLOBAL DEBUGMODE%	= TRUE
 GLOBAL CONSOLE		= TRUE
 GLOBAL STRICT		= TRUE

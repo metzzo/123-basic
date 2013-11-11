@@ -1,5 +1,5 @@
 // --------------------------------- //
-// Project: GLBScript
+// Project: 123basic
 // Start: Tuesday, May 22, 2012
 // IDE Version: 10.283
 
@@ -167,7 +167,7 @@ FUNCTION DoTarget$: Name$
 				InsertFont(GetAttribute$("name", Ac.Att[]))
 			CASE "run"
 				//command holen
-				?IFNDEF GLBSCRIPT
+				?IFNDEF OTTBASIC
 					IF NOT NoRun
 						LOCAL Run$ = GetAttribute$("command", Ac.Att[])
 
@@ -416,7 +416,7 @@ FUNCTION DoEmbed: Path$
 					WEND
 					CLOSEFILE f
 
-					WriteFile(File$+".GLBSCRIPT_DATA", Text$)
+					WriteFile(File$+".123SCRIPT_DATA", Text$)
 				ENDIF
 			ELSE
 				DirectoryStructure$ = DirectoryStructure$ + "static:"+ Path$ + "/"+File$+"\n"

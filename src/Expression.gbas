@@ -1,5 +1,5 @@
 // --------------------------------- //
-// Project: GLBasicScript
+// Project: 123basic
 // Start: Sunday, July 24, 2011
 // IDE Version: 9.040
 
@@ -68,7 +68,7 @@ FUNCTION CreateExpression%: Typ%, datatype AS Datatype
 	LOCAL pos = LastExprID
 	LastExprID = LastExprID + 1
 	IF LastExprID >= LEN(Exprs[])-10
-		?IFNDEF GLBSCRIPT
+		?IFNDEF OTTBASIC
 		REDIM Exprs[LastExprID + 10000] //100
 		?ELSE
 		REDIM Exprs[LastExprID + 50] //100

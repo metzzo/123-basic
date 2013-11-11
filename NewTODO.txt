@@ -1,8 +1,0 @@
-
-First Release
-	DFolgende Tests müssen ohne Probleme auf Chrome und FF gehen:
-		- Scramble
-			- wtf
-	
-	Schreibe Joystick Tests	
-	Tutorial für die Installation schreiben
