@@ -70,39 +70,9 @@ function LOADFONT(path, num) {
 				
 				var charwidth = null, charheight = null;
 				
-				var i = 0;
-				var curCol = getCol(fx, fy);
-				while (sizing) {
-					var x = fx + 1, y = fy + 1;
-					var col = getCol(x, y);
-					//if (col == blue || col == yellow) {
-					if (col !=curCol) {
-						var startx = x, starty = y;
-						//for (;getCol(x, starty) == blue || getCol(x, starty) == yellow;x++) {}
-						//for (;getCol(startx, y) == blue || getCol(startx, y) == yellow;y++) {}
-						for (;getCol(x, starty) == col;x++) {}
-						for (;getCol(startx, y) == col;y++) {}
-						//throwError("width: "+(x - startx)+" height: "+(y - starty));
-						if (!charwidth || charwidth > (x - startx)) charwidth = (x - startx);
-						if (!charheight || charheight > (y - starty)) charheight = (y - starty);
-						
-						fx += charwidth + 2;
-						
-						if (fx >= width) {
-							fx = 0;
-							fy += charheight + 2;
-						}
-						
-						i++;
-					} else {
-						//console.log("fx: "+fx+" fy: "+fy);
-						sizing = false;
-					}
-				}
-				
-				// wrong:
-				// charwidth = Math.floor(width/16);
-				// charheight = (height/width)*charwidth;
+				charwidth = INTEGER(width/16)-2;
+				charheight = (height/width)*charwidth;
+				 
 				
 				font.charwidth = charwidth;
 				font.charheight = charheight;

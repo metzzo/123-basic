@@ -8,6 +8,7 @@ GETSCREENSIZE screenx, screeny
 
 GLOBAL i, j, xa, ya, mx, my, b1, b2, swapx, swapy
 
+SYSTEMPOINTER TRUE
 
 LOADSOUND "boing.wav", 0, 4
 LOADSOUND "bwah.wav", 1, 1

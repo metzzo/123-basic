@@ -12,7 +12,9 @@ Added: PAUSEMUSIC
 Fixed: ALPHAMODE 0.5; SHOWSCREEN did cause weird graphical gliches
 Changed: All "GLBasicScript" / "GLBScript" / "GLB" renamed to 123basic/OTT
 Changed: Tested all samples in Firefox/Chrome/Opera/Safari (latest versions) and created issues for stuff that didnt work
-
+Fixed: Touch on mobile browsers working again
+Fixed: Font rendering on mobile platforms
+Fixed: Firefox supports PLAYMUSIC
 
 
 0.4

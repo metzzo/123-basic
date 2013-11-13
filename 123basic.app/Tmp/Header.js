@@ -2278,6 +2278,8 @@ var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
 var inFullscreen= false;
+var canvasOffsetLeft = 0;
+var canvasOffsetTop = 0;
 
 var waitForFont = false;
 
@@ -2336,7 +2338,8 @@ function update2D() {
 			} else {
 				canvasWidth = canvas.width; 
 				canvasHeight = canvas.height;
-				
+				canvasOffsetLeft = getOffsetLeft(canvas);
+				canvasOffsetTop = getOffsetTop(canvas);
 				
 				
 				if (showFPS == -1) {
@@ -2491,13 +2494,16 @@ function init2D(canvasName) {
 	
 	touches.push(new Touch()); //Einen Touch gibts immer!
 	
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
+	
 	//mouse listener
 	if (!touchable) {
 		canvas.onmousemove = function(ev) {
 			if(!ev) ev = window.event();
 			
-			touches[0].x = ev.clientX - canvas.offsetLeft;
-			touches[0].y = ev.clientY - canvas.offsetTop;
+			touches[0].x = ev.pageX - canvasOffsetLeft;
+			touches[0].y = ev.pageY - canvasOffsetTop;
 		}
 		canvas.onmousedown=function( e ) {
 			if(!e) e = window.event();
@@ -2552,7 +2558,7 @@ function init2D(canvasName) {
 		window.onmousewheel = document.onmousewheel = wheel;
 	} else {
 		canvas.addEventListener('touchmove', function(event) {
-			updateTouches(event.touches, 'move');
+			updateTouches(event.changedTouches, 'move');
 			
 			finishEvent(event);
 		}, false);
@@ -2560,7 +2566,7 @@ function init2D(canvasName) {
 		
 		canvas.addEventListener('touchstart', function(event) {
 			//Beginn...
-			updateTouches(event.touches, 'start');
+			updateTouches(event.changedTouches, 'start');
 			finishEvent(event);
 		}, false);
 		
@@ -2919,6 +2925,24 @@ function loadAsset(path) {
 
 
 
+function getOffsetLeft(elem) {
+    var offsetLeft = 0;
+    do {
+      if (!isNaN( elem.offsetLeft )) {
+          offsetLeft += elem.offsetLeft;
+      }
+    } while(elem = elem.offsetParent);
+    return offsetLeft;
+}
+function getOffsetTop(elem) {
+    var offsetTop = 0;
+    do {
+      if (!isNaN( elem.offsetTop )) {
+          offsetTop += elem.offsetTop;
+      }
+    } while(elem = elem.offsetParent);
+    return offsetTop;
+}
 //------------------------------------------------------------
 //text
 //------------------------------------------------------------
@@ -2991,39 +3015,9 @@ function LOADFONT(path, num) {
 				
 				var charwidth = null, charheight = null;
 				
-				var i = 0;
-				var curCol = getCol(fx, fy);
-				while (sizing) {
-					var x = fx + 1, y = fy + 1;
-					var col = getCol(x, y);
-					//if (col == blue || col == yellow) {
-					if (col !=curCol) {
-						var startx = x, starty = y;
-						//for (;getCol(x, starty) == blue || getCol(x, starty) == yellow;x++) {}
-						//for (;getCol(startx, y) == blue || getCol(startx, y) == yellow;y++) {}
-						for (;getCol(x, starty) == col;x++) {}
-						for (;getCol(startx, y) == col;y++) {}
-						//throwError("width: "+(x - startx)+" height: "+(y - starty));
-						if (!charwidth || charwidth > (x - startx)) charwidth = (x - startx);
-						if (!charheight || charheight > (y - starty)) charheight = (y - starty);
-						
-						fx += charwidth + 2;
-						
-						if (fx >= width) {
-							fx = 0;
-							fy += charheight + 2;
-						}
-						
-						i++;
-					} else {
-						//console.log("fx: "+fx+" fy: "+fy);
-						sizing = false;
-					}
-				}
-				
-				// wrong:
-				// charwidth = Math.floor(width/16);
-				// charheight = (height/width)*charwidth;
+				charwidth = INTEGER(width/16)-2;
+				charheight = (height/width)*charwidth;
+				 
 				
 				font.charwidth = charwidth;
 				font.charheight = charheight;
@@ -3211,12 +3205,10 @@ function Sound(file, num, buffer) {
 	this.loop = false;
 	
 	this.sound = new Audio(file);
+	this.sound.autoplay = false;
 	this.sound.load();
 	
-	// Add the audio element to the DOM, because otherwise a certain 
-	// retarded Browser from Redmond will refuse to properly clone it
-	
-	//document.body.appendChild( this.sound );
+	document.body.appendChild( this.sound );
 	
 	waitload++;
 	
@@ -3288,11 +3280,13 @@ function SoundChannel(sound, snd) {
 	this.sound.addEventListener( 'canplaythrough', function() {
 		if (!sndchn.loaded) {
 			waitload--;
+			setTimeout(function() {
+				if (sndchn.snd.music) {
+					PLAYSOUND(-1, 0, 1);
+				}
+			}, 0);
 		}
 		sndchn.loaded = true;
-		if (sndchn.snd.music) {
-			sndchn.play();
-		}
 	}, false );
 	this.sound.addEventListener("ended", function() {
 		sndchn.stop();
@@ -3370,7 +3364,7 @@ function SOUNDPLAYING(chn) {
 function PLAYMUSIC(file, loop) {
 	if (noSound) return;
 	
-	var s = LOADSOUND(file, 0, 1);
+	var s = LOADSOUND(file, -1, 1);
 	s.loop = loop;
 	s.music = true;
 }
@@ -3378,29 +3372,29 @@ function PLAYMUSIC(file, loop) {
 function STOPMUSIC() {
 	if (noSound) return;
 	
-	if (SOUNDPLAYING(0)) {
-		soundChannels[0].stop();
+	if (SOUNDPLAYING(-1)) {
+		soundChannels[-1].stop();
 	}
 }
 
 function ISMUSICPLAYING() {
 	if (noSound) return 0;
 	
-	return SOUNDPLAYING(0);
+	return SOUNDPLAYING(-1);
 }
 
 function PAUSEMUSIC(pause) {
-	if (!!soundChannels[0]) {
+	if (!!soundChannels[-1]) {
 		if (pause) {
-			soundChannels[0].pause();
+			soundChannels[-1].pause();
 		} else {
-			soundChannels[0].resume();
+			soundChannels[-1].resume();
 		}
 	}
 }
 
 function MUSICVOLUME(vol) {
-	if (!!soundChannels[0]) soundChannels[0].volume(vol);
+	if (!!soundChannels[-1]) soundChannels[-1].volume(vol);
 }
 //------------------------------------------------------------
 //input
@@ -3436,6 +3430,23 @@ function Touch() {
 	this.middle = false;
 	this.wheel 	= 0;
 	this.reallywheel = 0;
+	
+	this.identifier = null; // used by touch API
+}
+Touch.prototype.applyTouch = function(touch) {
+	this.left = true;
+	this.identifier = touch.identifier;
+	this.x = touch.pageX - canvasOffsetLeft;
+	this.y = touch.pageY - canvasOffsetTop;
+}
+
+function findTouchIndexByIdentifier(identifier) {
+	for (var i = 0; i < touches.length; i++) {
+		if (touches[i].identifier == identifier) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 function updateTouches(t, state) {
@@ -3444,26 +3455,35 @@ function updateTouches(t, state) {
 		switch(state) {
 			case 'start':
 				//falls neue tasten => draufhauen
-				for (var i = touches.length; i < t.length-1; i++) {
+				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left = true; //letzten true setzen!
+					var touch = tmp.identifier != 0 ? new Touch() : touches[0];
+					touch.applyTouch(tmp);
+					if (tmp.identifier != 0) touches.push(touch);
 				}
-				touches.length = t.length;
 				break;
 			case 'end':
 				//Alle Tasten zurücksetzen
 				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left  = false;
+					var touchid = findTouchIndexByIdentifier(tmp.identifier);
+					if (tmp.identifier != 0) {
+						if (touchid >= 0) {
+							touches.splice(touchid, 1);
+						}
+					} else {
+						touches[0].left = false;
+					}
 				}
 				break;
 			case 'move':
 				//Nun die gedrückten Tasten setzen
 				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left  = true
-					touches[tmp.identifier].x = tmp.clientX - canvas.offsetLeft;
-					touches[tmp.identifier].y = tmp.clientY - canvas.offsetTop;
+					var touchid = findTouchIndexByIdentifier(tmp.identifier);
+					if (touchid >= 0) {
+						touches[touchid].applyTouch(tmp);
+					}
 				}
 				break;
 		}
@@ -3473,20 +3493,22 @@ function updateTouches(t, state) {
 		
 		for (var i = 0; i <touches.length;i++) {
 			var touch = touches[i];
-			touch.reallywheel = touch.wheel
-			touch.wheel = 0;
-			
-			touch.speedx = (touch.x - touch.lastx);
-			touch.speedy = (touch.y - touch.lasty);
-			
-			globalSpeedX += touch.speedx;
-			globalSpeedY += touch.speedy;
-			
-			touch.lastX = touch.x;
-			touch.lastY = touch.y;
-			
-			if (touch.left || touch.right || touch.middle) {
-				anyMousePress = true;
+			if (!!touch) {
+				touch.reallywheel = touch.wheel
+				touch.wheel = 0;
+				
+				touch.speedx = (touch.x - touch.lastx);
+				touch.speedy = (touch.y - touch.lasty);
+				
+				globalSpeedX += touch.speedx;
+				globalSpeedY += touch.speedy;
+				
+				touch.lastX = touch.x;
+				touch.lastY = touch.y;
+				
+				if (touch.left || touch.right || touch.middle) {
+					anyMousePress = true;
+				}
 			}
 		}
 	}

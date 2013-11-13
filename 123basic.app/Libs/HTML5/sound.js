@@ -25,12 +25,10 @@ function Sound(file, num, buffer) {
 	this.loop = false;
 	
 	this.sound = new Audio(file);
+	this.sound.autoplay = false;
 	this.sound.load();
 	
-	// Add the audio element to the DOM, because otherwise a certain 
-	// retarded Browser from Redmond will refuse to properly clone it
-	
-	//document.body.appendChild( this.sound );
+	document.body.appendChild( this.sound );
 	
 	waitload++;
 	
@@ -102,11 +100,13 @@ function SoundChannel(sound, snd) {
 	this.sound.addEventListener( 'canplaythrough', function() {
 		if (!sndchn.loaded) {
 			waitload--;
+			setTimeout(function() {
+				if (sndchn.snd.music) {
+					PLAYSOUND(-1, 0, 1);
+				}
+			}, 0);
 		}
 		sndchn.loaded = true;
-		if (sndchn.snd.music) {
-			sndchn.play();
-		}
 	}, false );
 	this.sound.addEventListener("ended", function() {
 		sndchn.stop();
@@ -184,7 +184,7 @@ function SOUNDPLAYING(chn) {
 function PLAYMUSIC(file, loop) {
 	if (noSound) return;
 	
-	var s = LOADSOUND(file, 0, 1);
+	var s = LOADSOUND(file, -1, 1);
 	s.loop = loop;
 	s.music = true;
 }
@@ -192,27 +192,27 @@ function PLAYMUSIC(file, loop) {
 function STOPMUSIC() {
 	if (noSound) return;
 	
-	if (SOUNDPLAYING(0)) {
-		soundChannels[0].stop();
+	if (SOUNDPLAYING(-1)) {
+		soundChannels[-1].stop();
 	}
 }
 
 function ISMUSICPLAYING() {
 	if (noSound) return 0;
 	
-	return SOUNDPLAYING(0);
+	return SOUNDPLAYING(-1);
 }
 
 function PAUSEMUSIC(pause) {
-	if (!!soundChannels[0]) {
+	if (!!soundChannels[-1]) {
 		if (pause) {
-			soundChannels[0].pause();
+			soundChannels[-1].pause();
 		} else {
-			soundChannels[0].resume();
+			soundChannels[-1].resume();
 		}
 	}
 }
 
 function MUSICVOLUME(vol) {
-	if (!!soundChannels[0]) soundChannels[0].volume(vol);
+	if (!!soundChannels[-1]) soundChannels[-1].volume(vol);
 }

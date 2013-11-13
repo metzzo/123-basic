@@ -32,6 +32,23 @@ function Touch() {
 	this.middle = false;
 	this.wheel 	= 0;
 	this.reallywheel = 0;
+	
+	this.identifier = null; // used by touch API
+}
+Touch.prototype.applyTouch = function(touch) {
+	this.left = true;
+	this.identifier = touch.identifier;
+	this.x = touch.pageX - canvasOffsetLeft;
+	this.y = touch.pageY - canvasOffsetTop;
+}
+
+function findTouchIndexByIdentifier(identifier) {
+	for (var i = 0; i < touches.length; i++) {
+		if (touches[i].identifier == identifier) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 function updateTouches(t, state) {
@@ -40,26 +57,35 @@ function updateTouches(t, state) {
 		switch(state) {
 			case 'start':
 				//falls neue tasten => draufhauen
-				for (var i = touches.length; i < t.length-1; i++) {
+				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left = true; //letzten true setzen!
+					var touch = tmp.identifier != 0 ? new Touch() : touches[0];
+					touch.applyTouch(tmp);
+					if (tmp.identifier != 0) touches.push(touch);
 				}
-				touches.length = t.length;
 				break;
 			case 'end':
 				//Alle Tasten zurücksetzen
 				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left  = false;
+					var touchid = findTouchIndexByIdentifier(tmp.identifier);
+					if (tmp.identifier != 0) {
+						if (touchid >= 0) {
+							touches.splice(touchid, 1);
+						}
+					} else {
+						touches[0].left = false;
+					}
 				}
 				break;
 			case 'move':
 				//Nun die gedrückten Tasten setzen
 				for (var i = 0; i < t.length; i++) {
 					var tmp = t[i];
-					touches[tmp.identifier].left  = true
-					touches[tmp.identifier].x = tmp.clientX - canvas.offsetLeft;
-					touches[tmp.identifier].y = tmp.clientY - canvas.offsetTop;
+					var touchid = findTouchIndexByIdentifier(tmp.identifier);
+					if (touchid >= 0) {
+						touches[touchid].applyTouch(tmp);
+					}
 				}
 				break;
 		}
@@ -69,20 +95,22 @@ function updateTouches(t, state) {
 		
 		for (var i = 0; i <touches.length;i++) {
 			var touch = touches[i];
-			touch.reallywheel = touch.wheel
-			touch.wheel = 0;
-			
-			touch.speedx = (touch.x - touch.lastx);
-			touch.speedy = (touch.y - touch.lasty);
-			
-			globalSpeedX += touch.speedx;
-			globalSpeedY += touch.speedy;
-			
-			touch.lastX = touch.x;
-			touch.lastY = touch.y;
-			
-			if (touch.left || touch.right || touch.middle) {
-				anyMousePress = true;
+			if (!!touch) {
+				touch.reallywheel = touch.wheel
+				touch.wheel = 0;
+				
+				touch.speedx = (touch.x - touch.lastx);
+				touch.speedy = (touch.y - touch.lasty);
+				
+				globalSpeedX += touch.speedx;
+				globalSpeedY += touch.speedy;
+				
+				touch.lastX = touch.x;
+				touch.lastY = touch.y;
+				
+				if (touch.left || touch.right || touch.middle) {
+					anyMousePress = true;
+				}
 			}
 		}
 	}

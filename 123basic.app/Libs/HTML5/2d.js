@@ -48,6 +48,8 @@ var transCol	= null;		//Die durchsichtige farbe
 var setBmp 		= null;		//die funktion die den hintergrund setzen soll
 var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
 var inFullscreen= false;
+var canvasOffsetLeft = 0;
+var canvasOffsetTop = 0;
 
 var waitForFont = false;
 
@@ -106,7 +108,8 @@ function update2D() {
 			} else {
 				canvasWidth = canvas.width; 
 				canvasHeight = canvas.height;
-				
+				canvasOffsetLeft = getOffsetLeft(canvas);
+				canvasOffsetTop = getOffsetTop(canvas);
 				
 				
 				if (showFPS == -1) {
@@ -261,13 +264,16 @@ function init2D(canvasName) {
 	
 	touches.push(new Touch()); //Einen Touch gibts immer!
 	
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
+	
 	//mouse listener
 	if (!touchable) {
 		canvas.onmousemove = function(ev) {
 			if(!ev) ev = window.event();
 			
-			touches[0].x = ev.clientX - canvas.offsetLeft;
-			touches[0].y = ev.clientY - canvas.offsetTop;
+			touches[0].x = ev.pageX - canvasOffsetLeft;
+			touches[0].y = ev.pageY - canvasOffsetTop;
 		}
 		canvas.onmousedown=function( e ) {
 			if(!e) e = window.event();
@@ -322,7 +328,7 @@ function init2D(canvasName) {
 		window.onmousewheel = document.onmousewheel = wheel;
 	} else {
 		canvas.addEventListener('touchmove', function(event) {
-			updateTouches(event.touches, 'move');
+			updateTouches(event.changedTouches, 'move');
 			
 			finishEvent(event);
 		}, false);
@@ -330,7 +336,7 @@ function init2D(canvasName) {
 		
 		canvas.addEventListener('touchstart', function(event) {
 			//Beginn...
-			updateTouches(event.touches, 'start');
+			updateTouches(event.changedTouches, 'start');
 			finishEvent(event);
 		}, false);
 		
@@ -689,3 +695,21 @@ function loadAsset(path) {
 
 
 
+function getOffsetLeft(elem) {
+    var offsetLeft = 0;
+    do {
+      if (!isNaN( elem.offsetLeft )) {
+          offsetLeft += elem.offsetLeft;
+      }
+    } while(elem = elem.offsetParent);
+    return offsetLeft;
+}
+function getOffsetTop(elem) {
+    var offsetTop = 0;
+    do {
+      if (!isNaN( elem.offsetTop )) {
+          offsetTop += elem.offsetTop;
+      }
+    } while(elem = elem.offsetParent);
+    return offsetTop;
+}
