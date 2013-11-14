@@ -1,4 +1,8 @@
 // A Tree image
+LOCAL maxsx, maxsy
+GETDESKTOPSIZE maxsx, maxsy
+SETSCREEN maxsx, maxsy, 1
+
 LOCAL image$ = "" _
       + "....****...." _
       + "..**++++**.." _
@@ -29,7 +33,7 @@ LOCAL w%, h%
    GETSPRITESIZE 0, w,h
 MEM2SPRITE(pixl[], 1, w,h) // make a copy to see if it worked
 
-DRAWRECT 0,0,1000,1000,RGB(70,90,255)
+DRAWRECT 0,0,10000,10000,RGB(70,90,255)
 SMOOTHSHADING FALSE
 STRETCHSPRITE 0,  32,32,99,99
 STRETCHSPRITE 1, 232,32,99,99

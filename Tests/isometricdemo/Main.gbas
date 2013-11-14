@@ -3,7 +3,9 @@
 // Start: Thursday, May 24, 2012
 // IDE Version: 10.283
 
-
+LOCAL maxsx, maxsy
+GETDESKTOPSIZE maxsx, maxsy
+SETSCREEN maxsx, maxsy, 0
 
 SUB GLB_ON_LOOP:
 

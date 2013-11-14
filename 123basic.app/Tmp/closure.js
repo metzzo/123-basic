@@ -181,8 +181,12 @@ function SHELLEND(cmd) {
 }
 
 function CALLBYNAME(name) {
-	var ret = 1;
-	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
+	if (!!window[name]) {
+		window[name]();
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 //------------------------------------------------------------
@@ -194,18 +198,28 @@ var callStack = []
 * @constructor
 */
 function StackFrame(name, info, dbg) {
+	this.apply(name, info, dbg);
+}
+StackFrame.prototype.apply = function(name, info, dbg) {
 	this.name = name;
 	this.info = info;
 	this.dbg  = dbg;
 }
 
 function stackPush(name, info) {
-	callStack.push(new StackFrame(name, info, __debugInfo));
+	if (!!callStack[callStack.length]) {
+		callStack[callStack.length].apply(name, info, __debugInfo);
+		callStack.length++;
+	} else {
+		callStack.push(new StackFrame(name, info, __debugInfo));
+	}
 }
 
 function stackPop() {
-	var obj = callStack.pop();
-	__debugInfo = obj.dbg;
+	__debugInfo = callStack[callStack.length];
+	callStack.length--; 
+	//var obj = callStack.pop();
+	//__debugInfo = obj.dbg;
 }
 
 function stackTrace() {
@@ -2298,12 +2312,10 @@ var doCurrentFunction = function() {
 	}
 	
 	//Nun wieder auf normal
-	
+	ALPHAMODE(0);
 	if (inPoly) {
 		ENDPOLY();
 	}
-	
-	
 	if (inViewport) {
 		context.restore();
 		inViewport = false;
@@ -2427,10 +2439,8 @@ function SHOWSCREEN() {
 	lastShwscrn = GETTIMERALL();
 	if (initCalled) {
 		USESCREEN(-2);
-		ALPHAMODE(0);
 		CLEARSCREEN(clrColor);
 		USESCREEN(-1);
-		ALPHAMODE(0);
 		frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
 		CLEARSCREEN(clrColor);
 		//nun noch falls vorhanden den bg zeichnen
@@ -2692,7 +2702,7 @@ function ALPHAMODE(mode) {
 		context.globalCompositeOperation = 'lighter';
 		val = mode;
 	} else {
-		context.globalCompositeOperation = '';
+		context.globalCompositeOperation = 'source-over'; 
 		val = 1;
 	}
 	
@@ -2715,7 +2725,6 @@ function RGB(r, g, b) {
 var whiteRGB = RGB(255,255,255);
 
 function SETTRANSPARENCY(rgb) {
-	//throwError("TODO: SETTRANS");
 	transCol = rgb;
 	transFontCol = rgb;
 }
@@ -2724,22 +2733,58 @@ function SMOOTHSHADING(mode) {
 	context.imageSmoothingEnabled = mode ? true : false;
 }
 
+// unused: because fullscreen has to be triggered by the user
+function toggleFullScreen() {
+  if (!document.fullscreenElement &&    // alternative standard method
+      !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
+}
+
 function SETSCREEN(width, height, fullscreen) {
 	if (fullscreen && !inFullscreen) {
-		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		width = window.innerWidth;
+		height = window.innerHeight;
 		inFullscreen = true;
 	} else if (!fullscreen && inFullscreen) {
-		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		
 		inFullscreen = false;
 	}
-	var e = frontbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	e = backbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	canvas.width = width;
-	canvas.height = height;
+	var set = function(cvs) {
+		cvs.width = width
+		cvs.height = height;
+		cvs.style.width = width+"px";
+		cvs.style.height = height+"px";
+	}
+	
+	set(frontbuffer.canvas);
+	set(backbuffer.canvas);
+	set(canvas);
+	
+	
+	canvasWidth = width
+	canvasHeight = height
+	
+	USESCREEN(-1);
+	CLEARSCREEN(RGB(0,0,0)); //black background color
+	SHOWSCREEN();
+	
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
 }
 
 var inViewport = false;
@@ -3115,7 +3160,7 @@ function PRINT(text, x, y, kerning) {
 				throwError("Unicode unsupported! "+pos);
 			}
 			var c = font.chars[pos];
-			if (!!c) {
+			if (!!c && pos > 26) {
 				var pos;
 				if (kerning) {
 					pos = x-font.charwidth/2+c.width/2;
@@ -4008,7 +4053,7 @@ function SPRITE2MEM(pixels, num) {
 				var g = imageData.data[inpos++];
 				var b = imageData.data[inpos++];
 				var a = imageData.data[inpos++];
-				var v = bOR(RGB(r,g,b), ASL(a, 24));
+				var v = a*0x1000000 + b*0x10000 + g*0x100 + r;
 				if (isref)
 					v = [v];
 				pixels.arrAccess(x + y*width).values[tmpPositionCache] = v
@@ -4719,9 +4764,128 @@ var debugMode = true;
 window['main'] = function(){
 	stackPush("main", __debugInfo);
 	try {
-		__debugInfo = "4:\Pong.gbas";
+		var local5_maxsx_ref_1391 = [0.0], local5_maxsy_ref_1392 = [0.0], local2_dx_ref_1393 = [0], local2_dy_ref_1394 = [0];
+		__debugInfo = "27:\JumpIt.gbas";
+		GETDESKTOPSIZE(local5_maxsx_ref_1391, local5_maxsy_ref_1392);
+		__debugInfo = "28:\JumpIt.gbas";
+		SETSCREEN(800, 600, 1);
+		__debugInfo = "32:\JumpIt.gbas";
+		LIMITFPS(30);
+		__debugInfo = "33:\JumpIt.gbas";
+		global12_Hardware_Str = PLATFORMINFO_Str("DEVICE");
+		__debugInfo = "35:\JumpIt.gbas";
+		GETDESKTOPSIZE(local2_dx_ref_1393, local2_dy_ref_1394);
+		__debugInfo = "37:\JumpIt.gbas";
+		SYSTEMPOINTER(1);
+		__debugInfo = "43:\JumpIt.gbas";
+		if ((((global12_Hardware_Str) == ("DESKTOP")) ? 1 : 0)) {
+			
+		};
+		__debugInfo = "45:\JumpIt.gbas";
+		SETSCREEN(unref(local2_dx_ref_1393[0]), unref(local2_dy_ref_1394[0]), 0);
+		__debugInfo = "50:\JumpIt.gbas";
+		if ((((local2_dx_ref_1393[0]) < (local2_dy_ref_1394[0])) ? 1 : 0)) {
+			__debugInfo = "49:\JumpIt.gbas";
+			if (((((((global12_Hardware_Str) != ("DESKTOP")) ? 1 : 0)) || ((((global12_Hardware_Str) == ("WIZ")) ? 1 : 0))) ? 1 : 0)) {
+				__debugInfo = "48:\JumpIt.gbas";
+				SETORIENTATION(1);
+				__debugInfo = "48:\JumpIt.gbas";
+			};
+			__debugInfo = "49:\JumpIt.gbas";
+		};
+		__debugInfo = "52:\JumpIt.gbas";
+		SETCURRENTDIR("Media");
+		__debugInfo = "56:\JumpIt.gbas";
+		global9_Gamestate = ~~(0);
+		__debugInfo = "58:\JumpIt.gbas";
+		global10_SelectTile = 0;
+		__debugInfo = "66:\JumpIt.gbas";
+		global11_PlayerImage = GENSPRITE();
+		__debugInfo = "67:\JumpIt.gbas";
+		LOADANIM("spieler.png", global11_PlayerImage, 16, 32);
+		__debugInfo = "74:\JumpIt.gbas";
+		global11_LadderImage = GENSPRITE();
+		__debugInfo = "75:\JumpIt.gbas";
+		LOADSPRITE("leiter.png", global11_LadderImage);
+		__debugInfo = "78:\JumpIt.gbas";
+		global10_SpikeImage = GENSPRITE();
+		__debugInfo = "79:\JumpIt.gbas";
+		LOADSPRITE("stachel.png", global10_SpikeImage);
+		__debugInfo = "82:\JumpIt.gbas";
+		global15_TrampolineImage = GENSPRITE();
+		__debugInfo = "83:\JumpIt.gbas";
+		LOADSPRITE("trampolin.png", global15_TrampolineImage);
+		__debugInfo = "86:\JumpIt.gbas";
+		global8_PigImage = GENSPRITE();
+		__debugInfo = "87:\JumpIt.gbas";
+		LOADANIM("schwein.png", global8_PigImage, 32, 32);
+		__debugInfo = "90:\JumpIt.gbas";
+		global10_HumanImage = GENSPRITE();
+		__debugInfo = "91:\JumpIt.gbas";
+		LOADSPRITE("fettmonster.png", global10_HumanImage);
+		__debugInfo = "94:\JumpIt.gbas";
+		global9_BirdImage = GENSPRITE();
+		__debugInfo = "95:\JumpIt.gbas";
+		LOADANIM("vogel.png", global9_BirdImage, 32, 16);
+		__debugInfo = "98:\JumpIt.gbas";
+		global9_ShitImage = GENSPRITE();
+		__debugInfo = "99:\JumpIt.gbas";
+		LOADSPRITE("exkrement.png", global9_ShitImage);
+		__debugInfo = "102:\JumpIt.gbas";
+		global10_LlamaImage = GENSPRITE();
+		__debugInfo = "103:\JumpIt.gbas";
+		LOADANIM("llama.png", global10_LlamaImage, 46, 64);
+		__debugInfo = "106:\JumpIt.gbas";
+		global9_SpitImage = GENSPRITE();
+		__debugInfo = "107:\JumpIt.gbas";
+		LOADSPRITE("spucke.png", global9_SpitImage);
+		__debugInfo = "110:\JumpIt.gbas";
+		global9_DoorImage = GENSPRITE();
+		__debugInfo = "111:\JumpIt.gbas";
+		LOADSPRITE("tuer.png", global9_DoorImage);
+		__debugInfo = "114:\JumpIt.gbas";
+		global12_TriggerImage = GENSPRITE();
+		__debugInfo = "115:\JumpIt.gbas";
+		LOADANIM("schalter.png", global12_TriggerImage, 32, 16);
+		__debugInfo = "118:\JumpIt.gbas";
+		global12_DynamitImage = GENSPRITE();
+		__debugInfo = "119:\JumpIt.gbas";
+		LOADSPRITE("dynamit.png", global12_DynamitImage);
+		__debugInfo = "122:\JumpIt.gbas";
+		global14_ExplosionImage = GENSPRITE();
+		__debugInfo = "123:\JumpIt.gbas";
+		LOADANIM("explosion.png", global14_ExplosionImage, 32, 32);
+		__debugInfo = "126:\JumpIt.gbas";
+		global9_MenuImage = GENSPRITE();
+		__debugInfo = "127:\JumpIt.gbas";
+		LOADSPRITE("menu.png", global9_MenuImage);
+		__debugInfo = "130:\JumpIt.gbas";
+		global11_ButtonImage = GENSPRITE();
+		__debugInfo = "131:\JumpIt.gbas";
+		LOADSPRITE("button.png", global11_ButtonImage);
+		__debugInfo = "134:\JumpIt.gbas";
+		global10_ArrowImage = GENSPRITE();
+		__debugInfo = "135:\JumpIt.gbas";
+		LOADSPRITE("pfeil.png", global10_ArrowImage);
+		__debugInfo = "138:\JumpIt.gbas";
+		global9_JumpImage = GENSPRITE();
+		__debugInfo = "139:\JumpIt.gbas";
+		LOADSPRITE("springen.png", global9_JumpImage);
+		__debugInfo = "145:\JumpIt.gbas";
+		CLEARSCREEN(RGB(63, 156, 255));
+		__debugInfo = "147:\JumpIt.gbas";
 		Init();
-		__debugInfo = "4:\Pong.gbas";
+		__debugInfo = "148:\JumpIt.gbas";
+		global9_Title_Str = "JumpIt Spielmenue";
+		__debugInfo = "149:\JumpIt.gbas";
+		global9_Menu1_Str = "Spielen";
+		__debugInfo = "150:\JumpIt.gbas";
+		global9_Menu2_Str = "Mapeditor";
+		__debugInfo = "151:\JumpIt.gbas";
+		global9_Menu3_Str = "Beenden";
+		__debugInfo = "152:\JumpIt.gbas";
+		PUSHLOOP("MENU_LOOP");
+		__debugInfo = "27:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4734,11 +4898,229 @@ window['main'] = function(){
 window['GLB_ON_LOOP'] = function() {
 	stackPush("sub: GLB_ON_LOOP", __debugInfo);
 	try {
-		__debugInfo = "13:\Pong.gbas";
-		MoveAll();
-		__debugInfo = "14:\Pong.gbas";
-		ShowAll();
-		__debugInfo = "13:\Pong.gbas";
+		__debugInfo = "163:\JumpIt.gbas";
+		{
+			var ex_Str = "";
+			__debugInfo = "165:\JumpIt.gbas";
+			try {
+				__debugInfo = "160:\JumpIt.gbas";
+				Update();
+				__debugInfo = "161:\JumpIt.gbas";
+				Update();
+				__debugInfo = "162:\JumpIt.gbas";
+				Render();
+				__debugInfo = "160:\JumpIt.gbas";
+			} catch (ex_Str) {
+				if (ex_Str instanceof OTTException) ex_Str = ex_Str.getText(); else throwError(ex_Str);{
+					__debugInfo = "164:\JumpIt.gbas";
+					DEBUG((("Exception ") + (ex_Str)));
+					__debugInfo = "164:\JumpIt.gbas";
+				}
+			};
+			__debugInfo = "165:\JumpIt.gbas";
+		};
+		__debugInfo = "167:\JumpIt.gbas";
+		SHOWSCREEN();
+		__debugInfo = "163:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['Update'] = function() {
+	stackPush("sub: Update", __debugInfo);
+	try {
+		__debugInfo = "173:\JumpIt.gbas";
+		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
+		__debugInfo = "175:\JumpIt.gbas";
+		{
+			var local16___SelectHelper1__1396 = 0;
+			__debugInfo = "175:\JumpIt.gbas";
+			local16___SelectHelper1__1396 = global9_Gamestate;
+			__debugInfo = "195:\JumpIt.gbas";
+			if ((((local16___SelectHelper1__1396) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "177:\JumpIt.gbas";
+				(global3_Map).Update();
+				__debugInfo = "180:\JumpIt.gbas";
+				var forEachSaver1675 = global6_Enemys;
+				for(var forEachCounter1675 = 0 ; forEachCounter1675 < forEachSaver1675.values.length ; forEachCounter1675++) {
+					var local5_Enemy_1397 = forEachSaver1675.values[forEachCounter1675];
+				{
+						__debugInfo = "179:\JumpIt.gbas";
+						(local5_Enemy_1397).Update();
+						__debugInfo = "179:\JumpIt.gbas";
+					}
+					forEachSaver1675.values[forEachCounter1675] = local5_Enemy_1397;
+				
+				};
+				__debugInfo = "184:\JumpIt.gbas";
+				var forEachSaver1690 = global5_Shits;
+				for(var forEachCounter1690 = 0 ; forEachCounter1690 < forEachSaver1690.values.length ; forEachCounter1690++) {
+					var local4_Shit_1398 = forEachSaver1690.values[forEachCounter1690];
+				{
+						__debugInfo = "182:\JumpIt.gbas";
+						(local4_Shit_1398).Update();
+						__debugInfo = "183:\JumpIt.gbas";
+						if (local4_Shit_1398.attr3_Del) {
+							__debugInfo = "183:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1690.values[forEachCounter1690] = local4_Shit_1398;
+							DIMDEL(forEachSaver1690, forEachCounter1690);
+							forEachCounter1690--;
+							continue;
+							__debugInfo = "183:\JumpIt.gbas";
+						};
+						__debugInfo = "182:\JumpIt.gbas";
+					}
+					forEachSaver1690.values[forEachCounter1690] = local4_Shit_1398;
+				
+				};
+				__debugInfo = "188:\JumpIt.gbas";
+				var forEachSaver1705 = global5_Spits;
+				for(var forEachCounter1705 = 0 ; forEachCounter1705 < forEachSaver1705.values.length ; forEachCounter1705++) {
+					var local4_Spit_1399 = forEachSaver1705.values[forEachCounter1705];
+				{
+						__debugInfo = "186:\JumpIt.gbas";
+						(local4_Spit_1399).Update();
+						__debugInfo = "187:\JumpIt.gbas";
+						if (local4_Spit_1399.attr3_Del) {
+							__debugInfo = "187:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1705.values[forEachCounter1705] = local4_Spit_1399;
+							DIMDEL(forEachSaver1705, forEachCounter1705);
+							forEachCounter1705--;
+							continue;
+							__debugInfo = "187:\JumpIt.gbas";
+						};
+						__debugInfo = "186:\JumpIt.gbas";
+					}
+					forEachSaver1705.values[forEachCounter1705] = local4_Spit_1399;
+				
+				};
+				__debugInfo = "192:\JumpIt.gbas";
+				var forEachSaver1720 = global10_Explosions;
+				for(var forEachCounter1720 = 0 ; forEachCounter1720 < forEachSaver1720.values.length ; forEachCounter1720++) {
+					var local9_Explosion_1400 = forEachSaver1720.values[forEachCounter1720];
+				{
+						__debugInfo = "190:\JumpIt.gbas";
+						(local9_Explosion_1400).Update();
+						__debugInfo = "191:\JumpIt.gbas";
+						if (local9_Explosion_1400.attr3_Del) {
+							__debugInfo = "191:\JumpIt.gbas";
+							//DELETE!!111
+							forEachSaver1720.values[forEachCounter1720] = local9_Explosion_1400;
+							DIMDEL(forEachSaver1720, forEachCounter1720);
+							forEachCounter1720--;
+							continue;
+							__debugInfo = "191:\JumpIt.gbas";
+						};
+						__debugInfo = "190:\JumpIt.gbas";
+					}
+					forEachSaver1720.values[forEachCounter1720] = local9_Explosion_1400;
+				
+				};
+				__debugInfo = "193:\JumpIt.gbas";
+				(global6_Player).Update();
+				__debugInfo = "177:\JumpIt.gbas";
+			};
+			__debugInfo = "175:\JumpIt.gbas";
+		};
+		__debugInfo = "173:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['Render'] = function() {
+	stackPush("sub: Render", __debugInfo);
+	try {
+		var local5_Width_ref_1401 = [0.0], local6_Height_ref_1402 = [0.0];
+		__debugInfo = "201:\JumpIt.gbas";
+		GETSCREENSIZE(local5_Width_ref_1401, local6_Height_ref_1402);
+		__debugInfo = "211:\JumpIt.gbas";
+		{
+			var local16___SelectHelper2__1403 = 0;
+			__debugInfo = "211:\JumpIt.gbas";
+			local16___SelectHelper2__1403 = global9_Gamestate;
+			__debugInfo = "239:\JumpIt.gbas";
+			if ((((local16___SelectHelper2__1403) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "215:\JumpIt.gbas";
+				var forEachSaver1743 = global5_Shits;
+				for(var forEachCounter1743 = 0 ; forEachCounter1743 < forEachSaver1743.values.length ; forEachCounter1743++) {
+					var local4_Shit_1404 = forEachSaver1743.values[forEachCounter1743];
+				{
+						__debugInfo = "214:\JumpIt.gbas";
+						(local4_Shit_1404).Render();
+						__debugInfo = "214:\JumpIt.gbas";
+					}
+					forEachSaver1743.values[forEachCounter1743] = local4_Shit_1404;
+				
+				};
+				__debugInfo = "217:\JumpIt.gbas";
+				(global3_Map).Render();
+				__debugInfo = "221:\JumpIt.gbas";
+				var forEachSaver1753 = global5_Spits;
+				for(var forEachCounter1753 = 0 ; forEachCounter1753 < forEachSaver1753.values.length ; forEachCounter1753++) {
+					var local4_Spit_1405 = forEachSaver1753.values[forEachCounter1753];
+				{
+						__debugInfo = "220:\JumpIt.gbas";
+						(local4_Spit_1405).Render();
+						__debugInfo = "220:\JumpIt.gbas";
+					}
+					forEachSaver1753.values[forEachCounter1753] = local4_Spit_1405;
+				
+				};
+				__debugInfo = "225:\JumpIt.gbas";
+				var forEachSaver1761 = global6_Enemys;
+				for(var forEachCounter1761 = 0 ; forEachCounter1761 < forEachSaver1761.values.length ; forEachCounter1761++) {
+					var local5_Enemy_1406 = forEachSaver1761.values[forEachCounter1761];
+				{
+						__debugInfo = "224:\JumpIt.gbas";
+						(local5_Enemy_1406).Render();
+						__debugInfo = "224:\JumpIt.gbas";
+					}
+					forEachSaver1761.values[forEachCounter1761] = local5_Enemy_1406;
+				
+				};
+				__debugInfo = "229:\JumpIt.gbas";
+				var forEachSaver1769 = global10_Explosions;
+				for(var forEachCounter1769 = 0 ; forEachCounter1769 < forEachSaver1769.values.length ; forEachCounter1769++) {
+					var local9_Explosion_1407 = forEachSaver1769.values[forEachCounter1769];
+				{
+						__debugInfo = "228:\JumpIt.gbas";
+						(local9_Explosion_1407).Render();
+						__debugInfo = "228:\JumpIt.gbas";
+					}
+					forEachSaver1769.values[forEachCounter1769] = local9_Explosion_1407;
+				
+				};
+				__debugInfo = "231:\JumpIt.gbas";
+				(global6_Player).Render();
+				__debugInfo = "238:\JumpIt.gbas";
+				if (global12_Hardware_Str) {
+					__debugInfo = "234:\JumpIt.gbas";
+					func10_GameButton(42, ((local6_Height_ref_1402[0]) - (42)), "<");
+					__debugInfo = "235:\JumpIt.gbas";
+					func10_GameButton(((local5_Width_ref_1401[0]) - (42)), ((local6_Height_ref_1402[0]) - (42)), ">");
+					__debugInfo = "236:\JumpIt.gbas";
+					func10_GameButton(42, ((local6_Height_ref_1402[0]) - (125)), "jump");
+					__debugInfo = "237:\JumpIt.gbas";
+					func10_GameButton(((local5_Width_ref_1401[0]) - (42)), ((local6_Height_ref_1402[0]) - (125)), "jump");
+					__debugInfo = "234:\JumpIt.gbas";
+				};
+				__debugInfo = "215:\JumpIt.gbas";
+			};
+			__debugInfo = "211:\JumpIt.gbas";
+		};
+		__debugInfo = "201:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4751,27 +5133,27 @@ window['GLB_ON_LOOP'] = function() {
 window['Init'] = function() {
 	stackPush("sub: Init", __debugInfo);
 	try {
-		__debugInfo = "23:\Pong.gbas";
-		SETTRANSPARENCY(RGB(255, 0, 128));
-		__debugInfo = "25:\Pong.gbas";
-		ResetBall();
-		__debugInfo = "28:\Pong.gbas";
-		DIMDATA(global5_bat_y, [240, 240]);
-		__debugInfo = "29:\Pong.gbas";
-		DIMDATA(global5_bat_x, [16, 600]);
-		__debugInfo = "30:\Pong.gbas";
-		DIM(global5_score, [2], 0.0);
-		__debugInfo = "32:\Pong.gbas";
-		LOADBMP("back.bmp");
-		__debugInfo = "33:\Pong.gbas";
-		LOADSPRITE("ball.bmp", 0);
-		__debugInfo = "34:\Pong.gbas";
-		LOADSPRITE("bat.bmp", 1);
-		__debugInfo = "36:\Pong.gbas";
-		LOADSOUND("pong.wav", 0, 1);
-		__debugInfo = "37:\Pong.gbas";
-		PLAYMUSIC("pongtune.mp3", 1);
-		__debugInfo = "23:\Pong.gbas";
+		var local5_Width_ref_1408 = [0.0], local6_Height_ref_1409 = [0.0];
+		__debugInfo = "245:\JumpIt.gbas";
+		GETSCREENSIZE(local5_Width_ref_1408, local6_Height_ref_1409);
+		__debugInfo = "246:\JumpIt.gbas";
+		{
+			var local16___SelectHelper3__1410 = 0;
+			__debugInfo = "246:\JumpIt.gbas";
+			local16___SelectHelper3__1410 = global9_Gamestate;
+			__debugInfo = "250:\JumpIt.gbas";
+			if ((((local16___SelectHelper3__1410) == (~~(0))) ? 1 : 0)) {
+				__debugInfo = "248:\JumpIt.gbas";
+				(global6_Player).Init(100, 100, 16, 32);
+				__debugInfo = "249:\JumpIt.gbas";
+				(global3_Map).Init("map0.map");
+				__debugInfo = "248:\JumpIt.gbas";
+			};
+			__debugInfo = "246:\JumpIt.gbas";
+		};
+		__debugInfo = "252:\JumpIt.gbas";
+		DIM(global17_LastMousePosition, [0], 0);
+		__debugInfo = "245:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4781,166 +5163,78 @@ window['Init'] = function() {
 	}
 	
 };
-window['MoveAll'] = function() {
-	stackPush("sub: MoveAll", __debugInfo);
+window['MENU_LOOP'] = function() {
+	stackPush("sub: MENU_LOOP", __debugInfo);
 	try {
-		__debugInfo = "47:\Pong.gbas";
-		{
-			var local3_num_1241 = 0.0;
-			__debugInfo = "57:\Pong.gbas";
-			for (local3_num_1241 = 0;toCheck(local3_num_1241, 1, 1);local3_num_1241 += 1) {
-				__debugInfo = "49:\Pong.gbas";
-				if (KEY(30)) {
-					__debugInfo = "49:\Pong.gbas";
-					global5_bat_y.arrAccess(0).values[tmpPositionCache] = ((global5_bat_y.arrAccess(0).values[tmpPositionCache]) - (2));
-					__debugInfo = "49:\Pong.gbas";
-				};
-				__debugInfo = "50:\Pong.gbas";
-				if (KEY(44)) {
-					__debugInfo = "50:\Pong.gbas";
-					global5_bat_y.arrAccess(0).values[tmpPositionCache] = ((global5_bat_y.arrAccess(0).values[tmpPositionCache]) + (2));
-					__debugInfo = "50:\Pong.gbas";
-				};
-				__debugInfo = "52:\Pong.gbas";
-				if (KEY(200)) {
-					__debugInfo = "52:\Pong.gbas";
-					global5_bat_y.arrAccess(1).values[tmpPositionCache] = ((global5_bat_y.arrAccess(1).values[tmpPositionCache]) - (2));
-					__debugInfo = "52:\Pong.gbas";
-				};
-				__debugInfo = "53:\Pong.gbas";
-				if (KEY(208)) {
-					__debugInfo = "53:\Pong.gbas";
-					global5_bat_y.arrAccess(1).values[tmpPositionCache] = ((global5_bat_y.arrAccess(1).values[tmpPositionCache]) + (2));
-					__debugInfo = "53:\Pong.gbas";
-				};
-				__debugInfo = "55:\Pong.gbas";
-				if ((((global5_bat_y.arrAccess(~~(local3_num_1241)).values[tmpPositionCache]) < (0)) ? 1 : 0)) {
-					__debugInfo = "55:\Pong.gbas";
-					global5_bat_y.arrAccess(~~(local3_num_1241)).values[tmpPositionCache] = 0;
-					__debugInfo = "55:\Pong.gbas";
-				};
-				__debugInfo = "56:\Pong.gbas";
-				if ((((global5_bat_y.arrAccess(~~(local3_num_1241)).values[tmpPositionCache]) > (416)) ? 1 : 0)) {
-					__debugInfo = "56:\Pong.gbas";
-					global5_bat_y.arrAccess(~~(local3_num_1241)).values[tmpPositionCache] = 416;
-					__debugInfo = "56:\Pong.gbas";
-				};
-				__debugInfo = "49:\Pong.gbas";
+		var local1_x_ref_1411 = [0.0], local1_y_ref_1412 = [0.0], local1_w_ref_1413 = [0.0], local1_h_ref_1414 = [0.0], local2_iw_ref_1415 = [0.0], local2_ih_ref_1416 = [0.0], local2_hh_1417 = 0.0;
+		__debugInfo = "268:\JumpIt.gbas";
+		GETFONTSIZE(local1_x_ref_1411, local1_y_ref_1412);
+		__debugInfo = "270:\JumpIt.gbas";
+		GETSCREENSIZE(local1_w_ref_1413, local1_h_ref_1414);
+		__debugInfo = "272:\JumpIt.gbas";
+		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1415, local2_ih_ref_1416);
+		__debugInfo = "275:\JumpIt.gbas";
+		local2_hh_1417 = ((local1_h_ref_1414[0]) - (150));
+		__debugInfo = "277:\JumpIt.gbas";
+		global6_Action = 0;
+		__debugInfo = "279:\JumpIt.gbas";
+		MOUSESTATE(global6_MouseX_ref, global6_MouseY_ref, global2_ML_ref, global2_MR_ref);
+		__debugInfo = "280:\JumpIt.gbas";
+		Render();
+		__debugInfo = "282:\JumpIt.gbas";
+		STRETCHSPRITE(global9_MenuImage, ((local1_w_ref_1413[0]) - (KERNLEN(global9_Title_Str, 1))), 8, ((-(local1_w_ref_1413[0])) - (KERNLEN(global9_Title_Str, 1))), unref(local2_ih_ref_1416[0]));
+		__debugInfo = "283:\JumpIt.gbas";
+		PRINT(global9_Title_Str, 20, ((40) - (((local1_y_ref_1412[0]) / (2)))), 0);
+		__debugInfo = "285:\JumpIt.gbas";
+		if (func6_Button(global9_Menu1_Str, ((((local2_hh_1417) / (3))) + (100)))) {
+			__debugInfo = "285:\JumpIt.gbas";
+			global6_Action = 1;
+			__debugInfo = "285:\JumpIt.gbas";
+		};
+		__debugInfo = "286:\JumpIt.gbas";
+		if (func6_Button(global9_Menu2_Str, ((((((local2_hh_1417) / (3))) * (2))) + (100)))) {
+			__debugInfo = "286:\JumpIt.gbas";
+			global6_Action = 2;
+			__debugInfo = "286:\JumpIt.gbas";
+		};
+		__debugInfo = "287:\JumpIt.gbas";
+		if ((((global9_Menu3_Str) != ("")) ? 1 : 0)) {
+			__debugInfo = "287:\JumpIt.gbas";
+			if (func6_Button(global9_Menu3_Str, ((local2_hh_1417) + (100)))) {
+				__debugInfo = "287:\JumpIt.gbas";
+				global6_Action = 3;
+				__debugInfo = "287:\JumpIt.gbas";
 			};
-			__debugInfo = "57:\Pong.gbas";
+			__debugInfo = "287:\JumpIt.gbas";
 		};
-		__debugInfo = "60:\Pong.gbas";
-		global6_ball_x = ((global6_ball_x) + (global7_ball_sx));
-		__debugInfo = "61:\Pong.gbas";
-		global6_ball_y = ((global6_ball_y) + (global7_ball_sy));
-		__debugInfo = "67:\Pong.gbas";
-		if ((((global6_ball_y) > (464)) ? 1 : 0)) {
-			__debugInfo = "65:\Pong.gbas";
-			global6_ball_y = 464;
-			__debugInfo = "66:\Pong.gbas";
-			global7_ball_sy = -(global7_ball_sy);
-			__debugInfo = "65:\Pong.gbas";
-		};
-		__debugInfo = "73:\Pong.gbas";
-		if ((((global6_ball_y) < (0)) ? 1 : 0)) {
-			__debugInfo = "71:\Pong.gbas";
-			global6_ball_y = 0;
-			__debugInfo = "72:\Pong.gbas";
-			global7_ball_sy = -(global7_ball_sy);
-			__debugInfo = "71:\Pong.gbas";
-		};
-		__debugInfo = "79:\Pong.gbas";
-		if ((((global6_ball_x) < (0)) ? 1 : 0)) {
-			__debugInfo = "77:\Pong.gbas";
-			global5_score.arrAccess(1).values[tmpPositionCache] = ((global5_score.arrAccess(1).values[tmpPositionCache]) + (1));
-			__debugInfo = "78:\Pong.gbas";
-			ResetBall();
-			__debugInfo = "77:\Pong.gbas";
-		};
-		__debugInfo = "85:\Pong.gbas";
-		if ((((global6_ball_x) > (624)) ? 1 : 0)) {
-			__debugInfo = "83:\Pong.gbas";
-			global5_score.arrAccess(0).values[tmpPositionCache] = ((global5_score.arrAccess(0).values[tmpPositionCache]) + (1));
-			__debugInfo = "84:\Pong.gbas";
-			ResetBall();
-			__debugInfo = "83:\Pong.gbas";
-		};
-		__debugInfo = "87:\Pong.gbas";
+		__debugInfo = "289:\JumpIt.gbas";
 		{
-			var local3_num_1246 = 0.0;
-			__debugInfo = "103:\Pong.gbas";
-			for (local3_num_1246 = 0;toCheck(local3_num_1246, 1, 1);local3_num_1246 += 1) {
-				__debugInfo = "102:\Pong.gbas";
-				if (BOXCOLL(~~(global5_bat_x.arrAccess(~~(local3_num_1246)).values[tmpPositionCache]), ~~(global5_bat_y.arrAccess(~~(local3_num_1246)).values[tmpPositionCache]), 16, 64, ~~(global6_ball_x), ~~(global6_ball_y), 16, 16)) {
-					__debugInfo = "90:\Pong.gbas";
-					PLAYSOUND(0, 0, 1);
-					__debugInfo = "92:\Pong.gbas";
-					global6_ball_x = ((global6_ball_x) - (global7_ball_sx));
-					__debugInfo = "93:\Pong.gbas";
-					global7_ball_sx = -(global7_ball_sx);
-					__debugInfo = "101:\Pong.gbas";
-					if ((((global7_ball_sx) < (0)) ? 1 : 0)) {
-						__debugInfo = "96:\Pong.gbas";
-						global7_ball_sx = ((global7_ball_sx) - (0.1));
-						__debugInfo = "97:\Pong.gbas";
-						global7_ball_sy = ((global7_ball_sy) * (1.1));
-						__debugInfo = "96:\Pong.gbas";
-					} else {
-						__debugInfo = "99:\Pong.gbas";
-						global7_ball_sx = ((global7_ball_sx) + (0.1));
-						__debugInfo = "100:\Pong.gbas";
-						global7_ball_sy = ((global7_ball_sy) * (1.1));
-						__debugInfo = "99:\Pong.gbas";
-					};
-					__debugInfo = "90:\Pong.gbas";
-				};
-				__debugInfo = "102:\Pong.gbas";
+			var local16___SelectHelper4__1418 = 0;
+			__debugInfo = "289:\JumpIt.gbas";
+			local16___SelectHelper4__1418 = global6_Action;
+			__debugInfo = "295:\JumpIt.gbas";
+			if ((((local16___SelectHelper4__1418) == (1)) ? 1 : 0)) {
+				__debugInfo = "291:\JumpIt.gbas";
+				global9_Gamestate = ~~(0);
+				__debugInfo = "292:\JumpIt.gbas";
+				POPLOOP();
+				__debugInfo = "291:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper4__1418) == (3)) ? 1 : 0)) {
+				__debugInfo = "294:\JumpIt.gbas";
+				END();
+				__debugInfo = "294:\JumpIt.gbas";
 			};
-			__debugInfo = "103:\Pong.gbas";
+			__debugInfo = "289:\JumpIt.gbas";
 		};
-		__debugInfo = "47:\Pong.gbas";
-	} catch(ex) {
-		if (isKnownException(ex)) throw ex;
-		alert(formatError(ex));
-		END();
-	} finally {
-		stackPop();
-	}
-	
-};
-window['ShowAll'] = function() {
-	stackPush("sub: ShowAll", __debugInfo);
-	try {
-		__debugInfo = "111:\Pong.gbas";
-		{
-			var local3_num_1247 = 0.0;
-			__debugInfo = "118:\Pong.gbas";
-			for (local3_num_1247 = 0;toCheck(local3_num_1247, 1, 1);local3_num_1247 += 1) {
-				__debugInfo = "113:\Pong.gbas";
-				ALPHAMODE(-(0.5));
-				__debugInfo = "114:\Pong.gbas";
-				DRAWSPRITE(1, ((global5_bat_x.arrAccess(~~(local3_num_1247)).values[tmpPositionCache]) + (10)), ((global5_bat_y.arrAccess(~~(local3_num_1247)).values[tmpPositionCache]) + (20)));
-				__debugInfo = "115:\Pong.gbas";
-				ALPHAMODE(0);
-				__debugInfo = "116:\Pong.gbas";
-				DRAWSPRITE(1, global5_bat_x.arrAccess(~~(local3_num_1247)).values[tmpPositionCache], global5_bat_y.arrAccess(~~(local3_num_1247)).values[tmpPositionCache]);
-				__debugInfo = "117:\Pong.gbas";
-				PRINT(CAST2STRING(global5_score.arrAccess(~~(local3_num_1247)).values[tmpPositionCache]), ((((local3_num_1247) * (320))) + (32)), 16, 0);
-				__debugInfo = "113:\Pong.gbas";
-			};
-			__debugInfo = "118:\Pong.gbas";
+		__debugInfo = "296:\JumpIt.gbas";
+		if (global6_Action) {
+			__debugInfo = "296:\JumpIt.gbas";
+			Init();
+			__debugInfo = "296:\JumpIt.gbas";
 		};
-		__debugInfo = "119:\Pong.gbas";
-		ALPHAMODE(-(0.5));
-		__debugInfo = "120:\Pong.gbas";
-		DRAWSPRITE(0, INTEGER(((global6_ball_x) + (10))), INTEGER(((global6_ball_y) + (20))));
-		__debugInfo = "121:\Pong.gbas";
-		ALPHAMODE(0);
-		__debugInfo = "122:\Pong.gbas";
-		DRAWSPRITE(0, INTEGER(global6_ball_x), INTEGER(global6_ball_y));
-		__debugInfo = "123:\Pong.gbas";
+		__debugInfo = "298:\JumpIt.gbas";
 		SHOWSCREEN();
-		__debugInfo = "111:\Pong.gbas";
+		__debugInfo = "268:\JumpIt.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4950,26 +5244,2081 @@ window['ShowAll'] = function() {
 	}
 	
 };
-window['ResetBall'] = function() {
-	stackPush("sub: ResetBall", __debugInfo);
+window['func6_Button'] = function(param8_Text_Str, param1_Y) {
+	stackPush("function: Button", __debugInfo);
 	try {
-		__debugInfo = "130:\Pong.gbas";
-		global6_ball_x = 320;
-		__debugInfo = "131:\Pong.gbas";
-		global6_ball_y = 240;
-		__debugInfo = "137:\Pong.gbas";
-		if ((((global7_ball_sx) < (0)) ? 1 : 0)) {
-			__debugInfo = "134:\Pong.gbas";
-			global7_ball_sx = 1;
-			__debugInfo = "134:\Pong.gbas";
+		var local1_x_ref_1421 = [0.0], local1_y_ref_1422 = [0.0], local1_w_ref_1423 = [0.0], local1_h_ref_1424 = [0.0], local2_iw_ref_1425 = [0.0], local2_ih_ref_1426 = [0.0];
+		__debugInfo = "303:\JumpIt.gbas";
+		GETFONTSIZE(local1_x_ref_1421, local1_y_ref_1422);
+		__debugInfo = "305:\JumpIt.gbas";
+		GETSCREENSIZE(local1_w_ref_1423, local1_h_ref_1424);
+		__debugInfo = "307:\JumpIt.gbas";
+		GETSPRITESIZE(global9_MenuImage, local2_iw_ref_1425, local2_ih_ref_1426);
+		__debugInfo = "316:\JumpIt.gbas";
+		if (BOXCOLL(0, ~~(((param1_Y) - (32))), unref(~~(local1_w_ref_1423[0])), unref(~~(local2_ih_ref_1426[0])), unref(~~(global6_MouseX_ref[0])), unref(~~(global6_MouseY_ref[0])), 1, 1)) {
+			__debugInfo = "310:\JumpIt.gbas";
+			ALPHAMODE(0);
+			__debugInfo = "313:\JumpIt.gbas";
+			if (global2_ML_ref[0]) {
+				__debugInfo = "312:\JumpIt.gbas";
+				return 1;
+				__debugInfo = "312:\JumpIt.gbas";
+			};
+			__debugInfo = "310:\JumpIt.gbas";
 		} else {
-			__debugInfo = "136:\Pong.gbas";
-			global7_ball_sx = -(1);
-			__debugInfo = "136:\Pong.gbas";
+			__debugInfo = "315:\JumpIt.gbas";
+			ALPHAMODE(-(0.75));
+			__debugInfo = "315:\JumpIt.gbas";
 		};
-		__debugInfo = "139:\Pong.gbas";
-		global7_ball_sy = 1;
-		__debugInfo = "130:\Pong.gbas";
+		__debugInfo = "317:\JumpIt.gbas";
+		STRETCHSPRITE(global9_MenuImage, 0, ((param1_Y) - (32)), unref(local1_w_ref_1423[0]), unref(local2_ih_ref_1426[0]));
+		__debugInfo = "318:\JumpIt.gbas";
+		ALPHAMODE(0);
+		__debugInfo = "320:\JumpIt.gbas";
+		PRINT(param8_Text_Str, 40, ((param1_Y) - (((local1_y_ref_1422[0]) / (2)))), 0);
+		__debugInfo = "322:\JumpIt.gbas";
+		return tryClone(0);
+		__debugInfo = "323:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "303:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func10_GameButton'] = function(param1_X, param1_Y, param8_Text_Str) {
+	stackPush("function: GameButton", __debugInfo);
+	try {
+		__debugInfo = "331:\JumpIt.gbas";
+		if (func16_UpdateGameButton(param1_X, param1_Y)) {
+			__debugInfo = "328:\JumpIt.gbas";
+			ALPHAMODE(0.5);
+			__debugInfo = "328:\JumpIt.gbas";
+		} else {
+			__debugInfo = "330:\JumpIt.gbas";
+			ALPHAMODE(-(0.5));
+			__debugInfo = "330:\JumpIt.gbas";
+		};
+		__debugInfo = "333:\JumpIt.gbas";
+		DRAWSPRITE(global11_ButtonImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+		__debugInfo = "334:\JumpIt.gbas";
+		{
+			var local16___SelectHelper5__1430 = "";
+			__debugInfo = "334:\JumpIt.gbas";
+			local16___SelectHelper5__1430 = param8_Text_Str;
+			__debugInfo = "341:\JumpIt.gbas";
+			if ((((local16___SelectHelper5__1430) == ("<")) ? 1 : 0)) {
+				__debugInfo = "336:\JumpIt.gbas";
+				DRAWSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+				__debugInfo = "336:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper5__1430) == (">")) ? 1 : 0)) {
+				__debugInfo = "338:\JumpIt.gbas";
+				ZOOMSPRITE(global10_ArrowImage, ((param1_X) - (32)), ((param1_Y) - (32)), -(1), 1);
+				__debugInfo = "338:\JumpIt.gbas";
+			} else if ((((local16___SelectHelper5__1430) == ("jump")) ? 1 : 0)) {
+				__debugInfo = "340:\JumpIt.gbas";
+				DRAWSPRITE(global9_JumpImage, ((param1_X) - (32)), ((param1_Y) - (32)));
+				__debugInfo = "340:\JumpIt.gbas";
+			};
+			__debugInfo = "334:\JumpIt.gbas";
+		};
+		__debugInfo = "343:\JumpIt.gbas";
+		ALPHAMODE(0);
+		__debugInfo = "344:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "331:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func16_UpdateGameButton'] = function(param1_X, param1_Y) {
+	stackPush("function: UpdateGameButton", __debugInfo);
+	try {
+		var local2_MX_ref_1433 = [0.0], local2_MY_ref_1434 = [0.0], local2_ML_ref_1435 = [0.0], local2_MR_ref_1436 = [0.0];
+		__debugInfo = "347:\JumpIt.gbas";
+		{
+			var local1_i_1437 = 0.0;
+			__debugInfo = "355:\JumpIt.gbas";
+			for (local1_i_1437 = 0;toCheck(local1_i_1437, ((GETMOUSECOUNT()) - (1)), 1);local1_i_1437 += 1) {
+				__debugInfo = "349:\JumpIt.gbas";
+				SETACTIVEMOUSE(~~(local1_i_1437));
+				__debugInfo = "350:\JumpIt.gbas";
+				MOUSESTATE(local2_MX_ref_1433, local2_MY_ref_1434, local2_ML_ref_1435, local2_MR_ref_1436);
+				__debugInfo = "354:\JumpIt.gbas";
+				if ((((BOXCOLL(~~(((param1_X) - (32))), ~~(((param1_Y) - (32))), 64, 64, unref(~~(local2_MX_ref_1433[0])), unref(~~(local2_MY_ref_1434[0])), 1, 1)) && (local2_ML_ref_1435[0])) ? 1 : 0)) {
+					__debugInfo = "352:\JumpIt.gbas";
+					SETACTIVEMOUSE(0);
+					__debugInfo = "353:\JumpIt.gbas";
+					return tryClone(1);
+					__debugInfo = "352:\JumpIt.gbas";
+				};
+				__debugInfo = "349:\JumpIt.gbas";
+			};
+			__debugInfo = "355:\JumpIt.gbas";
+		};
+		__debugInfo = "356:\JumpIt.gbas";
+		SETACTIVEMOUSE(0);
+		__debugInfo = "357:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "358:\JumpIt.gbas";
+		return 0;
+		__debugInfo = "347:\JumpIt.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "80:\Enemy.gbas";
+		if (param4_self.attr4_Fall) {
+			__debugInfo = "27:\Enemy.gbas";
+			param4_self.attr2_VY = ((param4_self.attr2_VY) + (0.2));
+			__debugInfo = "29:\Enemy.gbas";
+			param4_self.attr1_Y+=param4_self.attr2_VY;
+			__debugInfo = "27:\Enemy.gbas";
+		} else {
+			__debugInfo = "31:\Enemy.gbas";
+			param4_self.attr4_Anim+=1;
+			__debugInfo = "32:\Enemy.gbas";
+			{
+				var local16___SelectHelper6__1440 = 0;
+				__debugInfo = "32:\Enemy.gbas";
+				local16___SelectHelper6__1440 = param4_self.attr3_Typ;
+				__debugInfo = "79:\Enemy.gbas";
+				if ((((local16___SelectHelper6__1440) == (~~(1))) ? 1 : 0)) {
+					__debugInfo = "36:\Enemy.gbas";
+					if (((((((((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "35:\Enemy.gbas";
+						param4_self.attr2_VX = -(param4_self.attr2_VX);
+						__debugInfo = "35:\Enemy.gbas";
+					};
+					__debugInfo = "37:\Enemy.gbas";
+					param4_self.attr1_X+=param4_self.attr2_VX;
+					__debugInfo = "38:\Enemy.gbas";
+					param4_self.attr2_VY = func4_QCOS(((GETTIMERALL()) / (10)));
+					__debugInfo = "41:\Enemy.gbas";
+					if ((global3_Map).Collision(((param4_self.attr1_X) + (4)), ((param4_self.attr1_Y) + (param4_self.attr2_VY)), ((param4_self.attr5_Width) - (8)), param4_self.attr6_Height)) {
+						__debugInfo = "40:\Enemy.gbas";
+						param4_self.attr2_VY = 0;
+						__debugInfo = "40:\Enemy.gbas";
+					};
+					__debugInfo = "43:\Enemy.gbas";
+					param4_self.attr12_EventCounter+=1;
+					__debugInfo = "47:\Enemy.gbas";
+					if ((((MOD(param4_self.attr12_EventCounter, ~~(RND(500)))) == (5)) ? 1 : 0)) {
+						var local1_S_1441 = new type5_TShit();
+						__debugInfo = "46:\Enemy.gbas";
+						(local1_S_1441).Init(param4_self.attr1_X, param4_self.attr1_Y);
+						__debugInfo = "46:\Enemy.gbas";
+					};
+					__debugInfo = "49:\Enemy.gbas";
+					param4_self.attr1_Y+=param4_self.attr2_VY;
+					__debugInfo = "51:\Enemy.gbas";
+					param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 30);
+					__debugInfo = "36:\Enemy.gbas";
+				} else if (((((((local16___SelectHelper6__1440) >= (~~(2))) ? 1 : 0)) && ((((local16___SelectHelper6__1440) <= (~~(4))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "53:\Enemy.gbas";
+					{
+						var local16___SelectHelper7__1442 = 0;
+						__debugInfo = "53:\Enemy.gbas";
+						local16___SelectHelper7__1442 = param4_self.attr3_Typ;
+						__debugInfo = "73:\Enemy.gbas";
+						if ((((local16___SelectHelper7__1442) == (~~(4))) ? 1 : 0)) {
+							var local4_Look_1443 = 0.0;
+							__debugInfo = "55:\Enemy.gbas";
+							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
+							__debugInfo = "56:\Enemy.gbas";
+							param4_self.attr12_EventCounter+=1;
+							__debugInfo = "63:\Enemy.gbas";
+							if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+								__debugInfo = "60:\Enemy.gbas";
+								local4_Look_1443 = 0;
+								__debugInfo = "60:\Enemy.gbas";
+							} else {
+								__debugInfo = "62:\Enemy.gbas";
+								local4_Look_1443 = ((param4_self.attr5_Width) / (2));
+								__debugInfo = "62:\Enemy.gbas";
+							};
+							__debugInfo = "70:\Enemy.gbas";
+							if (((((((MOD(param4_self.attr12_EventCounter, 55)) == (5)) ? 1 : 0)) && (((((global3_Map).RayCollision(((param4_self.attr1_X) + (local4_Look_1443)), ((param4_self.attr1_Y) + (4)), global6_Player.attr1_X, global6_Player.attr1_Y)) == (0)) ? 1 : 0))) ? 1 : 0)) {
+								var local1_S_1444 = new type5_TSpit();
+								__debugInfo = "69:\Enemy.gbas";
+								(local1_S_1444).Init(((param4_self.attr1_X) + (local4_Look_1443)), ((param4_self.attr1_Y) + (4)), ((param4_self.attr2_VX) * (4)), ((param4_self.attr2_VY) - (RND(2))));
+								__debugInfo = "69:\Enemy.gbas";
+							};
+							__debugInfo = "55:\Enemy.gbas";
+						} else if ((((local16___SelectHelper7__1442) == (~~(2))) ? 1 : 0)) {
+							__debugInfo = "72:\Enemy.gbas";
+							param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 10);
+							__debugInfo = "72:\Enemy.gbas";
+						};
+						__debugInfo = "53:\Enemy.gbas";
+					};
+					__debugInfo = "77:\Enemy.gbas";
+					if (((((((((((((((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) + (param4_self.attr2_VX)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) == (0)) ? 1 : 0))) ? 1 : 0)) || (((((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (2))) + (param4_self.attr2_VX)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2)))))) || ((global3_Map).CollisionPoint(((((((param4_self.attr1_X) - (2))) + (param4_self.attr2_VX))) + (param4_self.attr5_Width)), ((param4_self.attr1_Y) + (((param4_self.attr6_Height) / (2))))))) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) < (0)) ? 1 : 0))) ? 1 : 0)) || ((((((param4_self.attr1_X) + (param4_self.attr2_VX))) > (((global3_Map.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "76:\Enemy.gbas";
+						param4_self.attr2_VX = -(param4_self.attr2_VX);
+						__debugInfo = "76:\Enemy.gbas";
+					};
+					__debugInfo = "78:\Enemy.gbas";
+					param4_self.attr1_X+=param4_self.attr2_VX;
+					__debugInfo = "53:\Enemy.gbas";
+				};
+				__debugInfo = "32:\Enemy.gbas";
+			};
+			__debugInfo = "31:\Enemy.gbas";
+		};
+		__debugInfo = "81:\Enemy.gbas";
+		return 0;
+		__debugInfo = "80:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local5_Frame_1447 = 0;
+		__debugInfo = "84:\Enemy.gbas";
+		local5_Frame_1447 = 0;
+		__debugInfo = "86:\Enemy.gbas";
+		{
+			var local16___SelectHelper8__1448 = 0;
+			__debugInfo = "86:\Enemy.gbas";
+			local16___SelectHelper8__1448 = param4_self.attr3_Typ;
+			__debugInfo = "139:\Enemy.gbas";
+			if ((((local16___SelectHelper8__1448) == (~~(1))) ? 1 : 0)) {
+				var local3_Dir_1449 = 0;
+				__debugInfo = "93:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) > (0)) ? 1 : 0)) {
+					__debugInfo = "90:\Enemy.gbas";
+					local3_Dir_1449 = 1;
+					__debugInfo = "90:\Enemy.gbas";
+				} else {
+					__debugInfo = "92:\Enemy.gbas";
+					local3_Dir_1449 = 0;
+					__debugInfo = "92:\Enemy.gbas";
+				};
+				__debugInfo = "100:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
+					__debugInfo = "95:\Enemy.gbas";
+					local5_Frame_1447 = 2;
+					__debugInfo = "95:\Enemy.gbas";
+				} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+					__debugInfo = "97:\Enemy.gbas";
+					local5_Frame_1447 = 1;
+					__debugInfo = "97:\Enemy.gbas";
+				} else {
+					__debugInfo = "99:\Enemy.gbas";
+					local5_Frame_1447 = 0;
+					__debugInfo = "99:\Enemy.gbas";
+				};
+				__debugInfo = "102:\Enemy.gbas";
+				func9_TurnImage(global9_BirdImage, local5_Frame_1447, local3_Dir_1449, param4_self.attr1_X, param4_self.attr1_Y, 6);
+				__debugInfo = "93:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1448) == (~~(2))) ? 1 : 0)) {
+				var local3_Dir_1450 = 0;
+				__debugInfo = "109:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+					__debugInfo = "106:\Enemy.gbas";
+					local3_Dir_1450 = 0;
+					__debugInfo = "106:\Enemy.gbas";
+				} else {
+					__debugInfo = "108:\Enemy.gbas";
+					local3_Dir_1450 = 1;
+					__debugInfo = "108:\Enemy.gbas";
+				};
+				__debugInfo = "115:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+					__debugInfo = "112:\Enemy.gbas";
+					local5_Frame_1447 = 1;
+					__debugInfo = "112:\Enemy.gbas";
+				} else {
+					__debugInfo = "114:\Enemy.gbas";
+					local5_Frame_1447 = 0;
+					__debugInfo = "114:\Enemy.gbas";
+				};
+				__debugInfo = "118:\Enemy.gbas";
+				func9_TurnImage(global8_PigImage, local5_Frame_1447, local3_Dir_1450, param4_self.attr1_X, param4_self.attr1_Y, 4);
+				__debugInfo = "109:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1448) == (~~(3))) ? 1 : 0)) {
+				__debugInfo = "120:\Enemy.gbas";
+				ROTOSPRITE(global10_HumanImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)), -(MOD(~~(param4_self.attr1_X), 360)));
+				__debugInfo = "120:\Enemy.gbas";
+			} else if ((((local16___SelectHelper8__1448) == (~~(4))) ? 1 : 0)) {
+				var local3_Dir_1451 = 0;
+				__debugInfo = "127:\Enemy.gbas";
+				if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+					__debugInfo = "124:\Enemy.gbas";
+					local3_Dir_1451 = 1;
+					__debugInfo = "124:\Enemy.gbas";
+				} else {
+					__debugInfo = "126:\Enemy.gbas";
+					local3_Dir_1451 = 0;
+					__debugInfo = "126:\Enemy.gbas";
+				};
+				__debugInfo = "135:\Enemy.gbas";
+				if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+					__debugInfo = "130:\Enemy.gbas";
+					local5_Frame_1447 = 2;
+					__debugInfo = "130:\Enemy.gbas";
+				} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+					__debugInfo = "132:\Enemy.gbas";
+					local5_Frame_1447 = 1;
+					__debugInfo = "132:\Enemy.gbas";
+				} else {
+					__debugInfo = "134:\Enemy.gbas";
+					local5_Frame_1447 = 0;
+					__debugInfo = "134:\Enemy.gbas";
+				};
+				__debugInfo = "138:\Enemy.gbas";
+				func9_TurnImage(global10_LlamaImage, local5_Frame_1447, local3_Dir_1451, param4_self.attr1_X, param4_self.attr1_Y, 6);
+				__debugInfo = "127:\Enemy.gbas";
+			};
+			__debugInfo = "86:\Enemy.gbas";
+		};
+		__debugInfo = "140:\Enemy.gbas";
+		return 0;
+		__debugInfo = "84:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_4_Init'] = function(param3_Typ, param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "143:\Enemy.gbas";
+		param4_self.attr3_Typ = param3_Typ;
+		__debugInfo = "144:\Enemy.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "145:\Enemy.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "146:\Enemy.gbas";
+		param4_self.attr5_Width = 32;
+		__debugInfo = "147:\Enemy.gbas";
+		param4_self.attr6_Height = 32;
+		__debugInfo = "149:\Enemy.gbas";
+		{
+			var local16___SelectHelper9__1457 = 0;
+			__debugInfo = "149:\Enemy.gbas";
+			local16___SelectHelper9__1457 = param4_self.attr3_Typ;
+			__debugInfo = "181:\Enemy.gbas";
+			if ((((local16___SelectHelper9__1457) == (~~(1))) ? 1 : 0)) {
+				__debugInfo = "151:\Enemy.gbas";
+				param4_self.attr6_Height = 16;
+				__debugInfo = "156:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "153:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "153:\Enemy.gbas";
+				} else {
+					__debugInfo = "155:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "155:\Enemy.gbas";
+				};
+				__debugInfo = "151:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1457) == (~~(2))) ? 1 : 0)) {
+				__debugInfo = "162:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "159:\Enemy.gbas";
+					param4_self.attr2_VX = 2;
+					__debugInfo = "159:\Enemy.gbas";
+				} else {
+					__debugInfo = "161:\Enemy.gbas";
+					param4_self.attr2_VX = -(2);
+					__debugInfo = "161:\Enemy.gbas";
+				};
+				__debugInfo = "162:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1457) == (~~(3))) ? 1 : 0)) {
+				__debugInfo = "164:\Enemy.gbas";
+				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
+				__debugInfo = "165:\Enemy.gbas";
+				param4_self.attr6_Height = 64;
+				__debugInfo = "166:\Enemy.gbas";
+				param4_self.attr5_Width = 64;
+				__debugInfo = "171:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "168:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "168:\Enemy.gbas";
+				} else {
+					__debugInfo = "170:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "170:\Enemy.gbas";
+				};
+				__debugInfo = "164:\Enemy.gbas";
+			} else if ((((local16___SelectHelper9__1457) == (~~(4))) ? 1 : 0)) {
+				__debugInfo = "173:\Enemy.gbas";
+				param4_self.attr1_Y = ((param4_self.attr1_Y) - (32));
+				__debugInfo = "174:\Enemy.gbas";
+				param4_self.attr6_Height = 64;
+				__debugInfo = "175:\Enemy.gbas";
+				param4_self.attr5_Width = 64;
+				__debugInfo = "180:\Enemy.gbas";
+				if (INTEGER(RND(2))) {
+					__debugInfo = "177:\Enemy.gbas";
+					param4_self.attr2_VX = 1;
+					__debugInfo = "177:\Enemy.gbas";
+				} else {
+					__debugInfo = "179:\Enemy.gbas";
+					param4_self.attr2_VX = -(1);
+					__debugInfo = "179:\Enemy.gbas";
+				};
+				__debugInfo = "173:\Enemy.gbas";
+			};
+			__debugInfo = "149:\Enemy.gbas";
+		};
+		__debugInfo = "183:\Enemy.gbas";
+		DIMPUSH(global6_Enemys, param4_self);
+		__debugInfo = "184:\Enemy.gbas";
+		return 0;
+		__debugInfo = "143:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method12_type6_TEnemy_13_IsDestroyable'] = function(param4_self) {
+	stackPush("method: IsDestroyable", __debugInfo);
+	try {
+		__debugInfo = "191:\Enemy.gbas";
+		if ((((param4_self.attr3_Typ) == (3)) ? 1 : 0)) {
+			__debugInfo = "188:\Enemy.gbas";
+			return 0;
+			__debugInfo = "188:\Enemy.gbas";
+		} else {
+			__debugInfo = "190:\Enemy.gbas";
+			return tryClone(1);
+			__debugInfo = "190:\Enemy.gbas";
+		};
+		__debugInfo = "192:\Enemy.gbas";
+		return 0;
+		__debugInfo = "191:\Enemy.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "16:\Explosion.gbas";
+		param4_self.attr4_Anim+=1;
+		__debugInfo = "17:\Explosion.gbas";
+		if ((((param4_self.attr4_Anim) > (20)) ? 1 : 0)) {
+			__debugInfo = "17:\Explosion.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "17:\Explosion.gbas";
+		};
+		__debugInfo = "18:\Explosion.gbas";
+		return 0;
+		__debugInfo = "16:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local5_Frame_1464 = 0;
+		__debugInfo = "30:\Explosion.gbas";
+		if ((((param4_self.attr4_Anim) > (15)) ? 1 : 0)) {
+			__debugInfo = "23:\Explosion.gbas";
+			local5_Frame_1464 = 3;
+			__debugInfo = "23:\Explosion.gbas";
+		} else if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+			__debugInfo = "25:\Explosion.gbas";
+			local5_Frame_1464 = 2;
+			__debugInfo = "25:\Explosion.gbas";
+		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+			__debugInfo = "27:\Explosion.gbas";
+			local5_Frame_1464 = 1;
+			__debugInfo = "27:\Explosion.gbas";
+		} else {
+			__debugInfo = "29:\Explosion.gbas";
+			local5_Frame_1464 = 0;
+			__debugInfo = "29:\Explosion.gbas";
+		};
+		__debugInfo = "32:\Explosion.gbas";
+		DRAWANIM(global14_ExplosionImage, local5_Frame_1464, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "33:\Explosion.gbas";
+		return 0;
+		__debugInfo = "30:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method17_type10_TExplosion_4_Init'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "36:\Explosion.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "37:\Explosion.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "39:\Explosion.gbas";
+		DIMPUSH(global10_Explosions, param4_self);
+		__debugInfo = "40:\Explosion.gbas";
+		return 0;
+		__debugInfo = "36:\Explosion.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_9_InitEmpty'] = function(param5_Width, param6_Height, param11_Tileset_Str, param4_self) {
+	stackPush("method: InitEmpty", __debugInfo);
+	try {
+		__debugInfo = "25:\Map.gbas";
+		param4_self.attr6_IsSnow = 0;
+		__debugInfo = "26:\Map.gbas";
+		param4_self.attr5_Width = param5_Width;
+		__debugInfo = "27:\Map.gbas";
+		param4_self.attr6_Height = param6_Height;
+		__debugInfo = "29:\Map.gbas";
+		param4_self.attr7_ScrollX = 0;
+		__debugInfo = "30:\Map.gbas";
+		param4_self.attr7_ScrollY = 0;
+		__debugInfo = "32:\Map.gbas";
+		DIM(global5_Spits, [0], new type5_TSpit());
+		__debugInfo = "33:\Map.gbas";
+		DIM(global5_Shits, [0], new type5_TShit());
+		__debugInfo = "34:\Map.gbas";
+		DIM(global6_Enemys, [0], new type6_TEnemy());
+		__debugInfo = "35:\Map.gbas";
+		(global6_Player).Init(100, 100, 16, 32);
+		__debugInfo = "37:\Map.gbas";
+		param4_self.attr7_Tileset = GENSPRITE();
+		__debugInfo = "38:\Map.gbas";
+		param4_self.attr15_TilesetPath_Str = param11_Tileset_Str;
+		__debugInfo = "39:\Map.gbas";
+		LOADANIM(param11_Tileset_Str, param4_self.attr7_Tileset, 32, 32);
+		__debugInfo = "40:\Map.gbas";
+		if ((((INSTR(param11_Tileset_Str, "snowtileset", 0)) != (-(1))) ? 1 : 0)) {
+			__debugInfo = "40:\Map.gbas";
+			param4_self.attr6_IsSnow = 1;
+			__debugInfo = "40:\Map.gbas";
+		};
+		__debugInfo = "44:\Map.gbas";
+		DIM(param4_self.attr5_Datas, [param4_self.attr5_Width, param4_self.attr6_Height], 0);
+		__debugInfo = "46:\Map.gbas";
+		param4_self.attr6_HasFBO = INT2STR(PLATFORMINFO_Str("GLEX:glBindFramebufferEXT"));
+		__debugInfo = "53:\Map.gbas";
+		if (param4_self.attr6_HasFBO) {
+			__debugInfo = "48:\Map.gbas";
+			param4_self.attr5_SprID = GENSPRITE();
+			__debugInfo = "49:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 0;
+			__debugInfo = "50:\Map.gbas";
+			param4_self.attr8_ScreenID = 0;
+			__debugInfo = "51:\Map.gbas";
+			LOADSPRITE("", param4_self.attr5_SprID);
+			__debugInfo = "52:\Map.gbas";
+			CREATESCREEN(param4_self.attr8_ScreenID, param4_self.attr5_SprID, ~~(((param4_self.attr5_Width) * (32))), ~~(((param4_self.attr6_Height) * (32))));
+			__debugInfo = "48:\Map.gbas";
+		};
+		__debugInfo = "54:\Map.gbas";
+		return 0;
+		__debugInfo = "25:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_4_Save'] = function(param8_File_Str, param4_self) {
+	stackPush("method: Save", __debugInfo);
+	try {
+		var local3_Chn_1477 = 0;
+		__debugInfo = "57:\Map.gbas";
+		local3_Chn_1477 = GENFILE();
+		__debugInfo = "58:\Map.gbas";
+		if (DOESFILEEXIST(param8_File_Str)) {
+			__debugInfo = "58:\Map.gbas";
+			KILLFILE(param8_File_Str);
+			__debugInfo = "58:\Map.gbas";
+		};
+		__debugInfo = "59:\Map.gbas";
+		if ((((OPENFILE(local3_Chn_1477, param8_File_Str, 0)) == (0)) ? 1 : 0)) {
+			__debugInfo = "59:\Map.gbas";
+			END();
+			__debugInfo = "59:\Map.gbas";
+		};
+		__debugInfo = "62:\Map.gbas";
+		WRITELINE(local3_Chn_1477, CAST2STRING(param4_self.attr5_Width));
+		__debugInfo = "63:\Map.gbas";
+		WRITELINE(local3_Chn_1477, CAST2STRING(param4_self.attr6_Height));
+		__debugInfo = "64:\Map.gbas";
+		WRITELINE(local3_Chn_1477, param4_self.attr15_TilesetPath_Str);
+		__debugInfo = "65:\Map.gbas";
+		WRITELINE(local3_Chn_1477, param4_self.attr11_NextMap_Str);
+		__debugInfo = "65:\Map.gbas";
+		{
+			var local1_y_1478 = 0.0;
+			__debugInfo = "90:\Map.gbas";
+			for (local1_y_1478 = 0;toCheck(local1_y_1478, ((param4_self.attr6_Height) - (1)), 1);local1_y_1478 += 1) {
+				var local8_Line_Str_1479 = "";
+				__debugInfo = "67:\Map.gbas";
+				local8_Line_Str_1479 = "";
+				__debugInfo = "67:\Map.gbas";
+				{
+					var local1_x_1480 = 0.0;
+					__debugInfo = "88:\Map.gbas";
+					for (local1_x_1480 = 0;toCheck(local1_x_1480, ((param4_self.attr5_Width) - (1)), 1);local1_x_1480 += 1) {
+						var local12_PositionData_1481 = 0;
+						__debugInfo = "69:\Map.gbas";
+						if ((((local1_x_1480) > (0)) ? 1 : 0)) {
+							__debugInfo = "69:\Map.gbas";
+							local8_Line_Str_1479 = ((local8_Line_Str_1479) + (","));
+							__debugInfo = "69:\Map.gbas";
+						};
+						__debugInfo = "70:\Map.gbas";
+						local12_PositionData_1481 = param4_self.attr5_Datas.arrAccess(~~(local1_x_1480), ~~(local1_y_1478)).values[tmpPositionCache];
+						__debugInfo = "85:\Map.gbas";
+						var forEachSaver3461 = global6_Enemys;
+						for(var forEachCounter3461 = 0 ; forEachCounter3461 < forEachSaver3461.values.length ; forEachCounter3461++) {
+							var local4_Enem_1482 = forEachSaver3461.values[forEachCounter3461];
+						{
+								__debugInfo = "84:\Map.gbas";
+								if (((((((INTEGER(((local4_Enem_1482.attr1_X) / (32)))) == (local1_x_1480)) ? 1 : 0)) && ((((INTEGER(((((((local4_Enem_1482.attr1_Y) + (local4_Enem_1482.attr6_Height))) - (1))) / (32)))) == (local1_y_1478)) ? 1 : 0))) ? 1 : 0)) {
+									__debugInfo = "73:\Map.gbas";
+									{
+										var local17___SelectHelper10__1483 = 0;
+										__debugInfo = "73:\Map.gbas";
+										local17___SelectHelper10__1483 = local4_Enem_1482.attr3_Typ;
+										__debugInfo = "82:\Map.gbas";
+										if ((((local17___SelectHelper10__1483) == (~~(1))) ? 1 : 0)) {
+											__debugInfo = "75:\Map.gbas";
+											local12_PositionData_1481 = 8;
+											__debugInfo = "75:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1483) == (~~(2))) ? 1 : 0)) {
+											__debugInfo = "77:\Map.gbas";
+											local12_PositionData_1481 = 6;
+											__debugInfo = "77:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1483) == (~~(4))) ? 1 : 0)) {
+											__debugInfo = "79:\Map.gbas";
+											local12_PositionData_1481 = 9;
+											__debugInfo = "79:\Map.gbas";
+										} else if ((((local17___SelectHelper10__1483) == (~~(3))) ? 1 : 0)) {
+											__debugInfo = "81:\Map.gbas";
+											local12_PositionData_1481 = 7;
+											__debugInfo = "81:\Map.gbas";
+										};
+										__debugInfo = "73:\Map.gbas";
+									};
+									__debugInfo = "83:\Map.gbas";
+									break;
+									__debugInfo = "73:\Map.gbas";
+								};
+								__debugInfo = "84:\Map.gbas";
+							}
+							forEachSaver3461.values[forEachCounter3461] = local4_Enem_1482;
+						
+						};
+						__debugInfo = "87:\Map.gbas";
+						local8_Line_Str_1479 = ((local8_Line_Str_1479) + (CAST2STRING(local12_PositionData_1481)));
+						__debugInfo = "69:\Map.gbas";
+					};
+					__debugInfo = "88:\Map.gbas";
+				};
+				__debugInfo = "89:\Map.gbas";
+				WRITELINE(local3_Chn_1477, local8_Line_Str_1479);
+				__debugInfo = "67:\Map.gbas";
+			};
+			__debugInfo = "90:\Map.gbas";
+		};
+		__debugInfo = "92:\Map.gbas";
+		CLOSEFILE(local3_Chn_1477);
+		__debugInfo = "93:\Map.gbas";
+		return 0;
+		__debugInfo = "57:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_4_Init'] = function(param8_Name_Str, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		var local3_Chn_1487 = 0, local8_Line_Str_ref_1488 = [""], local11_Tileset_Str_1489 = "", local1_x_1490 = 0, local1_y_1491 = 0;
+		__debugInfo = "96:\Map.gbas";
+		local3_Chn_1487 = GENFILE();
+		__debugInfo = "99:\Map.gbas";
+		if ((((OPENFILE(local3_Chn_1487, param8_Name_Str, 1)) == (0)) ? 1 : 0)) {
+			__debugInfo = "99:\Map.gbas";
+			END();
+			__debugInfo = "99:\Map.gbas";
+		};
+		__debugInfo = "101:\Map.gbas";
+		READLINE(local3_Chn_1487, local8_Line_Str_ref_1488);
+		__debugInfo = "102:\Map.gbas";
+		param4_self.attr5_Width = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1488[0])));
+		__debugInfo = "104:\Map.gbas";
+		READLINE(local3_Chn_1487, local8_Line_Str_ref_1488);
+		__debugInfo = "105:\Map.gbas";
+		param4_self.attr6_Height = INTEGER(unref(FLOAT2STR(local8_Line_Str_ref_1488[0])));
+		__debugInfo = "107:\Map.gbas";
+		READLINE(local3_Chn_1487, local8_Line_Str_ref_1488);
+		__debugInfo = "108:\Map.gbas";
+		local11_Tileset_Str_1489 = local8_Line_Str_ref_1488[0];
+		__debugInfo = "110:\Map.gbas";
+		READLINE(local3_Chn_1487, local8_Line_Str_ref_1488);
+		__debugInfo = "111:\Map.gbas";
+		param4_self.attr11_NextMap_Str = local8_Line_Str_ref_1488[0];
+		__debugInfo = "113:\Map.gbas";
+		(param4_self).InitEmpty(param4_self.attr5_Width, param4_self.attr6_Height, local11_Tileset_Str_1489);
+		__debugInfo = "153:\Map.gbas";
+		while ((((ENDOFFILE(local3_Chn_1487)) == (0)) ? 1 : 0)) {
+			var local9_Tiles_Str_1492 = new OTTArray("");
+			__debugInfo = "117:\Map.gbas";
+			READLINE(local3_Chn_1487, local8_Line_Str_ref_1488);
+			__debugInfo = "120:\Map.gbas";
+			SPLITSTR(unref(local8_Line_Str_ref_1488[0]), unref(local9_Tiles_Str_1492), ",", 1);
+			__debugInfo = "123:\Map.gbas";
+			local1_x_1490 = 0;
+			__debugInfo = "150:\Map.gbas";
+			var forEachSaver3678 = local9_Tiles_Str_1492;
+			for(var forEachCounter3678 = 0 ; forEachCounter3678 < forEachSaver3678.values.length ; forEachCounter3678++) {
+				var local4_tile_1493 = forEachSaver3678.values[forEachCounter3678];
+			{
+					__debugInfo = "125:\Map.gbas";
+					param4_self.attr5_Datas.arrAccess(local1_x_1490, local1_y_1491).values[tmpPositionCache] = func7_Convert(local4_tile_1493);
+					__debugInfo = "126:\Map.gbas";
+					{
+						var local17___SelectHelper11__1494 = 0;
+						__debugInfo = "126:\Map.gbas";
+						local17___SelectHelper11__1494 = param4_self.attr5_Datas.arrAccess(local1_x_1490, local1_y_1491).values[tmpPositionCache];
+						__debugInfo = "148:\Map.gbas";
+						if ((((local17___SelectHelper11__1494) == (4)) ? 1 : 0)) {
+							__debugInfo = "128:\Map.gbas";
+							global6_Player.attr1_X = ((local1_x_1490) * (32));
+							__debugInfo = "129:\Map.gbas";
+							global6_Player.attr1_Y = ((local1_y_1491) * (32));
+							__debugInfo = "130:\Map.gbas";
+							param4_self.attr6_SpawnX = ~~(global6_Player.attr1_X);
+							__debugInfo = "131:\Map.gbas";
+							param4_self.attr6_SpawnY = ~~(global6_Player.attr1_Y);
+							__debugInfo = "132:\Map.gbas";
+							param4_self.attr5_Datas.arrAccess(local1_x_1490, local1_y_1491).values[tmpPositionCache] = 0;
+							__debugInfo = "128:\Map.gbas";
+						} else if (((((((local17___SelectHelper11__1494) >= (6)) ? 1 : 0)) && ((((local17___SelectHelper11__1494) <= (9)) ? 1 : 0))) ? 1 : 0)) {
+							var local3_Typ_1495 = 0.0, local5_Enemy_1497 = new type6_TEnemy();
+							__debugInfo = "135:\Map.gbas";
+							{
+								var local17___SelectHelper12__1496 = 0;
+								__debugInfo = "135:\Map.gbas";
+								local17___SelectHelper12__1496 = param4_self.attr5_Datas.arrAccess(local1_x_1490, local1_y_1491).values[tmpPositionCache];
+								__debugInfo = "144:\Map.gbas";
+								if ((((local17___SelectHelper12__1496) == (6)) ? 1 : 0)) {
+									__debugInfo = "137:\Map.gbas";
+									local3_Typ_1495 = 2;
+									__debugInfo = "137:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1496) == (7)) ? 1 : 0)) {
+									__debugInfo = "139:\Map.gbas";
+									local3_Typ_1495 = 3;
+									__debugInfo = "139:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1496) == (8)) ? 1 : 0)) {
+									__debugInfo = "141:\Map.gbas";
+									local3_Typ_1495 = 1;
+									__debugInfo = "141:\Map.gbas";
+								} else if ((((local17___SelectHelper12__1496) == (9)) ? 1 : 0)) {
+									__debugInfo = "143:\Map.gbas";
+									local3_Typ_1495 = 4;
+									__debugInfo = "143:\Map.gbas";
+								};
+								__debugInfo = "135:\Map.gbas";
+							};
+							__debugInfo = "146:\Map.gbas";
+							(local5_Enemy_1497).Init(~~(local3_Typ_1495), ((local1_x_1490) * (32)), ((local1_y_1491) * (32)));
+							__debugInfo = "147:\Map.gbas";
+							param4_self.attr5_Datas.arrAccess(local1_x_1490, local1_y_1491).values[tmpPositionCache] = 0;
+							__debugInfo = "135:\Map.gbas";
+						};
+						__debugInfo = "126:\Map.gbas";
+					};
+					__debugInfo = "149:\Map.gbas";
+					local1_x_1490+=1;
+					__debugInfo = "125:\Map.gbas";
+				}
+				forEachSaver3678.values[forEachCounter3678] = local4_tile_1493;
+			
+			};
+			__debugInfo = "152:\Map.gbas";
+			local1_y_1491+=1;
+			__debugInfo = "117:\Map.gbas";
+		};
+		__debugInfo = "155:\Map.gbas";
+		CLOSEFILE(local3_Chn_1487);
+		__debugInfo = "156:\Map.gbas";
+		return 0;
+		__debugInfo = "96:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "171:\Map.gbas";
+		if (param4_self.attr8_SpikeDir) {
+			__debugInfo = "160:\Map.gbas";
+			param4_self.attr13_SpikePosition+=-(0.5);
+			__debugInfo = "164:\Map.gbas";
+			if ((((param4_self.attr13_SpikePosition) <= (0)) ? 1 : 0)) {
+				__debugInfo = "162:\Map.gbas";
+				param4_self.attr13_SpikePosition = 0;
+				__debugInfo = "163:\Map.gbas";
+				param4_self.attr8_SpikeDir = 0;
+				__debugInfo = "162:\Map.gbas";
+			};
+			__debugInfo = "160:\Map.gbas";
+		} else {
+			__debugInfo = "166:\Map.gbas";
+			param4_self.attr13_SpikePosition+=0.5;
+			__debugInfo = "170:\Map.gbas";
+			if ((((param4_self.attr13_SpikePosition) >= (32)) ? 1 : 0)) {
+				__debugInfo = "168:\Map.gbas";
+				param4_self.attr8_SpikeDir = 1;
+				__debugInfo = "169:\Map.gbas";
+				param4_self.attr13_SpikePosition = 32;
+				__debugInfo = "168:\Map.gbas";
+			};
+			__debugInfo = "166:\Map.gbas";
+		};
+		__debugInfo = "172:\Map.gbas";
+		return 0;
+		__debugInfo = "171:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local10_TmpScrollX_1502 = 0.0, local10_TmpScrollY_1503 = 0.0;
+		__debugInfo = "175:\Map.gbas";
+		local10_TmpScrollX_1502 = param4_self.attr7_ScrollX;
+		__debugInfo = "176:\Map.gbas";
+		local10_TmpScrollY_1503 = param4_self.attr7_ScrollY;
+		__debugInfo = "183:\Map.gbas";
+		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
+			__debugInfo = "179:\Map.gbas";
+			USESCREEN(param4_self.attr8_ScreenID);
+			__debugInfo = "180:\Map.gbas";
+			DRAWRECT(0, 0, ((param4_self.attr5_Width) * (32)), ((param4_self.attr6_Height) * (32)), RGB(255, 0, 128));
+			__debugInfo = "181:\Map.gbas";
+			param4_self.attr7_ScrollX = 0;
+			__debugInfo = "182:\Map.gbas";
+			param4_self.attr7_ScrollY = 0;
+			__debugInfo = "179:\Map.gbas";
+		};
+		__debugInfo = "215:\Map.gbas";
+		if (((((((param4_self.attr6_HasFBO) == (0)) ? 1 : 0)) || ((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0))) ? 1 : 0)) {
+			var local5_width_ref_1504 = [0.0], local6_height_ref_1505 = [0.0], local2_sx_1506 = 0.0, local2_sy_1507 = 0.0;
+			__debugInfo = "187:\Map.gbas";
+			GETSCREENSIZE(local5_width_ref_1504, local6_height_ref_1505);
+			__debugInfo = "188:\Map.gbas";
+			local5_width_ref_1504[0] = ((INTEGER(((local5_width_ref_1504[0]) / (32)))) + (1));
+			__debugInfo = "189:\Map.gbas";
+			local6_height_ref_1505[0] = ((INTEGER(((local6_height_ref_1505[0]) / (32)))) + (1));
+			__debugInfo = "190:\Map.gbas";
+			local2_sx_1506 = ((-(INTEGER(((param4_self.attr7_ScrollX) / (32))))) - (1));
+			__debugInfo = "191:\Map.gbas";
+			local2_sy_1507 = ((-(INTEGER(((param4_self.attr7_ScrollY) / (32))))) - (1));
+			__debugInfo = "194:\Map.gbas";
+			{
+				var local1_x_1508 = 0.0;
+				__debugInfo = "201:\Map.gbas";
+				for (local1_x_1508 = local2_sx_1506;toCheck(local1_x_1508, ((local2_sx_1506) + (local5_width_ref_1504[0])), 1);local1_x_1508 += 1) {
+					__debugInfo = "195:\Map.gbas";
+					{
+						var local1_y_1509 = 0.0;
+						__debugInfo = "200:\Map.gbas";
+						for (local1_y_1509 = local2_sy_1507;toCheck(local1_y_1509, ((local2_sy_1507) + (local6_height_ref_1505[0])), 1);local1_y_1509 += 1) {
+							__debugInfo = "199:\Map.gbas";
+							if (((((((((((((local1_x_1508) >= (0)) ? 1 : 0)) && ((((local1_y_1509) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1508) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1509) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "198:\Map.gbas";
+								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache]) != (1)) ? 1 : 0)) {
+									__debugInfo = "198:\Map.gbas";
+									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1508), ~~(local1_y_1509)).values[tmpPositionCache], local1_x_1508, local1_y_1509, 0);
+									__debugInfo = "198:\Map.gbas";
+								};
+								__debugInfo = "198:\Map.gbas";
+							};
+							__debugInfo = "199:\Map.gbas";
+						};
+						__debugInfo = "200:\Map.gbas";
+					};
+					__debugInfo = "195:\Map.gbas";
+				};
+				__debugInfo = "201:\Map.gbas";
+			};
+			__debugInfo = "205:\Map.gbas";
+			STARTPOLY(param4_self.attr7_Tileset, 2);
+			__debugInfo = "205:\Map.gbas";
+			{
+				var local1_x_1510 = 0.0;
+				__debugInfo = "212:\Map.gbas";
+				for (local1_x_1510 = local2_sx_1506;toCheck(local1_x_1510, ((local2_sx_1506) + (local5_width_ref_1504[0])), 1);local1_x_1510 += 1) {
+					__debugInfo = "206:\Map.gbas";
+					{
+						var local1_y_1511 = 0.0;
+						__debugInfo = "211:\Map.gbas";
+						for (local1_y_1511 = local2_sy_1507;toCheck(local1_y_1511, ((local2_sy_1507) + (local6_height_ref_1505[0])), 1);local1_y_1511 += 1) {
+							__debugInfo = "210:\Map.gbas";
+							if (((((((((((((local1_x_1510) >= (0)) ? 1 : 0)) && ((((local1_y_1511) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((local1_x_1510) < (param4_self.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((local1_y_1511) < (param4_self.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+								__debugInfo = "209:\Map.gbas";
+								if ((((param4_self.attr5_Datas.arrAccess(~~(local1_x_1510), ~~(local1_y_1511)).values[tmpPositionCache]) == (1)) ? 1 : 0)) {
+									__debugInfo = "209:\Map.gbas";
+									(param4_self).RenderTile(param4_self.attr5_Datas.arrAccess(~~(local1_x_1510), ~~(local1_y_1511)).values[tmpPositionCache], local1_x_1510, local1_y_1511, 1);
+									__debugInfo = "209:\Map.gbas";
+								};
+								__debugInfo = "209:\Map.gbas";
+							};
+							__debugInfo = "210:\Map.gbas";
+						};
+						__debugInfo = "211:\Map.gbas";
+					};
+					__debugInfo = "206:\Map.gbas";
+				};
+				__debugInfo = "212:\Map.gbas";
+			};
+			__debugInfo = "213:\Map.gbas";
+			ENDPOLY();
+			__debugInfo = "187:\Map.gbas";
+		};
+		__debugInfo = "222:\Map.gbas";
+		if (((((((param4_self.attr13_IsRenderedFBO) == (0)) ? 1 : 0)) && (param4_self.attr6_HasFBO)) ? 1 : 0)) {
+			__debugInfo = "218:\Map.gbas";
+			USESCREEN(-(1));
+			__debugInfo = "219:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 1;
+			__debugInfo = "220:\Map.gbas";
+			param4_self.attr7_ScrollX = local10_TmpScrollX_1502;
+			__debugInfo = "221:\Map.gbas";
+			param4_self.attr7_ScrollY = local10_TmpScrollY_1503;
+			__debugInfo = "218:\Map.gbas";
+		};
+		__debugInfo = "225:\Map.gbas";
+		if (param4_self.attr13_IsRenderedFBO) {
+			__debugInfo = "224:\Map.gbas";
+			DRAWSPRITE(param4_self.attr5_SprID, param4_self.attr7_ScrollX, param4_self.attr7_ScrollY);
+			__debugInfo = "224:\Map.gbas";
+		};
+		__debugInfo = "226:\Map.gbas";
+		return 0;
+		__debugInfo = "175:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_10_RenderTile'] = function(param4_Tile, param1_x, param1_y, param6_IsPoly, param4_self) {
+	stackPush("method: RenderTile", __debugInfo);
+	try {
+		__debugInfo = "229:\Map.gbas";
+		if (((((((((((((((param1_x) >= (0)) ? 1 : 0)) && ((((param1_y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_x) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1)) {
+			__debugInfo = "229:\Map.gbas";
+			return 0;
+			__debugInfo = "229:\Map.gbas";
+		};
+		__debugInfo = "231:\Map.gbas";
+		{
+			var local17___SelectHelper13__1518 = 0;
+			__debugInfo = "231:\Map.gbas";
+			local17___SelectHelper13__1518 = param4_Tile;
+			__debugInfo = "274:\Map.gbas";
+			if ((((local17___SelectHelper13__1518) == (1)) ? 1 : 0)) {
+				__debugInfo = "233:\Map.gbas";
+				param4_Tile;
+				__debugInfo = "246:\Map.gbas";
+				if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) - (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "239:\Map.gbas";
+					if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]))) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "236:\Map.gbas";
+						param4_Tile = 1;
+						__debugInfo = "236:\Map.gbas";
+					} else {
+						__debugInfo = "238:\Map.gbas";
+						param4_Tile = 2;
+						__debugInfo = "238:\Map.gbas";
+					};
+					__debugInfo = "239:\Map.gbas";
+				} else if ((((((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) && (((((((param1_x) == (((param4_self.attr5_Width) - (1)))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(((param1_x) + (1))), ~~(param1_y)).values[tmpPositionCache]) == (0)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "241:\Map.gbas";
+					param4_Tile = 3;
+					__debugInfo = "241:\Map.gbas";
+				} else if (((((((param1_y) == (0)) ? 1 : 0)) || (func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_x), ~~(((param1_y) - (1)))).values[tmpPositionCache]))) ? 1 : 0)) {
+					__debugInfo = "243:\Map.gbas";
+					param4_Tile = 1;
+					__debugInfo = "243:\Map.gbas";
+				} else {
+					__debugInfo = "245:\Map.gbas";
+					param4_Tile = 0;
+					__debugInfo = "245:\Map.gbas";
+				};
+				__debugInfo = "257:\Map.gbas";
+				if ((((param6_IsPoly) == (0)) ? 1 : 0)) {
+					__debugInfo = "249:\Map.gbas";
+					DRAWANIM(param4_self.attr7_Tileset, param4_Tile, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+					__debugInfo = "249:\Map.gbas";
+				} else {
+					__debugInfo = "251:\Map.gbas";
+					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((param4_Tile) * (32)), 0, RGB(255, 255, 255));
+					__debugInfo = "252:\Map.gbas";
+					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) - (1)), ((((param4_Tile) + (1))) * (32)), 0, RGB(255, 255, 255));
+					__debugInfo = "253:\Map.gbas";
+					POLYVECTOR(((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((param4_Tile) * (32)), 31, RGB(255, 255, 255));
+					__debugInfo = "254:\Map.gbas";
+					POLYVECTOR(((((((param1_x) * (32))) + (param4_self.attr7_ScrollX))) + (32)), ((((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (32))) - (1)), ((((param4_Tile) + (1))) * (32)), 31, RGB(255, 255, 255));
+					__debugInfo = "256:\Map.gbas";
+					POLYNEWSTRIP();
+					__debugInfo = "251:\Map.gbas";
+				};
+				__debugInfo = "233:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (2)) ? 1 : 0)) {
+				__debugInfo = "259:\Map.gbas";
+				DRAWSPRITE(global11_LadderImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "259:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (3)) ? 1 : 0)) {
+				__debugInfo = "261:\Map.gbas";
+				DRAWSPRITE(global10_SpikeImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (param4_self.attr13_SpikePosition)));
+				__debugInfo = "261:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (4)) ? 1 : 0)) {
+				
+			} else if ((((local17___SelectHelper13__1518) == (5)) ? 1 : 0)) {
+				__debugInfo = "265:\Map.gbas";
+				DRAWSPRITE(global15_TrampolineImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "265:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (10)) ? 1 : 0)) {
+				__debugInfo = "267:\Map.gbas";
+				DRAWSPRITE(global9_DoorImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "267:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (11)) ? 1 : 0)) {
+				__debugInfo = "269:\Map.gbas";
+				DRAWSPRITE(global12_DynamitImage, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((param1_y) * (32))) + (param4_self.attr7_ScrollY)));
+				__debugInfo = "269:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (12)) ? 1 : 0)) {
+				__debugInfo = "271:\Map.gbas";
+				DRAWANIM(global12_TriggerImage, 0, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "271:\Map.gbas";
+			} else if ((((local17___SelectHelper13__1518) == (13)) ? 1 : 0)) {
+				__debugInfo = "273:\Map.gbas";
+				DRAWANIM(global12_TriggerImage, 1, ((((param1_x) * (32))) + (param4_self.attr7_ScrollX)), ((((((param1_y) * (32))) + (param4_self.attr7_ScrollY))) + (16)));
+				__debugInfo = "273:\Map.gbas";
+			};
+			__debugInfo = "231:\Map.gbas";
+		};
+		__debugInfo = "275:\Map.gbas";
+		return 0;
+		__debugInfo = "229:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_8_PickTile'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: PickTile", __debugInfo);
+	try {
+		__debugInfo = "288:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "281:\Map.gbas";
+			param1_X = INTEGER(((param1_X) / (32)));
+			__debugInfo = "282:\Map.gbas";
+			param1_Y = INTEGER(((param1_Y) / (32)));
+			__debugInfo = "283:\Map.gbas";
+			param4_self.attr9_LastPickX = ~~(param1_X);
+			__debugInfo = "284:\Map.gbas";
+			param4_self.attr9_LastPickY = ~~(param1_Y);
+			__debugInfo = "285:\Map.gbas";
+			return tryClone(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]);
+			__debugInfo = "281:\Map.gbas";
+		} else {
+			__debugInfo = "287:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "287:\Map.gbas";
+		};
+		__debugInfo = "289:\Map.gbas";
+		return 0;
+		__debugInfo = "288:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_10_RemoveTile'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: RemoveTile", __debugInfo);
+	try {
+		__debugInfo = "296:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (global3_Map.attr5_Width)) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (global3_Map.attr6_Height)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "294:\Map.gbas";
+			param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache] = 0;
+			__debugInfo = "295:\Map.gbas";
+			param4_self.attr13_IsRenderedFBO = 0;
+			__debugInfo = "294:\Map.gbas";
+		};
+		__debugInfo = "297:\Map.gbas";
+		return 0;
+		__debugInfo = "296:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_14_CollisionPoint'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: CollisionPoint", __debugInfo);
+	try {
+		var local4_TmpY_1531 = 0.0;
+		__debugInfo = "301:\Map.gbas";
+		local4_TmpY_1531 = param1_Y;
+		__debugInfo = "322:\Map.gbas";
+		if (((((((((((((param1_X) >= (0)) ? 1 : 0)) && ((((param1_Y) >= (0)) ? 1 : 0))) ? 1 : 0)) && ((((param1_X) < (((param4_self.attr5_Width) * (32)))) ? 1 : 0))) ? 1 : 0)) && ((((param1_Y) < (((param4_self.attr6_Height) * (32)))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "304:\Map.gbas";
+			param1_X = INTEGER(((param1_X) / (32)));
+			__debugInfo = "305:\Map.gbas";
+			param1_Y = INTEGER(((param1_Y) / (32)));
+			__debugInfo = "319:\Map.gbas";
+			if ((((func15_IsCollisionTile(param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache])) == (0)) ? 1 : 0)) {
+				__debugInfo = "315:\Map.gbas";
+				if ((((((((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (5)) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (12)) ? 1 : 0))) ? 1 : 0)) || ((((param4_self.attr5_Datas.arrAccess(~~(param1_X), ~~(param1_Y)).values[tmpPositionCache]) == (13)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "314:\Map.gbas";
+					if ((((MOD(~~(local4_TmpY_1531), 32)) > (16)) ? 1 : 0)) {
+						__debugInfo = "311:\Map.gbas";
+						return 1;
+						__debugInfo = "311:\Map.gbas";
+					} else {
+						__debugInfo = "313:\Map.gbas";
+						return tryClone(0);
+						__debugInfo = "313:\Map.gbas";
+					};
+					__debugInfo = "314:\Map.gbas";
+				};
+				__debugInfo = "316:\Map.gbas";
+				return 1;
+				__debugInfo = "315:\Map.gbas";
+			} else {
+				__debugInfo = "318:\Map.gbas";
+				return tryClone(0);
+				__debugInfo = "318:\Map.gbas";
+			};
+			__debugInfo = "304:\Map.gbas";
+		} else {
+			__debugInfo = "321:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "321:\Map.gbas";
+		};
+		__debugInfo = "323:\Map.gbas";
+		return 0;
+		__debugInfo = "301:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_12_RayCollision'] = function(param2_X1, param2_Y1, param2_X2, param2_Y2, param4_self) {
+	stackPush("method: RayCollision", __debugInfo);
+	try {
+		var local6_Length_1538 = 0.0, local6_DeltaX_1539 = 0.0, local6_DeltaY_1540 = 0.0;
+		__debugInfo = "327:\Map.gbas";
+		local6_Length_1538 = SQR(((((((((param2_X1) * (param2_X1))) + (((param2_Y1) * (param2_Y1))))) + (((param2_X2) * (param2_X2))))) + (((param2_Y2) * (param2_Y2)))));
+		__debugInfo = "328:\Map.gbas";
+		local6_DeltaX_1539 = ((((param2_X1) - (param2_X2))) / (local6_Length_1538));
+		__debugInfo = "329:\Map.gbas";
+		local6_DeltaY_1540 = ((((param2_Y1) - (param2_Y2))) / (local6_Length_1538));
+		__debugInfo = "329:\Map.gbas";
+		{
+			var local1_i_1541 = 0.0;
+			__debugInfo = "334:\Map.gbas";
+			for (local1_i_1541 = 0;toCheck(local1_i_1541, local6_Length_1538, 1);local1_i_1541 += 1) {
+				__debugInfo = "333:\Map.gbas";
+				if ((param4_self).CollisionPoint(((param2_X1) - (((local6_DeltaX_1539) * (local1_i_1541)))), ((param2_Y1) - (((local6_DeltaY_1540) * (local1_i_1541)))))) {
+					__debugInfo = "332:\Map.gbas";
+					return tryClone(1);
+					__debugInfo = "332:\Map.gbas";
+				};
+				__debugInfo = "333:\Map.gbas";
+			};
+			__debugInfo = "334:\Map.gbas";
+		};
+		__debugInfo = "335:\Map.gbas";
+		return 0;
+		__debugInfo = "336:\Map.gbas";
+		return 0;
+		__debugInfo = "327:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method10_type4_TMap_9_Collision'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
+	stackPush("method: Collision", __debugInfo);
+	try {
+		__debugInfo = "339:\Map.gbas";
+		{
+			var local2_XX_1548 = 0.0;
+			__debugInfo = "344:\Map.gbas";
+			for (local2_XX_1548 = param1_X;toCheck(local2_XX_1548, ((param1_X) + (param5_Width)), 4);local2_XX_1548 += 4) {
+				__debugInfo = "340:\Map.gbas";
+				{
+					var local2_YY_1549 = 0.0;
+					__debugInfo = "343:\Map.gbas";
+					for (local2_YY_1549 = param1_Y;toCheck(local2_YY_1549, ((param1_Y) + (param6_Height)), 4);local2_YY_1549 += 4) {
+						__debugInfo = "342:\Map.gbas";
+						if ((param4_self).CollisionPoint(local2_XX_1548, local2_YY_1549)) {
+							__debugInfo = "342:\Map.gbas";
+							return 1;
+							__debugInfo = "342:\Map.gbas";
+						};
+						__debugInfo = "342:\Map.gbas";
+					};
+					__debugInfo = "343:\Map.gbas";
+				};
+				__debugInfo = "340:\Map.gbas";
+			};
+			__debugInfo = "344:\Map.gbas";
+		};
+		__debugInfo = "351:\Map.gbas";
+		if (((((((((((param4_self).CollisionPoint(param1_X, param1_Y)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), param1_Y))) ? 1 : 0)) || ((param4_self).CollisionPoint(param1_X, ((param1_Y) + (param6_Height))))) ? 1 : 0)) || ((param4_self).CollisionPoint(((param1_X) + (param5_Width)), ((param1_Y) + (param6_Height))))) ? 1 : 0)) {
+			__debugInfo = "348:\Map.gbas";
+			return 1;
+			__debugInfo = "348:\Map.gbas";
+		} else {
+			__debugInfo = "350:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "350:\Map.gbas";
+		};
+		__debugInfo = "352:\Map.gbas";
+		return 0;
+		__debugInfo = "339:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func15_IsCollisionTile'] = function(param3_Typ) {
+	stackPush("function: IsCollisionTile", __debugInfo);
+	try {
+		__debugInfo = "360:\Map.gbas";
+		if (((((((((((((param3_Typ) == (0)) ? 1 : 0)) || ((((param3_Typ) == (2)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (3)) ? 1 : 0))) ? 1 : 0)) || ((((param3_Typ) == (10)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "357:\Map.gbas";
+			return 1;
+			__debugInfo = "357:\Map.gbas";
+		} else {
+			__debugInfo = "359:\Map.gbas";
+			return tryClone(0);
+			__debugInfo = "359:\Map.gbas";
+		};
+		__debugInfo = "361:\Map.gbas";
+		return 0;
+		__debugInfo = "360:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func7_Convert'] = function(param8_Text_Str) {
+	stackPush("function: Convert", __debugInfo);
+	try {
+		__debugInfo = "364:\Map.gbas";
+		{
+			var local17___SelectHelper14__1552 = "";
+			__debugInfo = "364:\Map.gbas";
+			local17___SelectHelper14__1552 = param8_Text_Str;
+			__debugInfo = "373:\Map.gbas";
+			if ((((local17___SelectHelper14__1552) == ("A")) ? 1 : 0)) {
+				__debugInfo = "366:\Map.gbas";
+				return 10;
+				__debugInfo = "366:\Map.gbas";
+			} else if ((((local17___SelectHelper14__1552) == ("B")) ? 1 : 0)) {
+				__debugInfo = "368:\Map.gbas";
+				return 11;
+				__debugInfo = "368:\Map.gbas";
+			} else if ((((local17___SelectHelper14__1552) == ("C")) ? 1 : 0)) {
+				__debugInfo = "370:\Map.gbas";
+				return 12;
+				__debugInfo = "370:\Map.gbas";
+			} else {
+				__debugInfo = "372:\Map.gbas";
+				return tryClone(INTEGER(FLOAT2STR(param8_Text_Str)));
+				__debugInfo = "372:\Map.gbas";
+			};
+			__debugInfo = "364:\Map.gbas";
+		};
+		__debugInfo = "374:\Map.gbas";
+		return 0;
+		__debugInfo = "364:\Map.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_4_Init'] = function(param1_X, param1_Y, param5_Width, param6_Height, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "16:\Player.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "17:\Player.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "18:\Player.gbas";
+		param4_self.attr2_VX = 0;
+		__debugInfo = "19:\Player.gbas";
+		param4_self.attr2_VY = 0;
+		__debugInfo = "21:\Player.gbas";
+		param4_self.attr5_Width = param5_Width;
+		__debugInfo = "22:\Player.gbas";
+		param4_self.attr6_Height = param6_Height;
+		__debugInfo = "23:\Player.gbas";
+		return 0;
+		__debugInfo = "16:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		var local8_ScrWidth_ref_1561 = [0.0], local9_ScrHeight_ref_1562 = [0.0], local4_OldX_1563 = 0.0, local4_OldY_1564 = 0.0;
+		__debugInfo = "27:\Player.gbas";
+		GETSCREENSIZE(local8_ScrWidth_ref_1561, local9_ScrHeight_ref_1562);
+		__debugInfo = "30:\Player.gbas";
+		param4_self.attr2_VY+=0.5;
+		__debugInfo = "33:\Player.gbas";
+		if ((((KEY(203)) || (func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1562[0]) - (42))))) ? 1 : 0)) {
+			__debugInfo = "33:\Player.gbas";
+			param4_self.attr2_VX+=-(1);
+			__debugInfo = "33:\Player.gbas";
+		};
+		__debugInfo = "34:\Player.gbas";
+		if ((((KEY(205)) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1561[0]) - (42)), ((local9_ScrHeight_ref_1562[0]) - (42))))) ? 1 : 0)) {
+			__debugInfo = "34:\Player.gbas";
+			param4_self.attr2_VX+=1;
+			__debugInfo = "34:\Player.gbas";
+		};
+		__debugInfo = "47:\Player.gbas";
+		if ((((KEY(57)) || ((((func16_UpdateGameButton(42, ((local9_ScrHeight_ref_1562[0]) - (125)))) || (func16_UpdateGameButton(((local8_ScrWidth_ref_1561[0]) - (42)), ((local9_ScrHeight_ref_1562[0]) - (125))))) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "46:\Player.gbas";
+			if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) == (2)) ? 1 : 0)) {
+				__debugInfo = "37:\Player.gbas";
+				param4_self.attr2_VY = 0;
+				__debugInfo = "38:\Player.gbas";
+				param4_self.attr1_Y+=-(4);
+				__debugInfo = "42:\Player.gbas";
+				while (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), param4_self.attr1_Y)) != (2)) ? 1 : 0)) {
+					__debugInfo = "41:\Player.gbas";
+					param4_self.attr1_Y+=1;
+					__debugInfo = "41:\Player.gbas";
+				};
+				__debugInfo = "37:\Player.gbas";
+			} else if (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1)))) || ((global3_Map).CollisionPoint(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (1)), ((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (1))))) ? 1 : 0)) {
+				__debugInfo = "45:\Player.gbas";
+				param4_self.attr2_VY = -(8);
+				__debugInfo = "45:\Player.gbas";
+			};
+			__debugInfo = "46:\Player.gbas";
+		};
+		__debugInfo = "58:\Player.gbas";
+		if (((((global3_Map).PickTile(((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2))))), ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2))))))) == (10)) ? 1 : 0)) {
+			__debugInfo = "57:\Player.gbas";
+			if ((((global3_Map.attr11_NextMap_Str) == ("")) ? 1 : 0)) {
+				__debugInfo = "53:\Player.gbas";
+				END();
+				__debugInfo = "53:\Player.gbas";
+			} else {
+				__debugInfo = "55:\Player.gbas";
+				(global3_Map).Init(global3_Map.attr11_NextMap_Str);
+				__debugInfo = "56:\Player.gbas";
+				throw new OTTException("Exit", "\Player.gbas", 56);
+				__debugInfo = "55:\Player.gbas";
+			};
+			__debugInfo = "57:\Player.gbas";
+		};
+		__debugInfo = "61:\Player.gbas";
+		param4_self.attr2_VX = ((param4_self.attr2_VX) * (((0.77) + (((global3_Map.attr6_IsSnow) * (0.1))))));
+		__debugInfo = "64:\Player.gbas";
+		if ((((param4_self.attr2_VY) > (31)) ? 1 : 0)) {
+			__debugInfo = "64:\Player.gbas";
+			param4_self.attr2_VY = 31;
+			__debugInfo = "64:\Player.gbas";
+		};
+		__debugInfo = "65:\Player.gbas";
+		if ((((param4_self.attr2_VY) < (-33)) ? 1 : 0)) {
+			__debugInfo = "65:\Player.gbas";
+			param4_self.attr2_VY = -33;
+			__debugInfo = "65:\Player.gbas";
+		};
+		__debugInfo = "69:\Player.gbas";
+		local4_OldX_1563 = param4_self.attr1_X;
+		__debugInfo = "70:\Player.gbas";
+		local4_OldY_1564 = param4_self.attr1_Y;
+		__debugInfo = "73:\Player.gbas";
+		param4_self.attr1_X+=param4_self.attr2_VX;
+		__debugInfo = "76:\Player.gbas";
+		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
+			__debugInfo = "75:\Player.gbas";
+			param4_self.attr1_X = local4_OldX_1563;
+			__debugInfo = "75:\Player.gbas";
+		};
+		__debugInfo = "78:\Player.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "82:\Player.gbas";
+		if ((global3_Map).Collision(((param4_self.attr1_X) + (1)), ((param4_self.attr1_Y) + (1)), ((param4_self.attr5_Width) - (2)), ((param4_self.attr6_Height) - (2)))) {
+			__debugInfo = "80:\Player.gbas";
+			param4_self.attr1_Y = local4_OldY_1564;
+			__debugInfo = "81:\Player.gbas";
+			param4_self.attr2_VY = 0;
+			__debugInfo = "80:\Player.gbas";
+		};
+		__debugInfo = "90:\Player.gbas";
+		if ((((ABS(param4_self.attr2_VX)) > (0.1)) ? 1 : 0)) {
+			__debugInfo = "86:\Player.gbas";
+			param4_self.attr4_Anim+=1;
+			__debugInfo = "87:\Player.gbas";
+			param4_self.attr4_Anim = MOD(param4_self.attr4_Anim, 15);
+			__debugInfo = "86:\Player.gbas";
+		} else {
+			__debugInfo = "89:\Player.gbas";
+			param4_self.attr4_Anim = 13;
+			__debugInfo = "89:\Player.gbas";
+		};
+		__debugInfo = "95:\Player.gbas";
+		if ((((((((global3_Map).PickTile(((param4_self.attr1_X) + (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) - (global3_Map.attr13_SpikePosition))) + (32))) - (1)))) == (3)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "94:\Player.gbas";
+			(param4_self).Reset();
+			__debugInfo = "94:\Player.gbas";
+		};
+		__debugInfo = "100:\Player.gbas";
+		if (((((((((((global3_Map).PickTile(((param4_self.attr1_X) + (2)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (5)) ? 1 : 0))) ? 1 : 0)) && ((((ABS(param4_self.attr2_VY)) > (0.25)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "99:\Player.gbas";
+			param4_self.attr2_VY = ((-(param4_self.attr2_VY)) * (1.1));
+			__debugInfo = "99:\Player.gbas";
+		};
+		__debugInfo = "160:\Player.gbas";
+		if ((((((((global3_Map).PickTile(param4_self.attr1_X, ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0)) || (((((global3_Map).PickTile(((((param4_self.attr1_X) + (param4_self.attr5_Width))) - (4)), ((((((param4_self.attr1_Y) + (param4_self.attr6_Height))) + (param4_self.attr2_VY))) - (16)))) == (12)) ? 1 : 0))) ? 1 : 0)) {
+			var local8_LastPosX_1565 = 0.0, local8_LastPosY_1566 = 0.0, local4_Dist_1567 = 0.0;
+			__debugInfo = "105:\Player.gbas";
+			global3_Map.attr5_Datas.arrAccess(global3_Map.attr9_LastPickX, global3_Map.attr9_LastPickY).values[tmpPositionCache] = 13;
+			__debugInfo = "106:\Player.gbas";
+			global3_Map.attr13_IsRenderedFBO = 0;
+			__debugInfo = "109:\Player.gbas";
+			local4_Dist_1567 = -(1);
+			__debugInfo = "109:\Player.gbas";
+			{
+				var local1_x_1568 = 0.0;
+				__debugInfo = "121:\Player.gbas";
+				for (local1_x_1568 = 0;toCheck(local1_x_1568, ((global3_Map.attr5_Width) - (1)), 1);local1_x_1568 += 1) {
+					__debugInfo = "110:\Player.gbas";
+					{
+						var local1_y_1569 = 0.0;
+						__debugInfo = "120:\Player.gbas";
+						for (local1_y_1569 = 0;toCheck(local1_y_1569, ((global3_Map.attr6_Height) - (1)), 1);local1_y_1569 += 1) {
+							__debugInfo = "119:\Player.gbas";
+							if ((((global3_Map.attr5_Datas.arrAccess(~~(local1_x_1568), ~~(local1_y_1569)).values[tmpPositionCache]) == (11)) ? 1 : 0)) {
+								var local7_TmpDist_1570 = 0.0;
+								__debugInfo = "113:\Player.gbas";
+								local7_TmpDist_1570 = SQR(((((((local1_x_1568) - (global3_Map.attr9_LastPickX))) * (((local1_x_1568) - (global3_Map.attr9_LastPickX))))) + (((((local1_y_1569) - (global3_Map.attr9_LastPickY))) * (((local1_y_1569) - (global3_Map.attr9_LastPickY)))))));
+								__debugInfo = "118:\Player.gbas";
+								if (((((((local4_Dist_1567) == (-(1))) ? 1 : 0)) || ((((local7_TmpDist_1570) < (local4_Dist_1567)) ? 1 : 0))) ? 1 : 0)) {
+									__debugInfo = "115:\Player.gbas";
+									local4_Dist_1567 = local7_TmpDist_1570;
+									__debugInfo = "116:\Player.gbas";
+									local8_LastPosX_1565 = local1_x_1568;
+									__debugInfo = "117:\Player.gbas";
+									local8_LastPosY_1566 = local1_y_1569;
+									__debugInfo = "115:\Player.gbas";
+								};
+								__debugInfo = "113:\Player.gbas";
+							};
+							__debugInfo = "119:\Player.gbas";
+						};
+						__debugInfo = "120:\Player.gbas";
+					};
+					__debugInfo = "110:\Player.gbas";
+				};
+				__debugInfo = "121:\Player.gbas";
+			};
+			__debugInfo = "159:\Player.gbas";
+			if ((((local4_Dist_1567) != (-(1))) ? 1 : 0)) {
+				var local2_X1_1571 = 0.0, local2_Y1_1572 = 0.0, local2_X2_1573 = 0.0, local2_Y2_1574 = 0.0, local5_Angle_1575 = 0.0;
+				__debugInfo = "126:\Player.gbas";
+				local2_Y1_1572 = ((((local8_LastPosY_1566) * (32))) + (16));
+				__debugInfo = "127:\Player.gbas";
+				local2_Y2_1574 = ((param4_self.attr1_Y) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
+				__debugInfo = "127:\Player.gbas";
+				local2_X1_1571 = ((((local8_LastPosX_1565) * (32))) + (16));
+				__debugInfo = "128:\Player.gbas";
+				local2_X2_1573 = ((param4_self.attr1_X) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
+				__debugInfo = "129:\Player.gbas";
+				local5_Angle_1575 = -(MOD(~~(((ATAN(((local2_Y1_1572) - (local2_Y2_1574)), ((local2_X1_1571) - (local2_X2_1573)))) + (180))), 360));
+				__debugInfo = "130:\Player.gbas";
+				local4_Dist_1567 = SQR(((((((local2_X1_1571) - (local2_X2_1573))) * (((local2_X1_1571) - (local2_X2_1573))))) + (((((local2_Y1_1572) - (local2_Y2_1574))) * (((local2_Y1_1572) - (local2_Y2_1574)))))));
+				__debugInfo = "136:\Player.gbas";
+				if ((((local4_Dist_1567) < (512)) ? 1 : 0)) {
+					var local8_Strength_1576 = 0.0;
+					__debugInfo = "133:\Player.gbas";
+					local8_Strength_1576 = ((((256) / (((local4_Dist_1567) + (1))))) * (16));
+					__debugInfo = "134:\Player.gbas";
+					param4_self.attr2_VX+=((func4_QCOS(local5_Angle_1575)) * (local8_Strength_1576));
+					__debugInfo = "135:\Player.gbas";
+					param4_self.attr2_VY+=((func4_QSIN(local5_Angle_1575)) * (local8_Strength_1576));
+					__debugInfo = "133:\Player.gbas";
+				};
+				__debugInfo = "138:\Player.gbas";
+				{
+					var local1_X_1577 = 0.0;
+					__debugInfo = "151:\Player.gbas";
+					for (local1_X_1577 = -(1);toCheck(local1_X_1577, 1, 1);local1_X_1577 += 1) {
+						__debugInfo = "139:\Player.gbas";
+						{
+							var local1_Y_1578 = 0.0;
+							__debugInfo = "150:\Player.gbas";
+							for (local1_Y_1578 = -(1);toCheck(local1_Y_1578, 1, 1);local1_Y_1578 += 1) {
+								__debugInfo = "141:\Player.gbas";
+								(global3_Map).RemoveTile(((local8_LastPosX_1565) + (local1_X_1577)), ((local8_LastPosY_1566) + (local1_Y_1578)));
+								__debugInfo = "141:\Player.gbas";
+								{
+									var local2_XX_1579 = 0.0;
+									__debugInfo = "149:\Player.gbas";
+									for (local2_XX_1579 = -(0.5);toCheck(local2_XX_1579, 0.5, 0.5);local2_XX_1579 += 0.5) {
+										__debugInfo = "142:\Player.gbas";
+										{
+											var local2_YY_1580 = 0.0;
+											__debugInfo = "148:\Player.gbas";
+											for (local2_YY_1580 = -(0.5);toCheck(local2_YY_1580, 0.5, 0.5);local2_YY_1580 += 0.5) {
+												__debugInfo = "147:\Player.gbas";
+												if ((((INTEGER(RND(2))) > (1)) ? 1 : 0)) {
+													var local3_Exp_1581 = new type10_TExplosion();
+													__debugInfo = "146:\Player.gbas";
+													(local3_Exp_1581).Init(((((((local8_LastPosX_1565) + (local1_X_1577))) + (local2_XX_1579))) * (32)), ((((((local8_LastPosY_1566) + (local1_Y_1578))) + (local2_YY_1580))) * (32)));
+													__debugInfo = "146:\Player.gbas";
+												};
+												__debugInfo = "147:\Player.gbas";
+											};
+											__debugInfo = "148:\Player.gbas";
+										};
+										__debugInfo = "142:\Player.gbas";
+									};
+									__debugInfo = "149:\Player.gbas";
+								};
+								__debugInfo = "141:\Player.gbas";
+							};
+							__debugInfo = "150:\Player.gbas";
+						};
+						__debugInfo = "139:\Player.gbas";
+					};
+					__debugInfo = "151:\Player.gbas";
+				};
+				__debugInfo = "158:\Player.gbas";
+				var forEachSaver5985 = global6_Enemys;
+				for(var forEachCounter5985 = 0 ; forEachCounter5985 < forEachSaver5985.values.length ; forEachCounter5985++) {
+					var local5_Enemy_1582 = forEachSaver5985.values[forEachCounter5985];
+				{
+						__debugInfo = "157:\Player.gbas";
+						if ((((SQR(((((((local5_Enemy_1582.attr1_X) - (((local8_LastPosX_1565) * (32))))) * (((local5_Enemy_1582.attr1_X) - (((local8_LastPosX_1565) * (32))))))) + (((local5_Enemy_1582.attr1_Y) - (((local8_LastPosY_1566) * (32)))))))) < (32)) ? 1 : 0)) {
+							__debugInfo = "156:\Player.gbas";
+							local5_Enemy_1582.attr4_Fall = 1;
+							__debugInfo = "156:\Player.gbas";
+						};
+						__debugInfo = "157:\Player.gbas";
+					}
+					forEachSaver5985.values[forEachCounter5985] = local5_Enemy_1582;
+				
+				};
+				__debugInfo = "126:\Player.gbas";
+			};
+			__debugInfo = "105:\Player.gbas";
+		};
+		__debugInfo = "173:\Player.gbas";
+		var forEachSaver6115 = global6_Enemys;
+		for(var forEachCounter6115 = 0 ; forEachCounter6115 < forEachSaver6115.values.length ; forEachCounter6115++) {
+			var local5_Enemy_1583 = forEachSaver6115.values[forEachCounter6115];
+		{
+				__debugInfo = "172:\Player.gbas";
+				if ((((local5_Enemy_1583.attr4_Fall) == (0)) ? 1 : 0)) {
+					__debugInfo = "171:\Player.gbas";
+					if (((((((BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) + (4)), ~~(((local5_Enemy_1583.attr1_X) + (4))), ~~(((local5_Enemy_1583.attr1_Y) - (8))), ~~(((local5_Enemy_1583.attr5_Width) - (8))), 16)) && ((local5_Enemy_1583).IsDestroyable())) ? 1 : 0)) && ((((param4_self.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+						__debugInfo = "167:\Player.gbas";
+						local5_Enemy_1583.attr4_Fall = 1;
+						__debugInfo = "167:\Player.gbas";
+					} else if (BOXCOLL(~~(((param4_self.attr1_X) + (2))), ~~(((param4_self.attr1_Y) + (2))), ((param4_self.attr5_Width) - (4)), ((param4_self.attr6_Height) - (4)), ~~(((local5_Enemy_1583.attr1_X) + (2))), ~~(((local5_Enemy_1583.attr1_Y) + (2))), ~~(((local5_Enemy_1583.attr5_Width) - (4))), ~~(((local5_Enemy_1583.attr6_Height) - (4))))) {
+						__debugInfo = "169:\Player.gbas";
+						(param4_self).Reset();
+						__debugInfo = "170:\Player.gbas";
+						break;
+						__debugInfo = "169:\Player.gbas";
+					};
+					__debugInfo = "171:\Player.gbas";
+				};
+				__debugInfo = "172:\Player.gbas";
+			}
+			forEachSaver6115.values[forEachCounter6115] = local5_Enemy_1583;
+		
+		};
+		__debugInfo = "181:\Player.gbas";
+		var forEachSaver6155 = global5_Shits;
+		for(var forEachCounter6155 = 0 ; forEachCounter6155 < forEachSaver6155.values.length ; forEachCounter6155++) {
+			var local1_S_1584 = forEachSaver6155.values[forEachCounter6155];
+		{
+				__debugInfo = "180:\Player.gbas";
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1584.attr1_X), ~~(local1_S_1584.attr1_Y), 16, 16)) && ((((local1_S_1584.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "178:\Player.gbas";
+					(param4_self).Reset();
+					__debugInfo = "179:\Player.gbas";
+					//DELETE!!111
+					forEachSaver6155.values[forEachCounter6155] = local1_S_1584;
+					DIMDEL(forEachSaver6155, forEachCounter6155);
+					forEachCounter6155--;
+					continue;
+					__debugInfo = "178:\Player.gbas";
+				};
+				__debugInfo = "180:\Player.gbas";
+			}
+			forEachSaver6155.values[forEachCounter6155] = local1_S_1584;
+		
+		};
+		__debugInfo = "189:\Player.gbas";
+		var forEachSaver6195 = global5_Spits;
+		for(var forEachCounter6195 = 0 ; forEachCounter6195 < forEachSaver6195.values.length ; forEachCounter6195++) {
+			var local1_S_1585 = forEachSaver6195.values[forEachCounter6195];
+		{
+				__debugInfo = "188:\Player.gbas";
+				if ((((BOXCOLL(~~(param4_self.attr1_X), ~~(param4_self.attr1_Y), param4_self.attr5_Width, param4_self.attr6_Height, ~~(local1_S_1585.attr1_X), ~~(local1_S_1585.attr1_Y), 8, 8)) && ((((local1_S_1585.attr2_VY) != (0)) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "186:\Player.gbas";
+					(param4_self).Reset();
+					__debugInfo = "187:\Player.gbas";
+					//DELETE!!111
+					forEachSaver6195.values[forEachCounter6195] = local1_S_1585;
+					DIMDEL(forEachSaver6195, forEachCounter6195);
+					forEachCounter6195--;
+					continue;
+					__debugInfo = "186:\Player.gbas";
+				};
+				__debugInfo = "188:\Player.gbas";
+			}
+			forEachSaver6195.values[forEachCounter6195] = local1_S_1585;
+		
+		};
+		__debugInfo = "195:\Player.gbas";
+		if ((((((param4_self.attr1_Y) - (((param4_self.attr6_Height) * (2))))) > (((global3_Map.attr6_Height) * (32)))) ? 1 : 0)) {
+			__debugInfo = "194:\Player.gbas";
+			(param4_self).Reset();
+			__debugInfo = "194:\Player.gbas";
+		};
+		__debugInfo = "198:\Player.gbas";
+		global3_Map.attr7_ScrollX = ((((-(param4_self.attr1_X)) + (((local8_ScrWidth_ref_1561[0]) / (2))))) + (CAST2INT(((param4_self.attr5_Width) / (2)))));
+		__debugInfo = "199:\Player.gbas";
+		global3_Map.attr7_ScrollY = ((((-(param4_self.attr1_Y)) + (((local9_ScrHeight_ref_1562[0]) / (2))))) + (CAST2INT(((param4_self.attr6_Height) / (2)))));
+		__debugInfo = "200:\Player.gbas";
+		return 0;
+		__debugInfo = "27:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		var local7_CurAnim_1588 = 0, local3_Dir_1589 = 0;
+		__debugInfo = "210:\Player.gbas";
+		if ((((param4_self.attr4_Anim) > (10)) ? 1 : 0)) {
+			__debugInfo = "205:\Player.gbas";
+			local7_CurAnim_1588 = 0;
+			__debugInfo = "205:\Player.gbas";
+		} else if ((((param4_self.attr4_Anim) > (5)) ? 1 : 0)) {
+			__debugInfo = "207:\Player.gbas";
+			local7_CurAnim_1588 = 1;
+			__debugInfo = "207:\Player.gbas";
+		} else {
+			__debugInfo = "209:\Player.gbas";
+			local7_CurAnim_1588 = 2;
+			__debugInfo = "209:\Player.gbas";
+		};
+		__debugInfo = "217:\Player.gbas";
+		if ((((param4_self.attr2_VX) < (0)) ? 1 : 0)) {
+			__debugInfo = "214:\Player.gbas";
+			local3_Dir_1589 = 1;
+			__debugInfo = "214:\Player.gbas";
+		} else {
+			__debugInfo = "216:\Player.gbas";
+			local3_Dir_1589 = 0;
+			__debugInfo = "216:\Player.gbas";
+		};
+		__debugInfo = "220:\Player.gbas";
+		func9_TurnImage(global11_PlayerImage, local7_CurAnim_1588, local3_Dir_1589, ((param4_self.attr1_X) + (1)), param4_self.attr1_Y, 6);
+		__debugInfo = "221:\Player.gbas";
+		return 0;
+		__debugInfo = "210:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method13_type7_TPlayer_5_Reset'] = function(param4_self) {
+	stackPush("method: Reset", __debugInfo);
+	try {
+		__debugInfo = "224:\Player.gbas";
+		param4_self.attr1_X = global3_Map.attr6_SpawnX;
+		__debugInfo = "225:\Player.gbas";
+		param4_self.attr1_Y = global3_Map.attr6_SpawnY;
+		__debugInfo = "226:\Player.gbas";
+		param4_self.attr2_VX = 0;
+		__debugInfo = "227:\Player.gbas";
+		param4_self.attr2_VY = 0;
+		__debugInfo = "228:\Player.gbas";
+		return 0;
+		__debugInfo = "224:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func9_TurnImage'] = function(param3_Img, param5_Frame, param3_Dir, param1_X, param1_Y, param8_MaxFrame) {
+	stackPush("function: TurnImage", __debugInfo);
+	try {
+		__debugInfo = "235:\Player.gbas";
+		if (param3_Dir) {
+			__debugInfo = "234:\Player.gbas";
+			param5_Frame = ((((param8_MaxFrame) - (1))) - (param5_Frame));
+			__debugInfo = "234:\Player.gbas";
+		};
+		__debugInfo = "237:\Player.gbas";
+		DRAWANIM(param3_Img, param5_Frame, ((param1_X) + (global3_Map.attr7_ScrollX)), ((param1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "238:\Player.gbas";
+		return 0;
+		__debugInfo = "235:\Player.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_QSIN'] = function(param1_x) {
+	stackPush("function: QSIN", __debugInfo);
+	try {
+		__debugInfo = "13:\qmath.gbas";
+		return tryClone(SIN(param1_x));
+		__debugInfo = "29:\qmath.gbas";
+		return 0;
+		__debugInfo = "13:\qmath.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['func4_QCOS'] = function(param1_x) {
+	stackPush("function: QCOS", __debugInfo);
+	try {
+		__debugInfo = "35:\qmath.gbas";
+		return tryClone(COS(param1_x));
+		__debugInfo = "39:\qmath.gbas";
+		return 0;
+		__debugInfo = "35:\qmath.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		__debugInfo = "17:\Shit.gbas";
+		DRAWSPRITE(global9_ShitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "18:\Shit.gbas";
+		return 0;
+		__debugInfo = "17:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		__debugInfo = "23:\Shit.gbas";
+		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
+			__debugInfo = "22:\Shit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "22:\Shit.gbas";
+		};
+		__debugInfo = "25:\Shit.gbas";
+		if ((((param4_self.attr1_Y) > (((((global3_Map.attr6_Height) * (32))) + (640)))) ? 1 : 0)) {
+			__debugInfo = "25:\Shit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "25:\Shit.gbas";
+		};
+		__debugInfo = "36:\Shit.gbas";
+		if ((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((((param4_self.attr1_Y) + (param4_self.attr2_VY))) + (16)))) {
+			__debugInfo = "31:\Shit.gbas";
+			while (((((global3_Map).CollisionPoint(((param4_self.attr1_X) + (8)), ((param4_self.attr1_Y) + (16)))) == (0)) ? 1 : 0)) {
+				__debugInfo = "30:\Shit.gbas";
+				param4_self.attr1_Y+=1;
+				__debugInfo = "30:\Shit.gbas";
+			};
+			__debugInfo = "32:\Shit.gbas";
+			param4_self.attr2_VY = 0;
+			__debugInfo = "33:\Shit.gbas";
+			param4_self.attr3_Age+=1;
+			__debugInfo = "31:\Shit.gbas";
+		} else {
+			__debugInfo = "35:\Shit.gbas";
+			param4_self.attr2_VY+=1;
+			__debugInfo = "35:\Shit.gbas";
+		};
+		__debugInfo = "37:\Shit.gbas";
+		param4_self.attr2_VY = MIN(param4_self.attr2_VY, 8);
+		__debugInfo = "40:\Shit.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "41:\Shit.gbas";
+		return 0;
+		__debugInfo = "23:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TShit_4_Init'] = function(param1_X, param1_Y, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "44:\Shit.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "45:\Shit.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "46:\Shit.gbas";
+		param4_self.attr2_VY = 1;
+		__debugInfo = "48:\Shit.gbas";
+		DIMPUSH(global5_Shits, param4_self);
+		__debugInfo = "49:\Shit.gbas";
+		return 0;
+		__debugInfo = "44:\Shit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_6_Update'] = function(param4_self) {
+	stackPush("method: Update", __debugInfo);
+	try {
+		var local4_OldX_1610 = 0.0, local4_OldY_1611 = 0.0;
+		__debugInfo = "16:\Spit.gbas";
+		param4_self.attr2_VX = ((param4_self.attr2_VX) * (0.99));
+		__debugInfo = "17:\Spit.gbas";
+		param4_self.attr2_VY+=0.1;
+		__debugInfo = "18:\Spit.gbas";
+		param4_self.attr3_Age+=1;
+		__debugInfo = "22:\Spit.gbas";
+		if ((((param4_self.attr3_Age) > (149)) ? 1 : 0)) {
+			__debugInfo = "21:\Spit.gbas";
+			param4_self.attr3_Del = 1;
+			__debugInfo = "21:\Spit.gbas";
+		};
+		__debugInfo = "25:\Spit.gbas";
+		local4_OldX_1610 = param4_self.attr1_X;
+		__debugInfo = "26:\Spit.gbas";
+		local4_OldY_1611 = param4_self.attr1_Y;
+		__debugInfo = "28:\Spit.gbas";
+		param4_self.attr1_X+=param4_self.attr2_VX;
+		__debugInfo = "32:\Spit.gbas";
+		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
+			__debugInfo = "30:\Spit.gbas";
+			param4_self.attr2_VX = -(param4_self.attr2_VX);
+			__debugInfo = "31:\Spit.gbas";
+			param4_self.attr1_X = local4_OldX_1610;
+			__debugInfo = "30:\Spit.gbas";
+		};
+		__debugInfo = "33:\Spit.gbas";
+		param4_self.attr1_Y+=param4_self.attr2_VY;
+		__debugInfo = "37:\Spit.gbas";
+		if ((global3_Map).Collision(param4_self.attr1_X, param4_self.attr1_Y, 8, 8)) {
+			__debugInfo = "35:\Spit.gbas";
+			param4_self.attr2_VY = -(param4_self.attr2_VY);
+			__debugInfo = "36:\Spit.gbas";
+			param4_self.attr1_Y = local4_OldY_1611;
+			__debugInfo = "35:\Spit.gbas";
+		};
+		__debugInfo = "38:\Spit.gbas";
+		return 0;
+		__debugInfo = "16:\Spit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_6_Render'] = function(param4_self) {
+	stackPush("method: Render", __debugInfo);
+	try {
+		__debugInfo = "41:\Spit.gbas";
+		DRAWSPRITE(global9_SpitImage, ((param4_self.attr1_X) + (global3_Map.attr7_ScrollX)), ((param4_self.attr1_Y) + (global3_Map.attr7_ScrollY)));
+		__debugInfo = "42:\Spit.gbas";
+		return 0;
+		__debugInfo = "41:\Spit.gbas";
+	} catch(ex) {
+		if (isKnownException(ex)) throw ex;
+		alert(formatError(ex));
+		END();
+	} finally {
+		stackPop();
+	}
+	
+};
+window['method11_type5_TSpit_4_Init'] = function(param1_X, param1_Y, param4_DirX, param4_DirY, param4_self) {
+	stackPush("method: Init", __debugInfo);
+	try {
+		__debugInfo = "45:\Spit.gbas";
+		param4_self.attr1_X = param1_X;
+		__debugInfo = "46:\Spit.gbas";
+		param4_self.attr1_Y = param1_Y;
+		__debugInfo = "47:\Spit.gbas";
+		param4_self.attr2_VX = param4_DirX;
+		__debugInfo = "48:\Spit.gbas";
+		param4_self.attr2_VY = param4_DirY;
+		__debugInfo = "50:\Spit.gbas";
+		DIMPUSH(global5_Spits, param4_self);
+		__debugInfo = "51:\Spit.gbas";
+		return 0;
+		__debugInfo = "45:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4982,11 +7331,11 @@ window['ResetBall'] = function() {
 window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 	stackPush("method: ToString_Str", __debugInfo);
 	try {
-		__debugInfo = "161:\Pong.gbas";
+		__debugInfo = "59:\Spit.gbas";
 		return "Object";
-		__debugInfo = "162:\Pong.gbas";
+		__debugInfo = "60:\Spit.gbas";
 		return "";
-		__debugInfo = "161:\Pong.gbas";
+		__debugInfo = "59:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -4999,19 +7348,19 @@ window['method13_type7_TObject_12_ToString_Str'] = function(param4_self) {
 window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 	stackPush("method: Equals", __debugInfo);
 	try {
-		__debugInfo = "168:\Pong.gbas";
+		__debugInfo = "66:\Spit.gbas";
 		if ((((param3_Obj) == (param4_self)) ? 1 : 0)) {
-			__debugInfo = "165:\Pong.gbas";
+			__debugInfo = "63:\Spit.gbas";
 			return 1;
-			__debugInfo = "165:\Pong.gbas";
+			__debugInfo = "63:\Spit.gbas";
 		} else {
-			__debugInfo = "167:\Pong.gbas";
+			__debugInfo = "65:\Spit.gbas";
 			return tryClone(0);
-			__debugInfo = "167:\Pong.gbas";
+			__debugInfo = "65:\Spit.gbas";
 		};
-		__debugInfo = "169:\Pong.gbas";
+		__debugInfo = "67:\Spit.gbas";
 		return 0;
-		__debugInfo = "168:\Pong.gbas";
+		__debugInfo = "66:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5024,11 +7373,11 @@ window['method13_type7_TObject_6_Equals'] = function(param3_Obj, param4_self) {
 window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 	stackPush("method: ToHashCode", __debugInfo);
 	try {
-		__debugInfo = "171:\Pong.gbas";
+		__debugInfo = "69:\Spit.gbas";
 		return 0;
-		__debugInfo = "172:\Pong.gbas";
+		__debugInfo = "70:\Spit.gbas";
 		return 0;
-		__debugInfo = "171:\Pong.gbas";
+		__debugInfo = "69:\Spit.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -5037,6 +7386,369 @@ window['method13_type7_TObject_10_ToHashCode'] = function(param4_self) {
 		stackPop();
 	}
 	
+};
+var vtbl_type6_TEnemy = {
+	Update: method12_type6_TEnemy_6_Update, 
+	Render: method12_type6_TEnemy_6_Render, 
+	Init: method12_type6_TEnemy_4_Init, 
+	IsDestroyable: method12_type6_TEnemy_13_IsDestroyable, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type6_TEnemy'] = function() {
+	this.attr3_Typ = 0;
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr5_Width = 0.0;
+	this.attr6_Height = 0.0;
+	this.attr4_Anim = 0;
+	this.attr4_Fall = 0;
+	this.attr12_EventCounter = 0;
+	this.vtbl = vtbl_type6_TEnemy;
+	return this;
+	
+};
+window['type6_TEnemy'].prototype.clone = function() {
+	var other = new type6_TEnemy();
+	other.attr3_Typ = this.attr3_Typ;
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr4_Anim = this.attr4_Anim;
+	other.attr4_Fall = this.attr4_Fall;
+	other.attr12_EventCounter = this.attr12_EventCounter;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type6_TEnemy.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type6_TEnemy.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type6_TEnemy.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], this);
+};
+type6_TEnemy.prototype.IsDestroyable = function() {
+	 return this.vtbl.IsDestroyable(this);
+};
+type6_TEnemy.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type6_TEnemy.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type6_TEnemy.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type10_TExplosion = {
+	Update: method17_type10_TExplosion_6_Update, 
+	Render: method17_type10_TExplosion_6_Render, 
+	Init: method17_type10_TExplosion_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type10_TExplosion'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr4_Anim = 0;
+	this.attr3_Del = 0;
+	this.vtbl = vtbl_type10_TExplosion;
+	return this;
+	
+};
+window['type10_TExplosion'].prototype.clone = function() {
+	var other = new type10_TExplosion();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr4_Anim = this.attr4_Anim;
+	other.attr3_Del = this.attr3_Del;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type10_TExplosion.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type10_TExplosion.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type10_TExplosion.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], this);
+};
+type10_TExplosion.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type10_TExplosion.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type10_TExplosion.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type4_TMap = {
+	InitEmpty: method10_type4_TMap_9_InitEmpty, 
+	Save: method10_type4_TMap_4_Save, 
+	Init: method10_type4_TMap_4_Init, 
+	Update: method10_type4_TMap_6_Update, 
+	Render: method10_type4_TMap_6_Render, 
+	RenderTile: method10_type4_TMap_10_RenderTile, 
+	PickTile: method10_type4_TMap_8_PickTile, 
+	RemoveTile: method10_type4_TMap_10_RemoveTile, 
+	CollisionPoint: method10_type4_TMap_14_CollisionPoint, 
+	RayCollision: method10_type4_TMap_12_RayCollision, 
+	Collision: method10_type4_TMap_9_Collision, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type4_TMap'] = function() {
+	this.attr6_IsSnow = 0;
+	this.attr5_Datas = new OTTArray(0);
+	this.attr5_Width = 0;
+	this.attr6_Height = 0;
+	this.attr7_ScrollX = 0.0;
+	this.attr7_ScrollY = 0.0;
+	this.attr7_Tileset = 0;
+	this.attr15_TilesetPath_Str = "";
+	this.attr13_SpikePosition = 0.0;
+	this.attr8_SpikeDir = 0;
+	this.attr6_SpawnX = 0;
+	this.attr6_SpawnY = 0;
+	this.attr11_NextMap_Str = "";
+	this.attr9_LastPickX = 0;
+	this.attr9_LastPickY = 0;
+	this.attr6_HasFBO = 0;
+	this.attr13_IsRenderedFBO = 0;
+	this.attr8_ScreenID = 0;
+	this.attr5_SprID = 0;
+	this.vtbl = vtbl_type4_TMap;
+	this.attr11_NextMap_Str = "";
+	return this;
+	
+};
+window['type4_TMap'].prototype.clone = function() {
+	var other = new type4_TMap();
+	other.attr6_IsSnow = this.attr6_IsSnow;
+	other.attr5_Datas = tryClone(this.attr5_Datas);
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr7_ScrollX = this.attr7_ScrollX;
+	other.attr7_ScrollY = this.attr7_ScrollY;
+	other.attr7_Tileset = this.attr7_Tileset;
+	other.attr15_TilesetPath_Str = this.attr15_TilesetPath_Str;
+	other.attr13_SpikePosition = this.attr13_SpikePosition;
+	other.attr8_SpikeDir = this.attr8_SpikeDir;
+	other.attr6_SpawnX = this.attr6_SpawnX;
+	other.attr6_SpawnY = this.attr6_SpawnY;
+	other.attr11_NextMap_Str = this.attr11_NextMap_Str;
+	other.attr9_LastPickX = this.attr9_LastPickX;
+	other.attr9_LastPickY = this.attr9_LastPickY;
+	other.attr6_HasFBO = this.attr6_HasFBO;
+	other.attr13_IsRenderedFBO = this.attr13_IsRenderedFBO;
+	other.attr8_ScreenID = this.attr8_ScreenID;
+	other.attr5_SprID = this.attr5_SprID;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type4_TMap.prototype.InitEmpty = function() {
+	 return this.vtbl.InitEmpty(arguments[0], arguments[1], arguments[2], this);
+};
+type4_TMap.prototype.Save = function() {
+	 return this.vtbl.Save(arguments[0], this);
+};
+type4_TMap.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], this);
+};
+type4_TMap.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type4_TMap.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type4_TMap.prototype.RenderTile = function() {
+	 return this.vtbl.RenderTile(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.PickTile = function() {
+	 return this.vtbl.PickTile(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.RemoveTile = function() {
+	 return this.vtbl.RemoveTile(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.CollisionPoint = function() {
+	 return this.vtbl.CollisionPoint(arguments[0], arguments[1], this);
+};
+type4_TMap.prototype.RayCollision = function() {
+	 return this.vtbl.RayCollision(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.Collision = function() {
+	 return this.vtbl.Collision(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type4_TMap.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type4_TMap.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type4_TMap.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type7_TPlayer = {
+	Init: method13_type7_TPlayer_4_Init, 
+	Update: method13_type7_TPlayer_6_Update, 
+	Render: method13_type7_TPlayer_6_Render, 
+	Reset: method13_type7_TPlayer_5_Reset, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type7_TPlayer'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr5_Width = 0;
+	this.attr6_Height = 0;
+	this.attr4_Anim = 0;
+	this.vtbl = vtbl_type7_TPlayer;
+	return this;
+	
+};
+window['type7_TPlayer'].prototype.clone = function() {
+	var other = new type7_TPlayer();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr5_Width = this.attr5_Width;
+	other.attr6_Height = this.attr6_Height;
+	other.attr4_Anim = this.attr4_Anim;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type7_TPlayer.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type7_TPlayer.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type7_TPlayer.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type7_TPlayer.prototype.Reset = function() {
+	 return this.vtbl.Reset(this);
+};
+type7_TPlayer.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type7_TPlayer.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type7_TPlayer.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type5_TShit = {
+	Render: method11_type5_TShit_6_Render, 
+	Update: method11_type5_TShit_6_Update, 
+	Init: method11_type5_TShit_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type5_TShit'] = function() {
+	this.attr3_Del = 0;
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr3_Age = 0;
+	this.attr2_Al = 0.0;
+	this.vtbl = vtbl_type5_TShit;
+	return this;
+	
+};
+window['type5_TShit'].prototype.clone = function() {
+	var other = new type5_TShit();
+	other.attr3_Del = this.attr3_Del;
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VY = this.attr2_VY;
+	other.attr3_Age = this.attr3_Age;
+	other.attr2_Al = this.attr2_Al;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type5_TShit.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type5_TShit.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type5_TShit.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], this);
+};
+type5_TShit.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type5_TShit.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type5_TShit.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
+};
+var vtbl_type5_TSpit = {
+	Update: method11_type5_TSpit_6_Update, 
+	Render: method11_type5_TSpit_6_Render, 
+	Init: method11_type5_TSpit_4_Init, 
+	ToString_Str: method13_type7_TObject_12_ToString_Str, 
+	Equals: method13_type7_TObject_6_Equals, 
+	ToHashCode: method13_type7_TObject_10_ToHashCode
+};
+window ['type5_TSpit'] = function() {
+	this.attr1_X = 0.0;
+	this.attr1_Y = 0.0;
+	this.attr2_VX = 0.0;
+	this.attr2_VY = 0.0;
+	this.attr3_Age = 0;
+	this.attr2_Al = 0.0;
+	this.attr3_Del = 0;
+	this.vtbl = vtbl_type5_TSpit;
+	return this;
+	
+};
+window['type5_TSpit'].prototype.clone = function() {
+	var other = new type5_TSpit();
+	other.attr1_X = this.attr1_X;
+	other.attr1_Y = this.attr1_Y;
+	other.attr2_VX = this.attr2_VX;
+	other.attr2_VY = this.attr2_VY;
+	other.attr3_Age = this.attr3_Age;
+	other.attr2_Al = this.attr2_Al;
+	other.attr3_Del = this.attr3_Del;
+	other.vtbl = this.vtbl;
+	return other;
+};
+type5_TSpit.prototype.Update = function() {
+	 return this.vtbl.Update(this);
+};
+type5_TSpit.prototype.Render = function() {
+	 return this.vtbl.Render(this);
+};
+type5_TSpit.prototype.Init = function() {
+	 return this.vtbl.Init(arguments[0], arguments[1], arguments[2], arguments[3], this);
+};
+type5_TSpit.prototype.ToString_Str = function() {
+	 return this.vtbl.ToString_Str(this);
+};
+type5_TSpit.prototype.Equals = function() {
+	 return this.vtbl.Equals(arguments[0], this);
+};
+type5_TSpit.prototype.ToHashCode = function() {
+	 return this.vtbl.ToHashCode(this);
 };
 var vtbl_type7_TObject = {
 	ToString_Str: method13_type7_TObject_12_ToString_Str, 
@@ -5110,6 +7822,6 @@ type10_DataBuffer.prototype.Equals = function() {
 type10_DataBuffer.prototype.ToHashCode = function() {
 	 return this.vtbl.ToHashCode(this);
 };
-var const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global6_Objs3D = new OTTArray(new type6_TObj3D()), global5_bat_y = new OTTArray(0.0), global5_bat_x = new OTTArray(0.0), global5_score = new OTTArray(0.0), global6_ball_x = 0.0, global7_ball_sx = 0.0, global6_ball_y = 0.0, global7_ball_sy = 0.0;
+var const13_STATE_IS_GAME = 0, const7_IS_BIRD = 1, const6_IS_PIG = 2, const8_IS_HUMAN = 3, const8_IS_LLAMA = 4, const8_Tilesize = 32, const19_GL_DEPTH_BUFFER_BIT = 256, const21_GL_STENCIL_BUFFER_BIT = 1024, const19_GL_COLOR_BUFFER_BIT = 16384, const8_GL_FALSE = 0, const7_GL_TRUE = 1, const9_GL_POINTS = 0, const8_GL_LINES = 1, const12_GL_LINE_LOOP = 2, const13_GL_LINE_STRIP = 3, const12_GL_TRIANGLES = 4, const17_GL_TRIANGLE_STRIP = 5, const15_GL_TRIANGLE_FAN = 6, const7_GL_ZERO = 0, const6_GL_ONE = 1, const12_GL_SRC_COLOR = 768, const22_GL_ONE_MINUS_SRC_COLOR = 769, const12_GL_SRC_ALPHA = 770, const22_GL_ONE_MINUS_SRC_ALPHA = 771, const12_GL_DST_ALPHA = 772, const22_GL_ONE_MINUS_DST_ALPHA = 773, const12_GL_DST_COLOR = 774, const22_GL_ONE_MINUS_DST_COLOR = 775, const21_GL_SRC_ALPHA_SATURATE = 776, const11_GL_FUNC_ADD = 32774, const17_GL_BLEND_EQUATION = 32777, const21_GL_BLEND_EQUATION_RGB = 32777, const23_GL_BLEND_EQUATION_ALPHA = 34877, const16_GL_FUNC_SUBTRACT = 32778, const24_GL_FUNC_REVERSE_SUBTRACT = 32779, const16_GL_BLEND_DST_RGB = 32968, const16_GL_BLEND_SRC_RGB = 32969, const18_GL_BLEND_DST_ALPHA = 32970, const18_GL_BLEND_SRC_ALPHA = 32971, const17_GL_CONSTANT_COLOR = 32769, const27_GL_ONE_MINUS_CONSTANT_COLOR = 32770, const17_GL_CONSTANT_ALPHA = 32771, const27_GL_ONE_MINUS_CONSTANT_ALPHA = 32772, const14_GL_BLEND_COLOR = 32773, const15_GL_ARRAY_BUFFER = 34962, const23_GL_ELEMENT_ARRAY_BUFFER = 34963, const23_GL_ARRAY_BUFFER_BINDING = 34964, const31_GL_ELEMENT_ARRAY_BUFFER_BINDING = 34965, const14_GL_STREAM_DRAW = 35040, const14_GL_STATIC_DRAW = 35044, const15_GL_DYNAMIC_DRAW = 35048, const14_GL_BUFFER_SIZE = 34660, const15_GL_BUFFER_USAGE = 34661, const24_GL_CURRENT_VERTEX_ATTRIB = 34342, const8_GL_FRONT = 1028, const7_GL_BACK = 1029, const17_GL_FRONT_AND_BACK = 1032, const13_GL_TEXTURE_2D = 3553, const12_GL_CULL_FACE = 2884, const8_GL_BLEND = 3042, const9_GL_DITHER = 3024, const15_GL_STENCIL_TEST = 2960, const13_GL_DEPTH_TEST = 2929, const15_GL_SCISSOR_TEST = 3089, const22_GL_POLYGON_OFFSET_FILL = 32823, const27_GL_SAMPLE_ALPHA_TO_COVERAGE = 32926, const18_GL_SAMPLE_COVERAGE = 32928, const11_GL_NO_ERROR = 0, const15_GL_INVALID_ENUM = 1280, const16_GL_INVALID_VALUE = 1281, const20_GL_INVALID_OPERATION = 1282, const16_GL_OUT_OF_MEMORY = 1285, const5_GL_CW = 2304, const6_GL_CCW = 2305, const13_GL_LINE_WIDTH = 2849, const27_GL_ALIASED_POINT_SIZE_RANGE = 33901, const27_GL_ALIASED_LINE_WIDTH_RANGE = 33902, const17_GL_CULL_FACE_MODE = 2885, const13_GL_FRONT_FACE = 2886, const14_GL_DEPTH_RANGE = 2928, const18_GL_DEPTH_WRITEMASK = 2930, const20_GL_DEPTH_CLEAR_VALUE = 2931, const13_GL_DEPTH_FUNC = 2932, const22_GL_STENCIL_CLEAR_VALUE = 2961, const15_GL_STENCIL_FUNC = 2962, const15_GL_STENCIL_FAIL = 2964, const26_GL_STENCIL_PASS_DEPTH_FAIL = 2965, const26_GL_STENCIL_PASS_DEPTH_PASS = 2966, const14_GL_STENCIL_REF = 2967, const21_GL_STENCIL_VALUE_MASK = 2963, const20_GL_STENCIL_WRITEMASK = 2968, const20_GL_STENCIL_BACK_FUNC = 34816, const20_GL_STENCIL_BACK_FAIL = 34817, const31_GL_STENCIL_BACK_PASS_DEPTH_FAIL = 34818, const31_GL_STENCIL_BACK_PASS_DEPTH_PASS = 34819, const19_GL_STENCIL_BACK_REF = 36003, const26_GL_STENCIL_BACK_VALUE_MASK = 36004, const25_GL_STENCIL_BACK_WRITEMASK = 36005, const11_GL_VIEWPORT = 2978, const14_GL_SCISSOR_BOX = 3088, const20_GL_COLOR_CLEAR_VALUE = 3106, const18_GL_COLOR_WRITEMASK = 3107, const19_GL_UNPACK_ALIGNMENT = 3317, const17_GL_PACK_ALIGNMENT = 3333, const19_GL_MAX_TEXTURE_SIZE = 3379, const20_GL_MAX_VIEWPORT_DIMS = 3386, const16_GL_SUBPIXEL_BITS = 3408, const11_GL_RED_BITS = 3410, const13_GL_GREEN_BITS = 3411, const12_GL_BLUE_BITS = 3412, const13_GL_ALPHA_BITS = 3413, const13_GL_DEPTH_BITS = 3414, const15_GL_STENCIL_BITS = 3415, const23_GL_POLYGON_OFFSET_UNITS = 10752, const24_GL_POLYGON_OFFSET_FACTOR = 32824, const21_GL_TEXTURE_BINDING_2D = 32873, const17_GL_SAMPLE_BUFFERS = 32936, const10_GL_SAMPLES = 32937, const24_GL_SAMPLE_COVERAGE_VALUE = 32938, const25_GL_SAMPLE_COVERAGE_INVERT = 32939, const33_GL_NUM_COMPRESSED_TEXTURE_FORMATS = 34466, const29_GL_COMPRESSED_TEXTURE_FORMATS = 34467, const12_GL_DONT_CARE = 4352, const10_GL_FASTEST = 4353, const9_GL_NICEST = 4354, const23_GL_GENERATE_MIPMAP_HINT = 33170, const7_GL_BYTE = 5120, const16_GL_UNSIGNED_BYTE = 5121, const8_GL_SHORT = 5122, const17_GL_UNSIGNED_SHORT = 5123, const6_GL_INT = 5124, const15_GL_UNSIGNED_INT = 5125, const8_GL_FLOAT = 5126, const8_GL_FIXED = 5132, const18_GL_DEPTH_COMPONENT = 6402, const8_GL_ALPHA = 6406, const6_GL_RGB = 6407, const7_GL_RGBA = 6408, const12_GL_LUMINANCE = 6409, const18_GL_LUMINANCE_ALPHA = 6410, const25_GL_UNSIGNED_SHORT_4_4_4_4 = 32819, const25_GL_UNSIGNED_SHORT_5_5_5_1 = 32820, const23_GL_UNSIGNED_SHORT_5_6_5 = 33635, const18_GL_FRAGMENT_SHADER = 35632, const16_GL_VERTEX_SHADER = 35633, const21_GL_MAX_VERTEX_ATTRIBS = 34921, const29_GL_MAX_VERTEX_UNIFORM_VECTORS = 36347, const22_GL_MAX_VARYING_VECTORS = 36348, const35_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661, const33_GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660, const26_GL_MAX_TEXTURE_IMAGE_UNITS = 34930, const31_GL_MAX_FRAGMENT_UNIFORM_VECTORS = 36349, const14_GL_SHADER_TYPE = 35663, const16_GL_DELETE_STATUS = 35712, const14_GL_LINK_STATUS = 35714, const18_GL_VALIDATE_STATUS = 35715, const19_GL_ATTACHED_SHADERS = 35717, const18_GL_ACTIVE_UNIFORMS = 35718, const28_GL_ACTIVE_UNIFORM_MAX_LENGTH = 35719, const20_GL_ACTIVE_ATTRIBUTES = 35721, const30_GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 35722, const27_GL_SHADING_LANGUAGE_VERSION = 35724, const18_GL_CURRENT_PROGRAM = 35725, const8_GL_NEVER = 512, const7_GL_LESS = 513, const8_GL_EQUAL = 514, const9_GL_LEQUAL = 515, const10_GL_GREATER = 516, const11_GL_NOTEQUAL = 517, const9_GL_GEQUAL = 518, const9_GL_ALWAYS = 519, const7_GL_KEEP = 7680, const10_GL_REPLACE = 7681, const7_GL_INCR = 7682, const7_GL_DECR = 7683, const9_GL_INVERT = 5386, const12_GL_INCR_WRAP = 34055, const12_GL_DECR_WRAP = 34056, const9_GL_VENDOR = 7936, const11_GL_RENDERER = 7937, const10_GL_VERSION = 7938, const13_GL_EXTENSIONS = 7939, const10_GL_NEAREST = 9728, const9_GL_LINEAR = 9729, const25_GL_NEAREST_MIPMAP_NEAREST = 9984, const24_GL_LINEAR_MIPMAP_NEAREST = 9985, const24_GL_NEAREST_MIPMAP_LINEAR = 9986, const23_GL_LINEAR_MIPMAP_LINEAR = 9987, const21_GL_TEXTURE_MAG_FILTER = 10240, const21_GL_TEXTURE_MIN_FILTER = 10241, const17_GL_TEXTURE_WRAP_S = 10242, const17_GL_TEXTURE_WRAP_T = 10243, const10_GL_TEXTURE = 5890, const19_GL_TEXTURE_CUBE_MAP = 34067, const27_GL_TEXTURE_BINDING_CUBE_MAP = 34068, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_X = 34069, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_X = 34070, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Y = 34071, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072, const30_GL_TEXTURE_CUBE_MAP_POSITIVE_Z = 34073, const30_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074, const28_GL_MAX_CUBE_MAP_TEXTURE_SIZE = 34076, const11_GL_TEXTURE0 = 33984, const11_GL_TEXTURE1 = 33985, const11_GL_TEXTURE2 = 33986, const11_GL_TEXTURE3 = 33987, const11_GL_TEXTURE4 = 33988, const11_GL_TEXTURE5 = 33989, const11_GL_TEXTURE6 = 33990, const11_GL_TEXTURE7 = 33991, const11_GL_TEXTURE8 = 33992, const11_GL_TEXTURE9 = 33993, const12_GL_TEXTURE10 = 33994, const12_GL_TEXTURE11 = 33995, const12_GL_TEXTURE12 = 33996, const12_GL_TEXTURE13 = 33997, const12_GL_TEXTURE14 = 33998, const12_GL_TEXTURE15 = 33999, const12_GL_TEXTURE16 = 34000, const12_GL_TEXTURE17 = 34001, const12_GL_TEXTURE18 = 34002, const12_GL_TEXTURE19 = 34003, const12_GL_TEXTURE20 = 34004, const12_GL_TEXTURE21 = 34005, const12_GL_TEXTURE22 = 34006, const12_GL_TEXTURE23 = 34007, const12_GL_TEXTURE24 = 34008, const12_GL_TEXTURE25 = 34009, const12_GL_TEXTURE26 = 34010, const12_GL_TEXTURE27 = 34011, const12_GL_TEXTURE28 = 34012, const12_GL_TEXTURE29 = 34013, const12_GL_TEXTURE30 = 34014, const12_GL_TEXTURE31 = 34015, const17_GL_ACTIVE_TEXTURE = 34016, const9_GL_REPEAT = 10497, const16_GL_CLAMP_TO_EDGE = 33071, const18_GL_MIRRORED_REPEAT = 33648, const13_GL_FLOAT_VEC2 = 35664, const13_GL_FLOAT_VEC3 = 35665, const13_GL_FLOAT_VEC4 = 35666, const11_GL_INT_VEC2 = 35667, const11_GL_INT_VEC3 = 35668, const11_GL_INT_VEC4 = 35669, const7_GL_BOOL = 35670, const12_GL_BOOL_VEC2 = 35671, const12_GL_BOOL_VEC3 = 35672, const12_GL_BOOL_VEC4 = 35673, const13_GL_FLOAT_MAT2 = 35674, const13_GL_FLOAT_MAT3 = 35675, const13_GL_FLOAT_MAT4 = 35676, const13_GL_SAMPLER_2D = 35678, const15_GL_SAMPLER_CUBE = 35680, const30_GL_VERTEX_ATTRIB_ARRAY_ENABLED = 34338, const27_GL_VERTEX_ATTRIB_ARRAY_SIZE = 34339, const29_GL_VERTEX_ATTRIB_ARRAY_STRIDE = 34340, const27_GL_VERTEX_ATTRIB_ARRAY_TYPE = 34341, const33_GL_VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922, const30_GL_VERTEX_ATTRIB_ARRAY_POINTER = 34373, const37_GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975, const33_GL_IMPLEMENTATION_COLOR_READ_TYPE = 35738, const35_GL_IMPLEMENTATION_COLOR_READ_FORMAT = 35739, const17_GL_COMPILE_STATUS = 35713, const18_GL_INFO_LOG_LENGTH = 35716, const23_GL_SHADER_SOURCE_LENGTH = 35720, const18_GL_SHADER_COMPILER = 36346, const24_GL_SHADER_BINARY_FORMATS = 36344, const28_GL_NUM_SHADER_BINARY_FORMATS = 36345, const12_GL_LOW_FLOAT = 36336, const15_GL_MEDIUM_FLOAT = 36337, const13_GL_HIGH_FLOAT = 36338, const10_GL_LOW_INT = 36339, const13_GL_MEDIUM_INT = 36340, const11_GL_HIGH_INT = 36341, const14_GL_FRAMEBUFFER = 36160, const15_GL_RENDERBUFFER = 36161, const8_GL_RGBA4 = 32854, const10_GL_RGB5_A1 = 32855, const9_GL_RGB565 = 36194, const20_GL_DEPTH_COMPONENT16 = 33189, const16_GL_STENCIL_INDEX = 6401, const17_GL_STENCIL_INDEX8 = 36168, const21_GL_RENDERBUFFER_WIDTH = 36162, const22_GL_RENDERBUFFER_HEIGHT = 36163, const31_GL_RENDERBUFFER_INTERNAL_FORMAT = 36164, const24_GL_RENDERBUFFER_RED_SIZE = 36176, const26_GL_RENDERBUFFER_GREEN_SIZE = 36177, const25_GL_RENDERBUFFER_BLUE_SIZE = 36178, const26_GL_RENDERBUFFER_ALPHA_SIZE = 36179, const26_GL_RENDERBUFFER_DEPTH_SIZE = 36180, const28_GL_RENDERBUFFER_STENCIL_SIZE = 36181, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048, const37_GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049, const39_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050, const47_GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051, const20_GL_COLOR_ATTACHMENT0 = 36064, const19_GL_DEPTH_ATTACHMENT = 36096, const21_GL_STENCIL_ATTACHMENT = 36128, const7_GL_NONE = 0, const23_GL_FRAMEBUFFER_COMPLETE = 36053, const36_GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054, const44_GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055, const36_GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057, const26_GL_FRAMEBUFFER_UNSUPPORTED = 36061, const22_GL_FRAMEBUFFER_BINDING = 36006, const23_GL_RENDERBUFFER_BINDING = 36007, const24_GL_MAX_RENDERBUFFER_SIZE = 34024, const32_GL_INVALID_FRAMEBUFFER_OPERATION = 1286, global12_Hardware_Str = "", global9_Gamestate = 0, global11_EditorEnemy = new type6_TEnemy(), global10_SelectTile = 0, global6_MouseX_ref = [0.0], global6_MouseY_ref = [0.0], global2_ML_ref = [0.0], global2_MR_ref = [0.0], global11_PlayerImage = 0, global11_LadderImage = 0, global10_SpikeImage = 0, global15_TrampolineImage = 0, global8_PigImage = 0, global10_HumanImage = 0, global9_BirdImage = 0, global9_ShitImage = 0, global10_LlamaImage = 0, global9_SpitImage = 0, global9_DoorImage = 0, global12_TriggerImage = 0, global12_DynamitImage = 0, global14_ExplosionImage = 0, global9_MenuImage = 0, global11_ButtonImage = 0, global10_ArrowImage = 0, global9_JumpImage = 0, global6_Player = new type7_TPlayer(), global3_Map = new type4_TMap(), global17_LastMousePosition = new OTTArray(0), global9_Title_Str = "", global9_Menu1_Str = "", global9_Menu2_Str = "", global9_Menu3_Str = "", global6_Action = 0, global6_Enemys = new OTTArray(new type6_TEnemy()), global10_Explosions = new OTTArray(new type10_TExplosion()), global5_Shits = new OTTArray(new type5_TShit()), global5_Spits = new OTTArray(new type5_TSpit()), global6_Objs3D = new OTTArray(new type6_TObj3D());
 window['initStatics'] = function() {}
 for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();

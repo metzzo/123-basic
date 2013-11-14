@@ -68,12 +68,10 @@ var doCurrentFunction = function() {
 	}
 	
 	//Nun wieder auf normal
-	
+	ALPHAMODE(0);
 	if (inPoly) {
 		ENDPOLY();
 	}
-	
-	
 	if (inViewport) {
 		context.restore();
 		inViewport = false;
@@ -197,10 +195,8 @@ function SHOWSCREEN() {
 	lastShwscrn = GETTIMERALL();
 	if (initCalled) {
 		USESCREEN(-2);
-		ALPHAMODE(0);
 		CLEARSCREEN(clrColor);
 		USESCREEN(-1);
-		ALPHAMODE(0);
 		frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
 		CLEARSCREEN(clrColor);
 		//nun noch falls vorhanden den bg zeichnen
@@ -462,7 +458,7 @@ function ALPHAMODE(mode) {
 		context.globalCompositeOperation = 'lighter';
 		val = mode;
 	} else {
-		context.globalCompositeOperation = '';
+		context.globalCompositeOperation = 'source-over'; 
 		val = 1;
 	}
 	
@@ -485,7 +481,6 @@ function RGB(r, g, b) {
 var whiteRGB = RGB(255,255,255);
 
 function SETTRANSPARENCY(rgb) {
-	//throwError("TODO: SETTRANS");
 	transCol = rgb;
 	transFontCol = rgb;
 }
@@ -494,22 +489,58 @@ function SMOOTHSHADING(mode) {
 	context.imageSmoothingEnabled = mode ? true : false;
 }
 
+// unused: because fullscreen has to be triggered by the user
+function toggleFullScreen() {
+  if (!document.fullscreenElement &&    // alternative standard method
+      !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
+}
+
 function SETSCREEN(width, height, fullscreen) {
 	if (fullscreen && !inFullscreen) {
-		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		width = window.innerWidth;
+		height = window.innerHeight;
 		inFullscreen = true;
 	} else if (!fullscreen && inFullscreen) {
-		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		
 		inFullscreen = false;
 	}
-	var e = frontbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	e = backbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	canvas.width = width;
-	canvas.height = height;
+	var set = function(cvs) {
+		cvs.width = width
+		cvs.height = height;
+		cvs.style.width = width+"px";
+		cvs.style.height = height+"px";
+	}
+	
+	set(frontbuffer.canvas);
+	set(backbuffer.canvas);
+	set(canvas);
+	
+	
+	canvasWidth = width
+	canvasHeight = height
+	
+	USESCREEN(-1);
+	CLEARSCREEN(RGB(0,0,0)); //black background color
+	SHOWSCREEN();
+	
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
 }
 
 var inViewport = false;

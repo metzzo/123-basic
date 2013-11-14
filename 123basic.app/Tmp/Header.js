@@ -181,8 +181,12 @@ function SHELLEND(cmd) {
 }
 
 function CALLBYNAME(name) {
-	var ret = 1;
-	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
+	if (!!window[name]) {
+		window[name]();
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 //------------------------------------------------------------
@@ -194,18 +198,28 @@ var callStack = []
 * @constructor
 */
 function StackFrame(name, info, dbg) {
+	this.apply(name, info, dbg);
+}
+StackFrame.prototype.apply = function(name, info, dbg) {
 	this.name = name;
 	this.info = info;
 	this.dbg  = dbg;
 }
 
 function stackPush(name, info) {
-	callStack.push(new StackFrame(name, info, __debugInfo));
+	if (!!callStack[callStack.length]) {
+		callStack[callStack.length].apply(name, info, __debugInfo);
+		callStack.length++;
+	} else {
+		callStack.push(new StackFrame(name, info, __debugInfo));
+	}
 }
 
 function stackPop() {
-	var obj = callStack.pop();
-	__debugInfo = obj.dbg;
+	__debugInfo = callStack[callStack.length];
+	callStack.length--; 
+	//var obj = callStack.pop();
+	//__debugInfo = obj.dbg;
 }
 
 function stackTrace() {
@@ -2298,12 +2312,10 @@ var doCurrentFunction = function() {
 	}
 	
 	//Nun wieder auf normal
-	
+	ALPHAMODE(0);
 	if (inPoly) {
 		ENDPOLY();
 	}
-	
-	
 	if (inViewport) {
 		context.restore();
 		inViewport = false;
@@ -2427,10 +2439,8 @@ function SHOWSCREEN() {
 	lastShwscrn = GETTIMERALL();
 	if (initCalled) {
 		USESCREEN(-2);
-		ALPHAMODE(0);
 		CLEARSCREEN(clrColor);
 		USESCREEN(-1);
-		ALPHAMODE(0);
 		frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
 		CLEARSCREEN(clrColor);
 		//nun noch falls vorhanden den bg zeichnen
@@ -2692,7 +2702,7 @@ function ALPHAMODE(mode) {
 		context.globalCompositeOperation = 'lighter';
 		val = mode;
 	} else {
-		context.globalCompositeOperation = '';
+		context.globalCompositeOperation = 'source-over'; 
 		val = 1;
 	}
 	
@@ -2715,7 +2725,6 @@ function RGB(r, g, b) {
 var whiteRGB = RGB(255,255,255);
 
 function SETTRANSPARENCY(rgb) {
-	//throwError("TODO: SETTRANS");
 	transCol = rgb;
 	transFontCol = rgb;
 }
@@ -2724,22 +2733,58 @@ function SMOOTHSHADING(mode) {
 	context.imageSmoothingEnabled = mode ? true : false;
 }
 
+// unused: because fullscreen has to be triggered by the user
+function toggleFullScreen() {
+  if (!document.fullscreenElement &&    // alternative standard method
+      !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
+}
+
 function SETSCREEN(width, height, fullscreen) {
 	if (fullscreen && !inFullscreen) {
-		if (!!canvas.requestFullScreen) canvas.requestFullScreen();
+		width = window.innerWidth;
+		height = window.innerHeight;
 		inFullscreen = true;
 	} else if (!fullscreen && inFullscreen) {
-		if (!!canvas.cancelFullScreen) canvas.cancelFullScreen();
+		
 		inFullscreen = false;
 	}
-	var e = frontbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	e = backbuffer.canvas;
-	e.width = width;
-	e.height = height;
-	canvas.width = width;
-	canvas.height = height;
+	var set = function(cvs) {
+		cvs.width = width
+		cvs.height = height;
+		cvs.style.width = width+"px";
+		cvs.style.height = height+"px";
+	}
+	
+	set(frontbuffer.canvas);
+	set(backbuffer.canvas);
+	set(canvas);
+	
+	
+	canvasWidth = width
+	canvasHeight = height
+	
+	USESCREEN(-1);
+	CLEARSCREEN(RGB(0,0,0)); //black background color
+	SHOWSCREEN();
+	
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
 }
 
 var inViewport = false;
@@ -3115,7 +3160,7 @@ function PRINT(text, x, y, kerning) {
 				throwError("Unicode unsupported! "+pos);
 			}
 			var c = font.chars[pos];
-			if (!!c) {
+			if (!!c && pos > 26) {
 				var pos;
 				if (kerning) {
 					pos = x-font.charwidth/2+c.width/2;
@@ -4008,7 +4053,7 @@ function SPRITE2MEM(pixels, num) {
 				var g = imageData.data[inpos++];
 				var b = imageData.data[inpos++];
 				var a = imageData.data[inpos++];
-				var v = bOR(RGB(r,g,b), ASL(a, 24));
+				var v = a*0x1000000 + b*0x10000 + g*0x100 + r;
 				if (isref)
 					v = [v];
 				pixels.arrAccess(x + y*width).values[tmpPositionCache] = v

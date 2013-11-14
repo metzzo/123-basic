@@ -8,6 +8,9 @@
 //                     keydef.gbas
 // From Samples/Common folder
 
+LOCAL maxsx, maxsy
+GETDESKTOPSIZE maxsx, maxsy
+SETSCREEN maxsx, maxsy, 0
 
 // A type holding the user defined keys
 // Ein Type, das die benutzerdefinierten Tasten hält

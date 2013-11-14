@@ -3,7 +3,9 @@
 // Start: Tuesday, May 10, 2005
 // IDE Version: 2.50405		PUSHLOOP("GameOn_Loop")
 
-
+LOCAL maxsx, maxsy
+GETDESKTOPSIZE maxsx, maxsy
+SETSCREEN maxsx, maxsy, 0
 
 SETTRANSPARENCY RGB(255, 0, 128)
 

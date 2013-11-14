@@ -191,7 +191,7 @@ function SPRITE2MEM(pixels, num) {
 				var g = imageData.data[inpos++];
 				var b = imageData.data[inpos++];
 				var a = imageData.data[inpos++];
-				var v = bOR(RGB(r,g,b), ASL(a, 24));
+				var v = a*0x1000000 + b*0x10000 + g*0x100 + r;
 				if (isref)
 					v = [v];
 				pixels.arrAccess(x + y*width).values[tmpPositionCache] = v

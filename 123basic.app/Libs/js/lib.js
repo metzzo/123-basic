@@ -181,8 +181,12 @@ function SHELLEND(cmd) {
 }
 
 function CALLBYNAME(name) {
-	var ret = 1;
-	return eval("if (!!window['"+name+"']) window."+name+"(); else ret = 0;");
+	if (!!window[name]) {
+		window[name]();
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 //------------------------------------------------------------
@@ -194,18 +198,28 @@ var callStack = []
 * @constructor
 */
 function StackFrame(name, info, dbg) {
+	this.apply(name, info, dbg);
+}
+StackFrame.prototype.apply = function(name, info, dbg) {
 	this.name = name;
 	this.info = info;
 	this.dbg  = dbg;
 }
 
 function stackPush(name, info) {
-	callStack.push(new StackFrame(name, info, __debugInfo));
+	if (!!callStack[callStack.length]) {
+		callStack[callStack.length].apply(name, info, __debugInfo);
+		callStack.length++;
+	} else {
+		callStack.push(new StackFrame(name, info, __debugInfo));
+	}
 }
 
 function stackPop() {
-	var obj = callStack.pop();
-	__debugInfo = obj.dbg;
+	__debugInfo = callStack[callStack.length];
+	callStack.length--; 
+	//var obj = callStack.pop();
+	//__debugInfo = obj.dbg;
 }
 
 function stackTrace() {

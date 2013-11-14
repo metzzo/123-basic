@@ -7,6 +7,7 @@
 SETCURRENTDIR("Media") // go to media files
 SYSTEMPOINTER TRUE
 
+
 CONSTANT MAIN_GAME = 0
 
 GLOBAL SolidTile% = LoadSpr("solidtile")

@@ -170,7 +170,7 @@ function PRINT(text, x, y, kerning) {
 				throwError("Unicode unsupported! "+pos);
 			}
 			var c = font.chars[pos];
-			if (!!c) {
+			if (!!c && pos > 26) {
 				var pos;
 				if (kerning) {
 					pos = x-font.charwidth/2+c.width/2;

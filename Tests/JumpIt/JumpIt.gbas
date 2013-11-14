@@ -22,6 +22,10 @@
 // 3) Fetter Mensch (der rollt/überrollt)
 // 4) Llama (spuckt)
 
+LOCAL maxsx, maxsy
+GETDESKTOPSIZE maxsx, maxsy
+SETSCREEN 800, 600, TRUE
+
 ?OPTIMIZE NONE
 
 LIMITFPS 30
@@ -31,9 +35,10 @@ GETDESKTOPSIZE dx, dy
 
 SYSTEMPOINTER TRUE
 
+
 IF Hardware$ = "DESKTOP"
-	dx = 800
-	dy = 600
+//	dx = 800
+//	dy = 600
 ENDIF
 
 SETSCREEN dx, dy, FALSE
@@ -155,6 +160,7 @@ SUB GLB_ON_LOOP:
 		GOSUB Update
 		GOSUB Render
 	CATCH ex$
+		DEBUG "Exception "+ex$
 	FINALLY
 
 	SHOWSCREEN

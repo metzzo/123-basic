@@ -15,7 +15,16 @@ Changed: Tested all samples in Firefox/Chrome/Opera/Safari (latest versions) and
 Fixed: Touch on mobile browsers working again
 Fixed: Font rendering on mobile platforms
 Fixed: Firefox supports PLAYMUSIC
-
+Fixed: SETSCREEN works again
+Fixed: LOCAL sx, sy; GETDESKTOPSIZE sx, sy; SETSCREEN sx, sy, FALSE // no ugly scroll bar is visible
+Fixed: ALPHABLEND 0 really resets alphablending
+Changed: Made some tests ready for mobile (resolution is set according to DESKTOPSIZE): JumpIt, IsometricDemo (still very slow), JumpFrog, ...
+Fixed: PRINT ignores unknown characters (0-26 charcode)
+Fixed: SPRITE2MEM had wrong color format (ARGB instead of ABGR)
+Fixed: CALLBYNAME rewritten and returns correct return value
+Changed: Optimized Shadow Stack implementation in Debugging mode - should run now much faster
+Fixed: SETSCREEN Fullscreen parameter functions now (does not use the HTML5 fullscreen API anymore, because it requires to be callen in a click/key event, which SETSCREEN is usually not -> sets the canvas size to innerWidth/innerHeight instead)
+Added: IE 11 support
 
 0.4
 Fixed: NOT fixed.
