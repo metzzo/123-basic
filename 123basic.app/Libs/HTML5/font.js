@@ -83,9 +83,9 @@ function LOADFONT(path, num) {
 						var startx, endx;
 						
 						//DO KERNING STUFF \o/
-						for (var leftx = x + 1; leftx < x + charwidth; leftx++) {
+						for (var leftx = x; leftx < x + charwidth; leftx++) {
 							var pixel = false;
-							for (var tmpy = y+1; tmpy < y + charheight-2; tmpy++) {
+							for (var tmpy = y; tmpy < y + charheight; tmpy++) {
 								if (getCol(leftx, tmpy) != transFontCol) {
 									pixel = true;
 									break;
@@ -97,9 +97,9 @@ function LOADFONT(path, num) {
 							}
 						}
 						
-						for (var rightx = x + charwidth; rightx > x; rightx--) {
+						for (var rightx = x + charwidth - 1; rightx > x; rightx--) {
 							var pixel = false;
-							for (var tmpy = y+1; tmpy < y + charheight-2; tmpy++) {
+							for (var tmpy = y; tmpy < y + charheight; tmpy++) {
 								if (getCol(rightx, tmpy) != transFontCol) {
 									pixel = true;
 									break;
@@ -112,17 +112,16 @@ function LOADFONT(path, num) {
 						}
 						
 						if (endx > startx) {
-							//console.log("posi: end "+endx+", start "+startx);
-							realwidth = endx - startx;
+							realwidth = (endx - startx) + 1;
 						} else {
-							realwidth= 14;
+							realwidth = charwidth;
 						}
 						
 						font.chars[i] = {
 							x: x, y: y,
 							
 							//kerning data
-							width: realwidth+2
+							width: realwidth+6
 						};
 						
 						i++;
@@ -172,7 +171,7 @@ function PRINT(text, x, y, kerning) {
 			if (!!c && pos > 26) {
 				var pos;
 				if (kerning) {
-					pos = x-font.charwidth/2+c.width/2;
+					pos = x-~~(font.charwidth/2+.5)+~~(c.width/2+.5);
 				} else {
 					pos = x;
 				}

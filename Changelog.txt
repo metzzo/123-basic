@@ -34,6 +34,7 @@ Fixed: MUSICVOLUME works with new sound system
 Fixed: If no channel is available in audio, the first one is taken and problems with playing multiple PLAYSOUNDS fixed with both sound systems
 Fixed: WebAudio supports "pan" parameter in PLAYSOUND
 Fixed: Font characters were moved by x+1, y+1 (caused some graphical gliches)
+Fixed: Kerning is more robust & Font rendering less blurry
 
 0.4
 Fixed: NOT fixed.
