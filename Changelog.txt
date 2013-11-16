@@ -25,6 +25,7 @@ Fixed: CALLBYNAME rewritten and returns correct return value
 Changed: Optimized Shadow Stack implementation in Debugging mode - should run now much faster
 Fixed: SETSCREEN Fullscreen parameter functions now (does not use the HTML5 fullscreen API anymore, because it requires to be callen in a click/key event, which SETSCREEN is usually not -> sets the canvas size to innerWidth/innerHeight instead)
 Added: IE 11 support
+Added: Automatic test compilation and upload
 
 0.4
 Fixed: NOT fixed.

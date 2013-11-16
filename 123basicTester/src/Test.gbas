@@ -5,45 +5,41 @@
 
 
 
-?IFDEF TEST_BEFORE
 
 FUNCTION RunTests:
-	IF DOESDIREXIST("../Tests")
+	IF DOESDIREXIST("../../Tests")
 		LOCAL Files$[]
 		LOCAL d$ = GETCURRENTDIR$()
-		SETCURRENTDIR("../Tests")
+		SETCURRENTDIR("../../Tests")
 
 		GETFILELIST("", Files$[])
 		LOCAL rd$ = GETCURRENTDIR$()
 		SETCURRENTDIR(d$)
-		NoRun = TRUE
+
 		STDOUT "Start Testing\n"
 		FOREACH F$ IN Files$[]
-			IF F$ <> "." AND F$ <> ".."
+			IF F$ <> "." AND F$ <> ".." AND F$ <> "Plain"
 				IF DOESDIREXIST(rd$+"/"+F$)
 					STDOUT "Test project "+F$+"\n"
-					LOCAL Input$ = ReadGBAP$(rd$+"/"+F$, "/"+F$+".gbap")
-					LOCAL Output$ = Compile$(Input$, "HTML5")
-					IF Output$ = ""
-						STDOUT "Test failed...\n"
-						KEYWAIT
-					ELSE
-						STDOUT "Test successfull\n"
-					ENDIF
+					LOCAL path$ = rd$+"/"+F$+"/"
+					LOCAL name$ = F$+".gbap"
+					shell(d$+"/../../123basic.app/123basic.exe -N\\\""+name$+"\\\" -P\\\""+path$+"\\\"-NR\"1\"-G\"HTML5\"")
 				ELSE
 					STDOUT "Test file "+F$+"\n"
-
 				ENDIF
 			ENDIF
 		NEXT
-		NoRun = FALSE
 	ELSE
 		STDOUT "Cannot find Tests...\n"
 	ENDIF
 ENDFUNCTION
 
 
-?ENDIF
+FUNCTION Upload:
+	shell("..\\..\\..\\uploader.bat") // hidden (contains crucial data :()
+ENDFUNCTION
 
-
-
+FUNCTION shell: cmd$
+	LOCAL res
+	SHELLCMD(cmd$, TRUE, TRUE, res)
+ENDFUNCTION

@@ -13,10 +13,16 @@ There will be 3 possibilities to do so:
  * Have your own texteditor and run the file with your own script.
  * Wait until the Melange IDE is finished, which is a completely web-based development enviroment (this could take a while tough)
  
- # Tested Platforms
+# Tested Platforms
 These platforms are tested (Google Chrome is the main test platfrom though)
   * Chrome (Desktop & Mobile)
   * Firefox (Desktop & Mobile)
-  * Safari
-  * Opera
- 
+  * Safari (Desktop)
+  * Opera (Desktop)
+  * Internet Explorer (Desktop)
+
+With the following operating systems, but keep in mind, that even I do not test other platforms, it may run perfectly on them.
+  * Windows 7
+  * Mac OS X 10.9 Mavericks
+  * Android 4.3
+

@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 		<style>
 			html, body, canvas, div { margin: 0px; padding: 0px;}
-			canvas { display: block; /* fix scrollbar issue */ }
+			canvas { display: block; /* fix scrollbar issue */ 
 		</sytle>
 	</head>
 	<body></body>

@@ -10,5 +10,6 @@ LOCAL myVar% = 42
 
 STDOUT "LOL: "+myVar+"\n"
 
-
+?IFNDEF HTML5
 KEYWAIT
+?ENDIF

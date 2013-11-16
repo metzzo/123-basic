@@ -486,7 +486,20 @@ function SETTRANSPARENCY(rgb) {
 }
 
 function SMOOTHSHADING(mode) {
-	context.imageSmoothingEnabled = mode ? true : false;
+	if (typeof context.imageSmoothingEnabled != 'undefined')
+		context.imageSmoothingEnabled = mode ? true : false;
+		
+	if (typeof context.mozImageSmoothingEnabled != 'undefined')
+		context.mozImageSmoothingEnabled = mode ? true : false;
+		
+	if (typeof context.oImageSmoothingEnabled != 'undefined')
+		context.oImageSmoothingEnabled = mode ? true : false;
+		
+	if (typeof context.webkitImageSmoothingEnabled != 'undefined')
+		context.webkitImageSmoothingEnabled = mode ? true : false;
+		
+	if (typeof context.msImageSmoothingEnabled != 'undefined')
+		context.msImageSmoothingEnabled = mode ? true : false;
 }
 
 // unused: because fullscreen has to be triggered by the user

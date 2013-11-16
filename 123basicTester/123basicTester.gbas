@@ -1,0 +1,11 @@
+// --------------------------------- //
+// Project: 123basicTester
+// Start: Friday, November 15, 2013
+// IDE Version: 10.283
+
+
+WHILE TRUE
+	RunTests()
+	Upload()
+	SLEEP 1000*60*30 // alle 30 minuten wiederholen
+WEND
