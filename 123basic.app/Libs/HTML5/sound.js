@@ -6,38 +6,37 @@ var engines = {
 	WEBAUDIO: {
 		play: function(sound, pan, volume) {
 			var curChn = sound.getNextFreeChannel();
-			if (!!curChn) {
-				if (!volume) volume = curChn.gainNode.gain.value;
-				if (!pan) pan = 0;
-				
-				if (sound.loop) {
-					curChn.source.loop = true;
-				}
-				// clear timeout if exists
-				if (!!curChn.timeout) {
-					clearTimeout(curChn.timeout);
-					curChn.timeout = null;
-				}
-				
-				
-				curChn.playing = true;
-				var startPos = 0;
-				if (!!curChn.pauseTime) {
-					curChn.startTime = GETTIMERALL() - curChn.pauseTime;
-					curChn.source.start(0, startPos = (curChn.pauseTime / 1000));
-				} else {
-					curChn.startTime = GETTIMERALL();
-					curChn.source.start(0);
-				}
-				
-				curChn.gainNode.gain.value = volume;
-				
-				curChn.timeout = setTimeout(function() {
-					soundEngine.stop(curChn);
-				}, (curChn.sound.data.duration+1)*1000 - startPos*1000);
-			} else {
-				console.log("No channel available...");
+			if (!curChn) {
+				curChn = sound.buffers[0];
+				soundEngine.newSource(curChn);
 			}
+			
+			if (sound.loop) {
+				curChn.source.loop = true;
+			}
+			// clear timeout if exists
+			if (!!curChn.timeout) {
+				clearTimeout(curChn.timeout);
+				curChn.timeout = null;
+			}
+			
+			
+			curChn.playing = true;
+			var startPos = 0;
+			if (!!curChn.pauseTime) {
+				curChn.startTime = GETTIMERALL() - curChn.pauseTime;
+				curChn.source.start(0, startPos = (curChn.pauseTime / 1000));
+			} else {
+				curChn.startTime = GETTIMERALL();
+				curChn.source.start(0);
+			}
+			
+			curChn.panner.setPosition(pan*5, 0, 0);
+			curChn.gainNode.gain.value = volume;
+			
+			curChn.timeout = setTimeout(function() {
+				soundEngine.stop(curChn);
+			}, (curChn.sound.data.duration+1)*1000 - startPos*1000);
 		},
 		setVolume: function(channel, volume) {
 			channel.gainNode.gain.value = volume;
@@ -74,6 +73,7 @@ var engines = {
 		},
 		newSource: function(channel) {
 			channel.gainNode = audioContext.createGain();
+			channel.panner = audioContext.createPanner();
 			channel.source = audioContext.createBufferSource();
 			
 			if (!channel.source.start) channel.source.start = channel.source.noteOn;
@@ -85,8 +85,9 @@ var engines = {
 			channel.startTime = null; // used when pausing
 			channel.pauseTime = null; // used when pausing
 			
-			channel.gainNode.connect(audioContext.destination);
 			channel.source.connect(channel.gainNode);
+			channel.gainNode.connect(channel.panner);
+			channel.panner.connect(audioContext.destination);
 		},
 		load: function(sound) {
 			var request = new XMLHttpRequest();
@@ -121,19 +122,19 @@ var engines = {
 	AUDIO: {
 		play: function(sound, pan, volume) {
 			var curChn = sound.getNextFreeChannel();
-			if (!!curChn) {
-				if (!volume) volume = curChn.audio.volume;
-				if (!pan) pan = 0;
-				
-				if (curChn.playing) sound.stop(curChn);
-				
-				curChn.playing = true;
-				curChn.audio.volume = volume;
-				curChn.audio.pan = pan;
-				curChn.audio.play();
-			} else {
-				console.log("No channel available...");
+			if (!curChn) {
+				curChn = sound.buffers[0];
+				soundEngine.stop(curChn);
 			}
+			if (!volume) volume = curChn.audio.volume;
+			if (!pan) pan = 0;
+			
+			if (curChn.playing) sound.stop(curChn);
+			
+			curChn.playing = true;
+			curChn.audio.volume = volume;
+			curChn.audio.pan = pan;
+			curChn.audio.play();
 			return curChn.num;
 		},
 		setVolume: function(channel, volume) {
@@ -200,12 +201,14 @@ if (!!window.AudioContext) {
 	try {
 		audioContext = new AudioContext();
 		if (!audioContext.createGain) audioContext.createGain = audioContext.createGainNode
+		
+		audioContext.listener.setPosition(0,0,0);
 	} catch(e) {
 		audioContext = null;
 	}
 }
 
-var soundEngine = !!audioContext ? engines.WEBAUDIO : engines.AUDIO; // which sound engine is currently being used
+var soundEngine =  !!audioContext ? engines.WEBAUDIO : engines.AUDIO; // which sound engine is currently being used
 var sounds = [];
 var soundChannels = [ ];
 var music = null, musicVolume = 1;
@@ -277,7 +280,7 @@ SoundChannel.prototype.finishedLoading = function() {
 }
 SoundChannel.prototype.finishedPlaying = function() {
 	this.playing = false;
-	if (channel.sound.loop) {
+	if (this.sound.loop) {
 		var that = this;
 		setTimeout(function() {
 			soundEngine.play(that.sound, 0, musicVolume);
@@ -304,6 +307,7 @@ function LOADSOUND(file, num, buffer) {
 		} else {
 			file = ass;
 		}
+		if (buffer <= 0) throwError("LOADSOUND buffer size must not be 0");
 		
 		var sound = new Sound(file, num, buffer);
 		register(sound);
@@ -372,7 +376,6 @@ function PAUSEMUSIC(pause) {
 	soundEngine.stop(music.buffers[0]);
 }
 
-// DOES NOT WORK
 function MUSICVOLUME(vol) {
 	musicVolume = vol;
 	if (!!music.loaded) {

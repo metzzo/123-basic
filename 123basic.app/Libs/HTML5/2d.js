@@ -427,6 +427,7 @@ function register(obj) {
 		if (obj.num >= soundChannels.length) soundChannels.length = obj.num + 1;
 	} else if (obj instanceof Font) {
 		fonts[obj.num] = obj;
+		if (obj.num >= fonts.length) fonts.length = obj.num+1;
 	} else {
 		throwError("Cannot register unknown object: "+obj.constructor);
 	}

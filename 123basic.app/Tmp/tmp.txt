@@ -1,17 +1,15 @@
-//$$RESETFILE.\VMTests.gbas
+//$$RESETFILE.\FontBugVonQuebo.gbas
 // --------------------------------- //
-// Project: VMTests
-// Start: Sunday, June 30, 2013
+// Project: FontBugVonQuebo
+// Start: Saturday, November 16, 2013
 // IDE Version: 10.283
 
-STDOUT "Hello World\n"
-STDOUT (5+6*2)+"\n"
+SETCURRENTDIR("Media") // go to media files
 
-LOCAL myVar% = 42
 
-STDOUT "LOL: "+myVar+"\n"
-
-?IFNDEF HTML5
-KEYWAIT
-?ENDIF
+SUB GLB_ON_LOOP:
+	PRINT "YOLO", 10, 10
+	
+	SHOWSCREEN
+ENDSUB
 

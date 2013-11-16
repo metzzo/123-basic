@@ -119,7 +119,7 @@ function LOADFONT(path, num) {
 						}
 						
 						font.chars[i] = {
-							x: x + 1, y: y + 1,
+							x: x, y: y,
 							
 							//kerning data
 							width: realwidth+2

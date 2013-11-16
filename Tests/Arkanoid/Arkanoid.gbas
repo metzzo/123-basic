@@ -99,7 +99,7 @@ SUB GLB_ON_LOOP:
 		IF swapx THEN bdirx[i]=-bdirx[i]
 
 		IF swapx OR swapy
-			PLAYSOUND (0,0,1)
+			PLAYSOUND (0,1,1)
 		ENDIF
 
 	NEXT
@@ -151,7 +151,7 @@ docol=FALSE
 	IF by[num]>=464
 		bdiry[num] = -ABS(bdiry[num])
 		by[num] = 300 // Hit floor
-		PLAYSOUND(1,0,1)
+		PLAYSOUND(1,-1,1)
 		RETURN FALSE
 	ENDIF
 
