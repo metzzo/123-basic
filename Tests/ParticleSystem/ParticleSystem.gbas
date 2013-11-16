@@ -1,0 +1,108 @@
+// --------------------------------- //
+// Project: ParticleSystem
+// Start: Wednesday, July 24, 2013
+// IDE Version: 11.414
+
+
+// SETCURRENTDIR("Media") // go to media files
+GLOBAL screenW, screenH
+
+// ------ PARTICLES
+GLOBAL m_numparticles
+
+GLOBAL PI#=3.141592653589793
+GLOBAL fw=0
+
+
+// ---- TYPES
+TYPE  Tparticle
+	x=0
+	y=0
+	sine=0
+	cosine=0
+	speed=0
+	life#=0.0
+	colors=0		//points to array of colors
+ENDTYPE
+GLOBAL m_particle[] AS Tparticle
+TYPE TObj
+	x=0
+	y=0
+	w=0
+	h=0
+	hit=0
+ENDTYPE
+GLOBAL particles AS TObj
+
+GLOBAL et#=0.0, m_time#=0.0
+GLOBAL particlecolors[]
+
+FUNCTION allocParticle:
+	IF (m_numparticles = LEN(m_particle[])-1)
+		RETURN -1
+	ENDIF
+	INC m_numparticles,1
+	RETURN m_numparticles
+ENDFUNCTION
+FUNCTION addParticles: num,expl,life#,cx,cy,colors[]
+	//DEBUG " --addParticles"
+	LOCAL i,angle#,dist
+
+	WHILE(num)
+		i = allocParticle()
+		IF(i<0)
+			RETURN	//* no more particles available */
+		ENDIF
+
+		m_particle[i].colors=colors[RND(LEN(colors)-1)]
+		angle# = RND(100)*(PI*2)
+		m_particle[i].sine=SIN(angle#)
+		m_particle[i].cosine=COS(angle#)
+		dist = RND(16)
+
+		IF (expl)
+			///* exploding */
+			m_particle[i].speed = 1.5 + RND(45)
+			m_particle[i].life#=life#
+			m_particle[i].x=cx+m_particle[i].sine*dist
+			m_particle[i].y=cy+m_particle[i].cosine*dist
+
+		ELSE
+			//* imploding */
+			m_particle[i].speed=1.5+RND(90)
+			m_particle[i].life#=life#
+			m_particle[i].x=cx-(m_particle[i].sine*(dist+m_particle[i].speed*m_particle[i].life#))
+			m_particle[i].y=cy-(m_particle[i].cosine*(dist+m_particle[i].speed*m_particle[i].life#))
+		ENDIF
+		DEC num,1
+	WEND
+ENDFUNCTION
+FUNCTION moveparticles:
+//* move all particles */
+	//DEBUG " ++Move:"+m_numparticles
+		LOCAL i,j
+		i=0
+		WHILE(i<m_numparticles)
+			 m_particle[i].life#= m_particle[i].life#-et#
+			IF(m_particle[i].life#<=0.0)
+				//* particle is now done, move last valid particle into this slot */
+				j = m_numparticles-1
+				IF(j<>i)
+					m_particle[i].x=m_particle[j].x
+					m_particle[i].y=m_particle[j].y
+					m_particle[i].sine=m_particle[j].sine
+					m_particle[i].cosine=m_particle[j].cosine
+					m_particle[i].life#=m_particle[j].life#
+					m_particle[i].speed=m_particle[j].speed
+					m_particle[i].colors=m_particle[j].colors
+				ENDIF
+				m_numparticles=j
+
+			ELSE
+				m_particle[i].x = m_particle[i].x + (m_particle[i].sine*m_particle[i].speed*et)
+				m_particle[i].y = m_particle[i].y + (m_particle[i].cosine*m_particle[i].speed*et)
+				INC i,1
+			ENDIF
+		WEND
+ENDFUNCTION
+

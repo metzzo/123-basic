@@ -93,7 +93,7 @@ GbapPath$ = "./"
 	ELSE
 		ArgumentError("Missing option '-P'")
 	ENDIF
-	
+
 	// No Run?
 	IF INSTR(c$, "-NR") <> -1
 		LOCAL StartPos% = INSTR(c$, "-NR")+3

@@ -1,0 +1,320 @@
+// --------------------------------- //
+// Project: ParticleSystem
+// Start: Wednesday, July 24, 2013
+// IDE Version: 11.414
+
+
+// Variables
+GLOBAL numpart,exp,life#, dot
+GLOBAL dot_w, dot_h
+GLOBAL vol# = 0.5 // 0.0 low - 1.0 loud
+GLOBAL pan = 0 // -1.0 left, 0 center, 1.0 right
+GLOBAL sound = TRUE
+GLOBAL fw=0
+GLOBAL mx=0, my=0, b1=0, b2=0, bl=0
+GLOBAL ftsz_w, ftsz_h 	// font size
+
+GLOBAL num$="512", life$="3.0", mode$="Explode", dot$="1"
+GLOBAL sd$
+
+//App Panel Text and Tex length
+GLOBAL title$ = "APD Particle System for GLB"
+GLOBAL tsz = LEN(title$)
+GLOBAL psz$="Particles:"
+GLOBAL psz=LEN(psz$)
+GLOBAL lif$= "Life:"
+GLOBAL lifsz=LEN(lif$)
+GLOBAL msz$="Mode:"
+GLOBAL msz= LEN(msz$)
+GLOBAL dsz$="Dot Size:"
+GLOBAL dsz= LEN(dsz$)
+GLOBAL ssz$="Sound:"
+GLOBAL ssz= LEN(ssz$)
+
+//Fonts
+LOADFONT "Media/fonts/APDfont_Blue.png",0
+LOADFONT "Media/fonts/APDfont_White.png",1
+LOADFONT "Media/fonts/APDfont_Green.png",2
+SETFONT 0
+
+
+//Types
+TYPE TMouse
+   x
+   y
+   b1
+   b2
+   b1m
+   tap
+   b1down
+ENDTYPE
+GLOBAL Mouse AS TMouse
+
+//Sound Files
+LOADSOUND "Media/sounds/fireworks.wav", 10, 3 	// Fireworks launch
+LOADSOUND "Media/sounds/fireworks2.wav", 11, 4 	// Fireworks 2
+
+//---------------------------------------------------------------------
+
+init()
+SUB GLB_ON_LOOP:
+	GETFONTSIZE ftsz_w, ftsz_h
+	
+	update()
+	moveparticles()
+	getMouse()
+	appPanel()
+	draw()
+ENDSUB
+
+FUNCTION init:
+	GETSCREENSIZE screenW, screenH
+	numpart=512
+	exp=1 // explode=1, implode=1
+	life#=3.0
+
+	life$=life
+	num$=numpart
+	dot=1
+	dot$=dot
+
+	dot_w=1
+	dot_h=1
+	fw=0
+
+	DIM m_particle[512]
+	DIM particlecolors[4]
+
+	particles.w = 50
+	particles.h = 50
+	particles.x = screenW/2
+	particles.y = screenH/2
+	LOCAL infoPlat$ = PLATFORMINFO$("")
+	IF infoPlat$ = "WIN32"
+		SYSTEMPOINTER TRUE
+	ELSE
+		SYSTEMPOINTER FALSE
+	ENDIF
+
+ENDFUNCTION
+FUNCTION update:
+LOCAL newtime = GETTIMERALL()
+	LOCAL beforeTime = newtime
+	et#=(newtime- m_time)/1000
+	IF(et#>(1.0/15.0))
+		et#=1.0/15.0
+	ENDIF
+	IF (m_numparticles=0)
+		IF sound
+			//play(10)
+		ENDIF
+		SELECT fw
+			CASE 0
+				particles.x = screenW/4
+				particles.y = screenH/4
+				IF sound
+					play(11)
+				ENDIF
+				particlecolors[0]=RGB(255,0,255)
+				particlecolors[1]=RGB(255,0,255)
+				particlecolors[2]=RGB(255,0,255)
+				particlecolors[3]=RGB(255,0,255)
+				addParticles(numpart,exp,life#,particles.x, particles.y,particlecolors[])
+				INC fw,1
+			CASE 1
+				particles.x = screenW/2
+				particles.y = screenH/4
+				particlecolors[0]=RGB(0,255,64)
+				particlecolors[1]=RGB(0,255,0)
+				particlecolors[2]=RGB(0,255,64)
+				particlecolors[3]=RGB(0,255,0)
+				addParticles(numpart,exp,life#,particles.x, particles.y,particlecolors[])
+				IF sound
+					play(11)
+				ENDIF
+				INC fw,1
+			CASE 2
+				particles.x = screenW/2
+				particles.y = screenH/2
+				particlecolors[0]=RGB(255,0,0)
+				particlecolors[1]=RGB(255,0,0)
+				particlecolors[2]=RGB(255,128,0)
+				particlecolors[3]=RGB(255,255,0)
+				addParticles(numpart,exp,life#,particles.x, particles.y,particlecolors[])
+				IF sound
+					play(11)
+				ENDIF
+				INC fw,1
+			CASE 3
+				particles.x = screenW-particles.w*2
+				particles.y = screenH-particles.h*2
+				particlecolors[0]=RGB(255,0,128)
+				particlecolors[1]=RGB(255,0,0)
+				particlecolors[2]=RGB(255,0,128)
+				particlecolors[3]=RGB(128,0,255)
+				addParticles(numpart,exp,life#,particles.x, particles.y,particlecolors[])
+				IF sound
+					play(11)
+				ENDIF
+				INC fw,1
+			CASE 4
+				particles.x = particles.w*2
+				particles.y = screenH-particles.h*2
+				particlecolors[0]=RGB(255,0,128)
+				particlecolors[1]=RGB(0,255,0)
+				particlecolors[2]=RGB(0,255,0)
+				particlecolors[3]=RGB(0,255,0)
+				addParticles(numpart,exp,life#,particles.x, particles.y,particlecolors[])
+				IF sound
+					play(11)
+				ENDIF
+				fw=0
+		ENDSELECT
+	ENDIF
+ENDFUNCTION
+FUNCTION draw:
+
+
+	//* draw particles */
+	FOR i=0 TO m_numparticles
+		IF(m_particle[i].y>=50)
+			LOCAL c=m_particle[i].colors
+			DRAWRECT m_particle[i].x, m_particle[i].y,dot_w,dot_h,c
+		ENDIF
+	NEXT
+	SHOWSCREEN
+ENDFUNCTION
+FUNCTION play: ch
+	PLAYSOUND (ch, pan, vol) // channel, pan, vol
+ENDFUNCTION // PLAY
+FUNCTION appPanel:
+	SETFONT 1
+	PRINT title$, screenW/2 - (tsz*ftsz_w)/2, 0
+	SETFONT 0
+	PRINT psz$+num$,0,ftsz_h*3
+
+	PRINT lif$+life,0,ftsz_h*4
+
+	PRINT msz$+mode$,0,ftsz_h*5
+	IF sound
+		sd$="On"
+	ELSE
+		sd$="Off"
+	ENDIF
+
+	PRINT dsz$+dot$,0,ftsz_h*6
+	SETFONT 2
+	PRINT ssz$+sd$,0,ftsz_h*7
+
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*3, ftsz_w*psz, ftsz_h)
+		DRAWLINE 0, ftsz_h*3, ftsz_w*psz, ftsz_h*3, RGB(255, 255, 0)			//Top
+		DRAWLINE 0, ftsz_h*4, ftsz_w*psz, ftsz_h*4, RGB(255, 255, 0)			//Bottom
+		DRAWLINE 0, ftsz_h*3, 0, ftsz_h*4, RGB(255, 255, 0)						// Left
+		DRAWLINE ftsz_w*psz, ftsz_h*3, ftsz_w*psz,ftsz_h*4 , RGB(255, 255, 0)	//Right
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*3, ftsz_w*psz, ftsz_h) AND Mouse.tap
+     	resetMouse()
+
+     	INC numpart,64
+
+     	IF numpart > 1024
+     		numpart = 64// it can't be zero or small number
+     	ENDIF
+     	num$=numpart
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*4, ftsz_w*lifsz, ftsz_h)
+		DRAWLINE 0, ftsz_h*4, ftsz_w*lifsz, ftsz_h*4, RGB(255, 255, 0)			 //Top
+		DRAWLINE 0, ftsz_h*5, ftsz_w*lifsz, ftsz_h*5, RGB(255, 255, 0)			 //Bottom
+		DRAWLINE 0, ftsz_h*4, 0, ftsz_h*5, RGB(255, 255, 0)						 // Left
+		DRAWLINE ftsz_w*lifsz, ftsz_h*4, ftsz_w*lifsz,ftsz_h*5 , RGB(255, 255, 0)//Right
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*4, ftsz_w*lifsz, ftsz_h) AND Mouse.tap
+     	resetMouse()
+     	INC life#,0.5
+
+     	IF life# > 10.5
+     		life# = 0.5
+     	ENDIF
+     	life$=life
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*5, ftsz_w*msz, ftsz_h)
+		DRAWLINE 0, ftsz_h*5, ftsz_w*msz, ftsz_h*5, RGB(255, 255, 0)		 //Top
+		DRAWLINE 0, ftsz_h*6, ftsz_w*msz, ftsz_h*6, RGB(255, 255, 0)		 //Bottom
+		DRAWLINE 0, ftsz_h*5, 0, ftsz_h*6, RGB(255, 255, 0)					 // Left
+		DRAWLINE ftsz_w*msz, ftsz_h*5, ftsz_w*msz,ftsz_h*6 , RGB(255, 255, 0)//Right
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*5, ftsz_w*msz, ftsz_h) AND Mouse.tap
+     	resetMouse()
+     	IF mode$="Explode"
+			mode$="Implode"
+			exp=0
+		ELSE
+			mode$="Explode"
+			exp=1
+		ENDIF
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*6, ftsz_w*dsz, ftsz_h)
+		DRAWLINE 0, ftsz_h*6, ftsz_w*dsz, ftsz_h*6, RGB(255, 255, 0)		 //Top
+		DRAWLINE 0, ftsz_h*7, ftsz_w*dsz, ftsz_h*7, RGB(255, 255, 0)		 //Bottom
+		DRAWLINE 0, ftsz_h*6, 0, ftsz_h*7, RGB(255, 255, 0)					 // Left
+		DRAWLINE ftsz_w*dsz, ftsz_h*6, ftsz_w*dsz,ftsz_h*7 , RGB(255, 255, 0)//Right
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*6, ftsz_w*dsz, ftsz_h) AND Mouse.tap
+     	resetMouse()
+     	INC dot_w,1
+     	INC dot_h,1
+     	IF dot_w > 5
+     		dot_w = 1
+     		dot_h = 1
+      	ENDIF
+     	dot$=dot_w
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*7, ftsz_w*ssz, ftsz_h)
+		DRAWLINE 0, ftsz_h*7, ftsz_w*ssz, ftsz_h*7, RGB(255, 255, 0)		 //Top
+		DRAWLINE 0, ftsz_h*8, ftsz_w*ssz, ftsz_h*8, RGB(255, 255, 0)		 //Bottom
+		DRAWLINE 0, ftsz_h*7, 0, ftsz_h*8, RGB(255, 255, 0)					 // Left
+		DRAWLINE ftsz_w*ssz, ftsz_h*7, ftsz_w*ssz,ftsz_h*8 , RGB(255, 255, 0)//Right
+	ENDIF
+	IF BOXCOLL( mx, my, 1, 1, 0, ftsz_h*7, ftsz_w*ssz, ftsz_h) AND Mouse.tap
+     	resetMouse()
+     	IF sound
+     		sound = FALSE
+     	ELSE
+     		sound = TRUE
+     	ENDIF
+	ENDIF
+ENDFUNCTION
+FUNCTION getMouse:
+	MOUSESTATE mx, my, b1, b2
+	IF b2 = 1
+		END
+	ENDIF
+
+	// Mouse Tap: detect mouse down => mouse up sequence
+	IF b1=0 AND Mouse.b1=1
+		Mouse.tap=1
+		Mouse.b1=0
+	ENDIF
+	// Mouse Down
+	IF b1=1
+		//PRINT "DOWN B1:"+mouse.b1down+" tap:"+mouse.tap,mx,my
+		Mouse.x=mx
+		Mouse.y=my
+		Mouse.b1=1
+		INC Mouse.b1m
+		//Mouse button 1 sensitivity
+		IF Mouse.b1m > 20
+			Mouse.b1down=1
+			Mouse.b1m = 0
+		ENDIF
+	ELSE
+		//PRINT "UP B1:"+mouse.b1down+" tap:"+mouse.tap,mx,my
+		Mouse.b1down=0
+	ENDIF
+ENDFUNCTION
+FUNCTION resetMouse:
+	Mouse.tap = 0
+	Mouse.b1m = 0
+	Mouse.b1down = 0
+ENDFUNCTION
+

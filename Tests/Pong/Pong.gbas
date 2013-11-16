@@ -34,6 +34,8 @@ SUB Init:
 
 	LOADSOUND "pong.wav", 0, 1
 	PLAYMUSIC "pongtune.mp3", TRUE
+	
+	MUSICVOLUME 0.5
 ENDSUB // INIT
 
 

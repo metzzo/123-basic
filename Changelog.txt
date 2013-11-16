@@ -26,6 +26,11 @@ Changed: Optimized Shadow Stack implementation in Debugging mode - should run no
 Fixed: SETSCREEN Fullscreen parameter functions now (does not use the HTML5 fullscreen API anymore, because it requires to be callen in a click/key event, which SETSCREEN is usually not -> sets the canvas size to innerWidth/innerHeight instead)
 Added: IE 11 support
 Added: Automatic test compilation and upload
+Added: Audio system rewrite, uses now additionally Web Audio as playing Backend
+Added: New demo (ParticleSystem)
+Fixed: Multiple LOADFONT did not work
+Fixed: Character height of some fonts was not set properly
+Fixed: MUSICVOLUME works with new sound system
 
 0.4
 Fixed: NOT fixed.

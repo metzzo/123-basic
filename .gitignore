@@ -6,20 +6,24 @@
 *.out
 Thumbs.db
 
+/123basic.app/Tmp/closure.js
+/123basic.app/Tmp/Header.js
+*.123SCRIPT_DATA
+
 Tests/*/*/*.exe
 
-*.123basic_DATA
 DIR_STRUCTURE
 123basic.exe
 123File.html
 123Script.js
-123basic.app/Tmp/closure.js
-123basic.app/Tmp/Header.js
-123basic.app/Tmp/remdata.txt
-123basic.app/Tmp/tmp.txt
+
+/123basic.app/Tmp/remdata.txt
+/123basic.app/Tmp/tmp.txt
 ftp.txt
 
 *.html5_convertedsounds*
 *.html5_convertedsounds*/sound.mp3
 *.html5_convertedsounds*/sound.ogg
 *.html5_convertedsounds*/sound.wav
+
+

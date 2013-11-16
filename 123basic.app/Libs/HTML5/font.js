@@ -57,33 +57,32 @@ function LOADFONT(path, num) {
 				//data modifizieren
 				var imageData = scrn.context.getImageData(0, 0, width, height);
 				
-				var blue = RGB(0,0,255);
-				var yellow = RGB(255,255,0);
-				
 				var data = imageData.data;
 				var fx = 0, fy = 0;
 				var sizing = true;
+				
+				var i = 0;
 				
 				var getCol = function(x, y) {
 					return RGB(data[(y*width + x)*4], data[(y*width + x)*4 + 1], data[(y*width + x)*4 + 2]);
 				}
 				
 				var charwidth = null, charheight = null;
+				var is256 = height > width;
+				charwidth = INTEGER(width/16);
+				charheight = INTEGER(height/(is256 ? 16 : 8));
 				
-				charwidth = INTEGER(width/16)-2;
-				charheight = (height/width)*charwidth;
-				 
 				
 				font.charwidth = charwidth;
 				font.charheight = charheight;
 				
-				for (var y = fy + 1; y < height; y += charheight + 2) {
-					for (var x = fx + 1; x < width; x += charwidth + 2) {
+				for (var y = fy; y < height; y += charheight) {
+					for (var x = fx; x < width; x += charwidth) {
 						var realwidth = charwidth;
 						
 						var startx, endx;
-						//DO KERNING STUFF \o/
 						
+						//DO KERNING STUFF \o/
 						for (var leftx = x + 1; leftx < x + charwidth; leftx++) {
 							var pixel = false;
 							for (var tmpy = y+1; tmpy < y + charheight-2; tmpy++) {
