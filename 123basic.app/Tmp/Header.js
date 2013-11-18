@@ -2697,10 +2697,10 @@ function GETTIMER() {
 function ALPHAMODE(mode) {
 	var val;
 	if (mode < 0) {
-		context.globalCompositeOperation = 'source-atop'; // TODO
+		context.globalCompositeOperation = 'source-atop'; // TODO: Implement properly
 		val = 1 - (1 + mode);
 	} else if (mode > 0) {
-		context.globalCompositeOperation = 'lighter';
+		context.globalCompositeOperation = 'source-atop';
 		val = mode;
 	} else {
 		context.globalCompositeOperation = 'source-over'; 
@@ -3070,6 +3070,9 @@ function LOADFONT(path, num) {
 				var getCol = function(x, y) {
 					return RGB(data[(y*width + x)*4], data[(y*width + x)*4 + 1], data[(y*width + x)*4 + 2]);
 				}
+				var trans = function(x,y) {
+					return data[(y*width + x)*4 + 3];
+				}
 				
 				var charwidth = null, charheight = null;
 				var is256 = height > width;
@@ -3084,7 +3087,7 @@ function LOADFONT(path, num) {
 					for (var x = fx; x < width; x += charwidth) {
 						var realwidth = charwidth;
 						
-						var startx, endx;
+						var startx = null, endx = null;
 						
 						//DO KERNING STUFF \o/
 						for (var leftx = x; leftx < x + charwidth; leftx++) {
@@ -3115,17 +3118,18 @@ function LOADFONT(path, num) {
 							}
 						}
 						
-						if (endx > startx) {
-							realwidth = (endx - startx) + 1;
+						if (typeof startx != 'undefined' && typeof endx != 'undefined' && endx > startx) {
+							realwidth = (endx - startx)+1;
 						} else {
-							realwidth = charwidth;
+							realwidth = INTEGER(charwidth/3) - 1;
+							startx = x;
 						}
 						
 						font.chars[i] = {
 							x: x, y: y,
-							
 							//kerning data
-							width: realwidth+6
+							kernx: startx, kernwidth: realwidth,
+							width: realwidth+1
 						};
 						
 						i++;
@@ -3173,14 +3177,18 @@ function PRINT(text, x, y, kerning) {
 			}
 			var c = font.chars[pos];
 			if (!!c && pos > 26) {
-				var pos;
+				var pos, tex, w;
 				if (kerning) {
-					pos = x-~~(font.charwidth/2+.5)+~~(c.width/2+.5);
+					pos = x; //-~~(font.charwidth/2+.5)+~~(c.width/2+.5);
+					tex = c.kernx;
+					w = c.kernwidth;
 				} else {
 					pos = x;
+					tex = c.x;
+					w = font.charwidth;
 				}
 				
-				context.drawImage(font.img, c.x, c.y, font.charwidth, font.charheight, pos, y, font.charwidth, font.charheight);
+				context.drawImage(font.img, tex, c.y, w, font.charheight, pos, y, w, font.charheight);
 				
 				
 				if (kerning) {

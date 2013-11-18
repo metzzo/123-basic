@@ -453,10 +453,10 @@ function GETTIMER() {
 function ALPHAMODE(mode) {
 	var val;
 	if (mode < 0) {
-		context.globalCompositeOperation = 'source-atop'; // TODO
+		context.globalCompositeOperation = 'source-atop'; // TODO: Implement properly
 		val = 1 - (1 + mode);
 	} else if (mode > 0) {
-		context.globalCompositeOperation = 'lighter';
+		context.globalCompositeOperation = 'source-atop';
 		val = mode;
 	} else {
 		context.globalCompositeOperation = 'source-over'; 
