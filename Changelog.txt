@@ -1,3 +1,9 @@
+0.55
+Fixed: Problem with UTF8 .GBAP files in the XML loader
+Added: Started working on documentation on github
+
+
+
 0.5
 Fixed: INIGET$ returns "NO_DATA" if data does not exist
 Fixed: NETWEBEND redirects properly

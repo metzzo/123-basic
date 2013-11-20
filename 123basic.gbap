@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<GLBASIC APP_NAME="123basic" COMPANY_NAME="programming with design" CONSOLE_PRG="1" DEBUG="0" DEBUGFULL="0" EDITFILE=".\123basic.gbas" EDITLINE="99" MAXDIMDEBUG="20" PLATFORM_BOX_SELECTION="ANDROID" STRICT="1" USERDEF_VERSION="000.005" VERSION="6.003" >
+<GLBASIC APP_NAME="123basic" COMPANY_NAME="programming with design" CONSOLE_PRG="1" DEBUG="1" DEBUGFULL="0" EDITFILE=".\src\Utils\XMLReader.gbas" EDITLINE="27" MAXDIMDEBUG="20" PLATFORM_BOX_SELECTION="ANDROID" STRICT="1" USERDEF_VERSION="000.005" VERSION="6.003" >
    <PLATFORMS >
       <PLATFORM ACTIVE="1" FRAMERATE="60" FULLSCREEN="0" MULTISAMPLE="0" NAME="ANDROID" RESX="640" RESY="480" />
       <PLATFORM ACTIVE="0" FRAMERATE="60" FULLSCREEN="0" MULTISAMPLE="0" NAME="CAANOO" RESX="640" RESY="480" />
@@ -23,12 +23,27 @@
       <FILE PATH=".\123basic.gbas" />
       <FILE PATH=".\src\CompilerPasses\Generator\JSGenerator.gbas" />
       <FILE PATH=".\src\Target.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Preprocessor.gbas" />
+      <FILE PATH=".\src\DocParser.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Parser.gbas" />
+      <FILE PATH=".\src\Compiler.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Lexer.gbas" />
+      <FILE PATH=".\src\Utils\GBAPReader.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Analyser.gbas" />
+      <FILE PATH=".\src\Expression.gbas" />
+      <FILE PATH=".\src\Utils\XMLReader.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Generator\VMGenerator.gbas" />
+      <FILE PATH=".\src\VMFunctions.gbas" />
+      <FILE PATH=".\src\Utils\Hashmap.gbas" />
+      <FILE PATH=".\src\CompilerPasses\Generator\CSGenerator.gbas" />
+      <FILE PATH="..\..\GLBasic\.config\MacroB.bat" />
    </EDITFILES>
    <SRCFILES >
       <FILE PATH=".\123basic.gbas" />
       <FILE PATH=".\src\CompilerPasses\Analyser.gbas" />
       <FILE PATH=".\src\Compiler.gbas" />
       <FILE PATH=".\src\CompilerPasses\Generator\CSGenerator.gbas" />
+      <FILE PATH=".\src\DocParser.gbas" />
       <FILE PATH=".\src\Expression.gbas" />
       <FILE PATH=".\src\Utils\GBAPReader.gbas" />
       <FILE PATH=".\src\Utils\Hashmap.gbas" />

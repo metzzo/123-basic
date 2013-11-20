@@ -10,7 +10,9 @@
 
 // ?DEFINE TEST_BEFORE
 
-?DEFINE PRE_FOR_IDE
+// ?DEFINE PRE_FOR_IDE
+
+?DEFINE GEN_DOC
 
 
 ?IF DEFINED(OTTBASIC) AND DEFINED(PRE_FOR_IDE)
@@ -78,6 +80,7 @@ GbapPath$ = "./"
 	LOCAL Input$	 = ""
 
 	LOCAL c$ = GETCOMMANDLINE$()
+	
 	IF INSTR(c$, "-N") <> -1
 		LOCAL StartPos% = INSTR(c$, "-N")+3
 		LOCAL EndPos% = INSTR(c$, "\"", StartPos)

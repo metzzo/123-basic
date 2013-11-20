@@ -6,8 +6,8 @@
 *.out
 Thumbs.db
 
-/123basic.app/Tmp/closure.js
-/123basic.app/Tmp/Header.js
+123basic.app/Tmp/closure.js
+123basic.app/Tmp/Header.js
 *.123SCRIPT_DATA
 
 Tests/*/*/*.exe
@@ -17,8 +17,8 @@ DIR_STRUCTURE
 123File.html
 123Script.js
 
-/123basic.app/Tmp/remdata.txt
-/123basic.app/Tmp/tmp.txt
+123basic.app/Tmp/remdata.txt
+tmp.txt
 ftp.txt
 
 *.html5_convertedsounds*

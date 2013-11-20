@@ -19,8 +19,12 @@ TYPE XML
 		self.Position = 0
 
 		self.SkipWhitespaces()
+		//überspringe alles vor <
+		WHILE self.Get$() <> "<"
+			INC self.Position
+		WEND
 		//überspringe <? >
-		IF LEFT$(self.Text$, 2) = "<?"
+		IF MID$(self.Text$, self.Position, 2) = "<?"
 			WHILE self.Get$() <> ">"
 				INC self.Position
 			WEND

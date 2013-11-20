@@ -613,6 +613,7 @@ FUNCTION LoadFile$: Path$
 			Text$=Text$+Line$+"\n"
 		WEND
 		CLOSEFILE File
+		STDOUT Text$
 	ELSE
 		Error("Cannot find file: " + Path$, CODELINE(), CODEFILE$())
 	ENDIF
@@ -851,6 +852,9 @@ FUNCTION InitCompiler:
 	RegisterDefine("ADDON_NET", TRUE)
 
 	ResetExpressions()
+	
+	// Documentation
+	REDIM Documentations[0]
 ENDFUNCTION
 
 
@@ -875,6 +879,9 @@ FUNCTION Compile$: Text$, Target$
 	PushTimer()
 	Text$ = Text$ + "\n"
 	Text$ = Text$ + LoadFile$("Target/Header.gbas")
+	?IFDEF GEN_DOC
+	Text$ = Text$ + LoadFile$("Target/Doc.gbas")
+	?ENDIF
 	Text$ = Text$ + "\n"
 
 	SetupTarget(Target$)

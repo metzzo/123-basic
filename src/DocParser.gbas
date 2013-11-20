@@ -1,0 +1,105 @@
+// --------------------------------- //
+// Project: 123basic
+// Start: Wednesday, November 20, 2013
+// IDE Version: 10.283
+
+GLOBAL Documentations[] AS Documentation
+TYPE Documentation
+	typ$ // what does this describe: FUNCTION, MODULE, TYPE, ...
+	desc[] AS LangElement // description
+	
+	// FUNCTION
+	params[] AS ParamElement
+	see$[]
+ENDTYPE
+
+TYPE ParamElement
+	name$
+	desc[] AS LangElement
+ENDTYPE
+
+TYPE LangElement
+	desc$ // the translations
+	lang$ // what name are the translations
+ENDTYPE
+
+FUNCTION ParseDoc:
+	LOCAL doc AS Documentation
+	
+	doc.typ$ = GetCurrent$()
+	IF NOT (IsToken("MODULE") OR IsToken("FUNCTION")) THEN Error("Unknown ?DOC", CODELINE(), CODEFILE$())
+	LOCAL name$ = ""
+	REPEAT
+		RemoveCurrent()
+		IF name$ <> "" THEN name$ = name$ + "."
+		name$ = name$ + GetCurrent$()
+		RemoveCurrent()
+	UNTIL NOT IsToken(".")
+	
+	RemoveAllNL()
+	
+	WHILE EOFParse() = TRUE
+		MatchAndRemove("?", CODELINE(), CODEFILE$())
+		SELECT GetCurrent$()
+			CASE "PARAM"
+				RemoveCurrent()
+				LOCAL param AS ParamElement
+				param.name$ = GetCurrent$()
+				RemoveCurrent()
+				MatchAndRemove("\n", CODELINE(), CODEFILE$())
+				
+				ParseDocLang(param.desc[], "ENDPARAM")
+			CASE "DESC"
+				RemoveCurrent()
+				MatchAndRemove("\n", CODELINE(), CODEFILE$())
+				
+				ParseDocLang(doc.desc[], "ENDDESC")
+			CASE "SEE"
+				RemoveCurrent()
+				
+				REPEAT
+					DIMPUSH doc.see$[], GetCurrent$()
+					RemoveCurrent()
+				UNTIL IsToken("\n")
+			CASE "ENDDOC"
+				RemoveCurrent()
+				BREAK
+		ENDSELECT
+		
+		RemoveAllNL()
+	WEND
+	
+	DIMPUSH Documentations[], doc
+ENDFUNCTION
+
+FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
+	WHILE IsToken("?")
+		LOCAL l AS LangElement
+		RemoveCurrent()
+		IF IsToken(endToken$)
+			RemoveCurrent()
+			RETURN
+		ENDIF
+		MatchAndRemove("LANG", CODELINE(), CODEFILE$())
+		LOCAL lang$ = GetCurrent$()
+		RemoveCurrent()
+		LOCAL text$ = MID$(GetCurrent$(), 1, LEN(GetCurrent$())-2)
+		RemoveCurrent()
+		
+		l.lang$ = lang$
+		l.desc$ = text$
+		
+		DIMPUSH langs[], l
+		
+		RemoveAllNL()
+	WEND
+ENDFUNCTION
+
+FUNCTION RemoveAllNL:
+	MatchAndRemove("\n", CODELINE(), CODEFILE$())
+	WHILE IsToken("\n")
+		MatchAndRemove("\n", CODELINE(), CODEFILE$())
+	WEND
+ENDFUNCTION
+
+

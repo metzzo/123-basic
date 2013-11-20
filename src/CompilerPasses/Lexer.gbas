@@ -44,6 +44,7 @@ FUNCTION Lexer:
 			ENDIF
 			LastFound = i
 		ENDIF
+		
 		LOCAL curChar$ = MID$(Compiler.Code$,i,1)
 
 		LOCAL TmpLineCont$ = LineContent$
@@ -62,6 +63,9 @@ FUNCTION Lexer:
 			CASE "\""
 				LOCAL WasBackSlash% = FALSE, WasWasBack% = FALSE
 				FOR j% = i + 1 TO LEN(Compiler.Code$) - 1
+					IF MID$(Compiler.Code$,j,1) = "\n" OR MID$(Compiler.Code$,j,1) = "\f"
+						INC Line
+					ENDIF
 					IF MID$(Compiler.Code$,j,1) = "\"" AND (WasBackSlash = FALSE OR WasWasBack)
 						i = j
 						BREAK
