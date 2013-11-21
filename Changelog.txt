@@ -4,7 +4,8 @@ Added: Started working on documentation on github
 Fixed: Macro supports files with whitespaces
 Fixed: RND returns integer
 Added: New demo (8BIT RAIN)
-
+Fixed: ZOOMSPRITE with sx > 1 or sy > 1 positions the sprite correctly
+Fixed: CLEARSCREEN has default parameter
 
 0.5
 Fixed: INIGET$ returns "NO_DATA" if data does not exist

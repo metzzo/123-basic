@@ -1,127 +1,17 @@
-//$$RESETFILE.\8BIT RAIN.gbas
+//$$RESETFILE.\VMTests.gbas
 // --------------------------------- //
-// Project: 8-bit RAIN
-// Start: Sunday, December 23, 2012
+// Project: VMTests
+// Start: Sunday, June 30, 2013
 // IDE Version: 10.283
-// Done by Erico Patricio Monteiro
-// CITY.png borrowed from ErekT and Ramenshop pixel art works for background example..and what a pretty one!
-// Everything ELSE is mine and free
-//
-// http://www.gamesradar.com/the-evolution-of-rain/
 
-BOOT:
+STDOUT "Hello World\n"
+STDOUT (5+6*2)+"\n"
 
-//	--- SYSTEM
-	SETCURRENTDIR("Media")														;// set media folder
-	LOADBMP "CITY.png"															;// load background image
-	LOADSPRITE "RAIN GOTA A.png",0												;// load rain sprite type A
-	LOADSPRITE "RAIN GOTA B.png",1												;// load rain sprite type B
-	LOADANIM "SPLASH.png",2,110,12												;// load splash anim sprite
-	LOADFONT "smalfont.png",0													;// load font
-	SETSCREEN 992,648,0															;// set output resolution
+LOCAL myVar% = 42
 
-//	--- RAIN VARIABLES
-	GLOBAL rain																	;// 0-rain off	 	1-rain on
-	GLOBAL raintg																;// rain target (what it plans to become)
-	GLOBAL rainmt																;// rain mid timer - rain fader
-	GLOBAL rainx[]																;// rain x sprite coord
-	GLOBAL rainy[]																;// rain y sprite coord
-	GLOBAL rains[]																;// rain state 0-drop off	1-drop on
-	GLOBAL raint																;// rain timer for drop flick
-	GLOBAL splashx																;// splash x sprite coord
+STDOUT "LOL: "+myVar+"\n"
 
-	DIM rainx[100] ; DIM rainy[100] ; DIM rains[100]							;// 100 rain sprites
-
-//	--- DIP SWITCH
-	rain=0
-	raintg=1
 ?IFNDEF HTML5
-WHILE TRUE
-GOSUB GLB_ON_LOOP
-WEND
+KEYWAIT
 ?ENDIF
-
-LOOP:
-SUB GLB_ON_LOOP: ;// ------------------------------------------------------------------------------------------- // LOOP
-//	--- DISPLAY
-	ALPHAMODE -1																;// no transparencies!
-	SMOOTHSHADING FALSE															;// no interpolation
-
-	IF raint>=0 AND raint<=4													;// set raint=2 and 3 to blink rain
-		IF (rain>0 OR rain=0) AND raintg=1										;// if it is raining or want to rain
-			FOR z=0 TO 49														;// loop 50x (100 drop sprites)
-				IF rains[z]=1 THEN DRAWSPRITE 0,rainx[z],rainy[z]				;// if drop on, draw it, type A
-				IF rains[z+50]=1 THEN DRAWSPRITE 1,rainx[z+50],rainy[z+50]		;// if drop on, draw it, type B
-			NEXT
-			IF raint=0 OR raint=2 THEN splashx=RND(496)								;// random splash
-			IF rain=1 THEN DRAWANIM 2,0,splashx,300								;// blink splash
-		ENDIF
-	ENDIF
-
-// --- KEY CONTROL (SPACE)
-	IF rain=raintg
-		IF KEY(57)=1															;// press space to change rain on/off
-			IF rain=0
-				raintg=1
-				rainmt=0
-			ELSE
-				raintg=0
-				rainmt=0
-			ENDIF
-		ENDIF
-	ENDIF
-
-//	--- RAIN STATES
-	IF (rain>0 OR rain=0) AND raintg=1											;// if raining or rain target on
-		FOR z=0 TO 49															;// loop 50x (100 drop sprites)
-			IF rains[z]=0 AND raintg=1					;// IF drop off AND rain target on (TYPE A)
-				IF RND(60)=0
-					rainx[z]=RND(496)					;// prepare drops x random position
-					rainy[z]=-15						;// set drop y position
-					rains[z]=1							;// drop on
-				ENDIF
-			ENDIF
-			IF rains[z+50]=0 AND raintg=1				;// if drop off and rain target on (TYPE B)
-				IF RND(60)=0
-					rainx[z+50]=RND(496)				;// prepare drops x random position
-					rainy[z+50]=-15						;// set drop y position
-					rains[z+50]=1						;// drop on
-				ENDIF
-			ENDIF
-			IF rains[z]=1								;// if drop on (TYPE A)
-			rainy[z]=rainy[z]+6							;// gravity
-				IF rainy[z]>290							;// hit ground turn drop off
-					rains[z]=0
-					rainy[z]=0
-				ENDIF
-			ENDIF
-			IF rains[z+50]=1							;// if drop on (TYPE B)
-				rainy[z+50]=rainy[z+50]+3				;// gravity
-				IF rainy[z+50]>300						;// hit ground turn drop off
-					rains[z+50]=0
-				ENDIF
-			ENDIF
-		NEXT
-		raint=raint+1															;// run rain timer
-		IF raint=4 THEN raint=0													;// reset rain timer
-	ENDIF
-
-//	--- MID RAIN
-	IF rain<>raintg																;// check midrain condition
-		rainmt=rainmt+1															;// advance midrain timer
-		IF rainmt=60 AND rain=0 AND raintg=1									;// if for rain on, check midrain timer at 60
-			rain=1																;// turn on rain
-			rainmt=0															;// reset midrain timer
-		ENDIF
-		IF rainmt=110 AND rain=1 AND raintg=0									;// if for rain off, check midrain timer at 110
-			rain=0																;// turn off rain
-			rainmt=0															;// reset midrain timer
-		ENDIF
-	ENDIF
-
-//	--- DOUBLE SCREEN AND SHOW
-	GRABSPRITE 10,0,0,496,324
-	ZOOMSPRITE 10,247,163,2,2
-	SHOWSCREEN
-ENDSUB		;// ------------------------------------------------------------------------------------------- // LOOP [end]
 

@@ -802,7 +802,7 @@ function RND(range) {
     if (range == 0) return 0;
 	if (range < 0) range = -range;
     //return MAX((Math.random()+.1)*range, range);
-	return (range+1) * random();
+	return ~~((range+1) * random());
 }
 
 function MIN(a,b) {
@@ -4535,6 +4535,8 @@ function ROTOSPRITE(num, x, y, phi) {
 }
 
 function ZOOMSPRITE(num, x, y, sx, sy) {
+	if (sx == 0 || sy == 0) return;
+	
 	if (sx == 1 && sy == 1) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
@@ -4543,6 +4545,10 @@ function ZOOMSPRITE(num, x, y, sx, sy) {
 		var dx = 0, dy = 0
 		if (sx < 0) dx = spr.img.width*sx;
 		if (sy < 0) dy = spr.img.height*sy;
+		
+		if (sx > 0) dx = spr.img.width/sx;
+		if (sy > 0) dy = spr.img.height/sy;
+		
 		
 		context.translate(x-dx,y-dy);
 		context.scale(sx, sy);
