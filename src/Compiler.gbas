@@ -613,7 +613,6 @@ FUNCTION LoadFile$: Path$
 			Text$=Text$+Line$+"\n"
 		WEND
 		CLOSEFILE File
-		STDOUT Text$
 	ELSE
 		Error("Cannot find file: " + Path$, CODELINE(), CODEFILE$())
 	ENDIF
@@ -852,7 +851,7 @@ FUNCTION InitCompiler:
 	RegisterDefine("ADDON_NET", TRUE)
 
 	ResetExpressions()
-	
+
 	// Documentation
 	REDIM Documentations[0]
 ENDFUNCTION

@@ -44,7 +44,7 @@ FUNCTION Lexer:
 			ENDIF
 			LastFound = i
 		ENDIF
-		
+
 		LOCAL curChar$ = MID$(Compiler.Code$,i,1)
 
 		LOCAL TmpLineCont$ = LineContent$

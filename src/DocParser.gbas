@@ -7,7 +7,8 @@ GLOBAL Documentations[] AS Documentation
 TYPE Documentation
 	typ$ // what does this describe: FUNCTION, MODULE, TYPE, ...
 	desc[] AS LangElement // description
-	
+	name$
+
 	// FUNCTION
 	params[] AS ParamElement
 	see$[]
@@ -25,7 +26,7 @@ ENDTYPE
 
 FUNCTION ParseDoc:
 	LOCAL doc AS Documentation
-	
+
 	doc.typ$ = GetCurrent$()
 	IF NOT (IsToken("MODULE") OR IsToken("FUNCTION")) THEN Error("Unknown ?DOC", CODELINE(), CODEFILE$())
 	LOCAL name$ = ""
@@ -35,9 +36,10 @@ FUNCTION ParseDoc:
 		name$ = name$ + GetCurrent$()
 		RemoveCurrent()
 	UNTIL NOT IsToken(".")
-	
+	doc.name$ = name$
+
 	RemoveAllNL()
-	
+
 	WHILE EOFParse() = TRUE
 		MatchAndRemove("?", CODELINE(), CODEFILE$())
 		SELECT GetCurrent$()
@@ -47,16 +49,16 @@ FUNCTION ParseDoc:
 				param.name$ = GetCurrent$()
 				RemoveCurrent()
 				MatchAndRemove("\n", CODELINE(), CODEFILE$())
-				
+
 				ParseDocLang(param.desc[], "ENDPARAM")
 			CASE "DESC"
 				RemoveCurrent()
 				MatchAndRemove("\n", CODELINE(), CODEFILE$())
-				
+
 				ParseDocLang(doc.desc[], "ENDDESC")
 			CASE "SEE"
 				RemoveCurrent()
-				
+
 				REPEAT
 					DIMPUSH doc.see$[], GetCurrent$()
 					RemoveCurrent()
@@ -65,11 +67,31 @@ FUNCTION ParseDoc:
 				RemoveCurrent()
 				BREAK
 		ENDSELECT
-		
+
 		RemoveAllNL()
 	WEND
-	
+
 	DIMPUSH Documentations[], doc
+ENDFUNCTION
+
+FUNCTION OutputDoc: typ$, file$
+	LOCAL result$ = ""
+	FOREACH doc IN Documentations[]
+		SELECT typ$
+			CASE "html"
+				SELECT doc.typ$
+					CASE "FUNCTION"
+						INC result$, "<h1>" + doc.name$ + "</h1>"
+						INC result$, "Parameters:"
+					DEFAULT
+						Error("Unimplemented", CODELINE(), CODEFILE$())
+				ENDSELECT
+			DEFAULT
+				Error("Unimplemented", CODELINE(), CODEFILE$())
+		ENDSELECT
+	NEXT
+
+	STDOUT result$
 ENDFUNCTION
 
 FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
@@ -85,12 +107,12 @@ FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
 		RemoveCurrent()
 		LOCAL text$ = MID$(GetCurrent$(), 1, LEN(GetCurrent$())-2)
 		RemoveCurrent()
-		
+
 		l.lang$ = lang$
 		l.desc$ = text$
-		
+
 		DIMPUSH langs[], l
-		
+
 		RemoveAllNL()
 	WEND
 ENDFUNCTION

@@ -12,7 +12,7 @@ function RND(range) {
     if (range == 0) return 0;
 	if (range < 0) range = -range;
     //return MAX((Math.random()+.1)*range, range);
-	return (range+1) * random();
+	return ~~((range+1) * random());
 }
 
 function MIN(a,b) {

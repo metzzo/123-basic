@@ -140,8 +140,10 @@ FUNCTION PreCommand%: IgnoreAll%
 				RemoveCurrent()
 			CASE "GRAPHICS"
 				IF NOT IgnoreAll THEN CONSOLE = FALSE
+			?IFDEF GEN_DOC
 			CASE "DOC"
 				ParseDoc()
+			?ENDIF
 			DEFAULT
 				Error("Expecting preprocessor command got '"+Cur$+"'", CODELINE(), CODEFILE$())
 		ENDSELECT
