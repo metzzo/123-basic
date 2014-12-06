@@ -27,4 +27,5 @@ ftp.txt
 *.html5_convertedsounds*/sound.ogg
 *.html5_convertedsounds*/sound.wav
 
+Tmp/
 

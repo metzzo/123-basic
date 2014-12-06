@@ -1,0 +1,43 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Saturday, December 06, 2014
+// IDE Version: 10.283
+
+
+SUB TestSimpleFunctions:
+	TEST_INPUT(fibonacci(11))
+	TEST_OUTPUT(89)
+	TEST_CHECK("Fibonacci")
+
+	TEST_INPUT(recursionTest())
+	TEST_OUTPUT(0)
+	TEST_CHECK("Simple Recursion")
+
+	TEST_INPUT(Simple$())
+	TEST_OUTPUT("Hello World")
+	TEST_CHECK("Simple String Return")
+ENDSUB
+
+
+FUNCTION Simple$:
+	RETURN "Hello World"
+ENDFUNCTION
+
+FUNCTION fibonacci: n
+	IF n <= 1
+		RETURN n
+	ELSE
+		RETURN fibonacci(n-1) + fibonacci(n-2)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION recursionTest: n = 5
+	IF n = 0 THEN RETURN
+	LOCAL i
+
+	INC i, n
+	recursionTest(n - 1)
+	DEC i, n
+
+	RETURN i
+ENDFUNCTION

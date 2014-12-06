@@ -1,0 +1,39 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Saturday, December 06, 2014
+// IDE Version: 10.283
+
+GLOBAL ExpectedOutput$ = ""
+GLOBAL ActualOutput$ = ""
+
+
+GOSUB TestSimpleVariables
+GOSUB TestSimpleIf
+
+
+KEYWAIT
+
+FUNCTION TEST_OUTPUT: text$
+	ExpectedOutput$ = ExpectedOutput$ + text$
+ENDFUNCTION
+
+FUNCTION TEST_INPUT: text$
+	ActualOutput$ = ActualOutput$  + text$
+ENDFUNCTION
+
+FUNCTION TEST_CHECK: name$
+	IF ExpectedOutput$ = ActualOutput$
+		// ok <3
+		STDOUT "Test " + name$ + " OK :) \n"
+	ELSE
+		STDOUT "Test " + name$ + " Failed :( \n"
+		STDOUT "---------- Actual Output ----------\n"
+		STDOUT ActualOutput$ + "\n"
+		STDOUT "---------- Expected Output --------\n"
+		STDOUT ExpectedOutput$ + "\n"
+		STDOUT "-----------------------------------\n"
+	ENDIF
+
+	ExpectedOutput$ = ""
+	ActualOutput$ = ""
+ENDFUNCTION

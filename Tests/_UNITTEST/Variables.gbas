@@ -1,0 +1,42 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Saturday, December 06, 2014
+// IDE Version: 10.283
+
+
+SUB TestSimpleVariables:
+	LOCAL i% = 42
+	TEST_INPUT(i)
+	TEST_OUTPUT("42")
+	TEST_CHECK("Simple Integer Declaration")
+
+	LOCAL j = 42.2
+	TEST_INPUT(j)
+	TEST_OUTPUT("42.2")
+	TEST_CHECK("Simple Float Declaration")
+
+	LOCAL k$ = "Hello World"
+	TEST_INPUT(k$)
+	TEST_OUTPUT("Hello World")
+	TEST_CHECK("Simple String Declaration")
+
+
+	LOCAL calc1% = 10
+	LOCAL calc2% = (5 + 6*2) - 100 * calc1
+	TEST_INPUT(calc2)
+	TEST_OUTPUT("-983")
+	TEST_CHECK("Simple Integer Calculation")
+
+	LOCAL calc3 = 10.3
+	LOCAL calc4 = (5.1 + 6.2*2.3) - 100.4 * calc1
+	TEST_INPUT(calc4)
+	TEST_OUTPUT("-984.64")
+	TEST_CHECK("Simple Float Calculation")
+
+
+	LOCAL calc5$ = "Hello"
+	LOCAL calc6$ = calc5$ + " World" + 10 +  10.4
+	TEST_INPUT(calc6$)
+	TEST_OUTPUT("Hello World1010.4")
+	TEST_CHECK("Simple String Concatination")
+ENDSUB

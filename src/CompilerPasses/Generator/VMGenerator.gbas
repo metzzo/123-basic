@@ -7,18 +7,191 @@
 ?IFDEF VMCOMPILER
 
 
-?DEFINE DEBUGVM
+// ?DEFINE DEBUGVM
+
+CONSTANT STACKENTRY_INT% 		= 1
+CONSTANT STACKENTRY_FLOAT% 		= 2
+CONSTANT STACKENTRY_STR% 		= 3
+CONSTANT STACKENTRY_INTARRAY% 	= 4
+CONSTANT STACKENTRY_FLOATARRAY% = 5
+CONSTANT STACKENTRY_STRARRAY% 	= 6
+CONSTANT STACKENTRY_VARI		= 7
+
+CONSTANT EXECUTION_NORMAL		= 0
+CONSTANT EXECUTION_BREAK		= 1
+CONSTANT EXECUTION_CONTINUE		= 2
+CONSTANT EXECUTION_RETURN		= 3
+
 
 TYPE TStackEntry
+	typ% = 0
+
 	intVal%
 	floatVal
 	strVal$
 
 	intArray%[]
 	floatArray#[]
-	strArray%[]
+	strArray$[]
 
-	// etc
+	vari%
+
+	FUNCTION GetContent$:
+		RETURN "Typ: "  + self.typ + " IntVal "+self.intVal+" FloatVal "+self.floatVal+" StringVal "+self.strVal$+" Len IntArray "+LEN(self.intArray[])+" Len FloatArray "+LEN(self.floatArray[])+" Len StringArray "+LEN(self.strArray$[])+" Variable "+self.vari
+	ENDFUNCTION
+
+	FUNCTION GetFloat#: exec AS Executor
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				RETURN self.intVal
+			CASE STACKENTRY_FLOAT
+				RETURN self.floatVal
+			CASE STACKENTRY_STR
+				RETURN self.strVal$
+			CASE STACKENTRY_INTARRAY
+				RETURN self.intArray[0]
+			CASE STACKENTRY_FLOATARRAY
+				RETURN self.floatArray[0]
+			CASE STACKENTRY_STRARRAY
+				RETURN self.strArray$[0]
+			CASE STACKENTRY_VARI
+				ALIAS S AS exec.comp.Varis[self.vari]
+				PrepareVari(S)
+				RETURN S.Value.GetFloat(exec)
+			DEFAULT
+				THROW "GetFloat: Unknown Typ "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetStr$: exec AS Executor
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				RETURN self.intVal
+			CASE STACKENTRY_FLOAT
+				RETURN self.floatVal
+			CASE STACKENTRY_STR
+				RETURN self.strVal$
+			CASE STACKENTRY_INTARRAY
+				RETURN self.intArray[0]
+			CASE STACKENTRY_FLOATARRAY
+				RETURN self.floatArray[0]
+			CASE STACKENTRY_STRARRAY
+				RETURN self.strArray$[0]
+			CASE STACKENTRY_VARI
+				ALIAS S AS exec.comp.Varis[self.vari]
+				PrepareVari(S)
+				?IFDEF DEBUGVM
+				STDOUT "GetStr$ "+S.Value.GetContent$()+"\n"
+				?ENDIF
+				RETURN S.Value.GetStr$(exec)
+			DEFAULT
+				THROW "GetStr: Unknown Typ "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetInt%: exec AS Executor
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				RETURN self.intVal
+			CASE STACKENTRY_FLOAT
+				RETURN self.floatVal
+			CASE STACKENTRY_STR
+				RETURN self.strVal$
+			CASE STACKENTRY_INTARRAY
+				RETURN self.intArray[0]
+			CASE STACKENTRY_FLOATARRAY
+				RETURN self.floatArray[0]
+			CASE STACKENTRY_STRARRAY
+				RETURN self.strArray$[0]
+			CASE STACKENTRY_VARI
+				ALIAS S AS exec.comp.Varis[self.vari]
+				PrepareVari(S)
+				RETURN S.Value.GetInt(exec)
+			DEFAULT
+				THROW "GetInt: Unknown Typ "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetVar%: exec AS Executor
+		SELECT self.typ
+			CASE STACKENTRY_VARI
+				RETURN self.vari
+			DEFAULT
+				THROW "GetVar: Unknown Typ: "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetFloatArr: arr#[]
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				DIMDATA arr[], self.intVal
+			CASE STACKENTRY_FLOAT
+				DIMDATA arr[], self.floatVal
+			CASE STACKENTRY_STR
+				DIMDATA arr[], self.strVal$
+			CASE STACKENTRY_INTARRAY
+				// arr[] = self.intArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_FLOATARRAY
+				// arr[] = self.floatArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_STRARRAY
+				// arr[] = self.strArray$[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_VARI
+				Error("Unimplemented", 0, 0)
+			DEFAULT
+				THROW "GetFloatArr: Unknown Typ: "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetStrArr: arr$[]
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				DIMDATA arr$[], self.intVal
+			CASE STACKENTRY_FLOAT
+				DIMDATA arr$[], self.floatVal
+			CASE STACKENTRY_STR
+				DIMDATA arr$[], self.strVal$
+			CASE STACKENTRY_INTARRAY
+				// arr$[] = self.intArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_FLOATARRAY
+				// arr$[] = self.floatArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_STRARRAY
+				// arr$[] = self.strArray$[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_VARI
+				Error("Unimplemented", 0, 0)
+			DEFAULT
+				THROW "GetStrArr: Unknown Typ: "+self.typ
+		ENDSELECT
+	ENDFUNCTION
+
+	FUNCTION GetIntArr: arr%[]
+		SELECT self.typ
+			CASE STACKENTRY_INT
+				DIMDATA arr[], self.intVal
+			CASE STACKENTRY_FLOAT
+				DIMDATA arr[], self.floatVal
+			CASE STACKENTRY_STR
+				DIMDATA arr[], self.strVal$
+			CASE STACKENTRY_INTARRAY
+				// arr[] = self.intArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_FLOATARRAY
+				// arr[] = self.floatArray[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_STRARRAY
+				// arr[] = self.strArray$[]
+				Error("Unimplemented", 0, 0)
+			CASE STACKENTRY_VARI
+				Error("Unimplemented", 0, 0)
+			DEFAULT
+				THROW "GetIntArr: Unknown Typ: "+self.typ
+		ENDSELECT
+	ENDFUNCTION
 ENDTYPE
 
 PROTOTYPE ScriptFunc: Exec AS Executor
@@ -35,17 +208,20 @@ ENDFUNCTION
 TYPE Executor
 	Stack[] AS TStackEntry
 
-
 	comp AS TCompiler
 
 	FUNCTION Execute:
-		self.ExecuteExpr(comp.MainScope)
+		TRY
+			self.ExecuteExpr(comp.MainScope)
+		CATCH ex$
+			STDOUT "Error "+ex$
+		FINALLY
 	ENDFUNCTION
 
 	FUNCTION PopFloat:
 		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
-
-		LOCAL v = self.Stack[-1].floatVal
+		ALIAS S AS self.Stack[-1]
+		LOCAL v = S.GetFloat(self)
 		DIMDEL self.Stack[],-1
 		RETURN v
 	ENDFUNCTION
@@ -53,8 +229,8 @@ TYPE Executor
 
 	FUNCTION PopInt%:
 		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
-
-		LOCAL v% = self.Stack[-1].intVal
+		ALIAS S AS self.Stack[-1]
+		LOCAL v% = S.GetInt(self)
 		DIMDEL self.Stack[],-1
 		RETURN v
 	ENDFUNCTION
@@ -62,34 +238,46 @@ TYPE Executor
 
 	FUNCTION PopStr$:
 		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
-
-		LOCAL v$ = self.Stack[-1].strVal$
+		ALIAS S AS self.Stack[-1]
+		LOCAL v$ = S.GetStr$(self)
 		DIMDEL self.Stack[],-1
 		RETURN v$
+	ENDFUNCTION
+
+	FUNCTION PopVar%:
+		IF LEN(self.Stack[]) = 0 THEN Error("Stack is empty, cannot POP.")
+		ALIAS S AS self.Stack[-1]
+		LOCAL v = S.GetVar(self)
+		DIMDEL self.Stack[],-1
+		RETURN v
 	ENDFUNCTION
 
 
 	FUNCTION PushFloat: v
 		LOCAL e AS TStackEntry
+		e.typ = STACKENTRY_FLOAT
 		e.floatVal = v
-		e.intVal = v
-		e.strVal$ = v+""
 		DIMPUSH self.Stack[], e
 	ENDFUNCTION
 
 	FUNCTION PushInt: v%
 		LOCAL e AS TStackEntry
+		e.typ = STACKENTRY_INT
 		e.intVal = v
-		e.floatVal = v
-		e.strVal$ = v+""
 		DIMPUSH self.Stack[], e
 	ENDFUNCTION
 
 	FUNCTION PushStr: v$
 		LOCAL e AS TStackEntry
+		e.typ = STACKENTRY_STR
 		e.strVal$ = v$
-		e.intVal = INTEGER(v$)
-		e.floatVal = 1*v$
+		DIMPUSH self.Stack[], e
+	ENDFUNCTION
+
+	FUNCTION PushVari: vari%
+		LOCAL e AS TStackEntry
+		e.typ = STACKENTRY_VARI
+		e.vari = vari
 		DIMPUSH self.Stack[], e
 	ENDFUNCTION
 
@@ -108,12 +296,15 @@ TYPE Executor
 		IF expr.Typ = EXPR_IS_EMPTY THEN RETURN // useless
 
 		?IFDEF DEBUGVM
-		STDOUT "\tExecute OpCode "+expr.Typ+"\n"
+		STDOUT "\tExecute OpCode "+GetExpressionName$(expr.Typ)+" Stacksize " + LEN(self.Stack[]) + "\n"
 		?ENDIF
 		SELECT expr.Typ
 			CASE EXPR_IS_SCOPE
 				FOREACH e IN expr.Exprs[]
-					self.ExecuteExpr(e)
+					LOCAL result% = self.ExecuteExpr(e)
+					IF result
+						RETURN result
+					ENDIF
 				NEXT
 			CASE EXPR_IS_OPERATOR
 				// op2
@@ -269,12 +460,11 @@ TYPE Executor
 			CASE EXPR_IS_STR
 				self.PushStr(MID$(expr.strval$,1,LEN(expr.strval$)-2))
 			CASE EXPR_IS_FUNCCALL
-				ALIAS Func AS Compiler.Funcs[expr.func]
+				ALIAS Func AS self.comp.Funcs[expr.func]
 				// push parameters
 				FOREACH P IN expr.Params[]
 					self.ExecuteExpr(P)
 				NEXT
-
 
 				IF Func.Native
 					IF FuncMap.DoesKeyExist(Func.Name$)
@@ -287,104 +477,220 @@ TYPE Executor
 						Error("Missing native function"+Func.Name$)
 					ENDIF
 				ELSE
-
+					// save values of variables (in order to allow recursion properly)
+					ALIAS Scp AS Exprs[Func.Scp]
+					LOCAL saveVaris[] AS IdentifierVari
+					FOREACH V IN Scp.Varis[]
+						DIMPUSH saveVaris[], self.comp.Varis[V]
+					NEXT
+					
+					// set parameter values
+					FOR i = LEN(expr.Params[]) - 1 TO 0 STEP -1
+						LOCAL P% = Exprs[expr.Params[i]].vari
+						self.comp.Varis[P].Value = self.Stack[-1]
+						STDOUT self.comp.Varis[P].Value.GetContent$()+"\n\n\n"
+						self.Pop()
+					NEXT
+					
+					self.ExecuteExpr(Func.Scp)
+					
+					// restore values
+					LOCAL i% = 0
+					FOREACH V IN Scp.Varis[]
+						self.comp.Varis[V] = saveVaris[i]
+						INC i
+					NEXT
 				ENDIF
 			CASE EXPR_IS_PROTOCALL
-				Error("TODO EXPR_IS_PROTOCALL")
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_VARI
-				ALIAS vari AS Compiler.Varis[expr.vari]
-				self.Push(vari.Value)
+				ALIAS vari AS self.comp.Varis[expr.vari]
+				PrepareVari(vari)
+				self.PushVari(vari.ID)
+				
+				?IFDEF DEBUGVM
+				STDOUT "Push Vari "+vari.ID+" With Content: "+vari.Value.GetContent$()+"\n"
+				?ENDIF
 			CASE EXPR_IS_ARRAY
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_ASSIGN
+				self.ExecuteExpr(expr.vari)
+				LOCAL var% = self.PopVar()
+				
+				?IFDEF DEBUGVM
+				STDOUT "Variable: "+var+" "+self.comp.Varis[var].Name$+"\n"
+				?ENDIF
+				
 				self.ExecuteExpr(expr.Right)
-				ALIAS vari AS Compiler.Varis[expr.vari]
-				vari.Value = self.Stack[-1]
+				ALIAS vari AS self.comp.Varis[var]
+				LOCAL se AS TStackEntry = self.Stack[-1]
+				
+				?IFDEF DEBUGVM
+				STDOUT "Content "+se.GetContent$()+"\n"
+				?ENDIF
+				
+				vari.Value = se
 				self.Pop()
 			CASE EXPR_IS_DIM
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_REDIM
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_CAST2INT
 				self.ExecuteExpr(expr.expr)
+				self.PushInt(self.PopInt())
+				
+				?IFDEF DEBUGVM
+				ALIAS S AS self.Stack[-1]
+				STDOUT "Cast2Int "+S.GetContent$()+"\n"
+				?ENDIF
 			CASE EXPR_IS_CAST2FLOAT
 				self.ExecuteExpr(expr.expr)
+				self.PushFloat(self.PopFloat())
+				
+				?IFDEF DEBUGVM
+				ALIAS S AS self.Stack[-1]
+				STDOUT "Cast2Float "+S.GetContent$()+"\n"
+				?ENDIF
 			CASE EXPR_IS_CAST2STRING
 				self.ExecuteExpr(expr.expr)
+				
+				?IFDEF DEBUGVM
+				ALIAS S AS self.Stack[-1]
+				STDOUT "Cast2String "+S.GetContent$()+"\n"
+				?ENDIF
+				
+				self.PushStr(self.PopStr$())
 			CASE EXPR_IS_ACCESS
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_RETURN
-
+				IF expr.expr <> -1
+					self.ExecuteExpr(expr.expr)
+				ENDIF
+				RETURN EXECUTION_RETURN
 			CASE EXPR_IS_FUNCDATA
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_IF
+				LOCAL success% = FALSE
+				FOR i = 0 TO LEN(expr.Conditions[]) - 1
+					self.ExecuteExpr(expr.Conditions[i])
+					IF self.PopInt()
+						success = TRUE
+						self.ExecuteExpr(expr.Scopes[i])
+						BREAK
+					ENDIF
+				NEXT
 
+				IF NOT success AND expr.elseScope <> -1
+					self.ExecuteExpr(expr.elseScope)
+				ENDIF
 			CASE EXPR_IS_WHILE
-
+				WHILE TRUE
+					self.ExecuteExpr(expr.expr)
+					IF self.PopInt()
+						LOCAL result% = self.ExecuteExpr(expr.Scp)
+						SELECT result
+							CASE EXECUTION_BREAK
+								BREAK
+							CASE EXECUTION_CONTINUE
+								CONTINUE
+							DEFAULT
+								RETURN result
+						ENDSELECT
+					ELSE
+						BREAK
+					ENDIF
+				WEND
 			CASE EXPR_IS_REPEAT
-
+				WHILE TRUE
+					LOCAL result% = self.ExecuteExpr(expr.Scp)
+					SELECT result
+						CASE EXECUTION_BREAK
+							BREAK
+						CASE EXECUTION_CONTINUE
+							CONTINUE
+						DEFAULT
+							RETURN result
+					ENDSELECT
+					
+					self.ExecuteExpr(expr.expr)
+					IF self.PopInt()
+						BREAK
+					ENDIF
+				WEND
 			CASE EXPR_IS_FOR
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_FOREACH
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_CONTINUE
-
+				RETURN EXECUTION_CONTINUE
 			CASE EXPR_IS_BREAK
-
+				RETURN EXECUTION_BREAK
 			CASE EXPR_IS_TRY
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_THROW
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_RESTORE
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_READ
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DEFVAL
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DIMASEXPR
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_ALIAS
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_GOTO
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_LABEL
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_INC
-
+				self.ExecuteExpr(expr.vari)
+				LOCAL var% = self.PopVar()
+				
+				ALIAS vari AS self.comp.Varis[var]
+				
+				self.ExecuteExpr(expr.expr)
+				
+				self.PushInt(self.PopFloat() + vari.Value.GetFloat(self))
+				
+				vari.Value = self.Stack[-1]
+				self.Pop()
 			CASE EXPR_IS_DIMPUSH
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_LEN
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_BOUND
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DIMDATA
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DELETE
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DIMDEL
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_NOT
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_ADDRESSOF
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_ASSERT
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DEBUGOUTPUT
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_IIF
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_REQUIRE
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_SUPER
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_CAST2OBJ
-
+				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_EMPTY
 			CASE EXPR_IS_DEBUG
 				Error("Invalid Expression")
 			DEFAULT
 				Error("Unknown expression type: "+expr.Typ)
 		ENDSELECT
+		
+		RETURN EXECUTION_NORMAL
 	ENDFUNCTION
 
 
@@ -397,6 +703,32 @@ TYPE Executor
 	ENDFUNCTION
 ENDTYPE
 
+FUNCTION PrepareVari: vari AS IdentifierVari
+	IF vari.Value.typ = 0
+		SELECT vari.datatype.Name$
+			CASE "int"
+				IF vari.datatype.IsArray
+					vari.Value.typ = STACKENTRY_INTARRAY
+				ELSE
+					vari.Value.typ = STACKENTRY_INT
+				ENDIF
+			CASE "float"
+				IF vari.datatype.IsArray
+					vari.Value.typ = STACKENTRY_FLOATARRAY
+				ELSE
+					vari.Value.typ = STACKENTRY_FLOAT
+				ENDIF
+			CASE "string"
+				IF vari.datatype.IsArray
+					vari.Value.typ = STACKENTRY_STRARRAY
+				ELSE
+					vari.Value.typ = STACKENTRY_STR
+				ENDIF
+			DEFAULT
+				Error("Unknown Variable Type")
+		ENDSELECT
+	ENDIF
+ENDFUNCTION
 
 //! Generiert JavaScript Code
 FUNCTION VM_Generator$:

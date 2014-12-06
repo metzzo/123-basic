@@ -15,7 +15,11 @@ ENDFUNCTION
 
 // CONSOLE
 FUNCTION VM_STDOUT: exec AS Executor
+	?IFDEF DEBUGVM
+	STDOUT "--- OUTPUT: " + REPLACE$(exec.PopStr$(),"\\n","\n")
+	?ELSE
 	STDOUT REPLACE$(exec.PopStr$(),"\\n","\n")
+	?ENDIF
 ENDFUNCTION
 
 FUNCTION VM_KEYWAIT: exec AS Executor

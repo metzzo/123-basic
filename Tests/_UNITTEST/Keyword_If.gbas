@@ -1,0 +1,43 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Saturday, December 06, 2014
+// IDE Version: 10.283
+
+SUB TestNothing:
+	TEST_OUTPUT("0")
+	TEST_INPUT("0")
+	TEST_CHECK("Nothing")
+ENDSUB
+
+SUB TestSimpleIf:
+	IF TRUE THEN TEST_INPUT("0")
+	IF FALSE THEN TEST_INPUT("1")
+
+	IF TRUE
+		TEST_INPUT("2")
+	ELSEIF FALSE
+		TEST_INPUT("3")
+	ELSE
+		TEST_INPUT("4")
+	ENDIF
+
+	IF FALSE
+		TEST_INPUT("5")
+	ELSEIF TRUE
+		TEST_INPUT("6")
+	ELSE
+		TEST_INPUT("7")
+	ENDIF
+
+	IF FALSE
+		TEST_INPUT("8")
+	ELSEIF FALSE
+		TEST_INPUT("9")
+	ELSE
+		TEST_INPUT("10")
+	ENDIF
+
+	TEST_OUTPUT("02610")
+	TEST_CHECK("SimpleIf")
+ENDSUB
+

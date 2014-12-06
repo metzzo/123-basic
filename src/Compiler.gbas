@@ -76,7 +76,6 @@ TYPE IdentifierFunc
 	//FUNC_IS_FUNC
 	IsCallback% = FALSE //Ist es eine Callbackfunktion?
 
-
 	FUNCTION Save: F%
 		WRITEUWORD F, IDENTIFIERFUNC_VERSION
 

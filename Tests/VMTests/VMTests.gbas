@@ -3,13 +3,52 @@
 // Start: Sunday, June 30, 2013
 // IDE Version: 10.283
 
+GLOBAL i
+
 STDOUT "Hello World\n"
 STDOUT (5+6*2)+"\n"
 
-LOCAL myVar% = 42
+LOCAL myVar% = 42, yolo$ = "Hallo Welt"
+myVar = myVar * 2
 
-STDOUT "LOL: "+myVar+"\n"
+STDOUT "LOL2: "+myVar+"\n"
+STDOUT "YOLO " + yolo$ + "\n"
+
+IF FALSE
+	STDOUT "Never Displayed :("
+ELSE
+	STDOUT "Displayed :)\n"
+ENDIF
+
+Swag()
+STDOUT "Fib: "+fibonacci(11)+"\n"
+
+
+STDOUT "Recursion: "+recursionTest()
 
 ?IFNDEF HTML5
 KEYWAIT
 ?ENDIF
+
+FUNCTION Swag:
+	STDOUT "IN SWAG\n"
+ENDFUNCTION
+
+FUNCTION fibonacci: n
+	IF n <= 1
+		RETURN n
+	ELSE
+		RETURN fibonacci(n-1) + fibonacci(n-2)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION recursionTest: n = 5
+	IF n = 0 THEN RETURN
+	LOCAL i
+	
+	INC i, n
+	recursionTest(n - 1)
+	DEC i, n
+	
+	RETURN i
+ENDFUNCTION
