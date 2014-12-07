@@ -1,0 +1,31 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Sunday, December 07, 2014
+// IDE Version: 10.283
+
+
+SUB TestLoops:
+	TEST_OUTPUT("012345")
+	LOCAL i% = 0
+	WHILE TRUE
+		TEST_INPUT(i)
+		INC i
+		IF i > 5 THEN BREAK
+	WEND
+	TEST_CHECK("While Loop")
+	
+	TEST_OUTPUT("012345")
+	i% = 0
+	REPEAT
+		TEST_INPUT(i)
+		INC i
+		IF i > 5 THEN BREAK
+	UNTIL FALSE
+	TEST_CHECK("RepeatUntil Loop")
+	
+	TEST_OUTPUT("012345")
+	FOR i = 0 TO 5
+		TEST_INPUT(i)
+	NEXT
+	TEST_CHECK("For Loop")
+ENDSUB

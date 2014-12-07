@@ -461,12 +461,13 @@ TYPE Executor
 				self.PushStr(MID$(expr.strval$,1,LEN(expr.strval$)-2))
 			CASE EXPR_IS_FUNCCALL
 				ALIAS Func AS self.comp.Funcs[expr.func]
-				// push parameters
-				FOREACH P IN expr.Params[]
-					self.ExecuteExpr(P)
-				NEXT
-
+				
 				IF Func.Native
+					// push parameters
+					FOREACH P IN expr.Params[]
+						self.ExecuteExpr(P)
+					NEXT
+
 					IF FuncMap.DoesKeyExist(Func.Name$)
 						LOCAL p AS ScriptFunc
 						LOCAL Value%
@@ -485,10 +486,11 @@ TYPE Executor
 					NEXT
 					
 					// set parameter values
-					FOR i = LEN(expr.Params[]) - 1 TO 0 STEP -1
-						LOCAL P% = Exprs[expr.Params[i]].vari
-						self.comp.Varis[P].Value = self.Stack[-1]
-						STDOUT self.comp.Varis[P].Value.GetContent$()+"\n\n\n"
+					FOR i = 0 TO LEN(Func.CopyParams[]) - 1
+						self.ExecuteExpr(expr.Params[i])
+						ALIAS P AS self.comp.Varis[Func.CopyParams[i]]
+						P.Value = self.Stack[-1]
+						// STDOUT self.comp.Varis[P].Value.GetContent$()+"\n\
 						self.Pop()
 					NEXT
 					
@@ -575,7 +577,9 @@ TYPE Executor
 					self.ExecuteExpr(expr.Conditions[i])
 					IF self.PopInt()
 						success = TRUE
-						self.ExecuteExpr(expr.Scopes[i])
+						LOCAL result% = self.ExecuteExpr(expr.Scopes[i])
+						IF result THEN RETURN result
+						
 						BREAK
 					ENDIF
 				NEXT
@@ -589,6 +593,8 @@ TYPE Executor
 					IF self.PopInt()
 						LOCAL result% = self.ExecuteExpr(expr.Scp)
 						SELECT result
+							CASE EXECUTION_NORMAL
+								// do nothing
 							CASE EXECUTION_BREAK
 								BREAK
 							CASE EXECUTION_CONTINUE
@@ -604,6 +610,8 @@ TYPE Executor
 				WHILE TRUE
 					LOCAL result% = self.ExecuteExpr(expr.Scp)
 					SELECT result
+						CASE EXECUTION_NORMAL
+								// do nothing
 						CASE EXECUTION_BREAK
 							BREAK
 						CASE EXECUTION_CONTINUE
@@ -618,7 +626,66 @@ TYPE Executor
 					ENDIF
 				WEND
 			CASE EXPR_IS_FOR
-				Error("TODO Unimplemented Expr")
+				self.ExecuteExpr(expr.varExpr)
+				
+				WHILE TRUE
+					self.ExecuteExpr(Exprs[expr.varExpr].vari)
+					LOCAL forCur = self.PopFloat()
+					
+					self.ExecuteExpr(expr.toExpr)
+					LOCAL forTarget = self.PopFloat()
+					
+					self.ExecuteExpr(expr.stepExpr)
+					LOCAL forStep = self.PopFloat()
+					
+					LOCAL cont%
+					IF expr.hasTo
+						SELECT forStep
+							CASE >0
+								cont = (forCur <= forTarget)
+							CASE <0
+								cont = (forCur >= forTarget)
+							DEFAULT
+								cont = NOT (forCur = forTarget) // <> buggy?!?!?
+						ENDSELECT
+					ELSE
+						SELECT forStep
+							CASE >0
+								cont = (forCur < forTarget)
+							CASE <0
+								cont = (forCur > forTarget)
+							DEFAULT
+								cont = NOT (forCur = forTarget)
+						ENDSELECT
+					ENDIF
+					
+					IF cont
+						LOCAL result% = self.ExecuteExpr(expr.Scp)
+						SELECT result
+							CASE EXECUTION_NORMAL
+									// do nothing
+							CASE EXECUTION_BREAK
+								BREAK
+							CASE EXECUTION_CONTINUE
+								CONTINUE
+							DEFAULT
+								RETURN result
+						ENDSELECT
+						
+						// increment/decrement counter
+						self.ExecuteExpr(Exprs[expr.varExpr].vari)
+						LOCAL var% = self.PopVar()
+						ALIAS vari AS self.comp.Varis[var]
+						
+						self.ExecuteExpr(expr.stepExpr)
+						
+						self.PushFloat(self.PopFloat() + vari.Value.GetFloat(self))
+						vari.Value = self.Stack[-1]
+						self.Pop()
+					ELSE
+						BREAK
+					ENDIF
+				WEND
 			CASE EXPR_IS_FOREACH
 				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_CONTINUE
@@ -651,7 +718,7 @@ TYPE Executor
 				
 				self.ExecuteExpr(expr.expr)
 				
-				self.PushInt(self.PopFloat() + vari.Value.GetFloat(self))
+				self.PushFloat(self.PopFloat() + vari.Value.GetFloat(self))
 				
 				vari.Value = self.Stack[-1]
 				self.Pop()

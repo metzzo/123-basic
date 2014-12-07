@@ -50,7 +50,7 @@ OTTException.prototype.getText = function() {
 }
 
 OTTException.prototype.toString = function() {
-	return "Uncought 123Basic Exception '"+this.text+"' stacktrace: "+STACKTRACE_Str();
+	return "Uncaught 123Basic Exception '"+this.text+"' stacktrace: "+STACKTRACE_Str();
 }
 
 //alert = function() {}
@@ -218,8 +218,6 @@ function stackPush(name, info) {
 function stackPop() {
 	__debugInfo = callStack[callStack.length];
 	callStack.length--; 
-	//var obj = callStack.pop();
-	//__debugInfo = obj.dbg;
 }
 
 function stackTrace() {
@@ -277,7 +275,7 @@ function untilCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur > to;
 	} else {
-		return true;
+		return cur != to;
 	}
 }
 

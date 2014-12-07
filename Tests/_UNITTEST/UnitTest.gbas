@@ -5,11 +5,19 @@
 
 GLOBAL ExpectedOutput$ = ""
 GLOBAL ActualOutput$ = ""
-
+GLOBAL AnyError% = FALSE
 
 GOSUB TestSimpleVariables
 GOSUB TestSimpleIf
+GOSUB TestLoops
 
+STDOUT "\n\n"
+
+IF AnyError
+	STDOUT "Some errors occured\n"
+ELSE
+	STDOUT "Successfully executed\n"
+ENDIF
 
 KEYWAIT
 
@@ -24,9 +32,11 @@ ENDFUNCTION
 FUNCTION TEST_CHECK: name$
 	IF ExpectedOutput$ = ActualOutput$
 		// ok <3
-		STDOUT "Test " + name$ + " OK :) \n"
+		STDOUT "Test " + name$ + " OK \n"
 	ELSE
-		STDOUT "Test " + name$ + " Failed :( \n"
+		AnyError = TRUE
+		
+		STDOUT "Test " + name$ + " Failed \n"
 		STDOUT "---------- Actual Output ----------\n"
 		STDOUT ActualOutput$ + "\n"
 		STDOUT "---------- Expected Output --------\n"
