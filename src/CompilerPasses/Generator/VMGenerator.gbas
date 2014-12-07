@@ -819,7 +819,80 @@ TYPE Executor
 					ENDIF
 				WEND
 			CASE EXPR_IS_FOREACH
-				Error("TODO Unimplemented Expr")
+				LOCAL cur% = 0
+				WHILE TRUE
+					self.ExecuteExpr(expr.varExpr)
+					self.ExecuteExpr(expr.inExpr)
+					ALIAS SE AS self.comp.Varis[self.Stack[-1].vari].Value
+					ALIAS target AS self.Stack[-2]
+					
+					LOCAL maxLen%
+					SELECT SE.typ
+						CASE STACKENTRY_FLOATARRAY
+							maxLen = LEN(SE.floatArray[])
+						CASE STACKENTRY_INTARRAY
+							maxLen = LEN(SE.intArray[])
+						CASE STACKENTRY_STRARRAY
+							maxLen = LEN(SE.strArray$[])
+						DEFAULT
+							THROW "Unimplemented StackEntry Typ"
+					ENDSELECT
+					
+					IF cur >= maxLen
+						self.Pop()
+						self.Pop()
+					
+						BREAK
+					ENDIF
+					
+					SELECT SE.typ
+						CASE STACKENTRY_FLOATARRAY
+							target.SetFloat(SE.floatArray[cur], self)
+						CASE STACKENTRY_INTARRAY
+							target.SetInt(SE.intArray[cur], self)
+						CASE STACKENTRY_STRARRAY
+							target.SetStr(SE.strArray$[cur], self)
+						DEFAULT
+							THROW "Unimplemented StackEntry Typ"
+					ENDSELECT
+					
+					self.Pop()
+					self.Pop()
+					
+					LOCAL result% = self.ExecuteExpr(expr.Scp)
+					SELECT result
+						CASE EXECUTION_NORMAL
+								// do nothing
+						CASE EXECUTION_BREAK
+							BREAK
+						CASE EXECUTION_CONTINUE
+							CONTINUE
+						DEFAULT
+							RETURN result
+					ENDSELECT
+					
+					self.ExecuteExpr(expr.varExpr)
+					self.ExecuteExpr(expr.inExpr)
+					
+					ALIAS SE_New AS self.comp.Varis[self.Stack[-1].vari].Value
+					ALIAS target_New AS self.Stack[-2]
+					
+					SELECT SE_New.typ
+						CASE STACKENTRY_FLOATARRAY
+							SE_New.floatArray[cur] = target_New.GetFloat(self)
+						CASE STACKENTRY_INTARRAY
+							SE_New.intArray[cur] = target_New.GetInt(self)
+						CASE STACKENTRY_STRARRAY
+							SE_New.strArray$[cur] = target_New.GetStr$(self)
+						DEFAULT
+							THROW "Unimplemented StackEntry Typ"
+					ENDSELECT
+					
+					self.Pop()
+					self.Pop()
+					
+					INC cur
+				WEND
 			CASE EXPR_IS_CONTINUE
 				RETURN EXECUTION_CONTINUE
 			CASE EXPR_IS_BREAK
@@ -854,9 +927,32 @@ TYPE Executor
 			CASE EXPR_IS_DIMPUSH
 				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_LEN
-				Error("TODO Unimplemented Expr")
+				IF expr.kern <> -1
+					self.ExecuteExpr(expr.expr)
+					
+					self.ExecuteExpr(expr.kern)
+					LOCAL useKern% = self.PopInt()
+					
+					self.PushInt(LEN(self.PopStr$(), useKern))
+				ELSE
+					self.ExecuteExpr(expr.expr)
+					ALIAS SE AS self.comp.Varis[self.Stack[-1].vari].Value
+					IF SE.IsStackEntryArray()
+						self.Pop()
+						self.PushInt(SE.dims[0])
+					ELSE
+						self.PushInt(LEN(self.PopStr$()))
+					ENDIF
+				ENDIF
 			CASE EXPR_IS_BOUND
-				Error("TODO Unimplemented Expr")
+				self.ExecuteExpr(expr.array)
+				ALIAS SE AS self.comp.Varis[self.Stack[-1].vari].Value
+				
+				self.ExecuteExpr(expr.position)
+				LOCAL pos% = self.PopInt()
+				
+				self.Pop()
+				self.PushInt(SE.dims[pos])
 			CASE EXPR_IS_DIMDATA
 				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_DELETE

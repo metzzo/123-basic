@@ -14,6 +14,7 @@ SUB TestLoops:
 	WEND
 	TEST_CHECK("While Loop")
 	
+	// -------------------------------------------------------------- 
 	TEST_OUTPUT("012345")
 	i% = 0
 	REPEAT
@@ -23,9 +24,25 @@ SUB TestLoops:
 	UNTIL FALSE
 	TEST_CHECK("RepeatUntil Loop")
 	
+	// -------------------------------------------------------------- 
 	TEST_OUTPUT("012345")
 	FOR i = 0 TO 5
 		TEST_INPUT(i)
 	NEXT
 	TEST_CHECK("For Loop")
+	
+	// -------------------------------------------------------------- 
+	LOCAL arr[]
+	DIM arr[10]
+	LOCAL i% = 0
+	FOREACH a IN arr[]
+		a = i
+		INC i
+	NEXT
+	
+	FOREACH a IN arr[]
+		TEST_INPUT(a)
+	NEXT
+	TEST_OUTPUT("0123456789")
+	TEST_CHECK("FOREACH through array")
 ENDSUB
