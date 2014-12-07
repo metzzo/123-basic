@@ -87,4 +87,10 @@ SUB TestSimpleArrays:
 	TEST_CHECK("Multi dimensional array copy")
 	
 	// -------------------------------------------------------------- 
+	
+	DIM arr[1]
+	INC arr[0], 2
+	TEST_INPUT(arr[0])
+	TEST_OUTPUT("2")
+	TEST_CHECK("INC with array")
 ENDSUB

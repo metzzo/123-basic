@@ -843,17 +843,13 @@ TYPE Executor
 			CASE EXPR_IS_LABEL
 				Error("TODO Unimplemented Expr")
 			CASE EXPR_IS_INC
-				// TODO: This should work with arrays too
-				self.ExecuteExpr(expr.vari)
-				LOCAL var% = self.PopVar()
-				
-				ALIAS vari AS self.comp.Varis[var]
-				
 				self.ExecuteExpr(expr.expr)
+				LOCAL add = self.PopFloat()
 				
-				self.PushFloat(self.PopFloat() + vari.Value.GetFloat(self))
+				self.ExecuteExpr(expr.vari)
+				ALIAS target AS self.Stack[-1]
+				target.SetFloat(target.GetFloat(self) + add, self)
 				
-				vari.Value = self.Stack[-1]
 				self.Pop()
 			CASE EXPR_IS_DIMPUSH
 				Error("TODO Unimplemented Expr")
