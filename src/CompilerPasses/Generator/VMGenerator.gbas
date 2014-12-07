@@ -213,14 +213,21 @@ TYPE TStackEntry
 				self.SetStr(SE.GetStr$(exec), exec)
 			CASE STACKENTRY_INTARRAY
 				self.intArray[] = SE.intArray[]
+				self.dims[] = SE.dims[]
 			CASE STACKENTRY_FLOATARRAY
 				self.floatArray[] = SE.floatArray[]
+				self.dims[] = SE.dims[]
 			CASE STACKENTRY_STRARRAY
 				self.strArray$[] = SE.strArray$[]
+				self.dims[] = SE.dims[]
 			CASE STACKENTRY_VARI
 				ALIAS S AS exec.comp.Varis[self.vari]
 				PrepareVari(S)
-				S.Value.SetStackEntry(SE, exec)
+				IF S.Value.IsStackEntryArray() AND SE.typ = STACKENTRY_VARI AND exec.comp.Varis[SE.vari].Value.IsStackEntryArray()
+					S.Value = exec.comp.Varis[SE.vari].Value // copy array
+				ELSE
+					S.Value.SetStackEntry(SE, exec)
+				ENDIF
 			CASE STACKENTRY_VARIARR
 				ALIAS S AS exec.comp.Varis[self.vari]
 				PrepareVari(S)
@@ -228,6 +235,14 @@ TYPE TStackEntry
 			DEFAULT
 				THROW "SetStackEntry: Unknown Typ "+self.typ
 		ENDSELECT
+	ENDFUNCTION
+	
+	FUNCTION IsStackEntryArray%:
+		IF self.typ = STACKENTRY_FLOATARRAY OR self.typ = STACKENTRY_INTARRAY OR self.typ = STACKENTRY_STRARRAY
+			RETURN TRUE
+		ELSE
+			RETURN FALSE
+		ENDIF
 	ENDFUNCTION
 ENDTYPE
 
@@ -322,6 +337,8 @@ TYPE Executor
 		e.typ = STACKENTRY_VARIARR
 		e.vari = vari
 		e.pos = pos
+		e.dims = self.comp.Varis[vari].Value.dims[]
+		
 		DIMPUSH self.Stack[], e
 	ENDFUNCTION
 
@@ -340,7 +357,8 @@ TYPE Executor
 		IF expr.Typ = EXPR_IS_EMPTY THEN RETURN // useless
 
 		?IFDEF DEBUGVM
-		STDOUT "\tExecute OpCode "+GetExpressionName$(expr.Typ)+" Stacksize " + LEN(self.Stack[]) + "\n"
+		ALIAS tok AS self.comp.Tokens[expr.tokID]
+		STDOUT "\tExecute OpCode "+GetExpressionName$(expr.Typ)+" Stacksize " + LEN(self.Stack[]) + " of file " + tok.Path$ + " in line "+ tok.Line +"\n"
 		?ENDIF
 		SELECT expr.Typ
 			CASE EXPR_IS_SCOPE
@@ -568,28 +586,31 @@ TYPE Executor
 			CASE EXPR_IS_ARRAY
 				self.ExecuteExpr(expr.array)
 				
-				LOCAL vari% = self.PopVar()
-				ALIAS array AS self.comp.Varis[vari]
-				PrepareVari(array)
 				
-				IF LEN(array.Value.dims[]) <> LEN(expr.dims[]) THEN Error("Wrong dimension count")
-				
-				LOCAL pos% = 0
-				LOCAL mul% = 1
-				FOR i = 0 TO LEN(array.Value.dims[]) - 1
-					self.ExecuteExpr(expr.dims[i])
+				IF LEN(expr.dims[]) > 0
+					LOCAL vari% = self.PopVar()
+					ALIAS array AS self.comp.Varis[vari]
+					PrepareVari(array)
+					IF LEN(array.Value.dims[]) <> LEN(expr.dims[]) THEN Error("Wrong dimension count "+LEN(array.Value.dims[]) + " and " + LEN(expr.dims[]))
 					
-					LOCAL currentPos% = self.PopInt()
+					LOCAL pos% = 0
+					LOCAL mul% = 1
+					FOR i = 0 TO LEN(array.Value.dims[]) - 1
+						self.ExecuteExpr(expr.dims[i])
+						
+						LOCAL currentPos% = self.PopInt()
+						IF currentPos < 0 THEN currentPos = array.Value.dims[i] + currentPos
+						
+						IF currentPos < 0 OR currentPos >= array.Value.dims[i]
+							Error("Array index out of bounds "+currentPos+" "+array.Value.dims[i])
+						ENDIF
+						
+						INC pos, currentPos * mul
+						mul = mul * array.Value.dims[i]
+					NEXT
 					
-					IF currentPos < 0 OR currentPos >= array.Value.dims[i]
-						Error("Array index out of bounds "+currentPos+" "+array.Value.dims[i])
-					ENDIF
-					
-					INC pos, currentPos * mul
-					mul = mul * array.Value.dims[i]
-				NEXT
-				
-				self.PushVariArr(vari, pos)
+					self.PushVariArr(vari, pos)
+				ENDIF
 			CASE EXPR_IS_ASSIGN
 				self.ExecuteExpr(expr.vari)
 				self.ExecuteExpr(expr.Right)
@@ -625,7 +646,29 @@ TYPE Executor
 						Error("Unimplemented Datatype")
 				ENDSELECT
 			CASE EXPR_IS_REDIM
-				Error("TODO Unimplemented Expr")
+				ALIAS array AS self.comp.Varis[GetVariable(expr.array)]
+				PrepareVari(array)
+				
+				REDIM array.Value.dims[0]
+				LOCAL size% = 1
+
+				FOR i = 0 TO LEN(expr.dims[]) - 1
+					self.ExecuteExpr(expr.dims[i])
+					LOCAL curSize% = self.PopInt()
+					size = size * curSize
+					DIMPUSH array.Value.dims[], curSize
+				NEXT
+				
+				SELECT array.datatype.Name$
+					CASE "int"
+						REDIM array.Value.intArray[size]
+					CASE "float"
+						REDIM array.Value.floatArray[size]
+					CASE "string"
+						REDIM array.Value.strArray$[size]
+					DEFAULT
+						Error("Unimplemented Datatype")
+				ENDSELECT
 			CASE EXPR_IS_CAST2INT
 				self.ExecuteExpr(expr.expr)
 				self.PushInt(self.PopInt())

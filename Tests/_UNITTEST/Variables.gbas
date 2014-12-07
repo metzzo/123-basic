@@ -44,9 +44,47 @@ ENDSUB
 SUB TestSimpleArrays:
 	LOCAL arr[]
 	DIM arr[10]
-	arr[4] = 8
-	TEST_INPUT(arr[4])
-	TEST_OUTPUT("8")
+	FOR i = 0 TO 9
+		arr[i] = i
+		TEST_INPUT(arr[i])
+	NEXT
+	TEST_OUTPUT("0123456789")
 	TEST_CHECK("Simple Array Usage")
 	
+	// -------------------------------------------------------------- 
+	DIM arr[10]
+	arr[-1] = 42
+	TEST_INPUT(arr[-1])
+	TEST_OUTPUT("42")
+	TEST_CHECK("Negative Index in Array")
+	
+	// -------------------------------------------------------------- 
+	DIM arr[4][4]
+	FOR x = 0 TO 3
+		FOR y = 0 TO 3
+			arr[x][y] = x*4 + y
+			TEST_INPUT(arr[x][y])
+		NEXT
+	NEXT
+	TEST_OUTPUT("0123456789101112131415")
+	TEST_CHECK("Multi dimensional array")
+	
+	// -------------------------------------------------------------- 
+	LOCAL arr2[]
+	DIM arr[4][4]
+	FOR x = 0 TO 3
+		FOR y = 0 TO 3
+			arr[x][y] = x*4 + y
+		NEXT
+	NEXT
+	arr2[] = arr[]
+	FOR x = 0 TO 3
+		FOR y = 0 TO 3
+			TEST_INPUT(arr2[x][y])
+		NEXT
+	NEXT
+	TEST_OUTPUT("0123456789101112131415")
+	TEST_CHECK("Multi dimensional array copy")
+	
+	// -------------------------------------------------------------- 
 ENDSUB
