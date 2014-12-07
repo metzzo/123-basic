@@ -8,6 +8,7 @@ GLOBAL ActualOutput$ = ""
 GLOBAL AnyError% = FALSE
 
 GOSUB TestSimpleVariables
+GOSUB TestSimpleArrays
 GOSUB TestSimpleIf
 GOSUB TestLoops
 

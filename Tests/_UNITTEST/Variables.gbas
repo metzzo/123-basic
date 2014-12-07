@@ -40,3 +40,13 @@ SUB TestSimpleVariables:
 	TEST_OUTPUT("Hello World1010.4")
 	TEST_CHECK("Simple String Concatination")
 ENDSUB
+
+SUB TestSimpleArrays:
+	LOCAL arr[]
+	DIM arr[10]
+	arr[4] = 8
+	TEST_INPUT(arr[4])
+	TEST_OUTPUT("8")
+	TEST_CHECK("Simple Array Usage")
+	
+ENDSUB
