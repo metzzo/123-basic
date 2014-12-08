@@ -111,5 +111,17 @@ SUB TestSimpleArrays:
 	TEST_OUTPUT("10105")
 	TEST_CHECK("Array Bounds/Len")
 	
-	
+	// -------------------------------------------------------------- 
+	DIM arr[5]
+	arr[1] = 42
+	ArrByRef(arr[])
+	TEST_INPUT(arr[1])
+	TEST_OUTPUT("421337")
+	TEST_CHECK("Array BYREF")
 ENDSUB
+
+
+FUNCTION ArrByRef: arr[]
+	TEST_INPUT(arr[1])
+	arr[1] = 1337
+ENDFUNCTION

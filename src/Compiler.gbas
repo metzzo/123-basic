@@ -152,6 +152,8 @@ TYPE IdentifierVari
 	OwnerVari% = -1 //wenns eine ausweichvariable ist, dann muss die gekennzeichnet werden
 
 	?IFDEF VMCOMPILER
+	typeId% = -1 // which IdentifierType is this variable?
+	attrPos% = -1 // which attribute position in the instance does this vari belong to?
 	Value AS TStackEntry // The value of this variable in the VM
 	?ENDIF
 

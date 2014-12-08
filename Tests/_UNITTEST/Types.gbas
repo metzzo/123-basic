@@ -1,0 +1,37 @@
+// --------------------------------- //
+// Project: UnitTest
+// Start: Sunday, December 07, 2014
+// IDE Version: 10.283
+
+TYPE THuman
+	Name$
+	Birth%
+ENDTYPE
+
+SUB TestTypes:
+	LOCAL H AS THuman
+	H.Name$ = "Test"
+	H.Birth = 42
+	TEST_INPUT(H.Name$)
+	TEST_INPUT(H.Birth)
+	TEST_OUTPUT("Test42")
+	TEST_CHECK("Simple Type Access")
+	
+	// -------------------------------------------------------------- 
+	LOCAL H2 AS THuman
+	H2.Name$ = "Test"
+	H2.Birth  = 42
+	TypeTest(H2)
+	TEST_INPUT(H2.Birth)
+	TEST_OUTPUT("Test4213371337")
+	TEST_CHECK("Type BYREF")
+ENDSUB
+
+
+FUNCTION TypeTest: Hello AS THuman
+	TEST_INPUT(Hello.Name$)
+	TEST_INPUT(Hello.Birth)
+	Hello.Birth = 1337
+	TEST_INPUT(Hello.Birth)
+ENDFUNCTION
+

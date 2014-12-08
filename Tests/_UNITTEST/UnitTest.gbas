@@ -11,6 +11,7 @@ GOSUB TestSimpleVariables
 GOSUB TestSimpleArrays
 GOSUB TestSimpleIf
 GOSUB TestLoops
+GOSUB TestTypes
 
 STDOUT "\n\n"
 
