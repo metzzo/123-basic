@@ -379,7 +379,7 @@ function READ() {
 
 //Castet die gegebene Value in eine Ganzzahl (falls NaN kommt => 0 returnen)
 function CAST2INT(value) {
-	if (value instanceof Array) { //not sure about this
+	if (value.constructor === Array) { //not sure about this
 		return [CAST2INT(value[0])];
 	} else {
 		switch (typeof value) {
@@ -389,7 +389,6 @@ function CAST2INT(value) {
 				throwError("Cannot cast 'undefined'");
 			case 'number':
 				return ~~value; //experimental
-				//if (value < 0) return Math.ceil(value); else if (value > 0) return Math.floor(value); else return 0;
 			case 'string':
 				if (isNaN(value) || value == '') 
 					return 0; //Falls keine Nummer => 0

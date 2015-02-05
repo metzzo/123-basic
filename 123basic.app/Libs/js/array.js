@@ -1,8 +1,6 @@
-
 //------------------------------------------------------------
 //ARRAY FUN
 //------------------------------------------------------------
-
 
 /**
 * Ein OTTArray ist ein Array, welches versucht die OTTArrays unter GLBasic so gut wie möglich zu simulieren.
@@ -12,7 +10,6 @@ function OTTArray(def) {
 	this.values = [];
 	this.dimensions = [0];
 	this.defval = !!def ? def : 0;
-	return this;
 }
 
 //Klonen!
@@ -32,7 +29,7 @@ OTTArray.prototype.clone = function() {
 			break;
 		default:
 			//es muss geklont werden
-			if (this.values != undefined && this.dimensions != undefined) {
+			if (this.values !== undefined) {
 				for (var i = 0; i < this.values.length; i++) {
 					other.values[i] = tryClone(this.values[i]);
 				}
@@ -46,41 +43,52 @@ OTTArray.prototype.clone = function() {
 
 //Zugriff!
 OTTArray.prototype.arrAccess = function() {
-	tmpPositionCache = 0;
-	
-	for (var i = arguments.length-1; i >= 0 ; i--) {
-		if (i >= this.dimensions.length) throwError("Wrong dimension count '"+(arguments.length-1)+"' expected '"+this.dimensions.length+"'");
+	if (arguments.length === 1) {
+		var dim0 = this.dimensions[0];
+		var position = arguments[0];
+		if (position < 0) position = (dim0 + position);
+		if (position < 0 || position >= dim0) throwError("Array index out of bounds access, position: "+dumpArray(arguments));
+		tmpPositionCache = position;
+	} else if (arguments.length === 2) {
+		var dim0 = this.dimensions[0], dim1 = this.dimensions[1];
+		var position1 = arguments[0];
+		if (position1 < 0) position1 = (dim0 + position1);
+		if (position1 < 0 || position1 >= dim0) throwError("Array index out of bounds access, position: "+dumpArray(arguments));
 		
-		var position = arguments[i]; //CAST2INT( normalerweise sollten access automatisch nach INT gecastet worden sein!
+		var position2 = arguments[1];
+		if (position2 < 0) position2 = (dim1 + position2);
+		if (position2 < 0 || position2 >= dim1) throwError("Array index out of bounds access, position: "+dumpArray(arguments));
 		
-		if (position < 0)
-			position = (this.dimensions[i] + position);
+		tmpPositionCache = position1 + position2*dim0;
+	} else {
+		tmpPositionCache = 0;
+		for (var i = arguments.length-1; i >= 0 ; i--) {
+			if (i >= this.dimensions.length) throwError("Wrong dimension count '"+(arguments.length-1)+"' expected '"+this.dimensions.length+"'");
+			
+			var position = arguments[i]; //CAST2INT( normalerweise sollten access automatisch nach INT gecastet worden sein!
+			
+			if (position < 0) position = (this.dimensions[i] + position);
+			
+			if (position < 0 || position >= this.dimensions[i]) throwError("Array index out of bounds access, position: "+dumpArray(arguments));
+			
+			arrargs[i] = position;
+		}
 		
-		if (position < 0 || position >= this.dimensions[i]) throwError("Array index out of bounds access, position: "+dumpArray(arguments));
 		
-		arrargs[i] = position;
-	}
-	
-	
-	switch (arguments.length) {
-		case 1:
-			tmpPositionCache = arrargs[0];
-			break;
-		case 2:
-			tmpPositionCache = arrargs[0] + arrargs[1]*this.dimensions[0];
-			break;
-		case 3:
-			tmpPositionCache = arrargs[0] + arrargs[1]*this.dimensions[0] + arrargs[2]*this.dimensions[0]*this.dimensions[1] 
-			break;
-		case 4:
-			tmpPositionCache = arrargs[0] + arrargs[1]*this.dimensions[0] + arrargs[2]*this.dimensions[0]*this.dimensions[1] + arrargs[3]*this.dimensions[0]*this.dimensions[1]*this.dimensions[2];
-			break;
-		default:
-			var mul = this.values.length/this.dimensions[arguments.length-1];
-			for (var i = arguments.length-1; i >= 0 ; i--) {
-				tmpPositionCache += arrargs[i]*mul;
-				mul /= this.dimensions[i-1];
-			}
+		switch (arguments.length) {
+			case 3:
+				tmpPositionCache = arrargs[0] + arrargs[1]*this.dimensions[0] + arrargs[2]*this.dimensions[0]*this.dimensions[1] 
+				break;
+			case 4:
+				tmpPositionCache = arrargs[0] + arrargs[1]*this.dimensions[0] + arrargs[2]*this.dimensions[0]*this.dimensions[1] + arrargs[3]*this.dimensions[0]*this.dimensions[1]*this.dimensions[2];
+				break;
+			default:
+				var mul = this.values.length/this.dimensions[arguments.length-1];
+				for (var i = arguments.length-1; i >= 0 ; i--) {
+					tmpPositionCache += arrargs[i]*mul;
+					mul /= this.dimensions[i-1];
+				}
+		}
 	}
 	
 	return this;

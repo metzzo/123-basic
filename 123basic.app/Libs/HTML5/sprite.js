@@ -124,38 +124,8 @@ function LOADANIM(path,num, width, height) {
 
 
 function MEM2SPRITE(pixels, num, width, height) {
-	var buf = document.createElement('canvas');
-	buf.width = width;
-	buf.height = height;
-	var spr = new Sprite(buf, num);
-	register(spr);
-	spr.loaded = true;
-	var scrn = new Screen(buf, -42);
 	try {
-		var isref = pixels.deval instanceof Array;
-		var imageData = scrn.context.getImageData(0,0,width, height);
-		var data = imageData.data;
-		for (var x = 0; x < width; x++) {
-			for (var y = 0; y < height; y++) {
-				var pos = x + y*width;
-				var p = pixels.arrAccess(pos).values[tmpPositionCache];
-				if (isref) p = p[0]; // Dereferenzieren, falls notwendig
-				
-				var a = (p & 0xFF000000)/0x1000000;
-				var b = (p & 0xFF0000)/0x10000;
-				var g = (p & 0xFF00)/0x100;
-				var r =  p & 0xFF;
-				
-				if (a == -1) a = 255;
-				
-				pos *= 4;
-				data[pos]   = r; 
-				data[pos+1] = g;
-				data[pos+2] = b;
-				data[pos+3] = a;
-			}
-		}
-		scrn.context.putImageData(imageData, 0, 0);
+		opt_MEM2SPRITE(pixels, num, width, height);
 	} catch(ex) {
 		//kann keine imagedata holen
 		return 0;
@@ -163,7 +133,52 @@ function MEM2SPRITE(pixels, num, width, height) {
 	return 1;
 }
 
+function opt_MEM2SPRITE(pixels,num,width,height) {
+	var buf = document.createElement('canvas');
+	buf.width = width;
+	buf.height = height;
+	var spr = new Sprite(buf, num);
+	register(spr);
+	spr.loaded = true;
+	var scrn = new Screen(buf, -42);
+	
+	var isref = pixels.deval instanceof Array;
+	var imageData = scrn.context.getImageData(0,0,width, height);
+	var data = imageData.data;
+	for (var x = 0; x < width; x++) {
+		for (var y = 0; y < height; y++) {
+			var pos = x + y*width;
+			var p = pixels.arrAccess(pos).values[tmpPositionCache];
+			if (isref) p = p[0]; // Dereferenzieren, falls notwendig
+			
+			var a = (p & 0xFF000000)/0x1000000;
+			var b = (p & 0xFF0000)/0x10000;
+			var g = (p & 0xFF00)/0x100;
+			var r =  p & 0xFF;
+			
+			if (a === -1) a = 255;
+			
+			pos *= 4;
+			data[pos]   = r; 
+			data[pos+1] = g;
+			data[pos+2] = b;
+			data[pos+3] = a;
+		}
+	}
+	scrn.context.putImageData(imageData, 0, 0);
+}
+
 function SPRITE2MEM(pixels, num) {
+	try {
+		opt_SPRITE2MEM(pixels, num);
+	}  catch(ex) {
+		return 0;
+	}
+	
+	return 1;
+}
+
+function opt_SPRITE2MEM(pixels, num) {
 	var isref = pixels.deval instanceof Array;
 	
 	var spr = getSprite(num);
@@ -180,29 +195,22 @@ function SPRITE2MEM(pixels, num) {
 	var scrn = new Screen(buf, -42);
 	scrn.context.drawImage(spr.img, 0, 0);
 	
-	//data modifizieren
-	try {
-		var imageData = scrn.context.getImageData(0, 0, width, height);
 	
-		for (var y = 0; y < height; y++) {
-			var inpos = y * width * 4; // *4 for 4 ints per pixel
-			for (var x = 0; x < width; x++) {
-				var r = imageData.data[inpos++];
-				var g = imageData.data[inpos++];
-				var b = imageData.data[inpos++];
-				var a = imageData.data[inpos++];
-				var v = a*0x1000000 + b*0x10000 + g*0x100 + r;
-				if (isref)
-					v = [v];
-				pixels.arrAccess(x + y*width).values[tmpPositionCache] = v
-			}
+	var imageData = scrn.context.getImageData(0, 0, width, height);
+	
+	for (var y = 0; y < height; y++) {
+		var inpos = y * width * 4; // *4 for 4 ints per pixel
+		for (var x = 0; x < width; x++) {
+			var r = imageData.data[inpos++];
+			var g = imageData.data[inpos++];
+			var b = imageData.data[inpos++];
+			var a = imageData.data[inpos++];
+			var v = a*0x1000000 + b*0x10000 + g*0x100 + r;
+			if (isref)
+				v = [v];
+			pixels.arrAccess(x + y*width).values[tmpPositionCache] = v
 		}
-	}  catch(ex) {
-		//kann keine imagedata holen
-		return 0;
 	}
-	
-	return 1;
 }
 
 function LOADSPRITEMEM(file, w, h, pixels) {
@@ -223,12 +231,12 @@ function ENDPOLY() {
 	if (!inPoly) throwError("ENDPOLY has to be in STARTPOLY - ENDPOLY ");
 	if (polyStack.length > 0) {
 		//schlieﬂen!
-		if (polyStack.length == 4) {
+		if (polyStack.length === 4) {
 			POLYNEWSTRIP();
 		} else {
 			context.save();
 			//Zeichnen
-			if (mode == 1) {
+			if (mode === 1) {
 				if ((polyStack.length % 3) != 0) throwError("Polyvector cannot draw non power of 3 triangles");
 				var spr = getSprite(num, true);
 				for (var i = 0; i < polyStack.length; i+=3) {
@@ -248,7 +256,7 @@ function ENDPOLY() {
 						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
 					}
 				}
-			} else if (mode == 0) {
+			} else if (mode === 0) {
 				if ((polyStack.length % 3) != 0) throwError("Polyvector cannot draw non power of 3 triangles");
 				var spr = getSprite(num, true);
 				for (var i = 0; i < polyStack.length-1; i++) {
@@ -267,7 +275,7 @@ function ENDPOLY() {
 						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
 					}
 				}
-			} else if (mode == 2) {
+			} else if (mode === 2) {
 				throwError("Unimplemented ENDPOLY drawing mode: 2");
 			} else {
 				throwError("Unknown draw mode.");
@@ -290,7 +298,7 @@ function POLYNEWSTRIP() {
 	if (!inPoly) throwError("POLYNEWSTRIP has to be in STARTPOLY - ENDPOLY ");
 		
 	context.save();
-	if (num == -1) {
+	if (num === -1) {
 		//use pure html5!
 		context.fillStyle = formatColor(polyStack[0].col);
 		context.beginPath();
@@ -305,11 +313,11 @@ function POLYNEWSTRIP() {
 		//use the texture!
 		//got code from: http://stackoverflow.com/questions/4774172/image-manipulation-and-texture-mapping-using-html5-canvas Thanks, you saved my life!!
 		var tris
-		if (mode == 2) {
+		if (mode === 2) {
 			tris = tris2;
-		} else if (mode == 1) {
+		} else if (mode === 1) {
 			tris =  tris1;
-		} else if (mode == 0){
+		} else if (mode === 0){
 			tris = tris1 //TODO;
 		}else {
 			throwError("Invalid drawing mode!")
@@ -335,6 +343,14 @@ function POLYNEWSTRIP() {
 }
 
 function drawPolygon(plzTint, tris, polyStack, spr) {
+	try {
+		opt_drawPolygon(plzTint, tris, polyStack, spr)
+	} catch (ex) {
+		domExceptionError(ex);
+	}
+}
+
+function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 	if (plzTint) {
 		var tmpAlpha = context.globalAlpha;
 		var tmpOperation = context.globalCompositeOperation;
@@ -371,15 +387,10 @@ function drawPolygon(plzTint, tris, polyStack, spr) {
 		
 		if (plzTint) {
 			//schauen ob alle gleiche Farbe haben
-			if (polyStack[0].col == polyStack[1].col && polyStack[1].col == polyStack[2].col && (polyStack.length > 2 && polyStack[2].col == polyStack[3].col)) {
+			if (polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col)) {
 				if (!spr.tint) {
 				//Hat noch nicht die Tinting Farbchannel
-					try {
-						//farbkan‰le holen!
-						spr.tint = generateRGBKs(spr.img);
-					} catch (ex) {
-						domExceptionError(ex);
-					}
+					spr.tint = generateRGBKs(spr.img);
 				}
 				if (spr.tint) {
 					//selbe farbe \o/
@@ -471,7 +482,7 @@ function DRAWSPRITE(num, x, y) {
 }
 
 function ROTOSPRITE(num, x, y, phi) {
-	if ((phi%360) == 0) {
+	if ((phi%360) === 0) {
 		DRAWSPRITE(num, x, y);
 	} else {
 		context.save();
@@ -484,9 +495,9 @@ function ROTOSPRITE(num, x, y, phi) {
 }
 
 function ZOOMSPRITE(num, x, y, sx, sy) {
-	if (sx == 0 || sy == 0) return;
+	if (sx === 0 || sy === 0) return;
 	
-	if (sx == 1 && sy == 1) {
+	if (sx === 1 && sy === 1) {
 		DRAWSPRITE(num, x, y);
 	} else if (sx != 0 && sy != 0){
 		context.save();
@@ -529,7 +540,7 @@ function ROTOZOOMSPRITE(num, x, y,phi, scale) {
 
 function DRAWANIM(num, frame, x, y) {
 	var spr = getSprite(num);
-	if (spr.frames == null) throwError("DRAWANIM can only draw an animation!");
+	if (spr.frames === undefined) throwError("DRAWANIM can only draw an animation!");
 	frame = frame % spr.frames.length;
 	if (frame < 0) throwError("Invalid frame '"+frame+"'");
 	context.drawImage(spr.img, ~~(spr.frames[frame].posx+.5), ~~(spr.frames[frame].posy+.5), spr.frameWidth, spr.frameHeight, CAST2INT(x), CAST2INT(y), spr.frameWidth, spr.frameHeight);
@@ -544,7 +555,7 @@ function ROTOZOOMANIM(num, frame, x, y,phi, scale) {
 }
 
 function ROTOANIM(num, frame, x, y, phi) {
-	if ((phi%360) == 0) {
+	if ((phi%360) === 0) {
 		DRAWANIM(num, frame, x, y);
 	} else {
 		context.save();
@@ -556,9 +567,9 @@ function ROTOANIM(num, frame, x, y, phi) {
 }
 
 function ZOOMANIM(num,frame, x, y, sx, sy) {
-	if (sx == 1 && sy == 1) {
+	if (sx === 1 && sy === 1) {
 		DRAWANIM(num,frame, x, y);
-	} else if (sx != 0 && sy != 0){
+	} else if (sx !== 0 && sy !== 0){
 		context.save();
 		context.translate(x, y);
 		context.scale(sx, sy);
@@ -582,19 +593,22 @@ function STRETCHANIM(num,frame,  x, y, width, height) {
 function GRABSPRITE(num, x, y, width, height) {
 	if (width < 1 || height < 1) throwError("Invalid width/height!");
 	try {
-		var data = context.getImageData(x, y, width, height);
-		
-		var canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		var ctxt = canvas.getContext("2d");
-		ctxt.putImageData(data, 0, 0);
-		
-		var spr = new Sprite(canvas, num);
-		spr.loaded = true;
-		register(spr);
+		opt_GRABSPRITE(num,x,y,width,height);
 	}  catch(ex) {
 		//kann keine imagedata holen
 		domExceptionError(ex);
 	}
+}
+
+function opt_GRABSPRITE(num, x, y, width, height) {
+	var data = context.getImageData(x, y, width, height);
+	var canvas = document.createElement('canvas');
+	canvas.width = width;
+	canvas.height = height;
+	var ctxt = canvas.getContext("2d");
+	ctxt.putImageData(data, 0, 0);
+	
+	var spr = new Sprite(canvas, num);
+	spr.loaded = true;
+	register(spr);
 }

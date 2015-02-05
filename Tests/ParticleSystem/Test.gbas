@@ -9,7 +9,7 @@ GLOBAL numpart,exp,life#, dot
 GLOBAL dot_w, dot_h
 GLOBAL vol# = 0.5 // 0.0 low - 1.0 loud
 GLOBAL pan = 0 // -1.0 left, 0 center, 1.0 right
-GLOBAL sound = TRUE
+GLOBAL sound = FALSE
 GLOBAL fw=0
 GLOBAL mx=0, my=0, b1=0, b2=0, bl=0
 GLOBAL ftsz_w, ftsz_h 	// font size
@@ -57,9 +57,14 @@ LOADSOUND "Media/sounds/fireworks2.wav", 11, 4 	// Fireworks 2
 //---------------------------------------------------------------------
 
 init()
+?IFNDEF HTML5
+	WHILE TRUE
+		GOSUB GLB_ON_LOOP
+	WEND
+?ENDIF
 SUB GLB_ON_LOOP:
 	GETFONTSIZE ftsz_w, ftsz_h
-	
+
 	update()
 	moveparticles()
 	getMouse()

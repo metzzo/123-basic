@@ -80,61 +80,65 @@ var doCurrentFunction = function() {
 
 function update2D() {
 	try {
-		if (!initCalled) {
-			if (waitForFont) {
-				if (!waitload) {
-					waitForFont = false;
-				}
-			} else {
-				//Erst wenn Font fertig geladen ist
-				initCalled = true;
-				
-				main();
-			}
-		} else {
-			if (setBmp) {
-				setBmp();
-				setBmp = null;
-			}
-			
-			updateTouches();
-			
-			if (hibernate) {
-				if (ANYMOUSE() || ANYKEY() || globalSpeedX || globalSpeedY) {
-					hibernate = false;
-				}
-			} else {
-				canvasWidth = canvas.width; 
-				canvasHeight = canvas.height;
-				canvasOffsetLeft = getOffsetLeft(canvas);
-				canvasOffsetTop = getOffsetTop(canvas);
-				
-				
-				if (showFPS == -1) {
-					doCurrentFunction();
-				} else {
-					var frameStart = GETTIMERALL();
-					var frameDelta = frameStart - framePrev;
-					
-					if (frameDelta >= frameDelay) {
-						doCurrentFunction();
-							
-						frameDelay = showFPS;
-						if (frameDelta > frameDelay) {
-							frameDelay = frameDelay - (frameDelta - frameDelay);
-						}
-						framePrev = frameStart;
-					}
-				}
-				
-			}
-			
-			anyKeyPress = false;
-		}
-		window.requestAnimFrame(update2D, frontbuffer.canvas);
+		opt_update2D();
 	} catch(ex) {
 		if (!(ex instanceof OTTExitException)) throw(formatError(ex));
 	}
+}
+
+function opt_update2D() {
+	if (!initCalled) {
+		if (waitForFont) {
+			if (!waitload) {
+				waitForFont = false;
+			}
+		} else {
+			//Erst wenn Font fertig geladen ist
+			initCalled = true;
+			
+			main();
+		}
+	} else {
+		if (setBmp) {
+			setBmp();
+			setBmp = null;
+		}
+		
+		updateTouches();
+		
+		if (hibernate) {
+			if (ANYMOUSE() || ANYKEY() || globalSpeedX || globalSpeedY) {
+				hibernate = false;
+			}
+		} else {
+			canvasWidth = canvas.width; 
+			canvasHeight = canvas.height;
+			canvasOffsetLeft = getOffsetLeft(canvas);
+			canvasOffsetTop = getOffsetTop(canvas);
+			
+			
+			if (showFPS == -1) {
+				doCurrentFunction();
+			} else {
+				var frameStart = GETTIMERALL();
+				var frameDelta = frameStart - framePrev;
+				
+				if (frameDelta >= frameDelay) {
+					doCurrentFunction();
+						
+					frameDelay = showFPS;
+					if (frameDelta > frameDelay) {
+						frameDelay = frameDelay - (frameDelta - frameDelay);
+					}
+					framePrev = frameStart;
+				}
+			}
+			
+		}
+		
+		anyKeyPress = false;
+	}
+	window.requestAnimFrame(update2D, frontbuffer.canvas);
 }
 
 function domExceptionError(ex) {
@@ -690,6 +694,7 @@ function DRAWLINE(x1, y1, x2, y2, col) {
 	context.stroke();
 	context.restore();
 }
+
 function DRAWRECT(x,y,w,h,col) {
 	if (col == transCol) {
 		// delete this from the canvas
@@ -702,12 +707,25 @@ function DRAWRECT(x,y,w,h,col) {
 	}
 }
 
-function formatColor(col) {
-	col = col.toString(16);
-	while(col.length<6) {
+function formatColor(origcol) {
+	var col = origcol.toString(16);
+	switch (col.length) {
+		case 5:
+		case 4:
+			return "#00"+col;
+		case 3:
+		case 2:
+			return "#0000"+col;
+		case 1:
+		case 0:
+			return "#000000"+col;
+		default:
+			return "#"+col;
+	}
+	/*while(col.length<6) {
 		col = "00"+col;
 	}
-	return '#'+col;
+	return '#'+col;*/
 }
 
 

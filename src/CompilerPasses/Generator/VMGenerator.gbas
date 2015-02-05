@@ -7,7 +7,7 @@
 ?IFDEF VMCOMPILER
 
 
-// ?DEFINE DEBUGVM
+?DEFINE DEBUGVM
 
 CONSTANT STACKENTRY_INT% 		= 1
 CONSTANT STACKENTRY_FLOAT% 		= 2
@@ -516,7 +516,7 @@ TYPE Executor
 						IF Exprs[expr.Left].datatype.Name$ = "string" OR Exprs[expr.Right].datatype.Name$ = "string"
 							LOCAL v2$ = self.PopStr$()
 							LOCAL v1$ = self.PopStr$()
-							
+
 							IF v1$ = v2$
 								r = TRUE
 							ELSE
@@ -525,7 +525,7 @@ TYPE Executor
 						ELSE
 							LOCAL v2 = self.PopFloat()
 							LOCAL v1 = self.PopFloat()
-							
+
 							IF v1 = v2
 								r = TRUE
 							ELSE
@@ -538,7 +538,7 @@ TYPE Executor
 						IF Exprs[expr.Left].datatype.Name$ = "string" OR Exprs[expr.Right].datatype.Name$ = "string"
 							LOCAL v2$ = self.PopStr$()
 							LOCAL v1$ = self.PopStr$()
-							
+
 							IF v1$ <> v2$
 								r = TRUE
 							ELSE
@@ -547,7 +547,7 @@ TYPE Executor
 						ELSE
 							LOCAL v2 = self.PopFloat()
 							LOCAL v1 = self.PopFloat()
-							
+
 							IF v1 <> v2
 								r = TRUE
 							ELSE

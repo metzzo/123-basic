@@ -470,10 +470,10 @@ FUNCTION JSGenerate$: expr AS Expr
 			LOCAL HasToBeInt = FALSE, MightBeInt% = FALSE
 			SELECT Sym$
 				CASE "="
-					Sym$ = "=="
+					Sym$ = "==="
 					HasToBeInt = TRUE
 				CASE "<>"
-					Sym$ = "!="
+					Sym$ = "!=="
 					HasToBeInt = TRUE
 				CASE "OR"
 					Sym$ = "||"
@@ -497,9 +497,9 @@ FUNCTION JSGenerate$: expr AS Expr
 					LOCAL Res$
 					SELECT Sym$
 						CASE "<"
-							Res$ = " == -1"
+							Res$ = " === -1"
 						CASE ">"
-							Res$ = " == 1"
+							Res$ = " === 1"
 						CASE "<="
 							Res$ = " <= 0"
 						CASE ">="
@@ -574,6 +574,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				LOCAL Add$ = ""
 				FOREACH d IN expr.dims[]
 					IF s THEN Text$ = Text$ + ", "
+					
 					Text$ = Text$ + JSGenerate$(Exprs[d])
 
 					s = TRUE
@@ -640,6 +641,9 @@ FUNCTION JSGenerate$: expr AS Expr
 						BREAK
 					ENDIF
 				NEXT
+			ELSEIF Exprs[expr.expr].datatype.Name$ = "float" AND Exprs[expr.expr].datatype.IsArray = 0
+				// experimental shit
+				// cast = FALSE
 			ENDIF
 			IF cast
 				//Den vorigen Datentyp anschauen
@@ -1023,7 +1027,6 @@ FUNCTION JSGenerate$: expr AS Expr
 			NEXT
 			Text$ = Text$ + "])"
 		CASE EXPR_IS_DELETE
-			Text$ = Text$ + "//DELETE!!111"+NewLine$()
 			Text$ = Text$ + "forEachSaver"+ForEachCounter+".values[forEachCounter"+ForEachCounter+"] = " + JSGenerate$(Exprs[Exprs[ForEachCounter].varExpr]) + ";"+NewLine$()
 			Text$ = Text$ + "DIMDEL(forEachSaver"+ForEachCounter+", forEachCounter"+ForEachCounter+");"+NewLine$()
 			Text$ = Text$ + "forEachCounter"+ForEachCounter+"--;"+NewLine$()

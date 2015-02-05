@@ -261,7 +261,7 @@ restart:
 		FOR i=1 TO life
 			thing(0, i*32+32, screeny*.15, RGB(0x00, 0x80, 0xff), 16,0)
 		NEXT
-		
+
 		SHOWSCREEN
 	ENDSUB
 
@@ -588,7 +588,7 @@ GLOBAL colormode
 	// up vector
 	ux=dy
 	uy=-dx
-	
+
 	// cap1
 	STARTPOLY 0
 		POLYVECTOR x1+ux-dx, y1+uy-dy,  0.5, 0.5,col
