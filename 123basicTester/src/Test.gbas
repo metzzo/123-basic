@@ -18,7 +18,7 @@ FUNCTION RunTests:
 
 		STDOUT "Start Testing\n"
 		FOREACH F$ IN Files$[]
-			IF F$ <> "." AND F$ <> ".." AND F$ <> "Plain"
+			IF F$ <> "." AND F$ <> ".." AND F$ <> "Plain" AND F$ <> "_UNITTEST"
 				IF DOESDIREXIST(rd$+"/"+F$)
 					STDOUT "Test project "+F$+"\n"
 					LOCAL path$ = rd$+"/"+F$+"/"

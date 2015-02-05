@@ -958,6 +958,7 @@ FUNCTION Parser:
 //		PushTimer()
 		//typenamemangling
 		FOREACH Typ IN Compiler.Types[]
+			Typ.OName$ = Typ.Name$
 			Typ.Name$ = ChangeTypeName$(Typ.Name$)
 		NEXT
 

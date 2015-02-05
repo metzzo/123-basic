@@ -170,7 +170,11 @@ function DIMPUSH(array, value) {
 }
 
 function DIMDEL(array, position) {
-	//OBACHT könnte bei mehrdimensionalen arrys unerwartete ergebnisse liefern, wenn man elemente rauslöscht
+	if (array.defval.pool !== undefined) { // add to object pool if possible
+		var val = array.values[position];
+		val.pool.free(val);
+	}
+	
 	array.values.splice(position, 1);
 	array.dimensions[0]--;
 }
@@ -179,4 +183,5 @@ function DIMDATA(array, values) {
 	array.values = values;
 	array.dimensions = [values.length];
 }
+
 

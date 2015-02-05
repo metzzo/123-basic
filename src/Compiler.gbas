@@ -186,6 +186,7 @@ ENDTYPE
 
 CONSTANT IDENTIFIERTYPE_VERSION = 3000
 TYPE IdentifierType
+	OName$
 	Name$
 	RealName$
 	Attributes%[]

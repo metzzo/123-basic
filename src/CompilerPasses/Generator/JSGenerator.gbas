@@ -18,7 +18,7 @@ GLOBAL LoopBreakID% = 0
 GLOBAL LoopContinueID% = 0
 GLOBAL LastDummyID%
 GLOBAL StaticText$ = ""
-
+GLOBAL VariUndef$ = ""
 
 
 //! Generiert JavaScript Code
@@ -117,10 +117,11 @@ FUNCTION JS_Generator$:
 				Text$ = Text$ + "* @constructor"+NewLine$()
 				Text$ = Text$ + "*/"+NewLine$()
 			ENDIF
+			
+			Text$ = Text$ +"window ['"+Typ.Name$+"'] = function() { this.reset(); }"+NewLine$()
 			IndentUp()
-			Text$ = Text$ +"window ['"+Typ.Name$+"'] = function() {"+NewLine$()
-			//Text$ = Text$ + "this = new Object();"+NewLine$()
-
+			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.reset = function() {"+NewLine$()
+			
 			//defaults setzen
 			FOREACH Attr IN Typ.Attributes[]
 				ALIAS variable AS Compiler.Varis[Attr]
@@ -147,16 +148,16 @@ FUNCTION JS_Generator$:
 					Text$ = Text$ + ";"+NewLine$()
 				ENDIF
 			NEXT
-
-
-
-			Text$ = Text$ + "return this;"+NewLine$()
+			
+			Text$ = Text$ + "this.pool = pool_" + Typ.OName$ + ";" + NewLine$()
+			Text$ = Text$ + "this.succ = null;" + NewLine$()
+			
 			IndentDown()
 			Text$ = Text$ + NewLine$() + "};" + NewLine$()
 
 			IndentUp()
 			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.clone = function() {"+NewLine$()
-			Text$ = Text$ + "var other = new "+Typ.Name$+"();"+NewLine$()
+			Text$ = Text$ + "var other = pool_"+Typ.OName$+".alloc();"+NewLine$()
 			FOREACH Attr IN Typ.Attributes[]
 				ALIAS variable AS Compiler.Varis[Attr]
 				//IF variable.datatype.IsArray=0 AND IsType(variable.Name$) = FALSE AND variable.ref = FALSE
@@ -181,12 +182,43 @@ FUNCTION JS_Generator$:
 			NEXT
 			//vtable
 			Text$ = Text$ + "other.vtbl = this.vtbl;"+NewLine$()
-
+			Text$ = Text$ + "other.pool = this.pool;"+NewLine$()
+			
 			//Text$ = Text$ + "other.clone = this.clone;"+NewLine$()
 			IndentDown()
 			Text$ = Text$ + "return other;"+NewLine$()
 			Text$ = Text$ + "};" + NewLine$()
-
+			
+			IndentUp()
+			Text$ = Text$ + "pool_" + Typ.OName$ +" = { " + NewLine$()
+			Text$ = Text$ + "last: null, "+NewLine$()
+			IndentUp()
+			Text$ = Text$ + "alloc: function() { " + NewLine$()
+			Text$ = Text$ + "var obj = null;"+NewLine$()
+			IndentUp()
+			Text$ = Text$ + "if (pool_" + Typ.OName$ +".last !== null) {" + NewLine$()
+			Text$ = Text$ + "obj = pool_" + Typ.OName$ +".last;" + NewLine$()
+			Text$ = Text$ + "pool_" + Typ.OName$ +".last = obj.succ;" + NewLine$()
+			IndentDown()
+			Text$ = Text$ + "obj.succ = null;" + NewLine$()
+			IndentUp()
+			Text$ = Text$ + "} else {"+NewLine$()
+			IndentDown()
+			Text$ = Text$ + "obj = new "+Typ.Name$+"();"+NewLine$()
+			Text$ = Text$ + "}" + NewLine$()
+			IndentDown()
+			Text$ = Text$ + "return obj;"+NewLine$()
+			Text$ = Text$ + "}," + NewLine$()
+			IndentUp()
+			Text$ = Text$ + "free: function(obj)  {" + NewLine$()
+			Text$ = Text$ + "if (obj.succ !== null) return;"+NewLine$()
+			Text$ = Text$ + "obj.reset();"+NewLine$()
+			Text$ = Text$ + "obj.succ = pool_" + Typ.OName$ + ".last;" + NewLine$()
+			IndentDown()
+			Text$ = Text$ + "pool_" + Typ.OName$ + ".last = obj;" + NewLine$()
+			IndentDown()
+			Text$ = Text$ + "}" + NewLine$()
+			Text$ = Text$ + "}" + NewLine$()
 
 			IF InWebWorker THEN Text$ = Text$ + Typ.Name$+ " = window['"+Typ.Name$+"'];"+NewLine$()
 
@@ -341,12 +373,22 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = Text$ + Def$
 				Text$ = Text$ + ";"+NewLine$()
 			ENDIF
+			
+			LOCAL BeforeUndef$ = VariUndef$
+			LOCAL MyUndef$ = ""
+			FOREACH Var IN expr.Varis[]
+				IF IsType(Compiler.Varis[Var].datatype.Name$) AND Compiler.Varis[Var].datatype.IsArray = 0
+					IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND Compiler.Varis[Var].Typ <> VARI_IS_STATIC AND JSShouldRedeclare(Var)
+						MyUndef$ = MyUndef$ + "pool_" + Compiler.Varis[Var].datatype.Name$+".free("+ Compiler.Varis[Var].Name$ + ");"
+					ENDIF
+				ENDIF
+			NEXT
 
 			IF CurrentFunc <> -1 AND oFunc = -1
 				LOCAL i%
 				FOREACH Param IN Compiler.Funcs[CurrentFunc].Params[]
 					IF Compiler.Varis[Param].OwnerVari <> -1
-						Text$ = Text$ + "var "+ Compiler.Varis[Compiler.Varis[Param].OwnerVari].Name$ + " = ["+Compiler.Varis[Param].Name$+"]; /* NEWCODEHERE */"+NewLine$()
+						Text$ = Text$ + "var "+ Compiler.Varis[Compiler.Varis[Param].OwnerVari].Name$ + " = ["+Compiler.Varis[Param].Name$+"];"+NewLine$()
 						INC i
 					ENDIF
 				NEXT
@@ -366,6 +408,7 @@ FUNCTION JSGenerate$: expr AS Expr
 					DIMPUSH ERes$[], add$
 				ENDIF
 			NEXT
+			
 			IF mngGoto
 				IndentDown()
 				IndentDown()
@@ -414,7 +457,9 @@ FUNCTION JSGenerate$: expr AS Expr
 			IF FirstText$ <> ""
 				Text$ = Text$ + FirstText$
 			ENDIF
-
+			
+			Text$ = Text$ + MyUndef$
+			
 			IF mngGoto
 				Text$ = Text$ + "__pc = -1; break;"+NewLine$()
 				IndentUp()
@@ -431,7 +476,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = NewLine$() + Text$
 			ENDIF
 			IF NOT IsInGoto OR mngGoto THEN Text$ = "{" + Text$ //öffnende klammer rein
-
+			
 			//Scope leave
 			IF DEBUGMODE AND IsStackPusher
 				IndentDown()
@@ -456,8 +501,8 @@ FUNCTION JSGenerate$: expr AS Expr
 				//IndentUp()
 				Text$ = Text$ + NewLine$()
 			ENDIF
-
-
+			
+			VariUndef$ = BeforeUndef$
 			CurrentScope = oScp
 			CurrentFunc = oFunc
 
@@ -693,7 +738,9 @@ FUNCTION JSGenerate$: expr AS Expr
 				CASE EXPR_IS_STR
 					F = TRUE
 			ENDSELECT
-
+			
+			Text$ = Text$ + VariUndef$
+			
 			IF F
 				Text$ = Text$ + "return "+JSTryUnref$(expr.expr)
 			ELSE
@@ -1193,7 +1240,7 @@ ENDFUNCTION
 FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
-		RetVal$ = "new OTTArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")" // previously just "new OTTArray()"
+		RetVal$ = "new OTTArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")"
 	ELSE
 		SELECT datatype.Name$
 			CASE "int"
@@ -1204,7 +1251,7 @@ FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
 				RetVal$ = "\"\""
 			DEFAULT
 				IF IsType(datatype.Name$)
-					RetVal$ = "new "+LastType.Name$+"()"
+					RetVal$ = "pool_"+datatype.Name$+".alloc()"
 				ELSE
 					RetVal$ = REPLACE$(datatype.Name$, "$", "_Str") //um die $ rauszukriegen
 				ENDIF
