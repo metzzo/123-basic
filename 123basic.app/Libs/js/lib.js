@@ -264,7 +264,7 @@ function toCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur >= to;
 	} else {
-		return cur != to;
+		return cur !== to;
 	}
 	//return (step > 0) ? (cur <= to) : ((step > 0) ? (cur >= to) : true);
 }
@@ -275,7 +275,7 @@ function untilCheck(cur, to, step) {
 	} else if(step < 0) {
 		return cur > to;
 	} else {
-		return cur != to;
+		return cur !== to;
 	}
 }
 

@@ -497,30 +497,29 @@ function ROTOSPRITE(num, x, y, phi) {
 
 function ZOOMSPRITE(num, x, y, sx, sy) {
 	if (sx === 0 || sy === 0) return;
+
+	context.save();
+	var spr = getSprite(num);
+	var dx = 0, dy = 0
+	// doc is wrong, it is mid handled
 	
-	if (sx === 1 && sy === 1) {
-		DRAWSPRITE(num, x, y);
-	} else if (sx != 0 && sy != 0){
-		context.save();
-		var spr = getSprite(num);
-		var dx = 0, dy = 0
-		if (sx < 0) dx = spr.img.width*sx;
-		if (sy < 0) dy = spr.img.height*sy;
-		
-		if (sx > 0) dx = spr.img.width/sx;
-		if (sy > 0) dy = spr.img.height/sy;
-		
-		
-		context.translate(x-dx,y-dy);
-		context.scale(sx, sy);
-		DRAWSPRITE(num, 0, 0);
-		context.restore();
-	}
+	if (sx < 0) dx = -spr.img.width*sx;
+	if (sy < 0) dy = -spr.img.height*sy;
+	
+	if (sx > 0) dx = spr.img.width*sx;
+	if (sy > 0) dy = spr.img.height*sy;
+	
+	
+	context.translate(x + dx/2,y + dy/2);
+	context.scale(sx, sy);
+	context.translate(-dx/2, -dy/2);
+	DRAWSPRITE(num, 0, 0);
+	context.restore();
 }
 
 function STRETCHSPRITE(num,  x, y, width, height) {
 	var spr = getSprite(num);
-	if (width != 0 && height != 0) {
+	if (width !== 0 && height !== 0) {
 		context.save();
 		var sx = width/spr.img.width, sy = height/spr.img.height;
 		context.translate(x, y);
@@ -549,7 +548,8 @@ function DRAWANIM(num, frame, x, y) {
 
 function ROTOZOOMANIM(num, frame, x, y,phi, scale) {
 	context.save();
-	context.translate(x, y)
+	var spr = getSprite(num);
+	context.translate(x+spr.frameWidth*scale, y+spr.frameHeight*scale)
 	context.scale(scale, scale);
 	ROTOANIM(num, frame, 0, 0, phi);
 	context.restore();
@@ -560,30 +560,41 @@ function ROTOANIM(num, frame, x, y, phi) {
 		DRAWANIM(num, frame, x, y);
 	} else {
 		context.save();
-		context.translate(x, y);
+		var spr = getSprite(num);
+		context.translate(x+spr.frameWidth/2, y+spr.frameHeight/2);
 		context.rotate(phi * Math.PI / 180); //convert into RAD
-		DRAWSPRITE(num, -spr.img.width/2, -spr.img.height/2);
+		DRAWANIM(num, frame, -spr.frameWidth/2, -spr.frameHeight/2);
 		context.restore();
 	}
 }
 
 function ZOOMANIM(num,frame, x, y, sx, sy) {
-	if (sx === 1 && sy === 1) {
-		DRAWANIM(num,frame, x, y);
-	} else if (sx !== 0 && sy !== 0){
-		context.save();
-		context.translate(x, y);
-		context.scale(sx, sy);
-		DRAWANIM(num,frame, 0, 0);
-		context.restore();
-	}
+	if (sx === 0 || sy === 0) return;
+
+	context.save();
+	var spr = getSprite(num);
+	var dx = 0, dy = 0
+	// doc is wrong, it is mid handled
+	
+	if (sx < 0) dx = -spr.frameWidth*sx;
+	if (sy < 0) dy = -spr.frameHeight*sy;
+	
+	if (sx > 0) dx = spr.frameWidth*sx;
+	if (sy > 0) dy = spr.frameHeight*sy;
+	
+	
+	context.translate(x + dx/2,y + dy/2);
+	context.scale(sx, sy);
+	context.translate(-dx/2, -dy/2);
+	DRAWANIM(num,frame, 0, 0);
+	context.restore();
 }
 
 function STRETCHANIM(num,frame,  x, y, width, height) {
 	var spr = getSprite(num);
-	if (width != 0 && height != 0) {
+	if (width !== 0 && height !== 0) {
 		context.save();
-		var sx = width/spr.img.frameWidth, sy = height/spr.img.frameHeight;
+		var sx = width/spr.frameWidth, sy = height/spr.frameHeight;
 		context.translate(x, y);
 		context.scale(sx, sy);
 		DRAWANIM(num,frame, 0, 0);

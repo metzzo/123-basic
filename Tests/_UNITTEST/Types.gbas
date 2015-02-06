@@ -16,8 +16,8 @@ SUB TestTypes:
 	TEST_INPUT(H.Birth)
 	TEST_OUTPUT("Test42")
 	TEST_CHECK("Simple Type Access")
-	
-	// -------------------------------------------------------------- 
+
+	// --------------------------------------------------------------
 	LOCAL H2 AS THuman
 	H2.Name$ = "Test"
 	H2.Birth  = 42
@@ -34,4 +34,12 @@ FUNCTION TypeTest: Hello AS THuman
 	Hello.Birth = 1337
 	TEST_INPUT(Hello.Birth)
 ENDFUNCTION
+
+SUB TypeTestStatic: 
+	STATIC T AS THuman
+	T.Name$ = "Wladimir Putin"
+	TEST_INPUT(T.Name$)
+	TEST_OUTPUT("Wladimir Putin")
+	TEST_CHECK("Static Type")
+ENDSUB
 

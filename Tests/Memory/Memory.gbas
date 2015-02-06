@@ -63,8 +63,8 @@ screenx=0; screeny=0; mx=0; my=0; b1=0; b2=0
 
 
 
-
-	PUSHLOOP "SelNumPlayers"
+	PUSH_LOOP("GLB_ON_LOOP")
+	PUSH_LOOP("SelNumPlayers")
 
 	// scaling factor for score-bar under each player
 	scorescale = blocksize/INTEGER(screenx*screeny/(blocksize*blocksize))*2
@@ -72,6 +72,32 @@ screenx=0; screeny=0; mx=0; my=0; b1=0; b2=0
 LIMITFPS 30
 
 GLOBAL gridCreate% = FALSE
+
+?IFNDEF HTML5
+GLOBAL games$[]
+
+WHILE TRUE
+	CALLBYNAME(games$[-1])
+WEND
+
+?ENDIF
+
+FUNCTION PUSH_LOOP: n$
+?IFDEF HTML5
+	PUSHLOOP n$
+?ELSE
+	DIMPUSH games$[], n$
+?ENDIF
+ENDFUNCTION
+
+FUNCTION POP_LOOP:
+?IFDEF HTML5
+	POPLOOP
+?ELSE
+	DIMDEL games$[], -1
+?ENDIF
+ENDFUNCTION
+
 
 SUB GLB_ON_LOOP:
 	// shuffle
@@ -85,7 +111,7 @@ DIM score[num_players]
 	released=TRUE
 	winner=0
 
-	PUSHLOOP "MainGame"
+	PUSH_LOOP("MainGame")
 ENDSUB
 
 SUB GLB_ON_LOADING:
@@ -160,7 +186,7 @@ SUB MainGame:
 			ENDIF
 			IF b1=FALSE THEN released=TRUE
 		ELSE
-			POPLOOP
+			POP_LOOP()
 		ENDIF
 	ENDIF
 ENDSUB
@@ -231,7 +257,7 @@ GLOBAL screenx, screeny
 		IF i<1 THEN i=1
 		IF i>4 THEN i=4
 		num_players = i
-		POPLOOP
+		POP_LOOP()
 		RETURN
 	ENDIF
 
@@ -241,6 +267,7 @@ GLOBAL screenx, screeny
 	PRINT "Anzahl der Spieler:", 0, (blocksize-fy)/2
 	FOR i=1 TO 4
 		ZOOMSPRITE i+49, i*blk*1.5, blk, blk/blocksize*1.4, blk/blocksize*1.4
+		DEBUG blk+"\n"
 		PRINT i, i*blk*1.5+blk/2-fx/2, blk*2.2
 	NEXT
 
@@ -250,15 +277,15 @@ GLOBAL screenx, screeny
 	SHOWSCREEN
 
 	IF b1
-		PUSHLOOP "MOUSEWAIT"
+		PUSH_LOOP("MOUSE_WAIT")
 		start = TRUE
 	ENDIF
 ENDSUB // SELNUMPLAYERS
 
-SUB MOUSEWAIT:
+SUB MOUSE_WAIT:
 	MOUSESTATE mx, my, b1, b2
 	IF NOT b1
-		POPLOOP
+		POP_LOOP()
 	ENDIF
 ENDSUB
 

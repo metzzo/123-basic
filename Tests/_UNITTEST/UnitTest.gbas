@@ -21,7 +21,9 @@ ELSE
 	STDOUT "Successfully executed\n"
 ENDIF
 
+?IFNDEF HTML5
 KEYWAIT
+?ENDIF
 
 FUNCTION TEST_OUTPUT: text$
 	ExpectedOutput$ = ExpectedOutput$ + text$
@@ -37,7 +39,7 @@ FUNCTION TEST_CHECK: name$
 		STDOUT "Test " + name$ + " OK \n"
 	ELSE
 		AnyError = TRUE
-		
+
 		STDOUT "Test " + name$ + " Failed \n"
 		STDOUT "---------- Actual Output ----------\n"
 		STDOUT ActualOutput$ + "\n"

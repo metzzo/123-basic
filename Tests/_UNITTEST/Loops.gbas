@@ -13,8 +13,8 @@ SUB TestLoops:
 		IF i > 5 THEN BREAK
 	WEND
 	TEST_CHECK("While Loop")
-	
-	// -------------------------------------------------------------- 
+
+	// --------------------------------------------------------------
 	TEST_OUTPUT("012345")
 	i% = 0
 	REPEAT
@@ -23,15 +23,15 @@ SUB TestLoops:
 		IF i > 5 THEN BREAK
 	UNTIL FALSE
 	TEST_CHECK("RepeatUntil Loop")
-	
-	// -------------------------------------------------------------- 
+
+	// --------------------------------------------------------------
 	TEST_OUTPUT("012345")
 	FOR i = 0 TO 5
 		TEST_INPUT(i)
 	NEXT
 	TEST_CHECK("For Loop")
-	
-	// -------------------------------------------------------------- 
+
+	// --------------------------------------------------------------
 	LOCAL arr[]
 	DIM arr[10]
 	LOCAL i% = 0
@@ -39,7 +39,7 @@ SUB TestLoops:
 		a = i
 		INC i
 	NEXT
-	
+
 	FOREACH a IN arr[]
 		TEST_INPUT(a)
 	NEXT

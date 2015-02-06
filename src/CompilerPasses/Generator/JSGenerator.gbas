@@ -51,11 +51,9 @@ FUNCTION JS_Generator$:
 			IF Func.Native = FALSE AND Func.Scp<>-1
 				//statics definieren
 				IF LEN(Func.Statics[])>0
-					StaticDefText$ = StaticDefText$ + "var "+ JSVariDef$(Func.Statics[], TRUE)+";"+NewLine$()
+					StaticDefText$ = StaticDefText$ + "var "+ JSVariDef$(Func.Statics[], TRUE, FALSE, FALSE)+";"+NewLine$()
 					StaticText$ = StaticText$ + JSVariDef$(Func.Statics[])+";"+NewLine$()
 				ENDIF
-				//falls eine Sub und DEBUGMODE = FALSE, erzeuge im window objekt eine referenz darauf, um CALLBYNAME ausführen zu können
-
 				Text$ = Text$ + "window['"+Func.Name$+"'] = function("
 				LOCAL Find = FALSE
 				FOREACH P IN Func.Params[]
@@ -1202,17 +1200,20 @@ FUNCTION JSDoParameter$: expr AS Expr, func%, DoParam% = TRUE
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION JSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE
+FUNCTION JSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE, InitVal% = TRUE
 	LOCAL Text$ = ""
 	LOCAL Find = FALSE
 	FOREACH Var IN Varis[]
 		IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND (NoStatic = FALSE OR Compiler.Varis[Var].Typ <> VARI_IS_STATIC) AND JSShouldRedeclare(Var)
 			IF Find THEN Text$ = Text$ + ", "
-			Text$ = Text$ + Compiler.Varis[Var].Name$ + " = "
-			IF Compiler.Varis[Var].PreDef <> -1 AND (ForceDefault = FALSE OR Compiler.Varis[Var].Typ = VARI_IS_CONST)
-				Text$ = Text$ + JSGenerate$(Exprs[Compiler.Varis[Var].PreDef])
-			ELSE
-				Text$ = Text$ + JSGetDefaultValue$(Compiler.Varis[Var].datatype,Compiler.Varis[Var].ref,FALSE)
+			Text$ = Text$ + Compiler.Varis[Var].Name$
+			IF InitVal
+				Text$ = Text$ + " = "
+				IF Compiler.Varis[Var].PreDef <> -1 AND (ForceDefault = FALSE OR Compiler.Varis[Var].Typ = VARI_IS_CONST)
+					Text$ = Text$ + JSGenerate$(Exprs[Compiler.Varis[Var].PreDef])
+				ELSE
+					Text$ = Text$ + JSGetDefaultValue$(Compiler.Varis[Var].datatype,Compiler.Varis[Var].ref,FALSE)
+				ENDIF
 			ENDIF
 			Find = TRUE
 		ENDIF

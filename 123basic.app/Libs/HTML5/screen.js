@@ -74,13 +74,12 @@ function BLACKSCREEN() {
 }
 
 function USEASBMP() {
-	background = backbuffer.canvas;
 	var buffer = document.createElement('canvas');
     buffer.width = canvasWidth;
     buffer.height = canvasHeight;
-	backbuffer = new Screen(buffer, -1);
-	register(backbuffer);
-	USESCREEN(-1);
+	buffer.getContext('2d').drawImage(backbuffer.canvas, 0, 0);
+	
+	background = buffer;
 }
 
 function LOADBMP(path) {
