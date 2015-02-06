@@ -225,10 +225,11 @@ function LOADSPRITEMEM(file, w, h, pixels) {
 var inPoly = false;
 var num, mode;
 var polyStack = [];
-var tmpPolyStack = new Array(3);
+var tmpPolyStack = new Array(2);
 
 function ENDPOLY() {
 	if (!inPoly) throwError("ENDPOLY has to be in STARTPOLY - ENDPOLY ");
+	var plzTint = false;
 	if (polyStack.length > 0) {
 		//schließen!
 		if (polyStack.length === 4) {
@@ -253,7 +254,13 @@ function ENDPOLY() {
 						tmpPolyStack[1] = polyStack[i+1];
 						tmpPolyStack[2] = polyStack[i+2];
 						
-						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
+						if (tmpPolyStack[0].col !== whiteRGB && tmpPolyStack[1].col !== whiteRGB && tmpPolyStack[2].col !== whiteRGB) {
+							plzTint = true;
+						} else {
+							plzTint = false;
+						}
+						
+						drawPolygon(plzTint, drawingtris[0], tmpPolyStack, spr); //TODO: plzTint Parameter
 					}
 				}
 			} else if (mode === 0) {
@@ -272,7 +279,12 @@ function ENDPOLY() {
 						tmpPolyStack[0] = polyStack[0];
 						tmpPolyStack[1] = polyStack[i];
 						tmpPolyStack[2] = polyStack[i+1];
-						drawPolygon(false, simpletris, tmpPolyStack, spr); //TODO: plzTint Parameter
+						if (tmpPolyStack[0].col !== whiteRGB && tmpPolyStack[1].col !== whiteRGB && tmpPolyStack[2].col !== whiteRGB) {
+							plzTint = true;
+						} else {
+							plzTint = false;
+						}
+						drawPolygon(plzTint, drawingtris[0], tmpPolyStack, spr);
 					}
 				}
 			} else if (mode === 2) {
@@ -290,9 +302,11 @@ function ENDPOLY() {
 	context.restore();
 }
 
-var simpletris = [[0, 1, 2]];
-var tris2 = [[0, 1, 2], [2, 3, 1]];
-var tris1 = [[0, 1, 2], [2, 3, 0]];
+var drawingtris = [
+	[[0, 1, 2]],
+	[[0, 1, 2], [2, 3, 0]],
+	[[0, 1, 2], [2, 1, 3]]
+];
 
 function POLYNEWSTRIP() {
 	if (!inPoly) throwError("POLYNEWSTRIP has to be in STARTPOLY - ENDPOLY ");
@@ -312,29 +326,18 @@ function POLYNEWSTRIP() {
 	} else {
 		//use the texture!
 		//got code from: http://stackoverflow.com/questions/4774172/image-manipulation-and-texture-mapping-using-html5-canvas Thanks, you saved my life!!
-		var tris
-		if (mode === 2) {
-			tris = tris2;
-		} else if (mode === 1) {
-			tris =  tris1;
-		} else if (mode === 0){
-			tris = tris1 //TODO;
-		}else {
-			throwError("Invalid drawing mode!")
-		}
-		
 		var spr = getSprite(num);
 		
 		//muss das sprite gefärbt werden?
 		var plzTint;
-		if (polyStack[0].col != whiteRGB && polyStack[1].col != whiteRGB && polyStack[2].col != whiteRGB  && polyStack[2].col != whiteRGB) {
+		if (polyStack[0].col !== whiteRGB && polyStack[1].col !== whiteRGB && polyStack[2].col !== whiteRGB  && (polyStack.length > 2 ? polyStack[3].col !== whiteRGB : true)) {
 			plzTint = true;
 		} else {
 			plzTint = false;
 		}
 		
 		
-		drawPolygon(plzTint, tris, polyStack, spr);
+		drawPolygon(plzTint, drawingtris[mode], polyStack, spr);
 	}
 	
 	context.restore();
@@ -356,6 +359,24 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 		var tmpOperation = context.globalCompositeOperation;
 	}
 	
+	if (plzTint) {
+		//schauen ob alle gleiche Farbe haben
+		var col;
+		if (!(polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 3 && polyStack[2].col === polyStack[3].col))) {
+			plzTint = false;
+		} else {
+			col = polyStack[0];
+			if (!spr.tint) {
+				//Hat noch nicht die Tinting Farbchannel
+				spr.tint = generateRGBKs(spr.img);
+			}
+			
+			var red = ((polyStack[0].col & 0xFF0000)/0x10000)/255.0;
+			var green = ((polyStack[0].col & 0xFF00)/0x100)/255.0;
+			var blue = (polyStack[0].col & 0xFF)/255.0;
+		}
+	}
+	
 	var pts = polyStack
 	for (var t=0; t<tris.length; t++) {
 		var pp = tris[t];
@@ -363,11 +384,6 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 		var y0 = pts[pp[0]].y, y1 = pts[pp[1]].y, y2 = pts[pp[2]].y;
 		var u0 = pts[pp[0]].u, u1 = pts[pp[1]].u, u2 = pts[pp[2]].u;
 		var v0 = pts[pp[0]].v, v1 = pts[pp[1]].v, v2 = pts[pp[2]].v;
-
-		// Set clipping area so that only pixels inside the triangle will
-		// be affected by the image drawing operation
-		context.save(); context.beginPath(); context.moveTo(x0, y0); context.lineTo(x1, y1);
-		context.lineTo(x2, y2); context.closePath(); context.clip();
 
 		// Compute matrix transform
 		var delta = u0*v1 + v0*u2 + u1*v2 - v1*u2 - v0*u1 - u0*v2;
@@ -379,61 +395,36 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 		var delta_e = u0*y1 + y0*u2 + u1*y2 - y1*u2 - y0*u1 - u0*y2;
 		var delta_f = u0*v1*y2 + v0*y1*u2 + y0*u1*v2 - y0*v1*u2
 					  - v0*u1*y2 - u0*y1*v2;
-
+		
+		// Set clipping area so that only pixels inside the triangle will
+		// be affected by the image drawing operation
+		context.save();
+		context.beginPath(); context.moveTo(x0, y0); context.lineTo(x1, y1);
+		context.lineTo(x2, y2); context.closePath(); context.clip();
+		
 		// Draw the transformed image
+		delta = delta === 0 ? 1 : delta;
 		context.transform(delta_a/delta, delta_d/delta,
 					  delta_b/delta, delta_e/delta,
 					  delta_c/delta, delta_f/delta);
 		
-		if (plzTint) {
-			//schauen ob alle gleiche Farbe haben
-			if (!(polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col))) {
-				// workaround: use average color
-				if (polyStack.length > 2) {
-					var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col + polyStack[3].col)/4);
-					polyStack[0].col = avg;
-					polyStack[1].col = avg;
-					polyStack[2].col = avg;
-					polyStack[3].col = avg;
-				} else {
-					var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col)/3);
-					polyStack[0].col = avg;
-					polyStack[1].col = avg;
-					polyStack[2].col = avg;
-				}
-			}
-			if (!spr.tint) {
-			//Hat noch nicht die Tinting Farbchannel
-				spr.tint = generateRGBKs(spr.img);
-			}
-			if (spr.tint) {
-				//selbe farbe \o/
-				
-				var red = (polyStack[t].col & 0xFF0000)/0x10000 
-				var green = (polyStack[t].col & 0xFF00)/0x100 
-				var blue = polyStack[t].col & 0xFF 
-				
-				context.globalAlpha = 1;
-				context.globalCompositeOperation = 'copy';
-				context.drawImage( spr.tint[3], 0, 0 );
+		if (plzTint && spr.tint) {
+			context.globalAlpha = 1;
+			context.globalCompositeOperation = 'copy';
+			context.drawImage( spr.tint[3], 0, 0 );
 
-				context.globalCompositeOperation = 'lighter';
-				if ( red > 0 ) {
-					context.globalAlpha = red   / 255.0;
-					context.drawImage( spr.tint[0], 0, 0 );
-				}
-				if ( green > 0 ) {
-					context.globalAlpha = green / 255.0;
-					context.drawImage( spr.tint[1], 0, 0 );
-				}
-				if ( blue > 0 ) {
-					context.globalAlpha = blue  / 255.0;
-					context.drawImage( spr.tint[2], 0, 0 );
-				}
-				
-				
-			} else {
-				//Kann nicht tinten...
+			context.globalCompositeOperation = 'lighter';
+			if ( red > 0 ) {
+				context.globalAlpha = red;
+				context.drawImage( spr.tint[0], 0, 0 );
+			}
+			if ( green > 0 ) {
+				context.globalAlpha = green;
+				context.drawImage( spr.tint[1], 0, 0 );
+			}
+			if ( blue > 0 ) {
+				context.globalAlpha = blue;
+				context.drawImage( spr.tint[2], 0, 0 );
 			}
 		} else {
 			context.drawImage(spr.img, 0, 0);
@@ -449,10 +440,10 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 function POLYVECTOR(posx, posy, tx, ty, color) {
 	if (!inPoly) throwError("POLYVECTOR has to be in STARTPOLY - ENDPODRAWANIMLY ");
 	
-	if (polyStack[polyStack.length]) {
+	if (polyStack[polyStack.length] !== undefined) {
 		//existiert bereits!
-		polyStack[polyStack.length].x = posx;
-		polyStack[polyStack.length].y = posy;
+		polyStack[polyStack.length].x = ~~(posx);
+		polyStack[polyStack.length].y = ~~(posy);
 		polyStack[polyStack.length].u = tx;
 		polyStack[polyStack.length].v = ty;
 		polyStack[polyStack.length].col = color;
@@ -621,4 +612,58 @@ function opt_GRABSPRITE(num, x, y, width, height) {
 	var spr = new Sprite(canvas, num);
 	spr.loaded = true;
 	register(spr);
+}
+
+/**
+ * @author Joseph Lenton - PlayMyCode.com
+ *
+ * @param img the image with tinting
+ */
+function generateRGBKs( img ) {
+	var w = img.width;
+	var h = img.height;
+	var rgbks = [];
+
+	var canvas = document.createElement("canvas");
+	canvas.width = w;
+	canvas.height = h;
+
+	var ctx = canvas.getContext("2d");
+	ctx.drawImage( img, 0, 0 );
+
+	var pixels = ctx.getImageData( 0, 0, w, h ).data;
+
+	// 4 is used to ask for 3 images: red, green, blue and
+	// black in that order.
+	for ( var rgbI = 0; rgbI < 4; rgbI++ ) {
+		var canvas = document.createElement("canvas");
+		canvas.width  = w;
+		canvas.height = h;
+
+		var ctx = canvas.getContext('2d');
+		ctx.drawImage( img, 0, 0 );
+		var to = ctx.getImageData( 0, 0, w, h );
+		var toData = to.data;
+
+		for (
+				var i = 0, len = pixels.length;
+				i < len;
+				i += 4
+		) {
+			toData[i  ] = (rgbI === 0) ? pixels[i  ] : 0;
+			toData[i+1] = (rgbI === 1) ? pixels[i+1] : 0;
+			toData[i+2] = (rgbI === 2) ? pixels[i+2] : 0;
+			toData[i+3] =                pixels[i+3]    ;
+		}
+
+		ctx.putImageData( to, 0, 0 );
+
+		// image is _slightly_ faster then canvas for this, so convert
+		var imgComp = new Image();
+		imgComp.src = canvas.toDataURL();
+
+		rgbks.push( canvas );
+	}
+
+	return rgbks;
 }

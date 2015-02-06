@@ -132,60 +132,6 @@ function isPixelCollision( first, x, y, other, x2, y2 ) {
     return false;
 }
 
-/**
- * @author Joseph Lenton - PlayMyCode.com
- *
- * @param img the image with tinting
- */
-function generateRGBKs( img ) {
-	var w = img.width;
-	var h = img.height;
-	var rgbks = [];
-
-	var canvas = document.createElement("canvas");
-	canvas.width = w;
-	canvas.height = h;
-
-	var ctx = canvas.getContext("2d");
-	ctx.drawImage( img, 0, 0 );
-
-	var pixels = ctx.getImageData( 0, 0, w, h ).data;
-
-	// 4 is used to ask for 3 images: red, green, blue and
-	// black in that order.
-	for ( var rgbI = 0; rgbI < 4; rgbI++ ) {
-		var canvas = document.createElement("canvas");
-		canvas.width  = w;
-		canvas.height = h;
-
-		var ctx = canvas.getContext('2d');
-		ctx.drawImage( img, 0, 0 );
-		var to = ctx.getImageData( 0, 0, w, h );
-		var toData = to.data;
-
-		for (
-				var i = 0, len = pixels.length;
-				i < len;
-				i += 4
-		) {
-			toData[i  ] = (rgbI === 0) ? pixels[i  ] : 0;
-			toData[i+1] = (rgbI === 1) ? pixels[i+1] : 0;
-			toData[i+2] = (rgbI === 2) ? pixels[i+2] : 0;
-			toData[i+3] =                pixels[i+3]    ;
-		}
-
-		ctx.putImageData( to, 0, 0 );
-
-		// image is _slightly_ faster then canvas for this, so convert
-		var imgComp = new Image();
-		imgComp.src = canvas.toDataURL();
-
-		rgbks.push( imgComp );
-	}
-
-	return rgbks;
-}
-
 function BOXCOLL(x1,y1,breite1,hoehe1,x2,y2,breite2,hoehe2) {
 	if (breite1 < 0) {
 		breite1 = -breite1;

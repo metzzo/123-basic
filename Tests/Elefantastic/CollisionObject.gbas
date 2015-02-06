@@ -48,14 +48,15 @@ TYPE TCollisionObject
 					STARTPOLY LineImg,2
 					LOCAL a = self.DirVec.Angle()+90
 					LOCAL s = SIN(a), c = COS(a)
-					LOCAL col = 0
+					LOCAL col = RGB(255,255,255)
 					POLYVECTOR self.PosVec.X+c*self.Thickness, self.PosVec.Y+s*self.Thickness,0,0,col
 					POLYVECTOR self.PosVec.X-c*self.Thickness, self.PosVec.Y-s*self.Thickness,1,0,col
-					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X+c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y+s*self.Thickness,1,0,col
+					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X+c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y+s*self.Thickness,0,1,col
 					POLYVECTOR self.InfoVec[LINE_INFO_ENDPOSVEC].X-c*self.Thickness, self.InfoVec[LINE_INFO_ENDPOSVEC].Y-s*self.Thickness,1,1,col
 					ENDPOLY
+					
+					//DRAWLINE self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, self.InfoVec[LINE_INFO_ENDPOSVEC].X + CurrentMap.Scroll.X, self.InfoVec[LINE_INFO_ENDPOSVEC].Y + CurrentMap.Scroll.Y, RGB(255,0,0)
 				ENDIF
-				//DRAWLINE self.PosVec.X + CurrentMap.Scroll.X, self.PosVec.Y + CurrentMap.Scroll.Y, self.InfoVec[LINE_INFO_ENDPOSVEC].X + CurrentMap.Scroll.X, self.InfoVec[LINE_INFO_ENDPOSVEC].Y + CurrentMap.Scroll.Y, RGB(255,0,0)
 			CASE OBJECT_IS_ROUNDLINE
 
 			CASE OBJECT_IS_AIRSTREAM

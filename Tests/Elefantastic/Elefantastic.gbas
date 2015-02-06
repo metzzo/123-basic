@@ -16,7 +16,6 @@ GLOBAL DestrTile% = LoadAni("destrtile", 32, 32)
 GLOBAL PlanetSpr% = LoadSpr("planet1")
 GLOBAL LineImg% = LoadSpr("line")
 
-
 GLOBAL GameState% = MAIN_GAME
 
 GLOBAL mx, my, ml, mr
@@ -42,8 +41,10 @@ SUB GLB_ON_LOOP:
 	MOUSESTATE mx, my, ml, mr
 	MouseSpeed.X = mx - ox
 	MouseSpeed.Y = my - oy
-
+	
 	STRETCHSPRITE BGSpr, 0, 0, ScreenWidth, ScreenHeight
+	
+	DRAWSPRITE LineImg, mx, my
 
 	IF FirstStart
 		SELECT GameState
