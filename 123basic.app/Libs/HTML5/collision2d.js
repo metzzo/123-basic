@@ -3,7 +3,6 @@
 //------------------------------------------------------------
 
 function SPRCOLL(spr1, x1, y1, spr2, x2, y2) {
-	//throwError("TODO: sprcoll");
 	var s1, s2;
 	s1 = getSprite(spr1);
 	s2 = getSprite(spr2);
@@ -36,8 +35,37 @@ function SPRCOLL(spr1, x1, y1, spr2, x2, y2) {
 	return isPixelCollision(s1.data, x1, y1, s2.data, x2, y2) ? 1 : 0;
 }
 
-function ANIMCOLL(ani1, tile, x1, y1, ani2, time2, x2, y2) {
-	throwError("TODO: animcoll");
+function ANIMCOLL(ani1, tile1, x1, y1, ani2, tile2, x2, y2) {
+	var s1, s2;
+	s1 = getSprite(ani1);
+	s2 = getSprite(ani2);
+	
+	
+	if (!s1.frames[tile1].data || !s2.frames[tile2].data) {
+		var getMyData = function(s, frame) {
+			//oha get the data!
+			try {
+				var canvas = document.createElement('canvas');
+				canvas.width = s.img.width;
+				canvas.height = s.img.height;
+				var context = canvas.getContext("2d");
+				
+				context.drawImage(s.img, 0, 0);
+				frame.data = context.getImageData(frame.posx, frame.posy, s.frameWidth, s.frameHeight);
+			} catch (ex) {
+				domExceptionError(ex);
+			}
+		}
+		
+		if (!s1.frames[tile1].data) {
+			getMyData(s1, s1.frames[tile1]);
+		}
+		if (!s2.frames[tile2].data) {
+			getMyData(s2, s2.frames[tile2]);
+		}
+	}
+	
+	return isPixelCollision(s1.frames[tile1].data, x1, y1, s2.frames[tile2].data, x2, y2) ? 1 : 0;
 }
 
 //Thanks Joseph for these two useful functions!

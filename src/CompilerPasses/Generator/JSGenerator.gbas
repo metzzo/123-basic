@@ -115,11 +115,11 @@ FUNCTION JS_Generator$:
 				Text$ = Text$ + "* @constructor"+NewLine$()
 				Text$ = Text$ + "*/"+NewLine$()
 			ENDIF
-			
+
 			Text$ = Text$ +"window ['"+Typ.Name$+"'] = function() { this.reset(); }"+NewLine$()
 			IndentUp()
 			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.reset = function() {"+NewLine$()
-			
+
 			//defaults setzen
 			FOREACH Attr IN Typ.Attributes[]
 				ALIAS variable AS Compiler.Varis[Attr]
@@ -146,10 +146,10 @@ FUNCTION JS_Generator$:
 					Text$ = Text$ + ";"+NewLine$()
 				ENDIF
 			NEXT
-			
+
 			Text$ = Text$ + "this.pool = pool_" + Typ.OName$ + ";" + NewLine$()
 			Text$ = Text$ + "this.succ = null;" + NewLine$()
-			
+
 			IndentDown()
 			Text$ = Text$ + NewLine$() + "};" + NewLine$()
 
@@ -181,12 +181,12 @@ FUNCTION JS_Generator$:
 			//vtable
 			Text$ = Text$ + "other.vtbl = this.vtbl;"+NewLine$()
 			Text$ = Text$ + "other.pool = this.pool;"+NewLine$()
-			
+
 			//Text$ = Text$ + "other.clone = this.clone;"+NewLine$()
 			IndentDown()
 			Text$ = Text$ + "return other;"+NewLine$()
 			Text$ = Text$ + "};" + NewLine$()
-			
+
 			IndentUp()
 			Text$ = Text$ + "pool_" + Typ.OName$ +" = { " + NewLine$()
 			Text$ = Text$ + "last: null, "+NewLine$()
@@ -371,7 +371,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = Text$ + Def$
 				Text$ = Text$ + ";"+NewLine$()
 			ENDIF
-			
+
 			LOCAL BeforeUndef$ = VariUndef$
 			LOCAL MyUndef$ = ""
 			FOREACH Var IN expr.Varis[]
@@ -410,7 +410,7 @@ FUNCTION JSGenerate$: expr AS Expr
 					DIMPUSH ERes$[], add$
 				ENDIF
 			NEXT
-			
+
 			IF mngGoto
 				IndentDown()
 				IndentDown()
@@ -459,9 +459,9 @@ FUNCTION JSGenerate$: expr AS Expr
 			IF FirstText$ <> ""
 				Text$ = Text$ + FirstText$
 			ENDIF
-			
+
 			Text$ = Text$ + MyUndef$
-			
+
 			IF mngGoto
 				Text$ = Text$ + "__pc = -1; break;"+NewLine$()
 				IndentUp()
@@ -478,7 +478,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				Text$ = NewLine$() + Text$
 			ENDIF
 			IF NOT IsInGoto OR mngGoto THEN Text$ = "{" + Text$ //öffnende klammer rein
-			
+
 			//Scope leave
 			IF DEBUGMODE AND IsStackPusher
 				IndentDown()
@@ -503,7 +503,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				//IndentUp()
 				Text$ = Text$ + NewLine$()
 			ENDIF
-			
+
 			VariUndef$ = BeforeUndef$
 			CurrentScope = oScp
 			CurrentFunc = oFunc
@@ -621,7 +621,7 @@ FUNCTION JSGenerate$: expr AS Expr
 				LOCAL Add$ = ""
 				FOREACH d IN expr.dims[]
 					IF s THEN Text$ = Text$ + ", "
-					
+
 					Text$ = Text$ + JSGenerate$(Exprs[d])
 
 					s = TRUE
@@ -740,9 +740,9 @@ FUNCTION JSGenerate$: expr AS Expr
 				CASE EXPR_IS_STR
 					F = TRUE
 			ENDSELECT
-			
+
 			Text$ = Text$ + VariUndef$
-			
+
 			IF F
 				Text$ = Text$ + "return "+JSTryUnref$(expr.expr)
 			ELSE

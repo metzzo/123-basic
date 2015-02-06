@@ -111,7 +111,7 @@ function updateFrames(num) {
 		var i = 0;
 		for (var y = 0; y < spr.img.height; y+= spr.frameHeight) {
 			for (var x = 0; x < spr.img.width; x += spr.frameWidth) {
-				spr.frames.push({posx: x, posy: y});
+				spr.frames.push({posx: x, posy: y, data: null});
 			}
 		}
 	}
@@ -260,7 +260,7 @@ function ENDPOLY() {
 							plzTint = false;
 						}
 						
-						drawPolygon(plzTint, drawingtris[0], tmpPolyStack, spr); //TODO: plzTint Parameter
+						drawPolygon(plzTint, drawingtris[0], tmpPolyStack, spr);
 					}
 				}
 			} else if (mode === 0) {
@@ -543,7 +543,7 @@ function DRAWANIM(num, frame, x, y) {
 	if (spr.frames === undefined) throwError("DRAWANIM can only draw an animation!");
 	frame = frame % spr.frames.length;
 	if (frame < 0) throwError("Invalid frame '"+frame+"'");
-	context.drawImage(spr.img, ~~(spr.frames[frame].posx+.5), ~~(spr.frames[frame].posy+.5), spr.frameWidth, spr.frameHeight, CAST2INT(x), CAST2INT(y), spr.frameWidth, spr.frameHeight);
+	context.drawImage(spr.img, ~~(spr.frames[frame].posx+.5), ~~(spr.frames[frame].posy+.5), spr.frameWidth, spr.frameHeight, ~~(x + .5), ~~(y + .5), spr.frameWidth, spr.frameHeight);
 }
 
 function ROTOZOOMANIM(num, frame, x, y,phi, scale) {

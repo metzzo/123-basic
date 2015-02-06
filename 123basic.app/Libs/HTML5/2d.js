@@ -470,7 +470,7 @@ function GETTIMER() {
 function ALPHAMODE(mode) {
 	var val;
 	if (mode < 0) {
-		context.globalCompositeOperation = 'source-atop'; // TODO: Implement properly
+		context.globalCompositeOperation = 'source-atop';
 		val = 1 - (1 + mode);
 	} else if (mode > 0) {
 		context.globalCompositeOperation = 'source-atop';
@@ -492,8 +492,7 @@ function LIMITFPS(fps) {
 }
 
 function RGB(r, g, b) {
-	r = r%256; g = g%256; b = b%256
-	return r*0x10000 + g*0x100 + b;
+	return (r%256)*0x10000 + (g%256)*0x100 + (b%256);
 }
 
 var whiteRGB = RGB(255,255,255);
@@ -595,7 +594,7 @@ function VIEWPORT(x, y, width, height) {
 }
 
 function ALLOWESCAPE(allow) {
-	throwError("TODO: allowescape");
+	// do nothing
 }
 
 function AUTOPAUSE(mode) {
@@ -604,6 +603,10 @@ function AUTOPAUSE(mode) {
 
 function HIBERNATE() {
 	hibernate = true;
+}
+
+function SETORIENTATION(orientation) {
+	throwError("TODO: implement setorientation");
 }
 
 //------------------------------------------------------------
@@ -639,6 +642,9 @@ function GETPIXEL(x, y) {
 	return RGB(data[0], data[1], data[2]);
 }
 
+function GETORIENTATION() {
+	throwError("TODO: implement getorientation");
+}
 
 function removeTransparency(image, col) {
 	if (typeof col == 'undefined') {

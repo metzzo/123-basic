@@ -289,7 +289,7 @@ SoundChannel.prototype.finishedPlaying = function() {
 }
 
 function LOADSOUND(file, num, buffer) {
-	if (file == "") {
+	if (file === "") {
 		// TODO: free up
 	} else {
 		var ass = loadAsset(file);
@@ -338,7 +338,7 @@ function SOUNDPLAYING(chn) {
 }
 
 function PLAYMUSIC(file, loop) {
-	if (file == "") {
+	if (file === "") {
 		// TODO: free up
 	} else {
 		var ass = loadAsset(file);
