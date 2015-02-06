@@ -10,11 +10,12 @@ function OTTArray(def) {
 	this.values = [];
 	this.dimensions = [0];
 	this.defval = !!def ? def : 0;
+	this.succ = null;
 }
 
 //Klonen!
 OTTArray.prototype.clone = function() {
-	var other = new OTTArray();
+	var other = pool_array.alloc(this.defval);
 	
 	other.dimensions = this.dimensions.slice(0);
 	other.defval = this.defval;
@@ -184,4 +185,27 @@ function DIMDATA(array, values) {
 	array.dimensions = [values.length];
 }
 
+var array_pools = { };
 
+var pool_array = {
+	alloc: function(defval) {
+		var typ = typeof defval
+		var obj = array_pools[typ];
+		if (obj !== undefined) {
+			array_pools[typ] = obj.succ;
+			obj.succ = null;
+		} else {
+			obj = new OTTArray(defval);
+		}
+		return obj;
+	},
+	free: function(obj) {
+		if (obj.succ !== null) return;
+		var typ = typeof obj.defval
+		if (array_pools[typ] === undefined) {
+			array_pools[typ] = null;
+		}
+		obj.succ = array_pools[typ];
+		array_pools[typ] = obj;
+	}
+};

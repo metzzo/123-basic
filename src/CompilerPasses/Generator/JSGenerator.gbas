@@ -377,10 +377,14 @@ FUNCTION JSGenerate$: expr AS Expr
 			LOCAL BeforeUndef$ = VariUndef$
 			LOCAL MyUndef$ = ""
 			FOREACH Var IN expr.Varis[]
-				IF IsType(Compiler.Varis[Var].datatype.Name$) AND Compiler.Varis[Var].datatype.IsArray = 0
-					IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND Compiler.Varis[Var].Typ <> VARI_IS_STATIC AND JSShouldRedeclare(Var)
-						MyUndef$ = MyUndef$ + "pool_" + Compiler.Varis[Var].datatype.Name$+".free("+ Compiler.Varis[Var].Name$ + ");"
+				IF Compiler.Varis[Var].datatype.IsArray = 0
+					IF IsType(Compiler.Varis[Var].datatype.Name$)
+						IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND Compiler.Varis[Var].Typ <> VARI_IS_STATIC AND JSShouldRedeclare(Var)
+							MyUndef$ = MyUndef$ + "pool_" + Compiler.Varis[Var].datatype.Name$+".free("+ Compiler.Varis[Var].Name$ + ");"
+						ENDIF
 					ENDIF
+				ELSE
+					MyUndef$ = "pool_array.free(" + Compiler.Varis[Var].Name$ + ");"
 				ENDIF
 			NEXT
 
@@ -1026,7 +1030,8 @@ FUNCTION JSGenerate$: expr AS Expr
 		CASE EXPR_IS_DEFVAL
 			Text$ = Text$ + JSGetDefaultValue$(expr.datatype,FALSE,FALSE)
 		CASE EXPR_IS_DIMASEXPR
-			Text$ = Text$ + "DIM(new OTTArray(), ["
+			LOCAL def$ = JSGetDefaultValue$(expr.datatype, TRUE, TRUE)
+			Text$ = Text$ + "DIM(pool_array.alloc(" + def$ + "), ["
 			LOCAL Find% = FALSE
 			FOREACH D IN expr.dims[]
 				IF Find = TRUE THEN Text$ = Text$ + ", "
@@ -1034,7 +1039,7 @@ FUNCTION JSGenerate$: expr AS Expr
 
 				Find = TRUE
 			NEXT
-			Text$ = Text$ + "], "+JSGetDefaultValue$(expr.datatype, TRUE, TRUE)+")"
+			Text$ = Text$ + "], "+def$+")"
 		CASE EXPR_IS_ALIAS
 			Text$ = Text$ + Compiler.Varis[expr.vari].Name$ + " = "
 			IF Exprs[expr.expr].Typ = EXPR_IS_CAST2OBJ
@@ -1240,7 +1245,7 @@ ENDFUNCTION
 FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
-		RetVal$ = "new OTTArray(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")"
+		RetVal$ = "pool_array.alloc(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")"
 	ELSE
 		SELECT datatype.Name$
 			CASE "int"
