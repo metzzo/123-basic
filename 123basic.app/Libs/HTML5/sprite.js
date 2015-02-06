@@ -387,43 +387,45 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 		
 		if (plzTint) {
 			//schauen ob alle gleiche Farbe haben
-			if (polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col)) {
-				if (!spr.tint) {
-				//Hat noch nicht die Tinting Farbchannel
-					spr.tint = generateRGBKs(spr.img);
-				}
-				if (spr.tint) {
-					//selbe farbe \o/
-					
-					var red = (polyStack[t].col & 0xFF0000)/0x10000 
-					var green = (polyStack[t].col & 0xFF00)/0x100 
-					var blue = polyStack[t].col & 0xFF 
-					
-					context.globalAlpha = 1;
-					context.globalCompositeOperation = 'copy';
-					context.drawImage( spr.tint[3], 0, 0 );
+			if (!(polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col)) {
+				// workaround: use average color
+				var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col)/3);
+				polyStack[0].col = avg;
+				polyStack[1].col = avg;
+				polyStack[2].col = avg;
+			}
+			if (!spr.tint) {
+			//Hat noch nicht die Tinting Farbchannel
+				spr.tint = generateRGBKs(spr.img);
+			}
+			if (spr.tint) {
+				//selbe farbe \o/
+				
+				var red = (polyStack[t].col & 0xFF0000)/0x10000 
+				var green = (polyStack[t].col & 0xFF00)/0x100 
+				var blue = polyStack[t].col & 0xFF 
+				
+				context.globalAlpha = 1;
+				context.globalCompositeOperation = 'copy';
+				context.drawImage( spr.tint[3], 0, 0 );
 
-					context.globalCompositeOperation = 'lighter';
-					if ( red > 0 ) {
-						context.globalAlpha = red   / 255.0;
-						context.drawImage( spr.tint[0], 0, 0 );
-					}
-					if ( green > 0 ) {
-						context.globalAlpha = green / 255.0;
-						context.drawImage( spr.tint[1], 0, 0 );
-					}
-					if ( blue > 0 ) {
-						context.globalAlpha = blue  / 255.0;
-						context.drawImage( spr.tint[2], 0, 0 );
-					}
-					
-					
-				} else {
-					//Kann nicht tinten...
+				context.globalCompositeOperation = 'lighter';
+				if ( red > 0 ) {
+					context.globalAlpha = red   / 255.0;
+					context.drawImage( spr.tint[0], 0, 0 );
 				}
+				if ( green > 0 ) {
+					context.globalAlpha = green / 255.0;
+					context.drawImage( spr.tint[1], 0, 0 );
+				}
+				if ( blue > 0 ) {
+					context.globalAlpha = blue  / 255.0;
+					context.drawImage( spr.tint[2], 0, 0 );
+				}
+				
+				
 			} else {
-				//Die Farbe ist ein Farbverlauf!
-				//Das kann ich noch nicht...
+				//Kann nicht tinten...
 			}
 		} else {
 			context.drawImage(spr.img, 0, 0);

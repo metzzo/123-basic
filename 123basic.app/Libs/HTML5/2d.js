@@ -24,7 +24,7 @@ preInitFuncs.push(function() {
 	}
 });
 
-
+var useDoubleBuffering = false; // soll double buffering verwendet werden?
 var waitload	= 0; 		//Auf wieviele Sachen muss noch gewartet werden
 var curScreen	= null;		//Der aktuell ausgewählte Screen
 var context		= null; 	//Der JavaScript Kontext
@@ -61,6 +61,14 @@ var sub_loopName = "GLB_ON_LOOP";
 //------------------------------------------------------------
 
 var doCurrentFunction = function() {
+	if (!useDoubleBuffering) {
+		CLEARSCREEN(clrColor);
+		
+		if (!!background) {
+			backbuffer.context.drawImage(background, 0, 0);
+		}
+	}
+	
 	if (!waitload) {
 		loopFunc(); //mainloop
 	} else if (!!window[sub_loadingName]) {
@@ -198,11 +206,13 @@ function SHOWSCREEN() {
 	
 	lastShwscrn = GETTIMERALL();
 	if (initCalled) {
-		USESCREEN(-2);
-		CLEARSCREEN(clrColor);
-		USESCREEN(-1);
-		frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
-		CLEARSCREEN(clrColor);
+		if (useDoubleBuffering) {
+			USESCREEN(-2);
+			CLEARSCREEN(clrColor);
+			USESCREEN(-1);
+			frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
+			CLEARSCREEN(clrColor);
+		}
 		//nun noch falls vorhanden den bg zeichnen
 		if (!!background) {
 			backbuffer.context.drawImage(background, 0, 0);
@@ -231,14 +241,22 @@ function init2D(canvasName) {
 		usedSoundFormat = 'mp3';
 	}
 	
-	frontbuffer = new Screen(document.getElementById(canvasName), -2);
-	register(frontbuffer);
-	
-	var cnvs = document.createElement('canvas');
-	cnvs.width = frontbuffer.canvas.width
-	cnvs.height = frontbuffer.canvas.height
-	backbuffer = new Screen(cnvs, -1);
-	register(backbuffer);
+	if (useDoubleBuffering) {
+		frontbuffer = new Screen(document.getElementById(canvasName), -2);
+		register(frontbuffer);
+		
+		var cnvs = document.createElement('canvas');
+		cnvs.width = frontbuffer.canvas.width
+		cnvs.height = frontbuffer.canvas.height
+		backbuffer = new Screen(cnvs, -1);
+		register(backbuffer);
+	} else {
+		frontbuffer = new Screen(document.getElementById(canvasName), -2);
+		register(frontbuffer);
+		
+		backbuffer = new Screen(document.getElementById(canvasName), -1);
+		register(backbuffer);
+	}
 	
 	if (typeof window[sub_loadingName] == 'undefined') window[sub_loadingName] = null;
 	

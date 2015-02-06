@@ -200,8 +200,8 @@ var pool_array = {
 		return obj;
 	},
 	free: function(obj) {
-		if (obj.succ !== null) return;
-		var typ = typeof obj.defval
+		if (obj.succ !== null || obj.constructor === Array) return;
+		var typ = typeof obj.defval;
 		if (array_pools[typ] === undefined) {
 			array_pools[typ] = null;
 		}
