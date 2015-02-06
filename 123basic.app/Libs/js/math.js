@@ -123,8 +123,7 @@ function SORTARRAY(array, cmp) {
 				case 'number':
 					return a < b ? -1 : (a > b ? 1 : 0)
 				default:
-					throwError("TODO: Default sortarray with types!");
-					return;
+					return 0;
 			}
 		}
 	} else {

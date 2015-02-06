@@ -65,7 +65,9 @@ TYPE IdentifierFunc
 	Tok% //Der Starttoken
 	PlzCompile% //Es soll bitte kompiliert werden wenn das Hauptfile fertig kompiliert wurde.
 	HasRef% = FALSE //Hat es BYREF Variablen?
-
+	
+	DefTok% // Token of the func declaration
+	
 	UsedAsPrototype% = FALSE // Wurde die FUnktion als Prototype verwendet? Dazu da: unref() in JS minimieren
 
 	//FUNC_IS_METHOD
@@ -75,62 +77,6 @@ TYPE IdentifierFunc
 
 	//FUNC_IS_FUNC
 	IsCallback% = FALSE //Ist es eine Callbackfunktion?
-
-	FUNCTION Save: F%
-		WRITEUWORD F, IDENTIFIERFUNC_VERSION
-
-		WriteString(F, self.OName$)
-		WriteString(F, self.Name$)
-
-		WRITEUWORD F, LEN(self.Params[])
-		FOREACH P IN self.Params[]
-			WRITELONG F, P
-			IF P <> -1 THEN Compiler.Varis[P].Save(F)
-		NEXT
-
-		WRITEUWORD F, LEN(self.CopyParams[])
-		FOREACH P IN self.CopyParams[]
-			WRITELONG F, P
-			IF P <> -1 THEN Compiler.Varis[P].Save(F)
-		NEXT
-
-		WRITEUWORD F, LEN(self.Statics[])
-		FOREACH P IN self.Statics[]
-			WRITELONG F, P
-			IF P <> -1 THEN Compiler.Varis[P].Save(F)
-		NEXT
-
-
-		WRITELONG F, self.Native
-		WRITELONG F, self.Scp
-		WRITELONG F, self.ID
-		WRITELONG F, self.Typ
-		WRITELONG F, self.Tok
-		WRITELONG F, self.PlzCompile
-		WRITELONG F, self.HasRef
-
-		WRITELONG F, self.MyType
-		WRITELONG F, self.SelfVar
-		WRITELONG F, self.IsAbstract
-
-		WRITELONG F, self.IsCallback
-
-
-		//Referenzen abspeichern!
-		IF self.Tok <> -1 THEN Compiler.Tokens[self.Tok].Save(F)
-
-		self.datatype.Save(F)
-
-		IF self.MyType <> -1 THEN Compiler.Types[self.MyType].Save(F)
-
-		IF self.Scp <> -1 THEN Exprs[self.Scp].Save(F)
-
-		WRITEUWORD F, IDENTIFIERFUNC_VERSION
-	ENDFUNCTION
-
-	FUNCTION Load%: F%
-
-	ENDFUNCTION
 ENDTYPE
 
 CONSTANT VARI_IS_LOCAL	= 1
@@ -160,28 +106,6 @@ TYPE IdentifierVari
 	//VARI_IS_STATIC
 	func% // Zu welcher funktion gehört die Variable
 
-	FUNCTION Save: F%
-		WRITEUWORD F, IDENTIFIERVARI_VERSION
-		WriteString(F, self.Name$)
-		self.datatype.Save(F)
-		WRITELONG  F, self.Typ
-		WRITELONG  F, self.ID
-		WRITELONG  F, self.PreDef
-		WRITELONG  F, self.ref
-		WRITELONG  F, self.OwnerVari
-		WRITELONG  F, self.func
-
-		IF self.func THEN Compiler.Funcs[self.func].Save(F)
-		IF self.OwnerVari THEN Compiler.Varis[self.OwnerVari].Save(F)
-		IF self.PreDef = -1 THEN Exprs[self.PreDef].Save(F)
-
-
-		WRITEUWORD F, IDENTIFIERVARI_VERSION
-	ENDFUNCTION
-
-	FUNCTION Load%: F%
-
-	ENDFUNCTION
 ENDTYPE
 
 CONSTANT IDENTIFIERTYPE_VERSION = 3000
@@ -199,53 +123,6 @@ TYPE IdentifierType
 	Createable% = TRUE
 
 	IsNative% = FALSE
-
-	FUNCTION Save: F%
-		WRITEUWORD F, IDENTIFIERTYPE_VERSION
-		WriteString(F, self.Name$)
-		WriteString(F, self.RealName$)
-
-
-
-		WRITEUWORD F, self.ID
-		WRITELONG  F, self.Extending
-
-
-		WRITEUWORD F, LEN(self.Attributes[])
-		FOREACH P IN self.Attributes[]
-			WRITELONG F, P
-			IF P <> -1 THEN Compiler.Varis[P].Save(F)
-		NEXT
-
-		WRITEUWORD F, LEN(self.Methods[])
-		FOREACH P IN self.Methods[]
-			WRITELONG F, P
-			IF P <> -1 THEN Compiler.Funcs[P].Save(F)
-		NEXT
-
-		WRITEUWORD F, LEN(self.PreSize[])
-		FOREACH P IN self.PreSize[]
-			WRITELONG F, P
-			IF P <> -1 THEN Exprs[P].Save(F)
-		NEXT
-
-
-		WRITEUWORD F, IDENTIFIERTYPE_VERSION
-	ENDFUNCTION
-
-	FUNCTION Load%: F%
-		LOCAL tmp%
-		READUWORD F, tmp
-		IF tmp <> IDENTIFIERTYPE_VERSION THEN RETURN FALSE
-
-
-
-
-		READUWORD F, tmp
-		IF tmp <> IDENTIFIERTYPE_VERSION THEN RETURN FALSE
-
-		RETURN FALSE
-	ENDFUNCTION
 ENDTYPE
 GLOBAL LastType AS IdentifierType
 
@@ -253,26 +130,6 @@ CONSTANT DATATYPE_VERSION = 4000
 TYPE Datatype
 	Name$
 	IsArray%
-
-	FUNCTION Save: F%
-		WRITEUWORD F, DATATYPE_VERSION
-		WriteString(F, self.Name$)
-		WRITELONG F, self.IsArray
-		WRITEUWORD F, DATATYPE_VERSION
-	ENDFUNCTION
-
-	FUNCTION Load%: F%
-		LOCAL tmp%
-		READUWORD F, tmp
-		IF tmp <> DATATYPE_VERSION THEN RETURN FALSE
-
-		ReadString(F, self.Name$)
-		READLONG F, self.IsArray
-
-		READUWORD F, tmp
-		IF tmp <> DATATYPE_VERSION THEN RETURN FALSE
-		RETURN TRUE
-	ENDFUNCTION
 ENDTYPE
 GLOBAL voidDatatype AS Datatype
 GLOBAL intDatatype AS Datatype
@@ -303,36 +160,6 @@ TYPE Token
 	Text$
 	IsDel% = FALSE //Ist es vom Präprozessor gelöscht?
 	//ID%
-
-	FUNCTION Load%: F%
-		LOCAL tmp%
-		READUWORD F, tmp
-		IF tmp <> TOKEN_VERSION THEN RETURN FALSE
-
-		READLONG F, self.Line
-		READLONG F, self.Character
-		//READLONG F, self.ID
-		ReadString(F, self.LineContent$)
-		ReadString(F, self.Path$)
-		ReadString(F, self.Text$)
-
-		READUWORD F, tmp
-		IF tmp <> TOKEN_VERSION THEN RETURN FALSE
-		RETURN TRUE
-	ENDFUNCTION
-
-	FUNCTION Save: F%
-		WRITEUWORD F, TOKEN_VERSION
-
-		WRITELONG F, self.Line
-		WRITELONG F, self.Character
-		//WRITELONG F, self.ID
-		WriteString(F, self.LineContent$)
-		WriteString(F, self.Path$)
-		WriteString(F, self.Text$)
-
-		WRITEUWORD F, TOKEN_VERSION
-	ENDFUNCTION
 ENDTYPE
 
 TYPE TExport
@@ -880,9 +707,6 @@ FUNCTION Compile$: Text$, Target$
 	PushTimer()
 	Text$ = Text$ + "\n"
 	Text$ = Text$ + LoadFile$("Target/Header.gbas")
-	?IFDEF GEN_DOC
-	Text$ = Text$ + LoadFile$("Target/Doc.gbas")
-	?ENDIF
 	Text$ = Text$ + "\n"
 
 	SetupTarget(Target$)
@@ -903,6 +727,7 @@ FUNCTION Compile$: Text$, Target$
 	Compiler.errorState$ = " (precompiler error)"
 	PushTimer()
 	Precompiler()
+	
 	PopTimer("Precompiler")
 
 	PassSuccessfull()
@@ -941,6 +766,22 @@ FUNCTION Compile$: Text$, Target$
 	ELSE
 		STDOUT "Parsing successful! \n"
 	ENDIF
+	
+	?IFDEF GEN_DOC
+	Compiler.errorState$ = " (doc generation error)"
+	PushTimer()
+	GenerateDoc()
+	PopTimer("Generate Doc")
+
+	PassSuccessfull()
+	IF Compiler.WasError
+		STDOUT "Doc Generation failed :( \n"
+		RETURN
+	ELSE
+		STDOUT "Doc Generation successful! \n"
+	ENDIF
+	?ENDIF
+	
 	Compiler.errorState$ = " (generate error)"
 
 	SETCURRENTDIR(tmpPath$)

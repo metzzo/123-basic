@@ -8,9 +8,11 @@ TYPE Documentation
 	typ$ // what does this describe: FUNCTION, MODULE, TYPE, ...
 	desc[] AS LangElement // description
 	name$
+	module$
 
 	// FUNCTION
 	params[] AS ParamElement
+	example[] AS LangElement
 	see$[]
 ENDTYPE
 
@@ -23,6 +25,105 @@ TYPE LangElement
 	desc$ // the translations
 	lang$ // what name are the translations
 ENDTYPE
+
+FUNCTION GenerateDoc:
+	GenerateDocForLanguage("EN")
+	GenerateDocForLanguage("DE")
+ENDFUNCTION
+
+FUNCTION GenerateDocForLanguage: Lang$
+	// Generate Markdown
+	LOCAL Documentation$ = ""
+	LOCAL JSONDoc$ = ""
+	LOCAL Glossary$ = "# Overview"
+	
+	FOREACH module IN Documentations[]
+		IF module.typ$ = "MODULE"
+			INC Glossary$, "\n## [Module " + module.name$ + "] (#" + module.name$ + ")\n"
+			INC Documentation$, "# " + module.name$ + "\n"
+			INC Documentation$, DocLangElement$(module.desc[], Lang$)+"\n"
+			FOREACH D IN Documentations[]
+				IF D.module$ = module.name$
+					LOCAL name$ = D.name$
+					INC Documentation$, "## " + name$ + "\n"
+					
+					SELECT D.typ$
+						CASE "FUNCTION"
+							INC Glossary$, "* [" + name$ + "] (" + name$ + ")\n"
+						
+							FOREACH F IN Compiler.Funcs[]
+								IF F.OName$ = D.name$
+									INC Documentation$, ">`"+GenerateFuncName$(F) + "`\n\n"
+									BREAK
+								ENDIF
+							NEXT
+							
+							// INC Documentation$, "Module: "+module.name$+"\n"
+							
+							IF LEN(D.params[])>0
+								SELECT Lang$
+									CASE "EN"
+										INC Documentation$, "Parameter | Description\n"
+									CASE "DE"
+										INC Documentation$, "Parameter | Beschreibung\n"
+								ENDSELECT
+								INC Documentation$, "-----------|-----------------------------------------------------------------------\n"
+								FOREACH P IN D.params[]
+									INC Documentation$, "`"+P.name$ + "`|"
+									INC Documentation$, DocLangElement$(P.desc[], Lang$)+"\n"
+								NEXT
+							ENDIF
+							
+							IF LEN(D.example[])>0
+								INC Documentation$, "```\n" + DocLangElement$(D.example[], Lang$)+"```\n"
+							ENDIF
+							
+							INC Documentation$, "\n" + DocLangElement$(D.desc[], Lang$) + "\n"
+							
+							IF LEN(D.see$[]) > 0
+								SELECT Lang$
+									CASE "EN"
+										INC Documentation$, "See also: "
+									CASE "DE"
+										INC Documentation$, "Siehe auch: "
+								ENDSELECT
+								
+								LOCAL first% = FALSE
+								FOREACH s$ IN D.see$[]
+									IF first THEN INC Documentation$, ", "
+									INC Documentation$, "["+s$+"] (#"+s$+")"
+									first = TRUE
+								NEXT
+								
+								INC Documentation$, "\n"
+							ENDIF
+					ENDSELECT
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+	
+	
+	
+	Documentation$ = Glossary$ + "\n" + Documentation$
+	
+	WriteFile("Documentation_"+Lang$+".md", Documentation$)
+	// WriteFile("commands_"+Lang$+".json", JSONDoc$)
+ENDFUNCTION
+
+FUNCTION DocLangElement$: Langs[] AS LangElement, Lang$
+	LOCAL Text$ = ""
+	FOREACH L IN Langs[]
+		IF L.lang$ = Lang$
+			INC Text$, L.desc$+"\n"
+		ENDIF
+	NEXT
+	RETURN Text$
+ENDFUNCTION
+
+FUNCTION GenerateFuncName$: F AS IdentifierFunc
+	RETURN Compiler.Tokens[F.DefTok].LineContent$
+ENDFUNCTION
 
 FUNCTION ParseDoc:
 	LOCAL doc AS Documentation
@@ -51,11 +152,18 @@ FUNCTION ParseDoc:
 				MatchAndRemove("\n", CODELINE(), CODEFILE$())
 
 				ParseDocLang(param.desc[], "ENDPARAM")
+				
+				DIMPUSH doc.params[], param
 			CASE "DESC"
 				RemoveCurrent()
 				MatchAndRemove("\n", CODELINE(), CODEFILE$())
 
 				ParseDocLang(doc.desc[], "ENDDESC")
+			CASE "EXAMPLE"
+				RemoveCurrent()
+				MatchAndRemove("\n", CODELINE(), CODEFILE$())
+
+				ParseDocLang(doc.example[], "ENDEXAMPLE")
 			CASE "SEE"
 				RemoveCurrent()
 
@@ -63,6 +171,11 @@ FUNCTION ParseDoc:
 					DIMPUSH doc.see$[], GetCurrent$()
 					RemoveCurrent()
 				UNTIL IsToken("\n")
+			CASE "MODULE"
+				RemoveCurrent()
+				doc.module$ = GetCurrent$()
+				RemoveCurrent()
+				MatchAndRemove("\n", CODELINE(), CODEFILE$())
 			CASE "ENDDOC"
 				RemoveCurrent()
 				BREAK
@@ -72,26 +185,6 @@ FUNCTION ParseDoc:
 	WEND
 
 	DIMPUSH Documentations[], doc
-ENDFUNCTION
-
-FUNCTION OutputDoc: typ$, file$
-	LOCAL result$ = ""
-	FOREACH doc IN Documentations[]
-		SELECT typ$
-			CASE "html"
-				SELECT doc.typ$
-					CASE "FUNCTION"
-						INC result$, "<h1>" + doc.name$ + "</h1>"
-						INC result$, "Parameters:"
-					DEFAULT
-						Error("Unimplemented", CODELINE(), CODEFILE$())
-				ENDSELECT
-			DEFAULT
-				Error("Unimplemented", CODELINE(), CODEFILE$())
-		ENDSELECT
-	NEXT
-
-	STDOUT result$
 ENDFUNCTION
 
 FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
@@ -109,12 +202,23 @@ FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
 		RemoveCurrent()
 
 		l.lang$ = lang$
-		l.desc$ = text$
+		l.desc$ = REPLACE$(text$, "\\"+"\"", "\"")
 
 		DIMPUSH langs[], l
 
 		RemoveAllNL()
 	WEND
+	
+	IF LEN(langs[]) = 1
+		LOCAL l2 AS LangElement
+		l2 = langs[0]
+		IF l2.lang$ = "EN"
+			l2.lang$ = "DE"
+		ELSE
+			l2.lang$ = "EN"
+		ENDIF
+		DIMPUSH langs[], l2
+	ENDIF
 ENDFUNCTION
 
 FUNCTION RemoveAllNL:

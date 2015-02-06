@@ -1,0 +1,87 @@
+?IFDEF OTTSCRIPT
+	?DOC MODULE 2D
+		?DESC
+			?LANG EN "Everything you need to perform high performance 2D operations on the web"
+			?LANG DE "Alles was du brauchst für hochperformante 2D Operationen am Web durchzuführen"
+		?ENDDESC
+	?ENDDOC
+	
+	// LOOP STUFF
+	?DOC FUNCTION PUSHLOOP
+		?MODULE 2D
+		
+		?PARAM loop$
+			?LANG EN "Describes the name of the SUB which is jumped to"
+			?LANG DE "Bezeichnet den Namen der SUB zu dem gesprungen wird."
+		?ENDPARAM
+		?EXAMPLE
+			?LANG EN "SUB GLB_ON_LOOP:
+	PUSHLOOP \"GLB_ON_MENU\"
+ENDSUB
+SUB GLB_ON_MENU:
+	PUSHLOOP \"GLB_ON_GAME\"
+ENDSUB
+SUB GLB_ON_GAME:
+	// game \o/
+ENDSUB"
+		?ENDEXAMPLE
+		?DESC
+			?LANG EN "This command pushes the given SUB loop$ onto the loop stack. The last sub on the stack is executed when the canvas is rendering. Use this method instead of a main loop (which would not work on the web).
+When the application is started, the 'GLB_ON_LOOP' is called as default, if it exists."
+		?ENDDESC
+		?SEE PUSHLOOP GETCURRENTLOOP$ RETURNTOLOOP
+	?ENDDOC
+	
+	?DOC FUNCTION POPLOOP
+		?MODULE 2D
+
+		?EXAMPLE
+			?LANG EN "SUB GLB_ON_LOOP:
+	POPLOOP 
+ENDSUB"
+		?ENDEXAMPLE
+		?DESC
+			?LANG EN "This command pops the currently executing game loop sub from the loop stack. Keep in mind that this does not affect the currently executing sub, it is only for the next execution."
+		?ENDDESC
+		?SEE POPLOOP GETCURRENTLOOP$ RETURNTOLOOP
+	?ENDDOC
+	
+	?DOC FUNCTION GETCURRENTLOOP$
+		?MODULE 2D
+
+		?EXAMPLE
+			?LANG EN "SUB GLB_ON_LOOP:
+	PRINT GETCURRENTLOOP$(), 10, 10
+ENDSUB"
+		?ENDEXAMPLE
+		?DESC
+			?LANG EN "Returns the name of the currently executing game loop sub."
+		?ENDDESC
+		?SEE POPLOOP PUSHLOOP RETURNTOLOOP
+	?ENDDOC
+	
+	?DOC FUNCTION RETURNTOLOOP
+		?MODULE 2D
+		
+		?PARAM loop$
+			?LANG EN "Describes the name of the SUB which is jumped to"
+			?LANG DE "Bezeichnet den Namen der SUB zu dem gesprungen wird."
+		?ENDPARAM
+		
+		?EXAMPLE
+			?LANG EN "SUB GLB_ON_LOOP:
+	PUSHLOOP \"TEST_LOOP\"
+ENDSUB
+SUB TEST_LOOP:
+	PUSHLOOP \"TEST_LOOP2\"
+ENDSUB
+SUB TEST_LOOP2:
+	RETURNTOLOOP \"GLB_ON_LOOP\"
+ENDSUB"
+		?ENDEXAMPLE
+		?DESC
+			?LANG EN "Returns to the first occurence of the loop sub on the stack with the given `name$` (skipping other loops if necessary)"
+		?ENDDESC
+		?SEE POPLOOP PUSHLOOP RETURNTOLOOP
+	?ENDDOC
+?ENDIF

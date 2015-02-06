@@ -109,7 +109,8 @@ FUNCTION Analyser:
 					func.datatype = var.datatype
 					func.IsCallback = IsCallback
 					func.IsAbstract = IsAbstract
-
+					func.DefTok = Compiler.currentPosi
+					
 					IF CurTyp <> -1
 						func.Typ = FUNC_IS_METHOD
 						DIMPUSH Compiler.Types[CurTyp].Methods[], LEN(Compiler.Funcs[])
@@ -127,6 +128,7 @@ FUNCTION Analyser:
 					func.Name$ = GetCurrent$()
 					func.datatype = voidDatatype
 					func.Typ = FUNC_IS_SUB
+					func.DefTok = Compiler.currentPosi
 					AddFunction(func)
 					SkipTokens("SUB", "ENDSUB", func.Name$)
 				CASE "TYPE"
