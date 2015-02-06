@@ -387,12 +387,20 @@ function opt_drawPolygon(plzTint, tris, polyStack, spr) {
 		
 		if (plzTint) {
 			//schauen ob alle gleiche Farbe haben
-			if (!(polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col)) {
+			if (!(polyStack[0].col === polyStack[1].col && polyStack[1].col === polyStack[2].col && (polyStack.length > 2 && polyStack[2].col === polyStack[3].col))) {
 				// workaround: use average color
-				var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col)/3);
-				polyStack[0].col = avg;
-				polyStack[1].col = avg;
-				polyStack[2].col = avg;
+				if (polyStack.length > 2) {
+					var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col + polyStack[3].col)/4);
+					polyStack[0].col = avg;
+					polyStack[1].col = avg;
+					polyStack[2].col = avg;
+					polyStack[3].col = avg;
+				} else {
+					var avg = ~~((polyStack[0].col + polyStack[1].col + polyStack[2].col)/3);
+					polyStack[0].col = avg;
+					polyStack[1].col = avg;
+					polyStack[2].col = avg;
+				}
 			}
 			if (!spr.tint) {
 			//Hat noch nicht die Tinting Farbchannel

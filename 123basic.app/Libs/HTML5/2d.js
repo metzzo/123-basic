@@ -63,10 +63,9 @@ var sub_loopName = "GLB_ON_LOOP";
 var doCurrentFunction = function() {
 	if (!useDoubleBuffering) {
 		CLEARSCREEN(clrColor);
-		
-		if (!!background) {
-			backbuffer.context.drawImage(background, 0, 0);
-		}
+	}
+	if (!!background) {
+		backbuffer.context.drawImage(background, 0, 0);
 	}
 	
 	if (!waitload) {
@@ -212,10 +211,6 @@ function SHOWSCREEN() {
 			USESCREEN(-1);
 			frontbuffer.context.drawImage(backbuffer.canvas,0, 0);
 			CLEARSCREEN(clrColor);
-		}
-		//nun noch falls vorhanden den bg zeichnen
-		if (!!background) {
-			backbuffer.context.drawImage(background, 0, 0);
 		}
 	}
 }
