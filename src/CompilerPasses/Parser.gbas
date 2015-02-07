@@ -135,7 +135,9 @@ FUNCTION FuncDef: Native%, IsCallBack%, Typ%, CurTyp%
 			NEXT
 			?ENDIF
 			//IF Typ = FUNC_IS_FUNC
-			Compiler.GlobalFuncs.Put(func.Name$, func.ID)
+			IF Typ <> FUNC_IS_METHOD
+				Compiler.GlobalFuncs.Put(func.Name$, func.ID)
+			ENDIF
 			//ENDIF
 			IF Typ <> FUNC_IS_PROTO
 				IF Native = FALSE AND func.IsAbstract = FALSE
@@ -163,7 +165,7 @@ ENDFUNCTION
 FUNCTION SubDef:
 	Match("SUB", CODELINE(), CODEFILE$())
 	FOREACH func IN Compiler.Funcs[]
-		IF IsToken(func.Name$)
+		IF IsToken(func.Name$) AND func.Typ = FUNC_IS_SUB
 			func.Name$ = GetCurrent$()
 			func.datatype = voidDatatype
 			func.Typ = FUNC_IS_SUB

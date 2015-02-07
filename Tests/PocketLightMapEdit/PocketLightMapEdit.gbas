@@ -1,0 +1,684 @@
+// --------------------------------- //
+// Project: PocketLightMapEdit
+// Start: Monday, August 22, 2011
+// IDE Version: 10.057
+
+IF DOESDIREXIST(PLATFORMINFO$("DOCUMENTS")+"/.PocketLight3D")= FALSE
+	IF CREATEDIR(PLATFORMINFO$("DOCUMENTS")+"/.PocketLight3D") = FALSE THEN DEBUG "ERROR, Could not create Main dir"
+ENDIF
+
+SETCURRENTDIR("Media") // go to media files
+SYSTEMPOINTER TRUE
+
+DDGUI_AUTO_INPUT_DLG = TRUE
+
+GLOBAL LastName$ = "Karte"
+
+GLOBAL MapWidth%, MapHeight%
+GLOBAL MapScrollX, MapScrollY, MapScrollXSpeed, MapScrollYSpeed
+GLOBAL MapData%[]
+GLOBAL MapDrawGrid% = TRUE
+GLOBAL SelectedTile%, SelectedObj AS TPLObj
+GLOBAL ZoomSpeed%
+
+GLOBAL GUIState$ = "main"
+//main = normaler platzierungsmodus
+//load = Map laden Dialog
+//pocketlight = pocketlight einstellungen
+
+GLOBAL SolidTileID% = GENSPRITE()
+LOADSPRITE "solidtile.png", SolidTileID
+
+GLOBAL CornerTilesID% = GENSPRITE()
+LOADANIM "cornertiles.png", CornerTilesID, 32, 32
+
+GLOBAL CircleTileID% = GENSPRITE()
+LOADSPRITE "circletile.png", CircleTileID
+
+GLOBAL PyramidTileID% = GENSPRITE()
+LOADSPRITE "pyramidtile.png", PyramidTileID
+
+GLOBAL ScreenSpriteID% = GENSPRITE()
+GRABSPRITE ScreenSpriteID, 0, 0, 1, 1
+
+GLOBAL PreviewSpriteID% = GENSPRITE()
+GRABSPRITE PreviewSpriteID, 0, 0, 1, 1
+
+GLOBAL PocketLightSpriteID% = GENSPRITE()
+LOADSPRITE "pocketlightobj.png", PocketLightSpriteID
+
+GLOBAL MirrorWallSpriteID% = GENSPRITE()
+LOADSPRITE "glastile.png", MirrorWallSpriteID
+
+GLOBAL MirrorCornerWallSpriteID% = GENSPRITE()
+LOADANIM "cornerglastile.bmp", MirrorCornerWallSpriteID, 32, 32
+
+
+GLOBAL ScreenID% = 0
+
+GLOBAL Tilesize = 32
+
+TYPE TPLObj
+	X;Y
+	ID% = -1
+	Name$
+	Radius% = 1
+	Angle = 180
+	Col%
+	Strength% = 20
+
+
+	FUNCTION Init: ID%
+		SELECT ID
+			CASE 0
+				self.Name$ = ""
+			CASE 1
+				self.Col = RGB(255,255,0)
+				self.Name$ = "pocketlight"
+		ENDSELECT
+	ENDFUNCTION
+	FUNCTION Update:
+
+	ENDFUNCTION
+	FUNCTION Render:
+		LOCAL scl = Tilesize
+		SELECT self.Name$
+			CASE ""
+			CASE "pocketlight"
+				RotoZoomPoly(PocketLightSpriteID, self.X*Tilesize + MapScrollX, self.Y*Tilesize + MapScrollY, self.Angle, Tilesize/32, RGB(255,255,255))
+				DRAWLINE self.X*Tilesize + MapScrollX, self.Y*Tilesize + MapScrollY, (self.X + COS(-self.Angle-90)*((20+self.Strength)/Tilesize))*Tilesize + MapScrollX, (self.Y + SIN(-self.Angle-90)*((self.Strength+20)/Tilesize))*Tilesize + MapScrollY, self.Col
+		ENDSELECT
+	ENDFUNCTION
+ENDTYPE
+GLOBAL Objs[] AS TPLObj
+
+SETCURRENTDIR(PLATFORMINFO$("DOCUMENTS")+"/.PocketLight3D/")
+LOCAL i
+WHILE DOESDIREXIST(LastName$+".pl3d")
+	INC i
+	LastName$ = "Karte"+i
+WEND
+
+GLOBAL ShowOnlyCurrentFrame% = FALSE
+
+GOSUB InitGUI
+WHILE TRUE
+	SMOOTHSHADING FALSE
+	ShowOnlyCurrentFrame = FALSE
+
+	GOSUB Render
+	GOSUB Update
+
+	DDgui_show(ShowOnlyCurrentFrame)
+	SHOWSCREEN
+WEND
+
+//Standard GUI Fenster initialisieren
+SUB InitGUI:
+	SELECT GUIState$
+		CASE "main"
+			LOCAL width, height
+			GETSCREENSIZE width, height
+
+
+			DDgui_UpdateFont(TRUE)
+			DDgui_pushdialog(width-140,0, 140, height)
+			//Actions
+			DDgui_framestart("actionsframe", "",130)
+				DDgui_button("actionsave", "Sichern")
+				DDgui_spacer(1)
+				DDgui_button("actionload", "Laden")
+				DDgui_spacer(1)
+				DDgui_button("actionnew", "Neu")
+			DDgui_frameend()
+
+			DDgui_spacer(10000,5)
+
+
+			DDgui_framestart("movement","")
+				DDgui_button("+","+",25)
+				DDgui_button("moveup","/\\", 76)
+				DDgui_button("-","-", 25)
+
+				DDgui_button("moveleft","<",130/2-1)
+				DDgui_button("moveright",">",130/2-1)
+
+				DDgui_spacer(25)
+				DDgui_button("movedown","\\/",76)
+				DDgui_spacer(25)
+			DDgui_frameend()
+
+			DDgui_spacer(10000,5)
+
+			DDgui_tab("tabber", "Info,prefframe|Kachel,tilesframe|Objekt,objectsframe")
+
+			//Preferences
+			DDgui_framestart("prefframe","")
+				DDgui_framestart("width", "Breite", 0)
+					DDgui_singletext("MapWidth", 4, 0)
+					DDgui_slider("WidthSlider",4)
+					DDgui_set("WidthSlider", "MINVAL", 4)
+					DDgui_set("WidthSlider", "MAXVAL", 50)
+					DDgui_set("WidthSlider", "TEXT", 4)
+					DDgui_set("WidthSlider", "STEP", 1)
+					DDgui_set("MapWidth","READONLY", TRUE)
+					DDgui_automate("WidthSlider", "TEXT", "MapWidth", "TEXT")
+				DDgui_frameend()
+				DDgui_framestart("height", "Höhe", 0)
+					DDgui_singletext("MapHeight", 4, 0)
+					DDgui_slider("HeightSlider",4)
+					DDgui_set("HeightSlider", "MINVAL", 4)
+					DDgui_set("HeightSlider", "MAXVAL", 50)
+					DDgui_set("HeightSlider", "TEXT", 4)
+					DDgui_set("HeightSlider", "STEP", 1)
+					DDgui_set("MapHeight","READONLY", TRUE)
+					DDgui_automate("HeightSlider", "TEXT", "MapHeight", "TEXT")
+				DDgui_frameend()
+				DDgui_singletext("","Kartenbeschreibung: ")
+				DDgui_text("desc", "Die Beschreibung ...", 130, 60)
+			DDgui_frameend()
+			//Tiles
+			DDgui_framestart("tilesframe", "")
+				DDgui_radio("Tiles","Leer|Solide|Schräg|Pyramide|Kugel|Portal Wand|Spiegelwand|Schräge Spiegelwand",120)
+			DDgui_frameend()
+			//Objects
+			DDgui_framestart("objectsframe", "",130)
+				DDgui_list("objects","Auswahl|Taschenlampe|Portal|Spiegel|Diskokugel|Schwarzes Loch|Weißes Loch|Prisma|Wasser|Knopf|Dynamit|Kamera|Kuh|Geschenk",130,190)
+			DDgui_frameend()
+
+			NewMap()
+		CASE "load"
+			LOCAL width, height
+			GETSCREENSIZE width, height
+
+
+			DDgui_pushdialog(0,0,width, height)
+			LOCAL maps$[]
+			LOCAL files$ = ""
+			GETFILELIST("*.pl3d", maps$[])
+			LOCAL Found% = FALSE
+			FOREACH f$ IN maps$[]
+				IF f$ <> "." AND f$ <> ".." AND f$ <> "Thumbs.db"
+					IF Found THEN files$ = files$ + "|"
+					files$ = files$ + REPLACE$(f$, ".pl3d", "")
+					Found = TRUE
+				ENDIF
+			NEXT
+
+			DDgui_list("maps", files$,110, height-50)
+
+			DDgui_spacer(10)
+
+			DDgui_framestart("info", "Info")
+				DDgui_widget("breite", "")
+				DDgui_spacer()
+				DDgui_widget("höhe", "")
+				DDgui_spacer()
+				DDgui_framestart("","Beschreibung: ")
+					DDgui_widget("beschreibung","",110)
+				DDgui_frameend()
+			DDgui_frameend()
+
+			DDgui_button("previewimg", "")
+			DDgui_set("previewimg","READONLY", TRUE)
+			DDgui_set("previewimg", "ALIGN",1)
+
+			GETSCREENSIZE width, height
+			DDgui_button("load", "Laden", width/2-4+100,30)
+			DDgui_button("cancel", "Abbrechen", width/2-4-100,30)
+
+
+
+			FOR i = 0 TO 3
+				DDgui_show(FALSE)
+			NEXT
+
+			DDgui_set("maps", "CLICKED", TRUE)
+			DDgui_set("maps", "SELECT",0)
+
+			GOSUB Update
+		CASE "pocketlight"
+			LOCAL width, height
+			GETSCREENSIZE width, height
+
+			DDgui_pushdialog(0,height-65,width,60)
+			DDgui_framestart("", "Winkel")
+				DDgui_slider("angle",SelectedObj.Angle,100,20)
+				DDgui_set("angle","MINVAL",1)
+				DDgui_set("angle","MAXVAL",360)
+				DDgui_set("angle","STEP",1)
+				DDgui_singletext("angleview", "",30)
+				DDgui_set("angleview", "READONLY", TRUE)
+				DDgui_automate("angle","TEXT","angleview","TEXT")
+			DDgui_frameend()
+			DDgui_framestart("", "Reichweite")
+				DDgui_slider("strength",SelectedObj.Strength,100,20)
+				DDgui_set("strength","MINVAL",10)
+				DDgui_set("strength","MAXVAL",150)
+				DDgui_set("strength","STEP",1)
+				DDgui_singletext("strengthview", "",30)
+				DDgui_set("strengthview", "READONLY", TRUE)
+				DDgui_automate("strength","TEXT","strengthview","TEXT")
+			DDgui_frameend()
+			DDgui_framestart("", "Farbe")
+				DDgui_button("color", "SPR_C"+SelectedObj.Col,40,20)
+			DDgui_frameend()
+			DDgui_framestart()
+				DDgui_button("okay", "Okay",90,20)
+				DDgui_spacer()
+				IF SelectedObj.ID <> -1
+					DDgui_button("cancel", "Löschen",90,25)
+				ELSE
+					DDgui_button("cancel", "Abbrechen",90,25)
+				ENDIF
+			DDgui_frameend()
+	ENDSELECT
+ENDSUB
+
+
+GLOBAL MouseX, MouseY, Mouse1, Mouse2
+GLOBAL MouseH
+//Tilemap Updaten
+SUB Update:
+	LOCAL sx = MOUSEAXIS(0), sy = MOUSEAXIS(1)
+	MOUSESTATE MouseX, MouseY, Mouse1, Mouse2
+	MouseH = MouseHit(Mouse1)
+	LOCAL width, height
+	GETSCREENSIZE width, height
+
+	SELECT GUIState$
+		CASE "main"
+			ShowOnlyCurrentFrame = TRUE
+
+
+
+			//Scrolling
+			INC MapScrollX, MapScrollXSpeed
+			INC MapScrollY, MapScrollYSpeed
+			MapScrollXSpeed = (MapScrollXSpeed*2)/3
+			MapScrollYSpeed = (MapScrollYSpeed*2)/3
+
+			//gui
+			IF DDgui_get("actionsave", "CLICKED")
+				LOCAL n$ = LastName$
+				LOCAL name$ = DDgui_input$(LastName$, FALSE, TRUE, TRUE)
+				IF GLOBAL cnclClick = FALSE
+					LastName$ = name$
+					IF DOESFILEEXIST(name$+".pl3d")
+						IF DDgui_msg("Karte existiert bereits, überschreiben?",TRUE,"Warnung") = FALSE
+							name$ = ""
+						ENDIF
+					ENDIF
+					IF name$ <> "" THEN SaveMap(name$, DDgui_get$("desc", "TEXT"))
+				ENDIF
+			ENDIF
+			IF DDgui_get("actionnew", "CLICKED") 	THEN NewMap()
+			IF DDgui_get("actionload", "CLICKED")
+				GUIState$ = "load"
+				GOSUB InitGUI
+				RETURN
+			ENDIF
+
+
+			INC MapScrollXSpeed, (DDgui_get("moveleft","CLICKED") - DDgui_get("moveright", "CLICKED"))*Tilesize/2
+			INC MapScrollYSpeed, (DDgui_get("moveup","CLICKED") - DDgui_get("movedown", "CLICKED"))*Tilesize/2
+			IF DDgui_get("+","CLICKED") AND ZoomSpeed = 0 THEN ZoomSpeed =-4
+			IF DDgui_get("-","CLICKED") AND ZoomSpeed = 0 THEN ZoomSpeed = 4
+
+			Tilesize = Tilesize - ZoomSpeed
+			ZoomSpeed = ZoomSpeed/2
+
+			Tilesize = MAX(8, MIN(Tilesize,128))
+
+
+			SELECT DDgui_get("tabber", "SELECT")
+				CASE 0
+					IF DDgui_get("WidthSlider","CLICKED") OR DDgui_get("HeightSlider", "CLICKED")
+						MapWidth  = DDgui_get("WidthSlider","TEXT")
+						MapHeight = DDgui_get("HeightSlider","TEXT")
+						REDIM MapData[MapWidth+1][MapHeight+1]
+					ENDIF
+				CASE 1
+					SelectedTile = DDgui_get("Tiles", "SELECT")
+				CASE 2
+					IF DDgui_get("objects", "CLICKED")
+						SelectedObj.Init(DDgui_get("objects", "SELECT"))
+					ENDIF
+
+					//object picking
+					IF SelectedObj.Name$ = "" AND MouseH
+						LOCAL Found% = FALSE
+						FOREACH Obj IN Objs[]
+							IF Obj.Name$ <> "" AND GetDistance(Obj.X*Tilesize + MapScrollX, Obj.Y*Tilesize + MapScrollY, MouseX, MouseY) < Obj.Radius*Tilesize
+								GUIState$ = Obj.Name$
+								SelectedObj = Obj
+								GOSUB InitGUI
+								Found = TRUE
+								DELETE Obj
+							ENDIF
+						NEXT
+						IF Found
+							GOSUB RefreshID
+							RETURN
+						ENDIF
+					ENDIF
+			ENDSELECT
+
+
+
+			//tile building
+			IF BOXCOLL(width-140,0, 140, height, MouseX, MouseY, 1, 1) = FALSE AND Mouse1
+				LOCAL SelectTileX%, SelectTileY%
+				PickTile(SelectTileX, SelectTileY)
+				SELECT DDgui_get("tabber", "SELECT")
+					CASE 1
+						IF SelectTileY >= 0 AND SelectTileX <= MapWidth AND SelectTileY <= MapHeight
+							MapData[SelectTileX][SelectTileY] = SelectedTile
+						ENDIF
+					CASE 2
+						IF SelectedObj.Name$ <> ""
+							GUIState$ = SelectedObj.Name$
+							GOSUB InitGUI
+
+							Mouse1 = FALSE
+						ENDIF
+				ENDSELECT
+			ENDIF
+		CASE "load"
+			ShowOnlyCurrentFrame = TRUE
+			IF DDgui_get("maps", "CLICKED")
+				LOCAL Name$ = DDgui_getitemtext$("maps", DDgui_get("maps", "SELECT")), Desc$
+				LOADSPRITE Name$+".bmp",PreviewSpriteID
+				GETSPRITESIZE PreviewSpriteID, width, height
+
+				LoadDesc(Name$, Desc$)
+
+
+				StretchSpriteForever(PreviewSpriteID,MIN(width, 256-64+12), MIN(height, 256-64+12))
+
+
+				DDgui_set("breite", "TEXT", "Breite: "+(width/32)+" Kacheln")
+				DDgui_set("höhe", "TEXT", "Höhe:  "+(height/32)+" Kacheln")
+				DDgui_set("beschreibung", "TEXT", Desc$)
+
+				DDgui_set("breite", "WIDTH", 130)
+				DDgui_set("höhe", "WIDTH", 130)
+				DDgui_set("beschreibung", "WIDTH", 130)
+
+				GETSPRITESIZE PreviewSpriteID, width, height
+				DDgui_set("previewimg","TEXT", "SPR_B"+PreviewSpriteID)
+				DDgui_set("previewimg", "WIDTH", width)
+				DDgui_set("previewimg", "HEIGHT", height)
+
+			ELSEIF DDgui_get("load", "CLICKED")
+				LOCAL d$
+				LoadMap(MapData[], DDgui_getitemtext$("maps", DDgui_get("maps", "SELECT")), d$)
+				GUIState$ = "main"
+				DDgui_popdialog()
+				DDgui_set("desc", "TEXT", d$)
+			ELSEIF DDgui_get("cancel", "CLICKED")
+				GUIState$ = "main"
+				DDgui_popdialog()
+			ENDIF
+		CASE "pocketlight"
+			ShowOnlyCurrentFrame = FALSE
+			SelectedObj.Col = MID$(DDgui_get$("color", "TEXT"),LEN("SPR_C"))
+			SelectedObj.Strength = DDgui_get("strength", "TEXT")
+			IF DDgui_get("cancel", "CLICKED")
+				DDgui_popdialog()
+				GOSUB ResetObjectSelection
+			ELSEIF DDgui_get("okay", "CLICKED")
+				GUIState$ = "main"
+				DDgui_popdialog()
+
+				GOSUB RegisterSelectedObj
+			ELSEIF DDgui_get("angle", "CLICKED")
+				SelectedObj.Angle = DDgui_get("angle", "TEXT")
+			ENDIF
+
+			IF BOXCOLL(0,0,width-140,height-65,MouseX, MouseY,1,1) AND Mouse1
+				SelectedObj.X = (MouseX - MapScrollX)/Tilesize
+				SelectedObj.Y = (MouseY - MapScrollY)/Tilesize
+			ENDIF
+		DEFAULT
+			DEBUG "Unknown state "+GUIState$+"\n"
+	ENDSELECT
+ENDSUB
+
+//Tilemap Rendern
+SUB Render:
+	//draw map
+	FOR x = 0 TO MapWidth - 1
+		FOR y = 0 TO MapHeight - 1
+			DrawTile(MapData[x][y], x,  y)
+		NEXT
+	NEXT
+
+	//render objects
+	FOREACH Obj IN Objs[]
+		Obj.Render()
+	NEXT
+
+	IF MapDrawGrid
+		//draw grid
+		FOR x = 0 TO MapWidth
+			DRAWLINE x*Tilesize+MapScrollX,0+MapScrollY,x*Tilesize+MapScrollX,(MapHeight)*Tilesize+MapScrollY,RGB(255,255,255)
+		NEXT
+		FOR y = 0 TO MapHeight
+			DRAWLINE 0+MapScrollX,y*Tilesize+MapScrollY,(MapWidth)*Tilesize+MapScrollX,y*Tilesize+MapScrollY,RGB(255,255,255)
+		NEXT
+
+		SELECT GUIState$
+			CASE "main"
+				//select tile
+				SELECT DDgui_get("tabber", "SELECT")
+					CASE 1
+						LOCAL SelectTileX%, SelectTileY%
+						PickTile(SelectTileX, SelectTileY)
+						DrawTile(SelectedTile, SelectTileX, SelectTileY)
+					CASE 2
+						SelectedObj.X = (MouseX - MapScrollX)/Tilesize
+						SelectedObj.Y = (MouseY - MapScrollY)/Tilesize
+						SelectedObj.Render()
+				ENDSELECT
+			CASE "pocketlight"
+				SelectedObj.Render()
+		ENDSELECT
+	ENDIF
+ENDSUB
+
+@FUNCTION PickTile: BYREF SelectTileX%, BYREF SelectTileY%
+	SelectTileX = INTEGER((MouseX - MapScrollX)/Tilesize)
+	SelectTileY = INTEGER((MouseY - MapScrollY)/Tilesize)
+ENDFUNCTION
+
+@FUNCTION DrawTile: TileID%, x, y
+	SELECT TileID
+		CASE 0
+		CASE 1
+			STRETCHSPRITE SolidTileID, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		CASE 2
+			LOCAL Posi% = 0
+			IF x >= 0 AND y >= 0 AND x <= MapWidth AND y <= MapHeight
+				LOCAL LeftCol% = FALSE, RightCol% = FALSE, UpCol% = FALSE, DownCol% = FALSE
+				IF x > 0 		THEN LeftCol 	= IsColli(MapData[x-1][y])
+				IF y > 0 		THEN UpCol 		= IsColli(MapData[x][y-1])
+				IF x<MapWidth 	THEN RightCol 	= IsColli(MapData[x+1][y])
+				IF y<MapHeight	THEN DownCol	= IsColli(MapData[x][y+1])
+
+				IF LeftCol AND UpCol THEN Posi = 0
+				IF RightCol AND UpCol THEN Posi = 1
+				IF RightCol AND DownCol THEN Posi = 2
+				IF LeftCol AND DownCol THEN Posi = 3
+
+			ENDIF
+			STRETCHANIM CornerTilesID, Posi, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		CASE 3
+			STRETCHSPRITE PyramidTileID, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		CASE 4
+			STRETCHSPRITE CircleTileID, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		CASE 5
+
+		CASE 6
+			STRETCHSPRITE MirrorWallSpriteID, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		CASE 7
+			STRETCHSPRITE MirrorCornerWallSpriteID, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+		LOCAL Posi% = 0
+			IF x >= 0 AND y >= 0 AND x <= MapWidth AND y <= MapHeight
+				LOCAL LeftCol% = FALSE, RightCol% = FALSE, UpCol% = FALSE, DownCol% = FALSE
+				IF x > 0 		THEN LeftCol 	= IsColli(MapData[x-1][y])
+				IF y > 0 		THEN UpCol 		= IsColli(MapData[x][y-1])
+				IF x<MapWidth 	THEN RightCol 	= IsColli(MapData[x+1][y])
+				IF y<MapHeight	THEN DownCol	= IsColli(MapData[x][y+1])
+
+				IF LeftCol AND UpCol THEN Posi = 1
+				IF RightCol AND UpCol THEN Posi = 0
+				IF RightCol AND DownCol THEN Posi = 2
+				IF LeftCol AND DownCol THEN Posi = 3
+			ENDIF
+
+			STRETCHANIM MirrorCornerWallSpriteID, Posi, x*Tilesize+MapScrollX,y*Tilesize+MapScrollY, Tilesize, Tilesize
+	ENDSELECT
+ENDFUNCTION
+@FUNCTION IsColli%: Tile%
+	IF Tile = 1 OR Tile = 2 OR Tile=6 OR Tile=5 OR Tile=7
+		RETURN TRUE
+	ELSE
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+@SUB RefreshID:
+	LOCAL i = 0
+	FOREACH Obj IN Objs[]
+		Obj.ID = i
+		INC i
+	NEXT
+ENDSUB
+
+@SUB ResetObjectSelection:
+	LOCAL O AS TPLObj
+	DDgui_set("objects", "SELECT", 0)
+	DDgui_set("objects", "CLICKED", FALSE)
+	SelectedObj = O
+	GUIState$ = "main"
+	Mouse1 =  FALSE
+ENDSUB
+
+@SUB RegisterSelectedObj:
+	LOCAL O AS TPLObj
+	O = SelectedObj
+	O.ID = LEN(Objs[])
+	DIMPUSH Objs[], O
+
+	GOSUB ResetObjectSelection
+ENDSUB
+
+FUNCTION SaveMap: Name$, Desc$
+	LOCAL f% = GENFILE()
+	IF OPENFILE(f, Name$+".pl3d", FALSE) = FALSE THEN DEBUG "ERROR, Could NOT open file"
+	WRITEIEEE f, 42
+	WRITEIEEE f, MapWidth
+	WRITEIEEE f, MapHeight
+
+	FOR x = 0 TO MapWidth
+		FOR y = 0 TO MapHeight
+			WRITEIEEE f, MapData[x][y]
+		NEXT
+	NEXT
+
+	WRITEIEEE f, LEN(Objs[])
+	FOREACH Obj IN Objs[]
+		WRITEIEEE f, LEN(Obj.Name$)
+		WRITESTR f, Obj.Name$
+
+		WRITEIEEE f, Obj.X
+		WRITEIEEE f, Obj.Y
+
+		WRITEIEEE f, Obj.Radius
+		WRITEIEEE f, Obj.Angle
+		WRITEIEEE f, Obj.Col
+		WRITEIEEE f, Obj.Strength
+		WRITEIEEE f, Obj.ID
+	NEXT
+
+	WRITEIEEE f, 42
+	CLOSEFILE f
+
+	//Thumbail speichern
+	LOCAL TmpScrollX = MapScrollX, TmpScrollY = MapScrollY
+	MapScrollX = 0
+	MapScrollY = 0
+	MapDrawGrid = FALSE
+	CLEARSCREEN RGB(255,0,128)
+	RenderOnSprite("Render", ScreenID)
+	MapScrollX = TmpScrollX
+	MapScrollY = TmpScrollY
+	MapDrawGrid = TRUE
+	SAVESPRITE Name$+".bmp",ScreenSpriteID
+	CLEARSCREEN RGB(0,0,0)
+
+	//beschreibung speichern
+	f = GENFILE()
+	OPENFILE(f, Name$+".desc", FALSE)
+	WRITEIEEE f, LEN(Desc$)
+	WRITESTR f, Desc$
+	CLOSEFILE f
+ENDFUNCTION
+
+FUNCTION LoadMap: Arr%[], Name$, BYREF Desc$
+	NewMap()
+
+	LOCAL f% = GENFILE()
+	OPENFILE(f, Name$+".pl3d", TRUE)
+	IF ReadInt(f) <> 42
+		DDgui_msg("Unsupported map format", FALSE, "Error")
+		RETURN
+	ENDIF
+	MapWidth = ReadInt(f)
+	MapHeight = ReadInt(f)
+	DIM Arr[MapWidth+1][MapHeight+1]
+
+	FOR x = 0 TO MapWidth
+		FOR y = 0 TO MapHeight
+			Arr[x][y] = ReadInt(f)
+		NEXT
+	NEXT
+
+
+
+	DIM Objs[ReadInt(f)]
+	FOR i = 0 TO LEN(Objs[])-1
+		READSTR f, Objs[i].Name$, ReadInt(f)
+
+		Objs[i].X = ReadInt(f)
+		Objs[i].Y = ReadInt(f)
+		Objs[i].Radius = ReadInt(f)
+		Objs[i].Angle = ReadInt(f)
+		Objs[i].Col = ReadInt(f)
+		Objs[i].Strength = ReadInt(f)
+		Objs[i].ID = ReadInt(f)
+	NEXT
+
+	IF ReadInt(f) <> 42
+		DDgui_msg("Error while loading map", FALSE, "Error")
+		RETURN
+	ENDIF
+
+	CLOSEFILE f
+
+	LoadDesc(Name$, Desc$)
+ENDFUNCTION
+
+
+
+FUNCTION NewMap:
+	MapWidth = 4; MapHeight = 4
+	DIM MapData[MapWidth+1][MapHeight+1]
+	DDgui_set("WidthSlider", "TEXT", MapWidth)
+	DDgui_set("HeightSlider", "TEXT", MapHeight)
+	DIM Objs[0]
+
+ENDFUNCTION
+
+

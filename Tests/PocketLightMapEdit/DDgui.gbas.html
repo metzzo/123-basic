@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=latin-1" >
+		<title>DDgui</title>
+	<style type="text/css">
+	<!-- 
+    * {padding: 0px; font-size: 1.0em; font-family: verdana, geneva, lucida, "lucida grande", arial, helvetica, sans-serif; margin: 0 0 0 0; }
+   p  {padding: 6px; }
+   keyword  {color: green;}
+	body { background: white; color: black; margin: 5px 10px 10px 10px; padding: 0px; }
+	pre {line-height:1; font-family: "Courier New", Courier, Monospace;}
+	code {line-height:1; font-size: .7em; font-family: "Courier New", Courier, Monospace;}
+	a {color: blue; text-decoration: none; }
+	a:hover, a:active, a:focus {background-color: #e0e0ff; text-decoration: underline; }
+	.blue {padding: 6px; background-color: lightblue; }
+	.yellow {margin-top: 16px; padding: 6px; background-color: #ffffcc; border-style: solid; border-color: #ffcc80; border-width: 1px; }
+	.white {line-height: 1.2; margin-top: 16px; background-color: #ffffff; border-style: solid; border-color: #000000; border-width: 1px; }
+	.native      {}
+	.alternative {display: none;}
+	.neutral     {}
+   h2   {padding: 6px; background-color: lightgreen; font-size: 1.1em; font-weight:bold;}
+   ul {padding-bottom: 0px; margin-left: 8px; padding-left: 8px; list-style-type: square; }
+	-->
+	</style>
+<script type="text/javascript">
+function ToggleLang()
+{
+	var divs = document.getElementsByTagName("div");
+	for (var i=0;i<divs.length;i++)
+	{
+		var obj = divs[i];
+		if(obj.className == "alternative")  obj.className = "native";
+		else if(obj.className == "native")  obj.className = "alternative";
+	}
+}
+</script>
+	</head>
+	<body>
+<div class="neutral"><div class="yellow">Combo boxes use lists now.<br>Lists return a CLICKED even if you click the currently selected item.<br></div></div>
+<div class="neutral"><div class="yellow">New widget: DDgui_singletext - single line text.<br>New functions: DDgui_advancefocus, DDgui_setfocus<br></div></div>
+<div class="neutral"><div class="yellow">DDgui_Input uses more space if available on large screens. Keyboard is centered.<br><br>DDgui_Input selects all text for short single line texts.<br></div></div>
+<div class="neutral"><div class="yellow">Version 2010.012<br>Frames align widgets side by side to gain width if width was 0<br>Spacers with width>possible size just break the line, but don't<br>extend frames anymore.<br></div></div>
+<div class="neutral"><div class="yellow">Version 2010.011<br>- Fixed carret display for end-of-line positions<br>- Fixed "Tab" key in texts - just inserting a space character now (NEEDS FIX)<br></div></div>
+<div class="neutral"><div class="yellow">Version 2010.010<br>- New widget: "Combo" - a list that can collapses to safe space<br>- XPOS, YPOS for all widgets (global coords, read only)<br>- scrollbar for non resize dialogs fixed.<br></div></div>
+<div class="neutral"><div class="yellow">Version 2010.002<br>-GLOBAL gDDguiMinControlDimension% allows the minimum size of a<br>control oncreation with default size. (Use at least 32 for iPhone).<br>-list with READONLY did not handle the scrollbar<br></div></div>
+<div class="neutral"><div class="yellow">Version 2010.001<br>New look of widgets, frames and caption bar<br>Texts scroll the caret into view. Home/End keys work.<br>All widgets support the "READONLY" flag.<br></div></div>
+<div class="neutral"><div class="yellow">Version 2009.004<br>Each wdget has the property "ALIGN", which can align it left (-1)<br>centered (0) or right (1) in the line/frame.<br></div></div>
+<div class="neutral"><div class="yellow">Version 2009.003<br><br>DDGui_Hide can hide frames with all childs now.<br>Also, you can pack a frame in a Tab - the Tab will enable the frame and all childs.<br>The set colours will be forwarded to all other dialogs.<br>The DDgui_input$ will use more space if available (iPhone)<br>Some fixes for iPhone platform implemented.<br>Fixed some crashes :s<br></div></div>
+<div class="neutral"><div class="yellow">Version 2009.002<br><br>New from old versions:<br><br>Checkbox width was way too wide with font kerning enabled.<br>DDgui_get("", "SCALEABLE") indicates, the dialog is currently resized.<br>Frames clip correctly.<br></div></div>
+<div class="neutral"><div class="yellow">Fixed scrollbars.<br><br>DDgui_frame() -> put widgets in a frame<br><br>DDgui_automate -> put values of one control to another one.<br>DDgui_get/DDgui_set have 2 parameters: widgetid$, property$<br>instead of widget$+property$<br>Some bugs fixed<br>Button can have SELECT 1/0 for highlit buttons<br><br>DDgui_UpdateFont(TRUE) <-- use font kerning now!<br></div></div>
+<div class="neutral"><div class="yellow">Start with DDgui_pushdialog(x,y,w,h) to create a new dialog<br>You can erase all items on this(current) dialog with<br>DDgui_Init()<br>If you want to close a dialog (and activate the one<br>that was visible before DDgui_pushdialog()<br>call DDgui_popdialog()<br>With DDgui_resizedialog(x,y,w,h) you can move/resize a dialog<br>if you set width and height to 0, only listboxes and stuff<br>will calculate their needed size.<br><br>All extended widgets have all information that widget has.<br>A spacer is an invisible spacing block for alignment.<br><br>the widgets get drawn left->right until one is too<br>wide for the given dialog area<br>then the widget starts in a new line.<br><br>All widgets have a DDGui_handleXYZ function, which handles<br>the behaviour of the widget.<br>Here you get mx, my in coordinates relative to the widget's<br>top left corner.<br>b1 has the state of the left mouse button:<br>b1 = 0 - not pressed<br>b1 = 1 - just released the button (clicked)<br>b1 =-1 - button has just been pressed down<br><br><br>--------------------------------------------------------------<br>A BUTTON is a simple click-button. You check if it's been<br>clicked with IF DDgui_get("my_button_idCLICKED") THEN ...<br>when you set it's TEXT to SPR_B123, the sprite 123 is used<br>instead of a text<br>if you set the TEXT to SPR_C123, you have a color picker dialog<br>when you press it. To get the color write col=MID$((DDgui_get(id$+"TEXT"),5,32)<br>--------------------------------------------------------------<br>a SLIDER is, well a slider. It has a value from 0 to 1<br>( regardless of it's width ) stored in the TEXT.<br>You can drag it with the mouse<br>--------------------------------------------------------------<br>a TOOLBAR is a macro that creates a lot of buttons for you<br>you simply<br>DDgui_toolbar: id_buttons$[], id_sprites[], width_button, height<br>--------------------------------------------------------------<br>a CHECKBOX is a button, that toggles the checked state with<br>every click. Check the state with DDgui_get("my_check_idSELECT")<br>Attantion! That was CHECKED in older versions of DDgui!<br>--------------------------------------------------------------<br>a RADIO is a group of checkboxes, where only _one_ can be<br>checked at a time. If you add/remove checkboxes, the height<br>changes automatically.<br>--------------------------------------------------------------<br>FILE is a button, that has a disk-image. If you click it, you get<br>a filerequester. The filename is drawn as text<br>Get the filename with DDgui_get$("file_btn_idTEXT")<br>If no filename / invalid filename, the text is empty<br>--------------------------------------------------------------<br>TEXT and SINGLETEXT is a text box, where the user can type things,<br>select text, overwrite, insert and so forth.<br>a text needs the focus to be able to get keyboard messages<br>focus is gained by clicking once with the mouse<br>you can get/set the focus with DDgui_set("FOCUS", "my_id")<br><br>On PocketPC and GP2X, when you click it, DDgui performs a<br>DDgui_input$ for you. This way you get an iPhone like<br>keyboard that can be used with the stylus.<br>You can DEBUG this behaviour by setting<br>DDGUI_AUTO_INPUT_DLG = TRUE<br><br>The SINGLETEXT is a text box that allows only single line input.<br>and uses the tab key to forward the focus to the next widget.<br>--------------------------------------------------------------<br>a LIST is the same as a radio, but you can scroll through<br>many list items, the height you gave does not change.<br>--------------------------------------------------------------<br>a TAB is a button row, where you can activate one of them.<br>Afterwards DDgui will DDgui_hide/DDgui_unhide the widgets<br>within the tab.<br>Use DDgui_selecttab<br>you create a tab with a captions$ like:<br>name1,wd_1,wd2|name2,wd_3,wd_4<br>where name1,name2 are the texts for each of the the 2 tabs<br>wd_1,wd_2 are the widgets to show for tab1<br>wd_3,wd_4 are the widgets to show for tab2<br>--------------------------------------------------------------<br>a USER widget is just a rectangular placeholder<br>that calls a user defined function of prototype<br>DDgui_userfunction.<br>PROTOTYPE DDgui_userfunction: id$, verb$, BYREF info$<br>The GUI will call this function with the verb$ set to what the<br>widget is notified of.<br>You can send user defined messages to such a widget with the<br>command: DDgui_signal(). The info$ parameter is byref, meaning<br>you have a way to return things with that method.<br><br>Possible notifications, that DDgui sends are:<br>verb$,  info$,          meaning<br>INIT    ""              The widget was created<br>allocate internal TYPEs or images now.<br>DESTROY ""              The widget was destroyed.<br>(DDgui_popdialog) - free resources.<br>CLICKED "XXXX,YYYY,BB"  Left button was up. X,Y,B are mouse<br>coords in widget space.<br>DRAW    ""              Readraw the widget now.<br>x=DDgui_get(id$, "X")<br>w=DDgui_get(id$, "WIDTH")<br>h=DDgui_get(id$, "HEIGHT")<br>Viewport is set to the widget's rectangle already.<br></div></div>
+<div class="neutral"><div class="yellow">--------------------------------------------------------------<br>CALLBACKs (overridable function):<br>--------------------------------------------------------------<br>FUNCTION DDgui_backgnd: col1, col2, x, y, dx, dy<br>change the graphical appearance of DDgui<br></div></div>
+<div class="neutral"><div class="yellow">FUNCTION DDgui_draw_user: BYREF id$, width, height<br>if you create a widget and set the "TYPE" of it<br>to some unknown type<br>(e.g. DDgui_set(id$+"TYPE", "SOURCE_EDITOR")<br>DDgui will call this function for your own drawing<br><br>FUNCTION ddgui_handle_user: BYREF id$, mx, my, b1, b2<br>calls the handler function for an unknown DDgui<br>widget.<br><br>--------------------------------------------------------------<br>HELPER FUNCTIONS:<br>--------------------------------------------------------------<br>DDgui_msg: text$, yes_no<br>display a messagebox with the text<br>if yes_no is set it returns 1 i "yes", 0 if "no"<br>was clicked<br><br>DDgui_insertitem(id$, text$, insert_before)<br>let's you insert a item to a radio/list<br>if you want to append, use insert_before=-1<br><br>DDgui_deleteitem(id$, index)<br>removes an item from a radio/list<br>index= -1 removes them all<br><br>DDgui_getitemtext$(id$, index)<br>get the word of a radio/list's item<br>index=-1 get's the currently selected item<br><br>DDGui_colordgl(color%)<br>a simple dialog that let's you edit a color.<br>it returns the changed color.<br><br>DDGui_input$<br>a INPUT dialog with an onscreen keyboard.<br>Very useful for PocketPC devices w/o keyboard.<br>DDgui uses this on POCKETPC and GP2X platforms<br>if you tip on a non-READONLY text box.<br></div></div>
+<div class="neutral"><div class="yellow">--------------------------------------------------------------<br>Values you can DDgui_get() or DDgui_set():<br>--------------------------------------------------------------<br><br>### dialog/global: - widget$="" ###<br>MOVING                    - Indicates the dialog is currently moved.<br>XPOS, YPOS, WIDTH, HEIGHT - dialog dimensions<br>SCALEABLE                 - can scale dialog<br>MOVEABLE                  - can move dialog<br>MOVING                    - dialog is currently being moved<br>SCALEING                  - dialog is currently being resized<br>COL_BRIGHT                - bright color<br>COL_NORM                  - normal color<br>COL_HOVER_BRIGHT          - bright color when under mouse<br>COL_HOVER_NORM            - normal color when under mouse<br>INKEY                     - a character, that is used instead of INKEY$<br>useful for button as a keyboard mapping.<br><br>--------------------------------------------------------------<br>### widget: ###  - this is a set of states that any widget has<br>XPOS, YPOS              - position, globally on screen<br>WIDTH<br>HEIGHT<br>HOVER   1/0<br>TEXT    "text"<br>CLICKED 1/0<br>READONLY                - if set, the user can't change the value<br>SCROLL                  - intern use<br>SCROLLMAX               - intern use<br>HIDE                    - do not show/handle (use DDgui_hide/DDgui_unhide)<br>ALIGN                   - -1=left, 0=center, 1=right. Center only in the remaining space of that line!<br>TIPTEXT                 - optional tooltip text, that apears, when mouse hovers<br>over this item<br>--------------------------------------------------------------<br>### spacer: ###<br>--------------------------------------------------------------<br>### button: ###<br>CLICKED 1/0<br>SELECT  1/0 - indicate that this button is "pressed/highlit"<br>READONLY1/0 - button is disabled<br>--------------------------------------------------------------<br>### slider: ###<br>TEXT    0...1<br>CLICKED inform about mouse is moving slider<br>MINVAL  minimum value (default=0)<br>MAXVAL  maximum value (default=1)<br>STEP    step size     (default=0.01)<br>--------------------------------------------------------------<br>### checkbox ###<br>SELECT 1/0              - checked(1), or unchecked (0) -> was idCHECKED before!!<br>--------------------------------------------------------------<br>### radio: ###<br>SELECT  -1(none) 0...n<br>COUNT   number of items<br>TEXT    token1|token2|token3|...<br>CLICKED inform about SELECT change<br>--------------------------------------------------------------<br>### file ###<br>TEXT    filename<br>FILTER  filter for file-open dialog<br>CLICKED inform about file change<br>--------------------------------------------------------------<br>### list / combo ###<br>TEXT    token1|token2|token3...<br>COUNT   number of items<br>SELECT  -1(none) 0...n<br>CLICKED inform about SELECT change<br>--------------------------------------------------------------<br>### text, singletext ###<br>SELSTART index of selection<br>SELEND   index of end of selection<br>READONLY TRUE/FALSE - can the text be edited?<br>--------------------------------------------------------------<br>### tab ###<br>SELECT   the selected tab (0=first)<br>CLICKED  inform about SELECT change<br>--------------------------------------------------------------<br>### frame ###<br>TEXT     caption text of the frame. Set to "" for an<br>invisible frame.<br>HEIGHT   gets updated at every redraw.<br>WIDTH    If =0 on creation, this will be set to the (one) widest child<br>on the first drawing. Beware of DDgui_Spacer(10000,0)!<br></div></div>
+<div class="white"><h2><a name="DDgui_automate"></a>DDgui_automate</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_automate</b> : idfrom$, whatfrom$, idto$, whatto$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_automate" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_index"></a>DDgui_index</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_index</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, <span class="keyword">BYREF</span> name$, create%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Get index in ddgui_vals$[] for given string<br>New sorting algorithm for much faster access<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_index" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_get_intern"></a>DDgui_get_intern</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_get_intern</b> $: wdg <span class="keyword">AS</span> DDGUI_WDG, <span class="keyword">BYREF</span> name$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_get_intern" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_get"></a>DDgui_get</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_get</b> $: id$, name$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_get" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_get"></a>DDgui_get</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_get</b> : id$, name$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_get" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_set"></a>DDgui_set</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_set</b> : id$, name$, val$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_set" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_UpdateFont"></a>DDgui_UpdateFont</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_UpdateFont</b> : bWantKerning%, iPixelsSpaceBetweenLettersIfKerning%=2</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Initialize font (with kerning)<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_UpdateFont" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_init"></a>DDgui_init</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_init</b> :</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">clear all widgets, but keep color and size<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_init" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">Get index in ddgui_vals$[] for given string<br>New sorting algorithm for much faster access<br></div></div>
+<div class="white"><h2><a name="DDgui_pushdialog"></a>DDgui_pushdialog</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_pushdialog</b> : x%, y%, width%, height%, center_to_screen% = FALSE</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Bring a new dialog in front of the current one<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_pushdialog" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_popdialog"></a>DDgui_popdialog</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_popdialog</b> :</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">quit current dialog, activate the one below this<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_popdialog" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_show"></a>DDgui_show</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_show</b> : only_show_current%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">show the dialogs (all) and handle the current one<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_show" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_show_intern"></a>DDgui_show_intern</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_show_intern</b> : ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, is_current%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">show the dialogs<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_show_intern" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_resizedialog"></a>DDgui_resizedialog</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_resizedialog</b> %: x%,y%,width%=0,height%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Resize and mode a dialog<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_resizedialog" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_hide"></a>DDgui_hide</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_hide</b> %: id$, bHide%=TRUE</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Show or hide a widget<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_hide" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="__DDgui_Callbacks__"></a>__DDgui_Callbacks__</h2><div class="blue">Type:   SUB<br><b>__DDgui_Callbacks__</b> :</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#__DDgui_Callbacks__" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_draw_user"></a>DDgui_draw_user</h2><div class="blue">Type:  CALLBACK FUNCTION<br><b>DDgui_draw_user</b> %: <span class="keyword">BYREF</span> id$, width%, height%, ytop%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Overwrite for drawing user defined widgets<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_draw_user" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_handle_user"></a>DDgui_handle_user</h2><div class="blue">Type:  CALLBACK FUNCTION<br><b>DDgui_handle_user</b> %: <span class="keyword">BYREF</span> id$, mx%, my%, b1%, b2%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Overwrite for handling user defined widgets<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_handle_user" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_backrect"></a>DDgui_backrect</h2><div class="blue">Type:  CALLBACK FUNCTION<br><b>DDgui_backrect</b> %: x%,y%,dx%,dy%, col%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Draw a 1 pixel rectangle usually around<br>text or list controls<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_backrect" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_backgnd"></a>DDgui_backgnd</h2><div class="blue">Type:  CALLBACK FUNCTION<br><b>DDgui_backgnd</b> %: col1%, col2%, x%, y%, dx%, dy%</div><br><br>
+<b>Parameters:</b><br><table><tr><td><ul><li><div class="neutral">col1 </div></li></ul></td><td>-</td><td><div class="neutral">a bright color</div></td></tr>
+<tr><td><ul><li><div class="neutral">col2 </div></li></ul></td><td>-</td><td><div class="neutral">the normal color, see</div></td></tr>
+<tr><td><ul><li><div class="neutral">x    </div></li></ul></td><td>-</td><td><div class="neutral">start x value</div></td></tr>
+<tr><td><ul><li><div class="neutral">y    </div></li></ul></td><td>-</td><td><div class="neutral">start y value</div></td></tr>
+<tr><td><ul><li><div class="neutral">dx   </div></li></ul></td><td>-</td><td><div class="neutral">width</div></td></tr>
+<tr><td><ul><li><div class="neutral">dy   </div></li></ul></td><td>-</td><td><div class="neutral">height</div></td></tr>
+</table><br>
+<b>Remarks:</b><br>
+<div class="neutral">Draw 3D background<br>override this function for your own<br>graphics style<br>Colors are:<br>col_bright				 - bright color<br>col_norm				 - normal color<br>col_hover_bright		 - bright color when under mouse<br>col_hover_norm			 - normal color when under mouse<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_backgnd" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="__DDgui_Widgets___"></a>__DDgui_Widgets___</h2><div class="blue">Type:   SUB<br><b>__DDgui_Widgets___</b> :</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#__DDgui_Widgets___" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_widget"></a>DDgui_widget</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_widget</b> %: id$, caption$, width%=0, height%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">widget c'tor - can be used as a static text widget<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_widget" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_user"></a>DDgui_user</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_user</b> %: id$, user_type$, fkt_ptr <span class="keyword">AS</span> DDgui_userfunction, width%, height%</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_user" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_signal"></a>DDgui_signal</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_signal</b> %: id$, verb$, <span class="keyword">BYREF</span> info$</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_signal" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_userdefined"></a>DDgui_userdefined</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_userdefined</b> : id$, user_type$, width%, height%</div><br><br>
+<div style="float:left;"><p><b>See Also:</b><br>
+<a href="#DDgui_handle_user">DDgui_handle_user</a><br>
+<a href="#DDgui_draw_user">DDgui_draw_user</a><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_userdefined" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_drawwidget"></a>DDgui_drawwidget</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_drawwidget</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, wdg <span class="keyword">AS</span> DDGUI_WDG, ytop%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Draw a widget (any one)<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_drawwidget" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_handlewidget"></a>DDgui_handlewidget</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_handlewidget</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, wdg <span class="keyword">AS</span> DDGUI_WDG, mx%, my%, b1%, b2%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Interact with a widget<br>\param mx% - mouse x position, relative to widget<br>\param my% - mouse y position, relative to widget<br>\param b1% - left mouse button. -1=down; 1=up; 0=pressed or released<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_handlewidget" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_boxprint"></a>DDgui_boxprint</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_boxprint</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, wdg <span class="keyword">AS</span> DDGUI_WDG, x%, y%, wx%, do_draw%, find_pos%</div><br><br>
+<b>Return:</b><br><table><tr><td><ul><li><div class="neutral">height of block</div>&nbsp;</li></ul></td></tr></table><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Print text, wrap if too wide<br>if !do_draw it won't paint<br>if find_pos, then it will return the char index<br>if you click on the point x,y<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_boxprint" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_drawscrollbar"></a>DDgui_drawscrollbar</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_drawscrollbar</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, wdg <span class="keyword">AS</span> DDGUI_WDG, width%, height%, page_height%, ytop%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">over-draw the scrollbar of a widget (if it has one)<br>VIEWPORT of the widget<br>width/height of complete widget -> scrollbar will<br>attach to right border itself!<br>page_height is the height of the visible "scroll size"->used for gripper size<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_drawscrollbar" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_handlescrollbar"></a>DDgui_handlescrollbar</h2><div class="blue">Type: HIDDEN   FUNCTION<br><b>DDgui_handlescrollbar</b> %: ddgui_vals <span class="keyword">AS</span> DDGUI_DLG, wdg <span class="keyword">AS</span> DDGUI_WDG, mx%, my%, b1%, b2%, height%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Handle scrollbar for any widget that has a scrollbar<br>returns 0 - noBar, 1 - VBAR<br>mx,my are relative to the widget.<br>The spin buttons are max(fontx, fonty) in square<br>height is the height of the scrollbar (y=0 for top point)<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_handlescrollbar" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_spacer"></a>DDgui_spacer</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_spacer</b> : width%=10000, height%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">------------------------------------------ //<br>Spacer. Width of 10000 make new line<br>------------------------------------------ //<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_spacer" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_button"></a>DDgui_button</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_button</b> : id$, caption$, width%=0, height%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">------------------------------------------ //<br>Button<br>------------------------------------------ //<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_button" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>Slider (Range is 0 - 1)<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_slider"></a>DDgui_slider</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_slider</b> : id$, value, width%=100, height%=16</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_slider" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>Toolbar (macro)<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_toolbar"></a>DDgui_toolbar</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_toolbar</b> : id_buttons$[], id_sprites[]</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_toolbar" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>Checkbox<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_checkbox"></a>DDgui_checkbox</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_checkbox</b> : id$, caption$, width%=0, height%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_checkbox" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>RadioGroup<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_radio"></a>DDgui_radio</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_radio</b> : id$, texts$, width%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_radio" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_file"></a>DDgui_file</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_file</b> : id$, caption$, filter$, width%=0, height%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">------------------------------------------ //<br>File<br>------------------------------------------ //<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_file" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_combo"></a>DDgui_combo</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_combo</b> : id$, texts$, width%=0, height%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_combo" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>List<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_list"></a>DDgui_list</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_list</b> : id$, texts$, width%=0, height%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_list" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">------------------------------------------ //<br>Text<br>------------------------------------------ //<br></div></div>
+<div class="white"><h2><a name="DDgui_text"></a>DDgui_text</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_text</b> : id$, text$, width%=0, height%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_text" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_singletext"></a>DDgui_singletext</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_singletext</b> : id$, text$, width%=0</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_singletext" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_tab"></a>DDgui_tab</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_tab</b> : id$, captions$</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">---------------------------------------<br>a TAB widget<br>---------------------------------------<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_tab" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_framestart"></a>DDgui_framestart</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_framestart</b> : id$="", caption$="", width%=0</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Start a frame element. All new widgets will be placed<br>within this frame, until you call DDgui_frameend()<br>If you add no caption, the frame is invisible.<br>Otherwise it's a nice frame, which takes some additional<br>space.<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_framestart" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_frameend"></a>DDgui_frameend</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_frameend</b> :</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">ends putting elements in a frame. From now on<br>elements will be placed next to the current frame, again.<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_frameend" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="__DDgui_Helpers___"></a>__DDgui_Helpers___</h2><div class="blue">Type:   SUB<br><b>__DDgui_Helpers___</b> :</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#__DDgui_Helpers___" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="neutral"><div class="yellow">#### HELPER FUNCTIONS #####<br></div></div>
+<div class="white"><h2><a name="DDgui_advancefocus"></a>DDgui_advancefocus</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_advancefocus</b> %: iDirection%=1</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Advance the focus of text elements<br>\param iDirection : -1 backwards, 1=forward<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_advancefocus" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_setfocus"></a>DDgui_setfocus</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_setfocus</b> %: id$</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Sets the focus to a widget, might select the text and such<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_setfocus" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_selecttab"></a>DDgui_selecttab</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_selecttab</b> %: id$, isel%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">performs the hide/unhide for the selected tab<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_selecttab" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_msg"></a>DDgui_msg</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_msg</b> %: text$, yes_no%, caption$="Information"</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">---------------------------------------<br>msg - a message box<br>---------------------------------------<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_msg" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_getitemtext"></a>DDgui_getitemtext</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_getitemtext</b> $: id$, index%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">get the text for a list item index<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_getitemtext" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_insertitem"></a>DDgui_insertitem</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_insertitem</b> %: id$, text$, before_index%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">insert an item into a list box<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_insertitem" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_deleteitem"></a>DDgui_deleteitem</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_deleteitem</b> %: id$, index%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">remove an item from a list box<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_deleteitem" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_input"></a>DDgui_input</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_input</b> $: text$, bSpecialChars%=TRUE, bFullscreen=FALSE, bSingleLine%=FALSE</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">---------------------------------------<br>An Onscreen Keyboard for PocketPC/GP2X<br>automatically kicked, when you tip on a<br>non-READONLY text box.<br>You can force/disable this behaviour by manually changing<br>the variable: DDGUI_AUTO_INPUT_DLG=TRUE/FALSE<br>---------------------------------------<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_input" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_FileDialog"></a>DDgui_FileDialog</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_FileDialog</b> $: bOpen%, filterstr$="*.*", initialise%=FALSE</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Opens a file request dialog for a DDgui program.<br>\param bOpen - Open (TRUE) or Save (FALSE) a file<br>\param filterstr$ - file filter to display. When writing (bOpen=FALSE), the extension will be appended.<br>\returns either the filename or an empty string in case of abort or error.<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_FileDialog" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_WaitCursor"></a>DDgui_WaitCursor</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_WaitCursor</b> %:  bWait%, iSpriteId% = -1</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">Display a wait animation. Call it with TRUE to show the wait cursor.<br>the current back buffer is grabbed as a background.<br>call it with FALSE at the end to clear up memory.<br>use the iSpriteId as the backgound. If you specify -1 here<br>DDgui will use GENSPRITE() for that<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_WaitCursor" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_ColorDlg"></a>DDgui_ColorDlg</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_ColorDlg</b> %: color%</div><br><br>
+<b>Remarks:</b><br>
+<div class="neutral">---------------------------------------<br>colordlg - a color picker dialog<br>returns the color<br>---------------------------------------<br></div>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_ColorDlg" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="DDgui_CenterDialog"></a>DDgui_CenterDialog</h2><div class="blue">Type:   FUNCTION<br><b>DDgui_CenterDialog</b> %:</div><br><br>
+<div style="float:left;"><p><br></p></div><div style="float:right;"><a href="#indexx">Back to Index</a><br><a href="#DDgui_CenterDialog" onclick="ToggleLang(); return(false);">Language &hArr;</a></div><div style="clear:both;"><br></div>
+</div>
+<div class="white"><h2><a name="indexx"></a>Index</h2><br><br>
+<a href="#DDgui_automate">DDgui_automate</a><br><a href="#DDgui_index">DDgui_index</a><br><a href="#DDgui_get_intern">DDgui_get_intern</a><br><a href="#DDgui_get">DDgui_get</a><br><a href="#DDgui_get">DDgui_get</a><br><a href="#DDgui_set">DDgui_set</a><br><a href="#DDgui_UpdateFont">DDgui_UpdateFont</a><br><a href="#DDgui_init">DDgui_init</a><br><a href="#DDgui_pushdialog">DDgui_pushdialog</a><br><a href="#DDgui_popdialog">DDgui_popdialog</a><br><a href="#DDgui_show">DDgui_show</a><br><a href="#DDgui_show_intern">DDgui_show_intern</a><br><a href="#DDgui_resizedialog">DDgui_resizedialog</a><br><a href="#DDgui_hide">DDgui_hide</a><br><a href="#__DDgui_Callbacks__">__DDgui_Callbacks__</a><br><a href="#DDgui_draw_user">DDgui_draw_user</a><br><a href="#DDgui_handle_user">DDgui_handle_user</a><br><a href="#DDgui_backrect">DDgui_backrect</a><br><a href="#DDgui_backgnd">DDgui_backgnd</a><br><a href="#__DDgui_Widgets___">__DDgui_Widgets___</a><br><a href="#DDgui_widget">DDgui_widget</a><br><a href="#DDgui_user">DDgui_user</a><br><a href="#DDgui_signal">DDgui_signal</a><br><a href="#DDgui_userdefined">DDgui_userdefined</a><br><a href="#DDgui_drawwidget">DDgui_drawwidget</a><br><a href="#DDgui_handlewidget">DDgui_handlewidget</a><br><a href="#DDgui_boxprint">DDgui_boxprint</a><br><a href="#DDgui_drawscrollbar">DDgui_drawscrollbar</a><br><a href="#DDgui_handlescrollbar">DDgui_handlescrollbar</a><br><a href="#DDgui_spacer">DDgui_spacer</a><br><a href="#DDgui_button">DDgui_button</a><br><a href="#DDgui_slider">DDgui_slider</a><br><a href="#DDgui_toolbar">DDgui_toolbar</a><br><a href="#DDgui_checkbox">DDgui_checkbox</a><br><a href="#DDgui_radio">DDgui_radio</a><br><a href="#DDgui_file">DDgui_file</a><br><a href="#DDgui_combo">DDgui_combo</a><br><a href="#DDgui_list">DDgui_list</a><br><a href="#DDgui_text">DDgui_text</a><br><a href="#DDgui_singletext">DDgui_singletext</a><br><a href="#DDgui_tab">DDgui_tab</a><br><a href="#DDgui_framestart">DDgui_framestart</a><br><a href="#DDgui_frameend">DDgui_frameend</a><br><a href="#__DDgui_Helpers___">__DDgui_Helpers___</a><br><a href="#DDgui_advancefocus">DDgui_advancefocus</a><br><a href="#DDgui_setfocus">DDgui_setfocus</a><br><a href="#DDgui_selecttab">DDgui_selecttab</a><br><a href="#DDgui_msg">DDgui_msg</a><br><a href="#DDgui_getitemtext">DDgui_getitemtext</a><br><a href="#DDgui_insertitem">DDgui_insertitem</a><br><a href="#DDgui_deleteitem">DDgui_deleteitem</a><br><a href="#DDgui_input">DDgui_input</a><br><a href="#DDgui_FileDialog">DDgui_FileDialog</a><br><a href="#DDgui_WaitCursor">DDgui_WaitCursor</a><br><a href="#DDgui_ColorDlg">DDgui_ColorDlg</a><br><a href="#DDgui_CenterDialog">DDgui_CenterDialog</a><br></div>
+</body></html>

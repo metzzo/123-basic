@@ -1,0 +1,88 @@
+// --------------------------------- //
+// Project: PocketLightMapEdit
+// Start: Friday, August 26, 2011
+// IDE Version: 10.057
+
+FUNCTION RotoZoomPoly: _id, _x,_y, _angle, _scale, _col
+	LOCAL sphi, cphi, spx, spy, dx, dy
+
+    sphi=SIN(_angle)
+    cphi=COS(_angle)
+    GETSPRITESIZE _id,spx,spy
+    dx=spx/2*_scale
+    dy=spy/2*_scale
+
+    LOCAL hx, hy
+
+    hx = _scale//(spx/4)*_scale
+    hy= _scale//(spy/4)*_scale
+
+    STARTPOLY _id
+    POLYVECTOR _x - cphi* (dx-hx) - sphi* (dy-hy),  _y - cphi*(dy-hy) + sphi*(dx-hx),   0,   0,   _col
+    POLYVECTOR _x - cphi* (dx-hx) + sphi* (dy+hy),  _y + cphi*(dy+hy) + sphi*(dx-hx),   0,   spy, _col
+    POLYVECTOR _x + cphi* (dx+hx) + sphi*(dy+hy),   _y + cphi*(dy+hy) - sphi*(dx+hx),   spx, spy, _col
+    POLYVECTOR _x + cphi* (dx+hx) - sphi*(dy-hy),   _y - cphi*(dy-hy) - sphi*(dx+hx),   spx, 0,   _col
+    ENDPOLY
+ENDFUNCTION
+
+
+FUNCTION GetDistance:x1,y1,x2,y2
+	RETURN SQR ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+ENDFUNCTION
+
+FUNCTION GetAngle: x1,y1,x2,y2
+	RETURN FMOD(ATAN(y1-y2,x1-x2)+360,360)-180
+ENDFUNCTION
+
+FUNCTION MouseHit%: Mouse
+	STATIC LastMouse%
+
+	IF LastMouse = FALSE AND Mouse = TRUE
+		LastMouse = TRUE
+		RETURN TRUE
+	ELSE
+		IF LastMouse = TRUE AND Mouse = FALSE
+			LastMouse = FALSE
+		ENDIF
+		RETURN FALSE
+	ENDIF
+ENDFUNCTION
+
+FUNCTION RenderOnSprite%: SubName$, Spr%
+	LOCAL TmpTilesize = Tilesize
+	Tilesize = 32
+	CREATESCREEN ScreenID, ScreenSpriteID, MapWidth*32, MapHeight*32
+	USESCREEN Spr
+	IF CALLBYNAME(SubName$) = FALSE THEN DEBUG "Failed to call "+SubName$
+	USESCREEN -1
+
+	Tilesize = TmpTilesize
+	RETURN Spr
+ENDFUNCTION
+
+FUNCTION StretchSpriteForever: Spr%, Width, Height
+	LOCAL OldWidth, OldHeight
+	GETSPRITESIZE Spr, OldWidth, OldHeight
+	IF OldWidth <> Width OR OldHeight <> Height
+		CLEARSCREEN RGB(255,0,128)
+		STRETCHSPRITE Spr, 0, 0, Width, Height
+		GRABSPRITE Spr,0,0,Width,Height
+		CLEARSCREEN RGB(0  ,0,  0)
+	ENDIF
+ENDFUNCTION
+
+FUNCTION LoadDesc: Name$, BYREF Desc$
+	Desc$ = "Keine Beschreibung vorhanden"
+	LOCAL f = GENFILE()
+	IF DOESFILEEXIST(Name$+".desc") AND OPENFILE(f, Name$+".desc",TRUE)
+		READSTR f, Desc$, ReadInt(f)
+		CLOSEFILE f
+	ENDIF
+ENDFUNCTION
+
+FUNCTION ReadInt: f
+	LOCAL num
+	READIEEE f, num
+	RETURN num
+ENDFUNCTION
+

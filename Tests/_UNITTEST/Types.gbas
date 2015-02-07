@@ -25,6 +25,9 @@ SUB TestTypes:
 	TEST_INPUT(H2.Birth)
 	TEST_OUTPUT("Test4213371337")
 	TEST_CHECK("Type BYREF")
+	
+	GOSUB TypeTestStatic
+	GOSUB TestSubInFunc
 ENDSUB
 
 
@@ -35,7 +38,7 @@ FUNCTION TypeTest: Hello AS THuman
 	TEST_INPUT(Hello.Birth)
 ENDFUNCTION
 
-SUB TypeTestStatic: 
+SUB TypeTestStatic:
 	STATIC T AS THuman
 	T.Name$ = "Wladimir Putin"
 	TEST_INPUT(T.Name$)
@@ -43,3 +46,18 @@ SUB TypeTestStatic:
 	TEST_CHECK("Static Type")
 ENDSUB
 
+TYPE TSubInFunc
+	Value$
+	FUNCTION TestSubInFunc:
+		self.Value$ = "Better Test"
+	ENDFUNCTION
+ENDTYPE
+
+
+SUB TestSubInFunc:
+	LOCAL test AS TSubInFunc
+	test.TestSubInFunc()
+	TEST_INPUT(test.Value$)
+	TEST_OUTPUT("Better Test")
+	TEST_CHECK("Same sub as in function")
+ENDSUB
