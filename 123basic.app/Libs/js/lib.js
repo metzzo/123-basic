@@ -325,6 +325,8 @@ function tryClone(o) {
 
 function updateConsole() {
 	try {
+		if (initStatics !== undefined) initStatics();
+		
 		if (!mainCall) {
 			main();
 			mainCall = true;

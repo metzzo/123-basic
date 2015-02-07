@@ -19,6 +19,8 @@ preInitFuncs.push(function() {
 			
 			document.body.appendChild(c);
 			
+			if (initStatics !== undefined) initStatics();
+			
 			init2D('OTTCANVAS');
 		}
 	}
