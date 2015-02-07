@@ -29,3 +29,5 @@ ftp.txt
 
 Tmp/
 
+Tests/**/Documentation*.md
+

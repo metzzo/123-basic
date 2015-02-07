@@ -1,3 +1,6 @@
+0.6
+Added: In source documentation system
+
 0.55
 Fixed: Problem with UTF8 .GBAP files in the XML loader
 Added: Started working on documentation on github
