@@ -92,18 +92,24 @@ TYPE TPLObj
 ENDTYPE
 GLOBAL Objs[] AS TPLObj
 
-SETCURRENTDIR(PLATFORMINFO$("DOCUMENTS")+"/.PocketLight3D/")
-LOCAL i
-WHILE DOESDIREXIST(LastName$+".pl3d")
-	INC i
-	LastName$ = "Karte"+i
-WEND
+//SETCURRENTDIR(PLATFORMINFO$("DOCUMENTS")+"/.PocketLight3D/")
+//LOCAL i
+//WHILE DOESDIREXIST(LastName$+".pl3d")
+//	INC i
+//	LastName$ = "Karte"+i
+//WEND
 
 GLOBAL ShowOnlyCurrentFrame% = FALSE
 
+SMOOTHSHADING FALSE
+
 GOSUB InitGUI
+?IFDEF HTML5
+SETTRANSPARENCY RGB(255,0,128)
+SUB GLB_ON_LOOP:
+?ELSE
 WHILE TRUE
-	SMOOTHSHADING FALSE
+?ENDIF
 	ShowOnlyCurrentFrame = FALSE
 
 	GOSUB Render
@@ -111,7 +117,11 @@ WHILE TRUE
 
 	DDgui_show(ShowOnlyCurrentFrame)
 	SHOWSCREEN
+?IFDEF HTML5
+ENDSUB
+?ELSE
 WEND
+?ENDIF
 
 //Standard GUI Fenster initialisieren
 SUB InitGUI:

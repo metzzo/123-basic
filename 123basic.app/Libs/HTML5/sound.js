@@ -169,7 +169,6 @@ BiquadFilterNode.type and OscillatorNode.type.
   }
   
 }(window));
-
 //------------------------------------------------------------
 //sound
 //------------------------------------------------------------
@@ -180,8 +179,16 @@ var engines = {
 			var curChn = sound.getNextFreeChannel();
 			if (!curChn) {
 				curChn = sound.buffers[0];
-				soundEngine.newSource(curChn);
 			}
+			
+			curChn.gainNode = audioContext.createGain();
+			curChn.panner = audioContext.createPanner();
+			curChn.source = audioContext.createBufferSource();
+			
+			curChn.source.buffer = curChn.sound.data;
+			
+			curChn.startTime = null; // used when starting
+			curChn.pauseTime = null; // used when pausing
 			
 			if (sound.loop) {
 				curChn.source.loop = true;
@@ -192,6 +199,13 @@ var engines = {
 				curChn.timeout = null;
 			}
 			
+			curChn.panner.setPosition(pan, 0, 1 - Math.abs(pan));
+			curChn.gainNode.gain.value = volume;
+			
+			curChn.source.connect(audioContext.destination);
+			curChn.gainNode.connect(curChn.panner);
+			curChn.panner.connect(audioContext.destination);
+			curChn.panner.panningModel = 'equalpower';
 			
 			curChn.playing = true;
 			var startPos = 0;
@@ -202,13 +216,12 @@ var engines = {
 				curChn.startTime = GETTIMERALL();
 				curChn.source.start(0);
 			}
-			
-			curChn.panner.setPosition(pan, 0, 1 - Math.abs(pan));
-			curChn.gainNode.gain.value = volume;
-			
+			/*
 			curChn.timeout = setTimeout(function() {
 				soundEngine.stop(curChn);
-			}, (curChn.sound.data.duration+1)*1000 - startPos*1000);
+			}, (curChn.sound.data.duration+1)*1000 - startPos*1000);*/
+			
+			return curChn.num;
 		},
 		setVolume: function(channel, volume) {
 			channel.gainNode.gain.value = volume;
@@ -225,9 +238,7 @@ var engines = {
 					clearTimeout(channel.timeout);
 					channel.timeout = null;
 				}
-				
-				// new
-				soundEngine.newSource(channel);
+
 			}
 		},
 		pause: function(channel) {
@@ -244,23 +255,9 @@ var engines = {
 			}
 		},
 		newSource: function(channel) {
-			channel.gainNode = audioContext.createGain();
-			channel.panner = audioContext.createPanner();
-			channel.source = audioContext.createBufferSource();
 			
-			if (!channel.source.start) channel.source.start = channel.source.noteOn;
-			if (!channel.source.stop) channel.source.stop = channel.source.noteOff;
 			
-			channel.source.buffer = channel.sound.data;
-			// channel.source.connect(audioContext.destination);
 			
-			channel.startTime = null; // used when pausing
-			channel.pauseTime = null; // used when pausing
-			
-			channel.source.connect(channel.gainNode);
-			channel.gainNode.connect(channel.panner);
-			channel.panner.connect(audioContext.destination);
-			channel.panner.panningModel = 'equalpower';
 		},
 		load: function(sound) {
 			var request = new XMLHttpRequest();
@@ -274,13 +271,10 @@ var engines = {
 					sound.data = buffer;
 					// sound sourcen erstellen
 					for (var i = 0; i < sound.buffers.length; i++) {
-						(function() {
-							var channel = new SoundChannel(sound);
-							soundEngine.newSource(channel);
-							sound.buffers[i] = channel;
-							channel.timeout = null; // when audio is finished
-							channel.finishedLoading();
-						})();
+						var channel = new SoundChannel(sound);
+						sound.buffers[i] = channel;
+						channel.timeout = null; // when audio is finished
+						channel.finishedLoading();
 					}
 				}, function() {
 					waitload--;
@@ -368,20 +362,26 @@ var engines = {
 	}
 };
 
+
+
 var audioContext;
-if (!!window.AudioContext) {
+var soundEngine // which sound engine is currently being used
+var sounds = [];
+var soundChannels = [ ];
+var music = null, musicVolume = 1;
+
+function initSoundEngine() {
 	try {
 		audioContext = new AudioContext();
 		audioContext.listener.setPosition(0,0,0);
 	} catch(e) {
 		audioContext = null;
 	}
+	
+	soundEngine =  !!audioContext ? engines.WEBAUDIO : engines.AUDIO;
+	
+	initSoundEngine = null;
 }
-
-var soundEngine =  !!audioContext ? engines.WEBAUDIO : engines.AUDIO; // which sound engine is currently being used
-var sounds = [];
-var soundChannels = [ ];
-var music = null, musicVolume = 1;
 
 /**
 * @constructor
@@ -459,6 +459,8 @@ SoundChannel.prototype.finishedPlaying = function() {
 }
 
 function LOADSOUND(file, num, buffer) {
+	if (initSoundEngine) initSoundEngine();
+	
 	if (file === "") {
 		// TODO: free up
 	} else {
@@ -508,6 +510,8 @@ function SOUNDPLAYING(chn) {
 }
 
 function PLAYMUSIC(file, loop) {
+	if (initSoundEngine) initSoundEngine();
+	
 	if (file === "") {
 		// TODO: free up
 	} else {
@@ -552,6 +556,4 @@ function MUSICVOLUME(vol) {
 		soundEngine.setVolume(music.buffers[0], vol);
 	}
 }
-
-
 

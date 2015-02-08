@@ -1455,14 +1455,7 @@ ENDFUNCTION
 // !Overwrite for handling user defined widgets
 // ------------------------------------------ //
 CALLBACK FUNCTION DDgui_handle_user%: BYREF id$, mx%, my%, b1%, b2%
-	VIEWPORT 0,0,0,0
-	DRAWRECT 0,0,1024,1024,RGB(255,128,64)
-	PRINT "Must overwrite: ddgui_handle_user", 0,0
-	PRINT "for item: "+id$, 0, 20
-	PRINT "type="+DDgui_get$(id$, "TYPE"), 0, 40
-	SHOWSCREEN
-	MOUSEWAIT
-	END
+	
 ENDFUNCTION
 
 
