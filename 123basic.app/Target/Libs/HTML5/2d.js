@@ -494,7 +494,10 @@ function LIMITFPS(fps) {
 }
 
 function RGB(r, g, b) {
-	return (r%256)*0x10000 + (g%256)*0x100 + (b%256);
+	r = r%256; if (r < 0) r = 256 + r;
+	g = g%256; if (g < 0) g = 256 + g;
+	b = b%256; if (b < 0) b = 256 + b;
+	return r*0x10000 + g*0x100 + b;
 }
 
 var whiteRGB = RGB(255,255,255);

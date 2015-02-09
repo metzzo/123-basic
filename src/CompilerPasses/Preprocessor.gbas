@@ -198,7 +198,7 @@ FUNCTION PreSkip: RemoveAll%
 	Error("Unexpected End Of File (maybe missing ?ENDIF)", CODELINE(), CODEFILE$())
 ENDFUNCTION
 
-FUNCTION CalculateTree: expr AS Expr
+FUNCTION CalculateTree: expr AS TExpr
 	SELECT expr.Typ
 		CASE EXPR_IS_INT
 			RETURN expr.intval

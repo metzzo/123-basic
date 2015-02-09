@@ -292,7 +292,7 @@ FUNCTION JS_Generator$:
 ENDFUNCTION
 
 
-FUNCTION JSGenerate$: expr AS Expr
+FUNCTION JSGenerate$: expr AS TExpr
 	?IFDEF DEBUG
 	STDOUT "Generating expression: '"+REPLACE$(Compiler.Tokens[expr.tokID].Text$,"\n","")+"' in Line "+Compiler.Tokens[expr.tokID].LineContent$+" type: "+expr.Typ+"\n"
 	?ENDIF
@@ -1177,7 +1177,7 @@ FUNCTION JSDoesUnref%: Expr%
 	RETURN unref
 ENDFUNCTION
 
-FUNCTION JSDoParameter$: expr AS Expr, func%, DoParam% = TRUE
+FUNCTION JSDoParameter$: expr AS TExpr, func%, DoParam% = TRUE
 	LOCAL Text$
 	IF DoParam THEN Text$= "("
 	LOCAL i = 0
@@ -1222,7 +1222,7 @@ FUNCTION JSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE, InitVal
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION ConditionJSGenerate$: expr AS Expr
+FUNCTION ConditionJSGenerate$: expr AS TExpr
 	IF expr.Typ = EXPR_IS_CAST2FLOAT
 		RETURN JSGenerate$(Exprs[expr.expr])
 	ELSE
@@ -1243,7 +1243,7 @@ FUNCTION JSShouldRedeclare%: Var%
 	RETURN TRUE
 ENDFUNCTION
 
-FUNCTION JSGetDefaultValue$: datatype AS Datatype,Ref%, IgnoreArray%
+FUNCTION JSGetDefaultValue$: datatype AS TDatatype, Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
 		RetVal$ = "pool_array.alloc(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")"

@@ -178,7 +178,7 @@ FUNCTION CS_Generator$:
 ENDFUNCTION
 
 
-FUNCTION CS_Generate$: expr AS Expr
+FUNCTION CS_Generate$: expr AS TExpr
 	?IFDEF DEBUG
 	STDOUT "Generating expression: '"+REPLACE$(Compiler.Tokens[expr.tokID].Text$,"\n","")+"' in Line "+Compiler.Tokens[expr.tokID].LineContent$+" type: "+expr.Typ+"\n"
 	?ENDIF
@@ -552,7 +552,7 @@ FUNCTION CS_Generate$: expr AS Expr
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION CSDoParameter$: expr AS Expr, func% = -1
+FUNCTION CSDoParameter$: expr AS TExpr, func% = -1
 	LOCAL Text$ = "("
 	LOCAL i = 0
 
@@ -592,7 +592,7 @@ FUNCTION CSVariDef$: Varis%[], ForceDefault% = FALSE, NoStatic% = FALSE, CreateS
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION CSCondition_Generate$: expr AS Expr
+FUNCTION CSCondition_Generate$: expr AS TExpr
 	IF expr.Typ = EXPR_IS_CAST2FLOAT
 		RETURN CS_Generate$(Exprs[expr.expr])
 	ELSE
@@ -601,7 +601,7 @@ FUNCTION CSCondition_Generate$: expr AS Expr
 ENDFUNCTION
 
 
-FUNCTION CSGetDefaultValue$: datatype AS Datatype, IgnoreArray%
+FUNCTION CSGetDefaultValue$: datatype AS TDatatype, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
 		RetVal$ = "new OTTArray<"+ChangeTypeName$(datatype.Name$)+">()"
@@ -624,7 +624,7 @@ FUNCTION CSGetDefaultValue$: datatype AS Datatype, IgnoreArray%
 	RETURN RetVal$
 ENDFUNCTION
 
-FUNCTION CSGenerateDatatype$: datatyp AS Datatype
+FUNCTION CSGenerateDatatype$: datatyp AS TDatatype
 	IF datatyp.IsArray
 		RETURN "OTTArray<"+ChangeTypeName$(datatyp.Name$)+">"
 	ELSE

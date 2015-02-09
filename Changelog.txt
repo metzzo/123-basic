@@ -1,7 +1,13 @@
-0.6
+0.7
+Fixed: Various speed optimizations (array pooling, object pooling, === usage, ...)
+Fixed: STATIC with types works now (STATIC test AS myType)
+Added: ANIMCOLL
 Added: In source documentation system
+Fixed: Lines are 1 px thick (not 2px)
+Fixed: LOADFONT chose wrong character image if it's 1 px thick
+Added: FINDPATH
 
-0.55
+0.6
 Fixed: Problem with UTF8 .GBAP files in the XML loader
 Added: Started working on documentation on github
 Fixed: Macro supports files with whitespaces
@@ -9,10 +15,7 @@ Fixed: RND returns integer
 Added: New demo (8BIT RAIN)
 Fixed: ZOOMSPRITE with sx > 1 or sy > 1 positions the sprite correctly
 Fixed: CLEARSCREEN has default parameter
-Added: Simple VM support (arrays, function calls, variables, if/while/for/.. statements working)
-Fixed: Various speed optimizations (array pooling, object pooling, === usage, ...)
-Fixed: STATIC with types works now (STATIC test AS myType)
-Added: ANIMCOLL
+Added: Simple VM support (arrays, function calls, variables, if/while/for/.. statements working), muuuuuuch work needed
 
 0.5
 Fixed: INIGET$ returns "NO_DATA" if data does not exist

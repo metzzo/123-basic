@@ -83,8 +83,8 @@ FUNCTION DoTarget$: Name$
 	//hole die Libraries
 	LOCAL LibText$ = ""
 	FOREACH L IN Libraries[]
-		LOCAL Path$ = "Libs/"+LCASE$(Target$)+"/"+L.Path$
-		LOCAL Path2$ = "Libs/"+LCASE$(Lang$)+"/"+L.Path$
+		LOCAL Path$ = "Target/Libs/"+LCASE$(Target$)+"/"+L.Path$
+		LOCAL Path2$ = "Target/Libs/"+LCASE$(Lang$)+"/"+L.Path$
 		LOCAL Text$ = ""
 		IF DOESFILEEXIST(Path$)
 			Text$ = LoadFile$(Path$)
@@ -238,6 +238,8 @@ FUNCTION SetupTarget_Proto: Name$, Atts[] AS xmlAttribute
 				RegisterDefine(UCASE$(GetAttribute$("lang", Atts[])), "1")
 				THROW "EXIT"
 			ENDIF
+		CASE "HEADER"
+			DIMPUSH Compiler.HeaderFiles$[], GetAttribute$("file", Atts[])
 	ENDSELECT
 ENDFUNCTION
 

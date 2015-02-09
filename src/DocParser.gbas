@@ -36,7 +36,7 @@ FUNCTION GenerateDocForLanguage: Lang$
 	LOCAL Documentation$ = ""
 	LOCAL JSONDoc$ = ""
 	LOCAL Glossary$ = "# Overview"
-	
+
 	FOREACH module IN Documentations[]
 		IF module.typ$ = "MODULE"
 			INC Glossary$, "\n## [Module " + module.name$ + "] (#" + module.name$ + ")\n"
@@ -46,20 +46,20 @@ FUNCTION GenerateDocForLanguage: Lang$
 				IF D.module$ = module.name$
 					LOCAL name$ = D.name$
 					INC Documentation$, "## " + name$ + "\n"
-					
+
 					SELECT D.typ$
 						CASE "FUNCTION"
 							INC Glossary$, "* [" + name$ + "] (" + name$ + ")\n"
-						
+
 							FOREACH F IN Compiler.Funcs[]
 								IF F.OName$ = D.name$
 									INC Documentation$, ">`"+GenerateFuncName$(F) + "`\n\n"
 									BREAK
 								ENDIF
 							NEXT
-							
+
 							// INC Documentation$, "Module: "+module.name$+"\n"
-							
+
 							IF LEN(D.params[])>0
 								SELECT Lang$
 									CASE "EN"
@@ -73,13 +73,13 @@ FUNCTION GenerateDocForLanguage: Lang$
 									INC Documentation$, DocLangElement$(P.desc[], Lang$)+"\n"
 								NEXT
 							ENDIF
-							
+
 							IF LEN(D.example[])>0
 								INC Documentation$, "```\n" + DocLangElement$(D.example[], Lang$)+"```\n"
 							ENDIF
-							
+
 							INC Documentation$, "\n" + DocLangElement$(D.desc[], Lang$) + "\n"
-							
+
 							IF LEN(D.see$[]) > 0
 								SELECT Lang$
 									CASE "EN"
@@ -87,14 +87,14 @@ FUNCTION GenerateDocForLanguage: Lang$
 									CASE "DE"
 										INC Documentation$, "Siehe auch: "
 								ENDSELECT
-								
+
 								LOCAL first% = FALSE
 								FOREACH s$ IN D.see$[]
 									IF first THEN INC Documentation$, ", "
 									INC Documentation$, "["+s$+"] (#"+s$+")"
 									first = TRUE
 								NEXT
-								
+
 								INC Documentation$, "\n"
 							ENDIF
 					ENDSELECT
@@ -102,11 +102,11 @@ FUNCTION GenerateDocForLanguage: Lang$
 			NEXT
 		ENDIF
 	NEXT
-	
-	
-	
+
+
+
 	Documentation$ = Glossary$ + "\n" + Documentation$
-	
+
 	WriteFile("Documentation_"+Lang$+".md", Documentation$)
 	// WriteFile("commands_"+Lang$+".json", JSONDoc$)
 ENDFUNCTION
@@ -121,7 +121,7 @@ FUNCTION DocLangElement$: Langs[] AS LangElement, Lang$
 	RETURN Text$
 ENDFUNCTION
 
-FUNCTION GenerateFuncName$: F AS IdentifierFunc
+FUNCTION GenerateFuncName$: F AS TIdentifierFunc
 	RETURN Compiler.Tokens[F.DefTok].LineContent$
 ENDFUNCTION
 
@@ -152,7 +152,7 @@ FUNCTION ParseDoc:
 				MatchAndRemove("\n", CODELINE(), CODEFILE$())
 
 				ParseDocLang(param.desc[], "ENDPARAM")
-				
+
 				DIMPUSH doc.params[], param
 			CASE "DESC"
 				RemoveCurrent()
@@ -208,7 +208,7 @@ FUNCTION ParseDocLang: langs[] AS LangElement, endToken$
 
 		RemoveAllNL()
 	WEND
-	
+
 	IF LEN(langs[]) = 1
 		LOCAL l2 AS LangElement
 		l2 = langs[0]

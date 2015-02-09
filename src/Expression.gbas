@@ -169,11 +169,11 @@ ENDFUNCTION
 
 
 //! Eine generische Expression.
-FUNCTION CreateExpression%: Typ%, datatype AS Datatype
-	LOCAL tmpD AS Datatype
+FUNCTION CreateExpression%: Typ%, datatype AS TDatatype
+	LOCAL tmpD AS TDatatype
 	tmpD = datatype
 	?IFDEF DEBUG
-	STDOUT "Create expression: "+Typ+" datatype: "+datatype.Name$+" is array: "+datatype.IsArray+"\n"
+	STDOUT "Create expression: "+Typ+" datatype: "+myDatatype.Name$+" is array: "+myDatatype.IsArray+"\n"
 	?ENDIF
 
 	LOCAL pos = LastExprID
@@ -186,7 +186,7 @@ FUNCTION CreateExpression%: Typ%, datatype AS Datatype
 		?ENDIF
 	ENDIF
 	Exprs[pos].Typ = Typ
-	LOCAL d AS Datatype
+	LOCAL d AS TDatatype
 	//Weird workaround for crash
 	d.Name$ = tmpD.Name$
 	d.IsArray = tmpD.IsArray
@@ -197,9 +197,9 @@ FUNCTION CreateExpression%: Typ%, datatype AS Datatype
 ENDFUNCTION
 
 //! Ein Operator (+,-,*,...)
-FUNCTION CreateOperatorExpression%: Op AS Operator, Left%, Right%
-	LOCAL expr%
-	LOCAL datatype AS Datatype
+FUNCTION CreateOperatorExpression%: Op AS TOperator, Left%, Right%
+	LOCAL Expr%
+	LOCAL datatype AS TDatatype
 	datatype = CastDatatype(Left, Right)
 	//ist es and/or? wenn ja ist der datentyp binär!
 	IF Op.Typ = OP_IS_BOOL
@@ -207,36 +207,36 @@ FUNCTION CreateOperatorExpression%: Op AS Operator, Left%, Right%
 		datatype = intDatatype
 	ENDIF
 
-	expr = CreateExpression(EXPR_IS_OPERATOR, datatype)
-	Exprs[expr].Left = Left
-	Exprs[expr].Right = Right
-	Exprs[expr].Op = Op.ID
+	Expr = CreateExpression(EXPR_IS_OPERATOR, datatype)
+	Exprs[Expr].Left = Left
+	Exprs[Expr].Right = Right
+	Exprs[Expr].Op = Op.ID
 	//Exprs[expr].gen = GenerateOperatorExpression$
 
-	RETURN expr
+	RETURN Expr
 ENDFUNCTION
 
 
 //! Eine Integerkonstante
 FUNCTION CreateIntExpression%: Num%
-	LOCAL expr% = CreateExpression(EXPR_IS_INT, intDatatype)
-	Exprs[expr].intval = Num
-	RETURN expr
+	LOCAL Expr% = CreateExpression(EXPR_IS_INT, intDatatype)
+	Exprs[Expr].intval = Num
+	RETURN Expr
 ENDFUNCTION
 
 
 //! Eine Floatkonstante
 FUNCTION CreateFloatExpression%: Num
-	LOCAL expr% = CreateExpression(EXPR_IS_FLOAT, floatDatatype)
-	Exprs[expr].floatval = Num
-	RETURN expr
+	LOCAL Expr% = CreateExpression(EXPR_IS_FLOAT, floatDatatype)
+	Exprs[Expr].floatval = Num
+	RETURN Expr
 ENDFUNCTION
 
 //! Eine Stringkonstante
 FUNCTION CreateStrExpression%: Str$
-	LOCAL expr% = CreateExpression(EXPR_IS_STR, strDatatype)
-	Exprs[expr].strval$ = Str$
-	RETURN expr
+	LOCAL Expr% = CreateExpression(EXPR_IS_STR, strDatatype)
+	Exprs[Expr].strval$ = Str$
+	RETURN Expr
 ENDFUNCTION
 
 //! Ein Scope
@@ -252,10 +252,10 @@ ENDFUNCTION
 // \param func - Ist die Funktion, welche aufgerufen wird
 // \param Params%[] - Die Parameter expression.
 FUNCTION CreateFuncCallExpression%: func%, Params%[]
-	LOCAL expr% = CreateExpression(EXPR_IS_FUNCCALL, Compiler.Funcs[func].datatype)
-	Exprs[expr].Params[] = Params[]
-	Exprs[expr].func = func
-	RETURN expr
+	LOCAL Expr% = CreateExpression(EXPR_IS_FUNCCALL, Compiler.Funcs[func].datatype)
+	Exprs[Expr].Params[] = Params[]
+	Exprs[Expr].func = func
+	RETURN Expr
 ENDFUNCTION
 
 //! Eine leere Expression, nützlich wenn eine Expression erwartet wird, aber das bereits vorher verarbeitet wurde
@@ -273,9 +273,9 @@ FUNCTION CreateVariableExpression%: vari%
 	IF Compiler.Varis[vari].Typ = VARI_IS_CONST
 		RETURN Compiler.Varis[vari].PreDef
 	ELSE
-		LOCAL expr% = CreateExpression(EXPR_IS_VARI, Compiler.Varis[vari].datatype)
-		Exprs[expr].vari = vari
-		RETURN expr
+		LOCAL Expr% = CreateExpression(EXPR_IS_VARI, Compiler.Varis[vari].datatype)
+		Exprs[Expr].vari = vari
+		RETURN Expr
 	ENDIF
 ENDFUNCTION
 
@@ -311,7 +311,7 @@ ENDFUNCTION
 
 //! Array Zugriff
 FUNCTION CreateArrayExpression%: Array%, Dims%[]
-	LOCAL tmpData AS Datatype
+	LOCAL tmpData AS TDatatype
 	tmpData = Exprs[Array].datatype
 	IF Exprs[Array].datatype.IsArray AND Compiler.Varis[GetVariable(Array)].datatype.IsArray AND LEN(Dims[]) THEN tmpData.IsArray = 0
 	LOCAL Expr% = CreateExpression(EXPR_IS_ARRAY, tmpData)
@@ -389,7 +389,7 @@ FUNCTION CreateLabelExpression%: Name$
 ENDFUNCTION
 
 //! Ein Functionname als Argument
-FUNCTION CreateFuncDataExpression%: d AS Datatype
+FUNCTION CreateFuncDataExpression%: d AS TDatatype
 	RETURN CreateExpression(EXPR_IS_FUNCDATA, d)
 ENDFUNCTION
 
@@ -497,7 +497,7 @@ FUNCTION CreateReadExpression%: Reads%[]
 ENDFUNCTION
 
 //! Default Value
-FUNCTION CreateDefaultValueExpression%: datatype AS Datatype
+FUNCTION CreateDefaultValueExpression%: datatype AS TDatatype
 	IF datatype.IsArray
 		RETURN CreateExpression(EXPR_IS_DEFVAL, datatype)
 	ELSE
@@ -517,7 +517,7 @@ FUNCTION CreateDefaultValueExpression%: datatype AS Datatype
 ENDFUNCTION
 
 //! Ein DIM als Expression LOCAL V[] = DIM[10][10]
-FUNCTION CreateDimAsExprExpression%: datatype AS Datatype, dims%[]
+FUNCTION CreateDimAsExprExpression%: datatype AS TDatatype, dims%[]
 	LOCAL Expr% = CreateExpression(EXPR_IS_DIMASEXPR, datatype)
 	Exprs[Expr].dims[] = dims[]
 
@@ -651,7 +651,7 @@ ENDFUNCTION
 
 
 FUNCTION CreateSuperExpression%: typ%
-	LOCAL d AS Datatype
+	LOCAL d AS TDatatype
 	d.IsArray = FALSE
 	d.Name$ = Compiler.Types[typ].Name$
 	RETURN CreateExpression(EXPR_IS_SUPER, d)
@@ -659,7 +659,7 @@ ENDFUNCTION
 
 
 FUNCTION CreateCast2Obj%: Obj$, expr%
-	LOCAL d AS Datatype
+	LOCAL d AS TDatatype
 	d.IsArray = FALSE
 	d.Name$ = Obj$
 	LOCAL Expr% = CreateExpression(EXPR_IS_CAST2OBJ, d)

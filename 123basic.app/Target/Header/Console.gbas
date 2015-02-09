@@ -1,0 +1,372 @@
+?IFDEF ADDON_CONSOLE
+	NATIVE FUNCTION SEEDRND: seed%
+	NATIVE FUNCTION RND: val
+
+	NATIVE FUNCTION STDOUT AS void: output$
+	NATIVE FUNCTION STDCOLOR AS void: forefround%, background%
+	NATIVE FUNCTION STDERR AS void: err$
+	NATIVE FUNCTION STDIN$:
+
+	?IFNDEF HTML5
+	NATIVE FUNCTION KEYWAIT AS void:
+	?ENDIF
+
+	NATIVE FUNCTION END AS void:
+	NATIVE FUNCTION PLATFORMINFO$: info$
+	NATIVE FUNCTION GETTIMERALL:
+	NATIVE FUNCTION LIMITFPS AS void: fps%
+
+	NATIVE FUNCTION GETLASTERROR$:
+	NATIVE FUNCTION SHELLCMD: cmd$, wait, show, BYREF rv
+	NATIVE FUNCTION SHELLEND AS void: cmd$
+	NATIVE FUNCTION CALLBYNAME%: name$
+	NATIVE FUNCTION SLEEP AS void: ms%
+
+	NATIVE FUNCTION BOXCOLL%: x1%, y1%, w1%, h1%, x2%, y2%, w2%, h2%
+	NATIVE FUNCTION SWAP AS void: BYREF a, BYREF b
+	NATIVE FUNCTION SORTARRAY: array[], cmp% = 0
+	NATIVE FUNCTION INTEGER%: num
+	NATIVE FUNCTION POW: value, p
+	NATIVE FUNCTION SQR: a
+	NATIVE FUNCTION MOD%: value%, m%
+	NATIVE FUNCTION FMOD: value, m
+	NATIVE FUNCTION MIN%: a, b
+	NATIVE FUNCTION MAX%: a, b
+	NATIVE FUNCTION ABS: num
+	NATIVE FUNCTION SGN%: a
+	NATIVE FUNCTION LOGN: a
+
+	NATIVE FUNCTION bAND%: a%, b%
+	NATIVE FUNCTION bOR%: a%, b%
+	NATIVE FUNCTION bXOR%: a%, b%
+	NATIVE FUNCTION bNOT%: a%
+
+	NATIVE FUNCTION SIN: a
+	NATIVE FUNCTION COS: a
+	NATIVE FUNCTION TAN: a
+	NATIVE FUNCTION ASIN: a
+	NATIVE FUNCTION ACOS: a
+	NATIVE FUNCTION ATAN: a, b
+
+	NATIVE FUNCTION ASL%: num%, shift%
+	NATIVE FUNCTION ASR%: num%, shift%
+
+	NATIVE FUNCTION ASC%: Text$, Index% = 0
+	NATIVE FUNCTION CHR$: Ascii%
+	NATIVE FUNCTION FORMAT$: numLetter%, numKomma%, Number
+	NATIVE FUNCTION INSTR%: Text$, Search$, Start% = 0
+	NATIVE FUNCTION LCASE$: Text$
+	NATIVE FUNCTION UCASE$: Text$
+	NATIVE FUNCTION MID$: Source$, Start%, Length% = -1
+	NATIVE FUNCTION REPLACE$: Text$, Search$, REPLACE$
+	NATIVE FUNCTION SPLITSTR%: Text$, Array$[], Split$, DropEmpty% = TRUE
+	NATIVE FUNCTION DECRYPT$: Code$, Text$
+	NATIVE FUNCTION ENCRYPT$: Code$, Text$
+	NATIVE FUNCTION LEFT$: Text$, Count%
+	NATIVE FUNCTION RIGHT$: Text$, Count%
+	NATIVE FUNCTION LTRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+	NATIVE FUNCTION RTRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+	NATIVE FUNCTION TRIM$: Text$, TRIM$ = " \t\r\n\v\f"
+	NATIVE FUNCTION URLENCODE$: Text$
+	NATIVE FUNCTION URLDECODE$: Text$
+	NATIVE FUNCTION REVINSTR%: Text$, Search$, Start% = -1
+
+	NATIVE FUNCTION OPENFILE%: channel%, File$, mode%
+	NATIVE FUNCTION ENDOFFILE%: channel%
+	NATIVE FUNCTION FILEPOSITION%: channel%
+	NATIVE FUNCTION FILESEEK AS void: channel%, bytes%, dir%
+	NATIVE FUNCTION CLOSEFILE AS void: channel%
+
+
+	NATIVE FUNCTION WRITELINE AS void: channel%, line$
+	NATIVE FUNCTION WRITESTR AS void: channel%, str$
+	NATIVE FUNCTION WRITEBYTE AS void: channel%, val%
+	NATIVE FUNCTION WRITEWORD AS void: channel%, val%
+	NATIVE FUNCTION WRITELONG AS void: channel%, val%
+	NATIVE FUNCTION WRITEUBYTE AS void: channel%, val%
+	NATIVE FUNCTION WRITEUWORD AS void: channel%, val%
+	NATIVE FUNCTION WRITEULONG AS void: channel%, val%
+	NATIVE FUNCTION WRITEIEEE AS void: channel%, val
+	NATIVE FUNCTION WRITESHORTIEEE AS void: channel%, val
+
+
+	NATIVE FUNCTION READUBYTE AS void: channel%, BYREF val%
+	NATIVE FUNCTION READBYTE AS void: channel%, BYREF val%
+	NATIVE FUNCTION READWORD AS void: channel%, BYREF val%
+	NATIVE FUNCTION READUWORD AS void: channel%, BYREF val%
+	NATIVE FUNCTION READLONG AS void: channel%, BYREF val%
+	NATIVE FUNCTION READULONG AS void: channel%, BYREF val%
+	NATIVE FUNCTION READIEEE AS void: channel%, BYREF val
+	NATIVE FUNCTION READSHORTIEEE AS void: channel%, BYREF val
+	NATIVE FUNCTION READSTR AS void: channel%, BYREF val$, count%
+	NATIVE FUNCTION READLINE AS void: channel%, BYREF line$
+
+
+	NATIVE FUNCTION SETCURRENTDIR%: Path$
+	NATIVE FUNCTION GETCURRENTDIR$:
+	NATIVE FUNCTION DOESFILEEXIST%: file$
+	NATIVE FUNCTION DOESDIREXIST%: file$
+	NATIVE FUNCTION GETFILELIST: find$, files$[]
+	NATIVE FUNCTION GETFILESIZE%: file$
+	NATIVE FUNCTION FILEREQUEST$: open, filter$
+
+	NATIVE FUNCTION COPYFILE AS void: source$, dest$
+	NATIVE FUNCTION CREATEDIR%: dir$
+
+	NATIVE FUNCTION INIOPEN AS void: file$
+	NATIVE FUNCTION INIPUT AS void: cat$, key$, value$
+	NATIVE FUNCTION INIGET$: cat$, key$, defval$ = "NO_DATA"
+
+	NATIVE FUNCTION KILLFILE AS void: file$
+
+	NATIVE FUNCTION PUTENV AS void: name$, value$
+	NATIVE FUNCTION GETENV$: name$
+
+	NATIVE FUNCTION GENFILE%:
+	NATIVE FUNCTION GENSPRITE%:
+	NATIVE FUNCTION GENFONT%:
+	NATIVE FUNCTION GENSOUND%:
+	//NATIVE FUNCTION GENX_OBJ%:
+
+	NATIVE FUNCTION GETCOMMANDLINE$:
+	NATIVE FUNCTION SETSHOEBOX AS void: data$, media$
+
+	NATIVE FUNCTION STACKTRACE$:
+	
+	FUNCTION FINDPATH%: map#[], result#[], heuristik#, startx%, starty%, endx%, endy%
+		PATHFINDING_Init_FindPath(map[], BOUNDS(map[], 0), BOUNDS(map[], 1))
+		RETURN PATHFINDING_Advanced_FindPath(map[], result[], heuristik, startx, starty, endx, endy)
+	ENDFUNCTION
+
+
+	// CODE FROM http://www.glbasic.com/forum/index.php?topic=5450.msg43652#msg43652 Thanks kanonet <3
+
+	FUNCTION PATHFINDING_Init_FindPath: AFP_map[], x, y
+			GLOBAL PATHFINDING_AFP_mapmax_x
+			PATHFINDING_AFP_mapmax_x=x
+			GLOBAL PATHFINDING_AFP_mapmax_y
+			PATHFINDING_AFP_mapmax_y=y
+
+			// "Bewegungsrichtung" zur Erstellung weiterer Knoten
+			GLOBAL PATHFINDING_AFP_dirx%[], PATHFINDING_AFP_diry%[], AFP_dirz%[]
+			DIMDATA PATHFINDING_AFP_dirx[], 0, 1, 0, -1, 1, 1, -1, -1
+			DIMDATA PATHFINDING_AFP_diry[], -1, 0, 1, 0, -1, 1, 1, -1
+			DIM AFP_dirz[8]
+			FOR i=0 TO 7
+					AFP_dirz[i] = (PATHFINDING_AFP_dirx[i] AND PATHFINDING_AFP_diry[i])+1
+			NEXT
+
+			// map dient der Ermittlung der Entfernung des jeweils aktuellen Knotens zu Ziel, vorausberechnung erfolgt um Geschwindigkeit gut zu machen
+			GLOBAL AFP_heuristic%[]
+			DIM AFP_heuristic[PATHFINDING_AFP_mapmax_x][PATHFINDING_AFP_mapmax_y]
+			FOR y=0 TO PATHFINDING_AFP_mapmax_y-1
+					FOR x=0 TO PATHFINDING_AFP_mapmax_x-1
+							AFP_heuristic[x][y]=SQR(x*x+y*y)
+					NEXT
+			NEXT
+	ENDFUNCTION
+
+	FUNCTION PATHFINDING_Advanced_FindPath: AFP_map[], loesung[], heuristik, startx%, starty%, endx%, endy%
+			REDIM loesung[0]
+
+			// Validität der Parameter prüfen
+			IF startx=endx AND starty=endy THEN RETURN 0
+			IF endx<0 OR endy<0 OR endx>PATHFINDING_AFP_mapmax_x-1 OR endy>PATHFINDING_AFP_mapmax_y-1 THEN RETURN 0
+			IF startx<0 OR starty<0 OR startx>PATHFINDING_AFP_mapmax_x-1 OR starty>PATHFINDING_AFP_mapmax_y-1 THEN RETURN 0
+			IF AFP_map[endx][endy]<=0 THEN RETURN 0
+			IF AFP_map[startx][starty]<=0 THEN RETURN 0
+			IF heuristik<0 OR heuristik>1 THEN heuristik=1
+
+			STATIC nodemap[]        // dient primär der Kennzeichnung bereits besuchter Felder
+			REDIM nodemap[0]
+			REDIM nodemap[PATHFINDING_AFP_mapmax_x][PATHFINDING_AFP_mapmax_y][2]
+
+			STATIC path[] AS PATHFINDING_TNode  // Zwischenspeicher des gefundenen Wegs
+			REDIM path[0]
+
+			// Variablen mit der Endung -s gehören zur Suche von Start, Variablen mit der Endung -g gehören zur Suche vom Ziel
+			STATIC x%, y%, finish%, cost%, delta%, nodezahls%, nodezahlg%
+			finish=0; nodezahls%=0; nodezahlg%=0
+
+
+			STATIC opens[] AS PATHFINDING_TNode // Openlists für noch zu untersuchende Knoten
+			REDIM opens[1]
+			STATIC openg[] AS PATHFINDING_TNode
+			REDIM openg[1]
+			STATIC topen AS PATHFINDING_TNode
+
+			STATIC nodes[] AS PATHFINDING_TNode // Closedlists für abschließend untersuchte Knoten
+			REDIM nodes[1]
+			STATIC nodeg[] AS PATHFINDING_TNode
+			REDIM nodeg[1]
+			STATIC PATHFINDING_TNode AS PATHFINDING_TNode
+
+			// Startpunktdaten einlesen
+			opens[0].x = startx
+			opens[0].y = starty
+			opens[0].cost = 0
+			opens[0].parent = -1
+			nodemap[startx][starty][0] = 1
+
+			// Zielpunktdaten einlesen
+			openg[0].x = endx
+			openg[0].y = endy
+			openg[0].cost = 0
+			openg[0].parent = -1
+			nodemap[endx][endy][0] = 2
+
+			REPEAT  // Wegsuche beginnen
+
+					// Wegsuche ausgehend vom Startpunkt
+					x = 0; cost = 2147483647
+					FOREACH topen IN opens[]        // Ermittlet günstigsten Open-Knoten
+							delta = AFP_heuristic[ABS(topen.x-endx)][ABS(topen.y-endy)]
+							IF topen.cost+delta<cost
+									cost = topen.cost+delta
+									y = x
+							ENDIF
+							INC x
+					NEXT
+					PATHFINDING_TNode = opens[y]
+					DIMPUSH nodes[], PATHFINDING_TNode  // übernimmt den Knoten in die Closedlist und löscht ihn aus der Openlist
+					DIMDEL opens[], y
+					INC nodezahls
+
+					FOR i=0 TO 7    // Untersuchung der 8 benachbarten Knoten
+							x = PATHFINDING_TNode.x + PATHFINDING_AFP_dirx[i]
+							y = PATHFINDING_TNode.y + PATHFINDING_AFP_diry[i]
+							IF x>-1 AND y>-1 AND x<PATHFINDING_AFP_mapmax_x AND y<PATHFINDING_AFP_mapmax_y // Knoten liegt auf der Karte
+									IF AFP_map[x][y]>0 AND AFP_map[x][PATHFINDING_TNode.y]>0 AND AFP_map[PATHFINDING_TNode.x][y]>0  // Knoten ist begehbar
+											IF nodemap[x][y][0]=0   // Knoten wurde noch nicht besucht
+													topen.x = x
+													topen.y = y
+													topen.parent = nodezahls
+													topen.cost = PATHFINDING_TNode.cost + heuristik * (AFP_map[x][y]-1)  + AFP_dirz[i]
+													DIMPUSH opens[], topen  // erzeuge neuen Openknoten
+													nodemap[x][y][0]=1
+													nodemap[x][y][1]=nodezahls
+											ELSEIF nodemap[x][y][0]=2       // Knoten wurde bereits durch die andere Suchroutine erreicht -> Suche erfolgreich
+													topen.x = x
+													topen.y = y
+													topen.parent = nodezahls
+													topen.cost = PATHFINDING_TNode.cost + heuristik * (AFP_map[x][y]-1)  + AFP_dirz[i] + nodeg[nodemap[x][y][1]].cost
+													DIMPUSH path[], topen   // erzeuge neuen Openknoten
+													finish = 1
+											ENDIF
+									ENDIF
+							ENDIF
+					NEXT
+
+					IF NOT LEN(opens[]) THEN finish=3 // Wenn kein Openknoten mehr existiert -> keine Verbindung zwischen Start und Ziel möglich -> Suche abbrechen
+
+					IF finish THEN BREAK
+
+					// Wegsuche ausgehend vom Zielpunkt
+					x = 0; cost = 2147483647
+					FOREACH topen IN openg[]        // Ermittlet günstigsten Open-Knoten
+							delta = AFP_heuristic[ABS(topen.x-startx)][ABS(topen.y-starty)]
+							IF topen.cost+delta<cost
+									cost = topen.cost+delta
+									y = x
+							ENDIF
+							INC x
+					NEXT
+					PATHFINDING_TNode = openg[y]
+					DIMPUSH nodeg[], PATHFINDING_TNode  // übernimmt den Knoten in die Closedlist und löscht ihn aus der Openlist
+					DIMDEL openg[], y
+					INC nodezahlg
+
+					FOR i=0 TO 7    // Untersuchung der 8 benachbarten Knoten
+							x = PATHFINDING_TNode.x + PATHFINDING_AFP_dirx[i]
+							y = PATHFINDING_TNode.y + PATHFINDING_AFP_diry[i]
+							IF x>-1 AND y>-1 AND x<PATHFINDING_AFP_mapmax_x AND y<PATHFINDING_AFP_mapmax_y // Knoten liegt auf der Karte
+									IF AFP_map[x][y]>0 AND AFP_map[x][PATHFINDING_TNode.y]>0 AND AFP_map[PATHFINDING_TNode.x][y]>0  // Knoten ist begehbar
+											IF nodemap[x][y][0]=0   // Knoten wurde noch nicht besucht
+													topen.x = x
+													topen.y = y
+													topen.parent = nodezahlg
+													topen.cost = PATHFINDING_TNode.cost + heuristik * (AFP_map[x][y]-1)  + AFP_dirz[i]
+													DIMPUSH openg[], topen  // erzeuge neuen Openknoten
+													nodemap[x][y][0]=2
+													nodemap[x][y][1]=nodezahlg
+											ELSEIF nodemap[x][y][0]=1       // Knoten wurde bereits durch die andere Suchroutine erreicht -> Suche erfolgreich
+													topen.x = x
+													topen.y = y
+													topen.parent = nodemap[x][y][1]
+													topen.cost = PATHFINDING_TNode.cost + heuristik * (AFP_map[x][y]-1)  + AFP_dirz[i] + nodes[topen.parent].cost
+													DIMPUSH path[], topen   // erzeuge neuen Openknoten
+													nodemap[x][y][0]=2
+													nodemap[x][y][1]=nodezahlg
+													finish = 1
+											ENDIF
+									ENDIF
+							ENDIF
+					NEXT
+
+					IF NOT LEN(openg[]) THEN finish=3 // Wenn kein Openknoten mehr existiert -> keine Verbindung zwischen Start und Ziel möglich -> Suche abbrechen
+
+			UNTIL finish    // Wegsuche beendet
+
+			IF finish=3 THEN RETURN 0       // es wurde kein Weg gefunden
+
+		x = 0; y=0; cost = 2147483647
+			FOREACH topen IN path[] // Ermittlet günstigsten Open-Knoten
+					IF topen.cost<cost
+							cost = topen.cost
+							y = x
+					ENDIF
+					INC x
+			NEXT
+			topen = path[y]
+			cost=topen.parent
+			delta=nodemap[topen.x][topen.y][1]
+			REDIM path[0]
+			DIMPUSH path[], topen
+
+			PATHFINDING_TNode = nodes[cost]     // gefundenen Pfad vom Startpunkt aus auswerten
+			WHILE PATHFINDING_TNode.parent <> -1
+					DIMPUSH path[], PATHFINDING_TNode
+					PATHFINDING_TNode = nodes[PATHFINDING_TNode.parent]
+			WEND
+			DIMPUSH path[], PATHFINDING_TNode
+			REDIM nodes[0]
+
+			cost = LEN(path[])
+			REDIM loesung[cost][2]
+			FOR i=cost-1 TO 0 STEP -1
+					loesung[i][0] = path[cost-i-1].x
+					loesung[i][1] = path[cost-i-1].y
+			NEXT
+			REDIM path[0]
+
+			IF nodezahlg    // gefundenen Pfad vom Zielpunkt aus auswerten
+					PATHFINDING_TNode = nodeg[delta]
+					WHILE PATHFINDING_TNode.parent <> -1
+					delta=PATHFINDING_TNode.parent
+							DIMPUSH path[], PATHFINDING_TNode
+							PATHFINDING_TNode = nodeg[PATHFINDING_TNode.parent]
+					WEND
+					DIMPUSH path[], PATHFINDING_TNode
+					REDIM nodeg[0]
+
+					delta = cost+LEN(path[])
+					REDIM loesung[delta][2]
+					FOR i=delta-1 TO cost STEP -1
+							loesung[i][0] = path[i-cost].x
+							loesung[i][1] = path[i-cost].y
+					NEXT
+					REDIM path[0]
+			ENDIF
+
+			RETURN delta
+
+	ENDFUNCTION
+
+	// Knoten, ein (möglicher) Schritt zum Ziel
+	TYPE PATHFINDING_TNode
+			cost%   // bisherige Wegkosten
+			parent% // ID des Vorgängerknotens
+			x%
+			y%
+	ENDTYPE
+?ENDIF

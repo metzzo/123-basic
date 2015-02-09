@@ -416,7 +416,7 @@ TYPE Executor
 		DIMDEL self.Stack[], -1
 	ENDFUNCTION
 
-	FUNCTION AllocType: Vari AS IdentifierVari
+	FUNCTION AllocType: Vari AS TIdentifierVari
 		LOCAL selectedId% = -1
 		FOR i = LEN(self.instances[]) - 1 TO 0 STEP -1
 			ALIAS instance AS self.instances[i]
@@ -449,7 +449,7 @@ TYPE Executor
 		Vari.Value.SetType(instance.myId, self)
 	ENDFUNCTION
 
-	FUNCTION DeAllocType: Vari AS IdentifierVari
+	FUNCTION DeAllocType: Vari AS TIdentifierVari
 		IF Vari.Value.instance <> -1
 			self.instances[Vari.Value.instance].used = FALSE
 		ENDIF
@@ -696,7 +696,7 @@ TYPE Executor
 				ELSE
 					// save values of variables (in order to allow recursion properly)
 					ALIAS Scp AS Exprs[Func.Scp]
-					LOCAL saveVaris[] AS IdentifierVari
+					LOCAL saveVaris[] AS TIdentifierVari
 					FOREACH V IN Scp.Varis[]
 						DIMPUSH saveVaris[], self.comp.Varis[V]
 					NEXT
@@ -1161,11 +1161,11 @@ TYPE Executor
 	ENDFUNCTION
 ENDTYPE
 
-FUNCTION PrepareVari: vari AS IdentifierVari
+FUNCTION PrepareVari: vari AS TIdentifierVari
 	PrepareStackEntry(vari.datatype, vari.Value)
 ENDFUNCTION
 
-FUNCTION PrepareStackEntry: datatype AS Datatype, Value AS TStackEntry
+FUNCTION PrepareStackEntry: datatype AS TDatatype, Value AS TStackEntry
 	IF Value.typ = 0
 		SELECT datatype.Name$
 			CASE "int"

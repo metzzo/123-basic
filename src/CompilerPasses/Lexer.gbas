@@ -190,7 +190,7 @@ FUNCTION Lexer:
 	?IFDEF CASEINSENSITIVE
 	//FOREACH Token IN Compiler.Tokens[]
 	FOR i = 0 TO Compiler.LastTokenID - 1
-		ALIAS Token AS Compiler.Tokens[i]
+		ALIAS TToken AS Compiler.Tokens[i]
 		IF INSTR(Token.Text$, "\"") = -1//kein string
 			LOCAL lc$ = LCASE$(Token.Text$)
 			IF lc$ = "self" OR lc$ = "void" OR lc$ = "int" OR lc$ = "float" OR lc$ = "bool" OR lc$ = "boolean" OR lc$ = "short" OR lc$ = "long" OR lc$ = "string" OR lc$ = "byte"

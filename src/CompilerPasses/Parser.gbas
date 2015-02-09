@@ -4,7 +4,7 @@
 // IDE Version: 9.040
 
 //! Eine Variablendefinition (Ohne LOCAL/GLOBAL/...)
-FUNCTION VariDef AS IdentifierVari: NoDefault% = FALSE
+FUNCTION VariDef AS TIdentifierVari: NoDefault% = FALSE
 	LOCAL Name$ = GetCurrent$()
 	IsValidVarName()
 	Match(Name$, CODELINE(), CODEFILE$())
@@ -67,7 +67,7 @@ FUNCTION VariDef AS IdentifierVari: NoDefault% = FALSE
 		ENDIF
 	ENDIF
 
-	LOCAL vari AS IdentifierVari
+	LOCAL vari AS TIdentifierVari
 	vari.Name$ = Name$
 	vari.datatype.Name$ = datatype$
 	vari.datatype.IsArray = IsArray
@@ -95,7 +95,7 @@ FUNCTION FuncDef: Native%, IsCallBack%, Typ%, CurTyp%
 	LOCAL Name$ = GetCurrent$()
 	FOREACH func IN Compiler.Funcs[]
 		IF (IsToken(AddDataChars$(func.Name$, func)) OR IsToken(func.Name$)) AND func.IsCallback = IsCallBack AND func.Typ = Typ AND func.MyType = CurTyp
-			LOCAL tmpVari AS IdentifierVari
+			LOCAL tmpVari AS TIdentifierVari
 			tmpVari = VariDef()
 			//weil ich faul bin und der parser das nicht so ganz unterstützt... also die arrays als rückgabewert
 			//IF tmpVari.datatype.IsArray THEN Error("Functions cannot return an array.",CODELINE(),CODEFILE$())
@@ -111,7 +111,7 @@ FUNCTION FuncDef: Native%, IsCallBack%, Typ%, CurTyp%
 					Match("BYREF", CODELINE(), CODEFILE$())
 					func.HasRef = TRUE
 				ENDIF
-				LOCAL vari AS IdentifierVari
+				LOCAL vari AS TIdentifierVari
 				vari = VariDef()
 				IF MustDefVal
 					IF vari.PreDef = -1 THEN Error("Parameter '"+vari.Name$+"' has to have default value.",CODELINE(), CODEFILE$())
@@ -130,7 +130,7 @@ FUNCTION FuncDef: Native%, IsCallBack%, Typ%, CurTyp%
 			STDOUT "\tDatatype: "+func.datatype.Name$+" "+func.datatype.IsArray+"\n"
 			LOCAL i% = 0
 			FOREACH P IN func.Params[]
-				STDOUT "\tParameter "+i+": "+Compiler.Varis[P].Name$+" Datatype: "+Compiler.Varis[P].datatype.Name$+" "+Compiler.Varis[P].datatype.IsArray+" ID: "+Compiler.Varis[P].ID+" ref: "+Compiler.Varis[P].ref+"\n"
+				STDOUT "\tParameter "+i+": "+Compiler.Varis[P].Name$+" datatype: "+Compiler.Varis[P].datatype.Name$+" "+Compiler.Varis[P].datatype.IsArray+" ID: "+Compiler.Varis[P].ID+" ref: "+Compiler.Varis[P].ref+"\n"
 				INC i
 			NEXT
 			?ENDIF
@@ -231,7 +231,7 @@ FUNCTION TypeDefi:
 						SkipTokens("FUNCTION", "ENDFUNCTION", "FUNCTION IN TYPE")
 					ENDIF
 				ELSE
-					LOCAL Vari AS IdentifierVari
+					LOCAL Vari AS TIdentifierVari
 					Vari = VariDef()
 					//FOREACH Attr IN typ.Attributes[]
 					//	IF Compiler.Funcs[Attr].Name$ = Vari.Name$ THEN Error("Attribute '"+Vari.Name$+"' already exists", CODELINE(), CODEFILE$()) //fehler bei GLBS kompilieren
@@ -258,7 +258,7 @@ FUNCTION TypeDefi:
 ENDFUNCTION
 
 //! Kompiliert eine Funktion
-FUNCTION CompileFunc%: func AS IdentifierFunc
+FUNCTION CompileFunc%: func AS TIdentifierFunc
 	IF func.Scp = -1 AND func.Native = FALSE AND func.PlzCompile = TRUE
 		IF func.IsAbstract
 		//	Error("Internal error (try to compile ABSTRACT method...)", CODELINE(), CODEFILE$())
@@ -273,7 +273,7 @@ FUNCTION CompileFunc%: func AS IdentifierFunc
 
 		IF func.Typ = FUNC_IS_METHOD
 			//self einfügen
-			LOCAL Vari AS IdentifierVari
+			LOCAL Vari AS TIdentifierVari
 			Vari.Name$ = "self"
 			Vari.datatype.Name$ = Compiler.Types[func.MyType].Name$
 			Vari.datatype.IsArray = 0
@@ -360,7 +360,7 @@ FUNCTION Expression%: Prio% = 0
 ENDFUNCTION
 
 //! Entscheidet welcher Datentyp das ist und castet.
-FUNCTION CastDatatype AS Datatype: BYREF RetData1%, BYREF RetData2%
+FUNCTION CastDatatype AS TDatatype: BYREF RetData1%, BYREF RetData2%
 	LOCAL Data1% = RetData1
 	LOCAL Data2% = RetData2
 
@@ -393,13 +393,13 @@ ENDFUNCTION
 // \param Data - Die Expression welche überprüft werden soll
 // \param NeedData - Der Datentyp den die Expression enthalten soll
 // \return Die neue Expression, falls notwendig ist zu casten, ansonsten die gleiche
-FUNCTION EnsureDatatype%: Expr%, NeedData AS Datatype, Line%, Strict% = FALSE
+FUNCTION EnsureDatatype%: Expr%, NeedData AS TDatatype, Line%, Strict% = FALSE
 	//If true, then BYREF parameters are strongly typed (need to get the right datatype) If there are any problems, uncomment the following line
 	Strict = FALSE
 
 
 	IF NeedData.Name$ = "" THEN Error("Internal error (datatype is empty)", CODELINE(), CODEFILE$())
-	LOCAL myData AS Datatype
+	LOCAL myData AS TDatatype
 	myData = Exprs[Expr].datatype
 	IF myData.Name$ = NeedData.Name$ AND myData.IsArray = NeedData.IsArray
 		RETURN Expr
@@ -427,7 +427,7 @@ FUNCTION EnsureDatatype%: Expr%, NeedData AS Datatype, Line%, Strict% = FALSE
 			IF func2 <> -1
 				IF myData.IsArray OR NeedData.IsArray THEN Error("PROTOTYPE cannot be an array.", CODELINE(), CODEFILE$())
 
-				LOCAL checker AS ProtoChecker
+				LOCAL checker AS TProtoChecker
 				checker.fromFunc 	= Compiler.Funcs[func1].ID
 				checker.toFunc 		= Compiler.Funcs[func2].ID
 				checker.Tok 		= GetCurrentToken()
@@ -472,15 +472,15 @@ ENDFUNCTION
 
 
 //! Converts Hex to Dec (got from the forum, thanks MrTAToad)
-FUNCTION Hex2Dec%: hex$
+FUNCTION Hex2Dec%: hexStr$
 	LOCAL i%
 	LOCAL j%
 	LOCAL loop%
 
 	i%=0
 	j%=0
-	FOR loop%=0 TO LEN(hex$)-1
-		 i%=ASC(MID$(hex$,loop%,1))-48
+	FOR loop%=0 TO LEN(hexStr$)-1
+		 i%=ASC(MID$(hexStr$,loop%,1))-48
 		 IF 9<i%
 		 	DEC i%,7
 		 ENDIF
@@ -545,7 +545,7 @@ FUNCTION Factor%:
 		Match("-", CODELINE(), CODEFILE$())
 		LOCAL Expr% = Factor()
 		ALIAS Op AS Operators[SearchOperator("sub")]
-		LOCAL tmpData AS Datatype
+		LOCAL tmpData AS TDatatype
 		tmpData = Exprs[Expr].datatype
 		tmpData.IsArray = 0
 
@@ -640,7 +640,7 @@ FUNCTION Factor%:
 			DIMASEXPRErr = TRUE
 			Warning("Experimental feature 'DIMASEXPR'")
 		ENDIF
-		LOCAL datatype AS Datatype
+		LOCAL datatype AS TDatatype
 		datatype.IsArray = TRUE
 		datatype.Name$ = "float"
 		IF IsToken("DIM%") THEN datatype.Name$ = "int"
@@ -1086,7 +1086,7 @@ FUNCTION Scope%: CloseStr$, func% = -1
 
 	IF ScpTyp = SCOPE_IS_FUNC AND func <> -1
 		FOREACH param IN Compiler.Funcs[func].Params[]
-			LOCAL vari AS IdentifierVari
+			LOCAL vari AS TIdentifierVari
 			vari = Compiler.Varis[param]
 			vari.Typ = VARI_IS_LOCAL
 			AddVariable(vari, TRUE)
@@ -1133,7 +1133,7 @@ FUNCTION Scope%: CloseStr$, func% = -1
 				GetNext()
 				IF IsToken(":")
 					Match(":", CODELINE(), CODEFILE$())
-					LOCAL Expr% = CreateLabelExpression(Name$)
+					Expr = CreateLabelExpression(Name$)
 					LOCAL Scp% = Compiler.CurrentScope
 					REPEAT
 						FOREACH lbl IN Exprs[Scp].Labels[]
@@ -1252,7 +1252,7 @@ FUNCTION Identifier%: IsCommand%
 		GetNext()
 		IF IsToken("(")
 			Match("(", CODELINE(), CODEFILE$())
-			LOCAL Expr% = Expression()
+			Expr = Expression()
 			Match(")", CODELINE(), CODEFILE$())
 			IF IsType(Exprs[Expr].datatype.Name$) AND Exprs[Expr].datatype.IsArray = 0
 				Expr = CreateCast2Obj(typ$, Expr)
@@ -1447,7 +1447,7 @@ FUNCTION Identifier%: IsCommand%
 		Match("=", CODELINE(), CODEFILE$())
 		IF IsCommand = FALSE THEN Error("Assignment is a statement.", CODELINE(), CODEFILE$())
 
-		LOCAL tmpData AS Datatype //kA wieso das so sein muss, aber sonst kommt eine EXCEPTION ACCESS VIOLATION
+		LOCAL tmpData AS TDatatype //kA wieso das so sein muss, aber sonst kommt eine EXCEPTION ACCESS VIOLATION
 		tmpData = Exprs[Expr].datatype
 		RETURN CreateAssignExpression(Expr , EnsureDatatype(Expression(), tmpData, CODELINE()))
 	ENDIF
@@ -1484,7 +1484,7 @@ FUNCTION ParseIdentifierFunc%: BYREF Expr%, BYREF SuperExpr%, IsCommand%, Name$,
 
 	IF IsToken("(") = FALSE AND IsCommand = FALSE
 		//Es ist eine Funktion als Parameter
-		LOCAL datatype AS Datatype
+		LOCAL datatype AS TDatatype
 		datatype.Name$ = Name$
 		datatype.IsArray = 0
 
@@ -1501,7 +1501,7 @@ FUNCTION ParseIdentifierFunc%: BYREF Expr%, BYREF SuperExpr%, IsCommand%, Name$,
 	RETURN -1
 ENDFUNCTION
 
-FUNCTION ParseFuncCall: datatype AS Datatype, Params%[], IsCommand%
+FUNCTION ParseFuncCall: datatype AS TDatatype, Params%[], IsCommand%
 	LOCAL OpBracket% = IsToken("(")
 	IF datatype.Name$ = "void"
 		IF NOT IsCommand
@@ -1563,7 +1563,7 @@ FUNCTION Keyword%:
 				ELSE
 					Match(",", CODELINE(), CODEFILE$())
 				ENDIF
-				LOCAL tmpVari AS IdentifierVari
+				LOCAL tmpVari AS TIdentifierVari
 				tmpVari = VariDef()
 				FOREACH V IN Compiler.Globals[]
 					ALIAS Vari AS Compiler.Varis[V]
@@ -1601,12 +1601,12 @@ FUNCTION Keyword%:
 					IF DontCreate
 						Warning("Variable '"+GetCurrent$()+"' already exists...")
 						LOCAL Expr% = Identifier(TRUE)
-						DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], Expr%
+						DIMPUSH Exprs[Compiler.CurrentScope].Exprs[], Expr
 					ENDIF
 				ENDIF
 
 				IF NOT DontCreate
-					LOCAL Vari AS IdentifierVari
+					LOCAL Vari AS TIdentifierVari
 					Vari = VariDef()
 					Vari.Typ = VARI_IS_LOCAL
 
@@ -1635,7 +1635,7 @@ FUNCTION Keyword%:
 					Match(",", CODELINE(), CODEFILE$())
 				ENDIF
 				IsValidVarName()
-				LOCAL Vari AS IdentifierVari
+				LOCAL Vari AS TIdentifierVari
 				Vari.Name$ = GetCurrent$()
 				Vari.Typ = VARI_IS_ALIAS
 				Vari.ref = TRUE
@@ -1668,7 +1668,7 @@ FUNCTION Keyword%:
 				ELSE
 					Match(",", CODELINE(), CODEFILE$())
 				ENDIF
-				LOCAL Vari AS IdentifierVari
+				LOCAL Vari AS TIdentifierVari
 				Vari = VariDef()
 				Vari.Typ = VARI_IS_STATIC
 				Vari.func = Compiler.currentFunc
@@ -1682,7 +1682,7 @@ FUNCTION Keyword%:
 			LOCAL Vari% = Identifier(FALSE)
 			IF Exprs[Vari].datatype.IsArray = 0 THEN Error("DIMPUSH needs array", CODELINE(), CODEFILE$())
 			Match(",", CODELINE(), CODEFILE$())
-			LOCAL datatype AS Datatype
+			LOCAL datatype AS TDatatype
 			datatype = Exprs[Vari].datatype
 			datatype.IsArray = 0
 
@@ -1760,7 +1760,7 @@ FUNCTION Keyword%:
 				IF LEN(Ex[]) = 0
 					DIMPUSH Ex[], Expression()
 				ELSE
-					LOCAL datatyp AS Datatype
+					LOCAL datatyp AS TDatatype
 					datatyp = Exprs[Ex[0]].datatype
 					LOCAL E% = EnsureDatatype(Expression(), datatyp, CODELINE())
 					DIMPUSH Ex[], E
@@ -1783,7 +1783,7 @@ FUNCTION Keyword%:
 			IF Compiler.currentFunc <> -1
 				Match("RETURN", CODELINE(), CODEFILE$())
 				LOCAL Expr%
-				LOCAL datatype AS Datatype
+				LOCAL datatype AS TDatatype
 				datatype = Compiler.Funcs[Compiler.currentFunc].datatype
 				IF IsToken("\n") //void
 					Expr = CreateDefaultValueExpression(datatype)
@@ -1893,7 +1893,7 @@ FUNCTION Keyword%:
 				ELSE
 					IsImplicit = TRUE
 					// Neue Variable erstellen!!
-					LOCAL Vari AS IdentifierVari
+					LOCAL Vari AS TIdentifierVari
 					Vari = VariDef()
 					Vari.Typ = VARI_IS_LOCAL
 
@@ -1957,7 +1957,7 @@ FUNCTION Keyword%:
 				//	varExpr = Identifier(TRUE)
 				//ELSE
 				// Neue Variable erstellen!!
-				LOCAL Vari AS IdentifierVari
+				LOCAL Vari AS TIdentifierVari
 				Vari = VariDef()
 				Vari.Typ = VARI_IS_LOCAL
 
@@ -2003,7 +2003,7 @@ FUNCTION Keyword%:
 			Match("TRY", CODELINE(), CODEFILE$())
 			Match("\n", CODELINE(), CODEFILE$())
 			LOCAL tryScp% = Scope("CATCH")
-			LOCAL Vari AS IdentifierVari
+			LOCAL Vari AS TIdentifierVari
 			Vari = VariDef()
 			IF Vari.datatype.Name$ <> "string"  THEN Error("Catch variable must be string", CODELINE(), CODEFILE$())
 			IF Vari.datatype.IsArray			THEN Error("Catch variable must be non array", CODELINE(), CODEFILE$())
@@ -2035,7 +2035,7 @@ FUNCTION Keyword%:
 		CASE IsToken("SELECT")
 			STATIC SelectHelper
 			INC SelectHelper
-			LOCAL Vari AS IdentifierVari
+			LOCAL Vari AS TIdentifierVari
 			Vari.Name$ = "__SelectHelper"+SelectHelper+"_"
 			Vari.Typ = VARI_IS_LOCAL
 
@@ -2043,7 +2043,7 @@ FUNCTION Keyword%:
 			Match("SELECT", CODELINE(), CODEFILE$())
 
 			LOCAL Cond1% = Expression()
-			LOCAL datatype AS Datatype
+			LOCAL datatype AS TDatatype
 			datatype = Exprs[Cond1].datatype
 			Vari.datatype = datatype
 
@@ -2246,7 +2246,7 @@ FUNCTION ImplicitDefine%:
 			LOCAL pos% = Compiler.currentPosi
 			//und ist noch nicht definiert
 			//=> Definiere
-			LOCAL Vari AS IdentifierVari
+			LOCAL Vari AS TIdentifierVari
 			Vari = VariDef(TRUE) //Darf den Defaultvalue dings nicht annehmen
 			Vari.Typ = VARI_IS_GLOBAL
 			AddVariable(Vari, FALSE)
@@ -2526,8 +2526,8 @@ FUNCTION GetRightExpr%: expr%
 	ENDSELECT
 ENDFUNCTION
 
-//! Entfernt die Datatype characters (%, #)
-FUNCTION AddDataChars$: Text$, func AS IdentifierFunc
+//! Entfernt die datatype characters (%, #)
+FUNCTION AddDataChars$: Text$, func AS TIdentifierFunc
 	IF func.datatype.Name$ = "int" THEN RETURN Text$ + "%"
 	IF func.datatype.Name$ = "float" THEN RETURN Text$ + "#"
 	RETURN Text$
@@ -2606,7 +2606,7 @@ FUNCTION CleanVariable$: Var$
 	ENDIF
 ENDFUNCTION
 
-FUNCTION ScopeHasGoto%: scp AS Expr
+FUNCTION ScopeHasGoto%: scp AS TExpr
 	IF scp.Typ <> EXPR_IS_SCOPE THEN Error("Internal error (Cant look for Scope)", CODELINE(), CODEFILE$())
 	FOREACH E IN scp.Exprs[]
 		ALIAS SubE AS Exprs[E]
@@ -2643,7 +2643,7 @@ FUNCTION ScopeHasGoto%: scp AS Expr
 ENDFUNCTION
 
 
-FUNCTION ScopeName$: expr AS Expr
+FUNCTION ScopeName$: expr AS TExpr
 	SELECT expr.ScpTyp
 		CASE SCOPE_IS_IF
 			RETURN "if"
@@ -2672,7 +2672,7 @@ FUNCTION ScopeName$: expr AS Expr
 ENDFUNCTION
 
 
-FUNCTION ChangeVarName:  Vari AS IdentifierVari
+FUNCTION ChangeVarName:  Vari AS TIdentifierVari
 	//Und nun in jedem Identifier die $ durch _Str ersetzen
 	Vari.Name$ = TRIM$(REPLACE$(Vari.Name$,"$","_Str"))
 
@@ -2715,7 +2715,7 @@ FUNCTION ChangeVarName:  Vari AS IdentifierVari
 	ENDIF
 ENDFUNCTION
 
-FUNCTION ChangeFuncName: Func AS IdentifierFunc
+FUNCTION ChangeFuncName: Func AS TIdentifierFunc
 	Func.Name$ = TRIM$(REPLACE$(Func.Name$,"$","_Str"))
 
 	Func.OName$ = Func.Name$

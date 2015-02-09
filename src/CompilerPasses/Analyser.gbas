@@ -14,7 +14,7 @@ FUNCTION Analyser:
 			SELECT GetCurrent$()
 				CASE "TYPE"
 					Match("TYPE", CODELINE(), CODEFILE$())
-					LOCAL typ AS IdentifierType
+					LOCAL typ AS TIdentifierType
 					typ.Name$=GetCurrent$()
 					typ.RealName$ = typ.Name$
 					typ.ID = LEN(Compiler.Types[])
@@ -23,7 +23,7 @@ FUNCTION Analyser:
 					GetNext()
 				CASE "PROTOTYPE"
 					Match("PROTOTYPE", CODELINE(), CODEFILE$())
-					LOCAL func AS IdentifierFunc
+					LOCAL func AS TIdentifierFunc
 					func.Name$ = GetCurrent$()
 					func.Typ = FUNC_IS_PROTO
 					AddFunction(func)
@@ -33,7 +33,7 @@ FUNCTION Analyser:
 					//Globals zwischenspeichern, damit man von CONSTANTs nicht auf funktionen und gloabalen zugreifen kann
 					//Nicht notwendig, weil hier noch keine GLOBAL/FUNCTION analysiert wurden
 //					LOCAL saveGlbVar%[]
-//					LOCAL saveFncVar[] AS IdentifierFunc
+//					LOCAL saveFncVar[] AS TIdentifierFunc
 //					saveFncVar[] = Compiler.Funcs[]
 //					saveGlbVar[] = Compiler.Globals[]
 //					DIM Compiler.Globals[0]
@@ -46,7 +46,7 @@ FUNCTION Analyser:
 							Match(",", CODELINE(), CODEFILE$())
 						ENDIF
 
-						LOCAL Vari AS IdentifierVari
+						LOCAL Vari AS TIdentifierVari
 						Vari = VariDef()
 						Vari.Typ = VARI_IS_CONST
 						AddVariable(Vari, FALSE)
@@ -87,7 +87,7 @@ FUNCTION Analyser:
 			SELECT GetCurrent$()
 				CASE "PROTOTYPE"
 					Match("PROTOTYPE", CODELINE(), CODEFILE$())
-					LOCAL var AS IdentifierVari
+					LOCAL var AS TIdentifierVari
 					var = VariDef()
 					LOCAL Found% = FALSE
 					FOREACH func IN Compiler.Funcs[]
@@ -101,16 +101,16 @@ FUNCTION Analyser:
 					IF CurTyp<>-1 THEN Error("PROTOTYPE definition not in Type allowed.", CODELINE(), CODEFILE$())
 				CASE "FUNCTION"
 					Match("FUNCTION", CODELINE(), CODEFILE$())
-					LOCAL var AS IdentifierVari
+					LOCAL var AS TIdentifierVari
 					var = VariDef()
 
-					LOCAL func AS IdentifierFunc
+					LOCAL func AS TIdentifierFunc
 					func.Name$ = var.Name$
 					func.datatype = var.datatype
 					func.IsCallback = IsCallback
 					func.IsAbstract = IsAbstract
 					func.DefTok = Compiler.currentPosi
-					
+
 					IF CurTyp <> -1
 						func.Typ = FUNC_IS_METHOD
 						DIMPUSH Compiler.Types[CurTyp].Methods[], LEN(Compiler.Funcs[])
@@ -124,7 +124,7 @@ FUNCTION Analyser:
 					IF IsNative = FALSE AND IsAbstract = FALSE THEN SkipTokens("FUNCTION", "ENDFUNCTION", func.Name$)
 				CASE "SUB"
 					Match("SUB", CODELINE(), CODEFILE$())
-					LOCAL func AS IdentifierFunc
+					LOCAL func AS TIdentifierFunc
 					func.Name$ = GetCurrent$()
 					func.datatype = voidDatatype
 					func.Typ = FUNC_IS_SUB
@@ -196,7 +196,7 @@ FUNCTION Analyser:
 						ELSE
 							Match(",", CODELINE(), CODEFILE$())
 						ENDIF
-						LOCAL Vari AS IdentifierVari
+						LOCAL Vari AS TIdentifierVari
 						Vari = VariDef()
 						Vari.Typ = VARI_IS_GLOBAL
 						AddVariable(Vari, TRUE) //OBACHT! Schaltet das doppelte existenzprüfen bei GLOBAL ab (ist vllt eh so in der GLB Syntax?)
@@ -286,7 +286,7 @@ FUNCTION Analyser:
 						WHILE IsToken("\n") = FALSE
 							IF Done = TRUE THEN Match(",", CODELINE(), CODEFILE$())
 							LOCAL e = Expression()
-							LOCAL tmpData AS Datatype
+							LOCAL tmpData AS TDatatype
 							tmpData = Exprs[e].datatype
 							tmpData.IsArray = 0
 							EnsureDatatype(e, tmpData, 0)
@@ -300,7 +300,7 @@ FUNCTION Analyser:
 						Match("\n", CODELINE(), CODEFILE$())
 					WEND
 					Match("ENDDATA", CODELINE(), CODEFILE$())
-					LOCAL dataB AS DataBlock
+					LOCAL dataB AS TDataBlock
 					dataB.Name$ = Name$
 					dataB.Datas[] = Datas[]
 
@@ -316,7 +316,7 @@ FUNCTION Analyser:
 ENDFUNCTION
 
 //! Schaut ob zyklisches Attribut
-FUNCTION CheckCyclic: Name$, typ AS IdentifierType
+FUNCTION CheckCyclic: Name$, typ AS TIdentifierType
 	FOREACH t IN typ.Attributes[]
 		IF Compiler.Varis[t].datatype.Name$ = Name$
 			Error("Cyclic reference '"+Compiler.Varis[t].Name$+"' to type '"+Name$+"'", CODELINE(), CODEFILE$())
@@ -330,7 +330,7 @@ FUNCTION CheckCyclic: Name$, typ AS IdentifierType
 ENDFUNCTION
 
 //! Erweitert einen Type mit der Extendklasse!
-FUNCTION ExtendType%: typ AS IdentifierType
+FUNCTION ExtendType%: typ AS TIdentifierType
 	IF typ.Extending <> -1
 		ExtendType(Compiler.Types[typ.Extending]) //Vorher aber Kind extenden!
 

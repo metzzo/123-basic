@@ -1,0 +1,59 @@
+// --------------------------------- //
+// Project: FINDPATH
+// Start: Monday, February 09, 2015
+// IDE Version: 10.283
+
+
+// Diesen Wert ändern für mehr/weniger Gelände
+?IFDEF OTTBASIC
+LOCAL w%, h%
+GETSCREENSIZE w, h
+CREATESCREEN 0, 0, w, h
+USESCREEN 0
+?ENDIF
+
+MAXX = 500
+
+
+MAXY = MAXX/2
+
+scalex = 640 / MAXX
+scaley = 320 / MAXY
+
+DIM map[MAXX][MAXY]
+DIM solution[0]
+
+// Irgend eine Karte machen
+FOR x=0 TO MAXX-1; FOR y=0 TO MAXY-1; map[x][y]=100; NEXT; NEXT
+FOR i=0 TO MAXX*MAXY*4; map[RND(MAXX-1)][RND(MAXY-1)] = RND(25); NEXT
+FOR i=0 TO MAXY*.5; map[i+1][i] = 0; map[i+MAXY/2][MAXY-i-1]=0; NEXT
+
+ // Go Pfadfinder, go!
+ gut = FINDPATH(map[], solution[], .3,  0,0,  MAXX-1, MAXY-1)
+ // Karte zeichnen
+ FOR x=0 TO MAXX-1; FOR y=0 TO MAXY-1; DRAWRECT x*scalex, y*scaley, scalex, scaley, RGB(255*(1-map[x][y]), 255*map[x][y], 0); NEXT; NEXT
+ 
+ IF gut
+  PRINT "Loesung gefunden!", 0, 400
+  x=0; y=0
+  FOR i=0 TO BOUNDS(solution[], 0)-1
+   xl = x
+   yl = y
+   x = solution[i][0]
+   y = solution[i][1]
+   DRAWLINE xl*scalex+scalex/2, yl*scaley+scaley/2, x*scalex+scalex/2, y*scaley+scalex/2, RGB(0, 0, 255)
+  NEXT
+ ELSE
+  PRINT "Keine Loesung gefunden!?", 0, 400
+ ENDIF
+ 
+ SHOWSCREEN
+?IFDEF OTTBASIC
+USESCREEN -1
+SUB GLB_ON_LOOP:
+	DRAWSPRITE 0, 0, 0
+	SHOWSCREEN
+ENDSUB
+?ELSE
+MOUSEWAIT
+?ENDIF
