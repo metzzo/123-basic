@@ -1455,7 +1455,7 @@ ENDFUNCTION
 // !Overwrite for handling user defined widgets
 // ------------------------------------------ //
 CALLBACK FUNCTION DDgui_handle_user%: BYREF id$, mx%, my%, b1%, b2%
-	
+
 ENDFUNCTION
 
 

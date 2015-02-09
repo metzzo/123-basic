@@ -216,10 +216,10 @@ var engines = {
 				curChn.startTime = GETTIMERALL();
 				curChn.source.start(0);
 			}
-			/*
+			
 			curChn.timeout = setTimeout(function() {
 				soundEngine.stop(curChn);
-			}, (curChn.sound.data.duration+1)*1000 - startPos*1000);*/
+			}, (curChn.sound.data.duration+1)*1000 - startPos*1000);
 			
 			return curChn.num;
 		},
@@ -253,11 +253,6 @@ var engines = {
 					channel.timeout = null;
 				}
 			}
-		},
-		newSource: function(channel) {
-			
-			
-			
 		},
 		load: function(sound) {
 			var request = new XMLHttpRequest();

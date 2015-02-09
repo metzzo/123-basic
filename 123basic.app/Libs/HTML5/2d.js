@@ -710,8 +710,9 @@ function DRAWLINE(x1, y1, x2, y2, col) {
 	context.save();
 	context.strokeStyle	= formatColor(col);
 	context.beginPath();
-	context.moveTo(CAST2INT(x1), CAST2INT(y1));
-	context.lineTo(CAST2INT(x2), CAST2INT(y2));
+	context.moveTo(~~x1 + .5, ~~y1 + .5); // +.5 in order to ensure lines are 1 px thick
+	context.lineTo(~~x2 + .5, ~~y2 + .5);
+	// context.lineWidth = 1;
 	context.stroke();
 	context.restore();
 }
@@ -723,7 +724,7 @@ function DRAWRECT(x,y,w,h,col) {
 	} else {
 		context.save();
 		context.fillStyle	= formatColor(col);
-		context.fillRect(CAST2INT(x), CAST2INT(y), CAST2INT(w), CAST2INT(h));
+		context.fillRect(~~x, ~~y, ~~w, ~~h);
 		context.restore();
 	}
 }
@@ -732,12 +733,15 @@ function formatColor(origcol) {
 	var col = origcol.toString(16);
 	switch (col.length) {
 		case 5:
+			return "#0"+col;
 		case 4:
 			return "#00"+col;
 		case 3:
+			return "#000"+col;
 		case 2:
 			return "#0000"+col;
 		case 1:
+			return "#00000"+col;
 		case 0:
 			return "#000000"+col;
 		default:

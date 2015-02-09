@@ -114,7 +114,7 @@ function LOADFONT(path, num) {
 							}
 						}
 						
-						if (typeof startx != 'undefined' && typeof endx != 'undefined' && endx > startx) {
+						if (typeof startx != 'undefined' && typeof endx != 'undefined' && endx >= startx) {
 							realwidth = (endx - startx)+1;
 						} else {
 							realwidth = INTEGER(charwidth/3) - 1;
