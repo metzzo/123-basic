@@ -40,6 +40,8 @@ maxbat=0
 bx[0]=580; by[0]=350; bdirx[0]= 1.2; bdiry[0]=-1
 bx[1]=160; by[1]=350; bdirx[1]=-1; bdiry[1]= 1.2
 
+AUTOPAUSE TRUE
+
 // Random level data
 // 32x16 = 20x30 blocks
 FOR x=0 TO 19
@@ -53,6 +55,14 @@ WHILE TRUE
 GOSUB GLB_ON_LOOP
 WEND
 ?ENDIF
+
+SUB GLB_ON_PAUSE:
+	DEBUG "PAUSE"
+ENDSUB
+
+SUB GLB_ON_RESUME:
+	DEBUG "RESUME"
+ENDSUB
 
 // ------------------------------------------------------------- //
 // -=#  MAINGAME  #=-

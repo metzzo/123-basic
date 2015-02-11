@@ -52,6 +52,8 @@ var lastKey		= ""; //der zuletzt gedrückte Buchstabe (ist für INKEY)
 var inFullscreen= false;
 var canvasOffsetLeft = 0;
 var canvasOffsetTop = 0;
+var autopauseEnabled = false; // is autopause enabled?
+var autopauseActive = false; // is it currently autopausing?
 
 var waitForFont = false;
 
@@ -119,13 +121,9 @@ function opt_update2D() {
 			if (ANYMOUSE() || ANYKEY() || globalSpeedX || globalSpeedY) {
 				hibernate = false;
 			}
+		} else if (autopauseEnabled && autopauseActive) {
+			// do nothing
 		} else {
-			canvasWidth = canvas.width; 
-			canvasHeight = canvas.height;
-			canvasOffsetLeft = getOffsetLeft(canvas);
-			canvasOffsetTop = getOffsetTop(canvas);
-			
-			
 			if (showFPS == -1) {
 				doCurrentFunction();
 			} else {
@@ -414,6 +412,12 @@ function init2D(canvasName) {
 		waitForFont = true;
 	}
 	
+	// TODO: Add event listener for changes
+	canvasWidth = canvas.width; 
+	canvasHeight = canvas.height;
+	canvasOffsetLeft = getOffsetLeft(canvas);
+	canvasOffsetTop = getOffsetTop(canvas);
+	
     update2D(); //call the render function
 }
 
@@ -603,7 +607,7 @@ function ALLOWESCAPE(allow) {
 }
 
 function AUTOPAUSE(mode) {
-	throwError("TODO: autopause");
+	autopauseEnabled = mode;
 }
 
 function HIBERNATE() {
@@ -768,8 +772,6 @@ function PLAYMOVIE(movie) {
 	throwError("TODO:playmovie");
 }
 
-
-
 function loadAsset(path) {
 	var oldpath = path;
 	path = path.toLowerCase();
@@ -783,8 +785,6 @@ function loadAsset(path) {
 	}
 	return oldpath;
 }
-
-
 
 function getOffsetLeft(elem) {
     var offsetLeft = 0;
@@ -804,3 +804,54 @@ function getOffsetTop(elem) {
     } while(elem = elem.offsetParent);
     return offsetTop;
 }
+
+(function() {
+  var hidden = "hidden";
+
+  // Standards:
+  if (hidden in document)
+    document.addEventListener("visibilitychange", onchange);
+  else if ((hidden = "mozHidden") in document)
+    document.addEventListener("mozvisibilitychange", onchange);
+  else if ((hidden = "webkitHidden") in document)
+    document.addEventListener("webkitvisibilitychange", onchange);
+  else if ((hidden = "msHidden") in document)
+    document.addEventListener("msvisibilitychange", onchange);
+  // IE 9 and lower:
+  else if ("onfocusin" in document)
+    document.onfocusin = document.onfocusout = onchange;
+  // All others:
+  else
+    window.onpageshow = window.onpagehide
+    = window.onfocus = window.onblur = onchange;
+
+  function onchange (evt) {
+    var v = "visible", h = "hidden",
+        evtMap = {
+          focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
+        };
+
+    evt = evt || window.event;
+    
+	var prev = autopauseActive;
+	
+	if (evt.type in evtMap)
+      autopauseActive = evtMap[evt.type] === "hidden" ? true : false;
+    else
+      autopauseActive = this[hidden];
+	  
+	if (autopauseEnabled && autopauseActive != prev) {
+		if (autopauseActive && window['GLB_ON_PAUSE']) {
+			window['GLB_ON_PAUSE']();
+		}
+		if (!autopauseActive && window['GLB_ON_RESUME']) {
+			window['GLB_ON_RESUME']();
+		}
+		lastShwscrn = GETTIMERALL();
+	}
+  }
+
+  // set the initial state (but only if browser supports the Page Visibility API)
+  if( document[hidden] !== undefined )
+    onchange({type: document[hidden] ? "blur" : "focus"});
+})();
