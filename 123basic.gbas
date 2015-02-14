@@ -6,16 +6,12 @@
 // ?DEFINE DEBUGLEXER
 // ?DEFINE DEBUG
 // ?DEFINE MEASURETIME
-
-
 // ?DEFINE TEST_BEFORE
-
-// ?DEFINE PRE_FOR_IDE
 
 ?DEFINE GEN_DOC
 
 
-?IF DEFINED(OTTBASIC) AND DEFINED(PRE_FOR_IDE)
+?IF DEFINED(OTTBASIC)
 	?DEFINE FOR_IDE //Kompiliere für die IDE
 ?ENDIF
 
@@ -111,6 +107,10 @@ GbapPath$ = "./"
 	ELSE
 		ArgumentError("Missing option -G")
 	ENDIF
+	
+	IF INSTR(c$,"-SAVEHEADER") <> -1
+		SaveHeader = TRUE
+	ENDIF
 
 	PushTimer()
 	Input$ = ReadGBAP$(ProjPath$, ProjName$)
@@ -133,7 +133,12 @@ GbapPath$ = "./"
 	ELSE
 		STDOUT "\n\nFunctions: "+LEN(Compiler.Funcs[])+" Variables: "+LEN(Compiler.Varis[])+" AST Nodes: "+LastExprID+" Types: "+LEN(Compiler.Types[])+"\n"
 		STDOUT "Successful compile! Duration: "+(GETTIMERALL()-Time)/1000+" S, time per token: "+(GETTIMERALL()-Time)/Compiler.LastMaxTokens+"MS, tokens: "+Compiler.LastMaxTokens+" \n"
-
+		
+		IF SaveHeader
+			STDOUT "Save header to " + GETCURRENTDIR$() + "\n"
+			COPYFILE "Tmp/Header.js", "Header.js"
+		ENDIF
+		
 		?IFDEF VMCOMPILER
 			IF Target$ = "VM"
 				InitFuncs()

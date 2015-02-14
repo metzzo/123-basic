@@ -6,6 +6,7 @@ Added: In source documentation system
 Fixed: Lines are 1 px thick (not 2px)
 Fixed: LOADFONT chose wrong character image if it's 1 px thick
 Added: FINDPATH
+Added: AUTOPAUSE
 
 0.6
 Fixed: Problem with UTF8 .GBAP files in the XML loader

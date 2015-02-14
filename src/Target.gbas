@@ -33,6 +33,7 @@ GLOBAL Templates[] AS TTemplate
 GLOBAL Lang$ = ""
 GLOBAL DirectoryStructure$
 GLOBAL NoRun% = FALSE
+GLOBAL SaveHeader% = FALSE
 
 
 FUNCTION DoTarget$: Name$
@@ -96,12 +97,10 @@ FUNCTION DoTarget$: Name$
 		LibText$ = LibText$ + Text$
 	NEXT
 
-	?IFDEF PRE_FOR_IDE
-	IF Target$ = "HTML5"
+	IF Target$ = "HTML5" AND SaveHeader
 		//Speichere den Header
 		WriteFile("Tmp/Header.js", LibText$)
 	ENDIF
-	?ENDIF
 
 	FOREACH Ac IN Actions[]
 		STDOUT "Action "+Ac.Name$+"\n"
