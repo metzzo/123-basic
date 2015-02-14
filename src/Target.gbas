@@ -98,8 +98,9 @@ FUNCTION DoTarget$: Name$
 	NEXT
 
 	IF Target$ = "HTML5" AND SaveHeader
-		//Speichere den Header
+		//Speichere die Header
 		WriteFile("Tmp/Header.js", LibText$)
+		WriteFile("Tmp/OTTHeader.gbas", Compiler.HeaderText$)
 	ENDIF
 
 	FOREACH Ac IN Actions[]

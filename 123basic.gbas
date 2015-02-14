@@ -137,6 +137,7 @@ GbapPath$ = "./"
 		IF SaveHeader
 			STDOUT "Save header to " + GETCURRENTDIR$() + "\n"
 			COPYFILE "Tmp/Header.js", "Header.js"
+			COPYFILE "Tmp/OTTHeader.gbas", "OTTHeader.gbas"
 		ENDIF
 		
 		?IFDEF VMCOMPILER
