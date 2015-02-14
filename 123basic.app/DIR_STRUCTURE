@@ -47,6 +47,8 @@ editable:/Target/Libs/js/math.js
 static:/Target/Libs/js/math.js.123SCRIPT_DATA
 editable:/Target/Libs/js/string.js
 static:/Target/Libs/js/string.js.123SCRIPT_DATA
+editable:/Target/Libs/js/workerBootstrap.js
+static:/Target/Libs/js/workerBootstrap.js.123SCRIPT_DATA
 editable:/Target/Libs/js/xna.xcl
 static:/Target/Libs/js/xna.xcl.123SCRIPT_DATA
 folder:/Target/VM
@@ -60,7 +62,8 @@ static:/DIR_STRUCTURE
 editable:/Header.js
 static:/Header.js.123SCRIPT_DATA
 editable:/OTTHeader.gbas
-var:compileTime=2015-02-14 12:57:05
+static:/OTTHeader.gbas.123SCRIPT_DATA
+var:compileTime=2015-02-14 13:09:38
 var:userDefVersion=000.005
 var:hostId=290816d5
 var:viewMode=console

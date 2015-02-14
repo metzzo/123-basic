@@ -1,3 +1,11 @@
+if (self !== undefined) {
+	window = {};
+	localStorage = null;
+	document = null;
+	isInWebWorker = true;
+} else {
+	isInWebWorker = false;
+}
 if (typeof preInitFuncs == 'undefined') preInitFuncs = [];
 preInitFuncs.push(function() {
 	if (viewMode == 'console' && (typeof inEditorPreview == 'undefined')) {
