@@ -6305,22 +6305,22 @@ func10_ExtendType = window['func10_ExtendType'];
 window['func12_LoadFile_Str'] = function(param8_Path_Str) {
 	stackPush("function: LoadFile_Str", __debugInfo);
 	try {
-		var local8_Text_Str_2569 = "", local4_File_2570 = 0;
+		var local8_Text_Str_2570 = "", local4_File_2571 = 0;
 		__debugInfo = "371:\src\Compiler.gbas";
-		local4_File_2570 = GENFILE();
+		local4_File_2571 = GENFILE();
 		__debugInfo = "381:\src\Compiler.gbas";
-		if (OPENFILE(local4_File_2570, param8_Path_Str, 1)) {
+		if (OPENFILE(local4_File_2571, param8_Path_Str, 1)) {
 			__debugInfo = "377:\src\Compiler.gbas";
-			while ((((ENDOFFILE(local4_File_2570)) === (0)) ? 1 : 0)) {
-				var local8_Line_Str_ref_2571 = [""];
+			while ((((ENDOFFILE(local4_File_2571)) === (0)) ? 1 : 0)) {
+				var local8_Line_Str_ref_2572 = [""];
 				__debugInfo = "375:\src\Compiler.gbas";
-				READLINE(local4_File_2570, local8_Line_Str_ref_2571);
+				READLINE(local4_File_2571, local8_Line_Str_ref_2572);
 				__debugInfo = "376:\src\Compiler.gbas";
-				local8_Text_Str_2569 = ((((local8_Text_Str_2569) + (local8_Line_Str_ref_2571[0]))) + ("\n"));
+				local8_Text_Str_2570 = ((((local8_Text_Str_2570) + (local8_Line_Str_ref_2572[0]))) + ("\n"));
 				__debugInfo = "375:\src\Compiler.gbas";
 			};
 			__debugInfo = "378:\src\Compiler.gbas";
-			CLOSEFILE(local4_File_2570);
+			CLOSEFILE(local4_File_2571);
 			__debugInfo = "377:\src\Compiler.gbas";
 		} else {
 			__debugInfo = "380:\src\Compiler.gbas";
@@ -6328,7 +6328,7 @@ window['func12_LoadFile_Str'] = function(param8_Path_Str) {
 			__debugInfo = "380:\src\Compiler.gbas";
 		};
 		__debugInfo = "383:\src\Compiler.gbas";
-		return tryClone(local8_Text_Str_2569);
+		return tryClone(local8_Text_Str_2570);
 		__debugInfo = "384:\src\Compiler.gbas";
 		return "";
 		__debugInfo = "371:\src\Compiler.gbas";
@@ -6384,17 +6384,17 @@ func5_Error = window['func5_Error'];
 window['func7_Warning'] = function(param7_Msg_Str) {
 	stackPush("function: Warning", __debugInfo);
 	try {
-		var local3_tok_2573 = pool_TToken.alloc();
+		var local3_tok_2574 = pool_TToken.alloc();
 		__debugInfo = "413:\src\Compiler.gbas";
-		local3_tok_2573 = func15_GetCurrentToken().clone(/* In Assign */);
+		local3_tok_2574 = func15_GetCurrentToken().clone(/* In Assign */);
 		__debugInfo = "415:\src\Compiler.gbas";
 		param7_Msg_Str = (((("Warning: '") + (REPLACE_Str(param7_Msg_Str, "\n", "NEWLINE")))) + ("'\n"));
 		__debugInfo = "416:\src\Compiler.gbas";
-		param7_Msg_Str = ((((((((((((((param7_Msg_Str) + ("in line '"))) + (CAST2STRING(local3_tok_2573.attr4_Line)))) + ("' at character '"))) + (CAST2STRING(local3_tok_2573.attr9_Character)))) + ("' near '"))) + (REPLACE_Str(local3_tok_2573.attr8_Text_Str, "\n", "NEWLINE")))) + ("'\n"));
+		param7_Msg_Str = ((((((((((((((param7_Msg_Str) + ("in line '"))) + (CAST2STRING(local3_tok_2574.attr4_Line)))) + ("' at character '"))) + (CAST2STRING(local3_tok_2574.attr9_Character)))) + ("' near '"))) + (REPLACE_Str(local3_tok_2574.attr8_Text_Str, "\n", "NEWLINE")))) + ("'\n"));
 		__debugInfo = "417:\src\Compiler.gbas";
-		param7_Msg_Str = ((((((param7_Msg_Str) + ("in file '"))) + (local3_tok_2573.attr8_Path_Str))) + ("'\n"));
+		param7_Msg_Str = ((((((param7_Msg_Str) + ("in file '"))) + (local3_tok_2574.attr8_Path_Str))) + ("'\n"));
 		__debugInfo = "418:\src\Compiler.gbas";
-		param7_Msg_Str = ((((((param7_Msg_Str) + ("\t '"))) + (local3_tok_2573.attr15_LineContent_Str))) + ("'\n"));
+		param7_Msg_Str = ((((((param7_Msg_Str) + ("\t '"))) + (local3_tok_2574.attr15_LineContent_Str))) + ("'\n"));
 		__debugInfo = "419:\src\Compiler.gbas";
 		param7_Msg_Str = ((param7_Msg_Str) + ("-----------------------------------\n"));
 		__debugInfo = "419:\src\Compiler.gbas";
@@ -6403,7 +6403,7 @@ window['func7_Warning'] = function(param7_Msg_Str) {
 		STDOUT(param7_Msg_Str);
 		__debugInfo = "422:\src\Compiler.gbas";
 		return 0;
-		__debugInfo = "413:\src\Compiler.gbas";pool_TToken.free(local3_tok_2573);
+		__debugInfo = "413:\src\Compiler.gbas";pool_TToken.free(local3_tok_2574);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6421,17 +6421,17 @@ window['func11_CreateToken'] = function(param8_Text_Str, param15_LineContent_Str
 		if (((((((((((((param8_Text_Str) !== ("\n")) ? 1 : 0)) && ((((TRIM_Str(param8_Text_Str, " \t\r\n\v\f")) === ("")) ? 1 : 0))) ? 1 : 0)) || ((((param8_Text_Str) === ("\t")) ? 1 : 0))) ? 1 : 0)) || ((((param8_Text_Str) === ("\r")) ? 1 : 0))) ? 1 : 0)) {
 			
 		} else {
-			var local6_ascval_2579 = 0, local3_pos_2580 = 0.0;
+			var local6_ascval_2580 = 0, local3_pos_2581 = 0.0;
 			__debugInfo = "430:\src\Compiler.gbas";
-			local6_ascval_2579 = ASC(param8_Text_Str, 0);
+			local6_ascval_2580 = ASC(param8_Text_Str, 0);
 			__debugInfo = "433:\src\Compiler.gbas";
-			if ((((((((((local6_ascval_2579) === (8)) ? 1 : 0)) || ((((local6_ascval_2579) === (12)) ? 1 : 0))) ? 1 : 0)) || ((((CAST2STRING(local6_ascval_2579)) === (global11_SHLASHF_Str)) ? 1 : 0))) ? 1 : 0)) {
+			if ((((((((((local6_ascval_2580) === (8)) ? 1 : 0)) || ((((local6_ascval_2580) === (12)) ? 1 : 0))) ? 1 : 0)) || ((((CAST2STRING(local6_ascval_2580)) === (global11_SHLASHF_Str)) ? 1 : 0))) ? 1 : 0)) {
 				__debugInfo = "432:\src\Compiler.gbas";
 				param8_Text_Str = "\n";
 				__debugInfo = "432:\src\Compiler.gbas";
 			};
 			__debugInfo = "437:\src\Compiler.gbas";
-			local3_pos_2580 = global8_Compiler.attr11_LastTokenID;
+			local3_pos_2581 = global8_Compiler.attr11_LastTokenID;
 			__debugInfo = "438:\src\Compiler.gbas";
 			global8_Compiler.attr11_LastTokenID = ((global8_Compiler.attr11_LastTokenID) + (1));
 			__debugInfo = "445:\src\Compiler.gbas";
@@ -6441,19 +6441,19 @@ window['func11_CreateToken'] = function(param8_Text_Str, param15_LineContent_Str
 				__debugInfo = "443:\src\Compiler.gbas";
 			};
 			__debugInfo = "447:\src\Compiler.gbas";
-			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr4_Line = param4_Line;
+			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr4_Line = param4_Line;
 			__debugInfo = "448:\src\Compiler.gbas";
-			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr9_Character = param9_Character;
+			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr9_Character = param9_Character;
 			__debugInfo = "449:\src\Compiler.gbas";
-			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr15_LineContent_Str = param15_LineContent_Str;
+			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr15_LineContent_Str = param15_LineContent_Str;
 			__debugInfo = "450:\src\Compiler.gbas";
-			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr8_Path_Str = param8_Path_Str;
+			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr8_Path_Str = param8_Path_Str;
 			__debugInfo = "451:\src\Compiler.gbas";
-			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr8_Text_Str = param8_Text_Str;
+			global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr8_Text_Str = param8_Text_Str;
 			__debugInfo = "452:\src\Compiler.gbas";
-			if ((((LEFT_Str(global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr8_Text_Str, 1)) === ("@")) ? 1 : 0)) {
+			if ((((LEFT_Str(global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr8_Text_Str, 1)) === ("@")) ? 1 : 0)) {
 				__debugInfo = "452:\src\Compiler.gbas";
-				global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr8_Text_Str = MID_Str(global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2580)).values[tmpPositionCache].attr8_Text_Str, 1, -(1));
+				global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr8_Text_Str = MID_Str(global8_Compiler.attr6_Tokens.arrAccess(~~(local3_pos_2581)).values[tmpPositionCache].attr8_Text_Str, 1, -(1));
 				__debugInfo = "452:\src\Compiler.gbas";
 			};
 			__debugInfo = "430:\src\Compiler.gbas";
@@ -6679,16 +6679,16 @@ func14_MatchAndRemove = window['func14_MatchAndRemove'];
 window['func14_CreateDatatype'] = function(param8_Name_Str, param7_IsArray) {
 	stackPush("function: CreateDatatype", __debugInfo);
 	try {
-		var local1_d_2586 = pool_TDatatype.alloc();
+		var local1_d_2587 = pool_TDatatype.alloc();
 		__debugInfo = "519:\src\Compiler.gbas";
-		local1_d_2586.attr8_Name_Str = param8_Name_Str;
+		local1_d_2587.attr8_Name_Str = param8_Name_Str;
 		__debugInfo = "520:\src\Compiler.gbas";
-		local1_d_2586.attr7_IsArray = param7_IsArray;
+		local1_d_2587.attr7_IsArray = param7_IsArray;
 		__debugInfo = "521:\src\Compiler.gbas";
-		return tryClone(local1_d_2586);
+		return tryClone(local1_d_2587);
 		__debugInfo = "522:\src\Compiler.gbas";
 		return tryClone(unref(pool_TDatatype.alloc()));
-		__debugInfo = "519:\src\Compiler.gbas";pool_TDatatype.free(local1_d_2586);
+		__debugInfo = "519:\src\Compiler.gbas";pool_TDatatype.free(local1_d_2587);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -6728,22 +6728,22 @@ func7_IsToken = window['func7_IsToken'];
 window['func14_CreateOperator'] = function(param8_Name_Str, param7_Sym_Str, param4_Prio, param3_Typ) {
 	stackPush("function: CreateOperator", __debugInfo);
 	try {
-		var local2_Op_ref_2591 = [pool_TOperator.alloc()];
+		var local2_Op_ref_2592 = [pool_TOperator.alloc()];
 		__debugInfo = "534:\src\Compiler.gbas";
-		local2_Op_ref_2591[0].attr8_Name_Str = param8_Name_Str;
+		local2_Op_ref_2592[0].attr8_Name_Str = param8_Name_Str;
 		__debugInfo = "535:\src\Compiler.gbas";
-		local2_Op_ref_2591[0].attr7_Sym_Str = param7_Sym_Str;
+		local2_Op_ref_2592[0].attr7_Sym_Str = param7_Sym_Str;
 		__debugInfo = "536:\src\Compiler.gbas";
-		local2_Op_ref_2591[0].attr4_Prio = param4_Prio;
+		local2_Op_ref_2592[0].attr4_Prio = param4_Prio;
 		__debugInfo = "537:\src\Compiler.gbas";
-		local2_Op_ref_2591[0].attr3_Typ = param3_Typ;
+		local2_Op_ref_2592[0].attr3_Typ = param3_Typ;
 		__debugInfo = "538:\src\Compiler.gbas";
-		local2_Op_ref_2591[0].attr2_ID = BOUNDS(global9_Operators_ref[0], 0);
+		local2_Op_ref_2592[0].attr2_ID = BOUNDS(global9_Operators_ref[0], 0);
 		__debugInfo = "539:\src\Compiler.gbas";
-		DIMPUSH(global9_Operators_ref[0], local2_Op_ref_2591);
+		DIMPUSH(global9_Operators_ref[0], local2_Op_ref_2592);
 		__debugInfo = "540:\src\Compiler.gbas";
 		return 0;
-		__debugInfo = "534:\src\Compiler.gbas";pool_TOperator.free(local2_Op_ref_2591);
+		__debugInfo = "534:\src\Compiler.gbas";pool_TOperator.free(local2_Op_ref_2592);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -7403,9 +7403,9 @@ func20_GenerateFuncName_Str = window['func20_GenerateFuncName_Str'];
 window['func8_ParseDoc'] = function() {
 	stackPush("function: ParseDoc", __debugInfo);
 	try {
-		var local3_doc_2592 = pool_Documentation.alloc(), local8_name_Str_2593 = "";
+		var local3_doc_2593 = pool_Documentation.alloc(), local8_name_Str_2594 = "";
 		__debugInfo = "132:\src\DocParser.gbas";
-		local3_doc_2592.attr7_typ_Str = func14_GetCurrent_Str();
+		local3_doc_2593.attr7_typ_Str = func14_GetCurrent_Str();
 		__debugInfo = "133:\src\DocParser.gbas";
 		if ((((((func7_IsToken("MODULE")) || (func7_IsToken("FUNCTION"))) ? 1 : 0)) ? 0 : 1)) {
 			__debugInfo = "133:\src\DocParser.gbas";
@@ -7413,25 +7413,25 @@ window['func8_ParseDoc'] = function() {
 			__debugInfo = "133:\src\DocParser.gbas";
 		};
 		__debugInfo = "134:\src\DocParser.gbas";
-		local8_name_Str_2593 = "";
+		local8_name_Str_2594 = "";
 		__debugInfo = "140:\src\DocParser.gbas";
 		do {
 			__debugInfo = "136:\src\DocParser.gbas";
 			func13_RemoveCurrent();
 			__debugInfo = "137:\src\DocParser.gbas";
-			if ((((local8_name_Str_2593) !== ("")) ? 1 : 0)) {
+			if ((((local8_name_Str_2594) !== ("")) ? 1 : 0)) {
 				__debugInfo = "137:\src\DocParser.gbas";
-				local8_name_Str_2593 = ((local8_name_Str_2593) + ("."));
+				local8_name_Str_2594 = ((local8_name_Str_2594) + ("."));
 				__debugInfo = "137:\src\DocParser.gbas";
 			};
 			__debugInfo = "138:\src\DocParser.gbas";
-			local8_name_Str_2593 = ((local8_name_Str_2593) + (func14_GetCurrent_Str()));
+			local8_name_Str_2594 = ((local8_name_Str_2594) + (func14_GetCurrent_Str()));
 			__debugInfo = "139:\src\DocParser.gbas";
 			func13_RemoveCurrent();
 			__debugInfo = "136:\src\DocParser.gbas";
 		} while (!(((func7_IsToken(".")) ? 0 : 1)));
 		__debugInfo = "141:\src\DocParser.gbas";
-		local3_doc_2592.attr8_name_Str = local8_name_Str_2593;
+		local3_doc_2593.attr8_name_Str = local8_name_Str_2594;
 		__debugInfo = "143:\src\DocParser.gbas";
 		func11_RemoveAllNL();
 		__debugInfo = "186:\src\DocParser.gbas";
@@ -7440,64 +7440,64 @@ window['func8_ParseDoc'] = function() {
 			func14_MatchAndRemove("?", 145, "src\DocParser.gbas");
 			__debugInfo = "147:\src\DocParser.gbas";
 			{
-				var local17___SelectHelper44__2594 = "";
+				var local17___SelectHelper44__2595 = "";
 				__debugInfo = "147:\src\DocParser.gbas";
-				local17___SelectHelper44__2594 = func14_GetCurrent_Str();
+				local17___SelectHelper44__2595 = func14_GetCurrent_Str();
 				__debugInfo = "183:\src\DocParser.gbas";
-				if ((((local17___SelectHelper44__2594) === ("PARAM")) ? 1 : 0)) {
-					var local5_param_2595 = pool_ParamElement.alloc();
+				if ((((local17___SelectHelper44__2595) === ("PARAM")) ? 1 : 0)) {
+					var local5_param_2596 = pool_ParamElement.alloc();
 					__debugInfo = "149:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "151:\src\DocParser.gbas";
-					local5_param_2595.attr8_name_Str = func14_GetCurrent_Str();
+					local5_param_2596.attr8_name_Str = func14_GetCurrent_Str();
 					__debugInfo = "152:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "153:\src\DocParser.gbas";
 					func14_MatchAndRemove("\n", 152, "src\DocParser.gbas");
 					__debugInfo = "155:\src\DocParser.gbas";
-					func12_ParseDocLang(unref(local5_param_2595.attr4_desc), "ENDPARAM");
+					func12_ParseDocLang(unref(local5_param_2596.attr4_desc), "ENDPARAM");
 					__debugInfo = "157:\src\DocParser.gbas";
-					DIMPUSH(local3_doc_2592.attr6_params, local5_param_2595);
-					__debugInfo = "149:\src\DocParser.gbas";pool_ParamElement.free(local5_param_2595);
-				} else if ((((local17___SelectHelper44__2594) === ("DESC")) ? 1 : 0)) {
+					DIMPUSH(local3_doc_2593.attr6_params, local5_param_2596);
+					__debugInfo = "149:\src\DocParser.gbas";pool_ParamElement.free(local5_param_2596);
+				} else if ((((local17___SelectHelper44__2595) === ("DESC")) ? 1 : 0)) {
 					__debugInfo = "159:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "160:\src\DocParser.gbas";
 					func14_MatchAndRemove("\n", 159, "src\DocParser.gbas");
 					__debugInfo = "162:\src\DocParser.gbas";
-					func12_ParseDocLang(unref(local3_doc_2592.attr4_desc), "ENDDESC");
+					func12_ParseDocLang(unref(local3_doc_2593.attr4_desc), "ENDDESC");
 					__debugInfo = "159:\src\DocParser.gbas";
-				} else if ((((local17___SelectHelper44__2594) === ("EXAMPLE")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper44__2595) === ("EXAMPLE")) ? 1 : 0)) {
 					__debugInfo = "164:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "165:\src\DocParser.gbas";
 					func14_MatchAndRemove("\n", 164, "src\DocParser.gbas");
 					__debugInfo = "167:\src\DocParser.gbas";
-					func12_ParseDocLang(unref(local3_doc_2592.attr7_example), "ENDEXAMPLE");
+					func12_ParseDocLang(unref(local3_doc_2593.attr7_example), "ENDEXAMPLE");
 					__debugInfo = "164:\src\DocParser.gbas";
-				} else if ((((local17___SelectHelper44__2594) === ("SEE")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper44__2595) === ("SEE")) ? 1 : 0)) {
 					__debugInfo = "169:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "174:\src\DocParser.gbas";
 					do {
 						__debugInfo = "172:\src\DocParser.gbas";
-						DIMPUSH(local3_doc_2592.attr7_see_Str, func14_GetCurrent_Str());
+						DIMPUSH(local3_doc_2593.attr7_see_Str, func14_GetCurrent_Str());
 						__debugInfo = "173:\src\DocParser.gbas";
 						func13_RemoveCurrent();
 						__debugInfo = "172:\src\DocParser.gbas";
 					} while (!(func7_IsToken("\n")));
 					__debugInfo = "169:\src\DocParser.gbas";
-				} else if ((((local17___SelectHelper44__2594) === ("MODULE")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper44__2595) === ("MODULE")) ? 1 : 0)) {
 					__debugInfo = "176:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "177:\src\DocParser.gbas";
-					local3_doc_2592.attr10_module_Str = func14_GetCurrent_Str();
+					local3_doc_2593.attr10_module_Str = func14_GetCurrent_Str();
 					__debugInfo = "178:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "179:\src\DocParser.gbas";
 					func14_MatchAndRemove("\n", 178, "src\DocParser.gbas");
 					__debugInfo = "176:\src\DocParser.gbas";
-				} else if ((((local17___SelectHelper44__2594) === ("ENDDOC")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper44__2595) === ("ENDDOC")) ? 1 : 0)) {
 					__debugInfo = "181:\src\DocParser.gbas";
 					func13_RemoveCurrent();
 					__debugInfo = "182:\src\DocParser.gbas";
@@ -7511,10 +7511,10 @@ window['func8_ParseDoc'] = function() {
 			__debugInfo = "146:\src\DocParser.gbas";
 		};
 		__debugInfo = "188:\src\DocParser.gbas";
-		DIMPUSH(global14_Documentations, local3_doc_2592);
+		DIMPUSH(global14_Documentations, local3_doc_2593);
 		__debugInfo = "189:\src\DocParser.gbas";
 		return 0;
-		__debugInfo = "132:\src\DocParser.gbas";pool_Documentation.free(local3_doc_2592);
+		__debugInfo = "132:\src\DocParser.gbas";pool_Documentation.free(local3_doc_2593);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -7530,7 +7530,7 @@ window['func12_ParseDocLang'] = function(param5_langs, param12_endToken_Str) {
 	try {
 		__debugInfo = "211:\src\DocParser.gbas";
 		while (func7_IsToken("?")) {
-			var local1_l_2598 = pool_LangElement.alloc(), local8_lang_Str_2599 = "", local8_text_Str_2600 = "";
+			var local1_l_2599 = pool_LangElement.alloc(), local8_lang_Str_2600 = "", local8_text_Str_2601 = "";
 			__debugInfo = "194:\src\DocParser.gbas";
 			func13_RemoveCurrent();
 			__debugInfo = "198:\src\DocParser.gbas";
@@ -7544,41 +7544,41 @@ window['func12_ParseDocLang'] = function(param5_langs, param12_endToken_Str) {
 			__debugInfo = "199:\src\DocParser.gbas";
 			func14_MatchAndRemove("LANG", 198, "src\DocParser.gbas");
 			__debugInfo = "200:\src\DocParser.gbas";
-			local8_lang_Str_2599 = func14_GetCurrent_Str();
+			local8_lang_Str_2600 = func14_GetCurrent_Str();
 			__debugInfo = "201:\src\DocParser.gbas";
 			func13_RemoveCurrent();
 			__debugInfo = "202:\src\DocParser.gbas";
-			local8_text_Str_2600 = MID_Str(func14_GetCurrent_Str(), 1, (((func14_GetCurrent_Str()).length) - (2)));
+			local8_text_Str_2601 = MID_Str(func14_GetCurrent_Str(), 1, (((func14_GetCurrent_Str()).length) - (2)));
 			__debugInfo = "203:\src\DocParser.gbas";
 			func13_RemoveCurrent();
 			__debugInfo = "205:\src\DocParser.gbas";
-			local1_l_2598.attr8_lang_Str = local8_lang_Str_2599;
+			local1_l_2599.attr8_lang_Str = local8_lang_Str_2600;
 			__debugInfo = "206:\src\DocParser.gbas";
-			local1_l_2598.attr8_desc_Str = REPLACE_Str(local8_text_Str_2600, (("\\") + ("\"")), "\"");
+			local1_l_2599.attr8_desc_Str = REPLACE_Str(local8_text_Str_2601, (("\\") + ("\"")), "\"");
 			__debugInfo = "208:\src\DocParser.gbas";
-			DIMPUSH(param5_langs, local1_l_2598);
+			DIMPUSH(param5_langs, local1_l_2599);
 			__debugInfo = "210:\src\DocParser.gbas";
 			func11_RemoveAllNL();
-			__debugInfo = "194:\src\DocParser.gbas";pool_LangElement.free(local1_l_2598);
+			__debugInfo = "194:\src\DocParser.gbas";pool_LangElement.free(local1_l_2599);
 		};
 		__debugInfo = "222:\src\DocParser.gbas";
 		if ((((BOUNDS(param5_langs, 0)) === (1)) ? 1 : 0)) {
-			var local2_l2_2601 = pool_LangElement.alloc();
+			var local2_l2_2602 = pool_LangElement.alloc();
 			__debugInfo = "215:\src\DocParser.gbas";
-			local2_l2_2601 = param5_langs.arrAccess(0).values[tmpPositionCache].clone(/* In Assign */);
+			local2_l2_2602 = param5_langs.arrAccess(0).values[tmpPositionCache].clone(/* In Assign */);
 			__debugInfo = "220:\src\DocParser.gbas";
-			if ((((local2_l2_2601.attr8_lang_Str) === ("EN")) ? 1 : 0)) {
+			if ((((local2_l2_2602.attr8_lang_Str) === ("EN")) ? 1 : 0)) {
 				__debugInfo = "217:\src\DocParser.gbas";
-				local2_l2_2601.attr8_lang_Str = "DE";
+				local2_l2_2602.attr8_lang_Str = "DE";
 				__debugInfo = "217:\src\DocParser.gbas";
 			} else {
 				__debugInfo = "219:\src\DocParser.gbas";
-				local2_l2_2601.attr8_lang_Str = "EN";
+				local2_l2_2602.attr8_lang_Str = "EN";
 				__debugInfo = "219:\src\DocParser.gbas";
 			};
 			__debugInfo = "221:\src\DocParser.gbas";
-			DIMPUSH(param5_langs, local2_l2_2601);
-			__debugInfo = "215:\src\DocParser.gbas";pool_LangElement.free(local2_l2_2601);
+			DIMPUSH(param5_langs, local2_l2_2602);
+			__debugInfo = "215:\src\DocParser.gbas";pool_LangElement.free(local2_l2_2602);
 		};
 		__debugInfo = "223:\src\DocParser.gbas";
 		return 0;
@@ -7620,11 +7620,11 @@ func11_RemoveAllNL = window['func11_RemoveAllNL'];
 window['func16_CreateExpression'] = function(param3_Typ, param8_datatype) {
 	stackPush("function: CreateExpression", __debugInfo);
 	try {
-		var local4_tmpD_2604 = pool_TDatatype.alloc(), local3_pos_2605 = 0.0, local1_d_2606 = pool_TDatatype.alloc();
+		var local4_tmpD_2605 = pool_TDatatype.alloc(), local3_pos_2606 = 0.0, local1_d_2607 = pool_TDatatype.alloc();
 		__debugInfo = "175:\src\Expression.gbas";
-		local4_tmpD_2604 = param8_datatype.clone(/* In Assign */);
+		local4_tmpD_2605 = param8_datatype.clone(/* In Assign */);
 		__debugInfo = "180:\src\Expression.gbas";
-		local3_pos_2605 = global10_LastExprID;
+		local3_pos_2606 = global10_LastExprID;
 		__debugInfo = "181:\src\Expression.gbas";
 		global10_LastExprID = ((global10_LastExprID) + (1));
 		__debugInfo = "188:\src\Expression.gbas";
@@ -7634,22 +7634,22 @@ window['func16_CreateExpression'] = function(param3_Typ, param8_datatype) {
 			__debugInfo = "186:\src\Expression.gbas";
 		};
 		__debugInfo = "189:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2605)).values[tmpPositionCache][0].attr3_Typ = param3_Typ;
+		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2606)).values[tmpPositionCache][0].attr3_Typ = param3_Typ;
 		__debugInfo = "192:\src\Expression.gbas";
-		local1_d_2606.attr8_Name_Str = local4_tmpD_2604.attr8_Name_Str;
+		local1_d_2607.attr8_Name_Str = local4_tmpD_2605.attr8_Name_Str;
 		__debugInfo = "193:\src\Expression.gbas";
-		local1_d_2606.attr7_IsArray = local4_tmpD_2604.attr7_IsArray;
+		local1_d_2607.attr7_IsArray = local4_tmpD_2605.attr7_IsArray;
 		__debugInfo = "194:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2605)).values[tmpPositionCache][0].attr8_datatype = local1_d_2606.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2606)).values[tmpPositionCache][0].attr8_datatype = local1_d_2607.clone(/* In Assign */);
 		__debugInfo = "195:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2605)).values[tmpPositionCache][0].attr2_ID = ~~(local3_pos_2605);
+		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2606)).values[tmpPositionCache][0].attr2_ID = ~~(local3_pos_2606);
 		__debugInfo = "196:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2605)).values[tmpPositionCache][0].attr5_tokID = global8_Compiler.attr11_currentPosi;
+		global5_Exprs_ref[0].arrAccess(~~(local3_pos_2606)).values[tmpPositionCache][0].attr5_tokID = global8_Compiler.attr11_currentPosi;
 		__debugInfo = "197:\src\Expression.gbas";
-		return tryClone(~~(local3_pos_2605));
+		return tryClone(~~(local3_pos_2606));
 		__debugInfo = "198:\src\Expression.gbas";
 		return 0;
-		__debugInfo = "175:\src\Expression.gbas";pool_TDatatype.free(local4_tmpD_2604);pool_TDatatype.free(local1_d_2606);
+		__debugInfo = "175:\src\Expression.gbas";pool_TDatatype.free(local4_tmpD_2605);pool_TDatatype.free(local1_d_2607);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -7663,30 +7663,30 @@ func16_CreateExpression = window['func16_CreateExpression'];
 window['func24_CreateOperatorExpression'] = function(param2_Op, param4_Left, param5_Right) {
 	stackPush("function: CreateOperatorExpression", __debugInfo);
 	try {
-		var local4_Expr_2610 = 0, local8_datatype_2611 = pool_TDatatype.alloc();
-		var local4_Left_ref_2608 = [param4_Left];
-		var local5_Right_ref_2609 = [param5_Right];
+		var local4_Expr_2611 = 0, local8_datatype_2612 = pool_TDatatype.alloc();
+		var local4_Left_ref_2609 = [param4_Left];
+		var local5_Right_ref_2610 = [param5_Right];
 		__debugInfo = "204:\src\Expression.gbas";
-		local8_datatype_2611 = func12_CastDatatype(local4_Left_ref_2608, local5_Right_ref_2609).clone(/* In Assign */);
+		local8_datatype_2612 = func12_CastDatatype(local4_Left_ref_2609, local5_Right_ref_2610).clone(/* In Assign */);
 		__debugInfo = "209:\src\Expression.gbas";
 		if ((((param2_Op.attr3_Typ) === (3)) ? 1 : 0)) {
 			__debugInfo = "208:\src\Expression.gbas";
-			local8_datatype_2611 = global11_intDatatype.clone(/* In Assign */);
+			local8_datatype_2612 = global11_intDatatype.clone(/* In Assign */);
 			__debugInfo = "208:\src\Expression.gbas";
 		};
 		__debugInfo = "211:\src\Expression.gbas";
-		local4_Expr_2610 = func16_CreateExpression(~~(1), local8_datatype_2611);
+		local4_Expr_2611 = func16_CreateExpression(~~(1), local8_datatype_2612);
 		__debugInfo = "212:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2610).values[tmpPositionCache][0].attr4_Left = local4_Left_ref_2608[0];
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2611).values[tmpPositionCache][0].attr4_Left = local4_Left_ref_2609[0];
 		__debugInfo = "213:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2610).values[tmpPositionCache][0].attr5_Right = local5_Right_ref_2609[0];
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2611).values[tmpPositionCache][0].attr5_Right = local5_Right_ref_2610[0];
 		__debugInfo = "214:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2610).values[tmpPositionCache][0].attr2_Op = param2_Op.attr2_ID;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2611).values[tmpPositionCache][0].attr2_Op = param2_Op.attr2_ID;
 		__debugInfo = "217:\src\Expression.gbas";
-		return tryClone(local4_Expr_2610);
+		return tryClone(local4_Expr_2611);
 		__debugInfo = "218:\src\Expression.gbas";
 		return 0;
-		__debugInfo = "204:\src\Expression.gbas";pool_TDatatype.free(local8_datatype_2611);
+		__debugInfo = "204:\src\Expression.gbas";pool_TDatatype.free(local8_datatype_2612);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -7700,13 +7700,13 @@ func24_CreateOperatorExpression = window['func24_CreateOperatorExpression'];
 window['func19_CreateIntExpression'] = function(param3_Num) {
 	stackPush("function: CreateIntExpression", __debugInfo);
 	try {
-		var local4_Expr_2613 = 0;
+		var local4_Expr_2614 = 0;
 		__debugInfo = "223:\src\Expression.gbas";
-		local4_Expr_2613 = func16_CreateExpression(~~(3), global11_intDatatype);
+		local4_Expr_2614 = func16_CreateExpression(~~(3), global11_intDatatype);
 		__debugInfo = "224:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2613).values[tmpPositionCache][0].attr6_intval = param3_Num;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2614).values[tmpPositionCache][0].attr6_intval = param3_Num;
 		__debugInfo = "225:\src\Expression.gbas";
-		return tryClone(local4_Expr_2613);
+		return tryClone(local4_Expr_2614);
 		__debugInfo = "226:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "223:\src\Expression.gbas";
@@ -7723,13 +7723,13 @@ func19_CreateIntExpression = window['func19_CreateIntExpression'];
 window['func21_CreateFloatExpression'] = function(param3_Num) {
 	stackPush("function: CreateFloatExpression", __debugInfo);
 	try {
-		var local4_Expr_2615 = 0;
+		var local4_Expr_2616 = 0;
 		__debugInfo = "231:\src\Expression.gbas";
-		local4_Expr_2615 = func16_CreateExpression(~~(4), global13_floatDatatype);
+		local4_Expr_2616 = func16_CreateExpression(~~(4), global13_floatDatatype);
 		__debugInfo = "232:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2615).values[tmpPositionCache][0].attr8_floatval = param3_Num;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2616).values[tmpPositionCache][0].attr8_floatval = param3_Num;
 		__debugInfo = "233:\src\Expression.gbas";
-		return tryClone(local4_Expr_2615);
+		return tryClone(local4_Expr_2616);
 		__debugInfo = "234:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "231:\src\Expression.gbas";
@@ -7746,13 +7746,13 @@ func21_CreateFloatExpression = window['func21_CreateFloatExpression'];
 window['func19_CreateStrExpression'] = function(param7_Str_Str) {
 	stackPush("function: CreateStrExpression", __debugInfo);
 	try {
-		var local4_Expr_2617 = 0;
+		var local4_Expr_2618 = 0;
 		__debugInfo = "238:\src\Expression.gbas";
-		local4_Expr_2617 = func16_CreateExpression(~~(5), global11_strDatatype);
+		local4_Expr_2618 = func16_CreateExpression(~~(5), global11_strDatatype);
 		__debugInfo = "239:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2617).values[tmpPositionCache][0].attr10_strval_Str = param7_Str_Str;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2618).values[tmpPositionCache][0].attr10_strval_Str = param7_Str_Str;
 		__debugInfo = "240:\src\Expression.gbas";
-		return tryClone(local4_Expr_2617);
+		return tryClone(local4_Expr_2618);
 		__debugInfo = "241:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "238:\src\Expression.gbas";
@@ -7769,15 +7769,15 @@ func19_CreateStrExpression = window['func19_CreateStrExpression'];
 window['func21_CreateScopeExpression'] = function(param6_ScpTyp) {
 	stackPush("function: CreateScopeExpression", __debugInfo);
 	try {
-		var local3_Scp_2619 = 0;
+		var local3_Scp_2620 = 0;
 		__debugInfo = "245:\src\Expression.gbas";
-		local3_Scp_2619 = func16_CreateExpression(~~(2), global12_voidDatatype);
+		local3_Scp_2620 = func16_CreateExpression(~~(2), global12_voidDatatype);
 		__debugInfo = "246:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local3_Scp_2619).values[tmpPositionCache][0].attr10_SuperScope = global8_Compiler.attr12_CurrentScope;
+		global5_Exprs_ref[0].arrAccess(local3_Scp_2620).values[tmpPositionCache][0].attr10_SuperScope = global8_Compiler.attr12_CurrentScope;
 		__debugInfo = "247:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local3_Scp_2619).values[tmpPositionCache][0].attr6_ScpTyp = param6_ScpTyp;
+		global5_Exprs_ref[0].arrAccess(local3_Scp_2620).values[tmpPositionCache][0].attr6_ScpTyp = param6_ScpTyp;
 		__debugInfo = "249:\src\Expression.gbas";
-		return tryClone(local3_Scp_2619);
+		return tryClone(local3_Scp_2620);
 		__debugInfo = "250:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "245:\src\Expression.gbas";
@@ -7794,15 +7794,15 @@ func21_CreateScopeExpression = window['func21_CreateScopeExpression'];
 window['func24_CreateFuncCallExpression'] = function(param4_func, param6_Params) {
 	stackPush("function: CreateFuncCallExpression", __debugInfo);
 	try {
-		var local4_Expr_2622 = 0;
+		var local4_Expr_2623 = 0;
 		__debugInfo = "256:\src\Expression.gbas";
-		local4_Expr_2622 = func16_CreateExpression(~~(6), global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr8_datatype);
+		local4_Expr_2623 = func16_CreateExpression(~~(6), global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr8_datatype);
 		__debugInfo = "257:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2622).values[tmpPositionCache][0].attr6_Params = param6_Params.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2623).values[tmpPositionCache][0].attr6_Params = param6_Params.clone(/* In Assign */);
 		__debugInfo = "258:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2622).values[tmpPositionCache][0].attr4_func = param4_func;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2623).values[tmpPositionCache][0].attr4_func = param4_func;
 		__debugInfo = "259:\src\Expression.gbas";
-		return tryClone(local4_Expr_2622);
+		return tryClone(local4_Expr_2623);
 		__debugInfo = "260:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "256:\src\Expression.gbas";pool_array.free(param6_Params);
@@ -7861,13 +7861,13 @@ window['func24_CreateVariableExpression'] = function(param4_vari) {
 			return tryClone(global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_vari).values[tmpPositionCache][0].attr6_PreDef);
 			__debugInfo = "275:\src\Expression.gbas";
 		} else {
-			var local4_Expr_2624 = 0;
+			var local4_Expr_2625 = 0;
 			__debugInfo = "277:\src\Expression.gbas";
-			local4_Expr_2624 = func16_CreateExpression(~~(9), global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_vari).values[tmpPositionCache][0].attr8_datatype);
+			local4_Expr_2625 = func16_CreateExpression(~~(9), global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_vari).values[tmpPositionCache][0].attr8_datatype);
 			__debugInfo = "278:\src\Expression.gbas";
-			global5_Exprs_ref[0].arrAccess(local4_Expr_2624).values[tmpPositionCache][0].attr4_vari = param4_vari;
+			global5_Exprs_ref[0].arrAccess(local4_Expr_2625).values[tmpPositionCache][0].attr4_vari = param4_vari;
 			__debugInfo = "279:\src\Expression.gbas";
-			return tryClone(local4_Expr_2624);
+			return tryClone(local4_Expr_2625);
 			__debugInfo = "277:\src\Expression.gbas";
 		};
 		__debugInfo = "281:\src\Expression.gbas";
@@ -7886,15 +7886,15 @@ func24_CreateVariableExpression = window['func24_CreateVariableExpression'];
 window['func22_CreateAssignExpression'] = function(param4_Vari, param5_Right) {
 	stackPush("function: CreateAssignExpression", __debugInfo);
 	try {
-		var local4_Expr_2627 = 0;
+		var local4_Expr_2628 = 0;
 		__debugInfo = "285:\src\Expression.gbas";
-		local4_Expr_2627 = func16_CreateExpression(~~(10), global12_voidDatatype);
+		local4_Expr_2628 = func16_CreateExpression(~~(10), global12_voidDatatype);
 		__debugInfo = "286:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2627).values[tmpPositionCache][0].attr4_vari = param4_Vari;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2628).values[tmpPositionCache][0].attr4_vari = param4_Vari;
 		__debugInfo = "287:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2627).values[tmpPositionCache][0].attr5_Right = param5_Right;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2628).values[tmpPositionCache][0].attr5_Right = param5_Right;
 		__debugInfo = "288:\src\Expression.gbas";
-		return tryClone(local4_Expr_2627);
+		return tryClone(local4_Expr_2628);
 		__debugInfo = "289:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "285:\src\Expression.gbas";
@@ -7911,15 +7911,15 @@ func22_CreateAssignExpression = window['func22_CreateAssignExpression'];
 window['func19_CreateDimExpression'] = function(param5_Array, param4_Dims) {
 	stackPush("function: CreateDimExpression", __debugInfo);
 	try {
-		var local4_Expr_2630 = 0;
+		var local4_Expr_2631 = 0;
 		__debugInfo = "294:\src\Expression.gbas";
-		local4_Expr_2630 = func16_CreateExpression(~~(11), global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype);
+		local4_Expr_2631 = func16_CreateExpression(~~(11), global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype);
 		__debugInfo = "295:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2630).values[tmpPositionCache][0].attr5_array = param5_Array;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2631).values[tmpPositionCache][0].attr5_array = param5_Array;
 		__debugInfo = "296:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2630).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2631).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
 		__debugInfo = "298:\src\Expression.gbas";
-		return tryClone(local4_Expr_2630);
+		return tryClone(local4_Expr_2631);
 		__debugInfo = "299:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "294:\src\Expression.gbas";pool_array.free(param4_Dims);
@@ -7936,15 +7936,15 @@ func19_CreateDimExpression = window['func19_CreateDimExpression'];
 window['func21_CreateReDimExpression'] = function(param5_Array, param4_Dims) {
 	stackPush("function: CreateReDimExpression", __debugInfo);
 	try {
-		var local4_Expr_2633 = 0;
+		var local4_Expr_2634 = 0;
 		__debugInfo = "305:\src\Expression.gbas";
-		local4_Expr_2633 = func16_CreateExpression(~~(12), global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype);
+		local4_Expr_2634 = func16_CreateExpression(~~(12), global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype);
 		__debugInfo = "306:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2633).values[tmpPositionCache][0].attr5_array = param5_Array;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2634).values[tmpPositionCache][0].attr5_array = param5_Array;
 		__debugInfo = "307:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2633).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2634).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
 		__debugInfo = "309:\src\Expression.gbas";
-		return tryClone(local4_Expr_2633);
+		return tryClone(local4_Expr_2634);
 		__debugInfo = "310:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "305:\src\Expression.gbas";pool_array.free(param4_Dims);
@@ -7961,26 +7961,26 @@ func21_CreateReDimExpression = window['func21_CreateReDimExpression'];
 window['func21_CreateArrayExpression'] = function(param5_Array, param4_Dims) {
 	stackPush("function: CreateArrayExpression", __debugInfo);
 	try {
-		var local7_tmpData_2636 = pool_TDatatype.alloc(), local4_Expr_2637 = 0;
+		var local7_tmpData_2637 = pool_TDatatype.alloc(), local4_Expr_2638 = 0;
 		__debugInfo = "316:\src\Expression.gbas";
-		local7_tmpData_2636 = global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype.clone(/* In Assign */);
+		local7_tmpData_2637 = global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype.clone(/* In Assign */);
 		__debugInfo = "317:\src\Expression.gbas";
 		if (((((((global5_Exprs_ref[0].arrAccess(param5_Array).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) && (global8_Compiler.attr5_Varis_ref[0].arrAccess(func11_GetVariable(param5_Array, 1)).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)) ? 1 : 0)) && (BOUNDS(param4_Dims, 0))) ? 1 : 0)) {
 			__debugInfo = "317:\src\Expression.gbas";
-			local7_tmpData_2636.attr7_IsArray = 0;
+			local7_tmpData_2637.attr7_IsArray = 0;
 			__debugInfo = "317:\src\Expression.gbas";
 		};
 		__debugInfo = "318:\src\Expression.gbas";
-		local4_Expr_2637 = func16_CreateExpression(~~(13), local7_tmpData_2636);
+		local4_Expr_2638 = func16_CreateExpression(~~(13), local7_tmpData_2637);
 		__debugInfo = "319:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2637).values[tmpPositionCache][0].attr5_array = param5_Array;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2638).values[tmpPositionCache][0].attr5_array = param5_Array;
 		__debugInfo = "320:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2637).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2638).values[tmpPositionCache][0].attr4_dims = param4_Dims.clone(/* In Assign */);
 		__debugInfo = "321:\src\Expression.gbas";
-		return tryClone(local4_Expr_2637);
+		return tryClone(local4_Expr_2638);
 		__debugInfo = "322:\src\Expression.gbas";
 		return 0;
-		__debugInfo = "316:\src\Expression.gbas";pool_array.free(param4_Dims);pool_TDatatype.free(local7_tmpData_2636);
+		__debugInfo = "316:\src\Expression.gbas";pool_array.free(param4_Dims);pool_TDatatype.free(local7_tmpData_2637);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -7994,13 +7994,13 @@ func21_CreateArrayExpression = window['func21_CreateArrayExpression'];
 window['func24_CreateCast2IntExpression'] = function(param4_expr) {
 	stackPush("function: CreateCast2IntExpression", __debugInfo);
 	try {
-		var local4_Expr_2639 = 0;
+		var local4_Expr_2640 = 0;
 		__debugInfo = "327:\src\Expression.gbas";
-		local4_Expr_2639 = func16_CreateExpression(~~(15), global11_intDatatype);
+		local4_Expr_2640 = func16_CreateExpression(~~(15), global11_intDatatype);
 		__debugInfo = "328:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2639).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2640).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "329:\src\Expression.gbas";
-		return tryClone(local4_Expr_2639);
+		return tryClone(local4_Expr_2640);
 		__debugInfo = "330:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "327:\src\Expression.gbas";
@@ -8017,13 +8017,13 @@ func24_CreateCast2IntExpression = window['func24_CreateCast2IntExpression'];
 window['func26_CreateCast2FloatExpression'] = function(param4_expr) {
 	stackPush("function: CreateCast2FloatExpression", __debugInfo);
 	try {
-		var local4_Expr_2641 = 0;
+		var local4_Expr_2642 = 0;
 		__debugInfo = "334:\src\Expression.gbas";
-		local4_Expr_2641 = func16_CreateExpression(~~(16), global13_floatDatatype);
+		local4_Expr_2642 = func16_CreateExpression(~~(16), global13_floatDatatype);
 		__debugInfo = "335:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2641).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2642).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "336:\src\Expression.gbas";
-		return tryClone(local4_Expr_2641);
+		return tryClone(local4_Expr_2642);
 		__debugInfo = "337:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "334:\src\Expression.gbas";
@@ -8040,13 +8040,13 @@ func26_CreateCast2FloatExpression = window['func26_CreateCast2FloatExpression'];
 window['func27_CreateCast2StringExpression'] = function(param4_expr) {
 	stackPush("function: CreateCast2StringExpression", __debugInfo);
 	try {
-		var local4_Expr_2643 = 0;
+		var local4_Expr_2644 = 0;
 		__debugInfo = "341:\src\Expression.gbas";
-		local4_Expr_2643 = func16_CreateExpression(~~(17), global11_strDatatype);
+		local4_Expr_2644 = func16_CreateExpression(~~(17), global11_strDatatype);
 		__debugInfo = "342:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2643).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2644).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "343:\src\Expression.gbas";
-		return tryClone(local4_Expr_2643);
+		return tryClone(local4_Expr_2644);
 		__debugInfo = "344:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "341:\src\Expression.gbas";
@@ -8079,9 +8079,9 @@ window['func22_CreateAccessExpression'] = function(param4_expr, param8_NextExpr)
 			return tryClone(param4_expr);
 			__debugInfo = "352:\src\Expression.gbas";
 		} else {
-			var local9_ONextExpr_2646 = 0;
+			var local9_ONextExpr_2647 = 0;
 			__debugInfo = "354:\src\Expression.gbas";
-			local9_ONextExpr_2646 = param8_NextExpr;
+			local9_ONextExpr_2647 = param8_NextExpr;
 			__debugInfo = "355:\src\Expression.gbas";
 			if ((((global5_Exprs_ref[0].arrAccess(param8_NextExpr).values[tmpPositionCache][0].attr3_Typ) === (13)) ? 1 : 0)) {
 				__debugInfo = "355:\src\Expression.gbas";
@@ -8093,20 +8093,20 @@ window['func22_CreateAccessExpression'] = function(param4_expr, param8_NextExpr)
 				__debugInfo = "357:\src\Expression.gbas";
 				DIMPUSH(global5_Exprs_ref[0].arrAccess(param8_NextExpr).values[tmpPositionCache][0].attr6_Params, param4_expr);
 				__debugInfo = "358:\src\Expression.gbas";
-				return tryClone(local9_ONextExpr_2646);
+				return tryClone(local9_ONextExpr_2647);
 				__debugInfo = "357:\src\Expression.gbas";
 			} else {
-				var local4_Expr_2647 = 0;
+				var local4_Expr_2648 = 0;
 				__debugInfo = "360:\src\Expression.gbas";
-				param8_NextExpr = local9_ONextExpr_2646;
+				param8_NextExpr = local9_ONextExpr_2647;
 				__debugInfo = "361:\src\Expression.gbas";
-				local4_Expr_2647 = func16_CreateExpression(~~(18), global5_Exprs_ref[0].arrAccess(param8_NextExpr).values[tmpPositionCache][0].attr8_datatype);
+				local4_Expr_2648 = func16_CreateExpression(~~(18), global5_Exprs_ref[0].arrAccess(param8_NextExpr).values[tmpPositionCache][0].attr8_datatype);
 				__debugInfo = "362:\src\Expression.gbas";
-				global5_Exprs_ref[0].arrAccess(local4_Expr_2647).values[tmpPositionCache][0].attr4_expr = param4_expr;
+				global5_Exprs_ref[0].arrAccess(local4_Expr_2648).values[tmpPositionCache][0].attr4_expr = param4_expr;
 				__debugInfo = "363:\src\Expression.gbas";
-				global5_Exprs_ref[0].arrAccess(local4_Expr_2647).values[tmpPositionCache][0].attr8_nextExpr = param8_NextExpr;
+				global5_Exprs_ref[0].arrAccess(local4_Expr_2648).values[tmpPositionCache][0].attr8_nextExpr = param8_NextExpr;
 				__debugInfo = "364:\src\Expression.gbas";
-				return tryClone(local4_Expr_2647);
+				return tryClone(local4_Expr_2648);
 				__debugInfo = "360:\src\Expression.gbas";
 			};
 			__debugInfo = "354:\src\Expression.gbas";
@@ -8127,13 +8127,13 @@ func22_CreateAccessExpression = window['func22_CreateAccessExpression'];
 window['func22_CreateReturnExpression'] = function(param4_expr) {
 	stackPush("function: CreateReturnExpression", __debugInfo);
 	try {
-		var local4_Expr_2649 = 0;
+		var local4_Expr_2650 = 0;
 		__debugInfo = "371:\src\Expression.gbas";
-		local4_Expr_2649 = func16_CreateExpression(~~(19), global12_voidDatatype);
+		local4_Expr_2650 = func16_CreateExpression(~~(19), global12_voidDatatype);
 		__debugInfo = "372:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2649).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2650).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "374:\src\Expression.gbas";
-		return tryClone(local4_Expr_2649);
+		return tryClone(local4_Expr_2650);
 		__debugInfo = "375:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "371:\src\Expression.gbas";
@@ -8150,15 +8150,15 @@ func22_CreateReturnExpression = window['func22_CreateReturnExpression'];
 window['func20_CreateGotoExpression'] = function(param8_Name_Str) {
 	stackPush("function: CreateGotoExpression", __debugInfo);
 	try {
-		var local4_Expr_2651 = 0;
+		var local4_Expr_2652 = 0;
 		__debugInfo = "379:\src\Expression.gbas";
-		local4_Expr_2651 = func16_CreateExpression(~~(20), global12_voidDatatype);
+		local4_Expr_2652 = func16_CreateExpression(~~(20), global12_voidDatatype);
 		__debugInfo = "380:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2651).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2652).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
 		__debugInfo = "381:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2651).values[tmpPositionCache][0].attr3_Scp = global8_Compiler.attr12_CurrentScope;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2652).values[tmpPositionCache][0].attr3_Scp = global8_Compiler.attr12_CurrentScope;
 		__debugInfo = "382:\src\Expression.gbas";
-		return tryClone(local4_Expr_2651);
+		return tryClone(local4_Expr_2652);
 		__debugInfo = "383:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "379:\src\Expression.gbas";
@@ -8175,13 +8175,13 @@ func20_CreateGotoExpression = window['func20_CreateGotoExpression'];
 window['func21_CreateLabelExpression'] = function(param8_Name_Str) {
 	stackPush("function: CreateLabelExpression", __debugInfo);
 	try {
-		var local4_Expr_2653 = 0;
+		var local4_Expr_2654 = 0;
 		__debugInfo = "387:\src\Expression.gbas";
-		local4_Expr_2653 = func16_CreateExpression(~~(21), global12_voidDatatype);
+		local4_Expr_2654 = func16_CreateExpression(~~(21), global12_voidDatatype);
 		__debugInfo = "388:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2653).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2654).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
 		__debugInfo = "389:\src\Expression.gbas";
-		return tryClone(local4_Expr_2653);
+		return tryClone(local4_Expr_2654);
 		__debugInfo = "390:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "387:\src\Expression.gbas";
@@ -8216,25 +8216,25 @@ func24_CreateFuncDataExpression = window['func24_CreateFuncDataExpression'];
 window['func25_CreateProtoCallExpression'] = function(param4_expr, param6_Params) {
 	stackPush("function: CreateProtoCallExpression", __debugInfo);
 	try {
-		var local4_Func_2657 = 0, local4_Expr_2658 = 0;
+		var local4_Func_2658 = 0, local4_Expr_2659 = 0;
 		__debugInfo = "399:\src\Expression.gbas";
-		local4_Func_2657 = func14_SearchPrototyp(global5_Exprs_ref[0].arrAccess(param4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str);
+		local4_Func_2658 = func14_SearchPrototyp(global5_Exprs_ref[0].arrAccess(param4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str);
 		__debugInfo = "400:\src\Expression.gbas";
-		if ((((local4_Func_2657) === (-(1))) ? 1 : 0)) {
+		if ((((local4_Func_2658) === (-(1))) ? 1 : 0)) {
 			__debugInfo = "400:\src\Expression.gbas";
 			func5_Error((((("Internal error (could not find prototype: ") + (global5_Exprs_ref[0].arrAccess(param4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (")")), 399, "src\Expression.gbas");
 			__debugInfo = "400:\src\Expression.gbas";
 		};
 		__debugInfo = "401:\src\Expression.gbas";
-		local4_Expr_2658 = func16_CreateExpression(~~(23), global5_Exprs_ref[0].arrAccess(param4_expr).values[tmpPositionCache][0].attr8_datatype);
+		local4_Expr_2659 = func16_CreateExpression(~~(23), global5_Exprs_ref[0].arrAccess(param4_expr).values[tmpPositionCache][0].attr8_datatype);
 		__debugInfo = "402:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2658).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2659).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "403:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2658).values[tmpPositionCache][0].attr6_Params = param6_Params.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2659).values[tmpPositionCache][0].attr6_Params = param6_Params.clone(/* In Assign */);
 		__debugInfo = "404:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2658).values[tmpPositionCache][0].attr4_func = local4_Func_2657;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2659).values[tmpPositionCache][0].attr4_func = local4_Func_2658;
 		__debugInfo = "405:\src\Expression.gbas";
-		return tryClone(local4_Expr_2658);
+		return tryClone(local4_Expr_2659);
 		__debugInfo = "406:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "399:\src\Expression.gbas";pool_array.free(param6_Params);
@@ -8251,19 +8251,19 @@ func25_CreateProtoCallExpression = window['func25_CreateProtoCallExpression'];
 window['func18_CreateIfExpression'] = function(param5_Conds, param4_Scps, param7_elseScp) {
 	stackPush("function: CreateIfExpression", __debugInfo);
 	try {
-		var local4_Expr_2662 = 0;
+		var local4_Expr_2663 = 0;
 		__debugInfo = "410:\src\Expression.gbas";
-		local4_Expr_2662 = func16_CreateExpression(~~(24), global12_voidDatatype);
+		local4_Expr_2663 = func16_CreateExpression(~~(24), global12_voidDatatype);
 		__debugInfo = "411:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2662).values[tmpPositionCache][0].attr10_Conditions = param5_Conds.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2663).values[tmpPositionCache][0].attr10_Conditions = param5_Conds.clone(/* In Assign */);
 		__debugInfo = "412:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2662).values[tmpPositionCache][0].attr6_Scopes = param4_Scps.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2663).values[tmpPositionCache][0].attr6_Scopes = param4_Scps.clone(/* In Assign */);
 		__debugInfo = "413:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2662).values[tmpPositionCache][0].attr9_elseScope = param7_elseScp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2663).values[tmpPositionCache][0].attr9_elseScope = param7_elseScp;
 		__debugInfo = "414:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2662).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2663).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
 		__debugInfo = "415:\src\Expression.gbas";
-		return tryClone(local4_Expr_2662);
+		return tryClone(local4_Expr_2663);
 		__debugInfo = "416:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "410:\src\Expression.gbas";pool_array.free(param4_Scps);
@@ -8280,17 +8280,17 @@ func18_CreateIfExpression = window['func18_CreateIfExpression'];
 window['func21_CreateWhileExpression'] = function(param4_expr, param3_Scp) {
 	stackPush("function: CreateWhileExpression", __debugInfo);
 	try {
-		var local4_Expr_2665 = 0;
+		var local4_Expr_2666 = 0;
 		__debugInfo = "420:\src\Expression.gbas";
-		local4_Expr_2665 = func16_CreateExpression(~~(25), global12_voidDatatype);
+		local4_Expr_2666 = func16_CreateExpression(~~(25), global12_voidDatatype);
 		__debugInfo = "421:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2665).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2666).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "422:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2665).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2666).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
 		__debugInfo = "423:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2665).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2666).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
 		__debugInfo = "424:\src\Expression.gbas";
-		return tryClone(local4_Expr_2665);
+		return tryClone(local4_Expr_2666);
 		__debugInfo = "425:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "420:\src\Expression.gbas";
@@ -8307,17 +8307,17 @@ func21_CreateWhileExpression = window['func21_CreateWhileExpression'];
 window['func22_CreateRepeatExpression'] = function(param4_expr, param3_Scp) {
 	stackPush("function: CreateRepeatExpression", __debugInfo);
 	try {
-		var local4_Expr_2668 = 0;
+		var local4_Expr_2669 = 0;
 		__debugInfo = "429:\src\Expression.gbas";
-		local4_Expr_2668 = func16_CreateExpression(~~(26), global12_voidDatatype);
+		local4_Expr_2669 = func16_CreateExpression(~~(26), global12_voidDatatype);
 		__debugInfo = "430:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2668).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2669).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "431:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2668).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2669).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
 		__debugInfo = "432:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2668).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2669).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
 		__debugInfo = "433:\src\Expression.gbas";
-		return tryClone(local4_Expr_2668);
+		return tryClone(local4_Expr_2669);
 		__debugInfo = "434:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "429:\src\Expression.gbas";
@@ -8334,23 +8334,23 @@ func22_CreateRepeatExpression = window['func22_CreateRepeatExpression'];
 window['func19_CreateForExpression'] = function(param7_varExpr, param6_toExpr, param8_stepExpr, param5_hasTo, param3_Scp) {
 	stackPush("function: CreateForExpression", __debugInfo);
 	try {
-		var local4_Expr_2674 = 0;
+		var local4_Expr_2675 = 0;
 		__debugInfo = "438:\src\Expression.gbas";
-		local4_Expr_2674 = func16_CreateExpression(~~(27), global12_voidDatatype);
+		local4_Expr_2675 = func16_CreateExpression(~~(27), global12_voidDatatype);
 		__debugInfo = "439:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr7_varExpr = param7_varExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr7_varExpr = param7_varExpr;
 		__debugInfo = "440:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr6_toExpr = param6_toExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr6_toExpr = param6_toExpr;
 		__debugInfo = "441:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr8_stepExpr = param8_stepExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr8_stepExpr = param8_stepExpr;
 		__debugInfo = "442:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
 		__debugInfo = "443:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr5_hasTo = param5_hasTo;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr5_hasTo = param5_hasTo;
 		__debugInfo = "444:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2674).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2675).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
 		__debugInfo = "445:\src\Expression.gbas";
-		return tryClone(local4_Expr_2674);
+		return tryClone(local4_Expr_2675);
 		__debugInfo = "446:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "438:\src\Expression.gbas";
@@ -8367,19 +8367,19 @@ func19_CreateForExpression = window['func19_CreateForExpression'];
 window['func23_CreateForEachExpression'] = function(param7_varExpr, param6_inExpr, param3_Scp) {
 	stackPush("function: CreateForEachExpression", __debugInfo);
 	try {
-		var local4_Expr_2678 = 0;
+		var local4_Expr_2679 = 0;
 		__debugInfo = "450:\src\Expression.gbas";
-		local4_Expr_2678 = func16_CreateExpression(~~(38), global12_voidDatatype);
+		local4_Expr_2679 = func16_CreateExpression(~~(38), global12_voidDatatype);
 		__debugInfo = "451:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2678).values[tmpPositionCache][0].attr7_varExpr = param7_varExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2679).values[tmpPositionCache][0].attr7_varExpr = param7_varExpr;
 		__debugInfo = "452:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2678).values[tmpPositionCache][0].attr6_inExpr = param6_inExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2679).values[tmpPositionCache][0].attr6_inExpr = param6_inExpr;
 		__debugInfo = "453:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2678).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2679).values[tmpPositionCache][0].attr3_Scp = param3_Scp;
 		__debugInfo = "454:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2678).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2679).values[tmpPositionCache][0].attr5_dummy = func21_CreateDummyExpression();
 		__debugInfo = "456:\src\Expression.gbas";
-		return tryClone(local4_Expr_2678);
+		return tryClone(local4_Expr_2679);
 		__debugInfo = "457:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "450:\src\Expression.gbas";
@@ -8432,17 +8432,17 @@ func24_CreateContinueExpression = window['func24_CreateContinueExpression'];
 window['func19_CreateTryExpression'] = function(param6_tryScp, param7_ctchScp, param4_vari) {
 	stackPush("function: CreateTryExpression", __debugInfo);
 	try {
-		var local4_Expr_2682 = 0;
+		var local4_Expr_2683 = 0;
 		__debugInfo = "471:\src\Expression.gbas";
-		local4_Expr_2682 = func16_CreateExpression(~~(31), global12_voidDatatype);
+		local4_Expr_2683 = func16_CreateExpression(~~(31), global12_voidDatatype);
 		__debugInfo = "472:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2682).values[tmpPositionCache][0].attr3_Scp = param6_tryScp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2683).values[tmpPositionCache][0].attr3_Scp = param6_tryScp;
 		__debugInfo = "473:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2682).values[tmpPositionCache][0].attr8_catchScp = param7_ctchScp;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2683).values[tmpPositionCache][0].attr8_catchScp = param7_ctchScp;
 		__debugInfo = "474:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2682).values[tmpPositionCache][0].attr4_vari = param4_vari;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2683).values[tmpPositionCache][0].attr4_vari = param4_vari;
 		__debugInfo = "476:\src\Expression.gbas";
-		return tryClone(local4_Expr_2682);
+		return tryClone(local4_Expr_2683);
 		__debugInfo = "477:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "471:\src\Expression.gbas";
@@ -8459,13 +8459,13 @@ func19_CreateTryExpression = window['func19_CreateTryExpression'];
 window['func21_CreateThrowExpression'] = function(param5_value) {
 	stackPush("function: CreateThrowExpression", __debugInfo);
 	try {
-		var local4_Expr_2684 = 0;
+		var local4_Expr_2685 = 0;
 		__debugInfo = "481:\src\Expression.gbas";
-		local4_Expr_2684 = func16_CreateExpression(~~(32), global12_voidDatatype);
+		local4_Expr_2685 = func16_CreateExpression(~~(32), global12_voidDatatype);
 		__debugInfo = "482:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2684).values[tmpPositionCache][0].attr4_expr = param5_value;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2685).values[tmpPositionCache][0].attr4_expr = param5_value;
 		__debugInfo = "483:\src\Expression.gbas";
-		return tryClone(local4_Expr_2684);
+		return tryClone(local4_Expr_2685);
 		__debugInfo = "484:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "481:\src\Expression.gbas";
@@ -8482,13 +8482,13 @@ func21_CreateThrowExpression = window['func21_CreateThrowExpression'];
 window['func23_CreateRestoreExpression'] = function(param8_Name_Str) {
 	stackPush("function: CreateRestoreExpression", __debugInfo);
 	try {
-		var local4_Expr_2686 = 0;
+		var local4_Expr_2687 = 0;
 		__debugInfo = "488:\src\Expression.gbas";
-		local4_Expr_2686 = func16_CreateExpression(~~(33), global12_voidDatatype);
+		local4_Expr_2687 = func16_CreateExpression(~~(33), global12_voidDatatype);
 		__debugInfo = "489:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2686).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2687).values[tmpPositionCache][0].attr8_Name_Str = param8_Name_Str;
 		__debugInfo = "490:\src\Expression.gbas";
-		return tryClone(local4_Expr_2686);
+		return tryClone(local4_Expr_2687);
 		__debugInfo = "491:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "488:\src\Expression.gbas";
@@ -8505,13 +8505,13 @@ func23_CreateRestoreExpression = window['func23_CreateRestoreExpression'];
 window['func20_CreateReadExpression'] = function(param5_Reads) {
 	stackPush("function: CreateReadExpression", __debugInfo);
 	try {
-		var local4_Expr_2688 = 0;
+		var local4_Expr_2689 = 0;
 		__debugInfo = "495:\src\Expression.gbas";
-		local4_Expr_2688 = func16_CreateExpression(~~(34), global12_voidDatatype);
+		local4_Expr_2689 = func16_CreateExpression(~~(34), global12_voidDatatype);
 		__debugInfo = "496:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2688).values[tmpPositionCache][0].attr5_Reads = param5_Reads.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2689).values[tmpPositionCache][0].attr5_Reads = param5_Reads.clone(/* In Assign */);
 		__debugInfo = "497:\src\Expression.gbas";
-		return tryClone(local4_Expr_2688);
+		return tryClone(local4_Expr_2689);
 		__debugInfo = "498:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "495:\src\Expression.gbas";pool_array.free(param5_Reads);
@@ -8536,23 +8536,23 @@ window['func28_CreateDefaultValueExpression'] = function(param8_datatype) {
 		} else {
 			__debugInfo = "505:\src\Expression.gbas";
 			{
-				var local17___SelectHelper45__2690 = "";
+				var local17___SelectHelper45__2691 = "";
 				__debugInfo = "505:\src\Expression.gbas";
-				local17___SelectHelper45__2690 = param8_datatype.attr8_Name_Str;
+				local17___SelectHelper45__2691 = param8_datatype.attr8_Name_Str;
 				__debugInfo = "516:\src\Expression.gbas";
-				if ((((local17___SelectHelper45__2690) === ("int")) ? 1 : 0)) {
+				if ((((local17___SelectHelper45__2691) === ("int")) ? 1 : 0)) {
 					__debugInfo = "507:\src\Expression.gbas";
 					return tryClone(func19_CreateIntExpression(0));
 					__debugInfo = "507:\src\Expression.gbas";
-				} else if ((((local17___SelectHelper45__2690) === ("float")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper45__2691) === ("float")) ? 1 : 0)) {
 					__debugInfo = "509:\src\Expression.gbas";
 					return tryClone(func21_CreateFloatExpression(0));
 					__debugInfo = "509:\src\Expression.gbas";
-				} else if ((((local17___SelectHelper45__2690) === ("string")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper45__2691) === ("string")) ? 1 : 0)) {
 					__debugInfo = "511:\src\Expression.gbas";
 					return tryClone(func19_CreateStrExpression("\"\""));
 					__debugInfo = "511:\src\Expression.gbas";
-				} else if ((((local17___SelectHelper45__2690) === ("void")) ? 1 : 0)) {
+				} else if ((((local17___SelectHelper45__2691) === ("void")) ? 1 : 0)) {
 					__debugInfo = "513:\src\Expression.gbas";
 					return tryClone(func19_CreateIntExpression(0));
 					__debugInfo = "513:\src\Expression.gbas";
@@ -8581,13 +8581,13 @@ func28_CreateDefaultValueExpression = window['func28_CreateDefaultValueExpressio
 window['func25_CreateDimAsExprExpression'] = function(param8_datatype, param4_dims) {
 	stackPush("function: CreateDimAsExprExpression", __debugInfo);
 	try {
-		var local4_Expr_2693 = 0;
+		var local4_Expr_2694 = 0;
 		__debugInfo = "522:\src\Expression.gbas";
-		local4_Expr_2693 = func16_CreateExpression(~~(36), param8_datatype);
+		local4_Expr_2694 = func16_CreateExpression(~~(36), param8_datatype);
 		__debugInfo = "523:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2693).values[tmpPositionCache][0].attr4_dims = param4_dims.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2694).values[tmpPositionCache][0].attr4_dims = param4_dims.clone(/* In Assign */);
 		__debugInfo = "525:\src\Expression.gbas";
-		return tryClone(local4_Expr_2693);
+		return tryClone(local4_Expr_2694);
 		__debugInfo = "526:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "522:\src\Expression.gbas";pool_array.free(param4_dims);
@@ -8604,15 +8604,15 @@ func25_CreateDimAsExprExpression = window['func25_CreateDimAsExprExpression'];
 window['func21_CreateAliasExpression'] = function(param4_vari, param4_expr) {
 	stackPush("function: CreateAliasExpression", __debugInfo);
 	try {
-		var local4_Expr_2696 = 0;
+		var local4_Expr_2697 = 0;
 		__debugInfo = "530:\src\Expression.gbas";
-		local4_Expr_2696 = func16_CreateExpression(~~(37), global12_voidDatatype);
+		local4_Expr_2697 = func16_CreateExpression(~~(37), global12_voidDatatype);
 		__debugInfo = "531:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2696).values[tmpPositionCache][0].attr4_vari = param4_vari;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2697).values[tmpPositionCache][0].attr4_vari = param4_vari;
 		__debugInfo = "532:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2696).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2697).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "534:\src\Expression.gbas";
-		return tryClone(local4_Expr_2696);
+		return tryClone(local4_Expr_2697);
 		__debugInfo = "535:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "530:\src\Expression.gbas";
@@ -8629,15 +8629,15 @@ func21_CreateAliasExpression = window['func21_CreateAliasExpression'];
 window['func19_CreateIncExpression'] = function(param4_Vari, param7_AddExpr) {
 	stackPush("function: CreateIncExpression", __debugInfo);
 	try {
-		var local4_Expr_2699 = 0;
+		var local4_Expr_2700 = 0;
 		__debugInfo = "539:\src\Expression.gbas";
-		local4_Expr_2699 = func16_CreateExpression(~~(39), global12_voidDatatype);
+		local4_Expr_2700 = func16_CreateExpression(~~(39), global12_voidDatatype);
 		__debugInfo = "540:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2699).values[tmpPositionCache][0].attr4_vari = param4_Vari;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2700).values[tmpPositionCache][0].attr4_vari = param4_Vari;
 		__debugInfo = "541:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2699).values[tmpPositionCache][0].attr4_expr = param7_AddExpr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2700).values[tmpPositionCache][0].attr4_expr = param7_AddExpr;
 		__debugInfo = "542:\src\Expression.gbas";
-		return tryClone(local4_Expr_2699);
+		return tryClone(local4_Expr_2700);
 		__debugInfo = "543:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "539:\src\Expression.gbas";
@@ -8654,15 +8654,15 @@ func19_CreateIncExpression = window['func19_CreateIncExpression'];
 window['func23_CreateDimpushExpression'] = function(param4_vari, param4_expr) {
 	stackPush("function: CreateDimpushExpression", __debugInfo);
 	try {
-		var local4_Expr_2702 = 0;
+		var local4_Expr_2703 = 0;
 		__debugInfo = "548:\src\Expression.gbas";
-		local4_Expr_2702 = func16_CreateExpression(~~(40), global12_voidDatatype);
+		local4_Expr_2703 = func16_CreateExpression(~~(40), global12_voidDatatype);
 		__debugInfo = "549:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2702).values[tmpPositionCache][0].attr4_vari = param4_vari;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2703).values[tmpPositionCache][0].attr4_vari = param4_vari;
 		__debugInfo = "550:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2702).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2703).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "551:\src\Expression.gbas";
-		return tryClone(local4_Expr_2702);
+		return tryClone(local4_Expr_2703);
 		__debugInfo = "552:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "548:\src\Expression.gbas";
@@ -8679,15 +8679,15 @@ func23_CreateDimpushExpression = window['func23_CreateDimpushExpression'];
 window['func19_CreateLenExpression'] = function(param4_expr, param4_kern) {
 	stackPush("function: CreateLenExpression", __debugInfo);
 	try {
-		var local4_Expr_2705 = 0;
+		var local4_Expr_2706 = 0;
 		__debugInfo = "556:\src\Expression.gbas";
-		local4_Expr_2705 = func16_CreateExpression(~~(41), global11_intDatatype);
+		local4_Expr_2706 = func16_CreateExpression(~~(41), global11_intDatatype);
 		__debugInfo = "557:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2705).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2706).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "558:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2705).values[tmpPositionCache][0].attr4_kern = param4_kern;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2706).values[tmpPositionCache][0].attr4_kern = param4_kern;
 		__debugInfo = "559:\src\Expression.gbas";
-		return tryClone(local4_Expr_2705);
+		return tryClone(local4_Expr_2706);
 		__debugInfo = "560:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "556:\src\Expression.gbas";
@@ -8704,15 +8704,15 @@ func19_CreateLenExpression = window['func19_CreateLenExpression'];
 window['func23_CreateDimDataExpression'] = function(param5_array, param5_exprs) {
 	stackPush("function: CreateDimDataExpression", __debugInfo);
 	try {
-		var local4_Expr_2708 = 0;
+		var local4_Expr_2709 = 0;
 		__debugInfo = "564:\src\Expression.gbas";
-		local4_Expr_2708 = func16_CreateExpression(~~(42), global12_voidDatatype);
+		local4_Expr_2709 = func16_CreateExpression(~~(42), global12_voidDatatype);
 		__debugInfo = "565:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2708).values[tmpPositionCache][0].attr5_array = param5_array;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2709).values[tmpPositionCache][0].attr5_array = param5_array;
 		__debugInfo = "566:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2708).values[tmpPositionCache][0].attr5_Exprs = param5_exprs.clone(/* In Assign */);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2709).values[tmpPositionCache][0].attr5_Exprs = param5_exprs.clone(/* In Assign */);
 		__debugInfo = "567:\src\Expression.gbas";
-		return tryClone(local4_Expr_2708);
+		return tryClone(local4_Expr_2709);
 		__debugInfo = "568:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "564:\src\Expression.gbas";pool_array.free(param5_exprs);
@@ -8747,15 +8747,15 @@ func22_CreateDeleteExpression = window['func22_CreateDeleteExpression'];
 window['func22_CreateDimDelExpression'] = function(param5_array, param8_position) {
 	stackPush("function: CreateDimDelExpression", __debugInfo);
 	try {
-		var local4_Expr_2711 = 0;
+		var local4_Expr_2712 = 0;
 		__debugInfo = "577:\src\Expression.gbas";
-		local4_Expr_2711 = func16_CreateExpression(~~(44), global12_voidDatatype);
+		local4_Expr_2712 = func16_CreateExpression(~~(44), global12_voidDatatype);
 		__debugInfo = "578:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2711).values[tmpPositionCache][0].attr5_array = param5_array;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2712).values[tmpPositionCache][0].attr5_array = param5_array;
 		__debugInfo = "579:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2711).values[tmpPositionCache][0].attr8_position = param8_position;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2712).values[tmpPositionCache][0].attr8_position = param8_position;
 		__debugInfo = "580:\src\Expression.gbas";
-		return tryClone(local4_Expr_2711);
+		return tryClone(local4_Expr_2712);
 		__debugInfo = "581:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "577:\src\Expression.gbas";
@@ -8772,15 +8772,15 @@ func22_CreateDimDelExpression = window['func22_CreateDimDelExpression'];
 window['func21_CreateBoundExpression'] = function(param4_expr, param8_position) {
 	stackPush("function: CreateBoundExpression", __debugInfo);
 	try {
-		var local4_Expr_2714 = 0;
+		var local4_Expr_2715 = 0;
 		__debugInfo = "585:\src\Expression.gbas";
-		local4_Expr_2714 = func16_CreateExpression(~~(45), global11_intDatatype);
+		local4_Expr_2715 = func16_CreateExpression(~~(45), global11_intDatatype);
 		__debugInfo = "586:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2714).values[tmpPositionCache][0].attr5_array = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2715).values[tmpPositionCache][0].attr5_array = param4_expr;
 		__debugInfo = "587:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2714).values[tmpPositionCache][0].attr8_position = param8_position;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2715).values[tmpPositionCache][0].attr8_position = param8_position;
 		__debugInfo = "588:\src\Expression.gbas";
-		return tryClone(local4_Expr_2714);
+		return tryClone(local4_Expr_2715);
 		__debugInfo = "589:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "585:\src\Expression.gbas";
@@ -8797,13 +8797,13 @@ func21_CreateBoundExpression = window['func21_CreateBoundExpression'];
 window['func19_CreateNotExpression'] = function(param4_expr) {
 	stackPush("function: CreateNotExpression", __debugInfo);
 	try {
-		var local4_Expr_2716 = 0;
+		var local4_Expr_2717 = 0;
 		__debugInfo = "593:\src\Expression.gbas";
-		local4_Expr_2716 = func16_CreateExpression(~~(46), global13_floatDatatype);
+		local4_Expr_2717 = func16_CreateExpression(~~(46), global13_floatDatatype);
 		__debugInfo = "594:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2716).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2717).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "595:\src\Expression.gbas";
-		return tryClone(local4_Expr_2716);
+		return tryClone(local4_Expr_2717);
 		__debugInfo = "596:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "593:\src\Expression.gbas";
@@ -8838,13 +8838,13 @@ func21_CreateDummyExpression = window['func21_CreateDummyExpression'];
 window['func25_CreateAddressOfExpression'] = function(param4_func) {
 	stackPush("function: CreateAddressOfExpression", __debugInfo);
 	try {
-		var local4_Expr_2718 = 0;
+		var local4_Expr_2719 = 0;
 		__debugInfo = "606:\src\Expression.gbas";
-		local4_Expr_2718 = func16_CreateExpression(~~(48), global11_intDatatype);
+		local4_Expr_2719 = func16_CreateExpression(~~(48), global11_intDatatype);
 		__debugInfo = "607:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2718).values[tmpPositionCache][0].attr4_func = param4_func;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2719).values[tmpPositionCache][0].attr4_func = param4_func;
 		__debugInfo = "608:\src\Expression.gbas";
-		return tryClone(local4_Expr_2718);
+		return tryClone(local4_Expr_2719);
 		__debugInfo = "609:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "606:\src\Expression.gbas";
@@ -8861,13 +8861,13 @@ func25_CreateAddressOfExpression = window['func25_CreateAddressOfExpression'];
 window['func22_CreateAssertExpression'] = function(param4_expr) {
 	stackPush("function: CreateAssertExpression", __debugInfo);
 	try {
-		var local4_Expr_2720 = 0;
+		var local4_Expr_2721 = 0;
 		__debugInfo = "614:\src\Expression.gbas";
-		local4_Expr_2720 = func16_CreateExpression(~~(49), global12_voidDatatype);
+		local4_Expr_2721 = func16_CreateExpression(~~(49), global12_voidDatatype);
 		__debugInfo = "615:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2720).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2721).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "616:\src\Expression.gbas";
-		return tryClone(local4_Expr_2720);
+		return tryClone(local4_Expr_2721);
 		__debugInfo = "617:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "614:\src\Expression.gbas";
@@ -8884,13 +8884,13 @@ func22_CreateAssertExpression = window['func22_CreateAssertExpression'];
 window['func27_CreateDebugOutputExpression'] = function(param4_expr) {
 	stackPush("function: CreateDebugOutputExpression", __debugInfo);
 	try {
-		var local4_Expr_2722 = 0;
+		var local4_Expr_2723 = 0;
 		__debugInfo = "622:\src\Expression.gbas";
-		local4_Expr_2722 = func16_CreateExpression(~~(50), global12_voidDatatype);
+		local4_Expr_2723 = func16_CreateExpression(~~(50), global12_voidDatatype);
 		__debugInfo = "623:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2722).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2723).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "624:\src\Expression.gbas";
-		return tryClone(local4_Expr_2722);
+		return tryClone(local4_Expr_2723);
 		__debugInfo = "625:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "622:\src\Expression.gbas";
@@ -8907,17 +8907,17 @@ func27_CreateDebugOutputExpression = window['func27_CreateDebugOutputExpression'
 window['func19_CreateIIFExpression'] = function(param4_Cond, param6_onTrue, param7_onFalse) {
 	stackPush("function: CreateIIFExpression", __debugInfo);
 	try {
-		var local4_Expr_2726 = 0;
+		var local4_Expr_2727 = 0;
 		__debugInfo = "629:\src\Expression.gbas";
-		local4_Expr_2726 = func16_CreateExpression(~~(51), global5_Exprs_ref[0].arrAccess(param6_onTrue).values[tmpPositionCache][0].attr8_datatype);
+		local4_Expr_2727 = func16_CreateExpression(~~(51), global5_Exprs_ref[0].arrAccess(param6_onTrue).values[tmpPositionCache][0].attr8_datatype);
 		__debugInfo = "630:\src\Expression.gbas";
-		DIMDATA(global5_Exprs_ref[0].arrAccess(local4_Expr_2726).values[tmpPositionCache][0].attr10_Conditions, [param4_Cond]);
+		DIMDATA(global5_Exprs_ref[0].arrAccess(local4_Expr_2727).values[tmpPositionCache][0].attr10_Conditions, [param4_Cond]);
 		__debugInfo = "631:\src\Expression.gbas";
-		DIMDATA(global5_Exprs_ref[0].arrAccess(local4_Expr_2726).values[tmpPositionCache][0].attr6_Scopes, [param6_onTrue]);
+		DIMDATA(global5_Exprs_ref[0].arrAccess(local4_Expr_2727).values[tmpPositionCache][0].attr6_Scopes, [param6_onTrue]);
 		__debugInfo = "632:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2726).values[tmpPositionCache][0].attr9_elseScope = param7_onFalse;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2727).values[tmpPositionCache][0].attr9_elseScope = param7_onFalse;
 		__debugInfo = "634:\src\Expression.gbas";
-		return tryClone(local4_Expr_2726);
+		return tryClone(local4_Expr_2727);
 		__debugInfo = "635:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "629:\src\Expression.gbas";
@@ -8934,18 +8934,18 @@ func19_CreateIIFExpression = window['func19_CreateIIFExpression'];
 window['func23_CreateRequireExpression'] = function(param8_Path_Str) {
 	stackPush("function: CreateRequireExpression", __debugInfo);
 	try {
-		var local4_Expr_2728 = 0;
+		var local4_Expr_2729 = 0;
 		__debugInfo = "638:\src\Expression.gbas";
-		local4_Expr_2728 = func16_CreateExpression(~~(52), global12_voidDatatype);
+		local4_Expr_2729 = func16_CreateExpression(~~(52), global12_voidDatatype);
 		__debugInfo = "646:\src\Expression.gbas";
 		if ((((REVINSTR(param8_Path_Str, ".", -(1))) !== (-(1))) ? 1 : 0)) {
 			__debugInfo = "641:\src\Expression.gbas";
 			{
-				var local17___SelectHelper46__2729 = "";
+				var local17___SelectHelper46__2730 = "";
 				__debugInfo = "641:\src\Expression.gbas";
-				local17___SelectHelper46__2729 = MID_Str(param8_Path_Str, ((REVINSTR(param8_Path_Str, ".", -(1))) + (1)), -(1));
+				local17___SelectHelper46__2730 = MID_Str(param8_Path_Str, ((REVINSTR(param8_Path_Str, ".", -(1))) + (1)), -(1));
 				__debugInfo = "645:\src\Expression.gbas";
-				if ((((local17___SelectHelper46__2729) === ("js")) ? 1 : 0)) {
+				if ((((local17___SelectHelper46__2730) === ("js")) ? 1 : 0)) {
 					
 				} else {
 					__debugInfo = "644:\src\Expression.gbas";
@@ -8957,11 +8957,11 @@ window['func23_CreateRequireExpression'] = function(param8_Path_Str) {
 			__debugInfo = "641:\src\Expression.gbas";
 		};
 		__debugInfo = "647:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2728).values[tmpPositionCache][0].attr8_Name_Str = param8_Path_Str;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2729).values[tmpPositionCache][0].attr8_Name_Str = param8_Path_Str;
 		__debugInfo = "648:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2728).values[tmpPositionCache][0].attr11_Content_Str = func12_LoadFile_Str(param8_Path_Str);
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2729).values[tmpPositionCache][0].attr11_Content_Str = func12_LoadFile_Str(param8_Path_Str);
 		__debugInfo = "650:\src\Expression.gbas";
-		return tryClone(local4_Expr_2728);
+		return tryClone(local4_Expr_2729);
 		__debugInfo = "651:\src\Expression.gbas";
 		return 0;
 		__debugInfo = "638:\src\Expression.gbas";
@@ -8978,16 +8978,16 @@ func23_CreateRequireExpression = window['func23_CreateRequireExpression'];
 window['func21_CreateSuperExpression'] = function(param3_typ) {
 	stackPush("function: CreateSuperExpression", __debugInfo);
 	try {
-		var local1_d_2731 = pool_TDatatype.alloc();
+		var local1_d_2732 = pool_TDatatype.alloc();
 		__debugInfo = "656:\src\Expression.gbas";
-		local1_d_2731.attr7_IsArray = 0;
+		local1_d_2732.attr7_IsArray = 0;
 		__debugInfo = "657:\src\Expression.gbas";
-		local1_d_2731.attr8_Name_Str = global8_Compiler.attr5_Types_ref[0].arrAccess(param3_typ).values[tmpPositionCache][0].attr8_Name_Str;
+		local1_d_2732.attr8_Name_Str = global8_Compiler.attr5_Types_ref[0].arrAccess(param3_typ).values[tmpPositionCache][0].attr8_Name_Str;
 		__debugInfo = "658:\src\Expression.gbas";
-		return tryClone(func16_CreateExpression(~~(53), local1_d_2731));
+		return tryClone(func16_CreateExpression(~~(53), local1_d_2732));
 		__debugInfo = "659:\src\Expression.gbas";
 		return 0;
-		__debugInfo = "656:\src\Expression.gbas";pool_TDatatype.free(local1_d_2731);
+		__debugInfo = "656:\src\Expression.gbas";pool_TDatatype.free(local1_d_2732);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -9001,20 +9001,20 @@ func21_CreateSuperExpression = window['func21_CreateSuperExpression'];
 window['func14_CreateCast2Obj'] = function(param7_Obj_Str, param4_expr) {
 	stackPush("function: CreateCast2Obj", __debugInfo);
 	try {
-		var local1_d_2734 = pool_TDatatype.alloc(), local4_Expr_2735 = 0;
+		var local1_d_2735 = pool_TDatatype.alloc(), local4_Expr_2736 = 0;
 		__debugInfo = "664:\src\Expression.gbas";
-		local1_d_2734.attr7_IsArray = 0;
+		local1_d_2735.attr7_IsArray = 0;
 		__debugInfo = "665:\src\Expression.gbas";
-		local1_d_2734.attr8_Name_Str = param7_Obj_Str;
+		local1_d_2735.attr8_Name_Str = param7_Obj_Str;
 		__debugInfo = "666:\src\Expression.gbas";
-		local4_Expr_2735 = func16_CreateExpression(~~(54), local1_d_2734);
+		local4_Expr_2736 = func16_CreateExpression(~~(54), local1_d_2735);
 		__debugInfo = "667:\src\Expression.gbas";
-		global5_Exprs_ref[0].arrAccess(local4_Expr_2735).values[tmpPositionCache][0].attr4_expr = param4_expr;
+		global5_Exprs_ref[0].arrAccess(local4_Expr_2736).values[tmpPositionCache][0].attr4_expr = param4_expr;
 		__debugInfo = "669:\src\Expression.gbas";
-		return tryClone(local4_Expr_2735);
+		return tryClone(local4_Expr_2736);
 		__debugInfo = "670:\src\Expression.gbas";
 		return 0;
-		__debugInfo = "664:\src\Expression.gbas";pool_TDatatype.free(local1_d_2734);
+		__debugInfo = "664:\src\Expression.gbas";pool_TDatatype.free(local1_d_2735);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -10076,14 +10076,14 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						func8_IndentUp();
 						
 					__debugInfo = "339:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29363;
+					__pc = 29393;
 					break;
 					
 				case 6684: //dummy jumper1
 					
 					
 					
-				case 29363: //dummy jumper2
+				case 29393: //dummy jumper2
 					;
 						
 					__debugInfo = "343:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -10128,14 +10128,14 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1969).values[tmpPositionCache][0].attr8_Name_Str))) + (" = unref("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1969).values[tmpPositionCache][0].attr8_Name_Str))) + (");"))) + (func11_NewLine_Str()));
 						
 					__debugInfo = "361:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29366;
+					__pc = 29396;
 					break;
 					
 				case 6752: //dummy jumper1
 					
 					
 					
-				case 29366: //dummy jumper2
+				case 29396: //dummy jumper2
 					;
 						
 					__debugInfo = "364:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -10212,7 +10212,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "384:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29368;
+					__pc = 29398;
 					break;
 					
 				case 6843: //dummy jumper1
@@ -10223,7 +10223,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "386:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29368: //dummy jumper2
+				case 29398: //dummy jumper2
 					;
 						
 					__debugInfo = "387:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -10358,7 +10358,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (local8_ERes_Str_1976.arrAccess(0).values[tmpPositionCache]));
 						
 					__debugInfo = "423:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29376;
+					__pc = 29406;
 					break;
 					
 				case 7060: //dummy jumper1
@@ -10369,7 +10369,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "425:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29376: //dummy jumper2
+				case 29406: //dummy jumper2
 					;
 						
 					__debugInfo = "427:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -10593,7 +10593,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "502:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + ("}"));
 					__debugInfo = "500:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29385;
+					__pc = 29415;
 					break;
 					
 				case 7474: //dummy jumper1
@@ -10604,7 +10604,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "505:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29385: //dummy jumper2
+				case 29415: //dummy jumper2
 					;
 						
 					__debugInfo = "508:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -10629,7 +10629,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "305:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local8_ERes_Str_1976);
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 6571: //dummy jumper1
@@ -10800,7 +10800,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "556:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((((((((((local8_Text_Str_1958) + ("((strcmp(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0]))))) + ("), ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + (")) "))) + (local7_Res_Str_1990))) + (" ) ? 1 : 0)"));
 					__debugInfo = "546:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29389;
+					__pc = 29419;
 					break;
 					
 				case 7636: //dummy jumper1
@@ -10811,11 +10811,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "558:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29389: //dummy jumper2
+				case 29419: //dummy jumper2
 					;
 						
 					__debugInfo = "559:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29388;
+					__pc = 29418;
 					break;
 					
 				case 7609: //dummy jumper1
@@ -10834,7 +10834,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("-("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "563:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29391;
+					__pc = 29421;
 					break;
 					
 				case 7741: //dummy jumper1
@@ -10845,12 +10845,12 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "565:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29391: //dummy jumper2
+				case 29421: //dummy jumper2
 					;
 						
 					__debugInfo = "561:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29388: //dummy jumper2
+				case 29418: //dummy jumper2
 					;
 						
 					case 7818:
@@ -10867,7 +10867,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "517:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 7516: //dummy jumper1
@@ -10878,7 +10878,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = CAST2STRING(INTEGER(param4_expr.attr6_intval));
 						
 					__debugInfo = "574:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 7820: //dummy jumper1
@@ -10889,7 +10889,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = CAST2STRING(param4_expr.attr8_floatval);
 						
 					__debugInfo = "576:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 7830: //dummy jumper1
@@ -10900,7 +10900,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = param4_expr.attr10_strval_Str;
 						
 					__debugInfo = "578:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 7839: //dummy jumper1
@@ -10941,7 +10941,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local5_typId_1996 = global8_LastType.attr2_ID;
 					case 8002:
 						__debugInfo = "599:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local5_typId_1996) !== (-(1))) ? 1 : 0))) {__pc = 29396; break;}
+						if (!((((local5_typId_1996) !== (-(1))) ? 1 : 0))) {__pc = 29426; break;}
 					
 					case 7992:
 						__debugInfo = "597:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -11000,7 +11000,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "597:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					__pc = 8002; break; //back jump
 					
-				case 29396:
+				case 29426:
 					;
 						
 					case 8003:
@@ -11008,7 +11008,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						//label: Exit;
 						
 					__debugInfo = "585:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29394;
+					__pc = 29424;
 					break;
 					
 				case 7881: //dummy jumper1
@@ -11019,11 +11019,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "603:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29394: //dummy jumper2
+				case 29424: //dummy jumper2
 					;
 						
 					__debugInfo = "581:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TExpr.free(alias2_Ex_ref_1994);
-					__pc = 29393;
+					__pc = 29423;
 					break;
 					
 				case 7860: //dummy jumper1
@@ -11034,11 +11034,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "607:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29393: //dummy jumper2
+				case 29423: //dummy jumper2
 					;
 						
 					__debugInfo = "608:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 7847: //dummy jumper1
@@ -11049,7 +11049,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (func17_JSDoParameter_Str(param4_expr, -(1), 1)));
 						
 					__debugInfo = "611:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8056: //dummy jumper1
@@ -11073,7 +11073,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "613:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8075: //dummy jumper1
@@ -11156,7 +11156,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "618:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8108: //dummy jumper1
@@ -11191,7 +11191,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "639:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8208: //dummy jumper1
@@ -11260,7 +11260,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "662:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2004, 1)))) + (")"));
 					__debugInfo = "650:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8283: //dummy jumper1
@@ -11329,7 +11329,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "677:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2008, 1)))) + (" )"));
 					__debugInfo = "665:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8383: //dummy jumper1
@@ -11418,7 +11418,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "701:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29412;
+					__pc = 29442;
 					break;
 					
 				case 8586: //dummy jumper1
@@ -11429,7 +11429,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("~~("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "703:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29412;
+					__pc = 29442;
 					break;
 					
 				case 8599: //dummy jumper1
@@ -11440,7 +11440,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("INT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "705:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29412;
+					__pc = 29442;
 					break;
 					
 				case 8616: //dummy jumper1
@@ -11451,14 +11451,14 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "707:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29412: //dummy jumper2
+				case 29442: //dummy jumper2
 					;
 						
 					__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
 						
 					__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29411;
+					__pc = 29441;
 					break;
 					
 				case 8571: //dummy jumper1
@@ -11469,11 +11469,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "710:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29411: //dummy jumper2
+				case 29441: //dummy jumper2
 					;
 						
 					__debugInfo = "680:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8483: //dummy jumper1
@@ -11488,7 +11488,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "715:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29413;
+					__pc = 29443;
 					break;
 					
 				case 8672: //dummy jumper1
@@ -11510,7 +11510,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "720:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29414;
+					__pc = 29444;
 					break;
 					
 				case 8698: //dummy jumper1
@@ -11521,7 +11521,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "723:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29414;
+					__pc = 29444;
 					break;
 					
 				case 8711: //dummy jumper1
@@ -11532,7 +11532,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("FLOAT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "725:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29414;
+					__pc = 29444;
 					break;
 					
 				case 8724: //dummy jumper1
@@ -11543,7 +11543,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "727:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29414: //dummy jumper2
+				case 29444: //dummy jumper2
 					;
 						
 					__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -11551,11 +11551,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29413: //dummy jumper2
+				case 29443: //dummy jumper2
 					;
 						
 					__debugInfo = "729:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8661: //dummy jumper1
@@ -11566,7 +11566,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("CAST2STRING("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "731:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8758: //dummy jumper1
@@ -11577,7 +11577,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("."))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_nextExpr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "733:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8775: //dummy jumper1
@@ -11639,7 +11639,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((local8_Text_Str_1958) + ("return "))) + (func14_JSTryUnref_Str(param4_expr.attr4_expr)));
 						
 					__debugInfo = "748:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29416;
+					__pc = 29446;
 					break;
 					
 				case 8839: //dummy jumper1
@@ -11650,11 +11650,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "750:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29416: //dummy jumper2
+				case 29446: //dummy jumper2
 					;
 						
 					__debugInfo = "735:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8797: //dummy jumper1
@@ -11717,7 +11717,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "759:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8866: //dummy jumper1
@@ -11804,7 +11804,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "771:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29419;
+					__pc = 29449;
 					break;
 					
 				case 8921: //dummy jumper1
@@ -11819,7 +11819,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						if (!(local8_IsSwitch_2023)) { __pc = 9089; break; }
 					
 					
-					__pc = 29422;
+					__pc = 29452;
 					break;
 					
 				case 9089: //dummy jumper1
@@ -11844,7 +11844,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + ("if"));
 						
 					__debugInfo = "851:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29423;
+					__pc = 29453;
 					break;
 					
 				case 9113: //dummy jumper1
@@ -11855,7 +11855,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "853:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29423: //dummy jumper2
+				case 29453: //dummy jumper2
 					;
 						
 					__debugInfo = "855:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -11887,16 +11887,16 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "848:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29422: //dummy jumper2
+				case 29452: //dummy jumper2
 					;
 						
 					__debugInfo = "802:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29419: //dummy jumper2
+				case 29449: //dummy jumper2
 					;
 						
 					__debugInfo = "862:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 8918: //dummy jumper1
@@ -11938,7 +11938,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "880:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global14_LoopContinueID = local6_TmpCID_2026;
 					__debugInfo = "865:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29425;
+					__pc = 29455;
 					break;
 					
 				case 9186: //dummy jumper1
@@ -11951,11 +11951,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
 					__debugInfo = "882:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29425: //dummy jumper2
+				case 29455: //dummy jumper2
 					;
 						
 					__debugInfo = "884:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 9183: //dummy jumper1
@@ -11997,7 +11997,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "903:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global14_LoopContinueID = local6_TmpCID_2028;
 					__debugInfo = "887:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29426;
+					__pc = 29456;
 					break;
 					
 				case 9307: //dummy jumper1
@@ -12012,11 +12012,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + (" while (!("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("))"));
 					__debugInfo = "905:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29426: //dummy jumper2
+				case 29456: //dummy jumper2
 					;
 						
 					__debugInfo = "908:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 9304: //dummy jumper1
@@ -12032,7 +12032,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local13_CheckComm_Str_2029 = "toCheck";
 						
 					__debugInfo = "912:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29427;
+					__pc = 29457;
 					break;
 					
 				case 9436: //dummy jumper1
@@ -12043,7 +12043,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "914:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29427: //dummy jumper2
+				case 29457: //dummy jumper2
 					;
 						
 					case 9709:
@@ -12092,7 +12092,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "940:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global14_LoopContinueID = local6_TmpCID_2031;
 					__debugInfo = "917:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29428;
+					__pc = 29458;
 					break;
 					
 				case 9447: //dummy jumper1
@@ -12105,11 +12105,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
 					__debugInfo = "942:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29428: //dummy jumper2
+				case 29458: //dummy jumper2
 					;
 						
 					__debugInfo = "915:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 9430: //dummy jumper1
@@ -12186,7 +12186,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "981:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global14_LoopContinueID = local6_TmpCID_2040;
 					__debugInfo = "956:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29429;
+					__pc = 29459;
 					break;
 					
 				case 9826: //dummy jumper1
@@ -12209,11 +12209,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local8_Text_Str_1958 = ((((local8_Text_Str_1958) + (func11_NewLine_Str()))) + ("}"));
 					__debugInfo = "983:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29429: //dummy jumper2
+				case 29459: //dummy jumper2
 					;
 						
 					__debugInfo = "946:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 9711: //dummy jumper1
@@ -12228,7 +12228,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("__pc = "))) + (CAST2STRING(global14_LoopContinueID)))) + ("; break"));
 						
 					__debugInfo = "993:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29430;
+					__pc = 29460;
 					break;
 					
 				case 10020: //dummy jumper1
@@ -12239,11 +12239,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "995:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29430: //dummy jumper2
+				case 29460: //dummy jumper2
 					;
 						
 					__debugInfo = "996:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10017: //dummy jumper1
@@ -12258,7 +12258,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break"));
 						
 					__debugInfo = "999:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29431;
+					__pc = 29461;
 					break;
 					
 				case 10043: //dummy jumper1
@@ -12269,11 +12269,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "1001:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29431: //dummy jumper2
+				case 29461: //dummy jumper2
 					;
 						
 					__debugInfo = "1002:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10040: //dummy jumper1
@@ -12305,7 +12305,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1017:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global8_IsInGoto = local9_oIsInGoto_2041;
 					__debugInfo = "1004:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10063: //dummy jumper1
@@ -12316,7 +12316,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((((((local8_Text_Str_1958) + ("throw new OTTException("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", \""))) + (global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr8_Path_Str))) + ("\", "))) + (CAST2STRING(global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr4_Line)))) + (")"));
 						
 					__debugInfo = "1018:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10183: //dummy jumper1
@@ -12327,7 +12327,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("RESTORE(datablock_"))) + (param4_expr.attr8_Name_Str))) + (")"));
 						
 					__debugInfo = "1021:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10225: //dummy jumper1
@@ -12377,7 +12377,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "1023:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10239: //dummy jumper1
@@ -12388,7 +12388,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (func21_JSGetDefaultValue_Str(param4_expr.attr8_datatype, 0, 0)));
 						
 					__debugInfo = "1030:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10289: //dummy jumper1
@@ -12442,7 +12442,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1041:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("], "))) + (local7_def_Str_2044))) + (")"));
 					__debugInfo = "1032:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10302: //dummy jumper1
@@ -12461,7 +12461,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("castobj("))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (", "))) + (func18_ChangeTypeName_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str)))) + (")"));
 						
 					__debugInfo = "1045:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29434;
+					__pc = 29464;
 					break;
 					
 				case 10393: //dummy jumper1
@@ -12472,13 +12472,13 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "1047:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29434: //dummy jumper2
+				case 29464: //dummy jumper2
 					;
 						
 					__debugInfo = "1050:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + (" /* ALIAS */"));
 					__debugInfo = "1043:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10367: //dummy jumper1
@@ -12489,7 +12489,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("__pc = __labels[\""))) + (param4_expr.attr8_Name_Str))) + ("\"]; break"));
 						
 					__debugInfo = "1052:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10446: //dummy jumper1
@@ -12502,7 +12502,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1056:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((local8_Text_Str_1958) + ("//label: "))) + (param4_expr.attr8_Name_Str));
 					__debugInfo = "1054:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10460: //dummy jumper1
@@ -12513,7 +12513,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + ("+="))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
 					__debugInfo = "1058:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10490: //dummy jumper1
@@ -12524,7 +12524,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("DIMPUSH("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (")"));
 						
 					__debugInfo = "1060:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10512: //dummy jumper1
@@ -12539,7 +12539,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("KERNLEN("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_kern).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "1063:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29435;
+					__pc = 29465;
 					break;
 					
 				case 10548: //dummy jumper1
@@ -12550,11 +12550,11 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "1065:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29435: //dummy jumper2
+				case 29465: //dummy jumper2
 					;
 						
 					__debugInfo = "1066:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10539: //dummy jumper1
@@ -12565,7 +12565,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("BOUNDS("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_position).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "1068:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10590: //dummy jumper1
@@ -12615,7 +12615,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1079:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + ("])"));
 					__debugInfo = "1070:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10616: //dummy jumper1
@@ -12632,7 +12632,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1084:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((local8_Text_Str_1958) + ("continue"));
 					__debugInfo = "1081:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10667: //dummy jumper1
@@ -12643,7 +12643,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("DIMDEL("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_position).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "1086:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10732: //dummy jumper1
@@ -12654,7 +12654,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") ? 0 : 1)"));
 						
 					__debugInfo = "1088:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10758: //dummy jumper1
@@ -12665,7 +12665,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((local8_Text_Str_1958) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr8_Name_Str));
 						
 					__debugInfo = "1090:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10775: //dummy jumper1
@@ -12679,7 +12679,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1093:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("if (!("))) + (local8_Cond_Str_2049))) + (")) throwError(\"AssertException "))) + (REPLACE_Str(local8_Cond_Str_2049, "\"", "'")))) + ("\")"));
 					__debugInfo = "1092:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10791: //dummy jumper1
@@ -12690,7 +12690,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("DEBUG("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
 					__debugInfo = "1095:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10819: //dummy jumper1
@@ -12701,7 +12701,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((((((local8_Text_Str_1958) + ("(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(0).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") ? ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(0).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") : ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))))) + ("))"));
 						
 					__debugInfo = "1097:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10836: //dummy jumper1
@@ -12716,7 +12716,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1101:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1958 = ((((((local8_Text_Str_1958) + ("//ENDREQUIRE: "))) + (param4_expr.attr8_Name_Str))) + (func11_NewLine_Str()));
 					__debugInfo = "1099:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10875: //dummy jumper1
@@ -12731,7 +12731,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					local3_Scp_2051 = global12_CurrentScope;
 					case 10999:
 						__debugInfo = "1117:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((((((local3_Scp_2051) !== (-(1))) ? 1 : 0)) && (((((((((global5_Exprs_ref[0].arrAccess(local3_Scp_2051).values[tmpPositionCache][0].attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((global5_Exprs_ref[0].arrAccess(local3_Scp_2051).values[tmpPositionCache][0].attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1))) ? 1 : 0)) && (((local5_Found_2050) ? 0 : 1))) ? 1 : 0))) {__pc = 29437; break;}
+						if (!((((((((((local3_Scp_2051) !== (-(1))) ? 1 : 0)) && (((((((((global5_Exprs_ref[0].arrAccess(local3_Scp_2051).values[tmpPositionCache][0].attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((global5_Exprs_ref[0].arrAccess(local3_Scp_2051).values[tmpPositionCache][0].attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1))) ? 1 : 0)) && (((local5_Found_2050) ? 0 : 1))) ? 1 : 0))) {__pc = 29467; break;}
 					
 					var local5_Varis_2052 = pool_array.alloc(0);
 					case 10955:
@@ -12786,7 +12786,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					__debugInfo = "1107:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local5_Varis_2052);
 					__pc = 10999; break; //back jump
 					
-				case 29437:
+				case 29467:
 					;
 						
 					case 11008:
@@ -12803,7 +12803,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 					;
 						
 					__debugInfo = "1103:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 10909: //dummy jumper1
@@ -12814,14 +12814,14 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						local8_Text_Str_1958 = ((((((((((local8_Text_Str_1958) + ("castobj("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", "))) + (func18_ChangeTypeName_Str(param4_expr.attr8_datatype.attr8_Name_Str)))) + (")"));
 						
 					__debugInfo = "1121:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 11010: //dummy jumper1
 					if (!((((local17___SelectHelper10__1959) === (~~(7))) ? 1 : 0))) { __pc = 11036; break; }
 					
 					
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 11036: //dummy jumper1
@@ -12832,7 +12832,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						func5_Error("Invalid Expression", 1123, "src\CompilerPasses\Generator\JSGenerator.gbas");
 						
 					__debugInfo = "1124:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29358;
+					__pc = 29388;
 					break;
 					
 				case 11039: //dummy jumper1
@@ -12843,7 +12843,7 @@ window['func14_JSGenerate_Str'] = function(param4_expr) {
 						
 					__debugInfo = "1126:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29358: //dummy jumper2
+				case 29388: //dummy jumper2
 					;
 						
 					__debugInfo = "303:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -14133,19 +14133,19 @@ window['func11_CompileFunc'] = function(param4_func) {
 	try {
 		__debugInfo = "325:\src\CompilerPasses\Parser.gbas";
 		if ((((((((((param4_func.attr3_Scp) === (-(1))) ? 1 : 0)) && ((((param4_func.attr6_Native) === (0)) ? 1 : 0))) ? 1 : 0)) && ((((param4_func.attr10_PlzCompile) === (1)) ? 1 : 0))) ? 1 : 0)) {
-			var local6_TmpScp_2737 = 0.0, local3_Tok_2738 = 0, local7_Curfunc_2739 = 0.0, local3_Scp_2741 = 0;
+			var local6_TmpScp_2738 = 0.0, local3_Tok_2739 = 0, local7_Curfunc_2740 = 0.0, local3_Scp_2742 = 0;
 			__debugInfo = "266:\src\CompilerPasses\Parser.gbas";
 			if (param4_func.attr10_IsAbstract) {
 				
 			};
 			__debugInfo = "267:\src\CompilerPasses\Parser.gbas";
-			local6_TmpScp_2737 = global8_Compiler.attr12_CurrentScope;
+			local6_TmpScp_2738 = global8_Compiler.attr12_CurrentScope;
 			__debugInfo = "268:\src\CompilerPasses\Parser.gbas";
 			global8_Compiler.attr12_CurrentScope = global8_Compiler.attr9_MainScope;
 			__debugInfo = "269:\src\CompilerPasses\Parser.gbas";
-			local3_Tok_2738 = global8_Compiler.attr11_currentPosi;
+			local3_Tok_2739 = global8_Compiler.attr11_currentPosi;
 			__debugInfo = "270:\src\CompilerPasses\Parser.gbas";
-			local7_Curfunc_2739 = global8_Compiler.attr11_currentFunc;
+			local7_Curfunc_2740 = global8_Compiler.attr11_currentFunc;
 			__debugInfo = "271:\src\CompilerPasses\Parser.gbas";
 			global8_Compiler.attr11_currentFunc = param4_func.attr2_ID;
 			__debugInfo = "272:\src\CompilerPasses\Parser.gbas";
@@ -14158,22 +14158,22 @@ window['func11_CompileFunc'] = function(param4_func) {
 			};
 			__debugInfo = "286:\src\CompilerPasses\Parser.gbas";
 			if ((((param4_func.attr3_Typ) === (3)) ? 1 : 0)) {
-				var local4_Vari_2740 = pool_TIdentifierVari.alloc();
+				var local4_Vari_2741 = pool_TIdentifierVari.alloc();
 				__debugInfo = "278:\src\CompilerPasses\Parser.gbas";
-				local4_Vari_2740.attr8_Name_Str = "self";
+				local4_Vari_2741.attr8_Name_Str = "self";
 				__debugInfo = "279:\src\CompilerPasses\Parser.gbas";
-				local4_Vari_2740.attr8_datatype.attr8_Name_Str = global8_Compiler.attr5_Types_ref[0].arrAccess(param4_func.attr6_MyType).values[tmpPositionCache][0].attr8_Name_Str;
+				local4_Vari_2741.attr8_datatype.attr8_Name_Str = global8_Compiler.attr5_Types_ref[0].arrAccess(param4_func.attr6_MyType).values[tmpPositionCache][0].attr8_Name_Str;
 				__debugInfo = "280:\src\CompilerPasses\Parser.gbas";
-				local4_Vari_2740.attr8_datatype.attr7_IsArray = 0;
+				local4_Vari_2741.attr8_datatype.attr7_IsArray = 0;
 				__debugInfo = "281:\src\CompilerPasses\Parser.gbas";
-				local4_Vari_2740.attr3_Typ = ~~(5);
+				local4_Vari_2741.attr3_Typ = ~~(5);
 				__debugInfo = "283:\src\CompilerPasses\Parser.gbas";
-				func11_AddVariable(local4_Vari_2740, 1);
+				func11_AddVariable(local4_Vari_2741, 1);
 				__debugInfo = "284:\src\CompilerPasses\Parser.gbas";
-				DIMPUSH(param4_func.attr6_Params, local4_Vari_2740.attr2_ID);
+				DIMPUSH(param4_func.attr6_Params, local4_Vari_2741.attr2_ID);
 				__debugInfo = "285:\src\CompilerPasses\Parser.gbas";
-				param4_func.attr7_SelfVar = local4_Vari_2740.attr2_ID;
-				__debugInfo = "278:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(local4_Vari_2740);
+				param4_func.attr7_SelfVar = local4_Vari_2741.attr2_ID;
+				__debugInfo = "278:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(local4_Vari_2741);
 			};
 			__debugInfo = "294:\src\CompilerPasses\Parser.gbas";
 			func7_GetNext();
@@ -14187,46 +14187,46 @@ window['func11_CompileFunc'] = function(param4_func) {
 						__debugInfo = "304:\src\CompilerPasses\Parser.gbas";
 						if ((((param4_func.attr3_Typ) === (2)) ? 1 : 0)) {
 							__debugInfo = "299:\src\CompilerPasses\Parser.gbas";
-							local3_Scp_2741 = func5_Scope("ENDSUB", param4_func.attr2_ID);
+							local3_Scp_2742 = func5_Scope("ENDSUB", param4_func.attr2_ID);
 							__debugInfo = "299:\src\CompilerPasses\Parser.gbas";
 						} else {
-							var local1_e_2742 = 0;
+							var local1_e_2743 = 0;
 							__debugInfo = "301:\src\CompilerPasses\Parser.gbas";
-							local3_Scp_2741 = func5_Scope("ENDFUNCTION", param4_func.attr2_ID);
+							local3_Scp_2742 = func5_Scope("ENDFUNCTION", param4_func.attr2_ID);
 							__debugInfo = "302:\src\CompilerPasses\Parser.gbas";
-							local1_e_2742 = func22_CreateReturnExpression(func28_CreateDefaultValueExpression(param4_func.attr8_datatype));
+							local1_e_2743 = func22_CreateReturnExpression(func28_CreateDefaultValueExpression(param4_func.attr8_datatype));
 							__debugInfo = "303:\src\CompilerPasses\Parser.gbas";
-							DIMPUSH(global5_Exprs_ref[0].arrAccess(local3_Scp_2741).values[tmpPositionCache][0].attr5_Exprs, local1_e_2742);
+							DIMPUSH(global5_Exprs_ref[0].arrAccess(local3_Scp_2742).values[tmpPositionCache][0].attr5_Exprs, local1_e_2743);
 							__debugInfo = "301:\src\CompilerPasses\Parser.gbas";
 						};
 						__debugInfo = "304:\src\CompilerPasses\Parser.gbas";
 					} else {
 						__debugInfo = "306:\src\CompilerPasses\Parser.gbas";
-						local3_Scp_2741 = func21_CreateScopeExpression(~~(2));
+						local3_Scp_2742 = func21_CreateScopeExpression(~~(2));
 						__debugInfo = "307:\src\CompilerPasses\Parser.gbas";
-						DIMPUSH(global5_Exprs_ref[0].arrAccess(local3_Scp_2741).values[tmpPositionCache][0].attr5_Exprs, func21_CreateEmptyExpression());
+						DIMPUSH(global5_Exprs_ref[0].arrAccess(local3_Scp_2742).values[tmpPositionCache][0].attr5_Exprs, func21_CreateEmptyExpression());
 						__debugInfo = "306:\src\CompilerPasses\Parser.gbas";
 					};
 					__debugInfo = "308:\src\CompilerPasses\Parser.gbas";
 				} catch (Err_Str) {
 					if (Err_Str instanceof OTTException) Err_Str = Err_Str.getText(); else throwError(Err_Str);{
 						__debugInfo = "310:\src\CompilerPasses\Parser.gbas";
-						local3_Scp_2741 = func21_CreateEmptyExpression();
+						local3_Scp_2742 = func21_CreateEmptyExpression();
 						__debugInfo = "310:\src\CompilerPasses\Parser.gbas";
 					}
 				};
 				__debugInfo = "311:\src\CompilerPasses\Parser.gbas";
 			};
 			__debugInfo = "316:\src\CompilerPasses\Parser.gbas";
-			param4_func.attr3_Scp = local3_Scp_2741;
+			param4_func.attr3_Scp = local3_Scp_2742;
 			__debugInfo = "318:\src\CompilerPasses\Parser.gbas";
-			global8_Compiler.attr11_currentPosi = ((local3_Tok_2738) - (1));
+			global8_Compiler.attr11_currentPosi = ((local3_Tok_2739) - (1));
 			__debugInfo = "319:\src\CompilerPasses\Parser.gbas";
 			func7_GetNext();
 			__debugInfo = "320:\src\CompilerPasses\Parser.gbas";
-			global8_Compiler.attr11_currentFunc = ~~(local7_Curfunc_2739);
+			global8_Compiler.attr11_currentFunc = ~~(local7_Curfunc_2740);
 			__debugInfo = "321:\src\CompilerPasses\Parser.gbas";
-			global8_Compiler.attr12_CurrentScope = ~~(local6_TmpScp_2737);
+			global8_Compiler.attr12_CurrentScope = ~~(local6_TmpScp_2738);
 			__debugInfo = "322:\src\CompilerPasses\Parser.gbas";
 			return 1;
 			__debugInfo = "266:\src\CompilerPasses\Parser.gbas";
@@ -14340,43 +14340,43 @@ func10_Expression = window['func10_Expression'];
 window['func12_CastDatatype'] = function(param8_RetData1_ref, param8_RetData2_ref) {
 	stackPush("function: CastDatatype", __debugInfo);
 	try {
-		var local5_Data1_2746 = 0, local5_Data2_2747 = 0;
+		var local5_Data1_2747 = 0, local5_Data2_2748 = 0;
 		__debugInfo = "365:\src\CompilerPasses\Parser.gbas";
-		local5_Data1_2746 = param8_RetData1_ref[0];
+		local5_Data1_2747 = param8_RetData1_ref[0];
 		__debugInfo = "366:\src\CompilerPasses\Parser.gbas";
-		local5_Data2_2747 = param8_RetData2_ref[0];
+		local5_Data2_2748 = param8_RetData2_ref[0];
 		__debugInfo = "390:\src\CompilerPasses\Parser.gbas";
-		if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)) ? 1 : 0)) {
+		if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)) ? 1 : 0)) {
 			__debugInfo = "387:\src\CompilerPasses\Parser.gbas";
-			if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === (global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str)) ? 1 : 0)) {
+			if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === (global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str)) ? 1 : 0)) {
 				__debugInfo = "370:\src\CompilerPasses\Parser.gbas";
-				param8_RetData1_ref[0] = local5_Data1_2746;
+				param8_RetData1_ref[0] = local5_Data1_2747;
 				__debugInfo = "371:\src\CompilerPasses\Parser.gbas";
-				param8_RetData2_ref[0] = local5_Data2_2747;
+				param8_RetData2_ref[0] = local5_Data2_2748;
 				__debugInfo = "372:\src\CompilerPasses\Parser.gbas";
 				return tryClone(global5_Exprs_ref[0].arrAccess(param8_RetData1_ref[0]).values[tmpPositionCache][0].attr8_datatype);
 				__debugInfo = "370:\src\CompilerPasses\Parser.gbas";
 			} else {
 				__debugInfo = "384:\src\CompilerPasses\Parser.gbas";
-				if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0)) {
+				if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0)) {
 					__debugInfo = "375:\src\CompilerPasses\Parser.gbas";
-					param8_RetData2_ref[0] = func27_CreateCast2StringExpression(local5_Data2_2747);
+					param8_RetData2_ref[0] = func27_CreateCast2StringExpression(local5_Data2_2748);
 					__debugInfo = "375:\src\CompilerPasses\Parser.gbas";
-				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0)) {
+				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0)) {
 					__debugInfo = "377:\src\CompilerPasses\Parser.gbas";
-					param8_RetData1_ref[0] = func27_CreateCast2StringExpression(local5_Data1_2746);
+					param8_RetData1_ref[0] = func27_CreateCast2StringExpression(local5_Data1_2747);
 					__debugInfo = "377:\src\CompilerPasses\Parser.gbas";
-				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) {
+				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) {
 					__debugInfo = "379:\src\CompilerPasses\Parser.gbas";
-					param8_RetData2_ref[0] = func26_CreateCast2FloatExpression(local5_Data2_2747);
+					param8_RetData2_ref[0] = func26_CreateCast2FloatExpression(local5_Data2_2748);
 					__debugInfo = "379:\src\CompilerPasses\Parser.gbas";
-				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) {
+				} else if ((((global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) {
 					__debugInfo = "381:\src\CompilerPasses\Parser.gbas";
-					param8_RetData1_ref[0] = func26_CreateCast2FloatExpression(local5_Data1_2746);
+					param8_RetData1_ref[0] = func26_CreateCast2FloatExpression(local5_Data1_2747);
 					__debugInfo = "381:\src\CompilerPasses\Parser.gbas";
 				} else {
 					__debugInfo = "383:\src\CompilerPasses\Parser.gbas";
-					func5_Error((((((((((((("Cannot cast '") + (global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + ("' to '"))) + (global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + ("'")), 382, "src\CompilerPasses\Parser.gbas");
+					func5_Error((((((((((((("Cannot cast '") + (global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + ("' to '"))) + (global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + ("'")), 382, "src\CompilerPasses\Parser.gbas");
 					__debugInfo = "383:\src\CompilerPasses\Parser.gbas";
 				};
 				__debugInfo = "386:\src\CompilerPasses\Parser.gbas";
@@ -14386,7 +14386,7 @@ window['func12_CastDatatype'] = function(param8_RetData1_ref, param8_RetData2_re
 			__debugInfo = "387:\src\CompilerPasses\Parser.gbas";
 		} else {
 			__debugInfo = "389:\src\CompilerPasses\Parser.gbas";
-			func5_Error((((((((((("Dimensions are different: ") + (global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data1_2746).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + (", "))) + (global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data2_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray))), 388, "src\CompilerPasses\Parser.gbas");
+			func5_Error((((((((((("Dimensions are different: ") + (global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data1_2747).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray)))) + (", "))) + (global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (func20_BuildArrBrackets_Str(global5_Exprs_ref[0].arrAccess(local5_Data2_2748).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray))), 388, "src\CompilerPasses\Parser.gbas");
 			__debugInfo = "389:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "391:\src\CompilerPasses\Parser.gbas";
@@ -14576,33 +14576,33 @@ func20_BuildArrBrackets_Str = window['func20_BuildArrBrackets_Str'];
 window['func7_Hex2Dec'] = function(param10_hexStr_Str) {
 	stackPush("function: Hex2Dec", __debugInfo);
 	try {
-		var local1_i_2749 = 0, local1_j_2750 = 0, local4_loop_2751 = 0;
+		var local1_i_2750 = 0, local1_j_2751 = 0, local4_loop_2752 = 0;
 		__debugInfo = "481:\src\CompilerPasses\Parser.gbas";
-		local1_i_2749 = 0;
+		local1_i_2750 = 0;
 		__debugInfo = "482:\src\CompilerPasses\Parser.gbas";
-		local1_j_2750 = 0;
+		local1_j_2751 = 0;
 		__debugInfo = "482:\src\CompilerPasses\Parser.gbas";
 		{
 			__debugInfo = "491:\src\CompilerPasses\Parser.gbas";
-			for (local4_loop_2751 = 0;toCheck(local4_loop_2751, (((param10_hexStr_Str).length) - (1)), 1);local4_loop_2751 += 1) {
+			for (local4_loop_2752 = 0;toCheck(local4_loop_2752, (((param10_hexStr_Str).length) - (1)), 1);local4_loop_2752 += 1) {
 				__debugInfo = "484:\src\CompilerPasses\Parser.gbas";
-				local1_i_2749 = ((ASC(MID_Str(param10_hexStr_Str, local4_loop_2751, 1), 0)) - (48));
+				local1_i_2750 = ((ASC(MID_Str(param10_hexStr_Str, local4_loop_2752, 1), 0)) - (48));
 				__debugInfo = "487:\src\CompilerPasses\Parser.gbas";
-				if ((((9) < (local1_i_2749)) ? 1 : 0)) {
+				if ((((9) < (local1_i_2750)) ? 1 : 0)) {
 					__debugInfo = "486:\src\CompilerPasses\Parser.gbas";
-					local1_i_2749+=-(7);
+					local1_i_2750+=-(7);
 					__debugInfo = "486:\src\CompilerPasses\Parser.gbas";
 				};
 				__debugInfo = "489:\src\CompilerPasses\Parser.gbas";
-				local1_j_2750 = ((local1_j_2750) * (16));
+				local1_j_2751 = ((local1_j_2751) * (16));
 				__debugInfo = "490:\src\CompilerPasses\Parser.gbas";
-				local1_j_2750 = bOR(local1_j_2750, bAND(local1_i_2749, 15));
+				local1_j_2751 = bOR(local1_j_2751, bAND(local1_i_2750, 15));
 				__debugInfo = "484:\src\CompilerPasses\Parser.gbas";
 			};
 			__debugInfo = "491:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "493:\src\CompilerPasses\Parser.gbas";
-		return tryClone(local1_j_2750);
+		return tryClone(local1_j_2751);
 		__debugInfo = "494:\src\CompilerPasses\Parser.gbas";
 		return 0;
 		__debugInfo = "481:\src\CompilerPasses\Parser.gbas";
@@ -20243,7 +20243,7 @@ func13_CalculateTree = window['func13_CalculateTree'];
 window['func12_DoTarget_Str'] = function(param8_Name_Str) {
 	stackPush("function: DoTarget_Str", __debugInfo);
 	try {
-		var local10_Output_Str_2534 = "";
+		var local10_Output_Str_2534 = "", local13_Bootstrap_Str_2536 = "";
 		__debugInfo = "41:\src\Target.gbas";
 		global8_Compiler.attr14_errorState_Str = ((((" (target '") + (param8_Name_Str))) + ("' error)"));
 		__debugInfo = "42:\src\Target.gbas";
@@ -20288,9 +20288,27 @@ window['func12_DoTarget_Str'] = function(param8_Name_Str) {
 			func5_Error("Empty output!", 81, "src\Target.gbas");
 			__debugInfo = "82:\src\Target.gbas";
 		};
-		__debugInfo = "202:\src\Target.gbas";
-		return tryClone(local10_Output_Str_2534);
 		__debugInfo = "203:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="if (self !== undefined) {";
+		__debugInfo = "204:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="window = {}; ";
+		__debugInfo = "205:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="localStorage = null; ";
+		__debugInfo = "206:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="document = null; ";
+		__debugInfo = "207:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="isInWebWorker = true; ";
+		__debugInfo = "208:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="} else { ";
+		__debugInfo = "209:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="isInWebWorker = false; ";
+		__debugInfo = "210:\src\Target.gbas";
+		local13_Bootstrap_Str_2536+="}";
+		__debugInfo = "211:\src\Target.gbas";
+		local10_Output_Str_2534 = ((local13_Bootstrap_Str_2536) + (local10_Output_Str_2534));
+		__debugInfo = "214:\src\Target.gbas";
+		return tryClone(local10_Output_Str_2534);
+		__debugInfo = "215:\src\Target.gbas";
 		return "";
 		__debugInfo = "41:\src\Target.gbas";
 	} catch(ex) {
@@ -20306,31 +20324,31 @@ func12_DoTarget_Str = window['func12_DoTarget_Str'];
 window['func11_SetupTarget'] = function(param8_Name_Str) {
 	stackPush("function: SetupTarget", __debugInfo);
 	try {
-		__debugInfo = "206:\src\Target.gbas";
+		__debugInfo = "218:\src\Target.gbas";
 		global13_SettingIn_Str = "";
-		__debugInfo = "207:\src\Target.gbas";
+		__debugInfo = "219:\src\Target.gbas";
 		global10_Target_Str = param8_Name_Str;
-		__debugInfo = "214:\src\Target.gbas";
-		if (global7_CONSOLE) {
-			__debugInfo = "211:\src\Target.gbas";
-			global8_Mode_Str = "console";
-			__debugInfo = "211:\src\Target.gbas";
-		} else {
-			__debugInfo = "213:\src\Target.gbas";
-			global8_Mode_Str = "2d";
-			__debugInfo = "213:\src\Target.gbas";
-		};
-		__debugInfo = "224:\src\Target.gbas";
-		global10_Target_Str = "HTML5";
-		__debugInfo = "225:\src\Target.gbas";
-		global8_Lang_Str = "js";
 		__debugInfo = "226:\src\Target.gbas";
+		if (global7_CONSOLE) {
+			__debugInfo = "223:\src\Target.gbas";
+			global8_Mode_Str = "console";
+			__debugInfo = "223:\src\Target.gbas";
+		} else {
+			__debugInfo = "225:\src\Target.gbas";
+			global8_Mode_Str = "2d";
+			__debugInfo = "225:\src\Target.gbas";
+		};
+		__debugInfo = "236:\src\Target.gbas";
+		global10_Target_Str = "HTML5";
+		__debugInfo = "237:\src\Target.gbas";
+		global8_Lang_Str = "js";
+		__debugInfo = "238:\src\Target.gbas";
 		RegisterDefine(UCASE_Str(global10_Target_Str), "1");
-		__debugInfo = "227:\src\Target.gbas";
+		__debugInfo = "239:\src\Target.gbas";
 		RegisterDefine("JS", "1");
-		__debugInfo = "230:\src\Target.gbas";
+		__debugInfo = "242:\src\Target.gbas";
 		return 0;
-		__debugInfo = "206:\src\Target.gbas";
+		__debugInfo = "218:\src\Target.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -20344,9 +20362,9 @@ func11_SetupTarget = window['func11_SetupTarget'];
 window['func9_WriteFile'] = function(param8_File_Str, param8_Text_Str) {
 	stackPush("function: WriteFile", __debugInfo);
 	try {
-		__debugInfo = "475:\src\Target.gbas";
+		__debugInfo = "487:\src\Target.gbas";
 		return 0;
-		__debugInfo = "475:\src\Target.gbas";
+		__debugInfo = "487:\src\Target.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -20431,9 +20449,9 @@ window['method9_type3_XML_10_ParseLayer'] = function(param4_self) {
 		(param4_self).SkipWhitespaces();
 		__debugInfo = "64:\src\Utils\XMLReader.gbas";
 		while (((((param4_self).Get_Str()) === ("<")) ? 1 : 0)) {
-			var local8_HasSlash_2546 = 0;
+			var local8_HasSlash_2547 = 0;
 			__debugInfo = "53:\src\Utils\XMLReader.gbas";
-			local8_HasSlash_2546 = 0;
+			local8_HasSlash_2547 = 0;
 			__debugInfo = "54:\src\Utils\XMLReader.gbas";
 			param4_self.attr8_Position+=1;
 			__debugInfo = "55:\src\Utils\XMLReader.gbas";
@@ -20441,7 +20459,7 @@ window['method9_type3_XML_10_ParseLayer'] = function(param4_self) {
 			__debugInfo = "58:\src\Utils\XMLReader.gbas";
 			if (((((param4_self).Get_Str()) === ("/")) ? 1 : 0)) {
 				__debugInfo = "57:\src\Utils\XMLReader.gbas";
-				local8_HasSlash_2546 = 1;
+				local8_HasSlash_2547 = 1;
 				__debugInfo = "57:\src\Utils\XMLReader.gbas";
 			};
 			__debugInfo = "61:\src\Utils\XMLReader.gbas";
@@ -20451,7 +20469,7 @@ window['method9_type3_XML_10_ParseLayer'] = function(param4_self) {
 				__debugInfo = "60:\src\Utils\XMLReader.gbas";
 			};
 			__debugInfo = "62:\src\Utils\XMLReader.gbas";
-			if (local8_HasSlash_2546) {
+			if (local8_HasSlash_2547) {
 				__debugInfo = "62:\src\Utils\XMLReader.gbas";
 				return tryClone(0);
 				__debugInfo = "62:\src\Utils\XMLReader.gbas";
@@ -20478,7 +20496,7 @@ method9_type3_XML_10_ParseLayer = window['method9_type3_XML_10_ParseLayer'];
 window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 	stackPush("method: ParseNode", __debugInfo);
 	try {
-		var local8_Name_Str_2549 = "", local10_Attributes_2550 = pool_array.alloc(pool_xmlAttribute.alloc());
+		var local8_Name_Str_2550 = "", local10_Attributes_2551 = pool_array.alloc(pool_xmlAttribute.alloc());
 		__debugInfo = "69:\src\Utils\XMLReader.gbas";
 		if (((((param4_self).Get_Str()) !== ("<")) ? 1 : 0)) {
 			__debugInfo = "69:\src\Utils\XMLReader.gbas";
@@ -20490,18 +20508,18 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 		__debugInfo = "71:\src\Utils\XMLReader.gbas";
 		(param4_self).SkipWhitespaces();
 		__debugInfo = "73:\src\Utils\XMLReader.gbas";
-		local8_Name_Str_2549 = (param4_self).ParseIdentifier_Str();
+		local8_Name_Str_2550 = (param4_self).ParseIdentifier_Str();
 		__debugInfo = "104:\src\Utils\XMLReader.gbas";
 		if (((((param4_self).Get_Str()) === (" ")) ? 1 : 0)) {
 			__debugInfo = "78:\src\Utils\XMLReader.gbas";
 			(param4_self).SkipWhitespaces();
 			__debugInfo = "103:\src\Utils\XMLReader.gbas";
 			while ((((((((param4_self).Get_Str()) !== ("/")) ? 1 : 0)) && (((((param4_self).Get_Str()) !== (">")) ? 1 : 0))) ? 1 : 0)) {
-				var local3_Att_2551 = pool_xmlAttribute.alloc(), local3_Pos_2552 = 0;
+				var local3_Att_2552 = pool_xmlAttribute.alloc(), local3_Pos_2553 = 0;
 				__debugInfo = "80:\src\Utils\XMLReader.gbas";
 				(param4_self).SkipWhitespaces();
 				__debugInfo = "83:\src\Utils\XMLReader.gbas";
-				local3_Att_2551.attr8_Name_Str = (param4_self).ParseIdentifier_Str();
+				local3_Att_2552.attr8_Name_Str = (param4_self).ParseIdentifier_Str();
 				__debugInfo = "84:\src\Utils\XMLReader.gbas";
 				(param4_self).SkipWhitespaces();
 				__debugInfo = "86:\src\Utils\XMLReader.gbas";
@@ -20523,7 +20541,7 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 				__debugInfo = "93:\src\Utils\XMLReader.gbas";
 				param4_self.attr8_Position+=1;
 				__debugInfo = "94:\src\Utils\XMLReader.gbas";
-				local3_Pos_2552 = param4_self.attr8_Position;
+				local3_Pos_2553 = param4_self.attr8_Position;
 				__debugInfo = "97:\src\Utils\XMLReader.gbas";
 				while (((((param4_self).Get_Str()) !== ("\"")) ? 1 : 0)) {
 					__debugInfo = "96:\src\Utils\XMLReader.gbas";
@@ -20533,24 +20551,24 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 				__debugInfo = "98:\src\Utils\XMLReader.gbas";
 				param4_self.attr8_Position+=1;
 				__debugInfo = "99:\src\Utils\XMLReader.gbas";
-				local3_Att_2551.attr9_Value_Str = MID_Str(param4_self.attr8_Text_Str, local3_Pos_2552, ((((param4_self.attr8_Position) - (local3_Pos_2552))) - (1)));
+				local3_Att_2552.attr9_Value_Str = MID_Str(param4_self.attr8_Text_Str, local3_Pos_2553, ((((param4_self.attr8_Position) - (local3_Pos_2553))) - (1)));
 				__debugInfo = "100:\src\Utils\XMLReader.gbas";
 				(param4_self).SkipWhitespaces();
 				__debugInfo = "102:\src\Utils\XMLReader.gbas";
-				DIMPUSH(local10_Attributes_2550, local3_Att_2551);
-				__debugInfo = "80:\src\Utils\XMLReader.gbas";pool_xmlAttribute.free(local3_Att_2551);
+				DIMPUSH(local10_Attributes_2551, local3_Att_2552);
+				__debugInfo = "80:\src\Utils\XMLReader.gbas";pool_xmlAttribute.free(local3_Att_2552);
 			};
 			__debugInfo = "78:\src\Utils\XMLReader.gbas";
 		};
 		__debugInfo = "106:\src\Utils\XMLReader.gbas";
-		param4_self.attr5_Event(local8_Name_Str_2549, local10_Attributes_2550);
+		param4_self.attr5_Event(local8_Name_Str_2550, local10_Attributes_2551);
 		__debugInfo = "108:\src\Utils\XMLReader.gbas";
 		{
-			var local17___SelectHelper43__2553 = "";
+			var local17___SelectHelper43__2554 = "";
 			__debugInfo = "108:\src\Utils\XMLReader.gbas";
-			local17___SelectHelper43__2553 = (param4_self).Get_Str();
+			local17___SelectHelper43__2554 = (param4_self).Get_Str();
 			__debugInfo = "135:\src\Utils\XMLReader.gbas";
-			if ((((local17___SelectHelper43__2553) === (">")) ? 1 : 0)) {
+			if ((((local17___SelectHelper43__2554) === (">")) ? 1 : 0)) {
 				__debugInfo = "110:\src\Utils\XMLReader.gbas";
 				param4_self.attr8_Position+=1;
 				__debugInfo = "111:\src\Utils\XMLReader.gbas";
@@ -20558,7 +20576,7 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 				__debugInfo = "113:\src\Utils\XMLReader.gbas";
 				if ((param4_self).ParseLayer()) {
 					__debugInfo = "113:\src\Utils\XMLReader.gbas";
-					throw new OTTException((((("XML Error - Unexpected End of File, expecting </") + (local8_Name_Str_2549))) + (">")), "\src\Utils\XMLReader.gbas", 113);
+					throw new OTTException((((("XML Error - Unexpected End of File, expecting </") + (local8_Name_Str_2550))) + (">")), "\src\Utils\XMLReader.gbas", 113);
 					__debugInfo = "113:\src\Utils\XMLReader.gbas";
 				};
 				__debugInfo = "116:\src\Utils\XMLReader.gbas";
@@ -20582,7 +20600,7 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 				__debugInfo = "121:\src\Utils\XMLReader.gbas";
 				param4_self.attr8_Position+=1;
 				__debugInfo = "123:\src\Utils\XMLReader.gbas";
-				if ((((local8_Name_Str_2549) !== ((param4_self).ParseIdentifier_Str())) ? 1 : 0)) {
+				if ((((local8_Name_Str_2550) !== ((param4_self).ParseIdentifier_Str())) ? 1 : 0)) {
 					__debugInfo = "123:\src\Utils\XMLReader.gbas";
 					throw new OTTException("XML Error - Nodes do not match", "\src\Utils\XMLReader.gbas", 123);
 					__debugInfo = "123:\src\Utils\XMLReader.gbas";
@@ -20598,7 +20616,7 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 				__debugInfo = "127:\src\Utils\XMLReader.gbas";
 				(param4_self).SkipWhitespaces();
 				__debugInfo = "110:\src\Utils\XMLReader.gbas";
-			} else if ((((local17___SelectHelper43__2553) === ("/")) ? 1 : 0)) {
+			} else if ((((local17___SelectHelper43__2554) === ("/")) ? 1 : 0)) {
 				__debugInfo = "129:\src\Utils\XMLReader.gbas";
 				param4_self.attr8_Position+=1;
 				__debugInfo = "130:\src\Utils\XMLReader.gbas";
@@ -20621,7 +20639,7 @@ window['method9_type3_XML_9_ParseNode'] = function(param4_self) {
 		};
 		__debugInfo = "136:\src\Utils\XMLReader.gbas";
 		return 0;
-		__debugInfo = "69:\src\Utils\XMLReader.gbas";pool_array.free(local10_Attributes_2550);
+		__debugInfo = "69:\src\Utils\XMLReader.gbas";pool_array.free(local10_Attributes_2551);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -20635,9 +20653,9 @@ method9_type3_XML_9_ParseNode = window['method9_type3_XML_9_ParseNode'];
 window['method9_type3_XML_19_ParseIdentifier_Str'] = function(param4_self) {
 	stackPush("method: ParseIdentifier_Str", __debugInfo);
 	try {
-		var local3_Pos_2556 = 0;
+		var local3_Pos_2557 = 0;
 		__debugInfo = "139:\src\Utils\XMLReader.gbas";
-		local3_Pos_2556 = param4_self.attr8_Position;
+		local3_Pos_2557 = param4_self.attr8_Position;
 		__debugInfo = "142:\src\Utils\XMLReader.gbas";
 		while ((((((((((((((param4_self).Get_Str()) !== (" ")) ? 1 : 0)) && (((((param4_self).Get_Str()) !== ("/")) ? 1 : 0))) ? 1 : 0)) && (((((param4_self).Get_Str()) !== (">")) ? 1 : 0))) ? 1 : 0)) && (((((param4_self).Get_Str()) !== ("=")) ? 1 : 0))) ? 1 : 0)) {
 			__debugInfo = "141:\src\Utils\XMLReader.gbas";
@@ -20651,7 +20669,7 @@ window['method9_type3_XML_19_ParseIdentifier_Str'] = function(param4_self) {
 			__debugInfo = "143:\src\Utils\XMLReader.gbas";
 		};
 		__debugInfo = "144:\src\Utils\XMLReader.gbas";
-		return tryClone(UCASE_Str(MID_Str(param4_self.attr8_Text_Str, local3_Pos_2556, ((param4_self.attr8_Position) - (local3_Pos_2556)))));
+		return tryClone(UCASE_Str(MID_Str(param4_self.attr8_Text_Str, local3_Pos_2557, ((param4_self.attr8_Position) - (local3_Pos_2557)))));
 		__debugInfo = "145:\src\Utils\XMLReader.gbas";
 		return "";
 		__debugInfo = "139:\src\Utils\XMLReader.gbas";

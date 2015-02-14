@@ -196,6 +196,18 @@ FUNCTION DoTarget$: Name$
 				Error("Unknown action '"+Ac.Name$+"'", CODELINE(), CODEFILE$())
 		ENDSELECT
 	NEXT
+	?ELSE
+	// add webworker bootstrap code
+	LOCAL Bootstrap$
+	INC Bootstrap$, "if (self !== undefined) {"
+	INC Bootstrap$, "window = {}; "
+	INC Bootstrap$, "localStorage = null; "
+	INC Bootstrap$, "document = null; "
+	INC Bootstrap$, "isInWebWorker = true; "
+	INC Bootstrap$, "} else { "
+	INC Bootstrap$, "isInWebWorker = false; "
+	INC Bootstrap$, "}"
+	Output$ = Bootstrap$ + Output$
 	?ENDIF
 
 	RETURN Output$
