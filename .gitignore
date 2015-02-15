@@ -7,7 +7,6 @@
 Thumbs.db
 
 Tests/**/*.exe
-Tests/**/DIR_STRUCTURE
 Tests/**/123Script.js
 Tests/**/Documentation*.md
 
@@ -16,7 +15,7 @@ Tmp/
 123basic.exe
 123File.html
 *.123SCRIPT_DATA
-
+DIR_STRUCTURE
 
 ftp.txt
 

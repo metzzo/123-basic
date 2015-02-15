@@ -622,13 +622,14 @@ ENDFUNCTION
 ?IFDEF OTTBASIC
 GLOBAL MaxPasses% = 6
 EXPORT MaxPasses
-NATIVE FUNCTION PassSuccessfull:
+NATIVE FUNCTION PassSuccessfull: CurrentPass%, MaxPass%
 ?ELSE
-FUNCTION PassSuccessfull:
+FUNCTION PassSuccessfull: CurrentPass%, MaxPass%
 ENDFUNCTION
 ?ENDIF
 
 FUNCTION Compile$: Text$, Target$
+	CONSTANT MAX_PASS = 5
 	LOCAL c AS TCompiler
 	Compiler = c //Neuen Compiler erstellen!
 
@@ -651,7 +652,7 @@ FUNCTION Compile$: Text$, Target$
 	Text$ = Text$ + Compiler.HeaderText$
 	?ENDIF
 
-	PassSuccessfull()
+	PassSuccessfull(0, MAX_PASS)
 
 	PopTimer("Header load & setup target!")
 
@@ -661,7 +662,7 @@ FUNCTION Compile$: Text$, Target$
 	Lexer()
 	PopTimer("Lexer!")
 
-	PassSuccessfull()
+	PassSuccessfull(1, MAX_PASS)
 	STDOUT "Lexing successful! \n"
 
 	Compiler.errorState$ = " (precompiler error)"
@@ -670,7 +671,7 @@ FUNCTION Compile$: Text$, Target$
 
 	PopTimer("Precompiler")
 
-	PassSuccessfull()
+	PassSuccessfull(2, MAX_PASS)
 	STDOUT "Preprocessing successful! \n"
 
 
@@ -683,7 +684,7 @@ FUNCTION Compile$: Text$, Target$
 	Analyser()
 	PopTimer("Analyser")
 
-	PassSuccessfull()
+	PassSuccessfull(3, MAX_PASS)
 	IF Compiler.WasError
 		STDOUT "Analysing failed :( \n"
 		RETURN
@@ -691,7 +692,7 @@ FUNCTION Compile$: Text$, Target$
 		STDOUT "Analysing successful! \n"
 	ENDIF
 
-	?IFNDEF FOR_IDE
+	?IFNDEF OTTBASIC
 	LOCAL tmpPath$ = GETCURRENTDIR$()
 	SETCURRENTDIR(GbapPath$)
 	?ENDIF
@@ -701,7 +702,7 @@ FUNCTION Compile$: Text$, Target$
 	Parser()
 	PopTimer("Parser")
 
-	PassSuccessfull()
+	PassSuccessfull(4, MAX_PASS)
 	IF Compiler.WasError
 		STDOUT "Parsing failed :( \n"
 		RETURN
@@ -714,8 +715,7 @@ FUNCTION Compile$: Text$, Target$
 	PushTimer()
 	GenerateDoc()
 	PopTimer("Generate Doc")
-
-	PassSuccessfull()
+	
 	IF Compiler.WasError
 		STDOUT "Doc Generation failed :( \n"
 		RETURN
@@ -726,7 +726,7 @@ FUNCTION Compile$: Text$, Target$
 
 	Compiler.errorState$ = " (generate error)"
 	
-	?IFNDEF FOR_IDE
+	?IFNDEF OTTBASIC
 	SETCURRENTDIR(tmpPath$)
 	?ENDIF
 
@@ -735,7 +735,7 @@ FUNCTION Compile$: Text$, Target$
 	LOCAL Output$ = DoTarget$(Target$)
 	PopTimer("Target stuff")
 
-	PassSuccessfull()
+	PassSuccessfull(5, MAX_PASS)
 	IF Compiler.WasError
 		STDOUT "Generating failed :( \n"
 		RETURN
