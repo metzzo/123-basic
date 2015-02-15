@@ -3,7 +3,7 @@
 //------------------------------------------------------------
 if (typeof preInitFuncs == 'undefined') preInitFuncs = [];
 preInitFuncs.push(function() {
-	if (viewMode == '2d' || (typeof inEditorPreview != 'undefined')) {
+	if (viewMode == '2d') {
 		if (typeof window == 'undefined') window = {};
 		window.onload=function( e ) {
 			if (typeof GFX_WIDTH 	== 'undefined')
@@ -805,7 +805,7 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-if (!isInWebWorker) {
+if (typeof document !== 'undefined') {
 	(function() {
 	  var hidden = "hidden";
 

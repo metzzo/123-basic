@@ -1,4 +1,4 @@
-if (self !== undefined) {
+if (self !== undefined && !self.document) {
 	window = self;
 	localStorage = null;
 	document = null;

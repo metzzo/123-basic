@@ -1,6 +1,6 @@
 if (typeof preInitFuncs == 'undefined') preInitFuncs = [];
 preInitFuncs.push(function() {
-	if (viewMode == 'console' && (typeof inEditorPreview == 'undefined')) {
+	if (viewMode == 'console') {
 		if (document) {
 			window.onload=function( e ){
 				var e = document.createElement('textarea');

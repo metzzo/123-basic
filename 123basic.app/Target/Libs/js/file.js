@@ -18,10 +18,10 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-if (!isInWebWorker) {
-	var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
-	var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
+var fileSystem = new VirtualFileSystem(typeof localStorage !== 'undefined' ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
+if (!isInWebWorker) {
 	var text = loadText("DIR_STRUCTURE");
 	if (text == null) {
 		throwError("Cannot load dir structure!");
@@ -71,7 +71,6 @@ if (!isInWebWorker) {
 		}
 	}
 }
-
 
 var channels 	= []
 function GENFILE() {
