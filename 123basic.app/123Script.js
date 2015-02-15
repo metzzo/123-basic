@@ -1,4 +1,4 @@
-if (self !== undefined) {
+if (self !== undefined && !self.document) {
 	window = self;
 	localStorage = null;
 	document = null;
@@ -9,7 +9,7 @@ if (self !== undefined) {
 }
 if (typeof preInitFuncs == 'undefined') preInitFuncs = [];
 preInitFuncs.push(function() {
-	if (viewMode == 'console' && (typeof inEditorPreview == 'undefined')) {
+	if (viewMode == 'console') {
 		if (document) {
 			window.onload=function( e ){
 				var e = document.createElement('textarea');
@@ -1246,10 +1246,10 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-if (!isInWebWorker) {
-	var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
-	var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
+var fileSystem = new VirtualFileSystem(typeof localStorage !== 'undefined' ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
+if (!isInWebWorker) {
 	var text = loadText("DIR_STRUCTURE");
 	if (text == null) {
 		throwError("Cannot load dir structure!");
@@ -1299,7 +1299,6 @@ if (!isInWebWorker) {
 		}
 	}
 }
-
 
 var channels 	= []
 function GENFILE() {
@@ -2338,7 +2337,7 @@ function INIGET_Str(cat, name) {
 //------------------------------------------------------------
 if (typeof preInitFuncs == 'undefined') preInitFuncs = [];
 preInitFuncs.push(function() {
-	if (viewMode == '2d' || (typeof inEditorPreview != 'undefined')) {
+	if (viewMode == '2d') {
 		if (typeof window == 'undefined') window = {};
 		window.onload=function( e ) {
 			if (typeof GFX_WIDTH 	== 'undefined')
@@ -3140,7 +3139,7 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-if (!isInWebWorker) {
+if (typeof document !== 'undefined') {
 	(function() {
 	  var hidden = "hidden";
 
