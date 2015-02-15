@@ -861,7 +861,7 @@ var pool_array = {
 	alloc: function(defval) {
 		var typ = typeof defval
 		var obj = array_pools[typ];
-		if (obj !== undefined) {
+		if (obj !== undefined && obj !== null) {
 			array_pools[typ] = obj.succ;
 			obj.succ = null;
 		} else {
