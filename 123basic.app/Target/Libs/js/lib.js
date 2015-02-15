@@ -503,7 +503,7 @@ function SLEEP(time) {
 //LocalStorage wrapper to cookies (if there is no localStorage) Found on the MDN
 //-----------------------------------------------------------
 
-if (!window.localStorage) {
+if (!window.localStorage && !isInWebworker) {
   Object.defineProperty(window, "localStorage", new (function () {
     var aKeys = [], oStorage = {};
     Object.defineProperty(oStorage, "getItem", {

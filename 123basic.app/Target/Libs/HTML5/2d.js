@@ -42,7 +42,7 @@ var framePrev	= 0;		//welche ms gabs davor?
 var frameDelay	= 0;		//wie lange soll gewarten werden?
 var canvasWidth, canvasHeight; //Die breite/höhe
 var	background	= null;		//Das Hintergrundbg (USEASBMP oder LOADBMP)
-var loopFunc 	= null; //Aktueller LOOP
+var loopFunc 	= function() { throwError('GLB_ON_LOOP not found.') }; //Aktueller LOOP
 var loops 	 	= [];		//Der Loopstack
 var usedSoundformat = 'ogg';	//Das benutzte Soundformat
 var hibernate	= false;	//SOlls warten
@@ -805,7 +805,7 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-if (typeof document !== 'undefined') {
+if (document) {
 	(function() {
 	  var hidden = "hidden";
 

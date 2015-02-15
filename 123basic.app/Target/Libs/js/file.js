@@ -18,7 +18,7 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-var fileSystem = new VirtualFileSystem(typeof localStorage !== 'undefined' ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
 var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
 if (!isInWebWorker) {

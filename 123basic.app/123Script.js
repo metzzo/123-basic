@@ -512,7 +512,7 @@ function SLEEP(time) {
 //LocalStorage wrapper to cookies (if there is no localStorage) Found on the MDN
 //-----------------------------------------------------------
 
-if (!window.localStorage) {
+if (!window.localStorage && !isInWebworker) {
   Object.defineProperty(window, "localStorage", new (function () {
     var aKeys = [], oStorage = {};
     Object.defineProperty(oStorage, "getItem", {
@@ -1246,7 +1246,7 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-var fileSystem = new VirtualFileSystem(typeof localStorage !== 'undefined' ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
 var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
 if (!isInWebWorker) {
@@ -2376,7 +2376,7 @@ var framePrev	= 0;		//welche ms gabs davor?
 var frameDelay	= 0;		//wie lange soll gewarten werden?
 var canvasWidth, canvasHeight; //Die breite/höhe
 var	background	= null;		//Das Hintergrundbg (USEASBMP oder LOADBMP)
-var loopFunc 	= null; //Aktueller LOOP
+var loopFunc 	= function() { throwError('GLB_ON_LOOP not found.') }; //Aktueller LOOP
 var loops 	 	= [];		//Der Loopstack
 var usedSoundformat = 'ogg';	//Das benutzte Soundformat
 var hibernate	= false;	//SOlls warten
@@ -3139,7 +3139,7 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-if (typeof document !== 'undefined') {
+if (document) {
 	(function() {
 	  var hidden = "hidden";
 
