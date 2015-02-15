@@ -18,58 +18,59 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
-var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
+if (!isInWebWorker) {
+	var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+	var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
-var text = loadText("DIR_STRUCTURE");
-if (text == null) {
-	throwError("Cannot load dir structure!");
-} else {
-	var lines = text.split("\n");
-	for (var pos = 0; pos < lines.length; pos++) {
-		var line = lines[pos];
-		if (line.indexOf(":") != -1) {
-			// es gibt ein .
-			var command = line.substring(0, line.indexOf(":"));
-			var param = line.substring(line.indexOf(":")+1);
-			
-			switch(command) {
-				case 'var':
-					if (param.indexOf("=") != -1) {
-						var name = param.substring(0, param.indexOf("="));
-						var value = param.substring(param.indexOf("=")+1);
-						if (typeof isInWebWorker == 'undefined') {
-							window[name] = value; //setzen \o/
+	var text = loadText("DIR_STRUCTURE");
+	if (text == null) {
+		throwError("Cannot load dir structure!");
+	} else {
+		var lines = text.split("\n");
+		for (var pos = 0; pos < lines.length; pos++) {
+			var line = lines[pos];
+			if (line.indexOf(":") != -1) {
+				// es gibt ein .
+				var command = line.substring(0, line.indexOf(":"));
+				var param = line.substring(line.indexOf(":")+1);
+				
+				switch(command) {
+					case 'var':
+						if (param.indexOf("=") != -1) {
+							var name = param.substring(0, param.indexOf("="));
+							var value = param.substring(param.indexOf("=")+1);
+							if (typeof isInWebWorker == 'undefined') {
+								window[name] = value; //setzen \o/
+							} else {
+								eval(name+" = '"+value+"'");
+							}
+							
 						} else {
-							eval(name+" = '"+value+"'");
+							throwError("Expecting '='");
 						}
-						
-					} else {
-						throwError("Expecting '='");
-					}
-					break;
-				case 'folder':
-					fileSystem.createDir(param);
-					staticFileSystem.createDir(param);
-					break;
-				case 'static':
-					staticFileSystem.createFile(param, []); //unlesbar aber da!
-					break;
-				case 'editable':
-					//TODO!
-					staticFileSystem.createFile(param, function(file) {
-						var text = loadText(file.path+".123SCRIPT_DATA");
-						file.data = text.split(",");
-						return file.data;
-					});
-					break;
-				default:
-					throwError("Unknown command '"+command+"'");
+						break;
+					case 'folder':
+						fileSystem.createDir(param);
+						staticFileSystem.createDir(param);
+						break;
+					case 'static':
+						staticFileSystem.createFile(param, []); //unlesbar aber da!
+						break;
+					case 'editable':
+						//TODO!
+						staticFileSystem.createFile(param, function(file) {
+							var text = loadText(file.path+".123SCRIPT_DATA");
+							file.data = text.split(",");
+							return file.data;
+						});
+						break;
+					default:
+						throwError("Unknown command '"+command+"'");
+				}
 			}
 		}
 	}
 }
-
 
 
 var channels 	= []

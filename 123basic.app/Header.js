@@ -1,8 +1,9 @@
 if (self !== undefined) {
-	window = {};
+	window = self;
 	localStorage = null;
 	document = null;
 	isInWebWorker = true;
+	viewMode = "console";
 } else {
 	isInWebWorker = false;
 }
@@ -1245,58 +1246,59 @@ function loadText(text) {
 	return load.responseText;
 }
 //FileSystem und variablen laden!
-var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
-var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
+if (!isInWebWorker) {
+	var fileSystem = new VirtualFileSystem(localStorage ? localStorage.getItem("filesystem") : "");; //dynamisch (= kann verändert werden)
+	var staticFileSystem = new VirtualFileSystem(); //statisch (= temporär)
 
-var text = loadText("DIR_STRUCTURE");
-if (text == null) {
-	throwError("Cannot load dir structure!");
-} else {
-	var lines = text.split("\n");
-	for (var pos = 0; pos < lines.length; pos++) {
-		var line = lines[pos];
-		if (line.indexOf(":") != -1) {
-			// es gibt ein .
-			var command = line.substring(0, line.indexOf(":"));
-			var param = line.substring(line.indexOf(":")+1);
-			
-			switch(command) {
-				case 'var':
-					if (param.indexOf("=") != -1) {
-						var name = param.substring(0, param.indexOf("="));
-						var value = param.substring(param.indexOf("=")+1);
-						if (typeof isInWebWorker == 'undefined') {
-							window[name] = value; //setzen \o/
+	var text = loadText("DIR_STRUCTURE");
+	if (text == null) {
+		throwError("Cannot load dir structure!");
+	} else {
+		var lines = text.split("\n");
+		for (var pos = 0; pos < lines.length; pos++) {
+			var line = lines[pos];
+			if (line.indexOf(":") != -1) {
+				// es gibt ein .
+				var command = line.substring(0, line.indexOf(":"));
+				var param = line.substring(line.indexOf(":")+1);
+				
+				switch(command) {
+					case 'var':
+						if (param.indexOf("=") != -1) {
+							var name = param.substring(0, param.indexOf("="));
+							var value = param.substring(param.indexOf("=")+1);
+							if (typeof isInWebWorker == 'undefined') {
+								window[name] = value; //setzen \o/
+							} else {
+								eval(name+" = '"+value+"'");
+							}
+							
 						} else {
-							eval(name+" = '"+value+"'");
+							throwError("Expecting '='");
 						}
-						
-					} else {
-						throwError("Expecting '='");
-					}
-					break;
-				case 'folder':
-					fileSystem.createDir(param);
-					staticFileSystem.createDir(param);
-					break;
-				case 'static':
-					staticFileSystem.createFile(param, []); //unlesbar aber da!
-					break;
-				case 'editable':
-					//TODO!
-					staticFileSystem.createFile(param, function(file) {
-						var text = loadText(file.path+".123SCRIPT_DATA");
-						file.data = text.split(",");
-						return file.data;
-					});
-					break;
-				default:
-					throwError("Unknown command '"+command+"'");
+						break;
+					case 'folder':
+						fileSystem.createDir(param);
+						staticFileSystem.createDir(param);
+						break;
+					case 'static':
+						staticFileSystem.createFile(param, []); //unlesbar aber da!
+						break;
+					case 'editable':
+						//TODO!
+						staticFileSystem.createFile(param, function(file) {
+							var text = loadText(file.path+".123SCRIPT_DATA");
+							file.data = text.split(",");
+							return file.data;
+						});
+						break;
+					default:
+						throwError("Unknown command '"+command+"'");
+				}
 			}
 		}
 	}
 }
-
 
 
 var channels 	= []
@@ -3138,56 +3140,58 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-(function() {
-  var hidden = "hidden";
+if (!isInWebWorker) {
+	(function() {
+	  var hidden = "hidden";
 
-  // Standards:
-  if (hidden in document)
-    document.addEventListener("visibilitychange", onchange);
-  else if ((hidden = "mozHidden") in document)
-    document.addEventListener("mozvisibilitychange", onchange);
-  else if ((hidden = "webkitHidden") in document)
-    document.addEventListener("webkitvisibilitychange", onchange);
-  else if ((hidden = "msHidden") in document)
-    document.addEventListener("msvisibilitychange", onchange);
-  // IE 9 and lower:
-  else if ("onfocusin" in document)
-    document.onfocusin = document.onfocusout = onchange;
-  // All others:
-  else
-    window.onpageshow = window.onpagehide
-    = window.onfocus = window.onblur = onchange;
+	  // Standards:
+	  if (hidden in document)
+		document.addEventListener("visibilitychange", onchange);
+	  else if ((hidden = "mozHidden") in document)
+		document.addEventListener("mozvisibilitychange", onchange);
+	  else if ((hidden = "webkitHidden") in document)
+		document.addEventListener("webkitvisibilitychange", onchange);
+	  else if ((hidden = "msHidden") in document)
+		document.addEventListener("msvisibilitychange", onchange);
+	  // IE 9 and lower:
+	  else if ("onfocusin" in document)
+		document.onfocusin = document.onfocusout = onchange;
+	  // All others:
+	  else
+		window.onpageshow = window.onpagehide
+		= window.onfocus = window.onblur = onchange;
 
-  function onchange (evt) {
-    var v = "visible", h = "hidden",
-        evtMap = {
-          focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
-        };
+	  function onchange (evt) {
+		var v = "visible", h = "hidden",
+			evtMap = {
+			  focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
+			};
 
-    evt = evt || window.event;
-    
-	var prev = autopauseActive;
-	
-	if (evt.type in evtMap)
-      autopauseActive = evtMap[evt.type] === "hidden" ? true : false;
-    else
-      autopauseActive = this[hidden];
-	  
-	if (autopauseEnabled && autopauseActive != prev) {
-		if (autopauseActive && window['GLB_ON_PAUSE']) {
-			window['GLB_ON_PAUSE']();
+		evt = evt || window.event;
+		
+		var prev = autopauseActive;
+		
+		if (evt.type in evtMap)
+		  autopauseActive = evtMap[evt.type] === "hidden" ? true : false;
+		else
+		  autopauseActive = this[hidden];
+		  
+		if (autopauseEnabled && autopauseActive != prev) {
+			if (autopauseActive && window['GLB_ON_PAUSE']) {
+				window['GLB_ON_PAUSE']();
+			}
+			if (!autopauseActive && window['GLB_ON_RESUME']) {
+				window['GLB_ON_RESUME']();
+			}
+			lastShwscrn = GETTIMERALL();
 		}
-		if (!autopauseActive && window['GLB_ON_RESUME']) {
-			window['GLB_ON_RESUME']();
-		}
-		lastShwscrn = GETTIMERALL();
-	}
-  }
+	  }
 
-  // set the initial state (but only if browser supports the Page Visibility API)
-  if( document[hidden] !== undefined )
-    onchange({type: document[hidden] ? "blur" : "focus"});
-})();
+	  // set the initial state (but only if browser supports the Page Visibility API)
+	  if( document[hidden] !== undefined )
+		onchange({type: document[hidden] ? "blur" : "focus"});
+	})();
+}
 //------------------------------------------------------------
 //text
 //------------------------------------------------------------

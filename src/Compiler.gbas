@@ -640,17 +640,17 @@ FUNCTION Compile$: Text$, Target$
 	PushTimer()
 
 	SetupTarget(Target$)
-	
+
 	?IFNDEF FOR_IDE
 	FOREACH HeaderFile$ IN Compiler.HeaderFiles$[]
 		Compiler.HeaderText$ = Compiler.HeaderText$ + "// HEADER " + HeaderFile$ + "\n"
 		Compiler.HeaderText$ = Compiler.HeaderText$ + LoadFile$("Target/Header/" + HeaderFile$)
 		Compiler.HeaderText$ = Compiler.HeaderText$ + "\n"
 	NEXT
-	
+
 	Text$ = Text$ + Compiler.HeaderText$
 	?ENDIF
-	
+
 	PassSuccessfull()
 
 	PopTimer("Header load & setup target!")
@@ -691,9 +691,11 @@ FUNCTION Compile$: Text$, Target$
 		STDOUT "Analysing successful! \n"
 	ENDIF
 
+	?IFNDEF FOR_IDE
 	LOCAL tmpPath$ = GETCURRENTDIR$()
 	SETCURRENTDIR(GbapPath$)
-
+	?ENDIF
+	
 	Compiler.errorState$ = " (parse error)"
 	PushTimer()
 	Parser()
@@ -723,8 +725,10 @@ FUNCTION Compile$: Text$, Target$
 	?ENDIF
 
 	Compiler.errorState$ = " (generate error)"
-
+	
+	?IFNDEF FOR_IDE
 	SETCURRENTDIR(tmpPath$)
+	?ENDIF
 
 
 	PushTimer()

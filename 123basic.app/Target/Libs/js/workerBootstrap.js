@@ -1,8 +1,9 @@
 if (self !== undefined) {
-	window = {};
+	window = self;
 	localStorage = null;
 	document = null;
 	isInWebWorker = true;
+	viewMode = "console";
 } else {
 	isInWebWorker = false;
 }

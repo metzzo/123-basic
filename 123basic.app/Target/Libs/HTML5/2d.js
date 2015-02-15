@@ -805,53 +805,55 @@ function getOffsetTop(elem) {
     return offsetTop;
 }
 
-(function() {
-  var hidden = "hidden";
+if (!isInWebWorker) {
+	(function() {
+	  var hidden = "hidden";
 
-  // Standards:
-  if (hidden in document)
-    document.addEventListener("visibilitychange", onchange);
-  else if ((hidden = "mozHidden") in document)
-    document.addEventListener("mozvisibilitychange", onchange);
-  else if ((hidden = "webkitHidden") in document)
-    document.addEventListener("webkitvisibilitychange", onchange);
-  else if ((hidden = "msHidden") in document)
-    document.addEventListener("msvisibilitychange", onchange);
-  // IE 9 and lower:
-  else if ("onfocusin" in document)
-    document.onfocusin = document.onfocusout = onchange;
-  // All others:
-  else
-    window.onpageshow = window.onpagehide
-    = window.onfocus = window.onblur = onchange;
+	  // Standards:
+	  if (hidden in document)
+		document.addEventListener("visibilitychange", onchange);
+	  else if ((hidden = "mozHidden") in document)
+		document.addEventListener("mozvisibilitychange", onchange);
+	  else if ((hidden = "webkitHidden") in document)
+		document.addEventListener("webkitvisibilitychange", onchange);
+	  else if ((hidden = "msHidden") in document)
+		document.addEventListener("msvisibilitychange", onchange);
+	  // IE 9 and lower:
+	  else if ("onfocusin" in document)
+		document.onfocusin = document.onfocusout = onchange;
+	  // All others:
+	  else
+		window.onpageshow = window.onpagehide
+		= window.onfocus = window.onblur = onchange;
 
-  function onchange (evt) {
-    var v = "visible", h = "hidden",
-        evtMap = {
-          focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
-        };
+	  function onchange (evt) {
+		var v = "visible", h = "hidden",
+			evtMap = {
+			  focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
+			};
 
-    evt = evt || window.event;
-    
-	var prev = autopauseActive;
-	
-	if (evt.type in evtMap)
-      autopauseActive = evtMap[evt.type] === "hidden" ? true : false;
-    else
-      autopauseActive = this[hidden];
-	  
-	if (autopauseEnabled && autopauseActive != prev) {
-		if (autopauseActive && window['GLB_ON_PAUSE']) {
-			window['GLB_ON_PAUSE']();
+		evt = evt || window.event;
+		
+		var prev = autopauseActive;
+		
+		if (evt.type in evtMap)
+		  autopauseActive = evtMap[evt.type] === "hidden" ? true : false;
+		else
+		  autopauseActive = this[hidden];
+		  
+		if (autopauseEnabled && autopauseActive != prev) {
+			if (autopauseActive && window['GLB_ON_PAUSE']) {
+				window['GLB_ON_PAUSE']();
+			}
+			if (!autopauseActive && window['GLB_ON_RESUME']) {
+				window['GLB_ON_RESUME']();
+			}
+			lastShwscrn = GETTIMERALL();
 		}
-		if (!autopauseActive && window['GLB_ON_RESUME']) {
-			window['GLB_ON_RESUME']();
-		}
-		lastShwscrn = GETTIMERALL();
-	}
-  }
+	  }
 
-  // set the initial state (but only if browser supports the Page Visibility API)
-  if( document[hidden] !== undefined )
-    onchange({type: document[hidden] ? "blur" : "focus"});
-})();
+	  // set the initial state (but only if browser supports the Page Visibility API)
+	  if( document[hidden] !== undefined )
+		onchange({type: document[hidden] ? "blur" : "focus"});
+	})();
+}

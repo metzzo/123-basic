@@ -11,7 +11,7 @@
 	<target name="html5" lang="js">
 		<template path="HTMLTEMPLATE" name="123File.html" mode="console 2d 3d" />
 		
-		<lib path="workerBootstrap.js" mode="console" />
+		<lib path="workerBootstrap.js" mode="console 2d 3d" />
 		<lib path="lib.js" mode="console 2d 3d" />
 		<lib path="array.js" mode="console 2d 3d" />
 		<lib path="math.js" mode="console 2d 3d" />
