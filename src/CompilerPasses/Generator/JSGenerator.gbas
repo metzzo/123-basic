@@ -118,6 +118,7 @@ FUNCTION JS_Generator$:
 
 			Text$ = Text$ +"window ['"+Typ.Name$+"'] = function() { this.reset(); }"+NewLine$()
 			IndentUp()
+			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.getTypeName = function() { return \"" + Typ.Name$ + "\" };"+NewLine$()
 			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.reset = function() {"+NewLine$()
 
 			//defaults setzen

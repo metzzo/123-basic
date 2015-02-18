@@ -512,7 +512,7 @@ function SLEEP(time) {
 //LocalStorage wrapper to cookies (if there is no localStorage) Found on the MDN
 //-----------------------------------------------------------
 
-if (!window.localStorage && !isInWebworker) {
+if (!window.localStorage && !isInWebWorker) {
   Object.defineProperty(window, "localStorage", new (function () {
     var aKeys = [], oStorage = {};
     Object.defineProperty(oStorage, "getItem", {
@@ -859,7 +859,9 @@ var array_pools = { };
 
 var pool_array = {
 	alloc: function(defval) {
-		var typ = typeof defval
+		if (defval.constructor === Array) return new OTTArray(defval);
+		
+		var typ = defval.getTypeName !== undefined ? defval.getTypeName() : typeof defval;
 		var obj = array_pools[typ];
 		if (obj !== undefined && obj !== null) {
 			array_pools[typ] = obj.succ;
@@ -871,7 +873,7 @@ var pool_array = {
 	},
 	free: function(obj) {
 		if (obj.succ !== null || obj.constructor === Array) return;
-		var typ = typeof obj.defval;
+		var typ = defval.getTypeName !== undefined ? defval.getTypeName() : typeof defval;
 		if (array_pools[typ] === undefined) {
 			array_pools[typ] = null;
 		}

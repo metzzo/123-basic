@@ -512,7 +512,7 @@ function SLEEP(time) {
 //LocalStorage wrapper to cookies (if there is no localStorage) Found on the MDN
 //-----------------------------------------------------------
 
-if (!window.localStorage && !isInWebworker) {
+if (!window.localStorage && !isInWebWorker) {
   Object.defineProperty(window, "localStorage", new (function () {
     var aKeys = [], oStorage = {};
     Object.defineProperty(oStorage, "getItem", {
@@ -859,7 +859,9 @@ var array_pools = { };
 
 var pool_array = {
 	alloc: function(defval) {
-		var typ = typeof defval
+		if (defval.constructor === Array) return new OTTArray(defval);
+		
+		var typ = defval.getTypeName !== undefined ? defval.getTypeName() : typeof defval;
 		var obj = array_pools[typ];
 		if (obj !== undefined && obj !== null) {
 			array_pools[typ] = obj.succ;
@@ -871,7 +873,7 @@ var pool_array = {
 	},
 	free: function(obj) {
 		if (obj.succ !== null || obj.constructor === Array) return;
-		var typ = typeof obj.defval;
+		var typ = defval.getTypeName !== undefined ? defval.getTypeName() : typeof defval;
 		if (array_pools[typ] === undefined) {
 			array_pools[typ] = null;
 		}
@@ -9391,10 +9393,10 @@ func7_HashStr = window['func7_HashStr'];
 window['func16_JS_Generator_Str'] = function() {
 	stackPush("function: JS_Generator_Str", __debugInfo);
 	try {
-		__debugInfo = "291:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "292:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		{
 			var Err_Str = "";
-			__debugInfo = "292:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "293:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			try {
 				var local11_InWebWorker_1932 = 0, local8_Text_Str_1933 = "", local14_StaticText_Str_1934 = "", local17_StaticDefText_Str_1935 = "";
 				__debugInfo = "28:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -9526,10 +9528,10 @@ window['func16_JS_Generator_Str'] = function() {
 					forEachSaver5440.values[forEachCounter5440] = local4_Func_ref_1939;
 				
 				};
-				__debugInfo = "249:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				var forEachSaver6377 = global8_Compiler.attr5_Types_ref[0];
-				for(var forEachCounter6377 = 0 ; forEachCounter6377 < forEachSaver6377.values.length ; forEachCounter6377++) {
-					var local3_Typ_ref_1940 = forEachSaver6377.values[forEachCounter6377];
+				__debugInfo = "250:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				var forEachSaver6396 = global8_Compiler.attr5_Types_ref[0];
+				for(var forEachCounter6396 = 0 ; forEachCounter6396 < forEachSaver6396.values.length ; forEachCounter6396++) {
+					var local3_Typ_ref_1940 = forEachSaver6396.values[forEachCounter6396];
 				{
 						var local5_typId_1941 = 0, local3_map_1942 = pool_HashMap.alloc(), local5_First_1943 = 0, local4_map2_1952 = pool_HashMap.alloc();
 						__debugInfo = "92:\src\CompilerPasses\Generator\JSGenerator.gbas";
@@ -9591,340 +9593,342 @@ window['func16_JS_Generator_Str'] = function() {
 						__debugInfo = "121:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						func8_IndentUp();
 						__debugInfo = "122:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((((((local8_Text_Str_1933) + ("window['"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("'].prototype.getTypeName = function() { return \""))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("\" };"))) + (func11_NewLine_Str()));
+						__debugInfo = "123:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("window['"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("'].prototype.reset = function() {"))) + (func11_NewLine_Str()));
-						__debugInfo = "132:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver5686 = local3_Typ_ref_1940[0].attr10_Attributes;
-						for(var forEachCounter5686 = 0 ; forEachCounter5686 < forEachSaver5686.values.length ; forEachCounter5686++) {
-							var local4_Attr_1945 = forEachSaver5686.values[forEachCounter5686];
+						__debugInfo = "133:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver5705 = local3_Typ_ref_1940[0].attr10_Attributes;
+						for(var forEachCounter5705 = 0 ; forEachCounter5705 < forEachSaver5705.values.length ; forEachCounter5705++) {
+							var local4_Attr_1945 = forEachSaver5705.values[forEachCounter5705];
 						{
 								var alias8_variable_ref_1946 = [pool_TIdentifierVari.alloc()];
-								__debugInfo = "126:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								alias8_variable_ref_1946 = global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1945).values[tmpPositionCache] /* ALIAS */;
 								__debugInfo = "127:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1946[0].attr8_Name_Str));
+								alias8_variable_ref_1946 = global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1945).values[tmpPositionCache] /* ALIAS */;
 								__debugInfo = "128:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								local8_Text_Str_1933 = ((local8_Text_Str_1933) + (" = "));
+								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1946[0].attr8_Name_Str));
 								__debugInfo = "129:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								local8_Text_Str_1933 = ((local8_Text_Str_1933) + (" = "));
+								__debugInfo = "130:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func21_JSGetDefaultValue_Str(alias8_variable_ref_1946[0].attr8_datatype, alias8_variable_ref_1946[0].attr3_ref, 0)));
-								__debugInfo = "131:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "132:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (";"))) + (func11_NewLine_Str()));
-								__debugInfo = "126:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1946);
+								__debugInfo = "127:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1946);
 							}
-							forEachSaver5686.values[forEachCounter5686] = local4_Attr_1945;
+							forEachSaver5705.values[forEachCounter5705] = local4_Attr_1945;
 						
 						};
-						__debugInfo = "135:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "136:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("this.vtbl = vtbl_"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + (";"))) + (func11_NewLine_Str()));
-						__debugInfo = "149:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver5776 = local3_Typ_ref_1940[0].attr10_Attributes;
-						for(var forEachCounter5776 = 0 ; forEachCounter5776 < forEachSaver5776.values.length ; forEachCounter5776++) {
-							var local4_Attr_1947 = forEachSaver5776.values[forEachCounter5776];
+						__debugInfo = "150:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver5795 = local3_Typ_ref_1940[0].attr10_Attributes;
+						for(var forEachCounter5795 = 0 ; forEachCounter5795 < forEachSaver5795.values.length ; forEachCounter5795++) {
+							var local4_Attr_1947 = forEachSaver5795.values[forEachCounter5795];
 						{
 								var alias8_variable_ref_1948 = [pool_TIdentifierVari.alloc()];
-								__debugInfo = "139:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "140:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								alias8_variable_ref_1948 = global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1947).values[tmpPositionCache] /* ALIAS */;
-								__debugInfo = "148:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "149:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								if ((((alias8_variable_ref_1948[0].attr6_PreDef) !== (-(1))) ? 1 : 0)) {
-									__debugInfo = "141:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1948[0].attr8_Name_Str));
 									__debugInfo = "142:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (" = "));
+									local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1948[0].attr8_Name_Str));
 									__debugInfo = "143:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									if (alias8_variable_ref_1948[0].attr3_ref) {
-										__debugInfo = "143:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("["));
-										__debugInfo = "143:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									};
+									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (" = "));
 									__debugInfo = "144:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(alias8_variable_ref_1948[0].attr6_PreDef).values[tmpPositionCache][0]))));
-									__debugInfo = "145:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									if (alias8_variable_ref_1948[0].attr3_ref) {
-										__debugInfo = "145:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("]"));
-										__debugInfo = "145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										__debugInfo = "144:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("["));
+										__debugInfo = "144:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									};
-									__debugInfo = "147:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(alias8_variable_ref_1948[0].attr6_PreDef).values[tmpPositionCache][0]))));
+									__debugInfo = "146:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									if (alias8_variable_ref_1948[0].attr3_ref) {
+										__debugInfo = "146:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("]"));
+										__debugInfo = "146:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									};
+									__debugInfo = "148:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (";"))) + (func11_NewLine_Str()));
-									__debugInfo = "141:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "142:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								};
-								__debugInfo = "139:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1948);
+								__debugInfo = "140:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1948);
 							}
-							forEachSaver5776.values[forEachCounter5776] = local4_Attr_1947;
+							forEachSaver5795.values[forEachCounter5795] = local4_Attr_1947;
 						
 						};
-						__debugInfo = "151:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("this.pool = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (";"))) + (func11_NewLine_Str()));
 						__debugInfo = "152:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("this.pool = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (";"))) + (func11_NewLine_Str()));
+						__debugInfo = "153:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this.succ = null;"))) + (func11_NewLine_Str()));
-						__debugInfo = "154:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
 						__debugInfo = "155:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						__debugInfo = "156:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + (func11_NewLine_Str()))) + ("};"))) + (func11_NewLine_Str()));
-						__debugInfo = "157:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
 						__debugInfo = "158:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("window['"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("'].prototype.clone = function() {"))) + (func11_NewLine_Str()));
+						func8_IndentUp();
 						__debugInfo = "159:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("window['"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("'].prototype.clone = function() {"))) + (func11_NewLine_Str()));
+						__debugInfo = "160:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("var other = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".alloc();"))) + (func11_NewLine_Str()));
-						__debugInfo = "181:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver5968 = local3_Typ_ref_1940[0].attr10_Attributes;
-						for(var forEachCounter5968 = 0 ; forEachCounter5968 < forEachSaver5968.values.length ; forEachCounter5968++) {
-							var local4_Attr_1949 = forEachSaver5968.values[forEachCounter5968];
+						__debugInfo = "182:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver5987 = local3_Typ_ref_1940[0].attr10_Attributes;
+						for(var forEachCounter5987 = 0 ; forEachCounter5987 < forEachSaver5987.values.length ; forEachCounter5987++) {
+							var local4_Attr_1949 = forEachSaver5987.values[forEachCounter5987];
 						{
 								var alias8_variable_ref_1950 = [pool_TIdentifierVari.alloc()], local8_plzclone_1951 = 0;
-								__debugInfo = "161:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "162:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								alias8_variable_ref_1950 = global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache] /* ALIAS */;
-								__debugInfo = "166:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "167:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local8_plzclone_1951 = 0;
-								__debugInfo = "171:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "172:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								if (((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (0)) ? 1 : 0)) && ((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("int")) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0))) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-									__debugInfo = "168:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "169:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									local8_plzclone_1951 = 0;
-									__debugInfo = "168:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "169:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								} else {
-									__debugInfo = "170:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "171:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									local8_plzclone_1951 = 1;
-									__debugInfo = "170:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								};
-								__debugInfo = "173:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								if (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr3_ref) {
-									__debugInfo = "173:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_plzclone_1951 = 1;
-									__debugInfo = "173:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "171:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								};
 								__debugInfo = "174:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								if (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Attr_1949).values[tmpPositionCache][0].attr3_ref) {
+									__debugInfo = "174:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									local8_plzclone_1951 = 1;
+									__debugInfo = "174:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								};
+								__debugInfo = "175:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("other."))) + (alias8_variable_ref_1950[0].attr8_Name_Str))) + (" = "));
-								__debugInfo = "176:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								if (local8_plzclone_1951) {
-									__debugInfo = "176:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("tryClone("));
-									__debugInfo = "176:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								};
 								__debugInfo = "177:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1950[0].attr8_Name_Str));
-								__debugInfo = "178:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								if (local8_plzclone_1951) {
-									__debugInfo = "178:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (")"));
-									__debugInfo = "178:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "177:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("tryClone("));
+									__debugInfo = "177:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								};
-								__debugInfo = "180:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "178:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("this."))) + (alias8_variable_ref_1950[0].attr8_Name_Str));
+								__debugInfo = "179:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								if (local8_plzclone_1951) {
+									__debugInfo = "179:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (")"));
+									__debugInfo = "179:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								};
+								__debugInfo = "181:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (";"))) + (func11_NewLine_Str()));
-								__debugInfo = "161:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1950);
+								__debugInfo = "162:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias8_variable_ref_1950);
 							}
-							forEachSaver5968.values[forEachCounter5968] = local4_Attr_1949;
+							forEachSaver5987.values[forEachCounter5987] = local4_Attr_1949;
 						
 						};
-						__debugInfo = "183:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("other.vtbl = this.vtbl;"))) + (func11_NewLine_Str()));
 						__debugInfo = "184:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("other.vtbl = this.vtbl;"))) + (func11_NewLine_Str()));
+						__debugInfo = "185:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("other.pool = this.pool;"))) + (func11_NewLine_Str()));
-						__debugInfo = "187:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
 						__debugInfo = "188:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("return other;"))) + (func11_NewLine_Str()));
+						func10_IndentDown();
 						__debugInfo = "189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("return other;"))) + (func11_NewLine_Str()));
+						__debugInfo = "190:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("};"))) + (func11_NewLine_Str()));
-						__debugInfo = "191:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
 						__debugInfo = "192:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (" = { "))) + (func11_NewLine_Str()));
+						func8_IndentUp();
 						__debugInfo = "193:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("last: null, "))) + (func11_NewLine_Str()));
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (" = { "))) + (func11_NewLine_Str()));
 						__debugInfo = "194:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("last: null, "))) + (func11_NewLine_Str()));
 						__debugInfo = "195:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("alloc: function() { "))) + (func11_NewLine_Str()));
+						func8_IndentUp();
 						__debugInfo = "196:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("var obj = null;"))) + (func11_NewLine_Str()));
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("alloc: function() { "))) + (func11_NewLine_Str()));
 						__debugInfo = "197:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("var obj = null;"))) + (func11_NewLine_Str()));
 						__debugInfo = "198:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("if (pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last !== null) {"))) + (func11_NewLine_Str()));
+						func8_IndentUp();
 						__debugInfo = "199:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last;"))) + (func11_NewLine_Str()));
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("if (pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last !== null) {"))) + (func11_NewLine_Str()));
 						__debugInfo = "200:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last = obj.succ;"))) + (func11_NewLine_Str()));
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last;"))) + (func11_NewLine_Str()));
 						__debugInfo = "201:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last = obj.succ;"))) + (func11_NewLine_Str()));
 						__debugInfo = "202:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("obj.succ = null;"))) + (func11_NewLine_Str()));
+						func10_IndentDown();
 						__debugInfo = "203:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("obj.succ = null;"))) + (func11_NewLine_Str()));
 						__debugInfo = "204:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("} else {"))) + (func11_NewLine_Str()));
-						__debugInfo = "205:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						__debugInfo = "206:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj = new "))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("();"))) + (func11_NewLine_Str()));
-						__debugInfo = "207:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
-						__debugInfo = "208:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						__debugInfo = "209:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("return obj;"))) + (func11_NewLine_Str()));
-						__debugInfo = "210:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("},"))) + (func11_NewLine_Str()));
-						__debugInfo = "211:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						func8_IndentUp();
-						__debugInfo = "212:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("free: function(obj)  {"))) + (func11_NewLine_Str()));
-						__debugInfo = "213:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("if (obj.succ !== null) return;"))) + (func11_NewLine_Str()));
-						__debugInfo = "214:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("obj.reset();"))) + (func11_NewLine_Str()));
-						__debugInfo = "215:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj.succ = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last;"))) + (func11_NewLine_Str()));
-						__debugInfo = "216:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "205:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("} else {"))) + (func11_NewLine_Str()));
+						__debugInfo = "206:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						func10_IndentDown();
-						__debugInfo = "217:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last = obj;"))) + (func11_NewLine_Str()));
-						__debugInfo = "218:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						__debugInfo = "219:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "207:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj = new "))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("();"))) + (func11_NewLine_Str()));
+						__debugInfo = "208:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
+						__debugInfo = "209:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						__debugInfo = "210:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("return obj;"))) + (func11_NewLine_Str()));
+						__debugInfo = "211:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("},"))) + (func11_NewLine_Str()));
+						__debugInfo = "212:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func8_IndentUp();
+						__debugInfo = "213:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("free: function(obj)  {"))) + (func11_NewLine_Str()));
+						__debugInfo = "214:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("if (obj.succ !== null) return;"))) + (func11_NewLine_Str()));
+						__debugInfo = "215:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("obj.reset();"))) + (func11_NewLine_Str()));
+						__debugInfo = "216:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("obj.succ = pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last;"))) + (func11_NewLine_Str()));
+						__debugInfo = "217:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						__debugInfo = "218:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + ("pool_"))) + (local3_Typ_ref_1940[0].attr9_OName_Str))) + (".last = obj;"))) + (func11_NewLine_Str()));
+						__debugInfo = "219:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
 						__debugInfo = "220:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
-						__debugInfo = "222:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "221:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
+						__debugInfo = "223:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						if (local11_InWebWorker_1932) {
-							__debugInfo = "222:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "223:\src\CompilerPasses\Generator\JSGenerator.gbas";
 							local8_Text_Str_1933 = ((((((((((local8_Text_Str_1933) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + (" = window['"))) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + ("'];"))) + (func11_NewLine_Str()));
-							__debugInfo = "222:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "223:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						};
-						__debugInfo = "225:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "226:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local5_typId_1941 = local3_Typ_ref_1940[0].attr2_ID;
-						__debugInfo = "228:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "229:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local5_First_1943 = 0;
-						__debugInfo = "248:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "249:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						while ((((local5_typId_1941) !== (-(1))) ? 1 : 0)) {
-							__debugInfo = "245:\src\CompilerPasses\Generator\JSGenerator.gbas";
-							var forEachSaver6366 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1941).values[tmpPositionCache][0].attr7_Methods;
-							for(var forEachCounter6366 = 0 ; forEachCounter6366 < forEachSaver6366.values.length ; forEachCounter6366++) {
-								var local3_Mth_1953 = forEachSaver6366.values[forEachCounter6366];
+							__debugInfo = "246:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							var forEachSaver6385 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1941).values[tmpPositionCache][0].attr7_Methods;
+							for(var forEachCounter6385 = 0 ; forEachCounter6385 < forEachSaver6385.values.length ; forEachCounter6385++) {
+								var local3_Mth_1953 = forEachSaver6385.values[forEachCounter6385];
 							{
-									__debugInfo = "244:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "245:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									if (((((((local4_map2_1952).DoesKeyExist(global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str)) ? 0 : 1)) && ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr3_Scp) !== (-(1))) ? 1 : 0))) ? 1 : 0)) {
-										__debugInfo = "232:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										func8_IndentUp();
 										__debugInfo = "233:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((((((((((((local8_Text_Str_1933) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + (".prototype."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str))) + (" = function() {"))) + (func11_NewLine_Str()))) + (" return "));
+										func8_IndentUp();
 										__debugInfo = "234:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("this.vtbl."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str))) + ("("));
+										local8_Text_Str_1933 = ((((((((((((local8_Text_Str_1933) + (local3_Typ_ref_1940[0].attr8_Name_Str))) + (".prototype."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str))) + (" = function() {"))) + (func11_NewLine_Str()))) + (" return "));
 										__debugInfo = "235:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("this.vtbl."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str))) + ("("));
+										__debugInfo = "236:\src\CompilerPasses\Generator\JSGenerator.gbas";
 										{
 											var local1_i_1954 = 0.0;
-											__debugInfo = "238:\src\CompilerPasses\Generator\JSGenerator.gbas";
+											__debugInfo = "239:\src\CompilerPasses\Generator\JSGenerator.gbas";
 											for (local1_i_1954 = 0;toCheck(local1_i_1954, ((BOUNDS(global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr6_Params, 0)) - (2)), 1);local1_i_1954 += 1) {
-												__debugInfo = "237:\src\CompilerPasses\Generator\JSGenerator.gbas";
+												__debugInfo = "238:\src\CompilerPasses\Generator\JSGenerator.gbas";
 												local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("arguments["))) + (CAST2STRING(local1_i_1954)))) + ("], "));
-												__debugInfo = "237:\src\CompilerPasses\Generator\JSGenerator.gbas";
+												__debugInfo = "238:\src\CompilerPasses\Generator\JSGenerator.gbas";
 											};
-											__debugInfo = "238:\src\CompilerPasses\Generator\JSGenerator.gbas";
+											__debugInfo = "239:\src\CompilerPasses\Generator\JSGenerator.gbas";
 										};
-										__debugInfo = "240:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("this"));
 										__debugInfo = "241:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										func10_IndentDown();
+										local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("this"));
 										__debugInfo = "242:\src\CompilerPasses\Generator\JSGenerator.gbas";
-										local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + (");"))) + (func11_NewLine_Str()))) + ("};"))) + (func11_NewLine_Str()));
+										func10_IndentDown();
 										__debugInfo = "243:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										local8_Text_Str_1933 = ((((((((local8_Text_Str_1933) + (");"))) + (func11_NewLine_Str()))) + ("};"))) + (func11_NewLine_Str()));
+										__debugInfo = "244:\src\CompilerPasses\Generator\JSGenerator.gbas";
 										(local4_map2_1952).Put(global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1953).values[tmpPositionCache][0].attr9_OName_Str, local3_Mth_1953);
-										__debugInfo = "232:\src\CompilerPasses\Generator\JSGenerator.gbas";
+										__debugInfo = "233:\src\CompilerPasses\Generator\JSGenerator.gbas";
 									};
-									__debugInfo = "244:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									__debugInfo = "245:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								}
-								forEachSaver6366.values[forEachCounter6366] = local3_Mth_1953;
+								forEachSaver6385.values[forEachCounter6385] = local3_Mth_1953;
 							
 							};
-							__debugInfo = "247:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "248:\src\CompilerPasses\Generator\JSGenerator.gbas";
 							local5_typId_1941 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1941).values[tmpPositionCache][0].attr9_Extending;
-							__debugInfo = "245:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "246:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						};
 						__debugInfo = "92:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_HashMap.free(local3_map_1942);pool_HashMap.free(local4_map2_1952);
 					}
-					forEachSaver6377.values[forEachCounter6377] = local3_Typ_ref_1940;
+					forEachSaver6396.values[forEachCounter6396] = local3_Typ_ref_1940;
 				
 				};
-				__debugInfo = "261:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				var forEachSaver6436 = global8_Compiler.attr10_DataBlocks;
-				for(var forEachCounter6436 = 0 ; forEachCounter6436 < forEachSaver6436.values.length ; forEachCounter6436++) {
-					var local5_block_1955 = forEachSaver6436.values[forEachCounter6436];
+				__debugInfo = "262:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				var forEachSaver6455 = global8_Compiler.attr10_DataBlocks;
+				for(var forEachCounter6455 = 0 ; forEachCounter6455 < forEachSaver6455.values.length ; forEachCounter6455++) {
+					var local5_block_1955 = forEachSaver6455.values[forEachCounter6455];
 				{
 						var local4_Done_1956 = 0;
-						__debugInfo = "253:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("var datablock_"))) + (local5_block_1955.attr8_Name_Str))) + (" = [ "));
 						__debugInfo = "254:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1933 = ((((((local8_Text_Str_1933) + ("var datablock_"))) + (local5_block_1955.attr8_Name_Str))) + (" = [ "));
+						__debugInfo = "255:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local4_Done_1956 = 0;
-						__debugInfo = "259:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver6428 = local5_block_1955.attr5_Datas;
-						for(var forEachCounter6428 = 0 ; forEachCounter6428 < forEachSaver6428.values.length ; forEachCounter6428++) {
-							var local1_d_1957 = forEachSaver6428.values[forEachCounter6428];
+						__debugInfo = "260:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver6447 = local5_block_1955.attr5_Datas;
+						for(var forEachCounter6447 = 0 ; forEachCounter6447 < forEachSaver6447.values.length ; forEachCounter6447++) {
+							var local1_d_1957 = forEachSaver6447.values[forEachCounter6447];
 						{
-								__debugInfo = "256:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								if (local4_Done_1956) {
-									__debugInfo = "256:\src\CompilerPasses\Generator\JSGenerator.gbas";
-									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (", "));
-									__debugInfo = "256:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								};
 								__debugInfo = "257:\src\CompilerPasses\Generator\JSGenerator.gbas";
-								local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_d_1957).values[tmpPositionCache][0]))));
+								if (local4_Done_1956) {
+									__debugInfo = "257:\src\CompilerPasses\Generator\JSGenerator.gbas";
+									local8_Text_Str_1933 = ((local8_Text_Str_1933) + (", "));
+									__debugInfo = "257:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								};
 								__debugInfo = "258:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_d_1957).values[tmpPositionCache][0]))));
+								__debugInfo = "259:\src\CompilerPasses\Generator\JSGenerator.gbas";
 								local4_Done_1956 = 1;
-								__debugInfo = "256:\src\CompilerPasses\Generator\JSGenerator.gbas";
+								__debugInfo = "257:\src\CompilerPasses\Generator\JSGenerator.gbas";
 							}
-							forEachSaver6428.values[forEachCounter6428] = local1_d_1957;
+							forEachSaver6447.values[forEachCounter6447] = local1_d_1957;
 						
 						};
-						__debugInfo = "260:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "261:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (" ];"))) + (func11_NewLine_Str()));
-						__debugInfo = "253:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "254:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					}
-					forEachSaver6436.values[forEachCounter6436] = local5_block_1955;
+					forEachSaver6455.values[forEachCounter6455] = local5_block_1955;
 				
 				};
-				__debugInfo = "269:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "270:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if ((((BOUNDS(global8_Compiler.attr7_Globals, 0)) > (0)) ? 1 : 0)) {
-					__debugInfo = "265:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("var "));
 					__debugInfo = "266:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((local8_Text_Str_1933) + ("var "));
+					__debugInfo = "267:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1933 = ((local8_Text_Str_1933) + (func13_JSVariDef_Str(unref(global8_Compiler.attr7_Globals), 1, 0, 1)));
-					__debugInfo = "268:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "269:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (";"))) + (func11_NewLine_Str()));
-					__debugInfo = "265:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				};
-				__debugInfo = "282:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				if ((((TRIM_Str(local14_StaticText_Str_1934, " \t\r\n\v\f")) !== ("")) ? 1 : 0)) {
-					__debugInfo = "272:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("// set default statics:"))) + (func11_NewLine_Str()));
-					__debugInfo = "273:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((local17_StaticDefText_Str_1935) + (local8_Text_Str_1933));
-					__debugInfo = "274:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "275:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("window['initStatics'] = function() {"))) + (func11_NewLine_Str()));
-					__debugInfo = "276:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "277:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (local14_StaticText_Str_1934))) + (func11_NewLine_Str()));
-					__debugInfo = "278:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
-					__debugInfo = "272:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				} else {
-					__debugInfo = "281:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("window['initStatics'] = function() {}"))) + (func11_NewLine_Str()));
-					__debugInfo = "281:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "266:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
 				__debugInfo = "283:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				if (local11_InWebWorker_1932) {
-					__debugInfo = "283:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("initStatics = window['initStatics'];"))) + (func11_NewLine_Str()));
-					__debugInfo = "283:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				if ((((TRIM_Str(local14_StaticText_Str_1934, " \t\r\n\v\f")) !== ("")) ? 1 : 0)) {
+					__debugInfo = "273:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("// set default statics:"))) + (func11_NewLine_Str()));
+					__debugInfo = "274:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((local17_StaticDefText_Str_1935) + (local8_Text_Str_1933));
+					__debugInfo = "275:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "276:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("window['initStatics'] = function() {"))) + (func11_NewLine_Str()));
+					__debugInfo = "277:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "278:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + (local14_StaticText_Str_1934))) + (func11_NewLine_Str()));
+					__debugInfo = "279:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("}"))) + (func11_NewLine_Str()));
+					__debugInfo = "273:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				} else {
+					__debugInfo = "282:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("window['initStatics'] = function() {}"))) + (func11_NewLine_Str()));
+					__debugInfo = "282:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "285:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "284:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				if (local11_InWebWorker_1932) {
+					__debugInfo = "284:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("initStatics = window['initStatics'];"))) + (func11_NewLine_Str()));
+					__debugInfo = "284:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				};
+				__debugInfo = "286:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();"))) + (func11_NewLine_Str()));
-				__debugInfo = "287:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "288:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("delete preInitFuncs;"))) + (func11_NewLine_Str()));
-				__debugInfo = "290:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "291:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				return tryClone(local8_Text_Str_1933);
 				__debugInfo = "28:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			} catch (Err_Str) {
@@ -9932,11 +9936,11 @@ window['func16_JS_Generator_Str'] = function() {
 					
 				}
 			};
-			__debugInfo = "292:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "293:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		};
-		__debugInfo = "293:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "294:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "291:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "292:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -9948,2914 +9952,2914 @@ window['func16_JS_Generator_Str'] = function() {
 };
 func16_JS_Generator_Str = window['func16_JS_Generator_Str'];
 window['func14_JSGenerate_Str'] = function(param4_expr) {
-		var __labels = {"Exit": 8003};
+		var __labels = {"Exit": 8022};
 		
 	stackPush("function: JSGenerate_Str", __debugInfo);
 	try {
 		var local8_Text_Str_1960 = "";
-		var __pc = 6559;
+		var __pc = 6578;
 		while(__pc >= 0) {
 			switch(__pc) {
-				case 6559:
-					__debugInfo = "301:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				case 6578:
+					__debugInfo = "302:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global8_Compiler.attr11_currentPosi = param4_expr.attr5_tokID;
 					
-				__debugInfo = "302:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				local8_Text_Str_1960 = "";
 				__debugInfo = "303:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				local8_Text_Str_1960 = "";
+				__debugInfo = "304:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				
 					var local17___SelectHelper10__1961 = 0;
-					case 6569:
-						__debugInfo = "303:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6588:
+						__debugInfo = "304:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local17___SelectHelper10__1961 = param4_expr.attr3_Typ;
 						
-					case 11055:
-						__debugInfo = "1127:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper10__1961) === (~~(2))) ? 1 : 0))) { __pc = 6571; break; }
+					case 11074:
+						__debugInfo = "1128:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper10__1961) === (~~(2))) ? 1 : 0))) { __pc = 6590; break; }
 					
 					var local4_oScp_1962 = 0.0, local5_oFunc_1963 = 0.0, local13_oLabelDef_Str_1964 = "", local9_oIsInGoto_1965 = 0, local6_IsFunc_1966 = 0, local7_mngGoto_1967 = 0, local13_IsStackPusher_1968 = 0, local7_Def_Str_1972 = "", local15_BeforeUndef_Str_1973 = "", local11_MyUndef_Str_1974 = "", local8_ERes_Str_1978 = pool_array.alloc(""), local13_FirstText_Str_1981 = "";
-					case 6576:
-						__debugInfo = "305:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6595:
+						__debugInfo = "306:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local4_oScp_1962 = global12_CurrentScope;
 						
-					__debugInfo = "306:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local5_oFunc_1963 = global11_CurrentFunc;
 					__debugInfo = "307:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local13_oLabelDef_Str_1964 = global12_LabelDef_Str;
+					local5_oFunc_1963 = global11_CurrentFunc;
 					__debugInfo = "308:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local9_oIsInGoto_1965 = global8_IsInGoto;
+					local13_oLabelDef_Str_1964 = global12_LabelDef_Str;
 					__debugInfo = "309:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_IsFunc_1966 = 0;
+					local9_oIsInGoto_1965 = global8_IsInGoto;
 					__debugInfo = "310:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local7_mngGoto_1967 = 0;
+					local6_IsFunc_1966 = 0;
 					__debugInfo = "311:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local7_mngGoto_1967 = 0;
+					__debugInfo = "312:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local13_IsStackPusher_1968 = 0;
-					case 6622:
-						__debugInfo = "312:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((param4_expr.attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((param4_expr.attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0))) { __pc = 6617; break; }
+					case 6641:
+						__debugInfo = "313:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((param4_expr.attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((param4_expr.attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0))) { __pc = 6636; break; }
 					
-					case 6621:
-						__debugInfo = "312:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6640:
+						__debugInfo = "313:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local13_IsStackPusher_1968 = 1;
 						
-					__debugInfo = "312:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "313:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 6617: //dummy jumper1
+				case 6636: //dummy jumper1
 					;
 						
-					case 6635:
-						__debugInfo = "317:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((func12_ScopeHasGoto(param4_expr)) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 6627; break; }
+					case 6654:
+						__debugInfo = "318:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((func12_ScopeHasGoto(param4_expr)) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 6646; break; }
 					
-					case 6631:
-						__debugInfo = "315:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6650:
+						__debugInfo = "316:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_mngGoto_1967 = 1;
 						
-					__debugInfo = "316:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "317:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global8_IsInGoto = 1;
-					__debugInfo = "315:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "316:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 6627: //dummy jumper1
+				case 6646: //dummy jumper1
 					;
 						
-					case 6672:
-						__debugInfo = "332:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((param4_expr.attr6_ScpTyp) === (2)) ? 1 : 0))) { __pc = 6641; break; }
+					case 6691:
+						__debugInfo = "333:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((param4_expr.attr6_ScpTyp) === (2)) ? 1 : 0))) { __pc = 6660; break; }
 					
 					var local1_i_1969 = 0;
-					case 6671:
-						__debugInfo = "331:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver6671 = global8_Compiler.attr5_Funcs_ref[0];
-					var forEachCounter6671 = 0
+					case 6690:
+						__debugInfo = "332:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver6690 = global8_Compiler.attr5_Funcs_ref[0];
+					var forEachCounter6690 = 0
 					
-				case 6649: //dummy for1
-					if (!(forEachCounter6671 < forEachSaver6671.values.length)) {__pc = 6645; break;}
-					var local4_Func_ref_1970 = forEachSaver6671.values[forEachCounter6671];
+				case 6668: //dummy for1
+					if (!(forEachCounter6690 < forEachSaver6690.values.length)) {__pc = 6664; break;}
+					var local4_Func_ref_1970 = forEachSaver6690.values[forEachCounter6690];
 					
 					
-					case 6667:
-						__debugInfo = "329:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local4_Func_ref_1970[0].attr3_Scp) === (param4_expr.attr2_ID)) ? 1 : 0))) { __pc = 6658; break; }
+					case 6686:
+						__debugInfo = "330:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local4_Func_ref_1970[0].attr3_Scp) === (param4_expr.attr2_ID)) ? 1 : 0))) { __pc = 6677; break; }
 					
-					case 6662:
-						__debugInfo = "324:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6681:
+						__debugInfo = "325:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						global11_CurrentFunc = local1_i_1969;
 						
-					__debugInfo = "325:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "326:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local6_IsFunc_1966 = 1;
-					case 6666:
-						__debugInfo = "328:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						__pc = 6645; break;
+					case 6685:
+						__debugInfo = "329:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__pc = 6664; break;
 						
-					__debugInfo = "324:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "325:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 6658: //dummy jumper1
-					;
-						
-					__debugInfo = "330:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_1969+=1;
-					__debugInfo = "329:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver6671.values[forEachCounter6671] = local4_Func_ref_1970;
-					
-					forEachCounter6671++
-					__pc = 6649; break; //back jump
-					
-				case 6645: //dummy for
+				case 6677: //dummy jumper1
 					;
 						
 					__debugInfo = "331:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_1969+=1;
+					__debugInfo = "330:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver6690.values[forEachCounter6690] = local4_Func_ref_1970;
 					
-				case 6641: //dummy jumper1
+					forEachCounter6690++
+					__pc = 6668; break; //back jump
+					
+				case 6664: //dummy for
 					;
 						
-					__debugInfo = "333:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global12_CurrentScope = param4_expr.attr2_ID;
-					case 6688:
-						__debugInfo = "342:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 6684; break; }
+					__debugInfo = "332:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-					case 6686:
-						__debugInfo = "339:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				case 6660: //dummy jumper1
+					;
+						
+					__debugInfo = "334:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global12_CurrentScope = param4_expr.attr2_ID;
+					case 6707:
+						__debugInfo = "343:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 6703; break; }
+					
+					case 6705:
+						__debugInfo = "340:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						func8_IndentUp();
 						
-					__debugInfo = "339:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29369;
+					__debugInfo = "340:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29388;
 					break;
 					
-				case 6684: //dummy jumper1
+				case 6703: //dummy jumper1
 					
 					
 					
-				case 29369: //dummy jumper2
+				case 29388: //dummy jumper2
 					;
 						
-					__debugInfo = "343:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "344:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					case 6719:
-						__debugInfo = "351:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global9_DEBUGMODE) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 6697; break; }
+					case 6738:
+						__debugInfo = "352:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global9_DEBUGMODE) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 6716; break; }
 					
-					case 6710:
-						__debugInfo = "348:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6729:
+						__debugInfo = "349:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("stackPush(\""))) + (func13_ScopeName_Str(param4_expr)))) + ("\", __debugInfo);"))) + (func11_NewLine_Str()));
 						
-					__debugInfo = "349:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
 					__debugInfo = "350:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "351:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("try {"))) + (func11_NewLine_Str()));
-					__debugInfo = "348:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "349:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 6697: //dummy jumper1
+				case 6716: //dummy jumper1
 					;
 						
-					case 6782:
+					case 6801:
+						__debugInfo = "367:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local6_IsFunc_1966) && (global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr15_UsedAsPrototype)) ? 1 : 0))) { __pc = 6748; break; }
+					
+					case 6800:
 						__debugInfo = "366:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local6_IsFunc_1966) && (global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr15_UsedAsPrototype)) ? 1 : 0))) { __pc = 6729; break; }
+						var forEachSaver6800 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr6_Params;
+					var forEachCounter6800 = 0
 					
-					case 6781:
+				case 6759: //dummy for1
+					if (!(forEachCounter6800 < forEachSaver6800.values.length)) {__pc = 6751; break;}
+					var local1_P_1971 = forEachSaver6800.values[forEachCounter6800];
+					
+					
+					case 6799:
 						__debugInfo = "365:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver6781 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr6_Params;
-					var forEachCounter6781 = 0
+						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1971).values[tmpPositionCache][0].attr3_ref) === (0)) ? 1 : 0))) { __pc = 6771; break; }
 					
-				case 6740: //dummy for1
-					if (!(forEachCounter6781 < forEachSaver6781.values.length)) {__pc = 6732; break;}
-					var local1_P_1971 = forEachSaver6781.values[forEachCounter6781];
-					
-					
-					case 6780:
-						__debugInfo = "364:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1971).values[tmpPositionCache][0].attr3_ref) === (0)) ? 1 : 0))) { __pc = 6752; break; }
-					
-					case 6778:
-						__debugInfo = "361:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 6797:
+						__debugInfo = "362:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1971).values[tmpPositionCache][0].attr8_Name_Str))) + (" = unref("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_1971).values[tmpPositionCache][0].attr8_Name_Str))) + (");"))) + (func11_NewLine_Str()));
 						
-					__debugInfo = "361:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29372;
-					break;
-					
-				case 6752: //dummy jumper1
-					
-					
-					
-				case 29372: //dummy jumper2
-					;
-						
-					__debugInfo = "364:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver6781.values[forEachCounter6781] = local1_P_1971;
-					
-					forEachCounter6781++
-					__pc = 6740; break; //back jump
-					
-				case 6732: //dummy for
-					;
-						
-					__debugInfo = "365:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6729: //dummy jumper1
-					;
-						
-					__debugInfo = "369:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local7_Def_Str_1972 = func13_JSVariDef_Str(unref(param4_expr.attr5_Varis), 0, 1, 1);
-					case 6816:
-						__debugInfo = "374:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((TRIM_Str(local7_Def_Str_1972, " \t\r\n\v\f")) !== ("")) ? 1 : 0))) { __pc = 6797; break; }
-					
-					case 6803:
-						__debugInfo = "371:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("var "));
-						
-					__debugInfo = "372:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local7_Def_Str_1972));
-					__debugInfo = "373:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
-					__debugInfo = "371:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6797: //dummy jumper1
-					;
-						
-					__debugInfo = "376:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local15_BeforeUndef_Str_1973 = global13_VariUndef_Str;
-					__debugInfo = "377:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local11_MyUndef_Str_1974 = "";
-					case 6925:
-						__debugInfo = "388:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver6925 = param4_expr.attr5_Varis;
-					var forEachCounter6925 = 0
-					
-				case 6830: //dummy for1
-					if (!(forEachCounter6925 < forEachSaver6925.values.length)) {__pc = 6826; break;}
-					var local3_Var_1975 = forEachSaver6925.values[forEachCounter6925];
-					
-					
-					case 6924:
-						__debugInfo = "387:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (0)) ? 1 : 0))) { __pc = 6843; break; }
-					
-					case 6909:
-						__debugInfo = "384:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(func6_IsType(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) { __pc = 6855; break; }
-					
-					case 6908:
-						__debugInfo = "383:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr3_Typ) !== (5)) ? 1 : 0)) && ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr3_Typ) !== (4)) ? 1 : 0))) ? 1 : 0)) && (func17_JSShouldRedeclare(local3_Var_1975))) ? 1 : 0))) { __pc = 6879; break; }
-					
-					case 6907:
-						__debugInfo = "382:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local11_MyUndef_Str_1974 = ((((((((((local11_MyUndef_Str_1974) + ("pool_"))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (".free("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
-						
-					__debugInfo = "382:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6879: //dummy jumper1
-					;
-						
-					__debugInfo = "383:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6855: //dummy jumper1
-					;
-						
-					__debugInfo = "384:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29374;
-					break;
-					
-				case 6843: //dummy jumper1
-					
-					case 6923:
-						__debugInfo = "386:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local11_MyUndef_Str_1974 = (((("pool_array.free(") + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
-						
-					__debugInfo = "386:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29374: //dummy jumper2
-					;
-						
-					__debugInfo = "387:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver6925.values[forEachCounter6925] = local3_Var_1975;
-					
-					forEachCounter6925++
-					__pc = 6830; break; //back jump
-					
-				case 6826: //dummy for
-					;
-						
-					case 7003:
-						__debugInfo = "398:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((global11_CurrentFunc) !== (-(1))) ? 1 : 0)) && ((((local5_oFunc_1963) === (-(1))) ? 1 : 0))) ? 1 : 0))) { __pc = 6938; break; }
-					
-					var local1_i_1976 = 0;
-					case 7002:
-						__debugInfo = "397:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver7002 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr6_Params;
-					var forEachCounter7002 = 0
-					
-				case 6950: //dummy for1
-					if (!(forEachCounter7002 < forEachSaver7002.values.length)) {__pc = 6942; break;}
-					var local5_Param_1977 = forEachSaver7002.values[forEachCounter7002];
-					
-					
-					case 7001:
-						__debugInfo = "396:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr9_OwnerVari) !== (-(1))) ? 1 : 0))) { __pc = 6963; break; }
-					
-					case 6997:
-						__debugInfo = "394:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("var "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr9_OwnerVari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = ["))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr8_Name_Str))) + ("];"))) + (func11_NewLine_Str()));
-						
-					__debugInfo = "395:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_1976+=1;
-					__debugInfo = "394:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6963: //dummy jumper1
-					;
-						
-					__debugInfo = "396:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver7002.values[forEachCounter7002] = local5_Param_1977;
-					
-					forEachCounter7002++
-					__pc = 6950; break; //back jump
-					
-				case 6942: //dummy for
-					;
-						
-					__debugInfo = "397:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 6938: //dummy jumper1
-					;
-						
-					case 7010:
-						__debugInfo = "405:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local7_mngGoto_1967)) { __pc = 7005; break; }
-					
-					case 7007:
-						__debugInfo = "402:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
-						
-					__debugInfo = "403:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "404:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "402:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7005: //dummy jumper1
-					;
-						
-					case 7042:
-						__debugInfo = "413:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver7042 = param4_expr.attr5_Exprs;
-					var forEachCounter7042 = 0
-					
-				case 7017: //dummy for1
-					if (!(forEachCounter7042 < forEachSaver7042.values.length)) {__pc = 7013; break;}
-					var local2_Ex_1979 = forEachSaver7042.values[forEachCounter7042];
-					
-					
-					var local7_add_Str_1980 = "";
-					case 7024:
-						__debugInfo = "408:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local7_add_Str_1980 = func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local2_Ex_1979).values[tmpPositionCache][0]));
-						
-					case 7041:
-						__debugInfo = "412:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((TRIM_Str(local7_add_Str_1980, " \t\r\n\v\f")) !== ("")) ? 1 : 0))) { __pc = 7030; break; }
-					
-					case 7036:
-						__debugInfo = "410:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						DIMPUSH(local8_ERes_Str_1978, CAST2STRING(local2_Ex_1979));
-						
-					__debugInfo = "411:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					DIMPUSH(local8_ERes_Str_1978, local7_add_Str_1980);
-					__debugInfo = "410:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7030: //dummy jumper1
-					;
-						
-					__debugInfo = "408:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver7042.values[forEachCounter7042] = local2_Ex_1979;
-					
-					forEachCounter7042++
-					__pc = 7017; break; //back jump
-					
-				case 7013: //dummy for
-					;
-						
-					case 7099:
-						__debugInfo = "433:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local7_mngGoto_1967)) { __pc = 7044; break; }
-					
-					case 7046:
-						__debugInfo = "416:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						
-					__debugInfo = "417:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "418:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "421:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("var __pc = "));
-					case 7075:
-						__debugInfo = "426:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((BOUNDS(local8_ERes_Str_1978, 0)) > (0)) ? 1 : 0))) { __pc = 7060; break; }
-					
-					case 7068:
-						__debugInfo = "423:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local8_ERes_Str_1978.arrAccess(0).values[tmpPositionCache]));
-						
-					__debugInfo = "423:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29382;
-					break;
-					
-				case 7060: //dummy jumper1
-					
-					case 7074:
-						__debugInfo = "425:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("0"));
-						
-					__debugInfo = "425:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29382: //dummy jumper2
-					;
-						
-					__debugInfo = "427:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
-					__debugInfo = "429:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "430:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("while(__pc >= 0) {"))) + (func11_NewLine_Str()));
-					__debugInfo = "431:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "432:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("switch(__pc) {"))) + (func11_NewLine_Str()));
-					__debugInfo = "416:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7044: //dummy jumper1
-					;
-						
-					__debugInfo = "435:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local13_FirstText_Str_1981 = "";
-					__debugInfo = "435:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-					var local1_i_1982 = 0.0;
-					case 7314:
-						__debugInfo = "458:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_i_1982 = 0
-					
-				case 7108: //dummy for1
-					if (!toCheck(local1_i_1982, ((BOUNDS(local8_ERes_Str_1978, 0)) - (1)), 2)) {__pc = 7119; break;}
-					
-					var local7_add_Str_1983 = "", local2_Ex_1984 = 0, alias4_ExEx_ref_1985 = [pool_TExpr.alloc()], local7_HasCase_1986 = 0;
-					case 7129:
-						__debugInfo = "437:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local7_add_Str_1983 = local8_ERes_Str_1978.arrAccess(~~(((local1_i_1982) + (1)))).values[tmpPositionCache];
-						
-					__debugInfo = "438:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local2_Ex_1984 = INT2STR(local8_ERes_Str_1978.arrAccess(~~(local1_i_1982)).values[tmpPositionCache]);
-					__debugInfo = "439:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					alias4_ExEx_ref_1985 = global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache] /* ALIAS */;
-					__debugInfo = "440:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local7_HasCase_1986 = 0;
-					case 7238:
-						__debugInfo = "445:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local7_mngGoto_1967) || (global8_IsInGoto)) ? 1 : 0)) && ((((((((((((((((((((((((((((((((((local1_i_1982) === (0)) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (20)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (21)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (24)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (25)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (27)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (38)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (26)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (29)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (30)) ? 1 : 0))) ? 1 : 0)) || ((((local1_i_1982) === (((BOUNDS(local8_ERes_Str_1978, 0)) - (1)))) ? 1 : 0))) ? 1 : 0))) ? 1 : 0))) { __pc = 7220; break; }
-					
-					case 7222:
-						__debugInfo = "442:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
-						
-					__debugInfo = "443:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local7_HasCase_1986 = 1;
-					__debugInfo = "444:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(local2_Ex_1984)))) + (":"))) + (func11_NewLine_Str()));
-					__debugInfo = "442:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7220: //dummy jumper1
-					;
-						
-					case 7291:
-						__debugInfo = "450:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global9_DEBUGMODE)) { __pc = 7240; break; }
-					
-					var local7_Add_Str_1987 = "";
-					case 7273:
-						__debugInfo = "447:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local7_Add_Str_1987 = (((((((("__debugInfo = \"") + (CAST2STRING(global8_Compiler.attr6_Tokens.arrAccess(global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache][0].attr5_tokID).values[tmpPositionCache].attr4_Line)))) + (":"))) + (global8_Compiler.attr6_Tokens.arrAccess(global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache][0].attr5_tokID).values[tmpPositionCache].attr8_Path_Str))) + ("\";"));
-						
-					__debugInfo = "448:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local7_Add_Str_1987))) + (func11_NewLine_Str()));
-					case 7290:
-						__debugInfo = "449:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local13_FirstText_Str_1981) === ("")) ? 1 : 0))) { __pc = 7285; break; }
-					
-					case 7289:
-						__debugInfo = "449:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local13_FirstText_Str_1981 = local7_Add_Str_1987;
-						
-					__debugInfo = "449:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7285: //dummy jumper1
-					;
-						
-					__debugInfo = "447:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7240: //dummy jumper1
-					;
-						
-					__debugInfo = "452:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local7_add_Str_1983));
-					__debugInfo = "453:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
-					case 7313:
-						__debugInfo = "457:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local7_HasCase_1986)) { __pc = 7305; break; }
-					
-					case 7307:
-						__debugInfo = "455:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						
-					__debugInfo = "456:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "455:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7305: //dummy jumper1
-					;
-						
-					__debugInfo = "437:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TExpr.free(alias4_ExEx_ref_1985);
-					local1_i_1982 += 2;
-					__pc = 7108; break; //back jump
-					
-				case 7119: //dummy for
-					;
-						
-					__debugInfo = "458:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-					case 7325:
-						__debugInfo = "462:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local13_FirstText_Str_1981) !== ("")) ? 1 : 0))) { __pc = 7318; break; }
-					
-					case 7324:
-						__debugInfo = "461:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local13_FirstText_Str_1981));
-						
-					__debugInfo = "461:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7318: //dummy jumper1
-					;
-						
-					__debugInfo = "464:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local11_MyUndef_Str_1974));
-					case 7391:
-						__debugInfo = "480:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local7_mngGoto_1967)) { __pc = 7332; break; }
-					
-					case 7340:
-						__debugInfo = "467:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("__pc = -1; break;"))) + (func11_NewLine_Str()));
-						
-					__debugInfo = "468:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "469:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("default:"))) + (func11_NewLine_Str()));
-					__debugInfo = "470:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "471:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("throwError(\"Gotocounter exception pc: \"+__pc);"))) + (func11_NewLine_Str()));
-					__debugInfo = "472:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "473:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
-					__debugInfo = "474:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "475:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
-					__debugInfo = "478:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = (((((((("var __labels = {") + (func16_JSRemoveLast_Str(global12_LabelDef_Str, ", ")))) + ("};"))) + (func11_NewLine_Str()))) + (local8_Text_Str_1960));
-					__debugInfo = "479:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((func11_NewLine_Str()) + (local8_Text_Str_1960));
-					__debugInfo = "467:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7332: //dummy jumper1
-					;
-						
-					case 7405:
-						__debugInfo = "481:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 7398; break; }
-					
-					case 7404:
-						__debugInfo = "481:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = (("{") + (local8_Text_Str_1960));
-						
-					__debugInfo = "481:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7398: //dummy jumper1
-					;
-						
-					case 7467:
-						__debugInfo = "497:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global9_DEBUGMODE) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 7409; break; }
-					
-					case 7411:
-						__debugInfo = "485:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						
-					__debugInfo = "486:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("} catch(ex) {"));
-					__debugInfo = "487:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "488:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("if (isKnownException(ex)) throw ex;"));
-					__debugInfo = "489:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("alert(formatError(ex));"));
-					__debugInfo = "490:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("END();"));
-					__debugInfo = "491:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "492:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("} finally {"));
-					__debugInfo = "493:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "494:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("stackPop();"));
-					__debugInfo = "495:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "496:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"))) + (func11_NewLine_Str()));
-					__debugInfo = "485:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7409: //dummy jumper1
-					;
-						
-					case 7493:
-						__debugInfo = "506:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 7474; break; }
-					
-					case 7476:
-						__debugInfo = "500:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func10_IndentDown();
-						
-					__debugInfo = "501:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "502:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("}"));
-					__debugInfo = "500:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "362:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					__pc = 29391;
 					break;
 					
-				case 7474: //dummy jumper1
+				case 6771: //dummy jumper1
 					
-					case 7492:
-						__debugInfo = "505:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-						
-					__debugInfo = "505:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
 					
 				case 29391: //dummy jumper2
 					;
 						
-					__debugInfo = "508:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global13_VariUndef_Str = local15_BeforeUndef_Str_1973;
-					__debugInfo = "509:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global12_CurrentScope = ~~(local4_oScp_1962);
-					__debugInfo = "510:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_CurrentFunc = ~~(local5_oFunc_1963);
-					case 7514:
-						__debugInfo = "515:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local7_mngGoto_1967)) { __pc = 7506; break; }
+					__debugInfo = "365:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver6800.values[forEachCounter6800] = local1_P_1971;
 					
-					case 7510:
-						__debugInfo = "513:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachCounter6800++
+					__pc = 6759; break; //back jump
+					
+				case 6751: //dummy for
+					;
+						
+					__debugInfo = "366:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6748: //dummy jumper1
+					;
+						
+					__debugInfo = "370:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local7_Def_Str_1972 = func13_JSVariDef_Str(unref(param4_expr.attr5_Varis), 0, 1, 1);
+					case 6835:
+						__debugInfo = "375:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((TRIM_Str(local7_Def_Str_1972, " \t\r\n\v\f")) !== ("")) ? 1 : 0))) { __pc = 6816; break; }
+					
+					case 6822:
+						__debugInfo = "372:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("var "));
+						
+					__debugInfo = "373:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local7_Def_Str_1972));
+					__debugInfo = "374:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
+					__debugInfo = "372:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6816: //dummy jumper1
+					;
+						
+					__debugInfo = "377:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local15_BeforeUndef_Str_1973 = global13_VariUndef_Str;
+					__debugInfo = "378:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local11_MyUndef_Str_1974 = "";
+					case 6944:
+						__debugInfo = "389:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver6944 = param4_expr.attr5_Varis;
+					var forEachCounter6944 = 0
+					
+				case 6849: //dummy for1
+					if (!(forEachCounter6944 < forEachSaver6944.values.length)) {__pc = 6845; break;}
+					var local3_Var_1975 = forEachSaver6944.values[forEachCounter6944];
+					
+					
+					case 6943:
+						__debugInfo = "388:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (0)) ? 1 : 0))) { __pc = 6862; break; }
+					
+					case 6928:
+						__debugInfo = "385:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(func6_IsType(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) { __pc = 6874; break; }
+					
+					case 6927:
+						__debugInfo = "384:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr3_Typ) !== (5)) ? 1 : 0)) && ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr3_Typ) !== (4)) ? 1 : 0))) ? 1 : 0)) && (func17_JSShouldRedeclare(local3_Var_1975))) ? 1 : 0))) { __pc = 6898; break; }
+					
+					case 6926:
+						__debugInfo = "383:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local11_MyUndef_Str_1974 = ((((((((((local11_MyUndef_Str_1974) + ("pool_"))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) + (".free("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
+						
+					__debugInfo = "383:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6898: //dummy jumper1
+					;
+						
+					__debugInfo = "384:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6874: //dummy jumper1
+					;
+						
+					__debugInfo = "385:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29393;
+					break;
+					
+				case 6862: //dummy jumper1
+					
+					case 6942:
+						__debugInfo = "387:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local11_MyUndef_Str_1974 = (((("pool_array.free(") + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_1975).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
+						
+					__debugInfo = "387:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29393: //dummy jumper2
+					;
+						
+					__debugInfo = "388:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver6944.values[forEachCounter6944] = local3_Var_1975;
+					
+					forEachCounter6944++
+					__pc = 6849; break; //back jump
+					
+				case 6845: //dummy for
+					;
+						
+					case 7022:
+						__debugInfo = "399:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((global11_CurrentFunc) !== (-(1))) ? 1 : 0)) && ((((local5_oFunc_1963) === (-(1))) ? 1 : 0))) ? 1 : 0))) { __pc = 6957; break; }
+					
+					var local1_i_1976 = 0;
+					case 7021:
+						__debugInfo = "398:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver7021 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr6_Params;
+					var forEachCounter7021 = 0
+					
+				case 6969: //dummy for1
+					if (!(forEachCounter7021 < forEachSaver7021.values.length)) {__pc = 6961; break;}
+					var local5_Param_1977 = forEachSaver7021.values[forEachCounter7021];
+					
+					
+					case 7020:
+						__debugInfo = "397:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr9_OwnerVari) !== (-(1))) ? 1 : 0))) { __pc = 6982; break; }
+					
+					case 7016:
+						__debugInfo = "395:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("var "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr9_OwnerVari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = ["))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local5_Param_1977).values[tmpPositionCache][0].attr8_Name_Str))) + ("];"))) + (func11_NewLine_Str()));
+						
+					__debugInfo = "396:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_1976+=1;
+					__debugInfo = "395:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6982: //dummy jumper1
+					;
+						
+					__debugInfo = "397:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver7021.values[forEachCounter7021] = local5_Param_1977;
+					
+					forEachCounter7021++
+					__pc = 6969; break; //back jump
+					
+				case 6961: //dummy for
+					;
+						
+					__debugInfo = "398:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 6957: //dummy jumper1
+					;
+						
+					case 7029:
+						__debugInfo = "406:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local7_mngGoto_1967)) { __pc = 7024; break; }
+					
+					case 7026:
+						__debugInfo = "403:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func8_IndentUp();
+						
+					__debugInfo = "404:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "405:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "403:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7024: //dummy jumper1
+					;
+						
+					case 7061:
+						__debugInfo = "414:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver7061 = param4_expr.attr5_Exprs;
+					var forEachCounter7061 = 0
+					
+				case 7036: //dummy for1
+					if (!(forEachCounter7061 < forEachSaver7061.values.length)) {__pc = 7032; break;}
+					var local2_Ex_1979 = forEachSaver7061.values[forEachCounter7061];
+					
+					
+					var local7_add_Str_1980 = "";
+					case 7043:
+						__debugInfo = "409:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local7_add_Str_1980 = func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local2_Ex_1979).values[tmpPositionCache][0]));
+						
+					case 7060:
+						__debugInfo = "413:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((TRIM_Str(local7_add_Str_1980, " \t\r\n\v\f")) !== ("")) ? 1 : 0))) { __pc = 7049; break; }
+					
+					case 7055:
+						__debugInfo = "411:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						DIMPUSH(local8_ERes_Str_1978, CAST2STRING(local2_Ex_1979));
+						
+					__debugInfo = "412:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					DIMPUSH(local8_ERes_Str_1978, local7_add_Str_1980);
+					__debugInfo = "411:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7049: //dummy jumper1
+					;
+						
+					__debugInfo = "409:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver7061.values[forEachCounter7061] = local2_Ex_1979;
+					
+					forEachCounter7061++
+					__pc = 7036; break; //back jump
+					
+				case 7032: //dummy for
+					;
+						
+					case 7118:
+						__debugInfo = "434:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local7_mngGoto_1967)) { __pc = 7063; break; }
+					
+					case 7065:
+						__debugInfo = "417:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						
+					__debugInfo = "418:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "419:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "422:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("var __pc = "));
+					case 7094:
+						__debugInfo = "427:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((BOUNDS(local8_ERes_Str_1978, 0)) > (0)) ? 1 : 0))) { __pc = 7079; break; }
+					
+					case 7087:
+						__debugInfo = "424:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local8_ERes_Str_1978.arrAccess(0).values[tmpPositionCache]));
+						
+					__debugInfo = "424:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29401;
+					break;
+					
+				case 7079: //dummy jumper1
+					
+					case 7093:
+						__debugInfo = "426:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("0"));
+						
+					__debugInfo = "426:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29401: //dummy jumper2
+					;
+						
+					__debugInfo = "428:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
+					__debugInfo = "430:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "431:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("while(__pc >= 0) {"))) + (func11_NewLine_Str()));
+					__debugInfo = "432:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "433:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("switch(__pc) {"))) + (func11_NewLine_Str()));
+					__debugInfo = "417:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7063: //dummy jumper1
+					;
+						
+					__debugInfo = "436:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local13_FirstText_Str_1981 = "";
+					__debugInfo = "436:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+					var local1_i_1982 = 0.0;
+					case 7333:
+						__debugInfo = "459:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_i_1982 = 0
+					
+				case 7127: //dummy for1
+					if (!toCheck(local1_i_1982, ((BOUNDS(local8_ERes_Str_1978, 0)) - (1)), 2)) {__pc = 7138; break;}
+					
+					var local7_add_Str_1983 = "", local2_Ex_1984 = 0, alias4_ExEx_ref_1985 = [pool_TExpr.alloc()], local7_HasCase_1986 = 0;
+					case 7148:
+						__debugInfo = "438:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local7_add_Str_1983 = local8_ERes_Str_1978.arrAccess(~~(((local1_i_1982) + (1)))).values[tmpPositionCache];
+						
+					__debugInfo = "439:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local2_Ex_1984 = INT2STR(local8_ERes_Str_1978.arrAccess(~~(local1_i_1982)).values[tmpPositionCache]);
+					__debugInfo = "440:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					alias4_ExEx_ref_1985 = global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache] /* ALIAS */;
+					__debugInfo = "441:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local7_HasCase_1986 = 0;
+					case 7257:
+						__debugInfo = "446:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local7_mngGoto_1967) || (global8_IsInGoto)) ? 1 : 0)) && ((((((((((((((((((((((((((((((((((local1_i_1982) === (0)) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (20)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (21)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (24)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (25)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (27)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (38)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (26)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (29)) ? 1 : 0))) ? 1 : 0)) || ((((alias4_ExEx_ref_1985[0].attr3_Typ) === (30)) ? 1 : 0))) ? 1 : 0)) || ((((local1_i_1982) === (((BOUNDS(local8_ERes_Str_1978, 0)) - (1)))) ? 1 : 0))) ? 1 : 0))) ? 1 : 0))) { __pc = 7239; break; }
+					
+					case 7241:
+						__debugInfo = "443:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func8_IndentUp();
+						
+					__debugInfo = "444:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local7_HasCase_1986 = 1;
+					__debugInfo = "445:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(local2_Ex_1984)))) + (":"))) + (func11_NewLine_Str()));
+					__debugInfo = "443:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7239: //dummy jumper1
+					;
+						
+					case 7310:
+						__debugInfo = "451:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global9_DEBUGMODE)) { __pc = 7259; break; }
+					
+					var local7_Add_Str_1987 = "";
+					case 7292:
+						__debugInfo = "448:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local7_Add_Str_1987 = (((((((("__debugInfo = \"") + (CAST2STRING(global8_Compiler.attr6_Tokens.arrAccess(global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache][0].attr5_tokID).values[tmpPositionCache].attr4_Line)))) + (":"))) + (global8_Compiler.attr6_Tokens.arrAccess(global5_Exprs_ref[0].arrAccess(local2_Ex_1984).values[tmpPositionCache][0].attr5_tokID).values[tmpPositionCache].attr8_Path_Str))) + ("\";"));
+						
+					__debugInfo = "449:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local7_Add_Str_1987))) + (func11_NewLine_Str()));
+					case 7309:
+						__debugInfo = "450:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local13_FirstText_Str_1981) === ("")) ? 1 : 0))) { __pc = 7304; break; }
+					
+					case 7308:
+						__debugInfo = "450:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local13_FirstText_Str_1981 = local7_Add_Str_1987;
+						
+					__debugInfo = "450:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7304: //dummy jumper1
+					;
+						
+					__debugInfo = "448:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7259: //dummy jumper1
+					;
+						
+					__debugInfo = "453:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local7_add_Str_1983));
+					__debugInfo = "454:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
+					case 7332:
+						__debugInfo = "458:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local7_HasCase_1986)) { __pc = 7324; break; }
+					
+					case 7326:
+						__debugInfo = "456:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						
+					__debugInfo = "457:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "456:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7324: //dummy jumper1
+					;
+						
+					__debugInfo = "438:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TExpr.free(alias4_ExEx_ref_1985);
+					local1_i_1982 += 2;
+					__pc = 7127; break; //back jump
+					
+				case 7138: //dummy for
+					;
+						
+					__debugInfo = "459:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					;
+					case 7344:
+						__debugInfo = "463:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local13_FirstText_Str_1981) !== ("")) ? 1 : 0))) { __pc = 7337; break; }
+					
+					case 7343:
+						__debugInfo = "462:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local13_FirstText_Str_1981));
+						
+					__debugInfo = "462:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7337: //dummy jumper1
+					;
+						
+					__debugInfo = "465:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local11_MyUndef_Str_1974));
+					case 7410:
+						__debugInfo = "481:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local7_mngGoto_1967)) { __pc = 7351; break; }
+					
+					case 7359:
+						__debugInfo = "468:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("__pc = -1; break;"))) + (func11_NewLine_Str()));
+						
+					__debugInfo = "469:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "470:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("default:"))) + (func11_NewLine_Str()));
+					__debugInfo = "471:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "472:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("throwError(\"Gotocounter exception pc: \"+__pc);"))) + (func11_NewLine_Str()));
+					__debugInfo = "473:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "474:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
+					__debugInfo = "475:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "476:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
+					__debugInfo = "479:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = (((((((("var __labels = {") + (func16_JSRemoveLast_Str(global12_LabelDef_Str, ", ")))) + ("};"))) + (func11_NewLine_Str()))) + (local8_Text_Str_1960));
+					__debugInfo = "480:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((func11_NewLine_Str()) + (local8_Text_Str_1960));
+					__debugInfo = "468:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7351: //dummy jumper1
+					;
+						
+					case 7424:
+						__debugInfo = "482:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 7417; break; }
+					
+					case 7423:
+						__debugInfo = "482:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = (("{") + (local8_Text_Str_1960));
+						
+					__debugInfo = "482:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7417: //dummy jumper1
+					;
+						
+					case 7486:
+						__debugInfo = "498:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global9_DEBUGMODE) && (local13_IsStackPusher_1968)) ? 1 : 0))) { __pc = 7428; break; }
+					
+					case 7430:
+						__debugInfo = "486:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						
+					__debugInfo = "487:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("} catch(ex) {"));
+					__debugInfo = "488:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "489:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("if (isKnownException(ex)) throw ex;"));
+					__debugInfo = "490:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("alert(formatError(ex));"));
+					__debugInfo = "491:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("END();"));
+					__debugInfo = "492:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "493:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("} finally {"));
+					__debugInfo = "494:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "495:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("stackPop();"));
+					__debugInfo = "496:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "497:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"))) + (func11_NewLine_Str()));
+					__debugInfo = "486:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7428: //dummy jumper1
+					;
+						
+					case 7512:
+						__debugInfo = "507:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((global8_IsInGoto) ? 0 : 1)) || (local7_mngGoto_1967)) ? 1 : 0))) { __pc = 7493; break; }
+					
+					case 7495:
+						__debugInfo = "501:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func10_IndentDown();
+						
+					__debugInfo = "502:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "503:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("}"));
+					__debugInfo = "501:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29410;
+					break;
+					
+				case 7493: //dummy jumper1
+					
+					case 7511:
+						__debugInfo = "506:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+						
+					__debugInfo = "506:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29410: //dummy jumper2
+					;
+						
+					__debugInfo = "509:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global13_VariUndef_Str = local15_BeforeUndef_Str_1973;
+					__debugInfo = "510:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global12_CurrentScope = ~~(local4_oScp_1962);
+					__debugInfo = "511:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_CurrentFunc = ~~(local5_oFunc_1963);
+					case 7533:
+						__debugInfo = "516:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local7_mngGoto_1967)) { __pc = 7525; break; }
+					
+					case 7529:
+						__debugInfo = "514:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						global12_LabelDef_Str = local13_oLabelDef_Str_1964;
 						
-					__debugInfo = "514:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "515:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					global8_IsInGoto = local9_oIsInGoto_1965;
-					__debugInfo = "513:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "514:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7506: //dummy jumper1
+				case 7525: //dummy jumper1
 					;
 						
-					__debugInfo = "305:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local8_ERes_Str_1978);
-					__pc = 29364;
+					__debugInfo = "306:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local8_ERes_Str_1978);
+					__pc = 29383;
 					break;
 					
-				case 6571: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(1))) ? 1 : 0))) { __pc = 7516; break; }
+				case 6590: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(1))) ? 1 : 0))) { __pc = 7535; break; }
 					
 					var local7_Sym_Str_1988 = "", local10_HasToBeInt_1989 = 0.0, local10_MightBeInt_1990 = 0;
-					case 7526:
-						__debugInfo = "517:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7545:
+						__debugInfo = "518:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Sym_Str_1988 = global9_Operators_ref[0].arrAccess(param4_expr.attr2_Op).values[tmpPositionCache][0].attr7_Sym_Str;
 						
-					__debugInfo = "517:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local10_HasToBeInt_1989 = 0;
 					__debugInfo = "518:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local10_MightBeInt_1990 = 0;
+					local10_HasToBeInt_1989 = 0;
 					__debugInfo = "519:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local10_MightBeInt_1990 = 0;
+					__debugInfo = "520:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
 					var local17___SelectHelper11__1991 = "";
-					case 7539:
-						__debugInfo = "519:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7558:
+						__debugInfo = "520:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local17___SelectHelper11__1991 = local7_Sym_Str_1988;
 						
-					case 7604:
-						__debugInfo = "541:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper11__1991) === ("=")) ? 1 : 0))) { __pc = 7541; break; }
+					case 7623:
+						__debugInfo = "542:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper11__1991) === ("=")) ? 1 : 0))) { __pc = 7560; break; }
 					
-					case 7545:
-						__debugInfo = "521:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7564:
+						__debugInfo = "522:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Sym_Str_1988 = "===";
 						
-					__debugInfo = "522:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "523:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_HasToBeInt_1989 = 1;
-					__debugInfo = "521:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "522:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7541: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === ("<>")) ? 1 : 0))) { __pc = 7551; break; }
+				case 7560: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === ("<>")) ? 1 : 0))) { __pc = 7570; break; }
 					
-					case 7555:
-						__debugInfo = "524:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7574:
+						__debugInfo = "525:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Sym_Str_1988 = "!==";
 						
-					__debugInfo = "525:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "526:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_HasToBeInt_1989 = 1;
-					__debugInfo = "524:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "525:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7551: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === ("OR")) ? 1 : 0))) { __pc = 7561; break; }
+				case 7570: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === ("OR")) ? 1 : 0))) { __pc = 7580; break; }
 					
-					case 7565:
-						__debugInfo = "527:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7584:
+						__debugInfo = "528:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Sym_Str_1988 = "||";
 						
-					__debugInfo = "528:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "529:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_HasToBeInt_1989 = 1;
-					__debugInfo = "527:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "528:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7561: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === ("AND")) ? 1 : 0))) { __pc = 7571; break; }
+				case 7580: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === ("AND")) ? 1 : 0))) { __pc = 7590; break; }
 					
-					case 7575:
-						__debugInfo = "530:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7594:
+						__debugInfo = "531:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Sym_Str_1988 = "&&";
 						
-					__debugInfo = "531:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "532:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_HasToBeInt_1989 = 1;
-					__debugInfo = "530:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "531:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7571: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === ("<")) ? 1 : 0))) { __pc = 7581; break; }
+				case 7590: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === ("<")) ? 1 : 0))) { __pc = 7600; break; }
 					
-					case 7585:
-						__debugInfo = "533:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7604:
+						__debugInfo = "534:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_MightBeInt_1990 = 1;
 						
-					__debugInfo = "533:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "534:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7581: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === (">")) ? 1 : 0))) { __pc = 7587; break; }
+				case 7600: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === (">")) ? 1 : 0))) { __pc = 7606; break; }
 					
-					case 7591:
-						__debugInfo = "535:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7610:
+						__debugInfo = "536:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_MightBeInt_1990 = 1;
 						
-					__debugInfo = "535:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "536:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7587: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === (">=")) ? 1 : 0))) { __pc = 7593; break; }
+				case 7606: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === (">=")) ? 1 : 0))) { __pc = 7612; break; }
 					
-					case 7597:
-						__debugInfo = "537:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7616:
+						__debugInfo = "538:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_MightBeInt_1990 = 1;
 						
-					__debugInfo = "537:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "538:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7593: //dummy jumper1
-					if (!((((local17___SelectHelper11__1991) === ("<=")) ? 1 : 0))) { __pc = 7599; break; }
+				case 7612: //dummy jumper1
+					if (!((((local17___SelectHelper11__1991) === ("<=")) ? 1 : 0))) { __pc = 7618; break; }
 					
-					case 7603:
-						__debugInfo = "539:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7622:
+						__debugInfo = "540:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_MightBeInt_1990 = 1;
 						
-					__debugInfo = "539:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "540:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7599: //dummy jumper1
+				case 7618: //dummy jumper1
 					;
 						
-					__debugInfo = "519:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "520:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
-					case 7781:
-						__debugInfo = "567:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local10_HasToBeInt_1989) || (local10_MightBeInt_1990)) ? 1 : 0))) { __pc = 7609; break; }
+					case 7800:
+						__debugInfo = "568:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local10_HasToBeInt_1989) || (local10_MightBeInt_1990)) ? 1 : 0))) { __pc = 7628; break; }
 					
-					case 7723:
-						__debugInfo = "559:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local10_MightBeInt_1990) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0))) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0))) ? 1 : 0))) { __pc = 7636; break; }
+					case 7742:
+						__debugInfo = "560:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local10_MightBeInt_1990) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0))) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("string")) ? 1 : 0))) ? 1 : 0))) { __pc = 7655; break; }
 					
 					var local7_Res_Str_1992 = "";
-					case 7640:
-						__debugInfo = "546:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7659:
+						__debugInfo = "547:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						
 					var local17___SelectHelper12__1993 = "";
-					case 7642:
-						__debugInfo = "546:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7661:
+						__debugInfo = "547:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local17___SelectHelper12__1993 = local7_Sym_Str_1988;
 						
-					case 7667:
-						__debugInfo = "555:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper12__1993) === ("<")) ? 1 : 0))) { __pc = 7644; break; }
+					case 7686:
+						__debugInfo = "556:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper12__1993) === ("<")) ? 1 : 0))) { __pc = 7663; break; }
 					
-					case 7648:
-						__debugInfo = "548:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7667:
+						__debugInfo = "549:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Res_Str_1992 = " === -1";
 						
-					__debugInfo = "548:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "549:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7644: //dummy jumper1
-					if (!((((local17___SelectHelper12__1993) === (">")) ? 1 : 0))) { __pc = 7650; break; }
+				case 7663: //dummy jumper1
+					if (!((((local17___SelectHelper12__1993) === (">")) ? 1 : 0))) { __pc = 7669; break; }
 					
-					case 7654:
-						__debugInfo = "550:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7673:
+						__debugInfo = "551:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Res_Str_1992 = " === 1";
 						
-					__debugInfo = "550:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "551:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7650: //dummy jumper1
-					if (!((((local17___SelectHelper12__1993) === ("<=")) ? 1 : 0))) { __pc = 7656; break; }
+				case 7669: //dummy jumper1
+					if (!((((local17___SelectHelper12__1993) === ("<=")) ? 1 : 0))) { __pc = 7675; break; }
 					
-					case 7660:
-						__debugInfo = "552:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7679:
+						__debugInfo = "553:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Res_Str_1992 = " <= 0";
 						
-					__debugInfo = "552:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "553:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7656: //dummy jumper1
-					if (!((((local17___SelectHelper12__1993) === (">=")) ? 1 : 0))) { __pc = 7662; break; }
+				case 7675: //dummy jumper1
+					if (!((((local17___SelectHelper12__1993) === (">=")) ? 1 : 0))) { __pc = 7681; break; }
 					
-					case 7666:
-						__debugInfo = "554:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7685:
+						__debugInfo = "555:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local7_Res_Str_1992 = " >= 0";
 						
-					__debugInfo = "554:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "555:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7662: //dummy jumper1
+				case 7681: //dummy jumper1
 					;
 						
-					__debugInfo = "546:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "547:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
 						
-					__debugInfo = "556:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "557:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("((strcmp(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0]))))) + ("), ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + (")) "))) + (local7_Res_Str_1992))) + (" ) ? 1 : 0)"));
-					__debugInfo = "546:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29395;
+					__debugInfo = "547:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29414;
 					break;
 					
-				case 7636: //dummy jumper1
+				case 7655: //dummy jumper1
 					
-					case 7722:
-						__debugInfo = "558:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7741:
+						__debugInfo = "559:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("((("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0]))))) + (") "))) + (local7_Sym_Str_1988))) + (" ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + (")) ? 1 : 0)"));
 						
-					__debugInfo = "558:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "559:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29395: //dummy jumper2
+				case 29414: //dummy jumper2
 					;
 						
-					__debugInfo = "559:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29394;
+					__debugInfo = "560:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29413;
 					break;
 					
-				case 7609: //dummy jumper1
+				case 7628: //dummy jumper1
 					
 					var local5_l_Str_1994 = "";
-					case 7732:
-						__debugInfo = "561:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7751:
+						__debugInfo = "562:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local5_l_Str_1994 = func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0]));
 						
-					case 7780:
-						__debugInfo = "566:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local7_Sym_Str_1988) === ("-")) ? 1 : 0)) && ((((local5_l_Str_1994) === ("0")) ? 1 : 0))) ? 1 : 0))) { __pc = 7741; break; }
+					case 7799:
+						__debugInfo = "567:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local7_Sym_Str_1988) === ("-")) ? 1 : 0)) && ((((local5_l_Str_1994) === ("0")) ? 1 : 0))) ? 1 : 0))) { __pc = 7760; break; }
 					
-					case 7756:
-						__debugInfo = "563:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7775:
+						__debugInfo = "564:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("-("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + (")"));
 						
-					__debugInfo = "563:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29397;
+					__debugInfo = "564:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29416;
 					break;
 					
-				case 7741: //dummy jumper1
+				case 7760: //dummy jumper1
 					
-					case 7779:
-						__debugInfo = "565:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7798:
+						__debugInfo = "566:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("(("))) + (local5_l_Str_1994))) + (") "))) + (local7_Sym_Str_1988))) + (" ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))))) + ("))"));
 						
-					__debugInfo = "565:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "566:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29397: //dummy jumper2
+				case 29416: //dummy jumper2
 					;
 						
-					__debugInfo = "561:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "562:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29394: //dummy jumper2
+				case 29413: //dummy jumper2
 					;
 						
-					case 7818:
+					case 7837:
+						__debugInfo = "573:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((((((local7_Sym_Str_1988) === ("/")) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("int")) ? 1 : 0))) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("int")) ? 1 : 0))) ? 1 : 0))) { __pc = 7828; break; }
+					
+					case 7836:
 						__debugInfo = "572:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((((((local7_Sym_Str_1988) === ("/")) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_Left).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("int")) ? 1 : 0))) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("int")) ? 1 : 0))) ? 1 : 0))) { __pc = 7809; break; }
-					
-					case 7817:
-						__debugInfo = "571:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = (((("CAST2INT(") + (local8_Text_Str_1960))) + (")"));
 						
-					__debugInfo = "571:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "572:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7809: //dummy jumper1
+				case 7828: //dummy jumper1
 					;
 						
-					__debugInfo = "517:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "518:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 7516: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(3))) ? 1 : 0))) { __pc = 7820; break; }
+				case 7535: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(3))) ? 1 : 0))) { __pc = 7839; break; }
 					
-					case 7828:
-						__debugInfo = "574:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7847:
+						__debugInfo = "575:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = CAST2STRING(INTEGER(param4_expr.attr6_intval));
 						
-					__debugInfo = "574:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 7820: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(4))) ? 1 : 0))) { __pc = 7830; break; }
-					
-					case 7837:
-						__debugInfo = "576:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = CAST2STRING(param4_expr.attr8_floatval);
-						
-					__debugInfo = "576:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 7830: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(5))) ? 1 : 0))) { __pc = 7839; break; }
-					
-					case 7845:
-						__debugInfo = "578:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = param4_expr.attr10_strval_Str;
-						
-					__debugInfo = "578:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "575:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
 				case 7839: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(6))) ? 1 : 0))) { __pc = 7847; break; }
+					if (!((((local17___SelectHelper10__1961) === (~~(4))) ? 1 : 0))) { __pc = 7849; break; }
 					
-					case 8054:
-						__debugInfo = "608:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) { __pc = 7860; break; }
+					case 7856:
+						__debugInfo = "577:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = CAST2STRING(param4_expr.attr8_floatval);
+						
+					__debugInfo = "577:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 7849: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(5))) ? 1 : 0))) { __pc = 7858; break; }
+					
+					case 7864:
+						__debugInfo = "579:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = param4_expr.attr10_strval_Str;
+						
+					__debugInfo = "579:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 7858: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(6))) ? 1 : 0))) { __pc = 7866; break; }
+					
+					case 8073:
+						__debugInfo = "609:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) { __pc = 7879; break; }
 					
 					var local1_P_1995 = 0, alias2_Ex_ref_1996 = [pool_TExpr.alloc()];
-					case 7870:
-						__debugInfo = "581:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7889:
+						__debugInfo = "582:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local1_P_1995 = param4_expr.attr6_Params.arrAccess(-(1)).values[tmpPositionCache];
 						
-					__debugInfo = "582:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "583:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					alias2_Ex_ref_1996 = global5_Exprs_ref[0].arrAccess(local1_P_1995).values[tmpPositionCache] /* ALIAS */;
-					case 8033:
-						__debugInfo = "604:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((alias2_Ex_ref_1996[0].attr3_Typ) === (53)) ? 1 : 0))) { __pc = 7881; break; }
+					case 8052:
+						__debugInfo = "605:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((alias2_Ex_ref_1996[0].attr3_Typ) === (53)) ? 1 : 0))) { __pc = 7900; break; }
 					
 					var local5_Found_1997 = 0, local5_typId_1998 = 0;
-					case 7904:
-						__debugInfo = "585:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((func6_IsType(alias2_Ex_ref_1996[0].attr8_datatype.attr8_Name_Str)) ? 0 : 1))) { __pc = 7890; break; }
+					case 7923:
+						__debugInfo = "586:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((func6_IsType(alias2_Ex_ref_1996[0].attr8_datatype.attr8_Name_Str)) ? 0 : 1))) { __pc = 7909; break; }
 					
-					case 7903:
-						__debugInfo = "585:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func5_Error((((("Internal error (Unable to find '") + (alias2_Ex_ref_1996[0].attr8_datatype.attr8_Name_Str))) + ("')")), 584, "src\CompilerPasses\Generator\JSGenerator.gbas");
+					case 7922:
+						__debugInfo = "586:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func5_Error((((("Internal error (Unable to find '") + (alias2_Ex_ref_1996[0].attr8_datatype.attr8_Name_Str))) + ("')")), 585, "src\CompilerPasses\Generator\JSGenerator.gbas");
 						
-					__debugInfo = "585:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "586:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7890: //dummy jumper1
+				case 7909: //dummy jumper1
 					;
 						
-					__debugInfo = "587:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local5_Found_1997 = 0;
 					__debugInfo = "588:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local5_Found_1997 = 0;
+					__debugInfo = "589:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_typId_1998 = global8_LastType.attr2_ID;
-					case 8002:
-						__debugInfo = "599:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local5_typId_1998) !== (-(1))) ? 1 : 0))) {__pc = 29402; break;}
+					case 8021:
+						__debugInfo = "600:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local5_typId_1998) !== (-(1))) ? 1 : 0))) {__pc = 29421; break;}
 					
-					case 7992:
+					case 8011:
+						__debugInfo = "598:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver8011 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1998).values[tmpPositionCache][0].attr7_Methods;
+					var forEachCounter8011 = 0
+					
+				case 7951: //dummy for1
+					if (!(forEachCounter8011 < forEachSaver8011.values.length)) {__pc = 7943; break;}
+					var local3_Mth_1999 = forEachSaver8011.values[forEachCounter8011];
+					
+					
+					case 8010:
 						__debugInfo = "597:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver7992 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1998).values[tmpPositionCache][0].attr7_Methods;
-					var forEachCounter7992 = 0
-					
-				case 7932: //dummy for1
-					if (!(forEachCounter7992 < forEachSaver7992.values.length)) {__pc = 7924; break;}
-					var local3_Mth_1999 = forEachSaver7992.values[forEachCounter7992];
-					
-					
-					case 7991:
-						__debugInfo = "596:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1999).values[tmpPositionCache][0].attr9_OName_Str) === (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr9_OName_Str)) ? 1 : 0))) { __pc = 7951; break; }
+						if (!((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1999).values[tmpPositionCache][0].attr9_OName_Str) === (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr9_OName_Str)) ? 1 : 0))) { __pc = 7970; break; }
 					
 					var local10_Params_Str_2000 = "";
-					case 7960:
-						__debugInfo = "592:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7979:
+						__debugInfo = "593:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_Params_Str_2000 = func17_JSDoParameter_Str(param4_expr, param4_expr.attr4_func, 0);
 						
-					case 7972:
-						__debugInfo = "593:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local10_Params_Str_2000) !== ("")) ? 1 : 0))) { __pc = 7965; break; }
+					case 7991:
+						__debugInfo = "594:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local10_Params_Str_2000) !== ("")) ? 1 : 0))) { __pc = 7984; break; }
 					
-					case 7971:
-						__debugInfo = "593:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 7990:
+						__debugInfo = "594:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_Params_Str_2000 = ((local10_Params_Str_2000) + (", "));
+						
+					__debugInfo = "594:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 7984: //dummy jumper1
+					;
+						
+					__debugInfo = "595:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1999).values[tmpPositionCache][0].attr8_Name_Str))) + ("("))) + (local10_Params_Str_2000))) + ("param4_self)"));
+					case 8009:
+						__debugInfo = "596:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__pc = __labels["Exit"]; break;
 						
 					__debugInfo = "593:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 7965: //dummy jumper1
+				case 7970: //dummy jumper1
 					;
 						
-					__debugInfo = "594:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local3_Mth_1999).values[tmpPositionCache][0].attr8_Name_Str))) + ("("))) + (local10_Params_Str_2000))) + ("param4_self)"));
-					case 7990:
-						__debugInfo = "595:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						__pc = __labels["Exit"]; break;
-						
-					__debugInfo = "592:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 7951: //dummy jumper1
-					;
-						
-					__debugInfo = "596:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver7992.values[forEachCounter7992] = local3_Mth_1999;
-					
-					forEachCounter7992++
-					__pc = 7932; break; //back jump
-					
-				case 7924: //dummy for
-					;
-						
-					__debugInfo = "598:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local5_typId_1998 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1998).values[tmpPositionCache][0].attr9_Extending;
 					__debugInfo = "597:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 8002; break; //back jump
+					forEachSaver8011.values[forEachCounter8011] = local3_Mth_1999;
 					
-				case 29402:
+					forEachCounter8011++
+					__pc = 7951; break; //back jump
+					
+				case 7943: //dummy for
 					;
 						
-					case 8003:
-						__debugInfo = "600:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "599:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local5_typId_1998 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_1998).values[tmpPositionCache][0].attr9_Extending;
+					__debugInfo = "598:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 8021; break; //back jump
+					
+				case 29421:
+					;
+						
+					case 8022:
+						__debugInfo = "601:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						//label: Exit;
 						
-					__debugInfo = "585:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29400;
-					break;
-					
-				case 7881: //dummy jumper1
-					
-					case 8032:
-						__debugInfo = "603:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_P_1995).values[tmpPositionCache][0]))))) + (")."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr9_OName_Str))) + (func17_JSDoParameter_Str(param4_expr, param4_expr.attr4_func, 1)));
-						
-					__debugInfo = "603:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29400: //dummy jumper2
-					;
-						
-					__debugInfo = "581:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TExpr.free(alias2_Ex_ref_1996);
-					__pc = 29399;
-					break;
-					
-				case 7860: //dummy jumper1
-					
-					case 8053:
-						__debugInfo = "607:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr8_Name_Str))) + (func17_JSDoParameter_Str(param4_expr, param4_expr.attr4_func, 1)));
-						
-					__debugInfo = "607:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29399: //dummy jumper2
-					;
-						
-					__debugInfo = "608:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 7847: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(23))) ? 1 : 0))) { __pc = 8056; break; }
-					
-					case 8073:
-						__debugInfo = "611:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (func17_JSDoParameter_Str(param4_expr, -(1), 1)));
-						
-					__debugInfo = "611:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8056: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(9))) ? 1 : 0))) { __pc = 8075; break; }
-					
-					case 8089:
-						__debugInfo = "613:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str));
-						
-					case 8106:
-						__debugInfo = "614:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr3_ref)) { __pc = 8099; break; }
-					
-					case 8105:
-						__debugInfo = "614:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("[0]"));
-						
-					__debugInfo = "614:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8099: //dummy jumper1
-					;
-						
-					__debugInfo = "613:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8075: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(13))) ? 1 : 0))) { __pc = 8108; break; }
-					
-					case 8119:
-						__debugInfo = "618:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))));
-						
-					case 8206:
-						__debugInfo = "637:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((BOUNDS(param4_expr.attr4_dims, 0)) !== (0)) ? 1 : 0))) { __pc = 8128; break; }
-					
-					var local1_s_2001 = 0, local7_Add_Str_2002 = "";
-					case 8134:
-						__debugInfo = "620:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (".arrAccess("));
-						
-					__debugInfo = "621:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_s_2001 = 0;
-					__debugInfo = "622:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local7_Add_Str_2002 = "";
-					case 8198:
-						__debugInfo = "634:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver8198 = param4_expr.attr4_dims;
-					var forEachCounter8198 = 0
-					
-				case 8149: //dummy for1
-					if (!(forEachCounter8198 < forEachSaver8198.values.length)) {__pc = 8145; break;}
-					var local1_d_2003 = forEachSaver8198.values[forEachCounter8198];
-					
-					
-					var local1_v_2004 = 0;
-					case 8159:
-						__debugInfo = "624:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local1_s_2001)) { __pc = 8152; break; }
-					
-					case 8158:
-						__debugInfo = "624:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
-						
-					__debugInfo = "624:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8152: //dummy jumper1
-					;
-						
-					__debugInfo = "626:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_d_2003).values[tmpPositionCache][0]))));
-					__debugInfo = "628:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_s_2001 = 1;
-					__debugInfo = "629:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_v_2004 = func11_GetVariable(param4_expr.attr5_array, 0);
-					case 8197:
-						__debugInfo = "633:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local1_v_2004) !== (-(1))) ? 1 : 0)) && (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2004).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8192; break; }
-					
-					case 8196:
-						__debugInfo = "632:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local7_Add_Str_2002 = "[0]";
-						
-					__debugInfo = "632:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8192: //dummy jumper1
-					;
-						
-					__debugInfo = "624:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver8198.values[forEachCounter8198] = local1_d_2003;
-					
-					forEachCounter8198++
-					__pc = 8149; break; //back jump
-					
-				case 8145: //dummy for
-					;
-						
-					__debugInfo = "635:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (").values[tmpPositionCache]"))) + (local7_Add_Str_2002));
-					__debugInfo = "620:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8128: //dummy jumper1
-					;
-						
-					__debugInfo = "618:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8108: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(10))) ? 1 : 0))) { __pc = 8208; break; }
-					
-					case 8221:
-						__debugInfo = "639:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + (" = "));
-						
-					__debugInfo = "641:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))));
-					case 8281:
-						__debugInfo = "646:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) || (func6_IsType(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) ? 1 : 0))) { __pc = 8252; break; }
-					
-					case 8280:
-						__debugInfo = "645:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr3_Typ) !== (35)) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr3_Typ) !== (36)) ? 1 : 0))) ? 1 : 0))) { __pc = 8273; break; }
-					
-					case 8279:
-						__debugInfo = "644:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (".clone(/* In Assign */)"));
-						
-					__debugInfo = "644:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8273: //dummy jumper1
-					;
-						
-					__debugInfo = "645:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8252: //dummy jumper1
-					;
-						
-					__debugInfo = "639:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8208: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(11))) ? 1 : 0))) { __pc = 8283; break; }
-					
-					var local1_v_2005 = 0, local6_hasRef_2006 = 0, local4_Find_2007 = 0;
-					case 8291:
-						__debugInfo = "650:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_v_2005 = func11_GetVariable(param4_expr.attr5_array, 0);
-						
-					__debugInfo = "651:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_hasRef_2006 = 0;
-					case 8316:
-						__debugInfo = "652:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local1_v_2005) === (-(1))) ? 1 : 0)) || (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2005).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8311; break; }
-					
-					case 8315:
-						__debugInfo = "652:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_hasRef_2006 = 1;
-						
-					__debugInfo = "652:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8311: //dummy jumper1
-					;
-						
-					__debugInfo = "654:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIM("))) + (func14_JSTryUnref_Str(param4_expr.attr5_array)))) + (", ["));
-					__debugInfo = "655:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2007 = 0;
-					case 8363:
-						__debugInfo = "661:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver8363 = param4_expr.attr4_dims;
-					var forEachCounter8363 = 0
-					
-				case 8339: //dummy for1
-					if (!(forEachCounter8363 < forEachSaver8363.values.length)) {__pc = 8335; break;}
-					var local1_D_2008 = forEachSaver8363.values[forEachCounter8363];
-					
-					
-					case 8351:
-						__debugInfo = "657:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local4_Find_2007) === (1)) ? 1 : 0))) { __pc = 8344; break; }
-					
-					case 8350:
-						__debugInfo = "657:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
-						
-					__debugInfo = "657:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8344: //dummy jumper1
-					;
-						
-					__debugInfo = "658:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2008).values[tmpPositionCache][0]))));
-					__debugInfo = "660:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2007 = 1;
-					__debugInfo = "657:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver8363.values[forEachCounter8363] = local1_D_2008;
-					
-					forEachCounter8363++
-					__pc = 8339; break; //back jump
-					
-				case 8335: //dummy for
-					;
-						
-					__debugInfo = "662:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2006, 1)))) + (")"));
-					__debugInfo = "650:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8283: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(12))) ? 1 : 0))) { __pc = 8383; break; }
-					
-					var local1_v_2009 = 0, local6_hasRef_2010 = 0, local4_Find_2011 = 0;
-					case 8391:
-						__debugInfo = "665:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_v_2009 = func11_GetVariable(param4_expr.attr5_array, 0);
-						
-					__debugInfo = "666:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_hasRef_2010 = 0;
-					case 8416:
-						__debugInfo = "667:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((((((local1_v_2009) === (-(1))) ? 1 : 0)) || (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2009).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8411; break; }
-					
-					case 8415:
-						__debugInfo = "667:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_hasRef_2010 = 1;
-						
-					__debugInfo = "667:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8411: //dummy jumper1
-					;
-						
-					__debugInfo = "669:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("REDIM("))) + (func14_JSTryUnref_Str(param4_expr.attr5_array)))) + (", ["));
-					__debugInfo = "670:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2011 = 0;
-					case 8463:
-						__debugInfo = "676:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver8463 = param4_expr.attr4_dims;
-					var forEachCounter8463 = 0
-					
-				case 8439: //dummy for1
-					if (!(forEachCounter8463 < forEachSaver8463.values.length)) {__pc = 8435; break;}
-					var local1_D_2012 = forEachSaver8463.values[forEachCounter8463];
-					
-					
-					case 8451:
-						__debugInfo = "672:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local4_Find_2011) === (1)) ? 1 : 0))) { __pc = 8444; break; }
-					
-					case 8450:
-						__debugInfo = "672:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
-						
-					__debugInfo = "672:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8444: //dummy jumper1
-					;
-						
-					__debugInfo = "673:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2012).values[tmpPositionCache][0]))));
-					__debugInfo = "675:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2011 = 1;
-					__debugInfo = "672:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver8463.values[forEachCounter8463] = local1_D_2012;
-					
-					forEachCounter8463++
-					__pc = 8439; break; //back jump
-					
-				case 8435: //dummy for
-					;
-						
-					__debugInfo = "677:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2010, 1)))) + (" )"));
-					__debugInfo = "665:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8383: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(15))) ? 1 : 0))) { __pc = 8483; break; }
-					
-					var local4_cast_2013 = 0;
-					case 8487:
-						__debugInfo = "680:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local4_cast_2013 = 1;
-						
-					case 8569:
-						__debugInfo = "695:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (4)) ? 1 : 0))) { __pc = 8498; break; }
-					
-					var local5_f_Str_2014 = "";
-					case 8503:
-						__debugInfo = "682:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local4_cast_2013 = 0;
-						
-					__debugInfo = "684:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local5_f_Str_2014 = ((CAST2STRING(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_floatval)) + (""));
-					__debugInfo = "684:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-					var local1_i_2015 = 0.0;
-					case 8543:
-						__debugInfo = "691:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_i_2015 = 0
-					
-				case 8521: //dummy for1
-					if (!toCheck(local1_i_2015, (((local5_f_Str_2014).length) - (1)), 1)) {__pc = 8528; break;}
-					
-					case 8542:
-						__debugInfo = "690:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((ASC(local5_f_Str_2014, ~~(local1_i_2015))) === (ASC(".", 0))) ? 1 : 0))) { __pc = 8536; break; }
-					
-					case 8540:
-						__debugInfo = "688:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local4_cast_2013 = 1;
-						
-					case 8541:
-						__debugInfo = "689:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						__pc = 8528; break;
-						
-					__debugInfo = "688:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8536: //dummy jumper1
-					;
-						
-					__debugInfo = "690:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_2015 += 1;
-					__pc = 8521; break; //back jump
-					
-				case 8528: //dummy for
-					;
-						
-					__debugInfo = "691:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-					__debugInfo = "682:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8498: //dummy jumper1
-					if (!(((((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 8567; break; }
-					
-					
-					
-				case 8567: //dummy jumper1
-					;
-						
-					case 8659:
-						__debugInfo = "711:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local4_cast_2013)) { __pc = 8571; break; }
-					
-					case 8582:
-						__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						
-					var local17___SelectHelper13__2016 = "";
-					case 8584:
-						__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local17___SelectHelper13__2016 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str;
-						
-					case 8647:
-						__debugInfo = "708:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper13__2016) === ("int")) ? 1 : 0))) { __pc = 8586; break; }
-					
-					case 8597:
-						__debugInfo = "701:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "701:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29418;
-					break;
-					
-				case 8586: //dummy jumper1
-					if (!((((local17___SelectHelper13__2016) === ("float")) ? 1 : 0))) { __pc = 8599; break; }
-					
-					case 8614:
-						__debugInfo = "703:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("~~("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
-						
-					__debugInfo = "703:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29418;
-					break;
-					
-				case 8599: //dummy jumper1
-					if (!((((local17___SelectHelper13__2016) === ("string")) ? 1 : 0))) { __pc = 8616; break; }
-					
-					case 8631:
-						__debugInfo = "705:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("INT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
-						
-					__debugInfo = "705:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29418;
-					break;
-					
-				case 8616: //dummy jumper1
-					
-					case 8646:
-						__debugInfo = "707:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2INT("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
-						
-					__debugInfo = "707:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29418: //dummy jumper2
-					;
-						
-					__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-						
-					__debugInfo = "698:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29417;
-					break;
-					
-				case 8571: //dummy jumper1
-					
-					case 8658:
-						__debugInfo = "710:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "710:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29417: //dummy jumper2
-					;
-						
-					__debugInfo = "680:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 8483: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(16))) ? 1 : 0))) { __pc = 8661; break; }
-					
-					case 8756:
-						__debugInfo = "729:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) { __pc = 8672; break; }
-					
-					case 8683:
-						__debugInfo = "715:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "715:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "586:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					__pc = 29419;
 					break;
 					
-				case 8672: //dummy jumper1
+				case 7900: //dummy jumper1
 					
-					case 8694:
-						__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8051:
+						__debugInfo = "604:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_P_1995).values[tmpPositionCache][0]))))) + (")."))) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr9_OName_Str))) + (func17_JSDoParameter_Str(param4_expr, param4_expr.attr4_func, 1)));
 						
-					var local17___SelectHelper14__2017 = "";
-					case 8696:
-						__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local17___SelectHelper14__2017 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str;
-						
-					case 8755:
-						__debugInfo = "728:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper14__2017) === ("int")) ? 1 : 0))) { __pc = 8698; break; }
-					
-					case 8709:
-						__debugInfo = "720:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "720:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29420;
-					break;
-					
-				case 8698: //dummy jumper1
-					if (!((((local17___SelectHelper14__2017) === ("float")) ? 1 : 0))) { __pc = 8711; break; }
-					
-					case 8722:
-						__debugInfo = "723:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "723:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29420;
-					break;
-					
-				case 8711: //dummy jumper1
-					if (!((((local17___SelectHelper14__2017) === ("string")) ? 1 : 0))) { __pc = 8724; break; }
-					
-					case 8739:
-						__debugInfo = "725:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("FLOAT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
-						
-					__debugInfo = "725:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29420;
-					break;
-					
-				case 8724: //dummy jumper1
-					
-					case 8754:
-						__debugInfo = "727:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2FLOAT("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
-						
-					__debugInfo = "727:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29420: //dummy jumper2
-					;
-						
-					__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-						
-					__debugInfo = "717:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "604:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
 				case 29419: //dummy jumper2
 					;
 						
-					__debugInfo = "729:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "582:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TExpr.free(alias2_Ex_ref_1996);
+					__pc = 29418;
 					break;
 					
-				case 8661: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(17))) ? 1 : 0))) { __pc = 8758; break; }
+				case 7879: //dummy jumper1
 					
-					case 8773:
-						__debugInfo = "731:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2STRING("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
+					case 8072:
+						__debugInfo = "608:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr8_Name_Str))) + (func17_JSDoParameter_Str(param4_expr, param4_expr.attr4_func, 1)));
 						
-					__debugInfo = "731:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "608:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29418: //dummy jumper2
+					;
+						
+					__debugInfo = "609:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8758: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(18))) ? 1 : 0))) { __pc = 8775; break; }
+				case 7866: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(23))) ? 1 : 0))) { __pc = 8075; break; }
 					
-					case 8795:
-						__debugInfo = "733:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("."))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_nextExpr).values[tmpPositionCache][0]))));
+					case 8092:
+						__debugInfo = "612:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (func17_JSDoParameter_Str(param4_expr, -(1), 1)));
 						
-					__debugInfo = "733:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "612:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8775: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(19))) ? 1 : 0))) { __pc = 8797; break; }
+				case 8075: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(9))) ? 1 : 0))) { __pc = 8094; break; }
 					
-					var local1_F_2018 = 0;
-					case 8802:
-						__debugInfo = "735:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_F_2018 = 0;
+					case 8108:
+						__debugInfo = "614:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str));
 						
-					__debugInfo = "736:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8125:
+						__debugInfo = "615:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr3_ref)) { __pc = 8118; break; }
 					
-					var local17___SelectHelper15__2019 = 0;
-					case 8813:
-						__debugInfo = "736:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local17___SelectHelper15__2019 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ;
+					case 8124:
+						__debugInfo = "615:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("[0]"));
 						
-					case 8832:
-						__debugInfo = "743:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local17___SelectHelper15__2019) === (~~(3))) ? 1 : 0))) { __pc = 8815; break; }
+					__debugInfo = "615:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-					case 8819:
-						__debugInfo = "738:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_F_2018 = 1;
-						
-					__debugInfo = "738:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8815: //dummy jumper1
-					if (!((((local17___SelectHelper15__2019) === (~~(4))) ? 1 : 0))) { __pc = 8821; break; }
-					
-					case 8825:
-						__debugInfo = "740:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_F_2018 = 1;
-						
-					__debugInfo = "740:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8821: //dummy jumper1
-					if (!((((local17___SelectHelper15__2019) === (~~(5))) ? 1 : 0))) { __pc = 8827; break; }
-					
-					case 8831:
-						__debugInfo = "742:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_F_2018 = 1;
-						
-					__debugInfo = "742:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8827: //dummy jumper1
+				case 8118: //dummy jumper1
 					;
 						
-					__debugInfo = "736:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-					__debugInfo = "745:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (global13_VariUndef_Str));
-					case 8864:
-						__debugInfo = "751:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local1_F_2018)) { __pc = 8839; break; }
-					
-					case 8850:
-						__debugInfo = "748:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("return "))) + (func14_JSTryUnref_Str(param4_expr.attr4_expr)));
-						
-					__debugInfo = "748:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29422;
+					__debugInfo = "614:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8839: //dummy jumper1
+				case 8094: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(13))) ? 1 : 0))) { __pc = 8127; break; }
 					
-					case 8863:
-						__debugInfo = "750:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("return tryClone("))) + (func14_JSTryUnref_Str(param4_expr.attr4_expr)))) + (")"));
+					case 8138:
+						__debugInfo = "619:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))));
 						
-					__debugInfo = "750:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8225:
+						__debugInfo = "638:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((BOUNDS(param4_expr.attr4_dims, 0)) !== (0)) ? 1 : 0))) { __pc = 8147; break; }
 					
-				case 29422: //dummy jumper2
+					var local1_s_2001 = 0, local7_Add_Str_2002 = "";
+					case 8153:
+						__debugInfo = "621:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (".arrAccess("));
+						
+					__debugInfo = "622:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_s_2001 = 0;
+					__debugInfo = "623:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local7_Add_Str_2002 = "";
+					case 8217:
+						__debugInfo = "635:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver8217 = param4_expr.attr4_dims;
+					var forEachCounter8217 = 0
+					
+				case 8168: //dummy for1
+					if (!(forEachCounter8217 < forEachSaver8217.values.length)) {__pc = 8164; break;}
+					var local1_d_2003 = forEachSaver8217.values[forEachCounter8217];
+					
+					
+					var local1_v_2004 = 0;
+					case 8178:
+						__debugInfo = "625:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local1_s_2001)) { __pc = 8171; break; }
+					
+					case 8177:
+						__debugInfo = "625:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
+						
+					__debugInfo = "625:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8171: //dummy jumper1
 					;
 						
-					__debugInfo = "735:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "627:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_d_2003).values[tmpPositionCache][0]))));
+					__debugInfo = "629:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_s_2001 = 1;
+					__debugInfo = "630:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_v_2004 = func11_GetVariable(param4_expr.attr5_array, 0);
+					case 8216:
+						__debugInfo = "634:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local1_v_2004) !== (-(1))) ? 1 : 0)) && (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2004).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8211; break; }
+					
+					case 8215:
+						__debugInfo = "633:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local7_Add_Str_2002 = "[0]";
+						
+					__debugInfo = "633:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8211: //dummy jumper1
+					;
+						
+					__debugInfo = "625:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver8217.values[forEachCounter8217] = local1_d_2003;
+					
+					forEachCounter8217++
+					__pc = 8168; break; //back jump
+					
+				case 8164: //dummy for
+					;
+						
+					__debugInfo = "636:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (").values[tmpPositionCache]"))) + (local7_Add_Str_2002));
+					__debugInfo = "621:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8147: //dummy jumper1
+					;
+						
+					__debugInfo = "619:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8797: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(22))) ? 1 : 0))) { __pc = 8866; break; }
+				case 8127: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(10))) ? 1 : 0))) { __pc = 8227; break; }
 					
-					var local8_Name_Str_2020 = "", local5_Found_2021 = 0;
-					case 8877:
-						__debugInfo = "759:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Name_Str_2020 = REPLACE_Str(param4_expr.attr8_datatype.attr8_Name_Str, "$", "_Str");
+					case 8240:
+						__debugInfo = "640:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + (" = "));
 						
-					case 8906:
-						__debugInfo = "767:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver8906 = global8_Compiler.attr5_Funcs_ref[0];
-					var forEachCounter8906 = 0
+					__debugInfo = "642:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0]))));
+					case 8300:
+						__debugInfo = "647:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) || (func6_IsType(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str))) ? 1 : 0))) { __pc = 8271; break; }
 					
-				case 8885: //dummy for1
-					if (!(forEachCounter8906 < forEachSaver8906.values.length)) {__pc = 8881; break;}
-					var local4_Func_ref_2022 = forEachSaver8906.values[forEachCounter8906];
+					case 8299:
+						__debugInfo = "646:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr3_Typ) !== (35)) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr5_Right).values[tmpPositionCache][0].attr3_Typ) !== (36)) ? 1 : 0))) ? 1 : 0))) { __pc = 8292; break; }
 					
-					
-					case 8905:
-						__debugInfo = "766:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local4_Func_ref_2022[0].attr9_OName_Str) === (local8_Name_Str_2020)) ? 1 : 0))) { __pc = 8892; break; }
-					
-					case 8900:
-						__debugInfo = "763:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local4_Func_ref_2022[0].attr8_Name_Str));
+					case 8298:
+						__debugInfo = "645:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (".clone(/* In Assign */)"));
 						
-					__debugInfo = "764:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local5_Found_2021 = 1;
-					case 8904:
-						__debugInfo = "765:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						__pc = 8881; break;
-						
-					__debugInfo = "763:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "645:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 8892: //dummy jumper1
+				case 8292: //dummy jumper1
 					;
 						
-					__debugInfo = "766:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver8906.values[forEachCounter8906] = local4_Func_ref_2022;
+					__debugInfo = "646:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-					forEachCounter8906++
-					__pc = 8885; break; //back jump
-					
-				case 8881: //dummy for
+				case 8271: //dummy jumper1
 					;
 						
-					case 8916:
-						__debugInfo = "768:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((local5_Found_2021) ? 0 : 1))) { __pc = 8909; break; }
-					
-					case 8915:
-						__debugInfo = "768:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local8_Name_Str_2020));
-						
-					__debugInfo = "768:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8909: //dummy jumper1
-					;
-						
-					__debugInfo = "759:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "640:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8866: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(24))) ? 1 : 0))) { __pc = 8918; break; }
+				case 8227: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(11))) ? 1 : 0))) { __pc = 8302; break; }
 					
-					case 9181:
-						__debugInfo = "862:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 8921; break; }
-					
-					var local5_dummy_2023 = 0;
-					case 8925:
-						__debugInfo = "771:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local5_dummy_2023 = global11_LastDummyID;
+					var local1_v_2005 = 0, local6_hasRef_2006 = 0, local4_Find_2007 = 0;
+					case 8310:
+						__debugInfo = "651:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_v_2005 = func11_GetVariable(param4_expr.attr5_array, 0);
 						
-					__debugInfo = "772:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LastDummyID+=1;
-					__debugInfo = "773:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "652:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_hasRef_2006 = 0;
+					case 8335:
+						__debugInfo = "653:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local1_v_2005) === (-(1))) ? 1 : 0)) || (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2005).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8330; break; }
 					
-					var local1_i_2024 = 0.0;
-					case 9042:
-						__debugInfo = "789:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_i_2024 = 0
-					
-				case 8934: //dummy for1
-					if (!toCheck(local1_i_2024, ((BOUNDS(param4_expr.attr10_Conditions, 0)) - (1)), 1)) {__pc = 8945; break;}
-					
-					case 8975:
-						__debugInfo = "775:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (")) { __pc = "))) + (CAST2STRING(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache])))) + ("; break; }"))) + (func11_NewLine_Str()));
+					case 8334:
+						__debugInfo = "653:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_hasRef_2006 = 1;
 						
-					__debugInfo = "778:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(~~(local1_i_2024)).values[tmpPositionCache]).values[tmpPositionCache][0]))));
-					case 9017:
-						__debugInfo = "784:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 8996; break; }
+					__debugInfo = "653:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-					case 9009:
-						__debugInfo = "782:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(local5_dummy_2023)))) + (";"))) + (func11_NewLine_Str()));
-						
-					__debugInfo = "783:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("break;"))) + (func11_NewLine_Str()));
-					__debugInfo = "782:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 8996: //dummy jumper1
+				case 8330: //dummy jumper1
 					;
 						
-					__debugInfo = "785:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "786:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "787:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "788:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache])))) + (": //dummy jumper1"))) + (func11_NewLine_Str()));
-					__debugInfo = "775:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_2024 += 1;
-					__pc = 8934; break; //back jump
+					__debugInfo = "655:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIM("))) + (func14_JSTryUnref_Str(param4_expr.attr5_array)))) + (", ["));
+					__debugInfo = "656:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2007 = 0;
+					case 8382:
+						__debugInfo = "662:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver8382 = param4_expr.attr4_dims;
+					var forEachCounter8382 = 0
 					
-				case 8945: //dummy for
+				case 8358: //dummy for1
+					if (!(forEachCounter8382 < forEachSaver8382.values.length)) {__pc = 8354; break;}
+					var local1_D_2008 = forEachSaver8382.values[forEachCounter8382];
+					
+					
+					case 8370:
+						__debugInfo = "658:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local4_Find_2007) === (1)) ? 1 : 0))) { __pc = 8363; break; }
+					
+					case 8369:
+						__debugInfo = "658:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
+						
+					__debugInfo = "658:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8363: //dummy jumper1
 					;
 						
-					__debugInfo = "789:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					;
-					case 9081:
-						__debugInfo = "798:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 9050; break; }
+					__debugInfo = "659:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2008).values[tmpPositionCache][0]))));
+					__debugInfo = "661:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2007 = 1;
+					__debugInfo = "658:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver8382.values[forEachCounter8382] = local1_D_2008;
 					
-					case 9061:
-						__debugInfo = "792:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))));
-						
-					__debugInfo = "794:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "795:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "796:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "797:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(local5_dummy_2023)))) + (": //dummy jumper2"))) + (func11_NewLine_Str()));
-					__debugInfo = "792:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachCounter8382++
+					__pc = 8358; break; //back jump
 					
-				case 9050: //dummy jumper1
+				case 8354: //dummy for
 					;
 						
-					__debugInfo = "771:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29425;
+					__debugInfo = "663:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2006, 1)))) + (")"));
+					__debugInfo = "651:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 8921: //dummy jumper1
+				case 8302: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(12))) ? 1 : 0))) { __pc = 8402; break; }
 					
-					var local8_IsSwitch_2025 = 0;
-					case 9086:
-						__debugInfo = "802:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_IsSwitch_2025 = 0;
+					var local1_v_2009 = 0, local6_hasRef_2010 = 0, local4_Find_2011 = 0;
+					case 8410:
+						__debugInfo = "666:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_v_2009 = func11_GetVariable(param4_expr.attr5_array, 0);
 						
-					case 9180:
-						__debugInfo = "861:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local8_IsSwitch_2025)) { __pc = 9089; break; }
+					__debugInfo = "667:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_hasRef_2010 = 0;
+					case 8435:
+						__debugInfo = "668:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((((((local1_v_2009) === (-(1))) ? 1 : 0)) || (global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2009).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0))) { __pc = 8430; break; }
 					
-					
-					__pc = 29428;
-					break;
-					
-				case 9089: //dummy jumper1
-					
-					case 9092:
-						__debugInfo = "848:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8434:
+						__debugInfo = "668:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_hasRef_2010 = 1;
 						
-					var local1_i_2026 = 0.0;
-					case 9157:
-						__debugInfo = "857:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_i_2026 = 0
+					__debugInfo = "668:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 9096: //dummy for1
-					if (!toCheck(local1_i_2026, ((BOUNDS(param4_expr.attr10_Conditions, 0)) - (1)), 1)) {__pc = 9107; break;}
-					
-					case 9126:
-						__debugInfo = "854:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local1_i_2026) === (0)) ? 1 : 0))) { __pc = 9113; break; }
-					
-					case 9119:
-						__debugInfo = "851:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("if"));
-						
-					__debugInfo = "851:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29429;
-					break;
-					
-				case 9113: //dummy jumper1
-					
-					case 9125:
-						__debugInfo = "853:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (" else if"));
-						
-					__debugInfo = "853:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29429: //dummy jumper2
+				case 8430: //dummy jumper1
 					;
 						
-					__debugInfo = "855:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (" ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2026)).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") "));
-					__debugInfo = "856:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(~~(local1_i_2026)).values[tmpPositionCache]).values[tmpPositionCache][0]))));
-					__debugInfo = "854:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_2026 += 1;
-					__pc = 9096; break; //back jump
+					__debugInfo = "670:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("REDIM("))) + (func14_JSTryUnref_Str(param4_expr.attr5_array)))) + (", ["));
+					__debugInfo = "671:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2011 = 0;
+					case 8482:
+						__debugInfo = "677:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver8482 = param4_expr.attr4_dims;
+					var forEachCounter8482 = 0
 					
-				case 9107: //dummy for
+				case 8458: //dummy for1
+					if (!(forEachCounter8482 < forEachSaver8482.values.length)) {__pc = 8454; break;}
+					var local1_D_2012 = forEachSaver8482.values[forEachCounter8482];
+					
+					
+					case 8470:
+						__debugInfo = "673:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local4_Find_2011) === (1)) ? 1 : 0))) { __pc = 8463; break; }
+					
+					case 8469:
+						__debugInfo = "673:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
+						
+					__debugInfo = "673:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8463: //dummy jumper1
 					;
 						
-					__debugInfo = "857:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "674:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2012).values[tmpPositionCache][0]))));
+					__debugInfo = "676:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2011 = 1;
+					__debugInfo = "673:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver8482.values[forEachCounter8482] = local1_D_2012;
+					
+					forEachCounter8482++
+					__pc = 8458; break; //back jump
+					
+				case 8454: //dummy for
 					;
 						
-					case 9179:
-						__debugInfo = "860:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 9165; break; }
+					__debugInfo = "678:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (func21_JSGetDefaultValue_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0].attr8_datatype, local6_hasRef_2010, 1)))) + (" )"));
+					__debugInfo = "666:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
 					
-					case 9178:
-						__debugInfo = "859:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (" else "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))));
+				case 8402: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(15))) ? 1 : 0))) { __pc = 8502; break; }
+					
+					var local4_cast_2013 = 0;
+					case 8506:
+						__debugInfo = "681:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local4_cast_2013 = 1;
 						
-					__debugInfo = "859:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8588:
+						__debugInfo = "696:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (4)) ? 1 : 0))) { __pc = 8517; break; }
 					
-				case 9165: //dummy jumper1
+					var local5_f_Str_2014 = "";
+					case 8522:
+						__debugInfo = "683:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local4_cast_2013 = 0;
+						
+					__debugInfo = "685:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local5_f_Str_2014 = ((CAST2STRING(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_floatval)) + (""));
+					__debugInfo = "685:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+					var local1_i_2015 = 0.0;
+					case 8562:
+						__debugInfo = "692:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_i_2015 = 0
+					
+				case 8540: //dummy for1
+					if (!toCheck(local1_i_2015, (((local5_f_Str_2014).length) - (1)), 1)) {__pc = 8547; break;}
+					
+					case 8561:
+						__debugInfo = "691:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((ASC(local5_f_Str_2014, ~~(local1_i_2015))) === (ASC(".", 0))) ? 1 : 0))) { __pc = 8555; break; }
+					
+					case 8559:
+						__debugInfo = "689:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local4_cast_2013 = 1;
+						
+					case 8560:
+						__debugInfo = "690:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__pc = 8547; break;
+						
+					__debugInfo = "689:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8555: //dummy jumper1
 					;
 						
-					__debugInfo = "848:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "691:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_2015 += 1;
+					__pc = 8540; break; //back jump
 					
-				case 29428: //dummy jumper2
+				case 8547: //dummy for
 					;
 						
-					__debugInfo = "802:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "692:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					;
+					__debugInfo = "683:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29425: //dummy jumper2
+				case 8517: //dummy jumper1
+					if (!(((((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str) === ("float")) ? 1 : 0)) && ((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) === (0)) ? 1 : 0))) ? 1 : 0))) { __pc = 8586; break; }
+					
+					
+					
+				case 8586: //dummy jumper1
 					;
 						
-					__debugInfo = "862:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
+					case 8678:
+						__debugInfo = "712:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local4_cast_2013)) { __pc = 8590; break; }
 					
-				case 8918: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(25))) ? 1 : 0))) { __pc = 9183; break; }
-					
-					case 9302:
-						__debugInfo = "884:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 9186; break; }
-					
-					var local6_TmpBID_2027 = 0, local6_TmpCID_2028 = 0;
-					case 9190:
-						__debugInfo = "865:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_TmpBID_2027 = global11_LoopBreakID;
+					case 8601:
+						__debugInfo = "699:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						
-					__debugInfo = "866:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_TmpCID_2028 = global14_LoopContinueID;
-					__debugInfo = "867:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = global11_LastDummyID;
-					__debugInfo = "868:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = param4_expr.attr2_ID;
-					__debugInfo = "869:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LastDummyID+=1;
-					__debugInfo = "871:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")) {__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break;}"))) + (func11_NewLine_Str()));
-					__debugInfo = "872:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "873:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr2_ID)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
-					__debugInfo = "874:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "875:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "876:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "877:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(global11_LoopBreakID)))) + (":"))) + (func11_NewLine_Str()));
-					__debugInfo = "879:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = local6_TmpBID_2027;
-					__debugInfo = "880:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = local6_TmpCID_2028;
-					__debugInfo = "865:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29431;
-					break;
-					
-				case 9186: //dummy jumper1
-					
-					case 9291:
-						__debugInfo = "882:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("while ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") "));
+					var local17___SelectHelper13__2016 = "";
+					case 8603:
+						__debugInfo = "699:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local17___SelectHelper13__2016 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str;
 						
-					__debugInfo = "883:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "882:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8666:
+						__debugInfo = "709:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper13__2016) === ("int")) ? 1 : 0))) { __pc = 8605; break; }
 					
-				case 29431: //dummy jumper2
-					;
+					case 8616:
+						__debugInfo = "702:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
-					__debugInfo = "884:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 9183: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(26))) ? 1 : 0))) { __pc = 9304; break; }
-					
-					case 9428:
-						__debugInfo = "908:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 9307; break; }
-					
-					var local6_TmpBID_2029 = 0, local6_TmpCID_2030 = 0;
-					case 9311:
-						__debugInfo = "887:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_TmpBID_2029 = global11_LoopBreakID;
-						
-					__debugInfo = "888:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_TmpCID_2030 = global14_LoopContinueID;
-					__debugInfo = "890:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = global11_LastDummyID;
-					__debugInfo = "891:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = param4_expr.attr2_ID;
-					__debugInfo = "892:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LastDummyID+=1;
-					__debugInfo = "894:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "895:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") {__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break;}"))) + (func11_NewLine_Str()));
-					__debugInfo = "896:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr2_ID)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
-					__debugInfo = "897:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "898:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "899:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "900:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(global11_LoopBreakID)))) + (": //dummy repeat"))) + (func11_NewLine_Str()));
-					__debugInfo = "902:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = local6_TmpBID_2029;
-					__debugInfo = "903:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = local6_TmpCID_2030;
-					__debugInfo = "887:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29432;
-					break;
-					
-				case 9307: //dummy jumper1
-					
-					case 9403:
-						__debugInfo = "905:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("do "));
-						
-					__debugInfo = "906:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "907:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (" while (!("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("))"));
-					__debugInfo = "905:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29432: //dummy jumper2
-					;
-						
-					__debugInfo = "908:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 9304: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(27))) ? 1 : 0))) { __pc = 9430; break; }
-					
-					var local13_CheckComm_Str_2031 = "";
-					case 9445:
-						__debugInfo = "915:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(param4_expr.attr5_hasTo)) { __pc = 9436; break; }
-					
-					case 9440:
-						__debugInfo = "912:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local13_CheckComm_Str_2031 = "toCheck";
-						
-					__debugInfo = "912:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29433;
-					break;
-					
-				case 9436: //dummy jumper1
-					
-					case 9444:
-						__debugInfo = "914:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local13_CheckComm_Str_2031 = "untilCheck";
-						
-					__debugInfo = "914:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29433: //dummy jumper2
-					;
-						
-					case 9709:
-						__debugInfo = "944:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 9447; break; }
-					
-					var local6_TmpBID_2032 = 0, local6_TmpCID_2033 = 0;
-					case 9451:
-						__debugInfo = "917:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_TmpBID_2032 = global11_LoopBreakID;
-						
-					__debugInfo = "918:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_TmpCID_2033 = global14_LoopContinueID;
-					__debugInfo = "920:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = param4_expr.attr8_stepExpr;
-					__debugInfo = "921:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = param4_expr.attr7_varExpr;
-					__debugInfo = "923:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0]))))) + (func11_NewLine_Str()));
-					__debugInfo = "924:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "925:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "926:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "927:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + (": //dummy for1"))) + (func11_NewLine_Str()));
-					__debugInfo = "930:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((((((((((((((local8_Text_Str_1960) + ("if (!"))) + (local13_CheckComm_Str_2031))) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_toExpr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (")) {__pc = "))) + (CAST2STRING(param4_expr.attr8_stepExpr)))) + ("; break;}"))) + (func11_NewLine_Str()));
-					__debugInfo = "931:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "932:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (" += "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (";"))) + (func11_NewLine_Str()));
-					__debugInfo = "933:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
-					__debugInfo = "934:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "935:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "936:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "937:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr8_stepExpr)))) + (": //dummy for"))) + (func11_NewLine_Str()));
-					__debugInfo = "939:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = local6_TmpBID_2032;
-					__debugInfo = "940:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = local6_TmpCID_2033;
-					__debugInfo = "917:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29434;
-					break;
-					
-				case 9447: //dummy jumper1
-					
-					case 9698:
-						__debugInfo = "942:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((((((((((((((((((((((local8_Text_Str_1960) + ("for ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0]))))) + (";"))) + (local13_CheckComm_Str_2031))) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_toExpr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (");"))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (" += "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (") "));
-						
-					__debugInfo = "943:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "942:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29434: //dummy jumper2
-					;
-						
-					__debugInfo = "915:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 9430: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(38))) ? 1 : 0))) { __pc = 9711; break; }
-					
-					var local1_c_2034 = 0, local11_varName_Str_2035 = "", local13_StartText_Str_2036 = "", local12_CondText_Str_2037 = "", local11_IncText_Str_2038 = "", local13_EachBegin_Str_2039 = "", local11_EachEnd_Str_2040 = "";
-					case 9717:
-						__debugInfo = "946:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						global14_ForEachCounter = param4_expr.attr2_ID;
-						
-					__debugInfo = "947:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_c_2034 = global14_ForEachCounter;
-					__debugInfo = "948:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("var forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (" = "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_inExpr).values[tmpPositionCache][0]))))) + (";"))) + (func11_NewLine_Str()));
-					__debugInfo = "949:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local11_varName_Str_2035 = func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0])), "[0]");
-					__debugInfo = "950:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local13_StartText_Str_2036 = (((("var forEachCounter") + (CAST2STRING(local1_c_2034)))) + (" = 0"));
-					__debugInfo = "951:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local12_CondText_Str_2037 = (((((((("forEachCounter") + (CAST2STRING(local1_c_2034)))) + (" < forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (".values.length"));
-					__debugInfo = "952:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local11_IncText_Str_2038 = (((("forEachCounter") + (CAST2STRING(local1_c_2034)))) + ("++"));
-					__debugInfo = "953:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local13_EachBegin_Str_2039 = (((((((((((((("var ") + (local11_varName_Str_2035))) + (" = forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (".values[forEachCounter"))) + (CAST2STRING(local1_c_2034)))) + ("];"))) + (func11_NewLine_Str()));
-					__debugInfo = "954:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local11_EachEnd_Str_2040 = (((((((((((((("forEachSaver") + (CAST2STRING(local1_c_2034)))) + (".values[forEachCounter"))) + (CAST2STRING(local1_c_2034)))) + ("] = "))) + (local11_varName_Str_2035))) + (";"))) + (func11_NewLine_Str()));
-					case 10015:
-						__debugInfo = "990:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 9826; break; }
-					
-					var local6_TmpBID_2041 = 0, local6_TmpCID_2042 = 0;
-					case 9830:
-						__debugInfo = "956:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local6_TmpBID_2041 = global11_LoopBreakID;
-						
-					__debugInfo = "957:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local6_TmpCID_2042 = global14_LoopContinueID;
-					__debugInfo = "959:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = param4_expr.attr7_varExpr;
-					__debugInfo = "960:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = param4_expr.attr6_inExpr;
-					__debugInfo = "962:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local13_StartText_Str_2036))) + (func11_NewLine_Str()));
-					__debugInfo = "963:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "964:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "965:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "966:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr6_inExpr)))) + (": //dummy for1"))) + (func11_NewLine_Str()));
-					__debugInfo = "969:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (local12_CondText_Str_2037))) + (")) {__pc = "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + ("; break;}"))) + (func11_NewLine_Str()));
-					__debugInfo = "970:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local13_EachBegin_Str_2039))) + (func11_NewLine_Str()));
-					__debugInfo = "971:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "972:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local11_EachEnd_Str_2040))) + (func11_NewLine_Str()));
-					__debugInfo = "973:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local11_IncText_Str_2038))) + (func11_NewLine_Str()));
-					__debugInfo = "974:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr6_inExpr)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
-					__debugInfo = "975:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "976:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
-					__debugInfo = "977:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "978:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + (": //dummy for"))) + (func11_NewLine_Str()));
-					__debugInfo = "980:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global11_LoopBreakID = local6_TmpBID_2041;
-					__debugInfo = "981:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global14_LoopContinueID = local6_TmpCID_2042;
-					__debugInfo = "956:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29435;
-					break;
-					
-				case 9826: //dummy jumper1
-					
-					case 9965:
-						__debugInfo = "983:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func8_IndentUp();
-						
-					__debugInfo = "984:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((((((local8_Text_Str_1960) + ("for("))) + (local13_StartText_Str_2036))) + (" ; "))) + (local12_CondText_Str_2037))) + (" ; "))) + (local11_IncText_Str_2038))) + (") {"))) + (func11_NewLine_Str()));
-					__debugInfo = "985:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local13_EachBegin_Str_2039));
-					__debugInfo = "986:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))))) + (func11_NewLine_Str()));
-					__debugInfo = "987:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local11_EachEnd_Str_2040));
-					__debugInfo = "988:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "989:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
-					__debugInfo = "983:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29435: //dummy jumper2
-					;
-						
-					__debugInfo = "946:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 9711: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(30))) ? 1 : 0))) { __pc = 10017; break; }
-					
-					case 10038:
-						__debugInfo = "996:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 10020; break; }
-					
-					case 10031:
-						__debugInfo = "993:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(global14_LoopContinueID)))) + ("; break"));
-						
-					__debugInfo = "993:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29436;
-					break;
-					
-				case 10020: //dummy jumper1
-					
-					case 10037:
-						__debugInfo = "995:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("continue"));
-						
-					__debugInfo = "995:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29436: //dummy jumper2
-					;
-						
-					__debugInfo = "996:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 10017: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(29))) ? 1 : 0))) { __pc = 10040; break; }
-					
-					case 10061:
-						__debugInfo = "1002:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(global8_IsInGoto)) { __pc = 10043; break; }
-					
-					case 10054:
-						__debugInfo = "999:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break"));
-						
-					__debugInfo = "999:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "702:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					__pc = 29437;
 					break;
 					
-				case 10043: //dummy jumper1
+				case 8605: //dummy jumper1
+					if (!((((local17___SelectHelper13__2016) === ("float")) ? 1 : 0))) { __pc = 8618; break; }
 					
-					case 10060:
-						__debugInfo = "1001:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("break"));
+					case 8633:
+						__debugInfo = "704:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("~~("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
-					__debugInfo = "1001:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "704:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29437;
+					break;
+					
+				case 8618: //dummy jumper1
+					if (!((((local17___SelectHelper13__2016) === ("string")) ? 1 : 0))) { __pc = 8635; break; }
+					
+					case 8650:
+						__debugInfo = "706:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("INT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "706:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29437;
+					break;
+					
+				case 8635: //dummy jumper1
+					
+					case 8665:
+						__debugInfo = "708:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2INT("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "708:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
 				case 29437: //dummy jumper2
 					;
 						
-					__debugInfo = "1002:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 10040: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(31))) ? 1 : 0))) { __pc = 10063; break; }
-					
-					var local9_oIsInGoto_2043 = 0;
-					case 10067:
-						__debugInfo = "1004:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local9_oIsInGoto_2043 = global8_IsInGoto;
-						
-					__debugInfo = "1005:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global8_IsInGoto = 0;
-					__debugInfo = "1007:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("try "));
-					__debugInfo = "1008:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
-					__debugInfo = "1009:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func8_IndentUp();
-					__debugInfo = "1010:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + (" catch ("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (") {"))) + (func11_NewLine_Str()));
-					__debugInfo = "1011:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((((((((local8_Text_Str_1960) + ("if ("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" instanceof OTTException) "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (".getText(); else throwError("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
-					__debugInfo = "1012:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_catchScp).values[tmpPositionCache][0]))));
-					__debugInfo = "1013:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					func10_IndentDown();
-					__debugInfo = "1014:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
-					__debugInfo = "1017:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					global8_IsInGoto = local9_oIsInGoto_2043;
-					__debugInfo = "1004:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 10063: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(32))) ? 1 : 0))) { __pc = 10183; break; }
-					
-					case 10223:
-						__debugInfo = "1018:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("throw new OTTException("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", \""))) + (global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr8_Path_Str))) + ("\", "))) + (CAST2STRING(global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr4_Line)))) + (")"));
-						
-					__debugInfo = "1018:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 10183: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(33))) ? 1 : 0))) { __pc = 10225; break; }
-					
-					case 10237:
-						__debugInfo = "1021:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("RESTORE(datablock_"))) + (param4_expr.attr8_Name_Str))) + (")"));
-						
-					__debugInfo = "1021:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
-					
-				case 10225: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(34))) ? 1 : 0))) { __pc = 10239; break; }
-					
-					var local1_i_2044 = 0.0;
-					case 10244:
-						__debugInfo = "1023:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local1_i_2044 = 0;
-						
-					case 10287:
-						__debugInfo = "1028:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver10287 = param4_expr.attr5_Reads;
-					var forEachCounter10287 = 0
-					
-				case 10251: //dummy for1
-					if (!(forEachCounter10287 < forEachSaver10287.values.length)) {__pc = 10247; break;}
-					var local1_R_2045 = forEachSaver10287.values[forEachCounter10287];
-					
-					
-					case 10262:
-						__debugInfo = "1025:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_R_2045).values[tmpPositionCache][0]))))) + (" = READ()"));
-						
-					case 10283:
-						__debugInfo = "1026:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local1_i_2044) < (((BOUNDS(param4_expr.attr5_Reads, 0)) - (1)))) ? 1 : 0))) { __pc = 10274; break; }
-					
-					case 10282:
-						__debugInfo = "1026:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
-						
-					__debugInfo = "1026:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 10274: //dummy jumper1
+					__debugInfo = "699:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
 						
-					__debugInfo = "1027:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local1_i_2044+=1;
-					__debugInfo = "1025:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver10287.values[forEachCounter10287] = local1_R_2045;
+					__debugInfo = "699:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29436;
+					break;
 					
-					forEachCounter10287++
-					__pc = 10251; break; //back jump
+				case 8590: //dummy jumper1
 					
-				case 10247: //dummy for
+					case 8677:
+						__debugInfo = "711:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "711:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29436: //dummy jumper2
 					;
 						
-					__debugInfo = "1023:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "681:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10239: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(35))) ? 1 : 0))) { __pc = 10289; break; }
+				case 8502: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(16))) ? 1 : 0))) { __pc = 8680; break; }
 					
-					case 10300:
-						__debugInfo = "1030:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func21_JSGetDefaultValue_Str(param4_expr.attr8_datatype, 0, 0)));
+					case 8775:
+						__debugInfo = "730:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) { __pc = 8691; break; }
+					
+					case 8702:
+						__debugInfo = "716:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
 						
-					__debugInfo = "1030:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "716:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29438;
 					break;
 					
-				case 10289: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(36))) ? 1 : 0))) { __pc = 10302; break; }
+				case 8691: //dummy jumper1
 					
-					var local7_def_Str_2046 = "", local4_Find_2047 = 0;
-					case 10311:
-						__debugInfo = "1032:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local7_def_Str_2046 = func21_JSGetDefaultValue_Str(param4_expr.attr8_datatype, 1, 1);
+					case 8713:
+						__debugInfo = "718:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						
-					__debugInfo = "1033:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIM(pool_array.alloc("))) + (local7_def_Str_2046))) + ("), ["));
-					__debugInfo = "1034:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2047 = 0;
-					case 10356:
-						__debugInfo = "1040:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver10356 = param4_expr.attr4_dims;
-					var forEachCounter10356 = 0
-					
-				case 10332: //dummy for1
-					if (!(forEachCounter10356 < forEachSaver10356.values.length)) {__pc = 10328; break;}
-					var local1_D_2048 = forEachSaver10356.values[forEachCounter10356];
-					
-					
-					case 10344:
-						__debugInfo = "1036:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((local4_Find_2047) === (1)) ? 1 : 0))) { __pc = 10337; break; }
-					
-					case 10343:
-						__debugInfo = "1036:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
+					var local17___SelectHelper14__2017 = "";
+					case 8715:
+						__debugInfo = "718:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local17___SelectHelper14__2017 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str;
 						
-					__debugInfo = "1036:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 8774:
+						__debugInfo = "729:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper14__2017) === ("int")) ? 1 : 0))) { __pc = 8717; break; }
 					
-				case 10337: //dummy jumper1
+					case 8728:
+						__debugInfo = "721:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "721:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29439;
+					break;
+					
+				case 8717: //dummy jumper1
+					if (!((((local17___SelectHelper14__2017) === ("float")) ? 1 : 0))) { __pc = 8730; break; }
+					
+					case 8741:
+						__debugInfo = "724:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "724:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29439;
+					break;
+					
+				case 8730: //dummy jumper1
+					if (!((((local17___SelectHelper14__2017) === ("string")) ? 1 : 0))) { __pc = 8743; break; }
+					
+					case 8758:
+						__debugInfo = "726:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("FLOAT2STR("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "726:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29439;
+					break;
+					
+				case 8743: //dummy jumper1
+					
+					case 8773:
+						__debugInfo = "728:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2FLOAT("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "728:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29439: //dummy jumper2
 					;
 						
-					__debugInfo = "1037:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2048).values[tmpPositionCache][0]))));
-					__debugInfo = "1039:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2047 = 1;
-					__debugInfo = "1036:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver10356.values[forEachCounter10356] = local1_D_2048;
-					
-					forEachCounter10356++
-					__pc = 10332; break; //back jump
-					
-				case 10328: //dummy for
+					__debugInfo = "718:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
 						
-					__debugInfo = "1041:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (local7_def_Str_2046))) + (")"));
-					__debugInfo = "1032:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
+					__debugInfo = "718:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 10302: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(37))) ? 1 : 0))) { __pc = 10367; break; }
-					
-					case 10383:
-						__debugInfo = "1043:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = "));
-						
-					case 10439:
-						__debugInfo = "1048:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (54)) ? 1 : 0))) { __pc = 10393; break; }
-					
-					case 10426:
-						__debugInfo = "1045:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("castobj("))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (", "))) + (func18_ChangeTypeName_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str)))) + (")"));
-						
-					__debugInfo = "1045:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29440;
-					break;
-					
-				case 10393: //dummy jumper1
-					
-					case 10438:
-						__debugInfo = "1047:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])), "[0]")));
-						
-					__debugInfo = "1047:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 29440: //dummy jumper2
+				case 29438: //dummy jumper2
 					;
 						
-					__debugInfo = "1050:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (" /* ALIAS */"));
-					__debugInfo = "1043:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "730:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10367: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(20))) ? 1 : 0))) { __pc = 10446; break; }
+				case 8680: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(17))) ? 1 : 0))) { __pc = 8777; break; }
 					
-					case 10458:
-						__debugInfo = "1052:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = __labels[\""))) + (param4_expr.attr8_Name_Str))) + ("\"]; break"));
+					case 8792:
+						__debugInfo = "732:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("CAST2STRING("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
-					__debugInfo = "1052:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "732:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10446: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(21))) ? 1 : 0))) { __pc = 10460; break; }
+				case 8777: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(18))) ? 1 : 0))) { __pc = 8794; break; }
 					
-					case 10479:
-						__debugInfo = "1054:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						global12_LabelDef_Str = ((((((((((global12_LabelDef_Str) + ("\""))) + (param4_expr.attr8_Name_Str))) + ("\": "))) + (CAST2STRING(param4_expr.attr2_ID)))) + (", "));
+					case 8814:
+						__debugInfo = "734:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("."))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_nextExpr).values[tmpPositionCache][0]))));
 						
-					__debugInfo = "1056:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("//label: "))) + (param4_expr.attr8_Name_Str));
-					__debugInfo = "1054:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "734:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10460: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(39))) ? 1 : 0))) { __pc = 10490; break; }
+				case 8794: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(19))) ? 1 : 0))) { __pc = 8816; break; }
 					
-					case 10510:
-						__debugInfo = "1058:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + ("+="))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
+					var local1_F_2018 = 0;
+					case 8821:
+						__debugInfo = "736:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_F_2018 = 0;
 						
-					__debugInfo = "1058:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
+					__debugInfo = "737:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 10490: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(40))) ? 1 : 0))) { __pc = 10512; break; }
-					
-					case 10537:
-						__debugInfo = "1060:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("DIMPUSH("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (")"));
+					var local17___SelectHelper15__2019 = 0;
+					case 8832:
+						__debugInfo = "737:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local17___SelectHelper15__2019 = global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ;
 						
-					__debugInfo = "1060:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
-					break;
+					case 8851:
+						__debugInfo = "744:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local17___SelectHelper15__2019) === (~~(3))) ? 1 : 0))) { __pc = 8834; break; }
 					
-				case 10512: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(41))) ? 1 : 0))) { __pc = 10539; break; }
-					
-					case 10588:
-						__debugInfo = "1066:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((param4_expr.attr4_kern) !== (-(1))) ? 1 : 0))) { __pc = 10548; break; }
-					
-					case 10572:
-						__debugInfo = "1063:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("KERNLEN("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_kern).values[tmpPositionCache][0]))))) + (")"));
+					case 8838:
+						__debugInfo = "739:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_F_2018 = 1;
 						
-					__debugInfo = "1063:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "739:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8834: //dummy jumper1
+					if (!((((local17___SelectHelper15__2019) === (~~(4))) ? 1 : 0))) { __pc = 8840; break; }
+					
+					case 8844:
+						__debugInfo = "741:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_F_2018 = 1;
+						
+					__debugInfo = "741:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8840: //dummy jumper1
+					if (!((((local17___SelectHelper15__2019) === (~~(5))) ? 1 : 0))) { __pc = 8846; break; }
+					
+					case 8850:
+						__debugInfo = "743:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_F_2018 = 1;
+						
+					__debugInfo = "743:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8846: //dummy jumper1
+					;
+						
+					__debugInfo = "737:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					;
+					__debugInfo = "746:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (global13_VariUndef_Str));
+					case 8883:
+						__debugInfo = "752:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local1_F_2018)) { __pc = 8858; break; }
+					
+					case 8869:
+						__debugInfo = "749:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("return "))) + (func14_JSTryUnref_Str(param4_expr.attr4_expr)));
+						
+					__debugInfo = "749:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					__pc = 29441;
 					break;
 					
-				case 10548: //dummy jumper1
+				case 8858: //dummy jumper1
 					
-					case 10587:
-						__debugInfo = "1065:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (").length"));
+					case 8882:
+						__debugInfo = "751:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("return tryClone("))) + (func14_JSTryUnref_Str(param4_expr.attr4_expr)))) + (")"));
 						
-					__debugInfo = "1065:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "751:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
 				case 29441: //dummy jumper2
 					;
 						
-					__debugInfo = "1066:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "736:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10539: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(45))) ? 1 : 0))) { __pc = 10590; break; }
+				case 8816: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(22))) ? 1 : 0))) { __pc = 8885; break; }
 					
-					case 10614:
-						__debugInfo = "1068:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("BOUNDS("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_position).values[tmpPositionCache][0]))))) + (")"));
+					var local8_Name_Str_2020 = "", local5_Found_2021 = 0;
+					case 8896:
+						__debugInfo = "760:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Name_Str_2020 = REPLACE_Str(param4_expr.attr8_datatype.attr8_Name_Str, "$", "_Str");
 						
-					__debugInfo = "1068:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					case 8925:
+						__debugInfo = "768:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver8925 = global8_Compiler.attr5_Funcs_ref[0];
+					var forEachCounter8925 = 0
+					
+				case 8904: //dummy for1
+					if (!(forEachCounter8925 < forEachSaver8925.values.length)) {__pc = 8900; break;}
+					var local4_Func_ref_2022 = forEachSaver8925.values[forEachCounter8925];
+					
+					
+					case 8924:
+						__debugInfo = "767:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local4_Func_ref_2022[0].attr9_OName_Str) === (local8_Name_Str_2020)) ? 1 : 0))) { __pc = 8911; break; }
+					
+					case 8919:
+						__debugInfo = "764:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local4_Func_ref_2022[0].attr8_Name_Str));
+						
+					__debugInfo = "765:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local5_Found_2021 = 1;
+					case 8923:
+						__debugInfo = "766:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__pc = 8900; break;
+						
+					__debugInfo = "764:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8911: //dummy jumper1
+					;
+						
+					__debugInfo = "767:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver8925.values[forEachCounter8925] = local4_Func_ref_2022;
+					
+					forEachCounter8925++
+					__pc = 8904; break; //back jump
+					
+				case 8900: //dummy for
+					;
+						
+					case 8935:
+						__debugInfo = "769:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((local5_Found_2021) ? 0 : 1))) { __pc = 8928; break; }
+					
+					case 8934:
+						__debugInfo = "769:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local8_Name_Str_2020));
+						
+					__debugInfo = "769:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 8928: //dummy jumper1
+					;
+						
+					__debugInfo = "760:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10590: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(42))) ? 1 : 0))) { __pc = 10616; break; }
+				case 8885: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(24))) ? 1 : 0))) { __pc = 8937; break; }
 					
-					var local4_Find_2049 = 0;
-					case 10631:
-						__debugInfo = "1070:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIMDATA("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", ["));
+					case 9200:
+						__debugInfo = "863:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 8940; break; }
+					
+					var local5_dummy_2023 = 0;
+					case 8944:
+						__debugInfo = "772:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local5_dummy_2023 = global11_LastDummyID;
 						
-					case 10660:
-						__debugInfo = "1078:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver10660 = param4_expr.attr5_Exprs;
-					var forEachCounter10660 = 0
+					__debugInfo = "773:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LastDummyID+=1;
+					__debugInfo = "774:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 10638: //dummy for1
-					if (!(forEachCounter10660 < forEachSaver10660.values.length)) {__pc = 10634; break;}
-					var local4_Elem_2050 = forEachSaver10660.values[forEachCounter10660];
+					var local1_i_2024 = 0.0;
+					case 9061:
+						__debugInfo = "790:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_i_2024 = 0
+					
+				case 8953: //dummy for1
+					if (!toCheck(local1_i_2024, ((BOUNDS(param4_expr.attr10_Conditions, 0)) - (1)), 1)) {__pc = 8964; break;}
+					
+					case 8994:
+						__debugInfo = "776:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (")) { __pc = "))) + (CAST2STRING(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache])))) + ("; break; }"))) + (func11_NewLine_Str()));
+						
+					__debugInfo = "779:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(~~(local1_i_2024)).values[tmpPositionCache]).values[tmpPositionCache][0]))));
+					case 9036:
+						__debugInfo = "785:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 9015; break; }
+					
+					case 9028:
+						__debugInfo = "783:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(local5_dummy_2023)))) + (";"))) + (func11_NewLine_Str()));
+						
+					__debugInfo = "784:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("break;"))) + (func11_NewLine_Str()));
+					__debugInfo = "783:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 9015: //dummy jumper1
+					;
+						
+					__debugInfo = "786:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "787:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "788:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "789:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2024)).values[tmpPositionCache])))) + (": //dummy jumper1"))) + (func11_NewLine_Str()));
+					__debugInfo = "776:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_2024 += 1;
+					__pc = 8953; break; //back jump
+					
+				case 8964: //dummy for
+					;
+						
+					__debugInfo = "790:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					;
+					case 9100:
+						__debugInfo = "799:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 9069; break; }
+					
+					case 9080:
+						__debugInfo = "793:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "795:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "796:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "797:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "798:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(local5_dummy_2023)))) + (": //dummy jumper2"))) + (func11_NewLine_Str()));
+					__debugInfo = "793:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 9069: //dummy jumper1
+					;
+						
+					__debugInfo = "772:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29444;
+					break;
+					
+				case 8940: //dummy jumper1
+					
+					var local8_IsSwitch_2025 = 0;
+					case 9105:
+						__debugInfo = "803:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_IsSwitch_2025 = 0;
+						
+					case 9199:
+						__debugInfo = "862:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local8_IsSwitch_2025)) { __pc = 9108; break; }
 					
 					
-					case 10648:
-						__debugInfo = "1073:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(local4_Find_2049)) { __pc = 10641; break; }
+					__pc = 29447;
+					break;
 					
-					case 10647:
-						__debugInfo = "1073:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				case 9108: //dummy jumper1
+					
+					case 9111:
+						__debugInfo = "849:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						
+					var local1_i_2026 = 0.0;
+					case 9176:
+						__debugInfo = "858:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_i_2026 = 0
+					
+				case 9115: //dummy for1
+					if (!toCheck(local1_i_2026, ((BOUNDS(param4_expr.attr10_Conditions, 0)) - (1)), 1)) {__pc = 9126; break;}
+					
+					case 9145:
+						__debugInfo = "855:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local1_i_2026) === (0)) ? 1 : 0))) { __pc = 9132; break; }
+					
+					case 9138:
+						__debugInfo = "852:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("if"));
+						
+					__debugInfo = "852:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29448;
+					break;
+					
+				case 9132: //dummy jumper1
+					
+					case 9144:
+						__debugInfo = "854:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (" else if"));
+						
+					__debugInfo = "854:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29448: //dummy jumper2
+					;
+						
+					__debugInfo = "856:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (" ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(~~(local1_i_2026)).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") "));
+					__debugInfo = "857:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(~~(local1_i_2026)).values[tmpPositionCache]).values[tmpPositionCache][0]))));
+					__debugInfo = "855:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_2026 += 1;
+					__pc = 9115; break; //back jump
+					
+				case 9126: //dummy for
+					;
+						
+					__debugInfo = "858:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					;
+						
+					case 9198:
+						__debugInfo = "861:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((param4_expr.attr9_elseScope) !== (-(1))) ? 1 : 0))) { __pc = 9184; break; }
+					
+					case 9197:
+						__debugInfo = "860:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (" else "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "860:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 9184: //dummy jumper1
+					;
+						
+					__debugInfo = "849:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29447: //dummy jumper2
+					;
+						
+					__debugInfo = "803:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29444: //dummy jumper2
+					;
+						
+					__debugInfo = "863:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 8937: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(25))) ? 1 : 0))) { __pc = 9202; break; }
+					
+					case 9321:
+						__debugInfo = "885:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 9205; break; }
+					
+					var local6_TmpBID_2027 = 0, local6_TmpCID_2028 = 0;
+					case 9209:
+						__debugInfo = "866:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_TmpBID_2027 = global11_LoopBreakID;
+						
+					__debugInfo = "867:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_TmpCID_2028 = global14_LoopContinueID;
+					__debugInfo = "868:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = global11_LastDummyID;
+					__debugInfo = "869:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = param4_expr.attr2_ID;
+					__debugInfo = "870:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LastDummyID+=1;
+					__debugInfo = "872:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")) {__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break;}"))) + (func11_NewLine_Str()));
+					__debugInfo = "873:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "874:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr2_ID)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
+					__debugInfo = "875:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "876:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "877:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "878:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(global11_LoopBreakID)))) + (":"))) + (func11_NewLine_Str()));
+					__debugInfo = "880:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = local6_TmpBID_2027;
+					__debugInfo = "881:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = local6_TmpCID_2028;
+					__debugInfo = "866:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29450;
+					break;
+					
+				case 9205: //dummy jumper1
+					
+					case 9310:
+						__debugInfo = "883:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("while ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") "));
+						
+					__debugInfo = "884:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "883:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29450: //dummy jumper2
+					;
+						
+					__debugInfo = "885:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 9202: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(26))) ? 1 : 0))) { __pc = 9323; break; }
+					
+					case 9447:
+						__debugInfo = "909:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 9326; break; }
+					
+					var local6_TmpBID_2029 = 0, local6_TmpCID_2030 = 0;
+					case 9330:
+						__debugInfo = "888:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_TmpBID_2029 = global11_LoopBreakID;
+						
+					__debugInfo = "889:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_TmpCID_2030 = global14_LoopContinueID;
+					__debugInfo = "891:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = global11_LastDummyID;
+					__debugInfo = "892:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = param4_expr.attr2_ID;
+					__debugInfo = "893:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LastDummyID+=1;
+					__debugInfo = "895:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "896:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if ("))) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") {__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break;}"))) + (func11_NewLine_Str()));
+					__debugInfo = "897:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr2_ID)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
+					__debugInfo = "898:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "899:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "900:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "901:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(global11_LoopBreakID)))) + (": //dummy repeat"))) + (func11_NewLine_Str()));
+					__debugInfo = "903:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = local6_TmpBID_2029;
+					__debugInfo = "904:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = local6_TmpCID_2030;
+					__debugInfo = "888:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29451;
+					break;
+					
+				case 9326: //dummy jumper1
+					
+					case 9422:
+						__debugInfo = "906:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("do "));
+						
+					__debugInfo = "907:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func23_ConditionJSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "908:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (" while (!("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + ("))"));
+					__debugInfo = "906:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29451: //dummy jumper2
+					;
+						
+					__debugInfo = "909:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 9323: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(27))) ? 1 : 0))) { __pc = 9449; break; }
+					
+					var local13_CheckComm_Str_2031 = "";
+					case 9464:
+						__debugInfo = "916:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(param4_expr.attr5_hasTo)) { __pc = 9455; break; }
+					
+					case 9459:
+						__debugInfo = "913:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local13_CheckComm_Str_2031 = "toCheck";
+						
+					__debugInfo = "913:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29452;
+					break;
+					
+				case 9455: //dummy jumper1
+					
+					case 9463:
+						__debugInfo = "915:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local13_CheckComm_Str_2031 = "untilCheck";
+						
+					__debugInfo = "915:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29452: //dummy jumper2
+					;
+						
+					case 9728:
+						__debugInfo = "945:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 9466; break; }
+					
+					var local6_TmpBID_2032 = 0, local6_TmpCID_2033 = 0;
+					case 9470:
+						__debugInfo = "918:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_TmpBID_2032 = global11_LoopBreakID;
+						
+					__debugInfo = "919:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_TmpCID_2033 = global14_LoopContinueID;
+					__debugInfo = "921:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = param4_expr.attr8_stepExpr;
+					__debugInfo = "922:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = param4_expr.attr7_varExpr;
+					__debugInfo = "924:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0]))))) + (func11_NewLine_Str()));
+					__debugInfo = "925:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "926:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "927:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "928:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + (": //dummy for1"))) + (func11_NewLine_Str()));
+					__debugInfo = "931:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((((((((((((((local8_Text_Str_1960) + ("if (!"))) + (local13_CheckComm_Str_2031))) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_toExpr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (")) {__pc = "))) + (CAST2STRING(param4_expr.attr8_stepExpr)))) + ("; break;}"))) + (func11_NewLine_Str()));
+					__debugInfo = "932:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "933:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (" += "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (";"))) + (func11_NewLine_Str()));
+					__debugInfo = "934:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
+					__debugInfo = "935:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "936:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "937:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "938:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr8_stepExpr)))) + (": //dummy for"))) + (func11_NewLine_Str()));
+					__debugInfo = "940:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = local6_TmpBID_2032;
+					__debugInfo = "941:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = local6_TmpCID_2033;
+					__debugInfo = "918:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29453;
+					break;
+					
+				case 9466: //dummy jumper1
+					
+					case 9717:
+						__debugInfo = "943:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((((((((((((((((((((((local8_Text_Str_1960) + ("for ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0]))))) + (";"))) + (local13_CheckComm_Str_2031))) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_toExpr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (");"))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0].attr4_vari).values[tmpPositionCache][0]))))) + (" += "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_stepExpr).values[tmpPositionCache][0]))))) + (") "));
+						
+					__debugInfo = "944:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "943:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29453: //dummy jumper2
+					;
+						
+					__debugInfo = "916:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 9449: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(38))) ? 1 : 0))) { __pc = 9730; break; }
+					
+					var local1_c_2034 = 0, local11_varName_Str_2035 = "", local13_StartText_Str_2036 = "", local12_CondText_Str_2037 = "", local11_IncText_Str_2038 = "", local13_EachBegin_Str_2039 = "", local11_EachEnd_Str_2040 = "";
+					case 9736:
+						__debugInfo = "947:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						global14_ForEachCounter = param4_expr.attr2_ID;
+						
+					__debugInfo = "948:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_c_2034 = global14_ForEachCounter;
+					__debugInfo = "949:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("var forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (" = "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_inExpr).values[tmpPositionCache][0]))))) + (";"))) + (func11_NewLine_Str()));
+					__debugInfo = "950:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local11_varName_Str_2035 = func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr7_varExpr).values[tmpPositionCache][0])), "[0]");
+					__debugInfo = "951:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local13_StartText_Str_2036 = (((("var forEachCounter") + (CAST2STRING(local1_c_2034)))) + (" = 0"));
+					__debugInfo = "952:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local12_CondText_Str_2037 = (((((((("forEachCounter") + (CAST2STRING(local1_c_2034)))) + (" < forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (".values.length"));
+					__debugInfo = "953:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local11_IncText_Str_2038 = (((("forEachCounter") + (CAST2STRING(local1_c_2034)))) + ("++"));
+					__debugInfo = "954:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local13_EachBegin_Str_2039 = (((((((((((((("var ") + (local11_varName_Str_2035))) + (" = forEachSaver"))) + (CAST2STRING(local1_c_2034)))) + (".values[forEachCounter"))) + (CAST2STRING(local1_c_2034)))) + ("];"))) + (func11_NewLine_Str()));
+					__debugInfo = "955:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local11_EachEnd_Str_2040 = (((((((((((((("forEachSaver") + (CAST2STRING(local1_c_2034)))) + (".values[forEachCounter"))) + (CAST2STRING(local1_c_2034)))) + ("] = "))) + (local11_varName_Str_2035))) + (";"))) + (func11_NewLine_Str()));
+					case 10034:
+						__debugInfo = "991:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 9845; break; }
+					
+					var local6_TmpBID_2041 = 0, local6_TmpCID_2042 = 0;
+					case 9849:
+						__debugInfo = "957:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local6_TmpBID_2041 = global11_LoopBreakID;
+						
+					__debugInfo = "958:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local6_TmpCID_2042 = global14_LoopContinueID;
+					__debugInfo = "960:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = param4_expr.attr7_varExpr;
+					__debugInfo = "961:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = param4_expr.attr6_inExpr;
+					__debugInfo = "963:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local13_StartText_Str_2036))) + (func11_NewLine_Str()));
+					__debugInfo = "964:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "965:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "966:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "967:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr6_inExpr)))) + (": //dummy for1"))) + (func11_NewLine_Str()));
+					__debugInfo = "970:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("if (!("))) + (local12_CondText_Str_2037))) + (")) {__pc = "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + ("; break;}"))) + (func11_NewLine_Str()));
+					__debugInfo = "971:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local13_EachBegin_Str_2039))) + (func11_NewLine_Str()));
+					__debugInfo = "972:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "973:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local11_EachEnd_Str_2040))) + (func11_NewLine_Str()));
+					__debugInfo = "974:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (local11_IncText_Str_2038))) + (func11_NewLine_Str()));
+					__debugInfo = "975:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(param4_expr.attr6_inExpr)))) + ("; break; //back jump"))) + (func11_NewLine_Str()));
+					__debugInfo = "976:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "977:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func11_NewLine_Str()));
+					__debugInfo = "978:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "979:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("case "))) + (CAST2STRING(param4_expr.attr7_varExpr)))) + (": //dummy for"))) + (func11_NewLine_Str()));
+					__debugInfo = "981:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global11_LoopBreakID = local6_TmpBID_2041;
+					__debugInfo = "982:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global14_LoopContinueID = local6_TmpCID_2042;
+					__debugInfo = "957:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29454;
+					break;
+					
+				case 9845: //dummy jumper1
+					
+					case 9984:
+						__debugInfo = "984:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func8_IndentUp();
+						
+					__debugInfo = "985:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((((((local8_Text_Str_1960) + ("for("))) + (local13_StartText_Str_2036))) + (" ; "))) + (local12_CondText_Str_2037))) + (" ; "))) + (local11_IncText_Str_2038))) + (") {"))) + (func11_NewLine_Str()));
+					__debugInfo = "986:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local13_EachBegin_Str_2039));
+					__debugInfo = "987:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))))) + (func11_NewLine_Str()));
+					__debugInfo = "988:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (local11_EachEnd_Str_2040));
+					__debugInfo = "989:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "990:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
+					__debugInfo = "984:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29454: //dummy jumper2
+					;
+						
+					__debugInfo = "947:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 9730: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(30))) ? 1 : 0))) { __pc = 10036; break; }
+					
+					case 10057:
+						__debugInfo = "997:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 10039; break; }
+					
+					case 10050:
+						__debugInfo = "994:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(global14_LoopContinueID)))) + ("; break"));
+						
+					__debugInfo = "994:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29455;
+					break;
+					
+				case 10039: //dummy jumper1
+					
+					case 10056:
+						__debugInfo = "996:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("continue"));
+						
+					__debugInfo = "996:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29455: //dummy jumper2
+					;
+						
+					__debugInfo = "997:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10036: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(29))) ? 1 : 0))) { __pc = 10059; break; }
+					
+					case 10080:
+						__debugInfo = "1003:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(global8_IsInGoto)) { __pc = 10062; break; }
+					
+					case 10073:
+						__debugInfo = "1000:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = "))) + (CAST2STRING(global11_LoopBreakID)))) + ("; break"));
+						
+					__debugInfo = "1000:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29456;
+					break;
+					
+				case 10062: //dummy jumper1
+					
+					case 10079:
+						__debugInfo = "1002:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("break"));
+						
+					__debugInfo = "1002:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29456: //dummy jumper2
+					;
+						
+					__debugInfo = "1003:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10059: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(31))) ? 1 : 0))) { __pc = 10082; break; }
+					
+					var local9_oIsInGoto_2043 = 0;
+					case 10086:
+						__debugInfo = "1005:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local9_oIsInGoto_2043 = global8_IsInGoto;
+						
+					__debugInfo = "1006:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global8_IsInGoto = 0;
+					__debugInfo = "1008:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("try "));
+					__debugInfo = "1009:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr3_Scp).values[tmpPositionCache][0]))));
+					__debugInfo = "1010:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func8_IndentUp();
+					__debugInfo = "1011:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + (" catch ("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (") {"))) + (func11_NewLine_Str()));
+					__debugInfo = "1012:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((((((((((((local8_Text_Str_1960) + ("if ("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" instanceof OTTException) "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = "))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (".getText(); else throwError("))) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (");"));
+					__debugInfo = "1013:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_catchScp).values[tmpPositionCache][0]))));
+					__debugInfo = "1014:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					func10_IndentDown();
+					__debugInfo = "1015:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func11_NewLine_Str()))) + ("}"));
+					__debugInfo = "1018:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					global8_IsInGoto = local9_oIsInGoto_2043;
+					__debugInfo = "1005:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10082: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(32))) ? 1 : 0))) { __pc = 10202; break; }
+					
+					case 10242:
+						__debugInfo = "1019:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("throw new OTTException("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", \""))) + (global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr8_Path_Str))) + ("\", "))) + (CAST2STRING(global8_Compiler.attr6_Tokens.arrAccess(param4_expr.attr5_tokID).values[tmpPositionCache].attr4_Line)))) + (")"));
+						
+					__debugInfo = "1019:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10202: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(33))) ? 1 : 0))) { __pc = 10244; break; }
+					
+					case 10256:
+						__debugInfo = "1022:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("RESTORE(datablock_"))) + (param4_expr.attr8_Name_Str))) + (")"));
+						
+					__debugInfo = "1022:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10244: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(34))) ? 1 : 0))) { __pc = 10258; break; }
+					
+					var local1_i_2044 = 0.0;
+					case 10263:
+						__debugInfo = "1024:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local1_i_2044 = 0;
+						
+					case 10306:
+						__debugInfo = "1029:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver10306 = param4_expr.attr5_Reads;
+					var forEachCounter10306 = 0
+					
+				case 10270: //dummy for1
+					if (!(forEachCounter10306 < forEachSaver10306.values.length)) {__pc = 10266; break;}
+					var local1_R_2045 = forEachSaver10306.values[forEachCounter10306];
+					
+					
+					case 10281:
+						__debugInfo = "1026:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_R_2045).values[tmpPositionCache][0]))))) + (" = READ()"));
+						
+					case 10302:
+						__debugInfo = "1027:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local1_i_2044) < (((BOUNDS(param4_expr.attr5_Reads, 0)) - (1)))) ? 1 : 0))) { __pc = 10293; break; }
+					
+					case 10301:
+						__debugInfo = "1027:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (";"))) + (func11_NewLine_Str()));
+						
+					__debugInfo = "1027:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 10293: //dummy jumper1
+					;
+						
+					__debugInfo = "1028:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local1_i_2044+=1;
+					__debugInfo = "1026:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver10306.values[forEachCounter10306] = local1_R_2045;
+					
+					forEachCounter10306++
+					__pc = 10270; break; //back jump
+					
+				case 10266: //dummy for
+					;
+						
+					__debugInfo = "1024:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10258: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(35))) ? 1 : 0))) { __pc = 10308; break; }
+					
+					case 10319:
+						__debugInfo = "1031:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func21_JSGetDefaultValue_Str(param4_expr.attr8_datatype, 0, 0)));
+						
+					__debugInfo = "1031:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10308: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(36))) ? 1 : 0))) { __pc = 10321; break; }
+					
+					var local7_def_Str_2046 = "", local4_Find_2047 = 0;
+					case 10330:
+						__debugInfo = "1033:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local7_def_Str_2046 = func21_JSGetDefaultValue_Str(param4_expr.attr8_datatype, 1, 1);
+						
+					__debugInfo = "1034:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIM(pool_array.alloc("))) + (local7_def_Str_2046))) + ("), ["));
+					__debugInfo = "1035:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2047 = 0;
+					case 10375:
+						__debugInfo = "1041:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver10375 = param4_expr.attr4_dims;
+					var forEachCounter10375 = 0
+					
+				case 10351: //dummy for1
+					if (!(forEachCounter10375 < forEachSaver10375.values.length)) {__pc = 10347; break;}
+					var local1_D_2048 = forEachSaver10375.values[forEachCounter10375];
+					
+					
+					case 10363:
+						__debugInfo = "1037:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((local4_Find_2047) === (1)) ? 1 : 0))) { __pc = 10356; break; }
+					
+					case 10362:
+						__debugInfo = "1037:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
 						
-					__debugInfo = "1073:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1037:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 10641: //dummy jumper1
+				case 10356: //dummy jumper1
 					;
 						
-					__debugInfo = "1075:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local4_Elem_2050).values[tmpPositionCache][0]))));
-					__debugInfo = "1077:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local4_Find_2049 = 1;
-					__debugInfo = "1073:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					forEachSaver10660.values[forEachCounter10660] = local4_Elem_2050;
+					__debugInfo = "1038:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local1_D_2048).values[tmpPositionCache][0]))));
+					__debugInfo = "1040:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2047 = 1;
+					__debugInfo = "1037:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver10375.values[forEachCounter10375] = local1_D_2048;
 					
-					forEachCounter10660++
-					__pc = 10638; break; //back jump
+					forEachCounter10375++
+					__pc = 10351; break; //back jump
 					
-				case 10634: //dummy for
+				case 10347: //dummy for
 					;
 						
-					__debugInfo = "1079:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("])"));
-					__debugInfo = "1070:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1042:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("], "))) + (local7_def_Str_2046))) + (")"));
+					__debugInfo = "1033:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10616: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(43))) ? 1 : 0))) { __pc = 10667; break; }
+				case 10321: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(37))) ? 1 : 0))) { __pc = 10386; break; }
 					
-					case 10696:
-						__debugInfo = "1081:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10402:
+						__debugInfo = "1044:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0].attr8_Name_Str))) + (" = "));
+						
+					case 10458:
+						__debugInfo = "1049:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr3_Typ) === (54)) ? 1 : 0))) { __pc = 10412; break; }
+					
+					case 10445:
+						__debugInfo = "1046:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("castobj("))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (", "))) + (func18_ChangeTypeName_Str(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0].attr8_datatype.attr8_Name_Str)))) + (")"));
+						
+					__debugInfo = "1046:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29459;
+					break;
+					
+				case 10412: //dummy jumper1
+					
+					case 10457:
+						__debugInfo = "1048:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])), "[0]")));
+						
+					__debugInfo = "1048:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29459: //dummy jumper2
+					;
+						
+					__debugInfo = "1051:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (" /* ALIAS */"));
+					__debugInfo = "1044:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10386: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(20))) ? 1 : 0))) { __pc = 10465; break; }
+					
+					case 10477:
+						__debugInfo = "1053:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("__pc = __labels[\""))) + (param4_expr.attr8_Name_Str))) + ("\"]; break"));
+						
+					__debugInfo = "1053:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10465: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(21))) ? 1 : 0))) { __pc = 10479; break; }
+					
+					case 10498:
+						__debugInfo = "1055:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						global12_LabelDef_Str = ((((((((((global12_LabelDef_Str) + ("\""))) + (param4_expr.attr8_Name_Str))) + ("\": "))) + (CAST2STRING(param4_expr.attr2_ID)))) + (", "));
+						
+					__debugInfo = "1057:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + ("//label: "))) + (param4_expr.attr8_Name_Str));
+					__debugInfo = "1055:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10479: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(39))) ? 1 : 0))) { __pc = 10509; break; }
+					
+					case 10529:
+						__debugInfo = "1059:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + ("+="))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))));
+						
+					__debugInfo = "1059:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10509: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(40))) ? 1 : 0))) { __pc = 10531; break; }
+					
+					case 10556:
+						__debugInfo = "1061:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("DIMPUSH("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_vari).values[tmpPositionCache][0]))))) + (", "))) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])), "[0]")))) + (")"));
+						
+					__debugInfo = "1061:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10531: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(41))) ? 1 : 0))) { __pc = 10558; break; }
+					
+					case 10607:
+						__debugInfo = "1067:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((param4_expr.attr4_kern) !== (-(1))) ? 1 : 0))) { __pc = 10567; break; }
+					
+					case 10591:
+						__debugInfo = "1064:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("KERNLEN("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_kern).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "1064:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29460;
+					break;
+					
+				case 10567: //dummy jumper1
+					
+					case 10606:
+						__debugInfo = "1066:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (").length"));
+						
+					__debugInfo = "1066:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 29460: //dummy jumper2
+					;
+						
+					__debugInfo = "1067:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10558: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(45))) ? 1 : 0))) { __pc = 10609; break; }
+					
+					case 10633:
+						__debugInfo = "1069:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("BOUNDS("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_position).values[tmpPositionCache][0]))))) + (")"));
+						
+					__debugInfo = "1069:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10609: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(42))) ? 1 : 0))) { __pc = 10635; break; }
+					
+					var local4_Find_2049 = 0;
+					case 10650:
+						__debugInfo = "1071:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DIMDATA("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", ["));
+						
+					case 10679:
+						__debugInfo = "1079:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver10679 = param4_expr.attr5_Exprs;
+					var forEachCounter10679 = 0
+					
+				case 10657: //dummy for1
+					if (!(forEachCounter10679 < forEachSaver10679.values.length)) {__pc = 10653; break;}
+					var local4_Elem_2050 = forEachSaver10679.values[forEachCounter10679];
+					
+					
+					case 10667:
+						__debugInfo = "1074:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(local4_Find_2049)) { __pc = 10660; break; }
+					
+					case 10666:
+						__debugInfo = "1074:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (", "));
+						
+					__debugInfo = "1074:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 10660: //dummy jumper1
+					;
+						
+					__debugInfo = "1076:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local4_Elem_2050).values[tmpPositionCache][0]))));
+					__debugInfo = "1078:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local4_Find_2049 = 1;
+					__debugInfo = "1074:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					forEachSaver10679.values[forEachCounter10679] = local4_Elem_2050;
+					
+					forEachCounter10679++
+					__pc = 10657; break; //back jump
+					
+				case 10653: //dummy for
+					;
+						
+					__debugInfo = "1080:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("])"));
+					__debugInfo = "1071:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
+					break;
+					
+				case 10635: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(43))) ? 1 : 0))) { __pc = 10686; break; }
+					
+					case 10715:
+						__debugInfo = "1082:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((((((((local8_Text_Str_1960) + ("forEachSaver"))) + (CAST2STRING(global14_ForEachCounter)))) + (".values[forEachCounter"))) + (CAST2STRING(global14_ForEachCounter)))) + ("] = "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global5_Exprs_ref[0].arrAccess(global14_ForEachCounter).values[tmpPositionCache][0].attr7_varExpr).values[tmpPositionCache][0]))))) + (";"))) + (func11_NewLine_Str()));
 						
-					__debugInfo = "1082:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("DIMDEL(forEachSaver"))) + (CAST2STRING(global14_ForEachCounter)))) + (", forEachCounter"))) + (CAST2STRING(global14_ForEachCounter)))) + (");"))) + (func11_NewLine_Str()));
 					__debugInfo = "1083:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("forEachCounter"))) + (CAST2STRING(global14_ForEachCounter)))) + ("--;"))) + (func11_NewLine_Str()));
+					local8_Text_Str_1960 = ((((((((((((local8_Text_Str_1960) + ("DIMDEL(forEachSaver"))) + (CAST2STRING(global14_ForEachCounter)))) + (", forEachCounter"))) + (CAST2STRING(global14_ForEachCounter)))) + (");"))) + (func11_NewLine_Str()));
 					__debugInfo = "1084:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((((((local8_Text_Str_1960) + ("forEachCounter"))) + (CAST2STRING(global14_ForEachCounter)))) + ("--;"))) + (func11_NewLine_Str()));
+					__debugInfo = "1085:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((local8_Text_Str_1960) + ("continue"));
-					__debugInfo = "1081:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1082:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10667: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(44))) ? 1 : 0))) { __pc = 10732; break; }
+				case 10686: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(44))) ? 1 : 0))) { __pc = 10751; break; }
 					
-					case 10756:
-						__debugInfo = "1086:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10775:
+						__debugInfo = "1087:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("DIMDEL("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr5_array).values[tmpPositionCache][0]))))) + (", "))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr8_position).values[tmpPositionCache][0]))))) + (")"));
 						
-					__debugInfo = "1086:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1087:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10732: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(46))) ? 1 : 0))) { __pc = 10758; break; }
+				case 10751: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(46))) ? 1 : 0))) { __pc = 10777; break; }
 					
-					case 10773:
-						__debugInfo = "1088:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10792:
+						__debugInfo = "1089:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (") ? 0 : 1)"));
 						
-					__debugInfo = "1088:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1089:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10758: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(48))) ? 1 : 0))) { __pc = 10775; break; }
+				case 10777: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(48))) ? 1 : 0))) { __pc = 10794; break; }
 					
-					case 10789:
-						__debugInfo = "1090:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10808:
+						__debugInfo = "1091:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_expr.attr4_func).values[tmpPositionCache][0].attr8_Name_Str));
 						
-					__debugInfo = "1090:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1091:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10775: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(49))) ? 1 : 0))) { __pc = 10791; break; }
+				case 10794: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(49))) ? 1 : 0))) { __pc = 10810; break; }
 					
 					var local8_Cond_Str_2051 = "";
-					case 10800:
-						__debugInfo = "1092:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10819:
+						__debugInfo = "1093:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Cond_Str_2051 = func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]));
 						
-					__debugInfo = "1093:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1094:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("if (!("))) + (local8_Cond_Str_2051))) + (")) throwError(\"AssertException "))) + (REPLACE_Str(local8_Cond_Str_2051, "\"", "'")))) + ("\")"));
-					__debugInfo = "1092:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1093:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10791: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(50))) ? 1 : 0))) { __pc = 10819; break; }
+				case 10810: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(50))) ? 1 : 0))) { __pc = 10838; break; }
 					
-					case 10834:
-						__debugInfo = "1095:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10853:
+						__debugInfo = "1096:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("DEBUG("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (")"));
 						
-					__debugInfo = "1095:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1096:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10819: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(51))) ? 1 : 0))) { __pc = 10836; break; }
+				case 10838: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(51))) ? 1 : 0))) { __pc = 10855; break; }
 					
-					case 10873:
-						__debugInfo = "1097:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10892:
+						__debugInfo = "1098:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((((((local8_Text_Str_1960) + ("(("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr10_Conditions.arrAccess(0).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") ? ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr6_Scopes.arrAccess(0).values[tmpPositionCache]).values[tmpPositionCache][0]))))) + (") : ("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr9_elseScope).values[tmpPositionCache][0]))))) + ("))"));
 						
-					__debugInfo = "1097:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1098:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10836: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(52))) ? 1 : 0))) { __pc = 10875; break; }
+				case 10855: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(52))) ? 1 : 0))) { __pc = 10894; break; }
 					
-					case 10887:
-						__debugInfo = "1099:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10906:
+						__debugInfo = "1100:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("//REQUIRE: "))) + (param4_expr.attr8_Name_Str))) + ("\n"));
 						
-					__debugInfo = "1100:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (param4_expr.attr11_Content_Str))) + (func11_NewLine_Str()));
 					__debugInfo = "1101:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_1960 = ((((local8_Text_Str_1960) + (param4_expr.attr11_Content_Str))) + (func11_NewLine_Str()));
+					__debugInfo = "1102:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_1960 = ((((((local8_Text_Str_1960) + ("//ENDREQUIRE: "))) + (param4_expr.attr8_Name_Str))) + (func11_NewLine_Str()));
-					__debugInfo = "1099:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1100:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10875: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(53))) ? 1 : 0))) { __pc = 10909; break; }
+				case 10894: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(53))) ? 1 : 0))) { __pc = 10928; break; }
 					
 					var local5_Found_2052 = 0, local3_Scp_2053 = 0;
-					case 10914:
-						__debugInfo = "1103:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10933:
+						__debugInfo = "1104:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local5_Found_2052 = 0;
 						
-					__debugInfo = "1104:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1105:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local3_Scp_2053 = global12_CurrentScope;
-					case 10999:
-						__debugInfo = "1117:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((((((((local3_Scp_2053) !== (-(1))) ? 1 : 0)) && (((((((((global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1))) ? 1 : 0)) && (((local5_Found_2052) ? 0 : 1))) ? 1 : 0))) {__pc = 29443; break;}
+					case 11018:
+						__debugInfo = "1118:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((((((((local3_Scp_2053) !== (-(1))) ? 1 : 0)) && (((((((((global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr6_ScpTyp) === (2)) ? 1 : 0)) || ((((global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr6_ScpTyp) === (4)) ? 1 : 0))) ? 1 : 0)) ? 0 : 1))) ? 1 : 0)) && (((local5_Found_2052) ? 0 : 1))) ? 1 : 0))) {__pc = 29462; break;}
 					
 					var local5_Varis_2054 = pool_array.alloc(0);
-					case 10955:
-						__debugInfo = "1107:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10974:
+						__debugInfo = "1108:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						func8_GetVaris(unref(local5_Varis_2054), local3_Scp_2053, 0);
 						
-					case 10991:
-						__debugInfo = "1115:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						var forEachSaver10991 = local5_Varis_2054;
-					var forEachCounter10991 = 0
+					case 11010:
+						__debugInfo = "1116:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						var forEachSaver11010 = local5_Varis_2054;
+					var forEachCounter11010 = 0
 					
-				case 10959: //dummy for1
-					if (!(forEachCounter10991 < forEachSaver10991.values.length)) {__pc = 10957; break;}
-					var local1_V_2055 = forEachSaver10991.values[forEachCounter10991];
+				case 10978: //dummy for1
+					if (!(forEachCounter11010 < forEachSaver11010.values.length)) {__pc = 10976; break;}
+					var local1_V_2055 = forEachSaver11010.values[forEachCounter11010];
 					
 					
 					var alias3_Var_ref_2056 = [pool_TIdentifierVari.alloc()];
-					case 10966:
-						__debugInfo = "1109:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 10985:
+						__debugInfo = "1110:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						alias3_Var_ref_2056 = global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_V_2055).values[tmpPositionCache] /* ALIAS */;
 						
-					case 10990:
-						__debugInfo = "1114:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!((((alias3_Var_ref_2056[0].attr8_Name_Str) === ((("param4_self_") + (CAST2STRING(alias3_Var_ref_2056[0].attr2_ID))))) ? 1 : 0))) { __pc = 10977; break; }
+					case 11009:
+						__debugInfo = "1115:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!((((alias3_Var_ref_2056[0].attr8_Name_Str) === ((("param4_self_") + (CAST2STRING(alias3_Var_ref_2056[0].attr2_ID))))) ? 1 : 0))) { __pc = 10996; break; }
 					
-					case 10985:
-						__debugInfo = "1111:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 11004:
+						__debugInfo = "1112:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((local8_Text_Str_1960) + (alias3_Var_ref_2056[0].attr8_Name_Str));
 						
-					__debugInfo = "1112:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1113:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_Found_2052 = 1;
-					case 10989:
-						__debugInfo = "1113:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						__pc = 10957; break;
-						
-					__debugInfo = "1111:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					
-				case 10977: //dummy jumper1
-					;
-						
-					__debugInfo = "1109:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias3_Var_ref_2056);
-					forEachSaver10991.values[forEachCounter10991] = local1_V_2055;
-					
-					forEachCounter10991++
-					__pc = 10959; break; //back jump
-					
-				case 10957: //dummy for
-					;
-						
-					__debugInfo = "1116:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local3_Scp_2053 = global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr10_SuperScope;
-					__debugInfo = "1107:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local5_Varis_2054);
-					__pc = 10999; break; //back jump
-					
-				case 29443:
-					;
-						
 					case 11008:
-						__debugInfo = "1118:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (!(((local5_Found_2052) ? 0 : 1))) { __pc = 11002; break; }
-					
-					case 11007:
-						__debugInfo = "1118:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func5_Error("Self not found for super", 1117, "src\CompilerPasses\Generator\JSGenerator.gbas");
+						__debugInfo = "1114:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__pc = 10976; break;
 						
-					__debugInfo = "1118:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1112:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 11002: //dummy jumper1
+				case 10996: //dummy jumper1
 					;
 						
-					__debugInfo = "1103:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1110:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_TIdentifierVari.free(alias3_Var_ref_2056);
+					forEachSaver11010.values[forEachCounter11010] = local1_V_2055;
+					
+					forEachCounter11010++
+					__pc = 10978; break; //back jump
+					
+				case 10976: //dummy for
+					;
+						
+					__debugInfo = "1117:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local3_Scp_2053 = global5_Exprs_ref[0].arrAccess(local3_Scp_2053).values[tmpPositionCache][0].attr10_SuperScope;
+					__debugInfo = "1108:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(local5_Varis_2054);
+					__pc = 11018; break; //back jump
+					
+				case 29462:
+					;
+						
+					case 11027:
+						__debugInfo = "1119:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (!(((local5_Found_2052) ? 0 : 1))) { __pc = 11021; break; }
+					
+					case 11026:
+						__debugInfo = "1119:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func5_Error("Self not found for super", 1118, "src\CompilerPasses\Generator\JSGenerator.gbas");
+						
+					__debugInfo = "1119:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					
+				case 11021: //dummy jumper1
+					;
+						
+					__debugInfo = "1104:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 10909: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(54))) ? 1 : 0))) { __pc = 11010; break; }
+				case 10928: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(54))) ? 1 : 0))) { __pc = 11029; break; }
 					
-					case 11034:
-						__debugInfo = "1121:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					case 11053:
+						__debugInfo = "1122:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local8_Text_Str_1960 = ((((((((((local8_Text_Str_1960) + ("castobj("))) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0]))))) + (", "))) + (func18_ChangeTypeName_Str(param4_expr.attr8_datatype.attr8_Name_Str)))) + (")"));
 						
-					__debugInfo = "1121:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1122:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 11010: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(7))) ? 1 : 0))) { __pc = 11036; break; }
+				case 11029: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(7))) ? 1 : 0))) { __pc = 11055; break; }
 					
 					
-					__pc = 29364;
+					__pc = 29383;
 					break;
 					
-				case 11036: //dummy jumper1
-					if (!((((local17___SelectHelper10__1961) === (~~(8))) ? 1 : 0))) { __pc = 11039; break; }
+				case 11055: //dummy jumper1
+					if (!((((local17___SelectHelper10__1961) === (~~(8))) ? 1 : 0))) { __pc = 11058; break; }
 					
-					case 11044:
-						__debugInfo = "1124:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func5_Error("Invalid Expression", 1123, "src\CompilerPasses\Generator\JSGenerator.gbas");
+					case 11063:
+						__debugInfo = "1125:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func5_Error("Invalid Expression", 1124, "src\CompilerPasses\Generator\JSGenerator.gbas");
 						
-					__debugInfo = "1124:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					__pc = 29364;
+					__debugInfo = "1125:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__pc = 29383;
 					break;
 					
-				case 11039: //dummy jumper1
+				case 11058: //dummy jumper1
 					
-					case 11054:
-						__debugInfo = "1126:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						func5_Error((("Unknown expression type: ") + (CAST2STRING(param4_expr.attr3_Typ))), 1125, "src\CompilerPasses\Generator\JSGenerator.gbas");
+					case 11073:
+						__debugInfo = "1127:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						func5_Error((("Unknown expression type: ") + (CAST2STRING(param4_expr.attr3_Typ))), 1126, "src\CompilerPasses\Generator\JSGenerator.gbas");
 						
-					__debugInfo = "1126:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1127:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					
-				case 29364: //dummy jumper2
+				case 29383: //dummy jumper2
 					;
 						
-					__debugInfo = "303:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "304:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					;
-				__debugInfo = "1129:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				return tryClone(local8_Text_Str_1960);
 				__debugInfo = "1130:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				return tryClone(local8_Text_Str_1960);
+				__debugInfo = "1131:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				return "";
-				__debugInfo = "301:\src\CompilerPasses\Generator\JSGenerator.gbas";__pc = -1; break;
+				__debugInfo = "302:\src\CompilerPasses\Generator\JSGenerator.gbas";__pc = -1; break;
 				default:
 					throwError("Gotocounter exception pc: "+__pc);
 				
@@ -12874,19 +12878,19 @@ func14_JSGenerate_Str = window['func14_JSGenerate_Str'];
 window['func14_JSTryUnref_Str'] = function(param1_E) {
 	stackPush("function: JSTryUnref_Str", __debugInfo);
 	try {
-		__debugInfo = "1137:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if (func11_JSDoesUnref(param1_E)) {
-			__debugInfo = "1134:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			return tryClone((((("unref(") + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param1_E).values[tmpPositionCache][0]))))) + (")")));
-			__debugInfo = "1134:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		} else {
-			__debugInfo = "1136:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			return tryClone(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param1_E).values[tmpPositionCache][0])));
-			__debugInfo = "1136:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
 		__debugInfo = "1138:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		if (func11_JSDoesUnref(param1_E)) {
+			__debugInfo = "1135:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			return tryClone((((("unref(") + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param1_E).values[tmpPositionCache][0]))))) + (")")));
+			__debugInfo = "1135:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		} else {
+			__debugInfo = "1137:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			return tryClone(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param1_E).values[tmpPositionCache][0])));
+			__debugInfo = "1137:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
+		__debugInfo = "1139:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1137:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1138:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -12901,85 +12905,85 @@ window['func11_JSDoesUnref'] = function(param4_Expr) {
 	stackPush("function: JSDoesUnref", __debugInfo);
 	try {
 		var local5_unref_2059 = 0;
-		__debugInfo = "1141:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1142:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		local5_unref_2059 = 1;
-		__debugInfo = "1177:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1178:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		if (((global5_Exprs_ref[0].arrAccess(param4_Expr).values[tmpPositionCache][0].attr8_datatype.attr7_IsArray) ? 0 : 1)) {
-			__debugInfo = "1145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1146:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			{
 				var local17___SelectHelper16__2060 = 0;
-				__debugInfo = "1145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1146:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local17___SelectHelper16__2060 = global5_Exprs_ref[0].arrAccess(param4_Expr).values[tmpPositionCache][0].attr3_Typ;
-				__debugInfo = "1176:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1177:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if ((((local17___SelectHelper16__2060) === (~~(3))) ? 1 : 0)) {
-					__debugInfo = "1147:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1148:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1147:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1148:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(4))) ? 1 : 0)) {
-					__debugInfo = "1149:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1150:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1149:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1150:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(5))) ? 1 : 0)) {
-					__debugInfo = "1151:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1152:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1151:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1152:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(15))) ? 1 : 0)) {
-					__debugInfo = "1153:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1154:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = func11_JSDoesUnref(global5_Exprs_ref[0].arrAccess(param4_Expr).values[tmpPositionCache][0].attr4_expr);
-					__debugInfo = "1153:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1154:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(16))) ? 1 : 0)) {
-					__debugInfo = "1155:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1156:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = func11_JSDoesUnref(global5_Exprs_ref[0].arrAccess(param4_Expr).values[tmpPositionCache][0].attr4_expr);
-					__debugInfo = "1155:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1156:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(17))) ? 1 : 0)) {
-					__debugInfo = "1157:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1158:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = func11_JSDoesUnref(global5_Exprs_ref[0].arrAccess(param4_Expr).values[tmpPositionCache][0].attr4_expr);
-					__debugInfo = "1157:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1158:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(1))) ? 1 : 0)) {
-					__debugInfo = "1159:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1160:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1159:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1160:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(6))) ? 1 : 0)) {
-					__debugInfo = "1161:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1162:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1161:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1162:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(23))) ? 1 : 0)) {
-					__debugInfo = "1163:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1164:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1163:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1164:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(45))) ? 1 : 0)) {
-					__debugInfo = "1165:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1166:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1165:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1166:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper16__2060) === (~~(41))) ? 1 : 0)) {
-					__debugInfo = "1167:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1168:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local5_unref_2059 = 0;
-					__debugInfo = "1167:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1168:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else {
 					var local1_v_2061 = 0;
-					__debugInfo = "1169:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1170:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local1_v_2061 = func11_GetVariable(param4_Expr, 0);
-					__debugInfo = "1175:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1176:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					if ((((local1_v_2061) !== (-(1))) ? 1 : 0)) {
-						__debugInfo = "1174:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1175:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						if (((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_v_2061).values[tmpPositionCache][0].attr3_ref) ? 0 : 1)) {
-							__debugInfo = "1173:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "1174:\src\CompilerPasses\Generator\JSGenerator.gbas";
 							local5_unref_2059 = 0;
-							__debugInfo = "1173:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							__debugInfo = "1174:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						};
-						__debugInfo = "1174:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1175:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					};
-					__debugInfo = "1169:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1170:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "1145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1146:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			};
-			__debugInfo = "1145:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1146:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		};
-		__debugInfo = "1178:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return tryClone(local5_unref_2059);
 		__debugInfo = "1179:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return tryClone(local5_unref_2059);
+		__debugInfo = "1180:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return 0;
-		__debugInfo = "1141:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1142:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -12994,59 +12998,59 @@ window['func17_JSDoParameter_Str'] = function(param4_expr, param4_func, param7_D
 	stackPush("function: JSDoParameter_Str", __debugInfo);
 	try {
 		var local8_Text_Str_2065 = "", local1_i_2066 = 0.0;
-		__debugInfo = "1183:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if (param7_DoParam) {
-			__debugInfo = "1183:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			local8_Text_Str_2065 = "(";
-			__debugInfo = "1183:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
 		__debugInfo = "1184:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		if (param7_DoParam) {
+			__debugInfo = "1184:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			local8_Text_Str_2065 = "(";
+			__debugInfo = "1184:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
+		__debugInfo = "1185:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		local1_i_2066 = 0;
-		__debugInfo = "1199:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		var forEachSaver11349 = param4_expr.attr6_Params;
-		for(var forEachCounter11349 = 0 ; forEachCounter11349 < forEachSaver11349.values.length ; forEachCounter11349++) {
-			var local5_param_2067 = forEachSaver11349.values[forEachCounter11349];
+		__debugInfo = "1200:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		var forEachSaver11368 = param4_expr.attr6_Params;
+		for(var forEachCounter11368 = 0 ; forEachCounter11368 < forEachSaver11368.values.length ; forEachCounter11368++) {
+			var local5_param_2067 = forEachSaver11368.values[forEachCounter11368];
 		{
-				__debugInfo = "1188:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				if ((((((((((param4_func) !== (-(1))) ? 1 : 0)) && ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) ? 1 : 0)) && ((((local1_i_2066) === (((BOUNDS(param4_expr.attr6_Params, 0)) - (1)))) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "1188:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					break;
-					__debugInfo = "1188:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				};
 				__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				if ((((((((((param4_func) !== (-(1))) ? 1 : 0)) && ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr3_Typ) === (3)) ? 1 : 0))) ? 1 : 0)) && ((((local1_i_2066) === (((BOUNDS(param4_expr.attr6_Params, 0)) - (1)))) ? 1 : 0))) ? 1 : 0)) {
+					__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					break;
+					__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				};
+				__debugInfo = "1190:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if (local1_i_2066) {
-					__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1190:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_2065 = ((local8_Text_Str_2065) + (", "));
-					__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1190:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "1196:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1197:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if ((((((((((param4_func) !== (-(1))) ? 1 : 0)) && (((global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr15_UsedAsPrototype) ? 0 : 1))) ? 1 : 0)) && ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr6_Params.arrAccess(~~(local1_i_2066)).values[tmpPositionCache]).values[tmpPositionCache][0].attr3_ref) === (0)) ? 1 : 0))) ? 1 : 0)) {
-					__debugInfo = "1193:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1194:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_2065 = ((local8_Text_Str_2065) + (func14_JSTryUnref_Str(local5_param_2067)));
-					__debugInfo = "1193:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1194:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else {
-					__debugInfo = "1195:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1196:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local8_Text_Str_2065 = ((local8_Text_Str_2065) + (func16_JSRemoveLast_Str(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(local5_param_2067).values[tmpPositionCache][0])), "[0]")));
-					__debugInfo = "1195:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1196:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "1198:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1199:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local1_i_2066+=1;
-				__debugInfo = "1188:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1189:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			}
-			forEachSaver11349.values[forEachCounter11349] = local5_param_2067;
+			forEachSaver11368.values[forEachCounter11368] = local5_param_2067;
 		
 		};
-		__debugInfo = "1200:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if (param7_DoParam) {
-			__debugInfo = "1200:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			local8_Text_Str_2065 = ((local8_Text_Str_2065) + (")"));
-			__debugInfo = "1200:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
 		__debugInfo = "1201:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return tryClone(local8_Text_Str_2065);
+		if (param7_DoParam) {
+			__debugInfo = "1201:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			local8_Text_Str_2065 = ((local8_Text_Str_2065) + (")"));
+			__debugInfo = "1201:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
 		__debugInfo = "1202:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return tryClone(local8_Text_Str_2065);
+		__debugInfo = "1203:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1183:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1184:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13061,55 +13065,55 @@ window['func13_JSVariDef_Str'] = function(param5_Varis, param12_ForceDefault, pa
 	stackPush("function: JSVariDef_Str", __debugInfo);
 	try {
 		var local8_Text_Str_2072 = "", local4_Find_2073 = 0.0;
-		__debugInfo = "1205:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		local8_Text_Str_2072 = "";
 		__debugInfo = "1206:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		local8_Text_Str_2072 = "";
+		__debugInfo = "1207:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		local4_Find_2073 = 0;
-		__debugInfo = "1221:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		var forEachSaver11503 = param5_Varis;
-		for(var forEachCounter11503 = 0 ; forEachCounter11503 < forEachSaver11503.values.length ; forEachCounter11503++) {
-			var local3_Var_2074 = forEachSaver11503.values[forEachCounter11503];
+		__debugInfo = "1222:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		var forEachSaver11522 = param5_Varis;
+		for(var forEachCounter11522 = 0 ; forEachCounter11522 < forEachSaver11522.values.length ; forEachCounter11522++) {
+			var local3_Var_2074 = forEachSaver11522.values[forEachCounter11522];
 		{
-				__debugInfo = "1220:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1221:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if ((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_Typ) !== (5)) ? 1 : 0)) && (((((((param8_NoStatic) === (0)) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_Typ) !== (4)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) && (func17_JSShouldRedeclare(local3_Var_2074))) ? 1 : 0)) {
-					__debugInfo = "1209:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					if (local4_Find_2073) {
-						__debugInfo = "1209:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_2072 = ((local8_Text_Str_2072) + (", "));
-						__debugInfo = "1209:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					};
 					__debugInfo = "1210:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					local8_Text_Str_2072 = ((local8_Text_Str_2072) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr8_Name_Str));
-					__debugInfo = "1218:\src\CompilerPasses\Generator\JSGenerator.gbas";
-					if (param7_InitVal) {
-						__debugInfo = "1212:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						local8_Text_Str_2072 = ((local8_Text_Str_2072) + (" = "));
-						__debugInfo = "1217:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						if (((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr6_PreDef) !== (-(1))) ? 1 : 0)) && (((((((param12_ForceDefault) === (0)) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_Typ) === (6)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
-							__debugInfo = "1214:\src\CompilerPasses\Generator\JSGenerator.gbas";
-							local8_Text_Str_2072 = ((local8_Text_Str_2072) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr6_PreDef).values[tmpPositionCache][0]))));
-							__debugInfo = "1214:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						} else {
-							__debugInfo = "1216:\src\CompilerPasses\Generator\JSGenerator.gbas";
-							local8_Text_Str_2072 = ((local8_Text_Str_2072) + (func21_JSGetDefaultValue_Str(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr8_datatype, global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_ref, 0)));
-							__debugInfo = "1216:\src\CompilerPasses\Generator\JSGenerator.gbas";
-						};
-						__debugInfo = "1212:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					if (local4_Find_2073) {
+						__debugInfo = "1210:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_2072 = ((local8_Text_Str_2072) + (", "));
+						__debugInfo = "1210:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					};
+					__debugInfo = "1211:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					local8_Text_Str_2072 = ((local8_Text_Str_2072) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr8_Name_Str));
 					__debugInfo = "1219:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					if (param7_InitVal) {
+						__debugInfo = "1213:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						local8_Text_Str_2072 = ((local8_Text_Str_2072) + (" = "));
+						__debugInfo = "1218:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						if (((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr6_PreDef) !== (-(1))) ? 1 : 0)) && (((((((param12_ForceDefault) === (0)) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_Typ) === (6)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) {
+							__debugInfo = "1215:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							local8_Text_Str_2072 = ((local8_Text_Str_2072) + (func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr6_PreDef).values[tmpPositionCache][0]))));
+							__debugInfo = "1215:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						} else {
+							__debugInfo = "1217:\src\CompilerPasses\Generator\JSGenerator.gbas";
+							local8_Text_Str_2072 = ((local8_Text_Str_2072) + (func21_JSGetDefaultValue_Str(global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr8_datatype, global8_Compiler.attr5_Varis_ref[0].arrAccess(local3_Var_2074).values[tmpPositionCache][0].attr3_ref, 0)));
+							__debugInfo = "1217:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						};
+						__debugInfo = "1213:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					};
+					__debugInfo = "1220:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local4_Find_2073 = 1;
-					__debugInfo = "1209:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1210:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "1220:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1221:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			}
-			forEachSaver11503.values[forEachCounter11503] = local3_Var_2074;
+			forEachSaver11522.values[forEachCounter11522] = local3_Var_2074;
 		
 		};
-		__debugInfo = "1223:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return tryClone(local8_Text_Str_2072);
 		__debugInfo = "1224:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return tryClone(local8_Text_Str_2072);
+		__debugInfo = "1225:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1205:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(param5_Varis);
+		__debugInfo = "1206:\src\CompilerPasses\Generator\JSGenerator.gbas";pool_array.free(param5_Varis);
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13123,19 +13127,19 @@ func13_JSVariDef_Str = window['func13_JSVariDef_Str'];
 window['func23_ConditionJSGenerate_Str'] = function(param4_expr) {
 	stackPush("function: ConditionJSGenerate_Str", __debugInfo);
 	try {
-		__debugInfo = "1231:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if ((((param4_expr.attr3_Typ) === (16)) ? 1 : 0)) {
-			__debugInfo = "1228:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			return tryClone(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])));
-			__debugInfo = "1228:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		} else {
-			__debugInfo = "1230:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			return tryClone(func14_JSGenerate_Str(param4_expr));
-			__debugInfo = "1230:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
 		__debugInfo = "1232:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		if ((((param4_expr.attr3_Typ) === (16)) ? 1 : 0)) {
+			__debugInfo = "1229:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			return tryClone(func14_JSGenerate_Str(unref(global5_Exprs_ref[0].arrAccess(param4_expr.attr4_expr).values[tmpPositionCache][0])));
+			__debugInfo = "1229:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		} else {
+			__debugInfo = "1231:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			return tryClone(func14_JSGenerate_Str(param4_expr));
+			__debugInfo = "1231:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
+		__debugInfo = "1233:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1231:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1232:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13149,31 +13153,31 @@ func23_ConditionJSGenerate_Str = window['func23_ConditionJSGenerate_Str'];
 window['func17_JSShouldRedeclare'] = function(param3_Var) {
 	stackPush("function: JSShouldRedeclare", __debugInfo);
 	try {
-		__debugInfo = "1243:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1244:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		if ((((global11_CurrentFunc) !== (-(1))) ? 1 : 0)) {
-			__debugInfo = "1242:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			var forEachSaver11558 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr10_CopyParams;
-			for(var forEachCounter11558 = 0 ; forEachCounter11558 < forEachSaver11558.values.length ; forEachCounter11558++) {
-				var local1_P_2077 = forEachSaver11558.values[forEachCounter11558];
+			__debugInfo = "1243:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			var forEachSaver11577 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(global11_CurrentFunc).values[tmpPositionCache][0].attr10_CopyParams;
+			for(var forEachCounter11577 = 0 ; forEachCounter11577 < forEachSaver11577.values.length ; forEachCounter11577++) {
+				var local1_P_2077 = forEachSaver11577.values[forEachCounter11577];
 			{
-					__debugInfo = "1241:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1242:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					if ((((local1_P_2077) === (param3_Var)) ? 1 : 0)) {
-						__debugInfo = "1240:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1241:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						return tryClone(0);
-						__debugInfo = "1240:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1241:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					};
-					__debugInfo = "1241:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1242:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				}
-				forEachSaver11558.values[forEachCounter11558] = local1_P_2077;
+				forEachSaver11577.values[forEachCounter11577] = local1_P_2077;
 			
 			};
-			__debugInfo = "1242:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1243:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		};
-		__debugInfo = "1244:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return 1;
 		__debugInfo = "1245:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return 1;
+		__debugInfo = "1246:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return 0;
-		__debugInfo = "1243:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1244:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13188,60 +13192,60 @@ window['func21_JSGetDefaultValue_Str'] = function(param8_datatype, param3_Ref, p
 	stackPush("function: JSGetDefaultValue_Str", __debugInfo);
 	try {
 		var local10_RetVal_Str_2081 = "";
-		__debugInfo = "1248:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1249:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		local10_RetVal_Str_2081 = "";
-		__debugInfo = "1266:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1267:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		if ((((param8_datatype.attr7_IsArray) && ((((param11_IgnoreArray) === (0)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1250:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1251:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			local10_RetVal_Str_2081 = (((("pool_array.alloc(") + (func21_JSGetDefaultValue_Str(param8_datatype, param3_Ref, 1)))) + (")"));
-			__debugInfo = "1250:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1251:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		} else {
-			__debugInfo = "1252:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1253:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			{
 				var local17___SelectHelper17__2082 = "";
-				__debugInfo = "1252:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1253:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local17___SelectHelper17__2082 = param8_datatype.attr8_Name_Str;
-				__debugInfo = "1265:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1266:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				if ((((local17___SelectHelper17__2082) === ("int")) ? 1 : 0)) {
-					__debugInfo = "1254:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1255:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_RetVal_Str_2081 = "0";
-					__debugInfo = "1254:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1255:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper17__2082) === ("float")) ? 1 : 0)) {
-					__debugInfo = "1256:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1257:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_RetVal_Str_2081 = "0.0";
-					__debugInfo = "1256:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1257:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else if ((((local17___SelectHelper17__2082) === ("string")) ? 1 : 0)) {
-					__debugInfo = "1258:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1259:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					local10_RetVal_Str_2081 = "\"\"";
-					__debugInfo = "1258:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1259:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				} else {
-					__debugInfo = "1264:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1265:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					if (func6_IsType(param8_datatype.attr8_Name_Str)) {
-						__debugInfo = "1261:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1262:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_RetVal_Str_2081 = (((("pool_") + (param8_datatype.attr8_Name_Str))) + (".alloc()"));
-						__debugInfo = "1261:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1262:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					} else {
-						__debugInfo = "1263:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1264:\src\CompilerPasses\Generator\JSGenerator.gbas";
 						local10_RetVal_Str_2081 = REPLACE_Str(param8_datatype.attr8_Name_Str, "$", "_Str");
-						__debugInfo = "1263:\src\CompilerPasses\Generator\JSGenerator.gbas";
+						__debugInfo = "1264:\src\CompilerPasses\Generator\JSGenerator.gbas";
 					};
-					__debugInfo = "1264:\src\CompilerPasses\Generator\JSGenerator.gbas";
+					__debugInfo = "1265:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				};
-				__debugInfo = "1252:\src\CompilerPasses\Generator\JSGenerator.gbas";
+				__debugInfo = "1253:\src\CompilerPasses\Generator\JSGenerator.gbas";
 			};
-			__debugInfo = "1252:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
-		__debugInfo = "1267:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if (param3_Ref) {
-			__debugInfo = "1267:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			local10_RetVal_Str_2081 = (((("[") + (local10_RetVal_Str_2081))) + ("]"));
-			__debugInfo = "1267:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			__debugInfo = "1253:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		};
 		__debugInfo = "1268:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return tryClone(local10_RetVal_Str_2081);
+		if (param3_Ref) {
+			__debugInfo = "1268:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			local10_RetVal_Str_2081 = (((("[") + (local10_RetVal_Str_2081))) + ("]"));
+			__debugInfo = "1268:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
 		__debugInfo = "1269:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return tryClone(local10_RetVal_Str_2081);
+		__debugInfo = "1270:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1248:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1249:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13255,17 +13259,17 @@ func21_JSGetDefaultValue_Str = window['func21_JSGetDefaultValue_Str'];
 window['func16_JSRemoveLast_Str'] = function(param8_Text_Str, param5_L_Str) {
 	stackPush("function: JSRemoveLast_Str", __debugInfo);
 	try {
-		__debugInfo = "1272:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		if ((((((((param8_Text_Str).length) > ((param5_L_Str).length)) ? 1 : 0)) && ((((RIGHT_Str(param8_Text_Str, (param5_L_Str).length)) === (param5_L_Str)) ? 1 : 0))) ? 1 : 0)) {
-			__debugInfo = "1272:\src\CompilerPasses\Generator\JSGenerator.gbas";
-			param8_Text_Str = LEFT_Str(param8_Text_Str, (((param8_Text_Str).length) - ((param5_L_Str).length)));
-			__debugInfo = "1272:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		};
 		__debugInfo = "1273:\src\CompilerPasses\Generator\JSGenerator.gbas";
-		return tryClone(param8_Text_Str);
+		if ((((((((param8_Text_Str).length) > ((param5_L_Str).length)) ? 1 : 0)) && ((((RIGHT_Str(param8_Text_Str, (param5_L_Str).length)) === (param5_L_Str)) ? 1 : 0))) ? 1 : 0)) {
+			__debugInfo = "1273:\src\CompilerPasses\Generator\JSGenerator.gbas";
+			param8_Text_Str = LEFT_Str(param8_Text_Str, (((param8_Text_Str).length) - ((param5_L_Str).length)));
+			__debugInfo = "1273:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		};
 		__debugInfo = "1274:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		return tryClone(param8_Text_Str);
+		__debugInfo = "1275:\src\CompilerPasses\Generator\JSGenerator.gbas";
 		return "";
-		__debugInfo = "1272:\src\CompilerPasses\Generator\JSGenerator.gbas";
+		__debugInfo = "1273:\src\CompilerPasses\Generator\JSGenerator.gbas";
 	} catch(ex) {
 		if (isKnownException(ex)) throw ex;
 		alert(formatError(ex));
@@ -13289,15 +13293,15 @@ window['func5_Lexer'] = function() {
 		__debugInfo = "15:\src\CompilerPasses\Lexer.gbas";
 		(local11_SplitterMap_2086).SetSize(((BOUNDS(local12_Splitter_Str_2085, 0)) * (8)));
 		__debugInfo = "18:\src\CompilerPasses\Lexer.gbas";
-		var forEachSaver11750 = local12_Splitter_Str_2085;
-		for(var forEachCounter11750 = 0 ; forEachCounter11750 < forEachSaver11750.values.length ; forEachCounter11750++) {
-			var local9_Split_Str_2087 = forEachSaver11750.values[forEachCounter11750];
+		var forEachSaver11769 = local12_Splitter_Str_2085;
+		for(var forEachCounter11769 = 0 ; forEachCounter11769 < forEachSaver11769.values.length ; forEachCounter11769++) {
+			var local9_Split_Str_2087 = forEachSaver11769.values[forEachCounter11769];
 		{
 				__debugInfo = "17:\src\CompilerPasses\Lexer.gbas";
 				(local11_SplitterMap_2086).Put(local9_Split_Str_2087, 1);
 				__debugInfo = "17:\src\CompilerPasses\Lexer.gbas";
 			}
-			forEachSaver11750.values[forEachCounter11750] = local9_Split_Str_2087;
+			forEachSaver11769.values[forEachCounter11769] = local9_Split_Str_2087;
 		
 		};
 		__debugInfo = "22:\src\CompilerPasses\Lexer.gbas";
@@ -13784,9 +13788,9 @@ window['func7_FuncDef'] = function(param6_Native, param10_IsCallBack, param3_Typ
 		__debugInfo = "96:\src\CompilerPasses\Parser.gbas";
 		local8_Name_Str_2129 = func14_GetCurrent_Str();
 		__debugInfo = "157:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver13033 = global8_Compiler.attr5_Funcs_ref[0];
-		for(var forEachCounter13033 = 0 ; forEachCounter13033 < forEachSaver13033.values.length ; forEachCounter13033++) {
-			var local4_func_ref_2130 = forEachSaver13033.values[forEachCounter13033];
+		var forEachSaver13052 = global8_Compiler.attr5_Funcs_ref[0];
+		for(var forEachCounter13052 = 0 ; forEachCounter13052 < forEachSaver13052.values.length ; forEachCounter13052++) {
+			var local4_func_ref_2130 = forEachSaver13052.values[forEachCounter13052];
 		{
 				__debugInfo = "156:\src\CompilerPasses\Parser.gbas";
 				if (((((((((((((func7_IsToken(func16_AddDataChars_Str(local4_func_ref_2130[0].attr8_Name_Str, unref(local4_func_ref_2130[0])))) || (func7_IsToken(local4_func_ref_2130[0].attr8_Name_Str))) ? 1 : 0)) && ((((local4_func_ref_2130[0].attr10_IsCallback) === (param10_IsCallBack)) ? 1 : 0))) ? 1 : 0)) && ((((local4_func_ref_2130[0].attr3_Typ) === (param3_Typ)) ? 1 : 0))) ? 1 : 0)) && ((((local4_func_ref_2130[0].attr6_MyType) === (param6_CurTyp)) ? 1 : 0))) ? 1 : 0)) {
@@ -13886,7 +13890,7 @@ window['func7_FuncDef'] = function(param6_Native, param10_IsCallBack, param3_Typ
 				};
 				__debugInfo = "156:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver13033.values[forEachCounter13033] = local4_func_ref_2130;
+			forEachSaver13052.values[forEachCounter13052] = local4_func_ref_2130;
 		
 		};
 		__debugInfo = "162:\src\CompilerPasses\Parser.gbas";
@@ -13918,9 +13922,9 @@ window['func6_SubDef'] = function() {
 		__debugInfo = "167:\src\CompilerPasses\Parser.gbas";
 		func5_Match("SUB", 166, "src\CompilerPasses\Parser.gbas");
 		__debugInfo = "183:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver13132 = global8_Compiler.attr5_Funcs_ref[0];
-		for(var forEachCounter13132 = 0 ; forEachCounter13132 < forEachSaver13132.values.length ; forEachCounter13132++) {
-			var local4_func_ref_2135 = forEachSaver13132.values[forEachCounter13132];
+		var forEachSaver13151 = global8_Compiler.attr5_Funcs_ref[0];
+		for(var forEachCounter13151 = 0 ; forEachCounter13151 < forEachSaver13151.values.length ; forEachCounter13151++) {
+			var local4_func_ref_2135 = forEachSaver13151.values[forEachCounter13151];
 		{
 				__debugInfo = "182:\src\CompilerPasses\Parser.gbas";
 				if ((((func7_IsToken(local4_func_ref_2135[0].attr8_Name_Str)) && ((((local4_func_ref_2135[0].attr3_Typ) === (2)) ? 1 : 0))) ? 1 : 0)) {
@@ -13948,7 +13952,7 @@ window['func6_SubDef'] = function() {
 				};
 				__debugInfo = "182:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver13132.values[forEachCounter13132] = local4_func_ref_2135;
+			forEachSaver13151.values[forEachCounter13151] = local4_func_ref_2135;
 		
 		};
 		__debugInfo = "184:\src\CompilerPasses\Parser.gbas";
@@ -13972,9 +13976,9 @@ window['func8_TypeDefi'] = function() {
 		__debugInfo = "189:\src\CompilerPasses\Parser.gbas";
 		func5_Match("TYPE", 188, "src\CompilerPasses\Parser.gbas");
 		__debugInfo = "257:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver13387 = global8_Compiler.attr5_Types_ref[0];
-		for(var forEachCounter13387 = 0 ; forEachCounter13387 < forEachSaver13387.values.length ; forEachCounter13387++) {
-			var local3_typ_ref_2136 = forEachSaver13387.values[forEachCounter13387];
+		var forEachSaver13406 = global8_Compiler.attr5_Types_ref[0];
+		for(var forEachCounter13406 = 0 ; forEachCounter13406 < forEachSaver13406.values.length ; forEachCounter13406++) {
+			var local3_typ_ref_2136 = forEachSaver13406.values[forEachCounter13406];
 		{
 				__debugInfo = "256:\src\CompilerPasses\Parser.gbas";
 				if (func7_IsToken(local3_typ_ref_2136[0].attr8_Name_Str)) {
@@ -14006,9 +14010,9 @@ window['func8_TypeDefi'] = function() {
 							__debugInfo = "205:\src\CompilerPasses\Parser.gbas";
 						};
 						__debugInfo = "211:\src\CompilerPasses\Parser.gbas";
-						var forEachSaver13232 = global8_Compiler.attr5_Types_ref[0];
-						for(var forEachCounter13232 = 0 ; forEachCounter13232 < forEachSaver13232.values.length ; forEachCounter13232++) {
-							var local1_T_ref_2138 = forEachSaver13232.values[forEachCounter13232];
+						var forEachSaver13251 = global8_Compiler.attr5_Types_ref[0];
+						for(var forEachCounter13251 = 0 ; forEachCounter13251 < forEachSaver13251.values.length ; forEachCounter13251++) {
+							var local1_T_ref_2138 = forEachSaver13251.values[forEachCounter13251];
 						{
 								__debugInfo = "210:\src\CompilerPasses\Parser.gbas";
 								if ((((local1_T_ref_2138[0].attr8_Name_Str) === (local11_ExtName_Str_2137)) ? 1 : 0)) {
@@ -14020,7 +14024,7 @@ window['func8_TypeDefi'] = function() {
 								};
 								__debugInfo = "210:\src\CompilerPasses\Parser.gbas";
 							}
-							forEachSaver13232.values[forEachCounter13232] = local1_T_ref_2138;
+							forEachSaver13251.values[forEachCounter13251] = local1_T_ref_2138;
 						
 						};
 						__debugInfo = "205:\src\CompilerPasses\Parser.gbas";
@@ -14034,14 +14038,14 @@ window['func8_TypeDefi'] = function() {
 					__debugInfo = "215:\src\CompilerPasses\Parser.gbas";
 					func5_Match("\n", 214, "src\CompilerPasses\Parser.gbas");
 					__debugInfo = "220:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver13298 = local3_typ_ref_2136[0].attr7_Methods;
-					for(var forEachCounter13298 = 0 ; forEachCounter13298 < forEachSaver13298.values.length ; forEachCounter13298++) {
-						var local2_M1_2139 = forEachSaver13298.values[forEachCounter13298];
+					var forEachSaver13317 = local3_typ_ref_2136[0].attr7_Methods;
+					for(var forEachCounter13317 = 0 ; forEachCounter13317 < forEachSaver13317.values.length ; forEachCounter13317++) {
+						var local2_M1_2139 = forEachSaver13317.values[forEachCounter13317];
 					{
 							__debugInfo = "219:\src\CompilerPasses\Parser.gbas";
-							var forEachSaver13297 = local3_typ_ref_2136[0].attr7_Methods;
-							for(var forEachCounter13297 = 0 ; forEachCounter13297 < forEachSaver13297.values.length ; forEachCounter13297++) {
-								var local2_M2_2140 = forEachSaver13297.values[forEachCounter13297];
+							var forEachSaver13316 = local3_typ_ref_2136[0].attr7_Methods;
+							for(var forEachCounter13316 = 0 ; forEachCounter13316 < forEachSaver13316.values.length ; forEachCounter13316++) {
+								var local2_M2_2140 = forEachSaver13316.values[forEachCounter13316];
 							{
 									__debugInfo = "218:\src\CompilerPasses\Parser.gbas";
 									if (((((((local2_M1_2139) !== (local2_M2_2140)) ? 1 : 0)) && ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local2_M2_2140).values[tmpPositionCache][0].attr8_Name_Str) === (global8_Compiler.attr5_Funcs_ref[0].arrAccess(local2_M1_2139).values[tmpPositionCache][0].attr8_Name_Str)) ? 1 : 0))) ? 1 : 0)) {
@@ -14051,12 +14055,12 @@ window['func8_TypeDefi'] = function() {
 									};
 									__debugInfo = "218:\src\CompilerPasses\Parser.gbas";
 								}
-								forEachSaver13297.values[forEachCounter13297] = local2_M2_2140;
+								forEachSaver13316.values[forEachCounter13316] = local2_M2_2140;
 							
 							};
 							__debugInfo = "219:\src\CompilerPasses\Parser.gbas";
 						}
-						forEachSaver13298.values[forEachCounter13298] = local2_M1_2139;
+						forEachSaver13317.values[forEachCounter13317] = local2_M1_2139;
 					
 					};
 					__debugInfo = "253:\src\CompilerPasses\Parser.gbas";
@@ -14113,7 +14117,7 @@ window['func8_TypeDefi'] = function() {
 				};
 				__debugInfo = "256:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver13387.values[forEachCounter13387] = local3_typ_ref_2136;
+			forEachSaver13406.values[forEachCounter13406] = local3_typ_ref_2136;
 		
 		};
 		__debugInfo = "258:\src\CompilerPasses\Parser.gbas";
@@ -14268,9 +14272,9 @@ window['func10_Expression'] = function(param4_Prio) {
 				__debugInfo = "335:\src\CompilerPasses\Parser.gbas";
 				local5_Found_2146 = 0;
 				__debugInfo = "354:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver13490 = global9_Operators_ref[0];
-				for(var forEachCounter13490 = 0 ; forEachCounter13490 < forEachSaver13490.values.length ; forEachCounter13490++) {
-					var local2_Op_ref_2147 = forEachSaver13490.values[forEachCounter13490];
+				var forEachSaver13509 = global9_Operators_ref[0];
+				for(var forEachCounter13509 = 0 ; forEachCounter13509 < forEachSaver13509.values.length ; forEachCounter13509++) {
+					var local2_Op_ref_2147 = forEachSaver13509.values[forEachCounter13509];
 				{
 						__debugInfo = "353:\src\CompilerPasses\Parser.gbas";
 						while (((((((local2_Op_ref_2147[0].attr4_Prio) === (param4_Prio)) ? 1 : 0)) && (func7_IsToken(local2_Op_ref_2147[0].attr7_Sym_Str))) ? 1 : 0)) {
@@ -14314,7 +14318,7 @@ window['func10_Expression'] = function(param4_Prio) {
 						};
 						__debugInfo = "353:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver13490.values[forEachCounter13490] = local2_Op_ref_2147;
+					forEachSaver13509.values[forEachCounter13509] = local2_Op_ref_2147;
 				
 				};
 				__debugInfo = "335:\src\CompilerPasses\Parser.gbas";
@@ -14858,9 +14862,9 @@ window['func6_Factor'] = function() {
 			__debugInfo = "622:\src\CompilerPasses\Parser.gbas";
 			local6_MyFunc_2178 = -(1);
 			__debugInfo = "628:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver14408 = global8_Compiler.attr5_Funcs_ref[0];
-			for(var forEachCounter14408 = 0 ; forEachCounter14408 < forEachSaver14408.values.length ; forEachCounter14408++) {
-				var local4_Func_ref_2179 = forEachSaver14408.values[forEachCounter14408];
+			var forEachSaver14427 = global8_Compiler.attr5_Funcs_ref[0];
+			for(var forEachCounter14427 = 0 ; forEachCounter14427 < forEachSaver14427.values.length ; forEachCounter14427++) {
+				var local4_Func_ref_2179 = forEachSaver14427.values[forEachCounter14427];
 			{
 					__debugInfo = "627:\src\CompilerPasses\Parser.gbas";
 					if ((((((((((local4_Func_ref_2179[0].attr3_Typ) === (1)) ? 1 : 0)) || ((((local4_Func_ref_2179[0].attr3_Typ) === (2)) ? 1 : 0))) ? 1 : 0)) && ((((local4_Func_ref_2179[0].attr8_Name_Str) === (local8_Name_Str_2177)) ? 1 : 0))) ? 1 : 0)) {
@@ -14872,7 +14876,7 @@ window['func6_Factor'] = function() {
 					};
 					__debugInfo = "627:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver14408.values[forEachCounter14408] = local4_Func_ref_2179;
+				forEachSaver14427.values[forEachCounter14427] = local4_Func_ref_2179;
 			
 			};
 			__debugInfo = "629:\src\CompilerPasses\Parser.gbas";
@@ -14973,9 +14977,9 @@ window['func6_Factor'] = function() {
 			__debugInfo = "674:\src\CompilerPasses\Parser.gbas";
 			local4_Find_2184 = 0;
 			__debugInfo = "680:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver14623 = global7_Defines;
-			for(var forEachCounter14623 = 0 ; forEachCounter14623 < forEachSaver14623.values.length ; forEachCounter14623++) {
-				var local3_Def_2185 = forEachSaver14623.values[forEachCounter14623];
+			var forEachSaver14642 = global7_Defines;
+			for(var forEachCounter14642 = 0 ; forEachCounter14642 < forEachSaver14642.values.length ; forEachCounter14642++) {
+				var local3_Def_2185 = forEachSaver14642.values[forEachCounter14642];
 			{
 					__debugInfo = "679:\src\CompilerPasses\Parser.gbas";
 					if ((((func7_IsToken(local3_Def_2185.attr7_Key_Str)) && ((((INTEGER(FLOAT2STR(local3_Def_2185.attr9_Value_Str))) !== (0)) ? 1 : 0))) ? 1 : 0)) {
@@ -14987,7 +14991,7 @@ window['func6_Factor'] = function() {
 					};
 					__debugInfo = "679:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver14623.values[forEachCounter14623] = local3_Def_2185;
+				forEachSaver14642.values[forEachCounter14642] = local3_Def_2185;
 			
 			};
 			__debugInfo = "681:\src\CompilerPasses\Parser.gbas";
@@ -15059,15 +15063,15 @@ window['func6_Factor'] = function() {
 				__debugInfo = "721:\src\CompilerPasses\Parser.gbas";
 				func8_GetVaris(unref(local5_Varis_2190), -(1), 0);
 				__debugInfo = "724:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver14804 = local5_Varis_2190;
-				for(var forEachCounter14804 = 0 ; forEachCounter14804 < forEachSaver14804.values.length ; forEachCounter14804++) {
-					var local4_Vari_2191 = forEachSaver14804.values[forEachCounter14804];
+				var forEachSaver14823 = local5_Varis_2190;
+				for(var forEachCounter14823 = 0 ; forEachCounter14823 < forEachSaver14823.values.length ; forEachCounter14823++) {
+					var local4_Vari_2191 = forEachSaver14823.values[forEachCounter14823];
 				{
 						__debugInfo = "723:\src\CompilerPasses\Parser.gbas";
 						local8_vars_Str_2189 = ((((local8_vars_Str_2189) + (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Vari_2191).values[tmpPositionCache][0].attr8_Name_Str))) + (", "));
 						__debugInfo = "723:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver14804.values[forEachCounter14804] = local4_Vari_2191;
+					forEachSaver14823.values[forEachCounter14823] = local4_Vari_2191;
 				
 				};
 				__debugInfo = "725:\src\CompilerPasses\Parser.gbas";
@@ -15131,9 +15135,9 @@ window['func6_Parser'] = function() {
 				__debugInfo = "747:\src\CompilerPasses\Parser.gbas";
 				func5_Scope("__EOFFILE__", -(1));
 				__debugInfo = "755:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver14876 = global8_Compiler.attr5_Funcs_ref[0];
-				for(var forEachCounter14876 = 0 ; forEachCounter14876 < forEachSaver14876.values.length ; forEachCounter14876++) {
-					var local4_func_ref_2192 = forEachSaver14876.values[forEachCounter14876];
+				var forEachSaver14895 = global8_Compiler.attr5_Funcs_ref[0];
+				for(var forEachCounter14895 = 0 ; forEachCounter14895 < forEachSaver14895.values.length ; forEachCounter14895++) {
+					var local4_func_ref_2192 = forEachSaver14895.values[forEachCounter14895];
 				{
 						__debugInfo = "754:\src\CompilerPasses\Parser.gbas";
 						if (((((((local4_func_ref_2192[0].attr3_Typ) === (2)) ? 1 : 0)) || ((((local4_func_ref_2192[0].attr3_Typ) === (3)) ? 1 : 0))) ? 1 : 0)) {
@@ -15143,7 +15147,7 @@ window['func6_Parser'] = function() {
 						};
 						__debugInfo = "754:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver14876.values[forEachCounter14876] = local4_func_ref_2192;
+					forEachSaver14895.values[forEachCounter14895] = local4_func_ref_2192;
 				
 				};
 				__debugInfo = "785:\src\CompilerPasses\Parser.gbas";
@@ -15152,9 +15156,9 @@ window['func6_Parser'] = function() {
 					__debugInfo = "776:\src\CompilerPasses\Parser.gbas";
 					local5_Found_2193 = 0;
 					__debugInfo = "783:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver14914 = global8_Compiler.attr5_Funcs_ref[0];
-					for(var forEachCounter14914 = 0 ; forEachCounter14914 < forEachSaver14914.values.length ; forEachCounter14914++) {
-						var local4_func_ref_2194 = forEachSaver14914.values[forEachCounter14914];
+					var forEachSaver14933 = global8_Compiler.attr5_Funcs_ref[0];
+					for(var forEachCounter14933 = 0 ; forEachCounter14933 < forEachSaver14933.values.length ; forEachCounter14933++) {
+						var local4_func_ref_2194 = forEachSaver14933.values[forEachCounter14933];
 					{
 							__debugInfo = "782:\src\CompilerPasses\Parser.gbas";
 							if ((((local4_func_ref_2194[0].attr10_PlzCompile) && ((((local4_func_ref_2194[0].attr3_Scp) === (-(1))) ? 1 : 0))) ? 1 : 0)) {
@@ -15168,7 +15172,7 @@ window['func6_Parser'] = function() {
 							};
 							__debugInfo = "782:\src\CompilerPasses\Parser.gbas";
 						}
-						forEachSaver14914.values[forEachCounter14914] = local4_func_ref_2194;
+						forEachSaver14933.values[forEachCounter14933] = local4_func_ref_2194;
 					
 					};
 					__debugInfo = "784:\src\CompilerPasses\Parser.gbas";
@@ -15266,9 +15270,9 @@ window['func6_Parser'] = function() {
 								__debugInfo = "840:\src\CompilerPasses\Parser.gbas";
 								local1_j_2201 = 0;
 								__debugInfo = "856:\src\CompilerPasses\Parser.gbas";
-								var forEachSaver15341 = global5_Exprs_ref[0].arrAccess(~~(local1_i_2199)).values[tmpPositionCache][0].attr6_Params;
-								for(var forEachCounter15341 = 0 ; forEachCounter15341 < forEachSaver15341.values.length ; forEachCounter15341++) {
-									var local1_P_2203 = forEachSaver15341.values[forEachCounter15341];
+								var forEachSaver15360 = global5_Exprs_ref[0].arrAccess(~~(local1_i_2199)).values[tmpPositionCache][0].attr6_Params;
+								for(var forEachCounter15360 = 0 ; forEachCounter15360 < forEachSaver15360.values.length ; forEachCounter15360++) {
+									var local1_P_2203 = forEachSaver15360.values[forEachCounter15360];
 								{
 										var local1_S_2204 = 0, local3_Tmp_2205 = 0;
 										__debugInfo = "843:\src\CompilerPasses\Parser.gbas";
@@ -15297,7 +15301,7 @@ window['func6_Parser'] = function() {
 										local1_j_2201+=1;
 										__debugInfo = "843:\src\CompilerPasses\Parser.gbas";
 									}
-									forEachSaver15341.values[forEachCounter15341] = local1_P_2203;
+									forEachSaver15360.values[forEachCounter15360] = local1_P_2203;
 								
 								};
 								__debugInfo = "857:\src\CompilerPasses\Parser.gbas";
@@ -15453,17 +15457,17 @@ window['func6_Parser'] = function() {
 										__debugInfo = "940:\src\CompilerPasses\Parser.gbas";
 									};
 									__debugInfo = "954:\src\CompilerPasses\Parser.gbas";
-									var forEachSaver16026 = alias4_Expr_ref_2219[0].attr5_Gotos;
-									for(var forEachCounter16026 = 0 ; forEachCounter16026 < forEachSaver16026.values.length ; forEachCounter16026++) {
-										var local1_G_2221 = forEachSaver16026.values[forEachCounter16026];
+									var forEachSaver16045 = alias4_Expr_ref_2219[0].attr5_Gotos;
+									for(var forEachCounter16045 = 0 ; forEachCounter16045 < forEachSaver16045.values.length ; forEachCounter16045++) {
+										var local1_G_2221 = forEachSaver16045.values[forEachCounter16045];
 									{
 											var local5_Found_2222 = 0;
 											__debugInfo = "942:\src\CompilerPasses\Parser.gbas";
 											local5_Found_2222 = 0;
 											__debugInfo = "948:\src\CompilerPasses\Parser.gbas";
-											var forEachSaver15999 = alias4_Expr_ref_2219[0].attr6_Labels;
-											for(var forEachCounter15999 = 0 ; forEachCounter15999 < forEachSaver15999.values.length ; forEachCounter15999++) {
-												var local1_L_2223 = forEachSaver15999.values[forEachCounter15999];
+											var forEachSaver16018 = alias4_Expr_ref_2219[0].attr6_Labels;
+											for(var forEachCounter16018 = 0 ; forEachCounter16018 < forEachSaver16018.values.length ; forEachCounter16018++) {
+												var local1_L_2223 = forEachSaver16018.values[forEachCounter16018];
 											{
 													__debugInfo = "947:\src\CompilerPasses\Parser.gbas";
 													if ((((global5_Exprs_ref[0].arrAccess(local1_L_2223).values[tmpPositionCache][0].attr8_Name_Str) === (global5_Exprs_ref[0].arrAccess(local1_G_2221).values[tmpPositionCache][0].attr8_Name_Str)) ? 1 : 0)) {
@@ -15475,7 +15479,7 @@ window['func6_Parser'] = function() {
 													};
 													__debugInfo = "947:\src\CompilerPasses\Parser.gbas";
 												}
-												forEachSaver15999.values[forEachCounter15999] = local1_L_2223;
+												forEachSaver16018.values[forEachCounter16018] = local1_L_2223;
 											
 											};
 											__debugInfo = "953:\src\CompilerPasses\Parser.gbas";
@@ -15488,7 +15492,7 @@ window['func6_Parser'] = function() {
 											};
 											__debugInfo = "942:\src\CompilerPasses\Parser.gbas";
 										}
-										forEachSaver16026.values[forEachCounter16026] = local1_G_2221;
+										forEachSaver16045.values[forEachCounter16045] = local1_G_2221;
 									
 									};
 									__debugInfo = "940:\src\CompilerPasses\Parser.gbas";
@@ -15502,9 +15506,9 @@ window['func6_Parser'] = function() {
 					__debugInfo = "957:\src\CompilerPasses\Parser.gbas";
 				};
 				__debugInfo = "966:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver16052 = global8_Compiler.attr5_Types_ref[0];
-				for(var forEachCounter16052 = 0 ; forEachCounter16052 < forEachSaver16052.values.length ; forEachCounter16052++) {
-					var local3_Typ_ref_2224 = forEachSaver16052.values[forEachCounter16052];
+				var forEachSaver16071 = global8_Compiler.attr5_Types_ref[0];
+				for(var forEachCounter16071 = 0 ; forEachCounter16071 < forEachSaver16071.values.length ; forEachCounter16071++) {
+					var local3_Typ_ref_2224 = forEachSaver16071.values[forEachCounter16071];
 				{
 						__debugInfo = "964:\src\CompilerPasses\Parser.gbas";
 						local3_Typ_ref_2224[0].attr9_OName_Str = local3_Typ_ref_2224[0].attr8_Name_Str;
@@ -15512,37 +15516,37 @@ window['func6_Parser'] = function() {
 						local3_Typ_ref_2224[0].attr8_Name_Str = func18_ChangeTypeName_Str(local3_Typ_ref_2224[0].attr8_Name_Str);
 						__debugInfo = "964:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver16052.values[forEachCounter16052] = local3_Typ_ref_2224;
+					forEachSaver16071.values[forEachCounter16071] = local3_Typ_ref_2224;
 				
 				};
 				__debugInfo = "972:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver16062 = global8_Compiler.attr5_Funcs_ref[0];
-				for(var forEachCounter16062 = 0 ; forEachCounter16062 < forEachSaver16062.values.length ; forEachCounter16062++) {
-					var local4_Func_ref_2225 = forEachSaver16062.values[forEachCounter16062];
+				var forEachSaver16081 = global8_Compiler.attr5_Funcs_ref[0];
+				for(var forEachCounter16081 = 0 ; forEachCounter16081 < forEachSaver16081.values.length ; forEachCounter16081++) {
+					var local4_Func_ref_2225 = forEachSaver16081.values[forEachCounter16081];
 				{
 						__debugInfo = "971:\src\CompilerPasses\Parser.gbas";
 						func14_ChangeFuncName(unref(local4_Func_ref_2225[0]));
 						__debugInfo = "971:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver16062.values[forEachCounter16062] = local4_Func_ref_2225;
+					forEachSaver16081.values[forEachCounter16081] = local4_Func_ref_2225;
 				
 				};
 				__debugInfo = "978:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver16072 = global8_Compiler.attr5_Varis_ref[0];
-				for(var forEachCounter16072 = 0 ; forEachCounter16072 < forEachSaver16072.values.length ; forEachCounter16072++) {
-					var local4_Vari_ref_2226 = forEachSaver16072.values[forEachCounter16072];
+				var forEachSaver16091 = global8_Compiler.attr5_Varis_ref[0];
+				for(var forEachCounter16091 = 0 ; forEachCounter16091 < forEachSaver16091.values.length ; forEachCounter16091++) {
+					var local4_Vari_ref_2226 = forEachSaver16091.values[forEachCounter16091];
 				{
 						__debugInfo = "977:\src\CompilerPasses\Parser.gbas";
 						func13_ChangeVarName(unref(local4_Vari_ref_2226[0]));
 						__debugInfo = "977:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver16072.values[forEachCounter16072] = local4_Vari_ref_2226;
+					forEachSaver16091.values[forEachCounter16091] = local4_Vari_ref_2226;
 				
 				};
 				__debugInfo = "986:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver16108 = global8_Compiler.attr5_Varis_ref[0];
-				for(var forEachCounter16108 = 0 ; forEachCounter16108 < forEachSaver16108.values.length ; forEachCounter16108++) {
-					var local1_V_ref_2227 = forEachSaver16108.values[forEachCounter16108];
+				var forEachSaver16127 = global8_Compiler.attr5_Varis_ref[0];
+				for(var forEachCounter16127 = 0 ; forEachCounter16127 < forEachSaver16127.values.length ; forEachCounter16127++) {
+					var local1_V_ref_2227 = forEachSaver16127.values[forEachCounter16127];
 				{
 						__debugInfo = "985:\src\CompilerPasses\Parser.gbas";
 						if (((((((local1_V_ref_2227[0].attr3_Typ) === (1)) ? 1 : 0)) || ((((local1_V_ref_2227[0].attr3_Typ) === (7)) ? 1 : 0))) ? 1 : 0)) {
@@ -15552,7 +15556,7 @@ window['func6_Parser'] = function() {
 						};
 						__debugInfo = "985:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver16108.values[forEachCounter16108] = local1_V_ref_2227;
+					forEachSaver16127.values[forEachCounter16127] = local1_V_ref_2227;
 				
 				};
 				__debugInfo = "988:\src\CompilerPasses\Parser.gbas";
@@ -15570,9 +15574,9 @@ window['func6_Parser'] = function() {
 							__debugInfo = "1000:\src\CompilerPasses\Parser.gbas";
 							if ((((func6_IsType(alias1_E_ref_2229[0].attr8_datatype.attr8_Name_Str)) === (0)) ? 1 : 0)) {
 								__debugInfo = "999:\src\CompilerPasses\Parser.gbas";
-								var forEachSaver16199 = global8_Compiler.attr5_Funcs_ref[0];
-								for(var forEachCounter16199 = 0 ; forEachCounter16199 < forEachSaver16199.values.length ; forEachCounter16199++) {
-									var local1_F_ref_2230 = forEachSaver16199.values[forEachCounter16199];
+								var forEachSaver16218 = global8_Compiler.attr5_Funcs_ref[0];
+								for(var forEachCounter16218 = 0 ; forEachCounter16218 < forEachSaver16218.values.length ; forEachCounter16218++) {
+									var local1_F_ref_2230 = forEachSaver16218.values[forEachCounter16218];
 								{
 										__debugInfo = "998:\src\CompilerPasses\Parser.gbas";
 										if ((((alias1_E_ref_2229[0].attr8_datatype.attr8_Name_Str) === (local1_F_ref_2230[0].attr9_OName_Str)) ? 1 : 0)) {
@@ -15582,7 +15586,7 @@ window['func6_Parser'] = function() {
 										};
 										__debugInfo = "998:\src\CompilerPasses\Parser.gbas";
 									}
-									forEachSaver16199.values[forEachCounter16199] = local1_F_ref_2230;
+									forEachSaver16218.values[forEachCounter16218] = local1_F_ref_2230;
 								
 								};
 								__debugInfo = "999:\src\CompilerPasses\Parser.gbas";
@@ -15622,9 +15626,9 @@ window['func15_CheckPrototypes'] = function() {
 		__debugInfo = "1039:\src\CompilerPasses\Parser.gbas";
 		if ((((BOUNDS(global8_Compiler.attr13_protoCheckers, 0)) > (0)) ? 1 : 0)) {
 			__debugInfo = "1037:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver16388 = global8_Compiler.attr13_protoCheckers;
-			for(var forEachCounter16388 = 0 ; forEachCounter16388 < forEachSaver16388.values.length ; forEachCounter16388++) {
-				var local7_checker_2232 = forEachSaver16388.values[forEachCounter16388];
+			var forEachSaver16407 = global8_Compiler.attr13_protoCheckers;
+			for(var forEachCounter16407 = 0 ; forEachCounter16407 < forEachSaver16407.values.length ; forEachCounter16407++) {
+				var local7_checker_2232 = forEachSaver16407.values[forEachCounter16407];
 			{
 					var alias5_func1_ref_2233 = [pool_TIdentifierFunc.alloc()], alias5_func2_ref_2234 = [pool_TIdentifierFunc.alloc()], local5_valid_2235 = 0;
 					__debugInfo = "1020:\src\CompilerPasses\Parser.gbas";
@@ -15671,7 +15675,7 @@ window['func15_CheckPrototypes'] = function() {
 					};
 					__debugInfo = "1020:\src\CompilerPasses\Parser.gbas";pool_TIdentifierFunc.free(alias5_func1_ref_2233);pool_TIdentifierFunc.free(alias5_func2_ref_2234);
 				}
-				forEachSaver16388.values[forEachCounter16388] = local7_checker_2232;
+				forEachSaver16407.values[forEachCounter16407] = local7_checker_2232;
 			
 			};
 			__debugInfo = "1038:\src\CompilerPasses\Parser.gbas";
@@ -15788,9 +15792,9 @@ window['func5_Scope'] = function(param12_CloseStr_Str, param4_func) {
 		__debugInfo = "1097:\src\CompilerPasses\Parser.gbas";
 		if (((((((local6_ScpTyp_2241) === (2)) ? 1 : 0)) && ((((param4_func) !== (-(1))) ? 1 : 0))) ? 1 : 0)) {
 			__debugInfo = "1096:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver16618 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr6_Params;
-			for(var forEachCounter16618 = 0 ; forEachCounter16618 < forEachSaver16618.values.length ; forEachCounter16618++) {
-				var local5_param_2247 = forEachSaver16618.values[forEachCounter16618];
+			var forEachSaver16637 = global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr6_Params;
+			for(var forEachCounter16637 = 0 ; forEachCounter16637 < forEachSaver16637.values.length ; forEachCounter16637++) {
+				var local5_param_2247 = forEachSaver16637.values[forEachCounter16637];
 			{
 					var local4_vari_2248 = pool_TIdentifierVari.alloc();
 					__debugInfo = "1091:\src\CompilerPasses\Parser.gbas";
@@ -15805,7 +15809,7 @@ window['func5_Scope'] = function(param12_CloseStr_Str, param4_func) {
 					DIMPUSH(global8_Compiler.attr5_Funcs_ref[0].arrAccess(param4_func).values[tmpPositionCache][0].attr10_CopyParams, ((BOUNDS(global8_Compiler.attr5_Varis_ref[0], 0)) - (1)));
 					__debugInfo = "1091:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(local4_vari_2248);
 				}
-				forEachSaver16618.values[forEachCounter16618] = local5_param_2247;
+				forEachSaver16637.values[forEachCounter16637] = local5_param_2247;
 			
 			};
 			__debugInfo = "1096:\src\CompilerPasses\Parser.gbas";
@@ -15895,9 +15899,9 @@ window['func5_Scope'] = function(param12_CloseStr_Str, param4_func) {
 							__debugInfo = "1146:\src\CompilerPasses\Parser.gbas";
 							do {
 								__debugInfo = "1144:\src\CompilerPasses\Parser.gbas";
-								var forEachSaver16793 = global5_Exprs_ref[0].arrAccess(local3_Scp_2254).values[tmpPositionCache][0].attr6_Labels;
-								for(var forEachCounter16793 = 0 ; forEachCounter16793 < forEachSaver16793.values.length ; forEachCounter16793++) {
-									var local3_lbl_2255 = forEachSaver16793.values[forEachCounter16793];
+								var forEachSaver16812 = global5_Exprs_ref[0].arrAccess(local3_Scp_2254).values[tmpPositionCache][0].attr6_Labels;
+								for(var forEachCounter16812 = 0 ; forEachCounter16812 < forEachSaver16812.values.length ; forEachCounter16812++) {
+									var local3_lbl_2255 = forEachSaver16812.values[forEachCounter16812];
 								{
 										__debugInfo = "1143:\src\CompilerPasses\Parser.gbas";
 										if ((((global5_Exprs_ref[0].arrAccess(local3_lbl_2255).values[tmpPositionCache][0].attr8_Name_Str) === (local8_Name_Str_2253)) ? 1 : 0)) {
@@ -15907,7 +15911,7 @@ window['func5_Scope'] = function(param12_CloseStr_Str, param4_func) {
 										};
 										__debugInfo = "1143:\src\CompilerPasses\Parser.gbas";
 									}
-									forEachSaver16793.values[forEachCounter16793] = local3_lbl_2255;
+									forEachSaver16812.values[forEachCounter16812] = local3_lbl_2255;
 								
 								};
 								__debugInfo = "1145:\src\CompilerPasses\Parser.gbas";
@@ -16254,9 +16258,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 			__debugInfo = "1296:\src\CompilerPasses\Parser.gbas";
 			local5_Found_2275 = 0;
 			__debugInfo = "1328:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver17533 = local5_Varis_2274;
-			for(var forEachCounter17533 = 0 ; forEachCounter17533 < forEachSaver17533.values.length ; forEachCounter17533++) {
-				var local4_Vari_2276 = forEachSaver17533.values[forEachCounter17533];
+			var forEachSaver17552 = local5_Varis_2274;
+			for(var forEachCounter17552 = 0 ; forEachCounter17552 < forEachSaver17552.values.length ; forEachCounter17552++) {
+				var local4_Vari_2276 = forEachSaver17552.values[forEachCounter17552];
 			{
 					__debugInfo = "1327:\src\CompilerPasses\Parser.gbas";
 					if ((((local8_Name_Str_2272) === (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Vari_2276).values[tmpPositionCache][0].attr8_Name_Str)) ? 1 : 0)) {
@@ -16266,9 +16270,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 							__debugInfo = "1303:\src\CompilerPasses\Parser.gbas";
 							local13_IsNotImplicit_2277 = 0;
 							__debugInfo = "1309:\src\CompilerPasses\Parser.gbas";
-							var forEachSaver17474 = local5_Varis_2274;
-							for(var forEachCounter17474 = 0 ; forEachCounter17474 < forEachSaver17474.values.length ; forEachCounter17474++) {
-								var local9_OtherVari_2278 = forEachSaver17474.values[forEachCounter17474];
+							var forEachSaver17493 = local5_Varis_2274;
+							for(var forEachCounter17493 = 0 ; forEachCounter17493 < forEachSaver17493.values.length ; forEachCounter17493++) {
+								var local9_OtherVari_2278 = forEachSaver17493.values[forEachCounter17493];
 							{
 									__debugInfo = "1308:\src\CompilerPasses\Parser.gbas";
 									if ((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr8_Name_Str) === (local8_Name_Str_2272)) ? 1 : 0)) && ((((((((((((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr3_Typ) === (1)) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr3_Typ) === (5)) ? 1 : 0))) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr3_Typ) === (4)) ? 1 : 0))) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr3_Typ) === (7)) ? 1 : 0))) ? 1 : 0)) || ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local9_OtherVari_2278).values[tmpPositionCache][0].attr3_Typ) === (6)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) && ((((local9_OtherVari_2278) !== (local4_Vari_2276)) ? 1 : 0))) ? 1 : 0)) {
@@ -16280,7 +16284,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 									};
 									__debugInfo = "1308:\src\CompilerPasses\Parser.gbas";
 								}
-								forEachSaver17474.values[forEachCounter17474] = local9_OtherVari_2278;
+								forEachSaver17493.values[forEachCounter17493] = local9_OtherVari_2278;
 							
 							};
 							__debugInfo = "1322:\src\CompilerPasses\Parser.gbas";
@@ -16289,9 +16293,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 								__debugInfo = "1312:\src\CompilerPasses\Parser.gbas";
 								alias3_Typ_ref_2279 = global8_Compiler.attr5_Types_ref[0].arrAccess(global8_Compiler.attr5_Funcs_ref[0].arrAccess(global8_Compiler.attr11_currentFunc).values[tmpPositionCache][0].attr6_MyType).values[tmpPositionCache] /* ALIAS */;
 								__debugInfo = "1319:\src\CompilerPasses\Parser.gbas";
-								var forEachSaver17519 = alias3_Typ_ref_2279[0].attr10_Attributes;
-								for(var forEachCounter17519 = 0 ; forEachCounter17519 < forEachSaver17519.values.length ; forEachCounter17519++) {
-									var local1_A_2280 = forEachSaver17519.values[forEachCounter17519];
+								var forEachSaver17538 = alias3_Typ_ref_2279[0].attr10_Attributes;
+								for(var forEachCounter17538 = 0 ; forEachCounter17538 < forEachSaver17538.values.length ; forEachCounter17538++) {
+									var local1_A_2280 = forEachSaver17538.values[forEachCounter17538];
 								{
 										__debugInfo = "1318:\src\CompilerPasses\Parser.gbas";
 										if ((((local4_Vari_2276) === (local1_A_2280)) ? 1 : 0)) {
@@ -16303,7 +16307,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 										};
 										__debugInfo = "1318:\src\CompilerPasses\Parser.gbas";
 									}
-									forEachSaver17519.values[forEachCounter17519] = local1_A_2280;
+									forEachSaver17538.values[forEachCounter17538] = local1_A_2280;
 								
 								};
 								__debugInfo = "1312:\src\CompilerPasses\Parser.gbas";pool_TIdentifierType.free(alias3_Typ_ref_2279);
@@ -16324,7 +16328,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 					};
 					__debugInfo = "1327:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver17533.values[forEachCounter17533] = local4_Vari_2276;
+				forEachSaver17552.values[forEachCounter17552] = local4_Vari_2276;
 			
 			};
 			__debugInfo = "1337:\src\CompilerPasses\Parser.gbas";
@@ -16361,9 +16365,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 					__debugInfo = "1357:\src\CompilerPasses\Parser.gbas";
 					while ((((local5_typId_2283) !== (-(1))) ? 1 : 0)) {
 						__debugInfo = "1354:\src\CompilerPasses\Parser.gbas";
-						var forEachSaver17676 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_2283).values[tmpPositionCache][0].attr7_Methods;
-						for(var forEachCounter17676 = 0 ; forEachCounter17676 < forEachSaver17676.values.length ; forEachCounter17676++) {
-							var local1_M_2284 = forEachSaver17676.values[forEachCounter17676];
+						var forEachSaver17695 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_2283).values[tmpPositionCache][0].attr7_Methods;
+						for(var forEachCounter17695 = 0 ; forEachCounter17695 < forEachSaver17695.values.length ; forEachCounter17695++) {
+							var local1_M_2284 = forEachSaver17695.values[forEachCounter17695];
 						{
 								__debugInfo = "1353:\src\CompilerPasses\Parser.gbas";
 								if ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local1_M_2284).values[tmpPositionCache][0].attr8_Name_Str) === (local8_Name_Str_2272)) ? 1 : 0)) {
@@ -16386,7 +16390,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 								};
 								__debugInfo = "1353:\src\CompilerPasses\Parser.gbas";
 							}
-							forEachSaver17676.values[forEachCounter17676] = local1_M_2284;
+							forEachSaver17695.values[forEachCounter17695] = local1_M_2284;
 						
 						};
 						__debugInfo = "1356:\src\CompilerPasses\Parser.gbas";
@@ -16419,9 +16423,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 						__debugInfo = "1382:\src\CompilerPasses\Parser.gbas";
 						while ((((local5_typId_2289) !== (-(1))) ? 1 : 0)) {
 							__debugInfo = "1379:\src\CompilerPasses\Parser.gbas";
-							var forEachSaver17819 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_2289).values[tmpPositionCache][0].attr7_Methods;
-							for(var forEachCounter17819 = 0 ; forEachCounter17819 < forEachSaver17819.values.length ; forEachCounter17819++) {
-								var local1_M_2290 = forEachSaver17819.values[forEachCounter17819];
+							var forEachSaver17838 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_typId_2289).values[tmpPositionCache][0].attr7_Methods;
+							for(var forEachCounter17838 = 0 ; forEachCounter17838 < forEachSaver17838.values.length ; forEachCounter17838++) {
+								var local1_M_2290 = forEachSaver17838.values[forEachCounter17838];
 							{
 									__debugInfo = "1378:\src\CompilerPasses\Parser.gbas";
 									if ((((global8_Compiler.attr5_Funcs_ref[0].arrAccess(local1_M_2290).values[tmpPositionCache][0].attr8_Name_Str) === (local8_Name_Str_2272)) ? 1 : 0)) {
@@ -16444,7 +16448,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 									};
 									__debugInfo = "1378:\src\CompilerPasses\Parser.gbas";
 								}
-								forEachSaver17819.values[forEachCounter17819] = local1_M_2290;
+								forEachSaver17838.values[forEachCounter17838] = local1_M_2290;
 							
 							};
 							__debugInfo = "1381:\src\CompilerPasses\Parser.gbas";
@@ -16479,9 +16483,9 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 						__debugInfo = "1398:\src\CompilerPasses\Parser.gbas";
 						local8_Atts_Str_2294 = "";
 						__debugInfo = "1403:\src\CompilerPasses\Parser.gbas";
-						var forEachSaver17923 = local5_Varis_2274;
-						for(var forEachCounter17923 = 0 ; forEachCounter17923 < forEachSaver17923.values.length ; forEachCounter17923++) {
-							var local4_Vari_2295 = forEachSaver17923.values[forEachCounter17923];
+						var forEachSaver17942 = local5_Varis_2274;
+						for(var forEachCounter17942 = 0 ; forEachCounter17942 < forEachSaver17942.values.length ; forEachCounter17942++) {
+							var local4_Vari_2295 = forEachSaver17942.values[forEachCounter17942];
 						{
 								__debugInfo = "1402:\src\CompilerPasses\Parser.gbas";
 								if ((((local8_Name_Str_2272) === (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Vari_2295).values[tmpPositionCache][0].attr8_Name_Str)) ? 1 : 0)) {
@@ -16491,7 +16495,7 @@ window['func10_Identifier'] = function(param9_IsCommand) {
 								};
 								__debugInfo = "1402:\src\CompilerPasses\Parser.gbas";
 							}
-							forEachSaver17923.values[forEachCounter17923] = local4_Vari_2295;
+							forEachSaver17942.values[forEachCounter17942] = local4_Vari_2295;
 						
 						};
 						__debugInfo = "1404:\src\CompilerPasses\Parser.gbas";
@@ -16810,9 +16814,9 @@ window['func7_Keyword'] = function() {
 					__debugInfo = "1568:\src\CompilerPasses\Parser.gbas";
 					local7_tmpVari_2314 = func7_VariDef(0).clone(/* In Assign */);
 					__debugInfo = "1577:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver18607 = global8_Compiler.attr7_Globals;
-					for(var forEachCounter18607 = 0 ; forEachCounter18607 < forEachSaver18607.values.length ; forEachCounter18607++) {
-						var local1_V_2315 = forEachSaver18607.values[forEachCounter18607];
+					var forEachSaver18626 = global8_Compiler.attr7_Globals;
+					for(var forEachCounter18626 = 0 ; forEachCounter18626 < forEachSaver18626.values.length ; forEachCounter18626++) {
+						var local1_V_2315 = forEachSaver18626.values[forEachCounter18626];
 					{
 							var alias4_Vari_ref_2316 = [pool_TIdentifierVari.alloc()];
 							__debugInfo = "1570:\src\CompilerPasses\Parser.gbas";
@@ -16836,7 +16840,7 @@ window['func7_Keyword'] = function() {
 							};
 							__debugInfo = "1570:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(alias4_Vari_ref_2316);
 						}
-						forEachSaver18607.values[forEachCounter18607] = local1_V_2315;
+						forEachSaver18626.values[forEachCounter18626] = local1_V_2315;
 					
 					};
 					__debugInfo = "1566:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(local7_tmpVari_2314);
@@ -16866,9 +16870,9 @@ window['func7_Keyword'] = function() {
 						__debugInfo = "1593:\src\CompilerPasses\Parser.gbas";
 						func8_GetVaris(unref(local5_Varis_2319), -(1), 0);
 						__debugInfo = "1601:\src\CompilerPasses\Parser.gbas";
-						var forEachSaver18686 = local5_Varis_2319;
-						for(var forEachCounter18686 = 0 ; forEachCounter18686 < forEachSaver18686.values.length ; forEachCounter18686++) {
-							var local1_V_2320 = forEachSaver18686.values[forEachCounter18686];
+						var forEachSaver18705 = local5_Varis_2319;
+						for(var forEachCounter18705 = 0 ; forEachCounter18705 < forEachSaver18705.values.length ; forEachCounter18705++) {
+							var local1_V_2320 = forEachSaver18705.values[forEachCounter18705];
 						{
 								__debugInfo = "1600:\src\CompilerPasses\Parser.gbas";
 								if ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_V_2320).values[tmpPositionCache][0].attr8_Name_Str) === (func17_CleanVariable_Str(func14_GetCurrent_Str()))) ? 1 : 0)) {
@@ -16884,7 +16888,7 @@ window['func7_Keyword'] = function() {
 								};
 								__debugInfo = "1600:\src\CompilerPasses\Parser.gbas";
 							}
-							forEachSaver18686.values[forEachCounter18686] = local1_V_2320;
+							forEachSaver18705.values[forEachCounter18705] = local1_V_2320;
 						
 						};
 						__debugInfo = "1606:\src\CompilerPasses\Parser.gbas";
@@ -17291,9 +17295,9 @@ window['func7_Keyword'] = function() {
 				__debugInfo = "1811:\src\CompilerPasses\Parser.gbas";
 				local5_Found_2352 = 0;
 				__debugInfo = "1819:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver19663 = global8_Compiler.attr5_Funcs_ref[0];
-				for(var forEachCounter19663 = 0 ; forEachCounter19663 < forEachSaver19663.values.length ; forEachCounter19663++) {
-					var local1_F_ref_2353 = forEachSaver19663.values[forEachCounter19663];
+				var forEachSaver19682 = global8_Compiler.attr5_Funcs_ref[0];
+				for(var forEachCounter19682 = 0 ; forEachCounter19682 < forEachSaver19682.values.length ; forEachCounter19682++) {
+					var local1_F_ref_2353 = forEachSaver19682.values[forEachCounter19682];
 				{
 						__debugInfo = "1818:\src\CompilerPasses\Parser.gbas";
 						if (((((((local1_F_ref_2353[0].attr3_Typ) === (1)) ? 1 : 0)) && ((((local3_Exp_2351.attr8_Name_Str) === (local1_F_ref_2353[0].attr8_Name_Str)) ? 1 : 0))) ? 1 : 0)) {
@@ -17307,15 +17311,15 @@ window['func7_Keyword'] = function() {
 						};
 						__debugInfo = "1818:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver19663.values[forEachCounter19663] = local1_F_ref_2353;
+					forEachSaver19682.values[forEachCounter19682] = local1_F_ref_2353;
 				
 				};
 				__debugInfo = "1829:\src\CompilerPasses\Parser.gbas";
 				if (((local5_Found_2352) ? 0 : 1)) {
 					__debugInfo = "1828:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver19703 = global8_Compiler.attr7_Globals;
-					for(var forEachCounter19703 = 0 ; forEachCounter19703 < forEachSaver19703.values.length ; forEachCounter19703++) {
-						var local1_V_2354 = forEachSaver19703.values[forEachCounter19703];
+					var forEachSaver19722 = global8_Compiler.attr7_Globals;
+					for(var forEachCounter19722 = 0 ; forEachCounter19722 < forEachSaver19722.values.length ; forEachCounter19722++) {
+						var local1_V_2354 = forEachSaver19722.values[forEachCounter19722];
 					{
 							__debugInfo = "1827:\src\CompilerPasses\Parser.gbas";
 							if (((((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_V_2354).values[tmpPositionCache][0].attr3_Typ) === (2)) ? 1 : 0)) && ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_V_2354).values[tmpPositionCache][0].attr8_Name_Str) === (local3_Exp_2351.attr8_Name_Str)) ? 1 : 0))) ? 1 : 0)) {
@@ -17327,7 +17331,7 @@ window['func7_Keyword'] = function() {
 							};
 							__debugInfo = "1827:\src\CompilerPasses\Parser.gbas";
 						}
-						forEachSaver19703.values[forEachCounter19703] = local1_V_2354;
+						forEachSaver19722.values[forEachCounter19722] = local1_V_2354;
 					
 					};
 					__debugInfo = "1828:\src\CompilerPasses\Parser.gbas";
@@ -17864,9 +17868,9 @@ window['func7_Keyword'] = function() {
 				__debugInfo = "2126:\src\CompilerPasses\Parser.gbas";
 				func5_Match(local8_Name_Str_2406, 2125, "src\CompilerPasses\Parser.gbas");
 				__debugInfo = "2131:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver20980 = global8_Compiler.attr10_DataBlocks;
-				for(var forEachCounter20980 = 0 ; forEachCounter20980 < forEachSaver20980.values.length ; forEachCounter20980++) {
-					var local5_block_2407 = forEachSaver20980.values[forEachCounter20980];
+				var forEachSaver20999 = global8_Compiler.attr10_DataBlocks;
+				for(var forEachCounter20999 = 0 ; forEachCounter20999 < forEachSaver20999.values.length ; forEachCounter20999++) {
+					var local5_block_2407 = forEachSaver20999.values[forEachCounter20999];
 				{
 						__debugInfo = "2130:\src\CompilerPasses\Parser.gbas";
 						if ((((local5_block_2407.attr8_Name_Str) === (local8_Name_Str_2406)) ? 1 : 0)) {
@@ -17876,7 +17880,7 @@ window['func7_Keyword'] = function() {
 						};
 						__debugInfo = "2130:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver20980.values[forEachCounter20980] = local5_block_2407;
+					forEachSaver20999.values[forEachCounter20999] = local5_block_2407;
 				
 				};
 				__debugInfo = "2132:\src\CompilerPasses\Parser.gbas";
@@ -18258,9 +18262,9 @@ window['func12_IsIdentifier'] = function(param9_CheckType, param18_IgnoreImplici
 			__debugInfo = "2323:\src\CompilerPasses\Parser.gbas";
 			while ((((local5_myTyp_2435) !== (-(1))) ? 1 : 0)) {
 				__debugInfo = "2320:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver21667 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_myTyp_2435).values[tmpPositionCache][0].attr7_Methods;
-				for(var forEachCounter21667 = 0 ; forEachCounter21667 < forEachSaver21667.values.length ; forEachCounter21667++) {
-					var local1_M_2436 = forEachSaver21667.values[forEachCounter21667];
+				var forEachSaver21686 = global8_Compiler.attr5_Types_ref[0].arrAccess(local5_myTyp_2435).values[tmpPositionCache][0].attr7_Methods;
+				for(var forEachCounter21686 = 0 ; forEachCounter21686 < forEachSaver21686.values.length ; forEachCounter21686++) {
+					var local1_M_2436 = forEachSaver21686.values[forEachCounter21686];
 				{
 						__debugInfo = "2319:\src\CompilerPasses\Parser.gbas";
 						if (func7_IsToken(global8_Compiler.attr5_Funcs_ref[0].arrAccess(local1_M_2436).values[tmpPositionCache][0].attr8_Name_Str)) {
@@ -18270,7 +18274,7 @@ window['func12_IsIdentifier'] = function(param9_CheckType, param18_IgnoreImplici
 						};
 						__debugInfo = "2319:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver21667.values[forEachCounter21667] = local1_M_2436;
+					forEachSaver21686.values[forEachCounter21686] = local1_M_2436;
 				
 				};
 				__debugInfo = "2322:\src\CompilerPasses\Parser.gbas";
@@ -18278,9 +18282,9 @@ window['func12_IsIdentifier'] = function(param9_CheckType, param18_IgnoreImplici
 				__debugInfo = "2320:\src\CompilerPasses\Parser.gbas";
 			};
 			__debugInfo = "2328:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver21698 = alias3_Typ_ref_2434[0].attr10_Attributes;
-			for(var forEachCounter21698 = 0 ; forEachCounter21698 < forEachSaver21698.values.length ; forEachCounter21698++) {
-				var local1_A_2437 = forEachSaver21698.values[forEachCounter21698];
+			var forEachSaver21717 = alias3_Typ_ref_2434[0].attr10_Attributes;
+			for(var forEachCounter21717 = 0 ; forEachCounter21717 < forEachSaver21717.values.length ; forEachCounter21717++) {
+				var local1_A_2437 = forEachSaver21717.values[forEachCounter21717];
 			{
 					__debugInfo = "2327:\src\CompilerPasses\Parser.gbas";
 					if (func7_IsToken(global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_A_2437).values[tmpPositionCache][0].attr8_Name_Str)) {
@@ -18290,7 +18294,7 @@ window['func12_IsIdentifier'] = function(param9_CheckType, param18_IgnoreImplici
 					};
 					__debugInfo = "2327:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver21698.values[forEachCounter21698] = local1_A_2437;
+				forEachSaver21717.values[forEachCounter21717] = local1_A_2437;
 			
 			};
 			__debugInfo = "2313:\src\CompilerPasses\Parser.gbas";pool_TIdentifierType.free(alias3_Typ_ref_2434);
@@ -18379,9 +18383,9 @@ window['func6_IsType'] = function(param7_Str_Str) {
 			__debugInfo = "2355:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "2361:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver21799 = global8_Compiler.attr5_Types_ref[0];
-		for(var forEachCounter21799 = 0 ; forEachCounter21799 < forEachSaver21799.values.length ; forEachCounter21799++) {
-			var local3_typ_ref_2440 = forEachSaver21799.values[forEachCounter21799];
+		var forEachSaver21818 = global8_Compiler.attr5_Types_ref[0];
+		for(var forEachCounter21818 = 0 ; forEachCounter21818 < forEachSaver21818.values.length ; forEachCounter21818++) {
+			var local3_typ_ref_2440 = forEachSaver21818.values[forEachCounter21818];
 		{
 				__debugInfo = "2360:\src\CompilerPasses\Parser.gbas";
 				if ((((local3_typ_ref_2440[0].attr12_RealName_Str) === (param7_Str_Str)) ? 1 : 0)) {
@@ -18393,7 +18397,7 @@ window['func6_IsType'] = function(param7_Str_Str) {
 				};
 				__debugInfo = "2360:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver21799.values[forEachCounter21799] = local3_typ_ref_2440;
+			forEachSaver21818.values[forEachCounter21818] = local3_typ_ref_2440;
 		
 		};
 		__debugInfo = "2362:\src\CompilerPasses\Parser.gbas";
@@ -18493,9 +18497,9 @@ window['func14_IsFuncExisting'] = function(param8_func_Str, param10_IsCallback) 
 	stackPush("function: IsFuncExisting", __debugInfo);
 	try {
 		__debugInfo = "2395:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver21924 = global8_Compiler.attr5_Types_ref[0];
-		for(var forEachCounter21924 = 0 ; forEachCounter21924 < forEachSaver21924.values.length ; forEachCounter21924++) {
-			var local1_T_ref_2446 = forEachSaver21924.values[forEachCounter21924];
+		var forEachSaver21943 = global8_Compiler.attr5_Types_ref[0];
+		for(var forEachCounter21943 = 0 ; forEachCounter21943 < forEachSaver21943.values.length ; forEachCounter21943++) {
+			var local1_T_ref_2446 = forEachSaver21943.values[forEachCounter21943];
 		{
 				__debugInfo = "2394:\src\CompilerPasses\Parser.gbas";
 				if ((((local1_T_ref_2446[0].attr8_Name_Str) === (param8_func_Str)) ? 1 : 0)) {
@@ -18505,7 +18509,7 @@ window['func14_IsFuncExisting'] = function(param8_func_Str, param10_IsCallback) 
 				};
 				__debugInfo = "2394:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver21924.values[forEachCounter21924] = local1_T_ref_2446;
+			forEachSaver21943.values[forEachCounter21943] = local1_T_ref_2446;
 		
 		};
 		__debugInfo = "2397:\src\CompilerPasses\Parser.gbas";
@@ -18515,9 +18519,9 @@ window['func14_IsFuncExisting'] = function(param8_func_Str, param10_IsCallback) 
 			__debugInfo = "2397:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "2401:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver21968 = global8_Compiler.attr5_Funcs_ref[0];
-		for(var forEachCounter21968 = 0 ; forEachCounter21968 < forEachSaver21968.values.length ; forEachCounter21968++) {
-			var local1_F_ref_2447 = forEachSaver21968.values[forEachCounter21968];
+		var forEachSaver21987 = global8_Compiler.attr5_Funcs_ref[0];
+		for(var forEachCounter21987 = 0 ; forEachCounter21987 < forEachSaver21987.values.length ; forEachCounter21987++) {
+			var local1_F_ref_2447 = forEachSaver21987.values[forEachCounter21987];
 		{
 				__debugInfo = "2400:\src\CompilerPasses\Parser.gbas";
 				if ((((((((((param8_func_Str) === (local1_F_ref_2447[0].attr8_Name_Str)) ? 1 : 0)) && (((((((local1_F_ref_2447[0].attr3_Typ) === (2)) ? 1 : 0)) || ((((local1_F_ref_2447[0].attr3_Typ) === (1)) ? 1 : 0))) ? 1 : 0))) ? 1 : 0)) && ((((local1_F_ref_2447[0].attr10_IsCallback) === (param10_IsCallback)) ? 1 : 0))) ? 1 : 0)) {
@@ -18527,7 +18531,7 @@ window['func14_IsFuncExisting'] = function(param8_func_Str, param10_IsCallback) 
 				};
 				__debugInfo = "2400:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver21968.values[forEachCounter21968] = local1_F_ref_2447;
+			forEachSaver21987.values[forEachCounter21987] = local1_F_ref_2447;
 		
 		};
 		__debugInfo = "2403:\src\CompilerPasses\Parser.gbas";
@@ -18549,9 +18553,9 @@ window['func10_IsOperator'] = function() {
 	stackPush("function: IsOperator", __debugInfo);
 	try {
 		__debugInfo = "2410:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver21989 = global9_Operators_ref[0];
-		for(var forEachCounter21989 = 0 ; forEachCounter21989 < forEachSaver21989.values.length ; forEachCounter21989++) {
-			var local2_Op_ref_2448 = forEachSaver21989.values[forEachCounter21989];
+		var forEachSaver22008 = global9_Operators_ref[0];
+		for(var forEachCounter22008 = 0 ; forEachCounter22008 < forEachSaver22008.values.length ; forEachCounter22008++) {
+			var local2_Op_ref_2448 = forEachSaver22008.values[forEachCounter22008];
 		{
 				__debugInfo = "2409:\src\CompilerPasses\Parser.gbas";
 				if (func7_IsToken(local2_Op_ref_2448[0].attr7_Sym_Str)) {
@@ -18561,7 +18565,7 @@ window['func10_IsOperator'] = function() {
 				};
 				__debugInfo = "2409:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver21989.values[forEachCounter21989] = local2_Op_ref_2448;
+			forEachSaver22008.values[forEachCounter22008] = local2_Op_ref_2448;
 		
 		};
 		__debugInfo = "2411:\src\CompilerPasses\Parser.gbas";
@@ -18589,9 +18593,9 @@ window['func15_IsValidDatatype'] = function() {
 			__debugInfo = "2417:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "2424:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22024 = global8_Compiler.attr5_Funcs_ref[0];
-		for(var forEachCounter22024 = 0 ; forEachCounter22024 < forEachSaver22024.values.length ; forEachCounter22024++) {
-			var local4_func_ref_2449 = forEachSaver22024.values[forEachCounter22024];
+		var forEachSaver22043 = global8_Compiler.attr5_Funcs_ref[0];
+		for(var forEachCounter22043 = 0 ; forEachCounter22043 < forEachSaver22043.values.length ; forEachCounter22043++) {
+			var local4_func_ref_2449 = forEachSaver22043.values[forEachCounter22043];
 		{
 				__debugInfo = "2423:\src\CompilerPasses\Parser.gbas";
 				if (((((((local4_func_ref_2449[0].attr3_Typ) === (4)) ? 1 : 0)) && (func7_IsToken(local4_func_ref_2449[0].attr8_Name_Str))) ? 1 : 0)) {
@@ -18601,19 +18605,19 @@ window['func15_IsValidDatatype'] = function() {
 				};
 				__debugInfo = "2423:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver22024.values[forEachCounter22024] = local4_func_ref_2449;
+			forEachSaver22043.values[forEachCounter22043] = local4_func_ref_2449;
 		
 		};
 		__debugInfo = "2428:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22038 = global8_Compiler.attr5_Types_ref[0];
-		for(var forEachCounter22038 = 0 ; forEachCounter22038 < forEachSaver22038.values.length ; forEachCounter22038++) {
-			var local3_typ_ref_2450 = forEachSaver22038.values[forEachCounter22038];
+		var forEachSaver22057 = global8_Compiler.attr5_Types_ref[0];
+		for(var forEachCounter22057 = 0 ; forEachCounter22057 < forEachSaver22057.values.length ; forEachCounter22057++) {
+			var local3_typ_ref_2450 = forEachSaver22057.values[forEachCounter22057];
 		{
 				__debugInfo = "2427:\src\CompilerPasses\Parser.gbas";
 				STDOUT(((local3_typ_ref_2450[0].attr12_RealName_Str) + ("\n")));
 				__debugInfo = "2427:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver22038.values[forEachCounter22038] = local3_typ_ref_2450;
+			forEachSaver22057.values[forEachCounter22057] = local3_typ_ref_2450;
 		
 		};
 		__debugInfo = "2429:\src\CompilerPasses\Parser.gbas";
@@ -18641,9 +18645,9 @@ window['func8_IsDefine'] = function(param7_Def_Str) {
 			__debugInfo = "2435:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "2441:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22075 = global7_Defines;
-		for(var forEachCounter22075 = 0 ; forEachCounter22075 < forEachSaver22075.values.length ; forEachCounter22075++) {
-			var local3_Def_2452 = forEachSaver22075.values[forEachCounter22075];
+		var forEachSaver22094 = global7_Defines;
+		for(var forEachCounter22094 = 0 ; forEachCounter22094 < forEachSaver22094.values.length ; forEachCounter22094++) {
+			var local3_Def_2452 = forEachSaver22094.values[forEachCounter22094];
 		{
 				__debugInfo = "2440:\src\CompilerPasses\Parser.gbas";
 				if ((((local3_Def_2452.attr7_Key_Str) === (param7_Def_Str)) ? 1 : 0)) {
@@ -18655,7 +18659,7 @@ window['func8_IsDefine'] = function(param7_Def_Str) {
 				};
 				__debugInfo = "2440:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver22075.values[forEachCounter22075] = local3_Def_2452;
+			forEachSaver22094.values[forEachCounter22094] = local3_Def_2452;
 		
 		};
 		__debugInfo = "2442:\src\CompilerPasses\Parser.gbas";
@@ -18685,15 +18689,15 @@ window['func8_GetVaris'] = function(param5_Varis, param3_Scp, param9_PreferVar) 
 		__debugInfo = "2454:\src\CompilerPasses\Parser.gbas";
 		if (((((((param9_PreferVar) === (-(1))) ? 1 : 0)) && ((((BOUNDS(param5_Varis, 0)) === (0)) ? 1 : 0))) ? 1 : 0)) {
 			__debugInfo = "2453:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver22122 = global8_Compiler.attr7_Globals;
-			for(var forEachCounter22122 = 0 ; forEachCounter22122 < forEachSaver22122.values.length ; forEachCounter22122++) {
-				var local4_Vari_2456 = forEachSaver22122.values[forEachCounter22122];
+			var forEachSaver22141 = global8_Compiler.attr7_Globals;
+			for(var forEachCounter22141 = 0 ; forEachCounter22141 < forEachSaver22141.values.length ; forEachCounter22141++) {
+				var local4_Vari_2456 = forEachSaver22141.values[forEachCounter22141];
 			{
 					__debugInfo = "2452:\src\CompilerPasses\Parser.gbas";
 					DIMPUSH(param5_Varis, local4_Vari_2456);
 					__debugInfo = "2452:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver22122.values[forEachCounter22122] = local4_Vari_2456;
+				forEachSaver22141.values[forEachCounter22141] = local4_Vari_2456;
 			
 			};
 			__debugInfo = "2453:\src\CompilerPasses\Parser.gbas";
@@ -18701,15 +18705,15 @@ window['func8_GetVaris'] = function(param5_Varis, param3_Scp, param9_PreferVar) 
 		__debugInfo = "2467:\src\CompilerPasses\Parser.gbas";
 		if ((((param3_Scp) !== (-(1))) ? 1 : 0)) {
 			__debugInfo = "2459:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver22146 = global5_Exprs_ref[0].arrAccess(~~(param3_Scp)).values[tmpPositionCache][0].attr5_Varis;
-			for(var forEachCounter22146 = 0 ; forEachCounter22146 < forEachSaver22146.values.length ; forEachCounter22146++) {
-				var local4_Vari_2457 = forEachSaver22146.values[forEachCounter22146];
+			var forEachSaver22165 = global5_Exprs_ref[0].arrAccess(~~(param3_Scp)).values[tmpPositionCache][0].attr5_Varis;
+			for(var forEachCounter22165 = 0 ; forEachCounter22165 < forEachSaver22165.values.length ; forEachCounter22165++) {
+				var local4_Vari_2457 = forEachSaver22165.values[forEachCounter22165];
 			{
 					__debugInfo = "2458:\src\CompilerPasses\Parser.gbas";
 					DIMPUSH(param5_Varis, local4_Vari_2457);
 					__debugInfo = "2458:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver22146.values[forEachCounter22146] = local4_Vari_2457;
+				forEachSaver22165.values[forEachCounter22165] = local4_Vari_2457;
 			
 			};
 			__debugInfo = "2466:\src\CompilerPasses\Parser.gbas";
@@ -18718,15 +18722,15 @@ window['func8_GetVaris'] = function(param5_Varis, param3_Scp, param9_PreferVar) 
 				__debugInfo = "2462:\src\CompilerPasses\Parser.gbas";
 				alias3_Typ_ref_2458 = global8_Compiler.attr5_Types_ref[0].arrAccess(global8_Compiler.attr5_Funcs_ref[0].arrAccess(global8_Compiler.attr11_currentFunc).values[tmpPositionCache][0].attr6_MyType).values[tmpPositionCache] /* ALIAS */;
 				__debugInfo = "2465:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver22195 = alias3_Typ_ref_2458[0].attr10_Attributes;
-				for(var forEachCounter22195 = 0 ; forEachCounter22195 < forEachSaver22195.values.length ; forEachCounter22195++) {
-					var local1_A_2459 = forEachSaver22195.values[forEachCounter22195];
+				var forEachSaver22214 = alias3_Typ_ref_2458[0].attr10_Attributes;
+				for(var forEachCounter22214 = 0 ; forEachCounter22214 < forEachSaver22214.values.length ; forEachCounter22214++) {
+					var local1_A_2459 = forEachSaver22214.values[forEachCounter22214];
 				{
 						__debugInfo = "2464:\src\CompilerPasses\Parser.gbas";
 						DIMPUSH(param5_Varis, local1_A_2459);
 						__debugInfo = "2464:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver22195.values[forEachCounter22195] = local1_A_2459;
+					forEachSaver22214.values[forEachCounter22214] = local1_A_2459;
 				
 				};
 				__debugInfo = "2462:\src\CompilerPasses\Parser.gbas";pool_TIdentifierType.free(alias3_Typ_ref_2458);
@@ -18740,15 +18744,15 @@ window['func8_GetVaris'] = function(param5_Varis, param3_Scp, param9_PreferVar) 
 			__debugInfo = "2470:\src\CompilerPasses\Parser.gbas";
 		} else if ((((param9_PreferVar) >= (0)) ? 1 : 0)) {
 			__debugInfo = "2475:\src\CompilerPasses\Parser.gbas";
-			var forEachSaver22244 = global8_Compiler.attr7_Globals;
-			for(var forEachCounter22244 = 0 ; forEachCounter22244 < forEachSaver22244.values.length ; forEachCounter22244++) {
-				var local4_Vari_2460 = forEachSaver22244.values[forEachCounter22244];
+			var forEachSaver22263 = global8_Compiler.attr7_Globals;
+			for(var forEachCounter22263 = 0 ; forEachCounter22263 < forEachSaver22263.values.length ; forEachCounter22263++) {
+				var local4_Vari_2460 = forEachSaver22263.values[forEachCounter22263];
 			{
 					__debugInfo = "2474:\src\CompilerPasses\Parser.gbas";
 					DIMPUSH(param5_Varis, local4_Vari_2460);
 					__debugInfo = "2474:\src\CompilerPasses\Parser.gbas";
 				}
-				forEachSaver22244.values[forEachCounter22244] = local4_Vari_2460;
+				forEachSaver22263.values[forEachCounter22263] = local4_Vari_2460;
 			
 			};
 			__debugInfo = "2475:\src\CompilerPasses\Parser.gbas";
@@ -18987,9 +18991,9 @@ window['func17_BuildPrototyp_Str'] = function(param1_F) {
 		__debugInfo = "2563:\src\CompilerPasses\Parser.gbas";
 		local5_Found_2480 = 0;
 		__debugInfo = "2569:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22586 = alias4_Func_ref_2478[0].attr6_Params;
-		for(var forEachCounter22586 = 0 ; forEachCounter22586 < forEachSaver22586.values.length ; forEachCounter22586++) {
-			var local1_P_2481 = forEachSaver22586.values[forEachCounter22586];
+		var forEachSaver22605 = alias4_Func_ref_2478[0].attr6_Params;
+		for(var forEachCounter22605 = 0 ; forEachCounter22605 < forEachSaver22605.values.length ; forEachCounter22605++) {
+			var local1_P_2481 = forEachSaver22605.values[forEachCounter22605];
 		{
 				var alias5_Param_ref_2482 = [pool_TIdentifierVari.alloc()];
 				__debugInfo = "2565:\src\CompilerPasses\Parser.gbas";
@@ -19006,7 +19010,7 @@ window['func17_BuildPrototyp_Str'] = function(param1_F) {
 				local5_Found_2480 = 1;
 				__debugInfo = "2565:\src\CompilerPasses\Parser.gbas";pool_TIdentifierVari.free(alias5_Param_ref_2482);
 			}
-			forEachSaver22586.values[forEachCounter22586] = local1_P_2481;
+			forEachSaver22605.values[forEachCounter22605] = local1_P_2481;
 		
 		};
 		__debugInfo = "2571:\src\CompilerPasses\Parser.gbas";
@@ -19063,9 +19067,9 @@ window['func14_SearchOperator'] = function(param8_Name_Str) {
 	stackPush("function: SearchOperator", __debugInfo);
 	try {
 		__debugInfo = "2596:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22652 = global9_Operators_ref[0];
-		for(var forEachCounter22652 = 0 ; forEachCounter22652 < forEachSaver22652.values.length ; forEachCounter22652++) {
-			var local2_Op_ref_2486 = forEachSaver22652.values[forEachCounter22652];
+		var forEachSaver22671 = global9_Operators_ref[0];
+		for(var forEachCounter22671 = 0 ; forEachCounter22671 < forEachSaver22671.values.length ; forEachCounter22671++) {
+			var local2_Op_ref_2486 = forEachSaver22671.values[forEachCounter22671];
 		{
 				__debugInfo = "2595:\src\CompilerPasses\Parser.gbas";
 				if (((((((local2_Op_ref_2486[0].attr7_Sym_Str) === (param8_Name_Str)) ? 1 : 0)) || ((((local2_Op_ref_2486[0].attr8_Name_Str) === (param8_Name_Str)) ? 1 : 0))) ? 1 : 0)) {
@@ -19075,7 +19079,7 @@ window['func14_SearchOperator'] = function(param8_Name_Str) {
 				};
 				__debugInfo = "2595:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver22652.values[forEachCounter22652] = local2_Op_ref_2486;
+			forEachSaver22671.values[forEachCounter22671] = local2_Op_ref_2486;
 		
 		};
 		__debugInfo = "2597:\src\CompilerPasses\Parser.gbas";
@@ -19132,9 +19136,9 @@ window['func12_ScopeHasGoto'] = function(param3_scp) {
 			__debugInfo = "2611:\src\CompilerPasses\Parser.gbas";
 		};
 		__debugInfo = "2642:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver22857 = param3_scp.attr5_Exprs;
-		for(var forEachCounter22857 = 0 ; forEachCounter22857 < forEachSaver22857.values.length ; forEachCounter22857++) {
-			var local1_E_2490 = forEachSaver22857.values[forEachCounter22857];
+		var forEachSaver22876 = param3_scp.attr5_Exprs;
+		for(var forEachCounter22876 = 0 ; forEachCounter22876 < forEachSaver22876.values.length ; forEachCounter22876++) {
+			var local1_E_2490 = forEachSaver22876.values[forEachCounter22876];
 		{
 				var alias4_SubE_ref_2491 = [pool_TExpr.alloc()];
 				__debugInfo = "2613:\src\CompilerPasses\Parser.gbas";
@@ -19147,9 +19151,9 @@ window['func12_ScopeHasGoto'] = function(param3_scp) {
 					__debugInfo = "2641:\src\CompilerPasses\Parser.gbas";
 					if ((((local17___SelectHelper34__2492) === (~~(24))) ? 1 : 0)) {
 						__debugInfo = "2618:\src\CompilerPasses\Parser.gbas";
-						var forEachSaver22737 = alias4_SubE_ref_2491[0].attr6_Scopes;
-						for(var forEachCounter22737 = 0 ; forEachCounter22737 < forEachSaver22737.values.length ; forEachCounter22737++) {
-							var local1_E_2493 = forEachSaver22737.values[forEachCounter22737];
+						var forEachSaver22756 = alias4_SubE_ref_2491[0].attr6_Scopes;
+						for(var forEachCounter22756 = 0 ; forEachCounter22756 < forEachSaver22756.values.length ; forEachCounter22756++) {
+							var local1_E_2493 = forEachSaver22756.values[forEachCounter22756];
 						{
 								__debugInfo = "2617:\src\CompilerPasses\Parser.gbas";
 								if (func12_ScopeHasGoto(unref(global5_Exprs_ref[0].arrAccess(local1_E_2493).values[tmpPositionCache][0]))) {
@@ -19159,7 +19163,7 @@ window['func12_ScopeHasGoto'] = function(param3_scp) {
 								};
 								__debugInfo = "2617:\src\CompilerPasses\Parser.gbas";
 							}
-							forEachSaver22737.values[forEachCounter22737] = local1_E_2493;
+							forEachSaver22756.values[forEachCounter22756] = local1_E_2493;
 						
 						};
 						__debugInfo = "2621:\src\CompilerPasses\Parser.gbas";
@@ -19238,7 +19242,7 @@ window['func12_ScopeHasGoto'] = function(param3_scp) {
 				};
 				__debugInfo = "2613:\src\CompilerPasses\Parser.gbas";pool_TExpr.free(alias4_SubE_ref_2491);
 			}
-			forEachSaver22857.values[forEachCounter22857] = local1_E_2490;
+			forEachSaver22876.values[forEachCounter22876] = local1_E_2490;
 		
 		};
 		__debugInfo = "2643:\src\CompilerPasses\Parser.gbas";
@@ -19352,9 +19356,9 @@ window['func13_ChangeVarName'] = function(param4_Vari) {
 				__debugInfo = "2684:\src\CompilerPasses\Parser.gbas";
 				local5_Found_2499 = 0;
 				__debugInfo = "2696:\src\CompilerPasses\Parser.gbas";
-				var forEachSaver23068 = global8_Compiler.attr7_Exports;
-				for(var forEachCounter23068 = 0 ; forEachCounter23068 < forEachSaver23068.values.length ; forEachCounter23068++) {
-					var local3_Exp_2500 = forEachSaver23068.values[forEachCounter23068];
+				var forEachSaver23087 = global8_Compiler.attr7_Exports;
+				for(var forEachCounter23087 = 0 ; forEachCounter23087 < forEachSaver23087.values.length ; forEachCounter23087++) {
+					var local3_Exp_2500 = forEachSaver23087.values[forEachCounter23087];
 				{
 						__debugInfo = "2695:\src\CompilerPasses\Parser.gbas";
 						if ((((local3_Exp_2500.attr8_Name_Str) === (param4_Vari.attr8_Name_Str)) ? 1 : 0)) {
@@ -19378,7 +19382,7 @@ window['func13_ChangeVarName'] = function(param4_Vari) {
 						};
 						__debugInfo = "2695:\src\CompilerPasses\Parser.gbas";
 					}
-					forEachSaver23068.values[forEachCounter23068] = local3_Exp_2500;
+					forEachSaver23087.values[forEachCounter23087] = local3_Exp_2500;
 				
 				};
 				__debugInfo = "2697:\src\CompilerPasses\Parser.gbas";
@@ -19460,9 +19464,9 @@ window['func14_ChangeFuncName'] = function(param4_Func) {
 					__debugInfo = "2728:\src\CompilerPasses\Parser.gbas";
 					local5_Found_2503 = 0;
 					__debugInfo = "2737:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver23372 = global8_Compiler.attr7_Exports;
-					for(var forEachCounter23372 = 0 ; forEachCounter23372 < forEachSaver23372.values.length ; forEachCounter23372++) {
-						var local3_Exp_2504 = forEachSaver23372.values[forEachCounter23372];
+					var forEachSaver23391 = global8_Compiler.attr7_Exports;
+					for(var forEachCounter23391 = 0 ; forEachCounter23391 < forEachSaver23391.values.length ; forEachCounter23391++) {
+						var local3_Exp_2504 = forEachSaver23391.values[forEachCounter23391];
 					{
 							__debugInfo = "2736:\src\CompilerPasses\Parser.gbas";
 							if ((((local3_Exp_2504.attr8_Name_Str) === (param4_Func.attr8_Name_Str)) ? 1 : 0)) {
@@ -19480,7 +19484,7 @@ window['func14_ChangeFuncName'] = function(param4_Func) {
 							};
 							__debugInfo = "2736:\src\CompilerPasses\Parser.gbas";
 						}
-						forEachSaver23372.values[forEachCounter23372] = local3_Exp_2504;
+						forEachSaver23391.values[forEachCounter23391] = local3_Exp_2504;
 					
 					};
 					__debugInfo = "2738:\src\CompilerPasses\Parser.gbas";
@@ -19608,9 +19612,9 @@ window['func23_ManageFuncParamOverlaps'] = function() {
 	stackPush("function: ManageFuncParamOverlaps", __debugInfo);
 	try {
 		__debugInfo = "2798:\src\CompilerPasses\Parser.gbas";
-		var forEachSaver23603 = global8_Compiler.attr5_Funcs_ref[0];
-		for(var forEachCounter23603 = 0 ; forEachCounter23603 < forEachSaver23603.values.length ; forEachCounter23603++) {
-			var local4_Func_ref_2508 = forEachSaver23603.values[forEachCounter23603];
+		var forEachSaver23622 = global8_Compiler.attr5_Funcs_ref[0];
+		for(var forEachCounter23622 = 0 ; forEachCounter23622 < forEachSaver23622.values.length ; forEachCounter23622++) {
+			var local4_Func_ref_2508 = forEachSaver23622.values[forEachCounter23622];
 		{
 				__debugInfo = "2797:\src\CompilerPasses\Parser.gbas";
 				if ((((((((((local4_Func_ref_2508[0].attr6_Native) === (0)) ? 1 : 0)) && ((((local4_Func_ref_2508[0].attr3_Scp) !== (-(1))) ? 1 : 0))) ? 1 : 0)) && ((((local4_Func_ref_2508[0].attr10_IsAbstract) === (0)) ? 1 : 0))) ? 1 : 0)) {
@@ -19618,9 +19622,9 @@ window['func23_ManageFuncParamOverlaps'] = function() {
 					__debugInfo = "2775:\src\CompilerPasses\Parser.gbas";
 					local1_i_2509 = 0;
 					__debugInfo = "2796:\src\CompilerPasses\Parser.gbas";
-					var forEachSaver23601 = local4_Func_ref_2508[0].attr6_Params;
-					for(var forEachCounter23601 = 0 ; forEachCounter23601 < forEachSaver23601.values.length ; forEachCounter23601++) {
-						var local1_P_2510 = forEachSaver23601.values[forEachCounter23601];
+					var forEachSaver23620 = local4_Func_ref_2508[0].attr6_Params;
+					for(var forEachCounter23620 = 0 ; forEachCounter23620 < forEachSaver23620.values.length ; forEachCounter23620++) {
+						var local1_P_2510 = forEachSaver23620.values[forEachCounter23620];
 					{
 							__debugInfo = "2793:\src\CompilerPasses\Parser.gbas";
 							if ((((global8_Compiler.attr5_Varis_ref[0].arrAccess(local1_P_2510).values[tmpPositionCache][0].attr3_ref) !== (global8_Compiler.attr5_Varis_ref[0].arrAccess(local4_Func_ref_2508[0].attr10_CopyParams.arrAccess(local1_i_2509).values[tmpPositionCache]).values[tmpPositionCache][0].attr3_ref)) ? 1 : 0)) {
@@ -19636,14 +19640,14 @@ window['func23_ManageFuncParamOverlaps'] = function() {
 							local1_i_2509+=1;
 							__debugInfo = "2793:\src\CompilerPasses\Parser.gbas";
 						}
-						forEachSaver23601.values[forEachCounter23601] = local1_P_2510;
+						forEachSaver23620.values[forEachCounter23620] = local1_P_2510;
 					
 					};
 					__debugInfo = "2775:\src\CompilerPasses\Parser.gbas";
 				};
 				__debugInfo = "2797:\src\CompilerPasses\Parser.gbas";
 			}
-			forEachSaver23603.values[forEachCounter23603] = local4_Func_ref_2508;
+			forEachSaver23622.values[forEachCounter23622] = local4_Func_ref_2508;
 		
 		};
 		__debugInfo = "2799:\src\CompilerPasses\Parser.gbas";
@@ -19743,22 +19747,22 @@ window['func10_PreCommand'] = function(param9_IgnoreAll) {
 					__debugInfo = "38:\src\CompilerPasses\Preprocessor.gbas";
 					if (((param9_IgnoreAll) ? 0 : 1)) {
 						__debugInfo = "37:\src\CompilerPasses\Preprocessor.gbas";
-						var forEachSaver23698 = global7_Defines;
-						for(var forEachCounter23698 = 0 ; forEachCounter23698 < forEachSaver23698.values.length ; forEachCounter23698++) {
-							var local3_Def_2516 = forEachSaver23698.values[forEachCounter23698];
+						var forEachSaver23717 = global7_Defines;
+						for(var forEachCounter23717 = 0 ; forEachCounter23717 < forEachSaver23717.values.length ; forEachCounter23717++) {
+							var local3_Def_2516 = forEachSaver23717.values[forEachCounter23717];
 						{
 								__debugInfo = "36:\src\CompilerPasses\Preprocessor.gbas";
 								if (func7_IsToken(local3_Def_2516.attr7_Key_Str)) {
 									__debugInfo = "36:\src\CompilerPasses\Preprocessor.gbas";
-									forEachSaver23698.values[forEachCounter23698] = local3_Def_2516;
-									DIMDEL(forEachSaver23698, forEachCounter23698);
-									forEachCounter23698--;
+									forEachSaver23717.values[forEachCounter23717] = local3_Def_2516;
+									DIMDEL(forEachSaver23717, forEachCounter23717);
+									forEachCounter23717--;
 									continue;
 									__debugInfo = "36:\src\CompilerPasses\Preprocessor.gbas";
 								};
 								__debugInfo = "36:\src\CompilerPasses\Preprocessor.gbas";
 							}
-							forEachSaver23698.values[forEachCounter23698] = local3_Def_2516;
+							forEachSaver23717.values[forEachCounter23717] = local3_Def_2516;
 						
 						};
 						__debugInfo = "37:\src\CompilerPasses\Preprocessor.gbas";
@@ -19773,9 +19777,9 @@ window['func10_PreCommand'] = function(param9_IgnoreAll) {
 						__debugInfo = "42:\src\CompilerPasses\Preprocessor.gbas";
 						local4_doIt_2517 = 0;
 						__debugInfo = "48:\src\CompilerPasses\Preprocessor.gbas";
-						var forEachSaver23729 = global7_Defines;
-						for(var forEachCounter23729 = 0 ; forEachCounter23729 < forEachSaver23729.values.length ; forEachCounter23729++) {
-							var local3_Def_2518 = forEachSaver23729.values[forEachCounter23729];
+						var forEachSaver23748 = global7_Defines;
+						for(var forEachCounter23748 = 0 ; forEachCounter23748 < forEachSaver23748.values.length ; forEachCounter23748++) {
+							var local3_Def_2518 = forEachSaver23748.values[forEachCounter23748];
 						{
 								__debugInfo = "47:\src\CompilerPasses\Preprocessor.gbas";
 								if (func7_IsToken(local3_Def_2518.attr7_Key_Str)) {
@@ -19787,7 +19791,7 @@ window['func10_PreCommand'] = function(param9_IgnoreAll) {
 								};
 								__debugInfo = "47:\src\CompilerPasses\Preprocessor.gbas";
 							}
-							forEachSaver23729.values[forEachCounter23729] = local3_Def_2518;
+							forEachSaver23748.values[forEachCounter23748] = local3_Def_2518;
 						
 						};
 						__debugInfo = "49:\src\CompilerPasses\Preprocessor.gbas";
@@ -19814,9 +19818,9 @@ window['func10_PreCommand'] = function(param9_IgnoreAll) {
 						__debugInfo = "59:\src\CompilerPasses\Preprocessor.gbas";
 						local4_doIt_2519 = 1;
 						__debugInfo = "65:\src\CompilerPasses\Preprocessor.gbas";
-						var forEachSaver23774 = global7_Defines;
-						for(var forEachCounter23774 = 0 ; forEachCounter23774 < forEachSaver23774.values.length ; forEachCounter23774++) {
-							var local3_Def_2520 = forEachSaver23774.values[forEachCounter23774];
+						var forEachSaver23793 = global7_Defines;
+						for(var forEachCounter23793 = 0 ; forEachCounter23793 < forEachSaver23793.values.length ; forEachCounter23793++) {
+							var local3_Def_2520 = forEachSaver23793.values[forEachCounter23793];
 						{
 								__debugInfo = "64:\src\CompilerPasses\Preprocessor.gbas";
 								if (func7_IsToken(local3_Def_2520.attr7_Key_Str)) {
@@ -19828,7 +19832,7 @@ window['func10_PreCommand'] = function(param9_IgnoreAll) {
 								};
 								__debugInfo = "64:\src\CompilerPasses\Preprocessor.gbas";
 							}
-							forEachSaver23774.values[forEachCounter23774] = local3_Def_2520;
+							forEachSaver23793.values[forEachCounter23793] = local3_Def_2520;
 						
 						};
 						__debugInfo = "66:\src\CompilerPasses\Preprocessor.gbas";
@@ -20264,9 +20268,9 @@ window['func12_DoTarget_Str'] = function(param8_Name_Str) {
 		__debugInfo = "73:\src\Target.gbas";
 		local10_Output_Str_2536 = "";
 		__debugInfo = "81:\src\Target.gbas";
-		var forEachSaver24390 = global10_Generators;
-		for(var forEachCounter24390 = 0 ; forEachCounter24390 < forEachSaver24390.values.length ; forEachCounter24390++) {
-			var local1_G_2537 = forEachSaver24390.values[forEachCounter24390];
+		var forEachSaver24409 = global10_Generators;
+		for(var forEachCounter24409 = 0 ; forEachCounter24409 < forEachSaver24409.values.length ; forEachCounter24409++) {
+			var local1_G_2537 = forEachSaver24409.values[forEachCounter24409];
 		{
 				__debugInfo = "80:\src\Target.gbas";
 				if ((((UCASE_Str(local1_G_2537.attr8_Name_Str)) === (UCASE_Str(global8_Lang_Str))) ? 1 : 0)) {
@@ -20282,7 +20286,7 @@ window['func12_DoTarget_Str'] = function(param8_Name_Str) {
 				};
 				__debugInfo = "80:\src\Target.gbas";
 			}
-			forEachSaver24390.values[forEachCounter24390] = local1_G_2537;
+			forEachSaver24409.values[forEachCounter24409] = local1_G_2537;
 		
 		};
 		__debugInfo = "82:\src\Target.gbas";
@@ -20792,7 +20796,8 @@ var vtbl_type9_TCompiler = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type9_TCompiler'] = function() { this.reset(); }
-window['type9_TCompiler'].prototype.reset = function() {
+window['type9_TCompiler'].prototype.getTypeName = function() { return "type9_TCompiler" };
+	window['type9_TCompiler'].prototype.reset = function() {
 	this.attr8_Code_Str = "";
 	this.attr6_Tokens = pool_array.alloc(pool_TToken.alloc());
 	this.attr11_currentPosi = 0;
@@ -20898,7 +20903,8 @@ var vtbl_type15_TIdentifierFunc = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type15_TIdentifierFunc'] = function() { this.reset(); }
-window['type15_TIdentifierFunc'].prototype.reset = function() {
+window['type15_TIdentifierFunc'].prototype.getTypeName = function() { return "type15_TIdentifierFunc" };
+	window['type15_TIdentifierFunc'].prototype.reset = function() {
 	this.attr9_OName_Str = "";
 	this.attr8_Name_Str = "";
 	this.attr6_Params = pool_array.alloc(0);
@@ -20990,7 +20996,8 @@ var vtbl_type15_TIdentifierVari = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type15_TIdentifierVari'] = function() { this.reset(); }
-window['type15_TIdentifierVari'].prototype.reset = function() {
+window['type15_TIdentifierVari'].prototype.getTypeName = function() { return "type15_TIdentifierVari" };
+	window['type15_TIdentifierVari'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr8_datatype = pool_TDatatype.alloc();
 	this.attr3_Typ = 0;
@@ -21057,7 +21064,8 @@ var vtbl_type15_TIdentifierType = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type15_TIdentifierType'] = function() { this.reset(); }
-window['type15_TIdentifierType'].prototype.reset = function() {
+window['type15_TIdentifierType'].prototype.getTypeName = function() { return "type15_TIdentifierType" };
+	window['type15_TIdentifierType'].prototype.reset = function() {
 	this.attr9_OName_Str = "";
 	this.attr8_Name_Str = "";
 	this.attr12_RealName_Str = "";
@@ -21128,7 +21136,8 @@ var vtbl_type9_TDatatype = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type9_TDatatype'] = function() { this.reset(); }
-window['type9_TDatatype'].prototype.reset = function() {
+window['type9_TDatatype'].prototype.getTypeName = function() { return "type9_TDatatype" };
+	window['type9_TDatatype'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr7_IsArray = 0;
 	this.vtbl = vtbl_type9_TDatatype;
@@ -21180,7 +21189,8 @@ var vtbl_type10_TDataBlock = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type10_TDataBlock'] = function() { this.reset(); }
-window['type10_TDataBlock'].prototype.reset = function() {
+window['type10_TDataBlock'].prototype.getTypeName = function() { return "type10_TDataBlock" };
+	window['type10_TDataBlock'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr5_Datas = pool_array.alloc(0);
 	this.vtbl = vtbl_type10_TDataBlock;
@@ -21232,7 +21242,8 @@ var vtbl_type13_TProtoChecker = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type13_TProtoChecker'] = function() { this.reset(); }
-window['type13_TProtoChecker'].prototype.reset = function() {
+window['type13_TProtoChecker'].prototype.getTypeName = function() { return "type13_TProtoChecker" };
+	window['type13_TProtoChecker'].prototype.reset = function() {
 	this.attr3_Tok = pool_TToken.alloc();
 	this.attr8_fromFunc = 0;
 	this.attr6_toFunc = 0;
@@ -21286,7 +21297,8 @@ var vtbl_type6_TToken = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type6_TToken'] = function() { this.reset(); }
-window['type6_TToken'].prototype.reset = function() {
+window['type6_TToken'].prototype.getTypeName = function() { return "type6_TToken" };
+	window['type6_TToken'].prototype.reset = function() {
 	this.attr4_Line = 0;
 	this.attr15_LineContent_Str = "";
 	this.attr9_Character = 0;
@@ -21347,7 +21359,8 @@ var vtbl_type7_TExport = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type7_TExport'] = function() { this.reset(); }
-window['type7_TExport'].prototype.reset = function() {
+window['type7_TExport'].prototype.getTypeName = function() { return "type7_TExport" };
+	window['type7_TExport'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr12_RealName_Str = "";
 	this.vtbl = vtbl_type7_TExport;
@@ -21399,7 +21412,8 @@ var vtbl_type5_TExpr = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type5_TExpr'] = function() { this.reset(); }
-window['type5_TExpr'].prototype.reset = function() {
+window['type5_TExpr'].prototype.getTypeName = function() { return "type5_TExpr" };
+	window['type5_TExpr'].prototype.reset = function() {
 	this.attr8_datatype = pool_TDatatype.alloc();
 	this.attr3_Typ = 0;
 	this.attr2_ID = 0;
@@ -21532,7 +21546,8 @@ var vtbl_type9_TOperator = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type9_TOperator'] = function() { this.reset(); }
-window['type9_TOperator'].prototype.reset = function() {
+window['type9_TOperator'].prototype.getTypeName = function() { return "type9_TOperator" };
+	window['type9_TOperator'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr7_Sym_Str = "";
 	this.attr3_Typ = 0;
@@ -21590,7 +21605,8 @@ var vtbl_type7_TDefine = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type7_TDefine'] = function() { this.reset(); }
-window['type7_TDefine'].prototype.reset = function() {
+window['type7_TDefine'].prototype.getTypeName = function() { return "type7_TDefine" };
+	window['type7_TDefine'].prototype.reset = function() {
 	this.attr7_Key_Str = "";
 	this.attr9_Value_Str = "";
 	this.vtbl = vtbl_type7_TDefine;
@@ -21642,7 +21658,8 @@ var vtbl_type10_TGenerator = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type10_TGenerator'] = function() { this.reset(); }
-window['type10_TGenerator'].prototype.reset = function() {
+window['type10_TGenerator'].prototype.getTypeName = function() { return "type10_TGenerator" };
+	window['type10_TGenerator'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr8_genProto = Lang_Generator_Str;
 	this.vtbl = vtbl_type10_TGenerator;
@@ -21694,7 +21711,8 @@ var vtbl_type13_Documentation = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type13_Documentation'] = function() { this.reset(); }
-window['type13_Documentation'].prototype.reset = function() {
+window['type13_Documentation'].prototype.getTypeName = function() { return "type13_Documentation" };
+	window['type13_Documentation'].prototype.reset = function() {
 	this.attr7_typ_Str = "";
 	this.attr4_desc = pool_array.alloc(pool_LangElement.alloc());
 	this.attr8_name_Str = "";
@@ -21756,7 +21774,8 @@ var vtbl_type12_ParamElement = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type12_ParamElement'] = function() { this.reset(); }
-window['type12_ParamElement'].prototype.reset = function() {
+window['type12_ParamElement'].prototype.getTypeName = function() { return "type12_ParamElement" };
+	window['type12_ParamElement'].prototype.reset = function() {
 	this.attr8_name_Str = "";
 	this.attr4_desc = pool_array.alloc(pool_LangElement.alloc());
 	this.vtbl = vtbl_type12_ParamElement;
@@ -21808,7 +21827,8 @@ var vtbl_type11_LangElement = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type11_LangElement'] = function() { this.reset(); }
-window['type11_LangElement'].prototype.reset = function() {
+window['type11_LangElement'].prototype.getTypeName = function() { return "type11_LangElement" };
+	window['type11_LangElement'].prototype.reset = function() {
 	this.attr8_desc_Str = "";
 	this.attr8_lang_Str = "";
 	this.vtbl = vtbl_type11_LangElement;
@@ -21860,7 +21880,8 @@ var vtbl_type6_Bucket = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type6_Bucket'] = function() { this.reset(); }
-window['type6_Bucket'].prototype.reset = function() {
+window['type6_Bucket'].prototype.getTypeName = function() { return "type6_Bucket" };
+	window['type6_Bucket'].prototype.reset = function() {
 	this.attr3_Set = 0;
 	this.attr8_Elements = pool_array.alloc(pool_KeyValue.alloc());
 	this.attr7_Element = pool_KeyValue.alloc();
@@ -21915,7 +21936,8 @@ var vtbl_type8_KeyValue = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type8_KeyValue'] = function() { this.reset(); }
-window['type8_KeyValue'].prototype.reset = function() {
+window['type8_KeyValue'].prototype.getTypeName = function() { return "type8_KeyValue" };
+	window['type8_KeyValue'].prototype.reset = function() {
 	this.attr7_Key_Str = "";
 	this.attr5_Value = 0;
 	this.vtbl = vtbl_type8_KeyValue;
@@ -21973,7 +21995,8 @@ var vtbl_type7_HashMap = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type7_HashMap'] = function() { this.reset(); }
-window['type7_HashMap'].prototype.reset = function() {
+window['type7_HashMap'].prototype.getTypeName = function() { return "type7_HashMap" };
+	window['type7_HashMap'].prototype.reset = function() {
 	this.attr7_Buckets_ref = [pool_array.alloc([pool_Bucket.alloc()])];
 	this.attr8_Elements = 0;
 	this.vtbl = vtbl_type7_HashMap;
@@ -22043,7 +22066,8 @@ var vtbl_type9_TTemplate = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type9_TTemplate'] = function() { this.reset(); }
-window['type9_TTemplate'].prototype.reset = function() {
+window['type9_TTemplate'].prototype.getTypeName = function() { return "type9_TTemplate" };
+	window['type9_TTemplate'].prototype.reset = function() {
 	this.attr8_Path_Str = "";
 	this.attr8_Mode_Str = "";
 	this.attr8_Name_Str = "";
@@ -22097,7 +22121,8 @@ var vtbl_type8_TLibrary = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type8_TLibrary'] = function() { this.reset(); }
-window['type8_TLibrary'].prototype.reset = function() {
+window['type8_TLibrary'].prototype.getTypeName = function() { return "type8_TLibrary" };
+	window['type8_TLibrary'].prototype.reset = function() {
 	this.attr8_Path_Str = "";
 	this.attr8_Mode_Str = "";
 	this.vtbl = vtbl_type8_TLibrary;
@@ -22149,7 +22174,8 @@ var vtbl_type10_TBlackList = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type10_TBlackList'] = function() { this.reset(); }
-window['type10_TBlackList'].prototype.reset = function() {
+window['type10_TBlackList'].prototype.getTypeName = function() { return "type10_TBlackList" };
+	window['type10_TBlackList'].prototype.reset = function() {
 	this.attr3_Typ = 0;
 	this.attr8_Name_Str = "";
 	this.attr10_Action_Str = "";
@@ -22203,7 +22229,8 @@ var vtbl_type7_TAction = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type7_TAction'] = function() { this.reset(); }
-window['type7_TAction'].prototype.reset = function() {
+window['type7_TAction'].prototype.getTypeName = function() { return "type7_TAction" };
+	window['type7_TAction'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr3_Att = pool_array.alloc(pool_xmlAttribute.alloc());
 	this.vtbl = vtbl_type7_TAction;
@@ -22255,7 +22282,8 @@ var vtbl_type12_xmlAttribute = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type12_xmlAttribute'] = function() { this.reset(); }
-window['type12_xmlAttribute'].prototype.reset = function() {
+window['type12_xmlAttribute'].prototype.getTypeName = function() { return "type12_xmlAttribute" };
+	window['type12_xmlAttribute'].prototype.reset = function() {
 	this.attr8_Name_Str = "";
 	this.attr9_Value_Str = "";
 	this.vtbl = vtbl_type12_xmlAttribute;
@@ -22313,7 +22341,8 @@ var vtbl_type3_XML = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type3_XML'] = function() { this.reset(); }
-window['type3_XML'].prototype.reset = function() {
+window['type3_XML'].prototype.getTypeName = function() { return "type3_XML" };
+	window['type3_XML'].prototype.reset = function() {
 	this.attr8_Text_Str = "";
 	this.attr5_Event = XMLEvent;
 	this.attr8_Position = 0;
@@ -22388,7 +22417,8 @@ var vtbl_type7_TObject = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type7_TObject'] = function() { this.reset(); }
-window['type7_TObject'].prototype.reset = function() {
+window['type7_TObject'].prototype.getTypeName = function() { return "type7_TObject" };
+	window['type7_TObject'].prototype.reset = function() {
 	this.vtbl = vtbl_type7_TObject;
 	this.pool = pool_TObject;
 	this.succ = null;
@@ -22436,7 +22466,8 @@ var vtbl_type17_PATHFINDING_TNode = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type17_PATHFINDING_TNode'] = function() { this.reset(); }
-window['type17_PATHFINDING_TNode'].prototype.reset = function() {
+window['type17_PATHFINDING_TNode'].prototype.getTypeName = function() { return "type17_PATHFINDING_TNode" };
+	window['type17_PATHFINDING_TNode'].prototype.reset = function() {
 	this.attr4_cost = 0;
 	this.attr6_parent = 0;
 	this.attr1_x = 0;
@@ -22492,7 +22523,8 @@ var vtbl_type6_TObj3D = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type6_TObj3D'] = function() { this.reset(); }
-window['type6_TObj3D'].prototype.reset = function() {
+window['type6_TObj3D'].prototype.getTypeName = function() { return "type6_TObj3D" };
+	window['type6_TObj3D'].prototype.reset = function() {
 	this.vtbl = vtbl_type6_TObj3D;
 	this.pool = pool_TObj3D;
 	this.succ = null;
@@ -22540,7 +22572,8 @@ var vtbl_type10_DataBuffer = {
 	ToHashCode: method13_type7_TObject_10_ToHashCode
 };
 window ['type10_DataBuffer'] = function() { this.reset(); }
-window['type10_DataBuffer'].prototype.reset = function() {
+window['type10_DataBuffer'].prototype.getTypeName = function() { return "type10_DataBuffer" };
+	window['type10_DataBuffer'].prototype.reset = function() {
 	this.vtbl = vtbl_type10_DataBuffer;
 	this.pool = pool_DataBuffer;
 	this.succ = null;
