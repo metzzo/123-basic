@@ -249,7 +249,7 @@ var pool_array = {
 	},
 	free: function(obj) {
 		if (obj.succ !== null || obj.constructor === Array) return;
-		var typ = defval.getTypeName !== undefined ? defval.getTypeName() : typeof defval;
+		var typ = obj.getTypeName !== undefined ? obj.getTypeName() : typeof obj;
 		if (array_pools[typ] === undefined) {
 			array_pools[typ] = null;
 		}
