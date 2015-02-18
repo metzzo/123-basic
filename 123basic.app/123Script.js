@@ -9927,7 +9927,7 @@ window['func16_JS_Generator_Str'] = function() {
 				__debugInfo = "286:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("for (var __init = 0; __init < preInitFuncs.length; __init++) preInitFuncs[__init]();"))) + (func11_NewLine_Str()));
 				__debugInfo = "288:\src\CompilerPasses\Generator\JSGenerator.gbas";
-				local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("delete preInitFuncs;"))) + (func11_NewLine_Str()));
+				local8_Text_Str_1933 = ((((local8_Text_Str_1933) + ("preInitFuncs = [];"))) + (func11_NewLine_Str()));
 				__debugInfo = "291:\src\CompilerPasses\Generator\JSGenerator.gbas";
 				return tryClone(local8_Text_Str_1933);
 				__debugInfo = "28:\src\CompilerPasses\Generator\JSGenerator.gbas";
