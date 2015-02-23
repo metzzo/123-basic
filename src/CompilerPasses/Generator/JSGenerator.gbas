@@ -190,7 +190,7 @@ FUNCTION JS_Generator$:
 			
 			IF LEN(Compiler.Exports[]) > 0 // if JSON add bridge
 				IndentUp()
-				Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.bridgeToJS = function() {"+NewLine$()
+				Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.bridgeToJS = function(isJSON) {"+NewLine$()
 				IndentUp()
 				Text$ = Text$ + "return {"+NewLine$()
 				FOREACH Attr IN Typ.Attributes[]
@@ -203,17 +203,17 @@ FUNCTION JS_Generator$:
 					ENDIF
 					//Es sei denn es ist REF
 					IF Compiler.Varis[Attr].ref THEN plzclone = TRUE //Sobald ref
-					Text$ = Text$ + "\"" +variable.OName$ + "\": "
+					Text$ = Text$ + "\"" +REPLACE$(variable.OName$, "$", "_Str") + "\": "
 	
 					IF plzclone THEN Text$ = Text$ + "("
 					Text$ = Text$ + "this."+variable.Name$
-					IF plzclone THEN Text$ = Text$ + ").bridgeToJS()"
+					IF plzclone THEN Text$ = Text$ + ").bridgeToJS(isJSON)"
 	
 					Text$ = Text$ + ","+NewLine$()
 				NEXT
 				//vtable
 				IndentDown()
-				Text$ = Text$ + "\"__vtbl\": this.vtbl"+NewLine$()
+				Text$ = Text$ + "\"__vtbl\": !isJSON ? this.vtbl : undefined"+NewLine$()
 				IndentDown()
 				Text$ = Text$ + "};"+NewLine$()
 				Text$ = Text$ + "};" + NewLine$()
