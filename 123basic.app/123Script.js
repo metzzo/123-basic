@@ -637,7 +637,7 @@ function OTTArray(def) {
 	this.succ = null;
 }
 
-function tryBridge(o) {
+function tryBridge(o, isJSON) {
 	switch (typeof o) {
 		case 'undefined':
 		case 'function':
@@ -647,19 +647,19 @@ function tryBridge(o) {
 			break;
 		default:
 			if (o instanceof Array) {
-				return [tryBridge(o[0])];
+				return [tryBridge(o[0]), isJSON];
 			} else {
-				return o.bridgeToJS();
+				return o.bridgeToJS(isJSON);
 			}
 	}
 	return o;
 }
 
 // bridges to JS (= making it useable in JS without special knowledge)
-OTTArray.prototype.bridgeToJS= function() {
+OTTArray.prototype.bridgeToJS= function(isJSON) {
 	var array = [];
 	for (var i = 0; i < this.values.length; i++) {
-		var val = tryBridge(this.values[i]);
+		var val = tryBridge(this.values[i], isJSON);
 		array.push(val);
 	}
 	return array;
