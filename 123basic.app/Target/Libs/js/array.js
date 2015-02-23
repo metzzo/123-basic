@@ -13,6 +13,34 @@ function OTTArray(def) {
 	this.succ = null;
 }
 
+function tryBridge(o) {
+	switch (typeof o) {
+		case 'undefined':
+		case 'function':
+		case 'string':
+		case 'boolean':
+		case 'number':
+			break;
+		default:
+			if (o instanceof Array) {
+				return [tryBridge(o[0])];
+			} else {
+				return o.bridgeToJS();
+			}
+	}
+	return o;
+}
+
+// bridges to JS (= making it useable in JS without special knowledge)
+OTTArray.prototype.bridgeToJS= function() {
+	var array = [];
+	for (var i = 0; i < this.values.length; i++) {
+		var val = tryBridge(this.values[i]);
+		array.push(val);
+	}
+	return array;
+}
+
 //Klonen!
 OTTArray.prototype.clone = function() {
 	var other = pool_array.alloc(this.defval);

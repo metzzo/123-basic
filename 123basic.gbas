@@ -161,34 +161,54 @@ GbapPath$ = "./"
 ?ELSE
 	CONSOLE = FALSE
 
-	EXPORT Compile$
-	EXPORT InitCompiler
-	EXPORT RegisterDefine
-
 	?IFDEF FOR_IDE
-		EXPORT GetIdentifierByPart$, GetIdentifierByPart
-
-
-		FUNCTION GetIdentifierByPart$: Text$
-			LOCAL Result$ = ""
-
-			LOCAL tmpCompiler AS TCompiler
-			tmpCompiler = Compiler
-
-			Compiler.Code$ = Text$+"\n"
-
-			Lexer()
-
-			Analyser()
-
-			Compiler.GetIdent = TRUE
-
-			Parser()
-
-			Compiler = tmpCompiler
-
-			RETURN Result$
+		EXPORT Compile$
+		EXPORT InitCompiler
+		EXPORT RegisterDefine
+		EXPORT GetIdentifierList
+		
+		FUNCTION GetIdentifierList[] AS TIDEIdentifier:
+			LOCAL Identifiers[] AS TIDEIdentifier
+			
+			FOREACH Func IN Compiler.Funcs[]
+				LOCAL ident AS TIDEIdentifier
+				ident.Name$ = Func.OName$
+				ident.datatype = Func.datatype
+				ident.Typ$ = "function"
+				ident.SubTyp = Func.Typ
+				ident.token = Compiler.Tokens[Func.Tok]
+				DIMPUSH Identifiers[], ident
+			NEXT
+			
+			FOREACH Vari IN Compiler.Varis[]
+				LOCAL ident AS TIDEIdentifier
+				ident.Name$ = Vari.OName$
+				ident.datatype = Vari.datatype
+				ident.Typ$ = "variable"
+				ident.SubTyp = Vari.Typ
+				ident.token = Compiler.Tokens[Vari.Tok]
+				DIMPUSH Identifiers[], ident
+			NEXT
+			
+			FOREACH typ IN Compiler.Types[]
+				LOCAL ident AS TIDEIdentifier
+				ident.Name$ = typ.OName$
+				ident.Typ$ = "type"
+				ident.SubTyp = 0
+				ident.token = Compiler.Tokens[typ.Tok]
+				DIMPUSH Identifiers[], ident
+			NEXT
+			
+			RETURN Identifiers
 		ENDFUNCTION
+		
+		TYPE TIDEIdentifier
+			Name$
+			datatype AS TDatatype
+			token AS TToken
+			Typ$
+			SubTyp%
+		ENDTYPE
 	?ENDIF
 ?ENDIF
 

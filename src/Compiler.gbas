@@ -91,13 +91,15 @@ CONSTANT VARI_IS_ALIAS	= 7
 
 TYPE TIdentifierVari
 	Name$
+	OName$
 	datatype AS TDatatype
 	Typ%
 	ID%
 	PreDef% = -1 //Der default Wert.
 	ref% = FALSE //Ist es by ref?
 	OwnerVari% = -1 //wenns eine ausweichvariable ist, dann muss die gekennzeichnet werden
-
+	Tok%
+	
 	?IFDEF VMCOMPILER
 	typeId% = -1 // which IdentifierType is this variable?
 	attrPos% = -1 // which attribute position in the instance does this vari belong to?
@@ -117,6 +119,7 @@ TYPE TIdentifierType
 	Methods%[] //funcarray in compiler
 	PreSize%[] //die vordefinierte größe
 	ID%
+	Tok%
 
 	Extending% = -1 //Extended dieser Type etwas?
 
@@ -552,6 +555,7 @@ ENDFUNCTION
 FUNCTION AddVariable: Vari AS TIdentifierVari, Ignore%
 	IF Ignore = FALSE AND IsVarExisting(Vari.Name$) THEN Error("Variable already exists, is a keyword or a type: '"+Vari.Name$+"'", CODELINE(), CODEFILE$())
 	Vari.ID = LEN(Compiler.Varis[])
+	Vari.Tok = Compiler.currentPosi
 
 	DIMPUSH Compiler.Varis[], Vari
 ENDFUNCTION

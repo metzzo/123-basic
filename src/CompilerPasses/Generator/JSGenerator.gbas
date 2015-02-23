@@ -187,6 +187,37 @@ FUNCTION JS_Generator$:
 			IndentDown()
 			Text$ = Text$ + "return other;"+NewLine$()
 			Text$ = Text$ + "};" + NewLine$()
+			
+			IF LEN(Compiler.Exports[]) > 0 // if JSON add bridge
+				IndentUp()
+				Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.bridgeToJS = function() {"+NewLine$()
+				IndentUp()
+				Text$ = Text$ + "return {"+NewLine$()
+				FOREACH Attr IN Typ.Attributes[]
+					ALIAS variable AS Compiler.Varis[Attr]
+					LOCAL plzclone% = FALSE
+					IF Compiler.Varis[Attr].datatype.IsArray = 0 AND (Compiler.Varis[Attr].datatype.Name$="int" OR Compiler.Varis[Attr].datatype.Name$="float" OR Compiler.Varis[Attr].datatype.Name$="string")
+						plzclone = FALSE
+					ELSE
+						plzclone = TRUE
+					ENDIF
+					//Es sei denn es ist REF
+					IF Compiler.Varis[Attr].ref THEN plzclone = TRUE //Sobald ref
+					Text$ = Text$ + "\"" +variable.OName$ + "\": "
+	
+					IF plzclone THEN Text$ = Text$ + "("
+					Text$ = Text$ + "this."+variable.Name$
+					IF plzclone THEN Text$ = Text$ + ").bridgeToJS()"
+	
+					Text$ = Text$ + ","+NewLine$()
+				NEXT
+				//vtable
+				IndentDown()
+				Text$ = Text$ + "\"__vtbl\": this.vtbl"+NewLine$()
+				IndentDown()
+				Text$ = Text$ + "};"+NewLine$()
+				Text$ = Text$ + "};" + NewLine$()
+			ENDIF
 
 			IndentUp()
 			Text$ = Text$ + "pool_" + Typ.OName$ +" = { " + NewLine$()

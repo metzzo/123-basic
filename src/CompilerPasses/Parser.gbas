@@ -189,6 +189,7 @@ FUNCTION TypeDefi:
 	FOREACH typ IN Compiler.Types[]
 		IF IsToken(typ.Name$)
 			typ.Name$ = GetCurrent$()
+			typ.Tok = Compiler.currentPosi
 			Match(typ.Name$, CODELINE(), CODEFILE$())
 
 			LOCAL ExtName$
@@ -2674,6 +2675,7 @@ ENDFUNCTION
 
 FUNCTION ChangeVarName:  Vari AS TIdentifierVari
 	//Und nun in jedem Identifier die $ durch _Str ersetzen
+	Vari.OName$ = Vari.Name$
 	Vari.Name$ = TRIM$(REPLACE$(Vari.Name$,"$","_Str"))
 
 	SELECT Vari.Typ
