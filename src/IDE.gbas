@@ -1,0 +1,116 @@
+// --------------------------------- //
+// Project: 123basic
+// Start: Tuesday, February 24, 2015
+// IDE Version: 12.308
+
+
+?IFDEF FOR_IDE
+	EXPORT Compile$
+	EXPORT InitCompiler
+	EXPORT RegisterDefine
+	EXPORT GetIdentifierList
+	EXPORT ParseIdentifiers
+	EXPORT GetErrors
+	
+	FUNCTION GetErrors[] AS TError:
+		RETURN Compiler.Errors
+	ENDFUNCTION
+
+	FUNCTION ParseIdentifiers[] AS TIDEIdentifier: Text$, Parse%, GenDoc%
+		LOCAL c AS TCompiler
+		Compiler = c //Neuen Compiler erstellen!
+		InitCompiler()
+		ResetExpressions()
+		Compiler.FaultTolerant = TRUE
+		Compiler.Code$ = Text$ + "\n"
+		Lexer()
+		Precompiler()
+		ResetExpressions()
+		Analyser()
+		IF Parse THEN Parser()
+		
+		?IFDEF GEN_DOC
+		IF GenDoc THEN GenerateDoc()
+		?ENDIF
+		
+		RETURN GetIdentifierList()
+	ENDFUNCTION
+	
+	FUNCTION GetIdentifierList[] AS TIDEIdentifier:
+		LOCAL Identifiers[] AS TIDEIdentifier
+		
+		FOREACH Func IN Compiler.Funcs[]
+			LOCAL ident AS TIDEIdentifier
+			ident.Name$ = Func.OName$
+			ident.datatype = Func.datatype
+			ident.Native% = Func.Native%
+			ident.Typ$ = "function"
+			ident.SubTyp = Func.Typ
+			ident.token = Compiler.Tokens[Func.Tok]
+			DIMPUSH Identifiers[], ident
+		NEXT
+		
+		FOREACH Vari IN Compiler.Varis[]
+			LOCAL ident AS TIDEIdentifier
+			ident.Name$ = Vari.OName$
+			ident.datatype = Vari.datatype
+			ident.Typ$ = "variable"
+			ident.SubTyp = Vari.Typ
+			ident.token = Compiler.Tokens[Vari.Tok]
+			DIMPUSH Identifiers[], ident
+		NEXT
+		
+		FOREACH typ IN Compiler.Types[]
+			LOCAL ident AS TIDEIdentifier
+			ident.Name$ = typ.OName$
+			ident.Typ$ = "type"
+			ident.SubTyp = 0 // Type
+			ident.token = Compiler.Tokens[typ.Tok]
+			DIMPUSH Identifiers[], ident
+		NEXT
+		
+		FOREACH kw$ IN Keywords$[]
+			LOCAL ident AS TIDEIdentifier
+			ident.Name$ = kw$
+			ident.Typ$ = "keyword"
+			ident.SubTyp = 0
+			DIMPUSH Identifiers[], ident
+		NEXT
+		
+		
+		// add primitive data types
+		LOCAL ident AS TIDEIdentifier
+		ident.Name$ = "int"
+		ident.Typ$ = "type"
+		ident.SubTyp = 1 // primitive type
+		DIMPUSH Identifiers[], ident
+		
+		ident.Name$ = "string"
+		ident.Typ$ = "type"
+		ident.SubTyp = 1
+		DIMPUSH Identifiers[], ident
+		
+		ident.Name$ = "float"
+		ident.Typ$ = "type"
+		ident.SubTyp = 1
+		DIMPUSH Identifiers[], ident
+		
+		ident.Name$ = "void"
+		ident.Typ$ = "type"
+		ident.SubTyp = 1
+		DIMPUSH Identifiers[], ident
+		
+		RETURN Identifiers
+	ENDFUNCTION
+	
+	TYPE TIDEIdentifier
+		Name$
+		datatype AS TDatatype
+		token AS TToken
+		Typ$
+		SubTyp%
+		
+		// FUnc:
+		Native%
+	ENDTYPE
+?ENDIF

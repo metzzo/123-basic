@@ -38,6 +38,7 @@ TYPE TCompiler
 
 	HeaderFiles$[]
 	HeaderText$
+	GOTOErr% // has the goto warning already been shown?
 ENDTYPE
 
 GLOBAL LastExprID = 0
@@ -619,6 +620,8 @@ FUNCTION InitCompiler:
 
 	DIMDATA Keywords$[], "CALLBACK","FUNCTION","ENDFUNCTION","SUB","ENDSUB","GOSUB","IF","ELSE","ELSEIF","THEN","ENDIF","WHILE","WEND","BREAK","CONTINUE","FOR", "FOREACH", "IN", "TO","STEP","NEXT","REPEAT","UNTIL","TYPE","ENDTYPE","RETURN", "NATIVE", "LOCAL", "GLOBAL", "STATIC", "DIM", "REDIM", "INLINE", "ENDINLINE", "PROTOTYPE", "REQUIRE", "BREAK", "CONTINUE", "TRY", "CATCH", "FINALLY", "THROW", "SELECT", "CASE", "DEFAULT", "ENDSELECT", "STARTDATA", "ENDDATA", "DATA", "RESTORE", "READ", "GOTO", "ALIAS", "AS", "CONSTANT", "INC", "DEC", "DIMPUSH", "LEN", "DIMDATA", "DELETE", "DIMDEL", "DEBUG", "ASSERT", "ABSTRACT", "EXPORT"
 	//Nun mache aus den Keywords$[] eine Map
+	LOCAL newKeywordMap AS HashMap
+	KeywordMap = newKeywordMap
 	KeywordMap.SetSize(LEN(Keywords$[])*8) //richtige größe für eine hashmap
 	FOREACH key$ IN Keywords$[]
 		KeywordMap.Put(key$, TRUE)
@@ -645,6 +648,7 @@ FUNCTION InitCompiler:
 	REDIM Documentations[0]
 	
 	Compiler.FaultTolerant = FALSE
+	REDIM Compiler.Errors[0]
 ENDFUNCTION
 
 

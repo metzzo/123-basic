@@ -716,13 +716,14 @@ FUNCTION Factor%:
 			//um weitere fehler darüber zu vermeiden erstelle nun eine variable davon
 			ImplicitDefine()
 
-			LOCAL vars$ = ""
-			LOCAL Varis%[]
-			GetVaris(Varis[])
-			FOREACH Vari IN Varis[]
-				vars$ = vars$ + Compiler.Varis[Vari].Name$+", "
-			NEXT
-			Error("Unknown variable/function: "+GetCurrent$()+" possible variables: '"+vars$+"'", CODELINE(), CODEFILE$())
+//			LOCAL vars$ = ""
+//			LOCAL Varis%[]
+//			GetVaris(Varis[])
+//			FOREACH Vari IN Varis[]
+//				vars$ = vars$ + Compiler.Varis[Vari].Name$+", "
+//			NEXT
+//			Error("Unknown variable/function: "+GetCurrent$()+" possible variables: '"+vars$+"'", CODELINE(), CODEFILE$())
+			Error("Unknown variable/function: "+GetCurrent$(), CODELINE(), CODEFILE$())
 		ENDIF
 	ENDIF
 ENDFUNCTION
@@ -2145,13 +2146,12 @@ FUNCTION Keyword%:
 
 			RETURN CreateReadExpression(Reads[])
 		CASE IsToken("GOTO")
-			STATIC GOTOErr%
 			Match("GOTO", CODELINE(), CODEFILE$())
 			LOCAL Name$ = GetCurrent$()
 			GetNext()
 			Compiler.HasGoto = TRUE
-			IF NOT GOTOErr
-				GOTOErr = TRUE
+			IF NOT Compiler.GOTOErr
+				Compiler.GOTOErr = TRUE
 				Warning("GOTO may cause problems!")
 			ENDIF
 			//Error("GOTO unsupported!", CODELINE(), CODEFILE$())

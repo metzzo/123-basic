@@ -209,7 +209,7 @@ function REDIM(vari, dims, value) {
 			}
 			
 			// set value
-			try { // this should NOT be done with exception handling... VERY slow
+			try { // this should NOT be done with exception handling... VERY slow TODO
 				newOTTArray.arrAccess.apply(newOTTArray, positionArray).values[tmpPositionCache] = value;
 			} catch(e) { }
 			
