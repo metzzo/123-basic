@@ -1326,13 +1326,15 @@ FUNCTION Identifier%: IsCommand%
 				BREAK
 			ENDIF
 		NEXT
-		WHILE IsToken("(") AND Found //Wenn ein "(" und eine variable gefunden wurde, dann ist es bereits ein funktionsaufruf => PROTOTYPE!
+		WHILE IsToken("(") AND Found  //Wenn ein "(" und eine variable gefunden wurde, dann ist es bereits ein funktionsaufruf (+ Datentyp ist eine Funktion) => PROTOTYPE!
 			LOCAL func% = SearchPrototyp(Exprs[Expr].datatype.Name$)
 			IF func <> -1
 				LOCAL Params%[]
 				ParseFuncCall(Compiler.Funcs[func].datatype, Params[], IsCommand)
 
 				Expr = CreateProtoCallExpression(Expr, Params[])
+			ELSE
+				Error("Can only call PROTOTYPEs", CODELINE(), CODEFILE$())
 			ENDIF
 		WEND
 		IF Found = FALSE
@@ -1390,6 +1392,8 @@ FUNCTION Identifier%: IsCommand%
 					ParseFuncCall(Compiler.Funcs[func].datatype, Params[], IsCommand)
 
 					Expr = CreateProtoCallExpression(Expr, Params[])
+				ELSE
+					Error("Can only call PROTOTYPEs", CODELINE(), CODEFILE$())
 				ENDIF
 			WEND
 

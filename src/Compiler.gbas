@@ -30,15 +30,11 @@ TYPE TCompiler
 
 	errorState$ = ""
 
-//	Blacklists$[] //was soll nicht eingebunden werden?
-//	BlacklistAll%
-
 	Exports[] AS TExport
 	LastTokenID% = 0
 
-	?IFDEF FOR_IDE
-	GetIdent% = FALSE
-	?ENDIF
+	FaultTolerant% = FALSE
+	Errors[] AS TError
 
 	HeaderFiles$[]
 	HeaderText$
@@ -340,6 +336,7 @@ ENDTYPE
 GLOBAL Operators[] AS TOperator
 //GLOBAL Keywords$[]
 GLOBAL KeywordMap AS HashMap
+GLOBAL Keywords$[]
 GLOBAL Compiler AS TCompiler
 
 
@@ -360,6 +357,14 @@ ENDTYPE
 
 GLOBAL Generators[] AS TGenerator
 
+CONSTANT ERROR_IS_ERROR = 0
+CONSTANT ERROR_IS_WARNING = 1
+TYPE TError
+	Typ% 
+	errorState$
+	token AS TToken
+	Msg$
+ENDTYPE
 
 GLOBAL SettingIn$ = ""
 
@@ -386,6 +391,7 @@ FUNCTION LoadFile$: Path$
 ENDFUNCTION
 
 FUNCTION Error: Msg$, Line%=42,File$="Unknown"
+	LOCAL OrigMsg$ = Msg$
 	LOCAL tok AS TToken
 	tok = GetCurrentToken()
 
@@ -407,10 +413,21 @@ FUNCTION Error: Msg$, Line%=42,File$="Unknown"
 	?ELSE
 	END //IN HTML5 aufhören, gibt kein KEYWAIT
 	?ENDIF
-	THROW "syntaxerror '"+Msg$+"'"
+	
+	IF NOT Compiler.FaultTolerant
+		THROW "syntaxerror '"+Msg$+"'"
+	ELSE
+		LOCAL err AS TError
+		err.token = tok
+		err.Msg$ = OrigMsg$
+		err.errorState$ = Compiler.errorState$
+		err.Typ = ERROR_IS_ERROR
+		DIMPUSH Compiler.Errors[], err
+	ENDIF
 ENDFUNCTION
 
 FUNCTION Warning: Msg$
+	LOCAL OrigMsg$ = Msg$
 	LOCAL tok AS TToken
 	tok = GetCurrentToken()
 
@@ -421,6 +438,13 @@ FUNCTION Warning: Msg$
 	Msg$ = Msg$ + "-----------------------------------\n"
 	Msg$ = "\n-----------------------------------\n" + Msg$;
 	STDOUT Msg$
+	
+	LOCAL err AS TError
+	err.token = tok
+	err.Msg$ = OrigMsg$
+	err.errorState$ = Compiler.errorState$
+	err.Typ = ERROR_IS_WARNING
+	DIMPUSH Compiler.Errors[], err
 ENDFUNCTION
 
 GLOBAL SHLASHF$
@@ -593,7 +617,6 @@ FUNCTION InitCompiler:
 	CreateOperator("and"	,"AND"	,2,OP_IS_BOOL)
 	CreateOperator("or"		,"OR"	,2,OP_IS_BOOL)
 
-	LOCAL Keywords$[]
 	DIMDATA Keywords$[], "CALLBACK","FUNCTION","ENDFUNCTION","SUB","ENDSUB","GOSUB","IF","ELSE","ELSEIF","THEN","ENDIF","WHILE","WEND","BREAK","CONTINUE","FOR", "FOREACH", "IN", "TO","STEP","NEXT","REPEAT","UNTIL","TYPE","ENDTYPE","RETURN", "NATIVE", "LOCAL", "GLOBAL", "STATIC", "DIM", "REDIM", "INLINE", "ENDINLINE", "PROTOTYPE", "REQUIRE", "BREAK", "CONTINUE", "TRY", "CATCH", "FINALLY", "THROW", "SELECT", "CASE", "DEFAULT", "ENDSELECT", "STARTDATA", "ENDDATA", "DATA", "RESTORE", "READ", "GOTO", "ALIAS", "AS", "CONSTANT", "INC", "DEC", "DIMPUSH", "LEN", "DIMDATA", "DELETE", "DIMDEL", "DEBUG", "ASSERT", "ABSTRACT", "EXPORT"
 	//Nun mache aus den Keywords$[] eine Map
 	KeywordMap.SetSize(LEN(Keywords$[])*8) //richtige größe für eine hashmap
@@ -620,6 +643,8 @@ FUNCTION InitCompiler:
 
 	// Documentation
 	REDIM Documentations[0]
+	
+	Compiler.FaultTolerant = FALSE
 ENDFUNCTION
 
 
