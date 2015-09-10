@@ -96,7 +96,7 @@ TYPE TIdentifierVari
 	ref% = FALSE //Ist es by ref?
 	OwnerVari% = -1 //wenns eine ausweichvariable ist, dann muss die gekennzeichnet werden
 	Tok%
-	
+
 	?IFDEF VMCOMPILER
 	typeId% = -1 // which IdentifierType is this variable?
 	attrPos% = -1 // which attribute position in the instance does this vari belong to?
@@ -361,7 +361,7 @@ GLOBAL Generators[] AS TGenerator
 CONSTANT ERROR_IS_ERROR = 0
 CONSTANT ERROR_IS_WARNING = 1
 TYPE TError
-	Typ% 
+	Typ%
 	errorState$
 	token AS TToken
 	Msg$
@@ -414,7 +414,7 @@ FUNCTION Error: Msg$, Line%=42,File$="Unknown"
 	?ELSE
 	END //IN HTML5 aufhören, gibt kein KEYWAIT
 	?ENDIF
-	
+
 	IF NOT Compiler.FaultTolerant
 		THROW "syntaxerror '"+Msg$+"'"
 	ELSE
@@ -439,7 +439,7 @@ FUNCTION Warning: Msg$
 	Msg$ = Msg$ + "-----------------------------------\n"
 	Msg$ = "\n-----------------------------------\n" + Msg$;
 	STDOUT Msg$
-	
+
 	LOCAL err AS TError
 	err.token = tok
 	err.Msg$ = OrigMsg$
@@ -646,7 +646,7 @@ FUNCTION InitCompiler:
 
 	// Documentation
 	REDIM Documentations[0]
-	
+
 	Compiler.FaultTolerant = FALSE
 	REDIM Compiler.Errors[0]
 ENDFUNCTION
@@ -729,7 +729,7 @@ FUNCTION Compile$: Text$, Target$
 	LOCAL tmpPath$ = GETCURRENTDIR$()
 	SETCURRENTDIR(GbapPath$)
 	?ENDIF
-	
+
 	Compiler.errorState$ = " (parse error)"
 	PushTimer()
 	Parser()
@@ -748,7 +748,7 @@ FUNCTION Compile$: Text$, Target$
 	PushTimer()
 	GenerateDoc()
 	PopTimer("Generate Doc")
-	
+
 	IF Compiler.WasError
 		STDOUT "Doc Generation failed :( \n"
 		RETURN
@@ -758,7 +758,7 @@ FUNCTION Compile$: Text$, Target$
 	?ENDIF
 
 	Compiler.errorState$ = " (generate error)"
-	
+
 	?IFNDEF OTTBASIC
 	SETCURRENTDIR(tmpPath$)
 	?ENDIF

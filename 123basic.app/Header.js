@@ -667,7 +667,7 @@ OTTArray.prototype.bridgeToJS= function(isJSON) {
 
 //Klonen!
 OTTArray.prototype.clone = function() {
-	var other = pool_array.alloc(this.defval);
+	var other = new OTTArray(); //pool_array.alloc(this.defval);
 	
 	other.dimensions = this.dimensions.slice(0);
 	other.defval = this.defval;
@@ -883,7 +883,7 @@ function DIMDATA(array, values) {
 	array.dimensions = [values.length];
 }
 
-var array_pools = { };
+/*var array_pools = { };
 
 var pool_array = {
 	alloc: function(defval) {
@@ -908,7 +908,7 @@ var pool_array = {
 		obj.succ = array_pools[typ];
 		array_pools[typ] = obj;
 	}
-};
+};*/
 
 //------------------------------------------------------------
 //MATH

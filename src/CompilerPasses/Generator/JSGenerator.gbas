@@ -19,6 +19,7 @@ GLOBAL LoopContinueID% = 0
 GLOBAL LastDummyID%
 GLOBAL StaticText$ = ""
 GLOBAL VariUndef$ = ""
+GLOBAL CurrentUndef$ = ""
 
 
 //! Generiert JavaScript Code
@@ -147,16 +148,21 @@ FUNCTION JS_Generator$:
 					Text$ = Text$ + ";"+NewLine$()
 				ENDIF
 			NEXT
-
+			?IFDEF OBJECT_POOLING
 			Text$ = Text$ + "this.pool = pool_" + Typ.OName$ + ";" + NewLine$()
 			Text$ = Text$ + "this.succ = null;" + NewLine$()
+			?ENDIF
 
 			IndentDown()
 			Text$ = Text$ + NewLine$() + "};" + NewLine$()
 
 			IndentUp()
 			Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.clone = function() {"+NewLine$()
+			?IFDEF OBJECT_POOLING
 			Text$ = Text$ + "var other = pool_"+Typ.OName$+".alloc();"+NewLine$()
+			?ELSE
+			Text$ = Text$ + "var other = new "+Typ.Name$+"();"+NewLine$()
+			?ENDIF
 			FOREACH Attr IN Typ.Attributes[]
 				ALIAS variable AS Compiler.Varis[Attr]
 				//IF variable.datatype.IsArray=0 AND IsType(variable.Name$) = FALSE AND variable.ref = FALSE
@@ -181,13 +187,15 @@ FUNCTION JS_Generator$:
 			NEXT
 			//vtable
 			Text$ = Text$ + "other.vtbl = this.vtbl;"+NewLine$()
+			?IFDEF OBJECT_POOLING
 			Text$ = Text$ + "other.pool = this.pool;"+NewLine$()
-
+			?ENDIF
+			
 			//Text$ = Text$ + "other.clone = this.clone;"+NewLine$()
 			IndentDown()
 			Text$ = Text$ + "return other;"+NewLine$()
 			Text$ = Text$ + "};" + NewLine$()
-			
+
 			IF LEN(Compiler.Exports[]) > 0 // if JSON add bridge
 				IndentUp()
 				Text$ = Text$ + "window['"+Typ.Name$+"'].prototype.bridgeToJS = function(isJSON) {"+NewLine$()
@@ -204,11 +212,11 @@ FUNCTION JS_Generator$:
 					//Es sei denn es ist REF
 					IF Compiler.Varis[Attr].ref THEN plzclone = TRUE //Sobald ref
 					Text$ = Text$ + "\"" +REPLACE$(variable.OName$, "$", "_Str") + "\": "
-	
+
 					IF plzclone THEN Text$ = Text$ + "("
 					Text$ = Text$ + "this."+variable.Name$
 					IF plzclone THEN Text$ = Text$ + ").bridgeToJS(isJSON)"
-	
+
 					Text$ = Text$ + ","+NewLine$()
 				NEXT
 				//vtable
@@ -218,7 +226,7 @@ FUNCTION JS_Generator$:
 				Text$ = Text$ + "};"+NewLine$()
 				Text$ = Text$ + "};" + NewLine$()
 			ENDIF
-
+?IFDEF OBJECT_POOLING
 			IndentUp()
 			Text$ = Text$ + "pool_" + Typ.OName$ +" = { " + NewLine$()
 			Text$ = Text$ + "last: null, "+NewLine$()
@@ -228,6 +236,7 @@ FUNCTION JS_Generator$:
 			IndentUp()
 			Text$ = Text$ + "if (pool_" + Typ.OName$ +".last !== null) {" + NewLine$()
 			Text$ = Text$ + "obj = pool_" + Typ.OName$ +".last;" + NewLine$()
+			Text$ = Text$ + "obj.reset();"+NewLine$()
 			Text$ = Text$ + "pool_" + Typ.OName$ +".last = obj.succ;" + NewLine$()
 			IndentDown()
 			Text$ = Text$ + "obj.succ = null;" + NewLine$()
@@ -242,13 +251,13 @@ FUNCTION JS_Generator$:
 			IndentUp()
 			Text$ = Text$ + "free: function(obj)  {" + NewLine$()
 			Text$ = Text$ + "if (obj.succ !== null) return;"+NewLine$()
-			Text$ = Text$ + "obj.reset();"+NewLine$()
 			Text$ = Text$ + "obj.succ = pool_" + Typ.OName$ + ".last;" + NewLine$()
 			IndentDown()
 			Text$ = Text$ + "pool_" + Typ.OName$ + ".last = obj;" + NewLine$()
 			IndentDown()
 			Text$ = Text$ + "}" + NewLine$()
 			Text$ = Text$ + "}" + NewLine$()
+?ENDIF
 
 			IF InWebWorker THEN Text$ = Text$ + Typ.Name$+ " = window['"+Typ.Name$+"'];"+NewLine$()
 
@@ -405,18 +414,19 @@ FUNCTION JSGenerate$: expr AS TExpr
 			ENDIF
 
 			LOCAL BeforeUndef$ = VariUndef$
-			LOCAL MyUndef$ = ""
+			?IFDEF OBJECT_POOLING
 			FOREACH Var IN expr.Varis[]
 				IF Compiler.Varis[Var].datatype.IsArray = 0
 					IF IsType(Compiler.Varis[Var].datatype.Name$)
 						IF Compiler.Varis[Var].Typ <> VARI_IS_PARAM AND Compiler.Varis[Var].Typ <> VARI_IS_STATIC AND JSShouldRedeclare(Var)
-							MyUndef$ = MyUndef$ + "pool_" + Compiler.Varis[Var].datatype.Name$+".free("+ Compiler.Varis[Var].Name$ + ");"
+							VariUndef$ = VariUndef$ + "pool_" + Compiler.Varis[Var].datatype.Name$+".free("+ Compiler.Varis[Var].Name$ + ");"
 						ENDIF
 					ENDIF
 				ELSE
-					MyUndef$ = "pool_array.free(" + Compiler.Varis[Var].Name$ + ");"
+					INC VariUndef$, "pool_array.free(" + Compiler.Varis[Var].Name$ + ");"
 				ENDIF
 			NEXT
+			?ENDIF
 
 			IF CurrentFunc <> -1 AND oFunc = -1
 				LOCAL i%
@@ -492,7 +502,7 @@ FUNCTION JSGenerate$: expr AS TExpr
 				Text$ = Text$ + FirstText$
 			ENDIF
 
-			Text$ = Text$ + MyUndef$
+			Text$ = Text$ + CurrentUndef$
 
 			IF mngGoto
 				Text$ = Text$ + "__pc = -1; break;"+NewLine$()
@@ -672,7 +682,11 @@ FUNCTION JSGenerate$: expr AS TExpr
 			Text$ = Text$ + JSGenerate$(Exprs[expr.Right])
 			IF Exprs[expr.vari].datatype.IsArray OR IsType(Exprs[expr.vari].datatype.Name$)
 				IF Exprs[expr.Right].Typ <> EXPR_IS_DEFVAL AND Exprs[expr.Right].Typ <> EXPR_IS_DIMASEXPR
-					Text$ = Text$ + ".clone(/* In Assign */)"
+					Text$ = Text$ + ".clone()"
+					// TODO: this might cause some side effects if something like yolo[swag()].text = type; if swag() has sideeffects...
+					?IFDEF OBJECT_POOLING
+					Text$ = "pool_" + Exprs[expr.vari].datatype.Name$+".free("+ JSGenerate$(Exprs[expr.vari]) + ");" + NewLine$() + Text$
+					?ENDIF
 				ENDIF
 			ENDIF
 
@@ -772,9 +786,11 @@ FUNCTION JSGenerate$: expr AS TExpr
 				CASE EXPR_IS_STR
 					F = TRUE
 			ENDSELECT
-
-			Text$ = Text$ + VariUndef$
-
+			
+			IF LEN(VariUndef$) > 0
+				Text$ = Text$ + VariUndef$ + NewLine$()
+			ENDIF
+			
 			IF F
 				Text$ = Text$ + "return "+JSTryUnref$(expr.expr)
 			ELSE
@@ -1061,7 +1077,11 @@ FUNCTION JSGenerate$: expr AS TExpr
 			Text$ = Text$ + JSGetDefaultValue$(expr.datatype,FALSE,FALSE)
 		CASE EXPR_IS_DIMASEXPR
 			LOCAL def$ = JSGetDefaultValue$(expr.datatype, TRUE, TRUE)
+			?IFDEF OBJECT_POOLING
 			Text$ = Text$ + "DIM(pool_array.alloc(" + def$ + "), ["
+			?ELSE
+			Text$ = Text$ + "DIM(" + def$ + ", ["
+			?ENDIF
 			LOCAL Find% = FALSE
 			FOREACH D IN expr.dims[]
 				IF Find = TRUE THEN Text$ = Text$ + ", "
@@ -1278,7 +1298,11 @@ ENDFUNCTION
 FUNCTION JSGetDefaultValue$: datatype AS TDatatype, Ref%, IgnoreArray%
 	LOCAL RetVal$ = ""
 	IF datatype.IsArray AND IgnoreArray = FALSE
+		?IFDEF OBJECT_POOLING
 		RetVal$ = "pool_array.alloc(" + JSGetDefaultValue$(datatype, Ref, TRUE) + ")"
+		?ELSE
+		RetVal$ = "new OTTArray()"
+		?ENDIF
 	ELSE
 		SELECT datatype.Name$
 			CASE "int"
@@ -1289,7 +1313,11 @@ FUNCTION JSGetDefaultValue$: datatype AS TDatatype, Ref%, IgnoreArray%
 				RetVal$ = "\"\""
 			DEFAULT
 				IF IsType(datatype.Name$)
+					?IFDEF OBJECT_POOLING
 					RetVal$ = "pool_"+datatype.Name$+".alloc()"
+					?ELSE
+					RetVal$ = "new "+LastType.Name$+"()"
+					?ENDIF
 				ELSE
 					RetVal$ = REPLACE$(datatype.Name$, "$", "_Str") //um die $ rauszukriegen
 				ENDIF
